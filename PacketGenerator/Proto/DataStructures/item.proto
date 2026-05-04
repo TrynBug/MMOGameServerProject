@@ -1,0 +1,12 @@
+﻿syntax = "proto3";
+
+package DataStructures;
+
+// 아이템 데이터 구조체 (DB 저장 단위)
+message Item {
+    int64 item_id     = 1;
+    int32 template_id = 2;
+    int32 quantity    = 3;
+    int32 durability  = 4;
+    bool  is_equipped = 5;
+}

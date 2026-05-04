@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="소스 파일\Proto">
+      <UniqueIdentifier>{63d153db-b282-4b05-bf2f-16d7913f7cba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Generated">
+      <UniqueIdentifier>{a6f92b2f-f412-4681-9f4f-8fec2f4ddfce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Generated\Common">
+      <UniqueIdentifier>{616532d5-8a65-4e5b-8698-21d8bbabf82d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Proto\Common">
+      <UniqueIdentifier>{b2ebde6c-5bef-49b9-a534-1dd6cdc7afca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Generated\GamePacket">
+      <UniqueIdentifier>{0a97ae80-dfea-4ef3-94ca-f548cb8ee860}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Proto\GamePacket">
+      <UniqueIdentifier>{300b9958-618a-4a73-9e3c-164134d35321}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Generated\ServerPacket">
+      <UniqueIdentifier>{e7261410-20da-4148-8bfc-79b6baf0fe6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Generated\DataStructures">
+      <UniqueIdentifier>{d0201373-379a-4755-8b96-254bd32a2bbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Proto\ServerPacket">
+      <UniqueIdentifier>{a3acaaae-7507-4712-9a63-a0b445a3073a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Proto\DataStructures">
+      <UniqueIdentifier>{dcd7a121-4cc3-4026-bb7a-4eb36b16d68b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PacketDispatcher.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ProtoJsonSerializer.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ProtoSerializer.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="PCH.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GamePacket\move_packet.pb.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GamePacket\move_packet.pb.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\Common\packet_id.pb.h">
+      <Filter>소스 파일\Generated\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\DataStructures\item.pb.h">
+      <Filter>소스 파일\Generated\DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GamePacket\item_packet.pb.h">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GamePacket\move_packet.pb.h">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\ServerPacket\user_packet.pb.h">
+      <Filter>소스 파일\Generated\ServerPacket</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ProtoSerializer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ProtoJsonSerializer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketDispatcher.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PCH.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\GamePacket\move_packet.pb.cc">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\GamePacket\move_packet.pb.cc">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\Common\packet_id.pb.cc">
+      <Filter>소스 파일\Generated\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\DataStructures\item.pb.cc">
+      <Filter>소스 파일\Generated\DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\GamePacket\item_packet.pb.cc">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\GamePacket\move_packet.pb.cc">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\ServerPacket\user_packet.pb.cc">
+      <Filter>소스 파일\Generated\ServerPacket</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="generate_proto.bat">
+      <Filter>소스 파일</Filter>
+    </None>
+    <None Include="Proto\Common\packet_id.proto">
+      <Filter>소스 파일\Proto\Common</Filter>
+    </None>
+    <None Include="Proto\DataStructures\item.proto">
+      <Filter>소스 파일\Proto\DataStructures</Filter>
+    </None>
+    <None Include="Proto\GamePacket\item_packet.proto">
+      <Filter>소스 파일\Proto\GamePacket</Filter>
+    </None>
+    <None Include="Proto\GamePacket\move_packet.proto">
+      <Filter>소스 파일\Proto\GamePacket</Filter>
+    </None>
+    <None Include="Proto\ServerPacket\user_packet.proto">
+      <Filter>소스 파일\Proto\ServerPacket</Filter>
+    </None>
+  </ItemGroup>
+</Project>

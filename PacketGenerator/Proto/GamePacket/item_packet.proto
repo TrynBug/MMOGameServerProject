@@ -1,0 +1,18 @@
+﻿syntax = "proto3";
+
+package GamePacket;
+
+import "Common/packet_id.proto";
+import "DataStructures/item.proto";
+
+// 아이템 사용 요청 (클라 -> 서버)
+message ItemUseReq {
+    int64 item_id = 1;
+}
+
+// 아이템 사용 결과 (서버 -> 클라)
+message ItemUseRes {
+    bool                success = 1;
+    string              message = 2;
+    DataStructures.Item item    = 3;
+}

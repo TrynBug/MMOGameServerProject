@@ -1,0 +1,17 @@
+﻿syntax = "proto3";
+
+package ServerPacket;
+
+import "Common/packet_id.proto";
+
+// 유저 입장 알림 (게이트웨이 -> 게임서버)
+message UserEnterNtf {
+    int64  user_id    = 1;
+    int32  gateway_id = 2;
+    string ip         = 3;
+}
+
+// 유저 연결 끊김 알림 (게이트웨이 -> 게임서버)
+message UserDisconnectNtf {
+    int64 user_id = 1;
+}

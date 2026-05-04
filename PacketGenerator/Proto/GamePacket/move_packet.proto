@@ -1,0 +1,22 @@
+﻿syntax = "proto3";
+
+package GamePacket;
+
+import "Common/packet_id.proto";
+
+// 이동 요청 (클라 -> 서버)
+message MoveReq {
+    float pos_x = 1;
+    float pos_y = 2;
+    float pos_z = 3;
+    float dir_y = 4;
+}
+
+// 이동 알림 (서버 -> 클라 브로드캐스트)
+message MoveNtf {
+    int64 player_id = 1;
+    float pos_x     = 2;
+    float pos_y     = 3;
+    float pos_z     = 4;
+    float dir_y     = 5;
+}

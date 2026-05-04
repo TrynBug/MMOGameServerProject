@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package Common;
+
+// 게임서버 <-> 클라이언트 패킷 ID
+enum GamePacketId {
+    GAME_PACKET_ID_NONE = 0;
+
+    // 1000~1999: 이동
+    GAME_PACKET_ID_MOVE_REQ = 1001;
+    GAME_PACKET_ID_MOVE_NTF = 1002;
+
+    // 2000~2999: 아이템
+    GAME_PACKET_ID_ITEM_USE_REQ = 2001;
+    GAME_PACKET_ID_ITEM_USE_RES = 2002;
+}
+
+// 서버 <-> 서버 패킷 ID
+enum ServerPacketId {
+    SERVER_PACKET_ID_NONE = 0;
+
+    // 1000~1999: 유저 관련
+    SERVER_PACKET_ID_USER_ENTER_NTF      = 1001;
+    SERVER_PACKET_ID_USER_DISCONNECT_NTF = 1002;
+}

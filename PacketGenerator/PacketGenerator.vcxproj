@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -19,59 +19,54 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Crypto.cpp" />
-    <ClCompile Include="IoContext.cpp" />
-    <ClCompile Include="NetClient.cpp" />
-    <ClCompile Include="NetLibStats.cpp" />
-    <ClCompile Include="NetServer.cpp" />
-    <ClCompile Include="Packet.cpp" />
-    <ClCompile Include="PacketPool.cpp" />
+    <ClCompile Include="Generated\Common\packet_id.pb.cc" />
+    <ClCompile Include="Generated\DataStructures\item.pb.cc" />
+    <ClCompile Include="Generated\GamePacket\item_packet.pb.cc" />
+    <ClCompile Include="Generated\GamePacket\move_packet.pb.cc" />
+    <ClCompile Include="Generated\ServerPacket\user_packet.pb.cc" />
     <ClCompile Include="pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="RingBuffer.cpp" />
-    <ClCompile Include="Session.cpp" />
+    <ClCompile Include="ProtoSerializer.cpp" />
+    <ClCompile Include="ProtoJsonSerializer.cpp" />
+    <ClCompile Include="PacketDispatcher.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Crypto.h" />
-    <ClInclude Include="INetEventHandler.h" />
-    <ClInclude Include="IoContext.h" />
-    <ClInclude Include="ISession.h" />
-    <ClInclude Include="INetBase.h" />
-    <ClInclude Include="NetClient.h" />
-    <ClInclude Include="NetConfig.h" />
-    <ClInclude Include="NetLibStats.h" />
-    <ClInclude Include="NetServer.h" />
-    <ClInclude Include="NetLib.h" />
-    <ClInclude Include="OverlappedEx.h" />
-    <ClInclude Include="Packet.h" />
-    <ClInclude Include="PacketHeader.h" />
-    <ClInclude Include="PacketPool.h" />
+    <ClInclude Include="Generated\Common\packet_id.pb.h" />
+    <ClInclude Include="Generated\DataStructures\item.pb.h" />
+    <ClInclude Include="Generated\GamePacket\item_packet.pb.h" />
+    <ClInclude Include="Generated\GamePacket\move_packet.pb.h" />
+    <ClInclude Include="Generated\ServerPacket\user_packet.pb.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="RingBuffer.h" />
-    <ClInclude Include="Session.h" />
-    <ClInclude Include="Types.h" />
+    <ClInclude Include="ProtoSerializer.h" />
+    <ClInclude Include="ProtoJsonSerializer.h" />
+    <ClInclude Include="PacketDispatcher.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="README.md" />
+    <None Include="generate_proto.bat" />
+    <None Include="Proto\Common\packet_id.proto" />
+    <None Include="Proto\DataStructures\item.proto" />
+    <None Include="Proto\GamePacket\item_packet.proto" />
+    <None Include="Proto\GamePacket\move_packet.proto" />
+    <None Include="Proto\ServerPacket\user_packet.proto" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{a575d888-eb05-493c-97b0-c130882c854f}</ProjectGuid>
-    <RootNamespace>NetLib</RootNamespace>
+    <ProjectGuid>{08D95FD9-2403-4E97-84CD-6368CFCA22D2}</ProjectGuid>
+    <RootNamespace>PacketGenerator</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -91,10 +86,8 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -110,71 +103,52 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)BIN\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(ProjectDir)Generated\;$(ProjectDir)Generated\Common\;$(ProjectDir)Generated\GamePacket\;$(ProjectDir)Generated\ServerPacket\;$(ProjectDir)Generated\DataStructures\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)BIN\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(ProjectDir)Generated\;$(ProjectDir)Generated\Common\;$(ProjectDir)Generated\GamePacket\;$(ProjectDir)Generated\ServerPacket\;$(ProjectDir)Generated\DataStructures\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PreBuildEvent>
+      <Command>call "$(ProjectDir)generate_proto.bat"</Command>
+      <Message>Generating protobuf files...</Message>
+    </PreBuildEvent>
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level1</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
     </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PreBuildEvent>
+      <Command>call "$(ProjectDir)generate_proto.bat"</Command>
+      <Message>protoc 를 사용하여 .protoc 파일로 패킷구조체를 생성합니다.</Message>
+    </PreBuildEvent>
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level1</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
     </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>
