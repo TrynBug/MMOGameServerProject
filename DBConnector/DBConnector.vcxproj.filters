@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="소스 파일\SQLite">
+      <UniqueIdentifier>{23de775e-cf52-4c8a-a4c6-212218d3eb17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Connection">
+      <UniqueIdentifier>{45f3e67d-3aa6-4d55-94b9-fc9ccfbb2fd8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="sqlite3.c">
+      <Filter>소스 파일\SQLite</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="AsyncDBQueue.cpp">
+      <Filter>소스 파일\Connection</Filter>
+    </ClCompile>
+    <ClCompile Include="DBConnection.cpp">
+      <Filter>소스 파일\Connection</Filter>
+    </ClCompile>
+    <ClCompile Include="DBTypes.cpp">
+      <Filter>소스 파일\Connection</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sqlite3.h">
+      <Filter>소스 파일\SQLite</Filter>
+    </ClInclude>
+    <ClInclude Include="sqlite3ext.h">
+      <Filter>소스 파일\SQLite</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncDBQueue.h">
+      <Filter>소스 파일\Connection</Filter>
+    </ClInclude>
+    <ClInclude Include="DBConnection.h">
+      <Filter>소스 파일\Connection</Filter>
+    </ClInclude>
+    <ClInclude Include="DBTypes.h">
+      <Filter>소스 파일\Connection</Filter>
+    </ClInclude>
+    <ClInclude Include="DBConnectorLib.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
