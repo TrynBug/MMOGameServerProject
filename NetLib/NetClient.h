@@ -56,7 +56,7 @@ public:
     // 연결 끊기. 자동 재연결도 중단
     void Disconnect();
 
-    std::shared_ptr<Session> GetSession();
+    std::shared_ptr<ISession> GetSession();
 
     bool IsConnected();
 

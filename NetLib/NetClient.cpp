@@ -96,7 +96,7 @@ void NetClient::Disconnect()
     }
 }
 
-std::shared_ptr<Session> NetClient::GetSession()
+std::shared_ptr<ISession> NetClient::GetSession()
 {
     std::lock_guard<std::mutex> lock(m_sessionMutex);
     return m_session;

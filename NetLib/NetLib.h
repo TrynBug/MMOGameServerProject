@@ -15,6 +15,7 @@
 #include "PacketPool.h"
 #include "ISession.h"
 #include "INetEventHandler.h"
+#include "FuncEventHandler.h"
 #include "IoContext.h"
 #include "NetServer.h"
 #include "NetClient.h"

@@ -8,8 +8,8 @@
 namespace netlib
 {
 
-// 라이브러리 사용자가 네트워크 이벤트를 받기위한 인터페이스
-// 사용자의 INetEventHandler를 NetServer 또는 NetClient에 등록하면 네트워크 이벤트가 발생했을 때 INetEventHandler의 콜백함수를 호출해준다.
+// 네트워크 이벤트 처리 인터페이스
+// 일반적으로는 INetEventHandler를 구현한 FuncEventHandler를 사용하면 된다.
 class INetEventHandler
 {
 public:

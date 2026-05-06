@@ -128,7 +128,7 @@ void NetServer::Shutdown()
 }
 
 // 세션 찾기
-std::shared_ptr<Session> NetServer::FindSession(int64 sessionId)
+std::shared_ptr<ISession> NetServer::FindSession(int64 sessionId)
 {
     std::lock_guard<std::mutex> lock(m_sessionMutex);
     auto iter = m_sessions.find(sessionId);

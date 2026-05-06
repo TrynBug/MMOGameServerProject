@@ -110,6 +110,9 @@
     <ClInclude Include="RingBuffer.h">
       <Filter>소스 파일\Network</Filter>
     </ClInclude>
+    <ClInclude Include="FuncEventHandler.h">
+      <Filter>소스 파일\Network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md">

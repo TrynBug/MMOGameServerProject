@@ -45,7 +45,7 @@ public:
     void              SetEventHandler(INetEventHandler* handler) { m_eventHandler = handler; }
 
     /* 세션 관리 */
-    std::shared_ptr<Session> FindSession(int64 sessionId);
+    std::shared_ptr<ISession> FindSession(int64 sessionId);
     void                     RemoveSession(int64 sessionId);
     int32                    GetSessionCount();
 
