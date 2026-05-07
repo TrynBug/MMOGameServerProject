@@ -1,0 +1,35 @@
+# ────────────────────────────────────────────────────────────────
+# server.ini  -  서버 설정 예시 (게임 서버 기준)
+# ────────────────────────────────────────────────────────────────
+# 서버ID는 운영자가 직접 지정한다 (Config 하드코딩 + 레지스트리 검증 방식).
+# ID 풀 사전 할당:
+#   Registry  : 1
+#   Login     : 10
+#   Chat      : 20
+#   Gateway   : 100~199
+#   Game      : 200~899
+#   (예비)    : 900~999
+
+[Server]
+Type    = Game
+Id      = 200          # 1~999 범위. 같은 IP:Port 충돌 시 레지스트리가 등록 거부.
+IP      = 0.0.0.0
+Port    = 9001
+
+[Registry]
+IP      = 127.0.0.1
+Port    = 7000
+
+[Network]
+NumConcurrentThread = 0         # 0 = CPU 코어 수
+NumWorkerThread     = 0         # 0 = CPU 코어 수 * 2
+InitPacketSize      = 512
+MaxPacketSize       = 65535
+
+[Contents]
+NumContentsThreads  = 4         # 일반 컨텐츠 스레드 수 (오픈필드 전용 스레드는 별도)
+ContentsUpdateMs    = 50        # 컨텐츠 Update 주기 (ms)
+
+[Log]
+Dir     = Logs
+Level   = Debug                 # Debug / Info / Warn / Error
