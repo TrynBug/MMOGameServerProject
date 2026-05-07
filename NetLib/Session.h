@@ -29,7 +29,7 @@ public:
     ~Session() override;
 
     /* ISession */
-    void        Send(PacketPtr& spPacket) override;
+    void        Send(PacketPtr& spPacket) override;  // thread-safe 한 Send 함수
     void        Disconnect() override;
     int64       GetId()       const override { return m_sessionId; }
     std::string GetIP()       const override { return m_ip; }
@@ -88,5 +88,6 @@ private:
 
 using SessionPtr = std::shared_ptr<Session>;
 using SessionWPtr = std::weak_ptr<Session>;
+using SessionUPtr = std::unique_ptr<Session>;
 
 } // namespace netlib

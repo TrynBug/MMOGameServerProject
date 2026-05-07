@@ -156,21 +156,10 @@ void NetClient::reconnectThreadProc()
 		// 아직 연결이 안되었고, 연결을 시도 해야하면 postConnect 시도
         if (!connected && m_bShouldConnect.load())
         {
-            // 재시도 횟수 제한 체크
-            const int32 attempts = m_reconnectAttempts.fetch_add(1);
-            if (m_config.maxReconnectAttempts >= 0 && attempts >= m_config.maxReconnectAttempts)
-            {
-                m_bShouldConnect.store(false);
-                if (m_eventHandler != nullptr)
-                {
-                    m_eventHandler->OnError(nullptr, "Max reconnect attempts reached");
-                }
-                break;
-            }
+            m_reconnectAttempts.fetch_add(1);
 
             // postConnect 성공 시 연결 완료통지는 비동기로 오고, 실패면 아래 wait 후 재시도
-            postConnect();
-            
+            postConnect();   
         }
 
         // m_config.reconnectIntervalMs 동안 wait한다. wait이 끝나거나 m_bReconnectRunning이 false로 바뀌었을때 다시 깨어난다.

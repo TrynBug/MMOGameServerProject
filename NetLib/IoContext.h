@@ -51,4 +51,8 @@ private:
     PacketPool               m_packetPool;
 };
 
+using IoContextPtr = std::shared_ptr<IoContext>;
+using IoContextWPtr = std::weak_ptr<IoContext>;
+using IContextUPtr = std::unique_ptr<IoContext>;
+
 } // namespace netlib

@@ -37,7 +37,6 @@ struct NetClientConfig
     // 재연결 정책
     bool   bAutoReconnect   = true;
     int32  reconnectIntervalMs = 10000;  // 연결 실패했을 때 재연결 시도 간격(ms)
-    int32  maxReconnectAttempts = -1;    // 재연결 시도 최대횟수 (-1 = 무제한)
 };
 
 } // namespace netlib

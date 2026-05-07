@@ -32,6 +32,7 @@ Session::~Session()
     NetLibStats::Inc(StatCounter::SessionDestroyed);
 }
 
+// thread-safe 한 Send 함수
 void Session::Send(PacketPtr& spPacket)
 {
     if (!spPacket || !m_bConnected.load())

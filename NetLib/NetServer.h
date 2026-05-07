@@ -77,4 +77,8 @@ private:
     INetEventHandler*                                          m_eventHandler = nullptr;
 };
 
+using NetServerPtr = std::shared_ptr<NetServer>;
+using NetServerWPtr = std::weak_ptr<NetServer>;
+using NetServerUPtr = std::unique_ptr<NetServer>;
+
 } // namespace netlib

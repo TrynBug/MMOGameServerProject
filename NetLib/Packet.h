@@ -50,5 +50,6 @@ private:
 
 using PacketPtr  = std::shared_ptr<Packet>;
 using PacketWPtr = std::weak_ptr<Packet>;
+using PacketUPtr = std::unique_ptr<Packet>;
 
 } // namespace netlib

@@ -27,5 +27,6 @@ public:
 
 using ISessionPtr  = std::shared_ptr<ISession>;
 using ISessionWPtr = std::weak_ptr<ISession>;
+using ISessionUPtr = std::unique_ptr<ISession>;
 
 } // namespace netlib
