@@ -6,6 +6,7 @@
 
 namespace serverbase
 {
+class ServerBase;
 
 // 레지스트리 서버와의 통신을 담당하는 클래스
 // 레지스트리 서버에 접속한다. 처음부터 접속에 실패했으면 10초마다 재연결, 접속성공후 연결이 끊긴 경우는 1분마다 재연결한다.
@@ -51,7 +52,7 @@ public:
 
 public:
     // 초기화. IoContext는 ServerBase에서 관리하는 것을 공유한다.
-    bool Initialize(netlib::IoContext* pIoContext, const Config& config);
+    bool Initialize(ServerBase* pServerBase, const Config& config);
 
     // 레지스트리 서버 연결시작
     void Start();
@@ -101,6 +102,8 @@ private:
 private:
     Config m_config;
     netlib::NetClientUPtr m_upNetClient;
+
+    ServerBase* m_pServerBase = nullptr;  // 자신이 속한 ServerBase
 
     std::atomic<bool> m_bRegistered { false };
     std::atomic<int32> m_userCount { 0 };

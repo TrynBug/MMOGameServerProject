@@ -75,8 +75,14 @@
     <ClInclude Include="Generated\GamePacket\move_packet.pb.h">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClInclude>
-    <ClInclude Include="Generated\ServerPacket\user_packet.pb.h">
+    <ClInclude Include="Generated\ServerPacket\server_registry_packet.pb.h">
       <Filter>소스 파일\Generated\ServerPacket</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\ServerPacket\login_server_packet.pb.h">
+      <Filter>소스 파일\Generated\ServerPacket</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GamePacket\login_packet.pb.h">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -110,8 +116,14 @@
     <ClCompile Include="Generated\GamePacket\move_packet.pb.cc">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClCompile>
-    <ClCompile Include="Generated\ServerPacket\user_packet.pb.cc">
+    <ClCompile Include="Generated\ServerPacket\server_registry_packet.pb.cc">
       <Filter>소스 파일\Generated\ServerPacket</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\ServerPacket\login_server_packet.pb.cc">
+      <Filter>소스 파일\Generated\ServerPacket</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\GamePacket\login_packet.pb.cc">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -130,8 +142,14 @@
     <None Include="Proto\GamePacket\move_packet.proto">
       <Filter>소스 파일\Proto\GamePacket</Filter>
     </None>
-    <None Include="Proto\ServerPacket\user_packet.proto">
+    <None Include="Proto\ServerPacket\server_registry_packet.proto">
       <Filter>소스 파일\Proto\ServerPacket</Filter>
+    </None>
+    <None Include="Proto\ServerPacket\login_server_packet.proto">
+      <Filter>소스 파일\Proto\ServerPacket</Filter>
+    </None>
+    <None Include="Proto\GamePacket\login_packet.proto">
+      <Filter>소스 파일\Proto\GamePacket</Filter>
     </None>
   </ItemGroup>
 </Project>

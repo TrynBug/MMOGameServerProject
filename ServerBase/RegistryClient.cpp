@@ -2,12 +2,12 @@
 #include "RegistryClient.h"
 #include "Logger.h"
 
-#include "ProtoSerializer.h"
 #include "Generated/Common/packet_id.pb.h"
 #include "Generated/ServerPacket/server_registry_packet.pb.h"
 
 #include "IoContext.h"
 #include "NetClient.h"
+#include "ServerBase.h"
 
 namespace serverbase
 {
@@ -17,9 +17,10 @@ RegistryClient::~RegistryClient()
     Stop();
 }
 
-bool RegistryClient::Initialize(netlib::IoContext* pIoContext, const Config& config)
+bool RegistryClient::Initialize(ServerBase* pServerBase, const Config& config)
 {
     m_config = config;
+    m_pServerBase = pServerBase;
 
     if (m_config.myServerId <= 0)
     {
@@ -33,7 +34,7 @@ bool RegistryClient::Initialize(netlib::IoContext* pIoContext, const Config& con
     clientConfig.reconnectIntervalMs  = m_config.initialReconnectMs;  // 첫 부팅시 재연결 대기시간 (연결을 한번 성공하고나면 재연결 대기시간이 1분으로 변경됨)
 
     // NetClient 생성
-    m_upNetClient = std::make_unique<netlib::NetClient>(pIoContext);
+    m_upNetClient = std::make_unique<netlib::NetClient>(&pServerBase->GetIoContext());
     if (!m_upNetClient->Initialize(clientConfig))
     {
         LOG_ERROR("RegistryClient: NetClient Initialize failed");
@@ -173,7 +174,7 @@ void RegistryClient::sendRegisterReq()
     req.set_ip(m_config.myIp);
     req.set_port(m_config.myPort);
 
-    auto spPacket = packet::ProtoSerializer::Serialize(Common::SERVER_PACKET_ID_REGISTRY_REGISTER_REQ, req);
+    auto spPacket = m_pServerBase->SerializePacket(Common::SERVER_PACKET_ID_REGISTRY_REGISTER_REQ, req);
 
     if (!spPacket)
     {
@@ -196,7 +197,7 @@ void RegistryClient::sendPollReq()
         req.add_target_types(static_cast<ServerPacket::ServerType>(type));
     }
 
-    auto spPacket = packet::ProtoSerializer::Serialize(Common::SERVER_PACKET_ID_REGISTRY_POLL_REQ, req);
+    auto spPacket = m_pServerBase->SerializePacket(Common::SERVER_PACKET_ID_REGISTRY_POLL_REQ, req);
 
     if (!spPacket)
     {
@@ -213,7 +214,7 @@ void RegistryClient::sendHeartbeatRes(int64 timestampMs)
     ServerPacket::RegistryHeartbeatRes res;
     res.set_timestamp_ms(timestampMs);
 
-    auto spPacket = packet::ProtoSerializer::Serialize(Common::SERVER_PACKET_ID_REGISTRY_HEARTBEAT_RES, res);
+    auto spPacket = m_pServerBase->SerializePacket(Common::SERVER_PACKET_ID_REGISTRY_HEARTBEAT_RES, res);
 
     if (!spPacket)
     {
@@ -233,7 +234,7 @@ void RegistryClient::sendUserCountReport()
     ServerPacket::RegistryUserCountNtf ntf;
     ntf.set_user_count(m_userCount.load());
 
-    auto spPacket = packet::ProtoSerializer::Serialize(Common::SERVER_PACKET_ID_REGISTRY_USER_COUNT_NTF, ntf);
+    auto spPacket = m_pServerBase->SerializePacket(Common::SERVER_PACKET_ID_REGISTRY_USER_COUNT_NTF, ntf);
 
     if (!spPacket)
     {
@@ -251,7 +252,7 @@ void RegistryClient::SendShutdownNotify()
         return;
 
     ServerPacket::RegistryShutdownReq req;
-    auto spPacket = packet::ProtoSerializer::Serialize(Common::SERVER_PACKET_ID_REGISTRY_SHUTDOWN_REQ, req);
+    auto spPacket = m_pServerBase->SerializePacket(Common::SERVER_PACKET_ID_REGISTRY_SHUTDOWN_REQ, req);
 
     if (!spPacket)
     {
@@ -267,7 +268,7 @@ void RegistryClient::SendShutdownNotify()
 void RegistryClient::handleRegisterRes(const netlib::Packet& packet)
 {
     ServerPacket::RegistryRegisterRes res;
-    if (!packet::ProtoSerializer::Deserialize(packet, res))
+    if (!m_pServerBase->DeserializePacket(packet, res))
     {
         LOG_ERROR("RegistryClient: failed to deserialize RegistryRegisterRes");
         return;
@@ -316,7 +317,7 @@ void RegistryClient::handleRegisterRes(const netlib::Packet& packet)
 void RegistryClient::handleServerInfoNtf(const netlib::Packet& packet)
 {
     ServerPacket::RegistryServerInfoNtf ntf;
-    if (!packet::ProtoSerializer::Deserialize(packet, ntf))
+    if (!m_pServerBase->DeserializePacket(packet, ntf))
     {
         LOG_ERROR("RegistryClient: failed to deserialize RegistryServerInfoNtf");
         return;
@@ -338,7 +339,7 @@ void RegistryClient::handleServerInfoNtf(const netlib::Packet& packet)
 void RegistryClient::handlePollRes(const netlib::Packet& packet)
 {
     ServerPacket::RegistryPollRes res;
-    if (!packet::ProtoSerializer::Deserialize(packet, res))
+    if (!m_pServerBase->DeserializePacket(packet, res))
     {
         LOG_ERROR("RegistryClient: failed to deserialize RegistryPollRes");
         return;
@@ -362,7 +363,7 @@ void RegistryClient::handlePollRes(const netlib::Packet& packet)
 void RegistryClient::handleHeartbeatReq(const netlib::Packet& packet)
 {
     ServerPacket::RegistryHeartbeatReq req;
-    if (!packet::ProtoSerializer::Deserialize(packet, req))
+    if (!m_pServerBase->DeserializePacket(packet, req))
     {
         LOG_ERROR("RegistryClient: failed to deserialize RegistryHeartbeatReq");
         return;

@@ -9,44 +9,35 @@ namespace packet
 class ProtoSerializer
 {
 public:
-    // protobuf message를 버퍼에 직렬화
+    // protobuf message의 직렬화 payload 크기를 반환 (PacketHeader 미포함)
     template<typename TMsg>
-    static netlib::PacketPtr Serialize(uint16 packetType, const TMsg& msg)
+    static int GetPayloadSize(const TMsg& msg)
     {
-        int32 payloadSize = static_cast<int32>(msg.ByteSizeLong());
-        int32 totalSize   = static_cast<int32>(sizeof(netlib::PacketHeader)) + payloadSize;
-
-        auto spPacket = std::make_shared<netlib::Packet>(totalSize);
-
-        if (payloadSize > 0)
-        {
-            uint8* pPayload = spPacket->GetPayload();
-            if (!msg.SerializeToArray(pPayload, payloadSize))
-            {
-                return nullptr;
-            }
-        }
-
-        spPacket->SetHeader(
-            static_cast<uint16>(totalSize),
-            packetType,
-            netlib::PacketFlags::None
-        );
-
-        return spPacket;
+        return static_cast<int32_t>(msg.ByteSizeLong());
     }
 
-    // 버퍼를 protobuf message로 역직렬화
+    // protobuf message를 payload 버퍼에 직렬화
+    // @pPayload : PacketHeader 다음 위치의 포인터
+    // @bufferSize : pPayload 버퍼 크기 (GetPayloadSize 반환값과 같아야 함)
     template<typename TMsg>
-    static bool Deserialize(const netlib::Packet& packet, TMsg& outMsg)
+    static bool Serialize(const TMsg& msg, uint8_t* pPayload, int32_t bufferSize)
     {
-        int32 payloadSize = packet.GetPayloadSize();
-        if (payloadSize <= 0)
-        {
+        if (bufferSize == 0)
             return true;  // 빈 메시지는 정상
-        }
 
-        return outMsg.ParseFromArray(packet.GetPayload(), payloadSize);
+        return msg.SerializeToArray(pPayload, bufferSize);
+    }
+
+    // payload 버퍼를 protobuf message로 역직렬화
+    // @pPayload : PacketHeader 다음 위치의 포인터
+    // @payloadSize : payload 크기
+    template<typename TMsg>
+    static bool Deserialize(const uint8_t* pPayload, int32_t payloadSize, TMsg& outMsg)
+    {
+        if (payloadSize <= 0)
+            return true;  // 빈 메시지는 정상
+
+        return outMsg.ParseFromArray(pPayload, payloadSize);
     }
 };
 

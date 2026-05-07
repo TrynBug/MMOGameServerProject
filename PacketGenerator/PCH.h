@@ -18,7 +18,3 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/json/json.h>
 
-// NetLib
-#include "../NetLib/Types.h"
-#include "../NetLib/PacketHeader.h"
-#include "../NetLib/Packet.h"

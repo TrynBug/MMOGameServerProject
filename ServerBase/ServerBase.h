@@ -105,6 +105,47 @@ public:
     Timer&            GetTimer()          { return m_timer; }
     RegistryClient*   GetRegistryClient() { return m_spRegistryClient.get(); }
     netlib::PacketPtr AllocPacket()       { return m_ioContext.GetPacketPool().Alloc(); }
+	netlib::IoContext& GetIoContext()     { return m_ioContext; }
+
+public:
+    // ── 패킷 ───────────────────────────────────────────────────
+
+    // protobuf message를 netlib::Packet으로 직렬화
+    template<typename TPacketId, typename TMsg>
+    netlib::PacketPtr SerializePacket(TPacketId packetId, const TMsg& msg)
+    {
+        int32 payloadSize = packet::ProtoSerializer::GetPayloadSize(msg);
+        int32 totalSize = static_cast<int32>(sizeof(netlib::PacketHeader)) + payloadSize;
+
+        netlib::PacketPtr spPacket = m_ioContext.GetPacketPool().Alloc(totalSize);
+        if (!spPacket)
+            return nullptr;
+
+        if (payloadSize > 0)
+        {
+            if (!packet::ProtoSerializer::Serialize(msg, spPacket->GetPayload(), payloadSize))
+                return nullptr;
+        }
+
+        spPacket->SetHeader(
+            static_cast<uint16>(totalSize),
+            static_cast<uint16>(packetId),
+            netlib::PacketFlags::None
+        );
+
+        return spPacket;
+    }
+
+    // netlib::Packet을 protobuf message로 역직렬화
+    template<typename TMsg>
+    bool DeserializePacket(const netlib::Packet& packet, TMsg& outMsg)
+    {
+        return packet::ProtoSerializer::Deserialize(
+            packet.GetPayload(),
+            packet.GetPayloadSize(),
+            outMsg
+        );
+    }
 
 protected:
     // ── 서브클래스 hook 함수들 ───────────────────────────

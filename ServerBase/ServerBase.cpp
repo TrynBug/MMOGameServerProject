@@ -102,7 +102,7 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
         regConfig.userCountReportMs = config.userCountReportMs;
 
         m_spRegistryClient = std::make_unique<RegistryClient>();
-        if (!m_spRegistryClient->Initialize(&m_ioContext, regConfig))
+        if (!m_spRegistryClient->Initialize(this, regConfig))
         {
             LOG_ERROR("ServerBase::Initialize - RegistryClient Initialize failed");
             return false;

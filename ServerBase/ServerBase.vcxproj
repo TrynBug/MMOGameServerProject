@@ -100,6 +100,7 @@
     <ClInclude Include="ContentsThread.h" />
     <ClInclude Include="RegistryClient.h" />
     <ClInclude Include="ServerBase.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <!-- 소스 파일 -->
   <ItemGroup>
@@ -113,6 +114,7 @@
     <ClCompile Include="ContentsThread.cpp" />
     <ClCompile Include="RegistryClient.cpp" />
     <ClCompile Include="ServerBase.cpp" />
+    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <!-- 기타 파일 -->
   <ItemGroup>
