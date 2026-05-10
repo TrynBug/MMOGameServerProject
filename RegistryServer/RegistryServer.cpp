@@ -63,23 +63,23 @@ void RegistryServer::onRecv(netlib::ISessionPtr spSession, netlib::PacketPtr spP
     switch (packetId)
     {
     case Common::SERVER_PACKET_ID_REGISTRY_REGISTER_REQ:
-        handleRegisterReq(spSession, *spPacket);
+        handleRegisterReq(spSession, spPacket);
         break;
 
     case Common::SERVER_PACKET_ID_REGISTRY_HEARTBEAT_RES:
-        handleHeartbeatRes(spSession, *spPacket);
+        handleHeartbeatRes(spSession, spPacket);
         break;
 
     case Common::SERVER_PACKET_ID_REGISTRY_POLL_REQ:
-        handlePollReq(spSession, *spPacket);
+        handlePollReq(spSession, spPacket);
         break;
 
     case Common::SERVER_PACKET_ID_REGISTRY_USER_COUNT_NTF:
-        handleUserCountNtf(spSession, *spPacket);
+        handleUserCountNtf(spSession, spPacket);
         break;
 
     case Common::SERVER_PACKET_ID_REGISTRY_SHUTDOWN_REQ:
-        handleShutdownReq(spSession, *spPacket);
+        handleShutdownReq(spSession, spPacket);
         break;
 
     default:
@@ -124,10 +124,11 @@ void RegistryServer::onDisconnect(netlib::ISessionPtr spSession)
     }
 }
 
-void RegistryServer::handleRegisterReq(netlib::ISessionPtr spSession, const netlib::Packet& packet)
+// 서버 등록 요청 처리
+void RegistryServer::handleRegisterReq(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket)
 {
     ServerPacket::RegistryRegisterReq req;
-    if (!DeserializePacket(packet, req))
+    if (!DeserializePacket(*spPacket, req))
     {
         LOG_WRITE(LogLevel::Error, "RegistryServer: failed to deserialize RegistryRegisterReq");
         spSession->Disconnect();
@@ -160,12 +161,12 @@ void RegistryServer::handleRegisterReq(netlib::ISessionPtr spSession, const netl
 
     // ServerEntry 생성 및 등록
     ServerEntry serverEntry;
-    serverEntry.serverId          = serverId;
-    serverEntry.serverType        = type;
-    serverEntry.status            = ServerStatus::Running;
-    serverEntry.ip                = ip;
-    serverEntry.port              = port;
-    serverEntry.spSession         = spSession;
+    serverEntry.serverId = serverId;
+    serverEntry.serverType = type;
+    serverEntry.status = ServerStatus::Running;
+    serverEntry.ip = ip;
+    serverEntry.port = port;
+    serverEntry.spSession = spSession;
     serverEntry.lastHeartbeatTime = std::chrono::steady_clock::now();
 
     {
@@ -173,7 +174,7 @@ void RegistryServer::handleRegisterReq(netlib::ISessionPtr spSession, const netl
         m_serverEntries[serverId] = serverEntry;
     }
 
-    // sessionId → serverId 인덱스 등록
+    // sessionId -> serverId 인덱스 등록
     {
         std::unique_lock<std::shared_mutex> lock(m_sessionIndexMutex);
         m_sessionToServerId[spSession->GetId()] = serverId;
@@ -184,7 +185,7 @@ void RegistryServer::handleRegisterReq(netlib::ISessionPtr spSession, const netl
              + " type=" + std::to_string(static_cast<int>(type))
              + " ip=" + ip + ":" + std::to_string(port));
 
-    // 1. 등록 응답
+    // 서버 등록 완료 응답
     {
         ServerPacket::RegistryRegisterRes res;
         res.set_success(true);
@@ -195,24 +196,27 @@ void RegistryServer::handleRegisterReq(netlib::ISessionPtr spSession, const netl
             spSession->Send(spPacket);
     }
 
-    // 2. 신규 서버에게 기존 서버 목록 전송
+    // 새로등록된 서버에게 기존 서버목록 전송
     {
         std::shared_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-        for (const auto& [id, existingEntry] : m_serverEntries)
+        for (const auto& [id, entry] : m_serverEntries)
         {
             if (id == serverId)
                 continue;
-            if (existingEntry.status == ServerStatus::Disconnected)
+
+            if (entry.status == ServerStatus::Disconnected)
                 continue;
-            sendServerInfoNtf(spSession, existingEntry);
+
+            sendServerInfoNtf(spSession, entry);
         }
     }
 
-    // 3. 기존 서버들에게 신규 서버 정보 브로드캐스트
+    // 기존 서버들에게 새로등록된 서버정보 브로드캐스트
     broadcastServerInfo(serverEntry);
 }
 
-void RegistryServer::handleHeartbeatRes(netlib::ISessionPtr spSession, const netlib::Packet& /*packet*/)
+// 하트비트 응답 처리
+void RegistryServer::handleHeartbeatRes(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket)
 {
     int32 serverId = findServerIdBySessionId(spSession->GetId());
     if (serverId == 0)
@@ -224,10 +228,11 @@ void RegistryServer::handleHeartbeatRes(netlib::ISessionPtr spSession, const net
         it->second.lastHeartbeatTime = std::chrono::steady_clock::now();
 }
 
-void RegistryServer::handlePollReq(netlib::ISessionPtr spSession, const netlib::Packet& packet)
+// 서버 목록 폴링 요청 처리
+void RegistryServer::handlePollReq(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket)
 {
     ServerPacket::RegistryPollReq req;
-    if (!DeserializePacket(packet, req))
+    if (!DeserializePacket(*spPacket, req))
     {
         LOG_WRITE(LogLevel::Error, "RegistryServer: failed to deserialize RegistryPollReq");
         return;
@@ -245,29 +250,33 @@ void RegistryServer::handlePollReq(netlib::ISessionPtr spSession, const netlib::
         {
             if (serverEntry.status == ServerStatus::Disconnected)
                 continue;
-            if (!targetTypes.empty() &&
-                targetTypes.find(static_cast<int>(serverEntry.serverType)) == targetTypes.end())
-                continue;
 
-            auto* pMsgInfo = res.add_servers();
-            pMsgInfo->set_server_id(serverEntry.serverId);
-            pMsgInfo->set_server_type(static_cast<ServerPacket::ServerType>(serverEntry.serverType));
-            pMsgInfo->set_status(static_cast<ServerPacket::ServerStatus>(serverEntry.status));
-            pMsgInfo->set_ip(serverEntry.ip);
-            pMsgInfo->set_port(serverEntry.port);
-            pMsgInfo->set_user_count(serverEntry.userCount);
+            if (!targetTypes.empty())
+            {
+                if(targetTypes.contains(static_cast<int>(serverEntry.serverType)) == false)
+					continue;
+            }
+                
+            ServerPacket::ServerInfoMsg* pInfo = res.add_servers();
+            pInfo->set_server_id(serverEntry.serverId);
+            pInfo->set_server_type(static_cast<ServerPacket::ServerType>(serverEntry.serverType));
+            pInfo->set_status(static_cast<ServerPacket::ServerStatus>(serverEntry.status));
+            pInfo->set_ip(serverEntry.ip);
+            pInfo->set_port(serverEntry.port);
+            pInfo->set_user_count(serverEntry.userCount);
         }
     }
 
-    auto spPacket = SerializePacket(Common::SERVER_PACKET_ID_REGISTRY_POLL_RES, res);
-    if (spPacket)
-        spSession->Send(spPacket);
+    auto spResPacket = SerializePacket(Common::SERVER_PACKET_ID_REGISTRY_POLL_RES, res);
+    if (spResPacket)
+        spSession->Send(spResPacket);
 }
 
-void RegistryServer::handleUserCountNtf(netlib::ISessionPtr spSession, const netlib::Packet& packet)
+// 유저수 변경통지 처리
+void RegistryServer::handleUserCountNtf(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket)
 {
     ServerPacket::RegistryUserCountNtf ntf;
-    if (!DeserializePacket(packet, ntf))
+    if (!DeserializePacket(*spPacket, ntf))
     {
         LOG_WRITE(LogLevel::Error, "RegistryServer: failed to deserialize RegistryUserCountNtf");
         return;
@@ -278,29 +287,31 @@ void RegistryServer::handleUserCountNtf(netlib::ISessionPtr spSession, const net
         return;
 
     std::unique_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-    auto it = m_serverEntries.find(serverId);
-    if (it != m_serverEntries.end())
-        it->second.userCount = ntf.user_count();
+    auto iter = m_serverEntries.find(serverId);
+    if (iter != m_serverEntries.end())
+        iter->second.userCount = ntf.user_count();
 }
 
-void RegistryServer::handleShutdownReq(netlib::ISessionPtr spSession, const netlib::Packet& /*packet*/)
+// 서버 종료 요청 처리
+void RegistryServer::handleShutdownReq(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket)
 {
     int32 serverId = findServerIdBySessionId(spSession->GetId());
     if (serverId == 0)
         return;
 
     std::unique_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-    auto it = m_serverEntries.find(serverId);
-    if (it == m_serverEntries.end())
+    auto iter = m_serverEntries.find(serverId);
+    if (iter == m_serverEntries.end())
         return;
 
-    it->second.status = ServerStatus::ShuttingDown;
+    // 서버 상태 변경
+    iter->second.status = ServerStatus::ShuttingDown;
 
     LOG_WRITE(LogLevel::Info, "RegistryServer: server shutdown requested. serverId=" + std::to_string(serverId)
-             + " type=" + std::to_string(static_cast<int>(it->second.serverType)));
+             + " type=" + std::to_string(static_cast<int>(iter->second.serverType)));
 
-    // ShuttingDown 상태를 다른 서버들에게 브로드캐스트
-    broadcastServerInfo(it->second);
+    // 서버상태변경을 다른 서버들에게 브로드캐스트
+    broadcastServerInfo(iter->second);
 }
 
 
@@ -386,6 +397,7 @@ void RegistryServer::sendServerInfoNtf(netlib::ISessionPtr spSession, const Serv
         spSession->Send(spPacket);
 }
 
+// 하트비트요청 보내기
 void RegistryServer::sendHeartbeatToAll()
 {
     ServerPacket::RegistryHeartbeatReq req;

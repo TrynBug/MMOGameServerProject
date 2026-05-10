@@ -31,11 +31,11 @@ private:
     void onDisconnect(netlib::ISessionPtr spSession);
 
     // 패킷 핸들러
-    void handleRegisterReq(netlib::ISessionPtr spSession, const netlib::Packet& packet);
-    void handleHeartbeatRes(netlib::ISessionPtr spSession, const netlib::Packet& packet);
-    void handlePollReq(netlib::ISessionPtr spSession, const netlib::Packet& packet);
-    void handleUserCountNtf(netlib::ISessionPtr spSession, const netlib::Packet& packet);
-    void handleShutdownReq(netlib::ISessionPtr spSession, const netlib::Packet& packet);
+    void handleRegisterReq(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket);
+    void handleHeartbeatRes(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket);
+    void handlePollReq(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket);
+    void handleUserCountNtf(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket);
+    void handleShutdownReq(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket);
 
 private:
     // 등록 요청의 serverId, IP:Port 충돌 여부를 검증한다.
