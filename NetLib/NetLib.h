@@ -9,6 +9,7 @@
 #include "Types.h"
 
 // NetLib public API
+#include "NetDefine.h"
 #include "NetConfig.h"
 #include "PacketHeader.h"
 #include "Packet.h"

@@ -26,7 +26,7 @@ public:
     std::function<void(ISessionPtr)>                     onConnect;
     std::function<void(ISessionPtr, PacketPtr)>          onRecv;
     std::function<void(ISessionPtr)>                     onDisconnect;
-    std::function<void(ISessionPtr, const std::string&)> onError;
+    std::function<void(LogLevel, ISessionPtr, const std::string&)> onLog;
 
     bool OnAccept(ISessionPtr spSession) override
     {
@@ -51,10 +51,10 @@ public:
             onDisconnect(std::move(spSession));
     }
 
-    void OnError(ISessionPtr spSession, const std::string& msg) override
+    void OnLog(LogLevel logLevel, ISessionPtr spSession, const std::string& msg) override
     {
-        if (onError)
-            onError(std::move(spSession), msg);
+        if (onLog)
+            onLog(logLevel, std::move(spSession), msg);
     }
 };
 

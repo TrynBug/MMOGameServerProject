@@ -42,6 +42,7 @@
     <ClInclude Include="INetBase.h" />
     <ClInclude Include="NetClient.h" />
     <ClInclude Include="NetConfig.h" />
+    <ClInclude Include="NetDefine.h" />
     <ClInclude Include="NetLibStats.h" />
     <ClInclude Include="NetServer.h" />
     <ClInclude Include="NetLib.h" />

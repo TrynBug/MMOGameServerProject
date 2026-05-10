@@ -114,7 +114,7 @@ bool Session::postRecv()
         NetLibStats::Inc(StatCounter::RecvBufferFull);
         if (m_pNetBase != nullptr && m_pNetBase->GetEventHandler() != nullptr)
         {
-            m_pNetBase->GetEventHandler()->OnError(shared_from_this(), "Recv buffer full");
+            m_pNetBase->GetEventHandler()->OnLog(LogLevel::Error, shared_from_this(), "Recv buffer full");
         }
         CloseSocket();
         return false;
@@ -154,7 +154,7 @@ bool Session::postRecv()
                 INetEventHandler* handler = m_pNetBase->GetEventHandler();
                 if (handler != nullptr)
                 {
-                    handler->OnError(shared_from_this(), std::format("WSARecv failed by unknown error. error:{}, session:{}", error, m_sessionId));
+                    handler->OnLog(LogLevel::Error, shared_from_this(), std::format("WSARecv failed by unknown error. error:{}, session:{}", error, m_sessionId));
                 }
 
                 NetLibStats::Inc(StatCounter::RecvUnknownFailed);
@@ -221,7 +221,7 @@ void Session::parseReceivedPackets()
             NetLibStats::Inc(StatCounter::InvalidPacketHeader);
             if (handler != nullptr)
             {
-                handler->OnError(shared_from_this(), "Invalid packet size");
+                handler->OnLog(LogLevel::Error, shared_from_this(), "Invalid packet size");
             }
             CloseSocket();
             return;
@@ -240,7 +240,7 @@ void Session::parseReceivedPackets()
             NetLibStats::Inc(StatCounter::PacketPoolAllocFail);
             if (handler != nullptr)
             {
-                handler->OnError(shared_from_this(), "PacketPool alloc failed");
+                handler->OnLog(LogLevel::Error, shared_from_this(), "PacketPool alloc failed");
             }
             CloseSocket();
             return;
@@ -318,7 +318,7 @@ bool Session::postSend()
                 INetEventHandler* handler = m_pNetBase->GetEventHandler();
                 if (handler != nullptr)
                 {
-                    handler->OnError(shared_from_this(), std::format("WSASend failed by unknown error. error:{}, session:{}", error, m_sessionId));
+                    handler->OnLog(LogLevel::Error, shared_from_this(), std::format("WSASend failed by unknown error. error:{}, session:{}", error, m_sessionId));
                 }
 
                 NetLibStats::Inc(StatCounter::SendUnknownFailed);

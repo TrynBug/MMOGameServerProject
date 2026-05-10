@@ -27,3 +27,4 @@
 
 // NetworkLib
 #include "Types.h"
+#include "NetDefine.h"

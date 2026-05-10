@@ -159,7 +159,16 @@ void NetClient::reconnectThreadProc()
             m_reconnectAttempts.fetch_add(1);
 
             // postConnect 성공 시 연결 완료통지는 비동기로 오고, 실패면 아래 wait 후 재시도
-            postConnect();   
+            if (postConnect())
+            {
+                if(GetEventHandler())
+                    GetEventHandler()->OnLog(LogLevel::Info, nullptr, std::format("ConnectEx posted. waiting for completion... remote ip = {}:{}", m_remoteIp, m_remotePort));
+            }
+            else
+            {
+                if (GetEventHandler())
+                    GetEventHandler()->OnLog(LogLevel::Error, nullptr, std::format("ConnectEx failed. remote ip = {}:{}", m_remoteIp, m_remotePort));
+            }
         }
 
         // m_config.reconnectIntervalMs 동안 wait한다. wait이 끝나거나 m_bReconnectRunning이 false로 바뀌었을때 다시 깨어난다.
@@ -290,7 +299,7 @@ bool NetClient::postConnect()
 
             if (m_eventHandler != nullptr)
             {
-                m_eventHandler->OnError(nullptr, "ConnectEx failed immediately");
+                m_eventHandler->OnLog(LogLevel::Error, nullptr, "ConnectEx failed immediately");
             }
             return false;
         }

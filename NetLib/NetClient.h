@@ -50,10 +50,6 @@ public:
 
     void SetEventHandler(INetEventHandler* handler) { m_eventHandler = handler; }
 
-    // 재연결 시도 간격을 런타임에 변경한다.
-    // 사용 예: ServerBase가 레지스트리 등록 성공 후 10초 → 1분으로 변경
-    void SetReconnectIntervalMs(int32 intervalMs) { m_config.reconnectIntervalMs = intervalMs; }
-
     // 연결 시도. 실패하면 자동으로 재연결 한다. 기존 연결이 있으면 끊고 새로 연결한다.
     bool Connect(const std::string& ip, uint16 port);
 

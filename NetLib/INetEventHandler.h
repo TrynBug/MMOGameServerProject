@@ -28,7 +28,7 @@ public:
     virtual void OnDisconnect(ISessionPtr spSession) = 0;
 
     // 오류가 발생했을 때 호출
-    virtual void OnError(ISessionPtr spSession, const std::string& msg) = 0;
+    virtual void OnLog(LogLevel logLevel, ISessionPtr spSession, const std::string& msg) = 0;
 };
 
 } // namespace netlib

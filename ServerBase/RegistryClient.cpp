@@ -31,7 +31,7 @@ bool RegistryClient::Initialize(ServerBase* pServerBase, const Config& config)
     netlib::NetClientConfig clientConfig;
     clientConfig.bUseNagle            = false;
     clientConfig.bAutoReconnect       = true;
-    clientConfig.reconnectIntervalMs  = m_config.initialReconnectMs;  // 첫 부팅시 재연결 대기시간 (연결을 한번 성공하고나면 재연결 대기시간이 1분으로 변경됨)
+    clientConfig.reconnectIntervalMs  = m_config.reconnectMs;
 
     // NetClient 생성
     m_upNetClient = std::make_unique<netlib::NetClient>(&pServerBase->GetIoContext());
@@ -41,7 +41,7 @@ bool RegistryClient::Initialize(ServerBase* pServerBase, const Config& config)
         return false;
     }
 
-	// EventHandler 등록
+    // EventHandler 등록
     m_upNetClient->SetEventHandler(this);
 
     return true;
@@ -152,9 +152,30 @@ void RegistryClient::OnDisconnect(netlib::ISessionPtr /*spSession*/)
     }
 }
 
-void RegistryClient::OnError(netlib::ISessionPtr /*spSession*/, const std::string& msg)
+void RegistryClient::OnLog(netlib::LogLevel logLevel, netlib::ISessionPtr /*spSession*/, const std::string& msg)
 {
-    LOG_ERROR("RegistryClient: error - " + msg);
+    switch (logLevel)
+    {
+        case netlib::LogLevel::Debug:
+            LOG_DEBUG("RegistryClient: " + msg);
+            return;
+        
+        case netlib::LogLevel::Info:
+            LOG_INFO("RegistryClient: " + msg);
+            return;
+
+        case netlib::LogLevel::Warn:
+            LOG_WARN("RegistryClient: " + msg);
+            return;
+
+        case netlib::LogLevel::Error:
+            LOG_ERROR("RegistryClient: " + msg);
+            break;
+
+         default:
+            LOG_ERROR("RegistryClient: " + msg);
+            return;
+    }
 }
 
 // Send
@@ -289,10 +310,6 @@ void RegistryClient::handleRegisterRes(const netlib::Packet& packet)
     m_bRegistered  = true;
 
     LOG_INFO("RegistryClient: registered successfully. serverId=" + std::to_string(m_config.myServerId));
-
-    // 등록 성공 후 재연결 주기를 1분으로 변경
-    if (m_upNetClient)
-        m_upNetClient->SetReconnectIntervalMs(m_config.runningReconnectMs);
 
     // 서버정보 폴링 타이머 등록
     if (!m_config.pollTargetTypes.empty())

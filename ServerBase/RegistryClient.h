@@ -9,7 +9,7 @@ namespace serverbase
 class ServerBase;
 
 // 레지스트리 서버와의 통신을 담당하는 클래스
-// 레지스트리 서버에 접속한다. 처음부터 접속에 실패했으면 10초마다 재연결, 접속성공후 연결이 끊긴 경우는 1분마다 재연결한다.
+// 레지스트리 서버에 접속한다. 처음부터 접속에 실패했으면 10초마다 재연결한다.
 // 레지스트리 서버에 자신의 서버 정보 등록, 하트비트 응답, 1분마다 다른서버 정보 폴링, 접속자 수 보고, Graceful Shutdown 알림 등을 담당한다.
 class RegistryClient : public netlib::INetEventHandler
 {
@@ -46,8 +46,7 @@ public:
         int64 userCountReportMs    = 60000;   // 접속자 수 보고 주기 (기본 1분, 0이면 보고 안 함)
 
         // 재연결 주기 
-        int32 initialReconnectMs   = 10000;   // 첫 부팅 시 10초
-        int32 runningReconnectMs   = 60000;   // 운영 중 1분
+        int32 reconnectMs   = 10000;   // 10초
     };
 
 public:
@@ -83,7 +82,7 @@ public:
     void OnConnect  (netlib::ISessionPtr spSession)                            override;
     void OnRecv     (netlib::ISessionPtr spSession, netlib::PacketPtr spPacket) override;
     void OnDisconnect(netlib::ISessionPtr spSession)                           override;
-    void OnError    (netlib::ISessionPtr spSession, const std::string& msg)    override;
+    void OnLog      (netlib::LogLevel logLevel, netlib::ISessionPtr spSession, const std::string& msg)    override;
 
 private:
     void sendRegisterReq();
