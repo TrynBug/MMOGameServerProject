@@ -13,3 +13,4 @@
 #include "ContentsThread.h"
 #include "RegistryClient.h"
 #include "ServerBase.h"
+#include "PacketDispatcher.h"

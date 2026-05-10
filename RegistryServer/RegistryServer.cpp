@@ -7,16 +7,41 @@
 
 bool RegistryServer::OnInitialize()
 {
+    // 패킷ID와 핸들러 등록
+    m_packetDispatcher.Register<ServerPacket::RegistryRegisterReq>(Common::SERVER_PACKET_ID_REGISTRY_REGISTER_REQ,
+        [this](const netlib::ISessionPtr& spSession, const ServerPacket::RegistryRegisterReq& msg) { handleRegisterReq(spSession, msg); });
+
+    m_packetDispatcher.Register<ServerPacket::RegistryHeartbeatRes>(Common::SERVER_PACKET_ID_REGISTRY_HEARTBEAT_RES,
+        [this](const netlib::ISessionPtr& spSession, const ServerPacket::RegistryHeartbeatRes& msg) { handleHeartbeatRes(spSession, msg); });
+
+    m_packetDispatcher.Register<ServerPacket::RegistryPollReq>(Common::SERVER_PACKET_ID_REGISTRY_POLL_REQ,
+        [this](const netlib::ISessionPtr& spSession, const ServerPacket::RegistryPollReq& msg) { handlePollReq(spSession, msg); });
+
+    m_packetDispatcher.Register<ServerPacket::RegistryUserCountNtf>(Common::SERVER_PACKET_ID_REGISTRY_USER_COUNT_NTF,
+        [this](const netlib::ISessionPtr& spSession, const ServerPacket::RegistryUserCountNtf& msg) { handleUserCountNtf(spSession, msg); });
+
+    m_packetDispatcher.Register<ServerPacket::RegistryShutdownReq>(Common::SERVER_PACKET_ID_REGISTRY_SHUTDOWN_REQ,
+        [this](const netlib::ISessionPtr& spSession, const ServerPacket::RegistryShutdownReq& msg) { handleShutdownReq(spSession, msg); });
+
+    m_packetDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
+    {
+        LOG_WRITE(LogLevel::Warn, "RegistryServer: unknown packetId=" + std::to_string(spPacket->GetHeader()->type) + " sessionId=" + std::to_string(spSession->GetId()));
+    });
+
     // 네트워크 이벤트 핸들러 콜백 등록
-    m_listenEventHandler.onAccept = [this](netlib::ISessionPtr spSession) { return onAccept(spSession); };
-    m_listenEventHandler.onConnect = [this](netlib::ISessionPtr spSession) { onConnect(spSession); };
-    m_listenEventHandler.onRecv = [this](netlib::ISessionPtr spSession, netlib::PacketPtr spPacket) { onRecv(spSession, spPacket); };
-    m_listenEventHandler.onDisconnect = [this](netlib::ISessionPtr spSession) { onDisconnect(spSession); };
-	m_listenEventHandler.onLog = [this](netlib::LogLevel netLogLevel, netlib::ISessionPtr spSession, const std::string& msg)
-        { 
-			const LogLevel logLevel = serverbase::NetLogLevelToLogLevel(netLogLevel);
-            LOG_WRITE(logLevel, msg);
-        };
+    m_listenEventHandler.onAccept = [this](const netlib::ISessionPtr& spSession) { return onAccept(spSession); };
+    m_listenEventHandler.onConnect = [this](const netlib::ISessionPtr& spSession) { onConnect(spSession); };
+    m_listenEventHandler.onRecv = [this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
+    {
+        m_packetDispatcher.Dispatch(spSession, spPacket);
+    };
+
+    m_listenEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spSession) { onDisconnect(spSession); };
+	m_listenEventHandler.onLog = [this](netlib::LogLevel netLogLevel, const netlib::ISessionPtr& spSession, const std::string& msg)
+    { 
+        const LogLevel logLevel = serverbase::NetLogLevelToLogLevel(netLogLevel);
+        LOG_WRITE(logLevel, msg);
+    };
 
     // TODO: RegistryDB에서 기존 serverId 데이터 로드
     // 현재는 메모리만 사용 (DB 연동은 이후 구현)
@@ -43,52 +68,20 @@ void RegistryServer::OnBeforeShutdown()
     LOG_WRITE(LogLevel::Info, "RegistryServer::OnBeforeShutdown");
 }
 
-bool RegistryServer::onAccept(netlib::ISessionPtr /*spSession*/)
+bool RegistryServer::onAccept(const netlib::ISessionPtr& spSession )
 {
     // 레지스트리 서버는 모든 서버의 접속을 허용한다.
     return true;
 }
 
-void RegistryServer::onConnect(netlib::ISessionPtr spSession)
+void RegistryServer::onConnect(const netlib::ISessionPtr& spSession)
 {
     // 아직 등록 요청 전이므로 세션만 기록해둔다.
     // ServerEntry는 RegistryRegisterReq 수신 후 생성한다.
     LOG_WRITE(LogLevel::Info, "RegistryServer: server connected. sessionId=" + std::to_string(spSession->GetId()));
 }
 
-void RegistryServer::onRecv(netlib::ISessionPtr spSession, netlib::PacketPtr spPacket)
-{
-    uint16 packetId = spPacket->GetHeader()->type;
-
-    switch (packetId)
-    {
-    case Common::SERVER_PACKET_ID_REGISTRY_REGISTER_REQ:
-        handleRegisterReq(spSession, spPacket);
-        break;
-
-    case Common::SERVER_PACKET_ID_REGISTRY_HEARTBEAT_RES:
-        handleHeartbeatRes(spSession, spPacket);
-        break;
-
-    case Common::SERVER_PACKET_ID_REGISTRY_POLL_REQ:
-        handlePollReq(spSession, spPacket);
-        break;
-
-    case Common::SERVER_PACKET_ID_REGISTRY_USER_COUNT_NTF:
-        handleUserCountNtf(spSession, spPacket);
-        break;
-
-    case Common::SERVER_PACKET_ID_REGISTRY_SHUTDOWN_REQ:
-        handleShutdownReq(spSession, spPacket);
-        break;
-
-    default:
-        LOG_WRITE(LogLevel::Warn, "RegistryServer: unknown packetId=" + std::to_string(packetId) + " sessionId=" + std::to_string(spSession->GetId()));
-        break;
-    }
-}
-
-void RegistryServer::onDisconnect(netlib::ISessionPtr spSession)
+void RegistryServer::onDisconnect(const netlib::ISessionPtr& spSession)
 {
     int64 sessionId = spSession->GetId();
 
@@ -125,20 +118,18 @@ void RegistryServer::onDisconnect(netlib::ISessionPtr spSession)
 }
 
 // 서버 등록 요청 처리
-void RegistryServer::handleRegisterReq(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket)
+void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryRegisterReq& req)
 {
-    ServerPacket::RegistryRegisterReq req;
-    if (!DeserializePacket(*spPacket, req))
-    {
-        LOG_WRITE(LogLevel::Error, "RegistryServer: failed to deserialize RegistryRegisterReq");
-        spSession->Disconnect();
-        return;
-    }
-
     int32 serverId = req.server_id();
     ServerType type = static_cast<ServerType>(req.server_type());
     std::string ip = req.ip();
     uint16 port = static_cast<uint16>(req.port());
+
+    if (!spSession)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("Session is null. serverId={}, serverType={}, ip={}, port={}", serverId, type, ip, port));
+        return;
+    }
 
     // 충돌 검증
     std::string errorMsg;
@@ -216,8 +207,14 @@ void RegistryServer::handleRegisterReq(netlib::ISessionPtr spSession, const netl
 }
 
 // 하트비트 응답 처리
-void RegistryServer::handleHeartbeatRes(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket)
+void RegistryServer::handleHeartbeatRes(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryHeartbeatRes& msg)
 {
+    if (!spSession)
+    {
+        LOG_WRITE(LogLevel::Error, "Session is null");
+        return;
+    }
+
     int32 serverId = findServerIdBySessionId(spSession->GetId());
     if (serverId == 0)
         return;
@@ -229,12 +226,11 @@ void RegistryServer::handleHeartbeatRes(netlib::ISessionPtr spSession, const net
 }
 
 // 서버 목록 폴링 요청 처리
-void RegistryServer::handlePollReq(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket)
+void RegistryServer::handlePollReq(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryPollReq& req)
 {
-    ServerPacket::RegistryPollReq req;
-    if (!DeserializePacket(*spPacket, req))
+    if (!spSession)
     {
-        LOG_WRITE(LogLevel::Error, "RegistryServer: failed to deserialize RegistryPollReq");
+        LOG_WRITE(LogLevel::Error, "Session is null");
         return;
     }
 
@@ -273,12 +269,11 @@ void RegistryServer::handlePollReq(netlib::ISessionPtr spSession, const netlib::
 }
 
 // 유저수 변경통지 처리
-void RegistryServer::handleUserCountNtf(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket)
+void RegistryServer::handleUserCountNtf(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryUserCountNtf& ntf)
 {
-    ServerPacket::RegistryUserCountNtf ntf;
-    if (!DeserializePacket(*spPacket, ntf))
+    if (!spSession)
     {
-        LOG_WRITE(LogLevel::Error, "RegistryServer: failed to deserialize RegistryUserCountNtf");
+        LOG_WRITE(LogLevel::Error, "Session is null");
         return;
     }
 
@@ -293,8 +288,14 @@ void RegistryServer::handleUserCountNtf(netlib::ISessionPtr spSession, const net
 }
 
 // 서버 종료 요청 처리
-void RegistryServer::handleShutdownReq(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket)
+void RegistryServer::handleShutdownReq(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryShutdownReq& msg)
 {
+    if (!spSession)
+    {
+        LOG_WRITE(LogLevel::Error, "Session is null");
+        return;
+    }
+
     int32 serverId = findServerIdBySessionId(spSession->GetId());
     if (serverId == 0)
         return;

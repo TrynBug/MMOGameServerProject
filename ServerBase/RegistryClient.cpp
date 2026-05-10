@@ -85,12 +85,12 @@ void RegistryClient::SetRegisterRejectedCallback(RegisterRejectedCallback callba
 
 // ──────────── INetEventHandler ─────────────────────────────
 
-bool RegistryClient::OnAccept(netlib::ISessionPtr /*spSession*/)
+bool RegistryClient::OnAccept(const netlib::ISessionPtr& spSession)
 {
     return false;  // NetClient에서는 호출되지 않는다
 }
 
-void RegistryClient::OnConnect(netlib::ISessionPtr spSession)
+void RegistryClient::OnConnect(const netlib::ISessionPtr& spSession)
 {
     {
         std::lock_guard<std::mutex> lock(m_sessionMutex);
@@ -101,7 +101,7 @@ void RegistryClient::OnConnect(netlib::ISessionPtr spSession)
     sendRegisterReq();
 }
 
-void RegistryClient::OnRecv(netlib::ISessionPtr spSession, netlib::PacketPtr spPacket)
+void RegistryClient::OnRecv(const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
 {
     uint16 packetId = spPacket->GetHeader()->type;
 
@@ -130,7 +130,7 @@ void RegistryClient::OnRecv(netlib::ISessionPtr spSession, netlib::PacketPtr spP
     }
 }
 
-void RegistryClient::OnDisconnect(netlib::ISessionPtr /*spSession*/)
+void RegistryClient::OnDisconnect(const netlib::ISessionPtr& spSession)
 {
     LOG_WRITE(LogLevel::Warn, "RegistryClient: disconnected from registry server. will reconnect.");
     m_bRegistered = false;
@@ -152,7 +152,7 @@ void RegistryClient::OnDisconnect(netlib::ISessionPtr /*spSession*/)
     }
 }
 
-void RegistryClient::OnLog(netlib::LogLevel netLogLevel, netlib::ISessionPtr /*spSession*/, const std::string& msg)
+void RegistryClient::OnLog(netlib::LogLevel netLogLevel, const netlib::ISessionPtr& spSession, const std::string& msg)
 {
 	const LogLevel logLevel = NetLogLevelToLogLevel(netLogLevel);
 	LOG_WRITE(logLevel, "RegistryClient: " + msg);

@@ -78,11 +78,11 @@ public:
 
 public:
     // INetEventHandler
-    bool OnAccept   (netlib::ISessionPtr spSession)                            override;
-    void OnConnect  (netlib::ISessionPtr spSession)                            override;
-    void OnRecv     (netlib::ISessionPtr spSession, netlib::PacketPtr spPacket) override;
-    void OnDisconnect(netlib::ISessionPtr spSession)                           override;
-    void OnLog      (netlib::LogLevel netLogLevel, netlib::ISessionPtr spSession, const std::string& msg)    override;
+    bool OnAccept(const netlib::ISessionPtr& spSession) override;
+    void OnConnect(const netlib::ISessionPtr& spSession) override;
+    void OnRecv(const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket) override;
+    void OnDisconnect(const netlib::ISessionPtr& spSession) override;
+    void OnLog(const netlib::LogLevel netLogLevel, const netlib::ISessionPtr& spSession, const std::string& msg) override;
 
 private:
     void sendRegisterReq();

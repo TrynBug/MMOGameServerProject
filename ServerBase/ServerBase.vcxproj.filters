@@ -48,6 +48,9 @@
     <ClInclude Include="Utils.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
+    <ClInclude Include="PacketDispatcher.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -75,6 +78,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Utils.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketDispatcher.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

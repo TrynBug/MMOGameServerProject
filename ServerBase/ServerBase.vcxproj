@@ -90,6 +90,7 @@
   </ItemDefinitionGroup>
   <!-- 헤더 파일 -->
   <ItemGroup>
+    <ClInclude Include="PacketDispatcher.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ServerBaseLib.h" />
     <ClInclude Include="Types.h" />
@@ -106,6 +107,7 @@
   <ItemGroup>
     <ClCompile Include="Contents.cpp" />
     <ClCompile Include="ObjectIdGenerator.cpp" />
+    <ClCompile Include="PacketDispatcher.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

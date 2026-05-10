@@ -22,39 +22,39 @@ namespace netlib
 class FuncEventHandler : public INetEventHandler
 {
 public:
-    std::function<bool(ISessionPtr)>                     onAccept;
-    std::function<void(ISessionPtr)>                     onConnect;
-    std::function<void(ISessionPtr, PacketPtr)>          onRecv;
-    std::function<void(ISessionPtr)>                     onDisconnect;
-    std::function<void(LogLevel, ISessionPtr, const std::string&)> onLog;
+    std::function<bool(const ISessionPtr&)> onAccept;
+    std::function<void(const ISessionPtr&)> onConnect;
+    std::function<void(const ISessionPtr&, const PacketPtr&)> onRecv;
+    std::function<void(const ISessionPtr&)> onDisconnect;
+    std::function<void(LogLevel, const ISessionPtr&, const std::string&)> onLog;
 
-    bool OnAccept(ISessionPtr spSession) override
+    bool OnAccept(const ISessionPtr& spSession) override
     {
-        return onAccept ? onAccept(std::move(spSession)) : true;
+        return onAccept ? onAccept(spSession) : true;
     }
 
-    void OnConnect(ISessionPtr spSession) override
+    void OnConnect(const ISessionPtr& spSession) override
     {
         if (onConnect)
-            onConnect(std::move(spSession));
+            onConnect(spSession);
     }
 
-    void OnRecv(ISessionPtr spSession, PacketPtr spPacket) override
+    void OnRecv(const ISessionPtr& spSession, const PacketPtr& spPacket) override
     {
         if (onRecv)
-            onRecv(std::move(spSession), std::move(spPacket));
+            onRecv(spSession, spPacket);
     }
 
-    void OnDisconnect(ISessionPtr spSession) override
+    void OnDisconnect(const ISessionPtr& spSession) override
     {
         if (onDisconnect)
-            onDisconnect(std::move(spSession));
+            onDisconnect(spSession);
     }
 
-    void OnLog(LogLevel logLevel, ISessionPtr spSession, const std::string& msg) override
+    void OnLog(LogLevel logLevel, const ISessionPtr& spSession, const std::string& msg) override
     {
         if (onLog)
-            onLog(logLevel, std::move(spSession), msg);
+            onLog(logLevel, spSession, msg);
     }
 };
 

@@ -25,17 +25,16 @@ protected:
 
 private:
     // 네트워크 이벤트 핸들러
-    bool onAccept(netlib::ISessionPtr spSession);
-    void onConnect(netlib::ISessionPtr spSession);
-    void onRecv(netlib::ISessionPtr spSession, netlib::PacketPtr spPacket);
-    void onDisconnect(netlib::ISessionPtr spSession);
+    bool onAccept(const netlib::ISessionPtr& spSession);
+    void onConnect(const netlib::ISessionPtr& spSession);
+    void onDisconnect(const netlib::ISessionPtr& spSession);
 
     // 패킷 핸들러
-    void handleRegisterReq(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket);
-    void handleHeartbeatRes(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket);
-    void handlePollReq(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket);
-    void handleUserCountNtf(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket);
-    void handleShutdownReq(netlib::ISessionPtr spSession, const netlib::PacketPtr& spPacket);
+    void handleRegisterReq(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryRegisterReq& msg);
+    void handleHeartbeatRes(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryHeartbeatRes& msg);
+    void handlePollReq(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryPollReq& msg);
+    void handleUserCountNtf(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryUserCountNtf& msg);
+    void handleShutdownReq(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryShutdownReq& msg);
 
 private:
     // 등록 요청의 serverId, IP:Port 충돌 여부를 검증한다.
@@ -75,4 +74,5 @@ private:
     static constexpr int64  k_heartbeatTimeoutMs  = 60000;  // 1분 무응답 시 끊김
 
     netlib::FuncEventHandler m_listenEventHandler;
+    serverbase::PacketDispatcher m_packetDispatcher;
 };
