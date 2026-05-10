@@ -53,6 +53,9 @@ struct TableStruct_ServerPacket_2flogin_5fserver_5fpacket_2eproto {
 extern const ::google::protobuf::internal::DescriptorTable
     descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto;
 namespace ServerPacket {
+class GatewayHandshakeNtf;
+struct GatewayHandshakeNtfDefaultTypeInternal;
+extern GatewayHandshakeNtfDefaultTypeInternal _GatewayHandshakeNtf_default_instance_;
 class LoginAuthTokenNtf;
 struct LoginAuthTokenNtfDefaultTypeInternal;
 extern LoginAuthTokenNtfDefaultTypeInternal _LoginAuthTokenNtf_default_instance_;
@@ -131,7 +134,7 @@ class LoginDuplicateNtf final : public ::google::protobuf::Message
     return reinterpret_cast<const LoginDuplicateNtf*>(
         &_LoginDuplicateNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 2;
   friend void swap(LoginDuplicateNtf& a, LoginDuplicateNtf& b) { a.Swap(&b); }
   inline void Swap(LoginDuplicateNtf* other) {
     if (other == this) return;
@@ -321,7 +324,7 @@ class LoginAuthTokenNtf final : public ::google::protobuf::Message
     return reinterpret_cast<const LoginAuthTokenNtf*>(
         &_LoginAuthTokenNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 0;
+  static constexpr int kIndexInFileMessages = 1;
   friend void swap(LoginAuthTokenNtf& a, LoginAuthTokenNtf& b) { a.Swap(&b); }
   inline void Swap(LoginAuthTokenNtf* other) {
     if (other == this) return;
@@ -474,6 +477,196 @@ class LoginAuthTokenNtf final : public ::google::protobuf::Message
   union { Impl_ _impl_; };
   friend struct ::TableStruct_ServerPacket_2flogin_5fserver_5fpacket_2eproto;
 };
+// -------------------------------------------------------------------
+
+class GatewayHandshakeNtf final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:ServerPacket.GatewayHandshakeNtf) */ {
+ public:
+  inline GatewayHandshakeNtf() : GatewayHandshakeNtf(nullptr) {}
+  ~GatewayHandshakeNtf() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(GatewayHandshakeNtf* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(GatewayHandshakeNtf));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR GatewayHandshakeNtf(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline GatewayHandshakeNtf(const GatewayHandshakeNtf& from) : GatewayHandshakeNtf(nullptr, from) {}
+  inline GatewayHandshakeNtf(GatewayHandshakeNtf&& from) noexcept
+      : GatewayHandshakeNtf(nullptr, std::move(from)) {}
+  inline GatewayHandshakeNtf& operator=(const GatewayHandshakeNtf& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline GatewayHandshakeNtf& operator=(GatewayHandshakeNtf&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const GatewayHandshakeNtf& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const GatewayHandshakeNtf* internal_default_instance() {
+    return reinterpret_cast<const GatewayHandshakeNtf*>(
+        &_GatewayHandshakeNtf_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 0;
+  friend void swap(GatewayHandshakeNtf& a, GatewayHandshakeNtf& b) { a.Swap(&b); }
+  inline void Swap(GatewayHandshakeNtf* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(GatewayHandshakeNtf* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  GatewayHandshakeNtf* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<GatewayHandshakeNtf>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const GatewayHandshakeNtf& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const GatewayHandshakeNtf& from) { GatewayHandshakeNtf::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(GatewayHandshakeNtf* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "ServerPacket.GatewayHandshakeNtf"; }
+
+ protected:
+  explicit GatewayHandshakeNtf(::google::protobuf::Arena* arena);
+  GatewayHandshakeNtf(::google::protobuf::Arena* arena, const GatewayHandshakeNtf& from);
+  GatewayHandshakeNtf(::google::protobuf::Arena* arena, GatewayHandshakeNtf&& from) noexcept
+      : GatewayHandshakeNtf(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+  static const ::google::protobuf::internal::ClassDataFull _class_data_;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kServerIdFieldNumber = 1,
+  };
+  // int32 server_id = 1;
+  void clear_server_id() ;
+  ::int32_t server_id() const;
+  void set_server_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_server_id() const;
+  void _internal_set_server_id(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:ServerPacket.GatewayHandshakeNtf)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 0,
+      0, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const GatewayHandshakeNtf& from_msg);
+    ::int32_t server_id_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_ServerPacket_2flogin_5fserver_5fpacket_2eproto;
+};
 
 // ===================================================================
 
@@ -487,6 +680,32 @@ class LoginAuthTokenNtf final : public ::google::protobuf::Message
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// GatewayHandshakeNtf
+
+// int32 server_id = 1;
+inline void GatewayHandshakeNtf::clear_server_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.server_id_ = 0;
+}
+inline ::int32_t GatewayHandshakeNtf::server_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.GatewayHandshakeNtf.server_id)
+  return _internal_server_id();
+}
+inline void GatewayHandshakeNtf::set_server_id(::int32_t value) {
+  _internal_set_server_id(value);
+  // @@protoc_insertion_point(field_set:ServerPacket.GatewayHandshakeNtf.server_id)
+}
+inline ::int32_t GatewayHandshakeNtf::_internal_server_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.server_id_;
+}
+inline void GatewayHandshakeNtf::_internal_set_server_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.server_id_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // LoginAuthTokenNtf

@@ -77,6 +77,31 @@ struct LoginAuthTokenNtfDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 LoginAuthTokenNtfDefaultTypeInternal _LoginAuthTokenNtf_default_instance_;
+
+inline constexpr GatewayHandshakeNtf::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : server_id_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR GatewayHandshakeNtf::GatewayHandshakeNtf(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct GatewayHandshakeNtfDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR GatewayHandshakeNtfDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~GatewayHandshakeNtfDefaultTypeInternal() {}
+  union {
+    GatewayHandshakeNtf _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GatewayHandshakeNtfDefaultTypeInternal _GatewayHandshakeNtf_default_instance_;
 }  // namespace ServerPacket
 static constexpr const ::_pb::EnumDescriptor**
     file_level_enum_descriptors_ServerPacket_2flogin_5fserver_5fpacket_2eproto = nullptr;
@@ -85,6 +110,15 @@ static constexpr const ::_pb::ServiceDescriptor**
 const ::uint32_t
     TableStruct_ServerPacket_2flogin_5fserver_5fpacket_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayHandshakeNtf, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayHandshakeNtf, _impl_.server_id_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::ServerPacket::LoginAuthTokenNtf, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -109,21 +143,24 @@ const ::uint32_t
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, -1, -1, sizeof(::ServerPacket::LoginAuthTokenNtf)},
-        {11, -1, -1, sizeof(::ServerPacket::LoginDuplicateNtf)},
+        {0, -1, -1, sizeof(::ServerPacket::GatewayHandshakeNtf)},
+        {9, -1, -1, sizeof(::ServerPacket::LoginAuthTokenNtf)},
+        {20, -1, -1, sizeof(::ServerPacket::LoginDuplicateNtf)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
+    &::ServerPacket::_GatewayHandshakeNtf_default_instance_._instance,
     &::ServerPacket::_LoginAuthTokenNtf_default_instance_._instance,
     &::ServerPacket::_LoginDuplicateNtf_default_instance_._instance,
 };
 const char descriptor_table_protodef_ServerPacket_2flogin_5fserver_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n&ServerPacket/login_server_packet.proto"
-    "\022\014ServerPacket\032\026Common/packet_id.proto\"P"
-    "\n\021LoginAuthTokenNtf\022\017\n\007user_id\030\001 \001(\003\022\022\n\n"
-    "auth_token\030\002 \001(\004\022\026\n\016expire_time_ms\030\003 \001(\003"
-    "\"$\n\021LoginDuplicateNtf\022\017\n\007user_id\030\001 \001(\003b\006"
-    "proto3"
+    "\022\014ServerPacket\032\026Common/packet_id.proto\"("
+    "\n\023GatewayHandshakeNtf\022\021\n\tserver_id\030\001 \001(\005"
+    "\"P\n\021LoginAuthTokenNtf\022\017\n\007user_id\030\001 \001(\003\022\022"
+    "\n\nauth_token\030\002 \001(\004\022\026\n\016expire_time_ms\030\003 \001"
+    "(\003\"$\n\021LoginDuplicateNtf\022\017\n\007user_id\030\001 \001(\003"
+    "b\006proto3"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto_deps[1] =
     {
@@ -133,13 +170,13 @@ static ::absl::once_flag descriptor_table_ServerPacket_2flogin_5fserver_5fpacket
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto = {
     false,
     false,
-    206,
+    248,
     descriptor_table_protodef_ServerPacket_2flogin_5fserver_5fpacket_2eproto,
     "ServerPacket/login_server_packet.proto",
     &descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto_once,
     descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto_deps,
     1,
-    2,
+    3,
     schemas,
     file_default_instances,
     TableStruct_ServerPacket_2flogin_5fserver_5fpacket_2eproto::offsets,
@@ -147,6 +184,213 @@ PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2
     file_level_service_descriptors_ServerPacket_2flogin_5fserver_5fpacket_2eproto,
 };
 namespace ServerPacket {
+// ===================================================================
+
+class GatewayHandshakeNtf::_Internal {
+ public:
+};
+
+GatewayHandshakeNtf::GatewayHandshakeNtf(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:ServerPacket.GatewayHandshakeNtf)
+}
+GatewayHandshakeNtf::GatewayHandshakeNtf(
+    ::google::protobuf::Arena* arena, const GatewayHandshakeNtf& from)
+    : GatewayHandshakeNtf(arena) {
+  MergeFrom(from);
+}
+inline PROTOBUF_NDEBUG_INLINE GatewayHandshakeNtf::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0} {}
+
+inline void GatewayHandshakeNtf::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.server_id_ = {};
+}
+GatewayHandshakeNtf::~GatewayHandshakeNtf() {
+  // @@protoc_insertion_point(destructor:ServerPacket.GatewayHandshakeNtf)
+  SharedDtor(*this);
+}
+inline void GatewayHandshakeNtf::SharedDtor(MessageLite& self) {
+  GatewayHandshakeNtf& this_ = static_cast<GatewayHandshakeNtf&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* GatewayHandshakeNtf::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) GatewayHandshakeNtf(arena);
+}
+constexpr auto GatewayHandshakeNtf::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(GatewayHandshakeNtf),
+                                            alignof(GatewayHandshakeNtf));
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull GatewayHandshakeNtf::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_GatewayHandshakeNtf_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &GatewayHandshakeNtf::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<GatewayHandshakeNtf>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &GatewayHandshakeNtf::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<GatewayHandshakeNtf>(), &GatewayHandshakeNtf::ByteSizeLong,
+            &GatewayHandshakeNtf::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(GatewayHandshakeNtf, _impl_._cached_size_),
+        false,
+    },
+    &GatewayHandshakeNtf::kDescriptorMethods,
+    &descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* GatewayHandshakeNtf::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 0, 2> GatewayHandshakeNtf::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::ServerPacket::GatewayHandshakeNtf>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // int32 server_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(GatewayHandshakeNtf, _impl_.server_id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(GatewayHandshakeNtf, _impl_.server_id_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 server_id = 1;
+    {PROTOBUF_FIELD_OFFSET(GatewayHandshakeNtf, _impl_.server_id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+
+PROTOBUF_NOINLINE void GatewayHandshakeNtf::Clear() {
+// @@protoc_insertion_point(message_clear_start:ServerPacket.GatewayHandshakeNtf)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.server_id_ = 0;
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* GatewayHandshakeNtf::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const GatewayHandshakeNtf& this_ = static_cast<const GatewayHandshakeNtf&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* GatewayHandshakeNtf::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const GatewayHandshakeNtf& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:ServerPacket.GatewayHandshakeNtf)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // int32 server_id = 1;
+          if (this_._internal_server_id() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<1>(
+                    stream, this_._internal_server_id(), target);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:ServerPacket.GatewayHandshakeNtf)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t GatewayHandshakeNtf::ByteSizeLong(const MessageLite& base) {
+          const GatewayHandshakeNtf& this_ = static_cast<const GatewayHandshakeNtf&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t GatewayHandshakeNtf::ByteSizeLong() const {
+          const GatewayHandshakeNtf& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:ServerPacket.GatewayHandshakeNtf)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+           {
+            // int32 server_id = 1;
+            if (this_._internal_server_id() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_server_id());
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void GatewayHandshakeNtf::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<GatewayHandshakeNtf*>(&to_msg);
+  auto& from = static_cast<const GatewayHandshakeNtf&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:ServerPacket.GatewayHandshakeNtf)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_server_id() != 0) {
+    _this->_impl_.server_id_ = from._impl_.server_id_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void GatewayHandshakeNtf::CopyFrom(const GatewayHandshakeNtf& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:ServerPacket.GatewayHandshakeNtf)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void GatewayHandshakeNtf::InternalSwap(GatewayHandshakeNtf* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+        swap(_impl_.server_id_, other->_impl_.server_id_);
+}
+
+::google::protobuf::Metadata GatewayHandshakeNtf::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
 // ===================================================================
 
 class LoginAuthTokenNtf::_Internal {

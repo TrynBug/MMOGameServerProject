@@ -65,8 +65,9 @@ enum ServerPacketId {
     SERVER_PACKET_ID_USER_MOVE_TO_GAME_SERVER_FAIL_NTF = 1202;   // 게이트웨이 -> 게임서버: 유저 이동 실패 알림
 
     // 2000~2999: 로그인 서버 관련
-    SERVER_PACKET_ID_LOGIN_AUTH_TOKEN_NTF = 2001;   // 로그인서버 -> 게이트웨이: 인증 토큰 사전 전달
-    SERVER_PACKET_ID_LOGIN_DUPLICATE_NTF = 2002;    // 로그인서버 -> 게이트웨이: 중복 로그인 알림
+    SERVER_PACKET_ID_LOGIN_GATEWAY_HANDSHAKE_NTF = 2000;   // 게이트웨이 -> 로그인서버: 핸드셰이크 (자신의 serverId 전달)
+    SERVER_PACKET_ID_LOGIN_AUTH_TOKEN_NTF = 2001;          // 로그인서버 -> 게이트웨이: 인증 토큰 사전 전달
+    SERVER_PACKET_ID_LOGIN_DUPLICATE_NTF = 2002;           // 로그인서버 -> 게이트웨이: 중복 로그인 알림
 
     // 3000~3999: 채팅 서버 관련 (게임서버 <-> 채팅서버)
     SERVER_PACKET_ID_CHAT_BROADCAST_REQ = 3001;   // 게임서버 -> 채팅서버: 채팅 브로드캐스트 요청
