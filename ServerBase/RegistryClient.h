@@ -82,7 +82,7 @@ public:
     void OnConnect  (netlib::ISessionPtr spSession)                            override;
     void OnRecv     (netlib::ISessionPtr spSession, netlib::PacketPtr spPacket) override;
     void OnDisconnect(netlib::ISessionPtr spSession)                           override;
-    void OnLog      (netlib::LogLevel logLevel, netlib::ISessionPtr spSession, const std::string& msg)    override;
+    void OnLog      (netlib::LogLevel netLogLevel, netlib::ISessionPtr spSession, const std::string& msg)    override;
 
 private:
     void sendRegisterReq();

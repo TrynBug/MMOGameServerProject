@@ -80,7 +80,7 @@ void Timer::threadProc()
             }
             catch (const std::exception& e)
             {
-                LOG_ERROR(std::string("Timer callback exception: ") + e.what());
+                LOG_WRITE(LogLevel::Error, std::string("Timer callback exception: ") + e.what());
             }
         }
 

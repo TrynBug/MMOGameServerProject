@@ -11,7 +11,6 @@ enum class LogLevel : int
     Info    = 1,
     Warn    = 2,
     Error   = 3,
-    Off     = 4,
 };
 
 // spdlog 라이브러리를 사용하는 로거 입니다.
@@ -34,15 +33,17 @@ public:
     static void Shutdown();
 
     // 로그 write
-    static void Debug(const std::string& msg, const std::source_location loc = std::source_location::current());
-    static void Info (const std::string& msg, const std::source_location loc = std::source_location::current());
-    static void Warn (const std::string& msg, const std::source_location loc = std::source_location::current());
-    static void Error(const std::string& msg, const std::source_location loc = std::source_location::current());
+    static void LogWrite(const LogLevel logLevel, const std::string& msg, const std::source_location loc = std::source_location::current());
 
     // 로그레벨 변경
     static void SetLevel(LogLevel level);
 
     static bool IsInitialized() { return sm_bInitialized; }
+
+    // 로그레벨 -> string
+    static std::string LogLevelToString(LogLevel level);
+    // string -> 로그레벨
+    static LogLevel StringToLogLevel(const std::string& str);
 
 private:
     static inline bool sm_bInitialized = false;
@@ -51,7 +52,4 @@ private:
 
 
 // 로그기록 매크로
-#define LOG_DEBUG(msg) Logger::Debug(msg)
-#define LOG_INFO(msg)  Logger::Info(msg)
-#define LOG_WARN(msg)  Logger::Warn(msg)
-#define LOG_ERROR(msg) Logger::Error(msg)
+#define LOG_WRITE(logLevel, msg) Logger::LogWrite(logLevel, msg)

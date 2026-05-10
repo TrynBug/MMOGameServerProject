@@ -13,7 +13,7 @@ bool Config::Load(const std::string& filePath)
     std::ifstream file(filePath);
     if (!file.is_open())
     {
-        LOG_ERROR("Config::Load - cannot open file: " + filePath);
+        LOG_WRITE(LogLevel::Error, "Config::Load - cannot open file: " + filePath);
         return false;
     }
 
@@ -54,7 +54,7 @@ bool Config::Load(const std::string& filePath)
         m_data[currentSection][key] = value;
     }
 
-    LOG_INFO("Config loaded: " + filePath);
+    LOG_WRITE(LogLevel::Info, "Config loaded: " + filePath);
     return true;
 }
 

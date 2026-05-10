@@ -18,7 +18,6 @@ namespace
         case LogLevel::Info:  return spdlog::level::info;
         case LogLevel::Warn:  return spdlog::level::warn;
         case LogLevel::Error: return spdlog::level::err;
-        case LogLevel::Off:   return spdlog::level::off;
         default:              return spdlog::level::debug;
         }
     }
@@ -85,24 +84,26 @@ void Logger::Shutdown()
     sm_bInitialized = false;
 }
 
-void Logger::Debug(const std::string& msg, const std::source_location loc)
+void Logger::LogWrite(const LogLevel logLevel, const std::string& msg, const std::source_location loc)
 {
-    spdlog::debug(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
-}
-
-void Logger::Info(const std::string& msg, const std::source_location loc)
-{
-    spdlog::info(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
-}
-
-void Logger::Warn(const std::string& msg, const std::source_location loc)
-{
-    spdlog::warn(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
-}
-
-void Logger::Error(const std::string& msg, const std::source_location loc)
-{
-    spdlog::error(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
+    switch (logLevel)
+    {
+    case LogLevel::Debug: 
+        spdlog::debug(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
+        break;
+    case LogLevel::Info: 
+        spdlog::info(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
+        break;
+    case LogLevel::Warn: 
+        spdlog::warn(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
+        break;
+    case LogLevel::Error: 
+        spdlog::error(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
+        break;
+    default: 
+        spdlog::error(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
+        break;
+    }
 }
 
 void Logger::SetLevel(LogLevel level)
@@ -112,3 +113,34 @@ void Logger::SetLevel(LogLevel level)
 }
 
 
+// 로그레벨 -> string
+std::string Logger::LogLevelToString(LogLevel level)
+{
+    switch (level)
+    {
+    case LogLevel::Debug: return "Debug";
+    case LogLevel::Info: return "Info";
+    case LogLevel::Warn: return "Warn";
+    case LogLevel::Error: return "Error";
+    default: return "unknown";
+    }
+}
+
+// string -> 로그레벨
+LogLevel Logger::StringToLogLevel(const std::string& str)
+{
+    if (str == "Debug") return LogLevel::Debug;
+    if (str == "Info")  return LogLevel::Info;
+    if (str == "Warn")  return LogLevel::Warn;
+    if (str == "Error") return LogLevel::Error;
+
+    std::string lower = str;
+    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return std::tolower(c); });
+
+    if (lower == "debug") return LogLevel::Debug;
+    if (lower == "info")  return LogLevel::Info;
+    if (lower == "warn")  return LogLevel::Warn;
+    if (lower == "error") return LogLevel::Error;
+
+    return LogLevel::Debug; // 기본값
+}

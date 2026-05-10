@@ -24,7 +24,7 @@ bool RegistryClient::Initialize(ServerBase* pServerBase, const Config& config)
 
     if (m_config.myServerId <= 0)
     {
-        LOG_ERROR("RegistryClient::Initialize - invalid serverId: " + std::to_string(m_config.myServerId));
+        LOG_WRITE(LogLevel::Error, "RegistryClient::Initialize - invalid serverId: " + std::to_string(m_config.myServerId));
         return false;
     }
 
@@ -37,7 +37,7 @@ bool RegistryClient::Initialize(ServerBase* pServerBase, const Config& config)
     m_upNetClient = std::make_unique<netlib::NetClient>(&pServerBase->GetIoContext());
     if (!m_upNetClient->Initialize(clientConfig))
     {
-        LOG_ERROR("RegistryClient: NetClient Initialize failed");
+        LOG_WRITE(LogLevel::Error, "RegistryClient: NetClient Initialize failed");
         return false;
     }
 
@@ -52,7 +52,7 @@ void RegistryClient::Start()
     m_timer.Start();
 
     m_upNetClient->Connect(m_config.registryIp, m_config.registryPort);
-    LOG_INFO("RegistryClient: connecting to registry " + m_config.registryIp + ":" + std::to_string(m_config.registryPort));
+    LOG_WRITE(LogLevel::Info, "RegistryClient: connecting to registry " + m_config.registryIp + ":" + std::to_string(m_config.registryPort));
 }
 
 void RegistryClient::Stop()
@@ -97,7 +97,7 @@ void RegistryClient::OnConnect(netlib::ISessionPtr spSession)
         m_spSession = spSession;
     }
 
-    LOG_INFO("RegistryClient: connected to registry server. sending register request.");
+    LOG_WRITE(LogLevel::Info, "RegistryClient: connected to registry server. sending register request.");
     sendRegisterReq();
 }
 
@@ -125,14 +125,14 @@ void RegistryClient::OnRecv(netlib::ISessionPtr spSession, netlib::PacketPtr spP
         break;
 
     default:
-        LOG_WARN("RegistryClient: unknown packet id=" + std::to_string(packetId));
+        LOG_WRITE(LogLevel::Warn, "RegistryClient: unknown packet id=" + std::to_string(packetId));
         break;
     }
 }
 
 void RegistryClient::OnDisconnect(netlib::ISessionPtr /*spSession*/)
 {
-    LOG_WARN("RegistryClient: disconnected from registry server. will reconnect.");
+    LOG_WRITE(LogLevel::Warn, "RegistryClient: disconnected from registry server. will reconnect.");
     m_bRegistered = false;
 
     {
@@ -152,30 +152,10 @@ void RegistryClient::OnDisconnect(netlib::ISessionPtr /*spSession*/)
     }
 }
 
-void RegistryClient::OnLog(netlib::LogLevel logLevel, netlib::ISessionPtr /*spSession*/, const std::string& msg)
+void RegistryClient::OnLog(netlib::LogLevel netLogLevel, netlib::ISessionPtr /*spSession*/, const std::string& msg)
 {
-    switch (logLevel)
-    {
-        case netlib::LogLevel::Debug:
-            LOG_DEBUG("RegistryClient: " + msg);
-            return;
-        
-        case netlib::LogLevel::Info:
-            LOG_INFO("RegistryClient: " + msg);
-            return;
-
-        case netlib::LogLevel::Warn:
-            LOG_WARN("RegistryClient: " + msg);
-            return;
-
-        case netlib::LogLevel::Error:
-            LOG_ERROR("RegistryClient: " + msg);
-            break;
-
-         default:
-            LOG_ERROR("RegistryClient: " + msg);
-            return;
-    }
+	const LogLevel logLevel = NetLogLevelToLogLevel(netLogLevel);
+	LOG_WRITE(logLevel, "RegistryClient: " + msg);
 }
 
 // Send
@@ -199,7 +179,7 @@ void RegistryClient::sendRegisterReq()
 
     if (!spPacket)
     {
-        LOG_ERROR("RegistryClient: failed to serialize RegistryRegisterReq");
+        LOG_WRITE(LogLevel::Error, "RegistryClient: failed to serialize RegistryRegisterReq");
         return;
     }
 
@@ -222,7 +202,7 @@ void RegistryClient::sendPollReq()
 
     if (!spPacket)
     {
-        LOG_ERROR("RegistryClient: failed to serialize RegistryPollReq");
+        LOG_WRITE(LogLevel::Error, "RegistryClient: failed to serialize RegistryPollReq");
         return;
     }
 
@@ -239,7 +219,7 @@ void RegistryClient::sendHeartbeatRes(int64 timestampMs)
 
     if (!spPacket)
     {
-        LOG_ERROR("RegistryClient: failed to serialize RegistryHeartbeatRes");
+        LOG_WRITE(LogLevel::Error, "RegistryClient: failed to serialize RegistryHeartbeatRes");
         return;
     }
 
@@ -259,7 +239,7 @@ void RegistryClient::sendUserCountReport()
 
     if (!spPacket)
     {
-        LOG_ERROR("RegistryClient: failed to serialize RegistryUserCountNtf");
+        LOG_WRITE(LogLevel::Error, "RegistryClient: failed to serialize RegistryUserCountNtf");
         return;
     }
 
@@ -277,12 +257,12 @@ void RegistryClient::SendShutdownNotify()
 
     if (!spPacket)
     {
-        LOG_ERROR("RegistryClient: failed to serialize RegistryShutdownReq");
+        LOG_WRITE(LogLevel::Error, "RegistryClient: failed to serialize RegistryShutdownReq");
         return;
     }
 
     sendPacket(std::move(spPacket));
-    LOG_INFO("RegistryClient: sent shutdown notify to registry server.");
+    LOG_WRITE(LogLevel::Info, "RegistryClient: sent shutdown notify to registry server.");
 }
 
 // 서버 등록 요청 응답 처리
@@ -291,7 +271,7 @@ void RegistryClient::handleRegisterRes(const netlib::Packet& packet)
     ServerPacket::RegistryRegisterRes res;
     if (!m_pServerBase->DeserializePacket(packet, res))
     {
-        LOG_ERROR("RegistryClient: failed to deserialize RegistryRegisterRes");
+        LOG_WRITE(LogLevel::Error, "RegistryClient: failed to deserialize RegistryRegisterRes");
         return;
     }
 
@@ -299,7 +279,7 @@ void RegistryClient::handleRegisterRes(const netlib::Packet& packet)
     {
         // 등록 거부됨(서버ID 충돌 등). 서버는 종료되어야 함
         std::string reason = res.message();
-        LOG_ERROR("RegistryClient: register rejected - " + reason + " (serverId=" + std::to_string(m_config.myServerId) + "). server must shut down.");
+        LOG_WRITE(LogLevel::Error, "RegistryClient: register rejected - " + reason + " (serverId=" + std::to_string(m_config.myServerId) + "). server must shut down.");
 
         if (m_registerRejectedCallback)
             m_registerRejectedCallback(reason);
@@ -309,7 +289,7 @@ void RegistryClient::handleRegisterRes(const netlib::Packet& packet)
 
     m_bRegistered  = true;
 
-    LOG_INFO("RegistryClient: registered successfully. serverId=" + std::to_string(m_config.myServerId));
+    LOG_WRITE(LogLevel::Info, "RegistryClient: registered successfully. serverId=" + std::to_string(m_config.myServerId));
 
     // 서버정보 폴링 타이머 등록
     if (!m_config.pollTargetTypes.empty())
@@ -336,7 +316,7 @@ void RegistryClient::handleServerInfoNtf(const netlib::Packet& packet)
     ServerPacket::RegistryServerInfoNtf ntf;
     if (!m_pServerBase->DeserializePacket(packet, ntf))
     {
-        LOG_ERROR("RegistryClient: failed to deserialize RegistryServerInfoNtf");
+        LOG_WRITE(LogLevel::Error, "RegistryClient: failed to deserialize RegistryServerInfoNtf");
         return;
     }
 
@@ -358,7 +338,7 @@ void RegistryClient::handlePollRes(const netlib::Packet& packet)
     ServerPacket::RegistryPollRes res;
     if (!m_pServerBase->DeserializePacket(packet, res))
     {
-        LOG_ERROR("RegistryClient: failed to deserialize RegistryPollRes");
+        LOG_WRITE(LogLevel::Error, "RegistryClient: failed to deserialize RegistryPollRes");
         return;
     }
 
@@ -382,7 +362,7 @@ void RegistryClient::handleHeartbeatReq(const netlib::Packet& packet)
     ServerPacket::RegistryHeartbeatReq req;
     if (!m_pServerBase->DeserializePacket(packet, req))
     {
-        LOG_ERROR("RegistryClient: failed to deserialize RegistryHeartbeatReq");
+        LOG_WRITE(LogLevel::Error, "RegistryClient: failed to deserialize RegistryHeartbeatReq");
         return;
     }
 
@@ -398,7 +378,7 @@ void RegistryClient::applyServerInfo(const ServerInfo& info)
         m_servers[info.serverId] = info;
     }
 
-    LOG_INFO("RegistryClient: server info updated. serverId=" + std::to_string(info.serverId)
+    LOG_WRITE(LogLevel::Info, "RegistryClient: server info updated. serverId=" + std::to_string(info.serverId)
              + " type=" + std::to_string(static_cast<int>(info.serverType))
              + " status=" + std::to_string(static_cast<int>(info.status)));
 
