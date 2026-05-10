@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package ServerPacket;
+
+import "Common/packet_id.proto";
+
+// ──────────────────────────────────────────────
+// 로그인 서버 패킷 (로그인서버 <-> 게이트웨이서버)
+// ──────────────────────────────────────────────
+
+// 인증 토큰 사전 전달 (로그인서버 -> 게이트웨이서버)
+// 로그인 성공 후, 클라이언트가 게이트웨이에 접속하기 전에 미리 전달한다.
+// 게이트웨이는 이 토큰을 5분간 보관하고 클라이언트 접속 시 검증한다.
+message LoginAuthTokenNtf {
+    int64 user_id = 1;
+    uint64 auth_token = 2;   // 인증 토큰 (8byte 랜덤값)
+    int64 expire_time_ms = 3;   // 만료 시각 (Unix timestamp ms)
+}
+
+// 중복 로그인 알림 (로그인서버 -> 게이트웨이서버)
+// 이미 해당 유저가 접속 중인 게이트웨이에 전달한다.
+// 게이트웨이는 해당 유저의 연결을 끊는다.
+message LoginDuplicateNtf {
+    int64 user_id = 1;
+}

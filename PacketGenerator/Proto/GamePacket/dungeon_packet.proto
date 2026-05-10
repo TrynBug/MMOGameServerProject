@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package GamePacket;
+
+import "Common/packet_id.proto";
+
+// ──────────────────────────────────────────────
+// 던전 패킷 (클라이언트 <-> 게임서버)
+// ──────────────────────────────────────────────
+
+// 공용던전 목록 요청 (클라 -> 서버)
+message PublicDungeonListReq {
+}
+
+// 공용던전 정보
+message PublicDungeonInfo {
+    int64 dungeon_id = 1;
+    int32 template_id = 2;   // 던전 종류 (csv 참조)
+    int32 current_users = 3;
+    int64 start_time_ms = 4;   // 입장 가능 시작 시각 (Unix timestamp ms)
+    int64 end_time_ms = 5;   // 입장 가능 종료 시각
+}
+
+// 공용던전 목록 응답 (서버 -> 클라)
+message PublicDungeonListRes {
+    repeated PublicDungeonInfo dungeons = 1;
+}
+
+// 공용던전 입장 요청 (클라 -> 서버)
+message PublicDungeonEnterReq {
+    int64 dungeon_id = 1;
+}
+
+// 던전 입장 결과 (서버 -> 클라)
+// 공용던전 / 유저던전 공통
+message DungeonEnterRes {
+    bool success = 1;
+    string message = 2;   // 실패 사유 (입장 시간 아님, 정원 초과 등)
+}
+
+// 유저던전 생성 요청 (클라 -> 서버)
+message UserDungeonCreateReq {
+    int32 template_id = 1;
+}
+
+// 유저던전 생성 결과 (서버 -> 클라)
+message UserDungeonCreateRes {
+    bool success = 1;
+    string message = 2;
+    int64 dungeon_id = 3;
+}
+
+// 유저던전 닫기 요청 (클라 -> 서버)
+// 던전 생성자만 요청 가능
+message UserDungeonCloseReq {
+    int64 dungeon_id = 1;
+}
+
+// 던전 종료 알림 (서버 -> 클라 브로드캐스트)
+// 시간 만료 또는 생성자가 닫을 때 던전 내 모든 유저에게 전송
+// 클라는 이 패킷을 받으면 오픈필드로 강제 이동
+message DungeonClosedNtf {
+    int64 dungeon_id = 1;
+    string reason = 2;   // "expired" | "closed_by_owner"
+}

@@ -84,6 +84,27 @@
     <ClInclude Include="Generated\GamePacket\login_packet.pb.h">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClInclude>
+    <ClInclude Include="Generated\DataStructures\character.pb.h">
+      <Filter>소스 파일\Generated\DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GamePacket\chat_packet.pb.h">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GamePacket\dungeon_packet.pb.h">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GamePacket\stage_packet.pb.h">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\ServerPacket\chat_server_packet.pb.h">
+      <Filter>소스 파일\Generated\ServerPacket</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\ServerPacket\gateway_game_packet.pb.h">
+      <Filter>소스 파일\Generated\ServerPacket</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GamePacket\session_packet.pb.h">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ProtoSerializer.cpp">
@@ -125,6 +146,27 @@
     <ClCompile Include="Generated\GamePacket\login_packet.pb.cc">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClCompile>
+    <ClCompile Include="Generated\DataStructures\character.pb.cc">
+      <Filter>소스 파일\Generated\DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\GamePacket\chat_packet.pb.cc">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\GamePacket\dungeon_packet.pb.cc">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\GamePacket\stage_packet.pb.cc">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\ServerPacket\chat_server_packet.pb.cc">
+      <Filter>소스 파일\Generated\ServerPacket</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\ServerPacket\gateway_game_packet.pb.cc">
+      <Filter>소스 파일\Generated\ServerPacket</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\GamePacket\session_packet.pb.cc">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="generate_proto.bat">
@@ -149,6 +191,27 @@
       <Filter>소스 파일\Proto\ServerPacket</Filter>
     </None>
     <None Include="Proto\GamePacket\login_packet.proto">
+      <Filter>소스 파일\Proto\GamePacket</Filter>
+    </None>
+    <None Include="Proto\DataStructures\character.proto">
+      <Filter>소스 파일\Proto\DataStructures</Filter>
+    </None>
+    <None Include="Proto\GamePacket\chat_packet.proto">
+      <Filter>소스 파일\Proto\GamePacket</Filter>
+    </None>
+    <None Include="Proto\GamePacket\dungeon_packet.proto">
+      <Filter>소스 파일\Proto\GamePacket</Filter>
+    </None>
+    <None Include="Proto\GamePacket\stage_packet.proto">
+      <Filter>소스 파일\Proto\GamePacket</Filter>
+    </None>
+    <None Include="Proto\ServerPacket\chat_server_packet.proto">
+      <Filter>소스 파일\Proto\ServerPacket</Filter>
+    </None>
+    <None Include="Proto\ServerPacket\gateway_game_packet.proto">
+      <Filter>소스 파일\Proto\ServerPacket</Filter>
+    </None>
+    <None Include="Proto\GamePacket\session_packet.proto">
       <Filter>소스 파일\Proto\GamePacket</Filter>
     </None>
   </ItemGroup>

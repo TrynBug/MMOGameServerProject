@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+package ServerPacket;
+
+import "Common/packet_id.proto";
+
+// ──────────────────────────────────────────────
+// 유저 입/퇴장 알림 (게이트웨이 <-> 게임서버)
+// ──────────────────────────────────────────────
+
+// 유저 입장 알림 (게이트웨이 -> 게임서버)
+message UserEnterNtf {
+    int64 user_id = 1;
+    int32 gateway_id = 2;
+    string ip = 3;
+}
+
+// 유저 연결 끊김 알림 (게이트웨이 -> 게임서버)
+message UserDisconnectNtf {
+    int64 user_id = 1;
+}
+
+// ──────────────────────────────────────────────
+// 레지스트리 서버 패킷
+// ──────────────────────────────────────────────
+
+// 서버 타입 (packet_id.proto 와 대응)
+enum ServerType {
+    SERVER_TYPE_UNKNOWN  = 0;
+    SERVER_TYPE_REGISTRY = 1;
+    SERVER_TYPE_LOGIN    = 2;
+    SERVER_TYPE_GATEWAY  = 3;
+    SERVER_TYPE_GAME     = 4;
+    SERVER_TYPE_CHAT     = 5;
+}
+
+// 서버 상태
+enum ServerStatus {
+    SERVER_STATUS_UNKNOWN       = 0;
+    SERVER_STATUS_RUNNING       = 1;
+    SERVER_STATUS_SHUTTING_DOWN = 2;
+    SERVER_STATUS_DISCONNECTED  = 3;
+}
+
+// 서버 정보 (레지스트리에 저장되는 단일 서버 엔트리)
+message ServerInfoMsg {
+    int32 server_id = 1;
+    ServerType server_type = 2;
+    ServerStatus status = 3;
+    string ip = 4;
+    int32 port = 5;
+    int32 user_count = 6;
+}
+
+// 서버 등록 요청 (서버 -> 레지스트리)
+// 서버 ID는 각 서버의 Config 파일에 하드코딩되어 있으며, 등록 요청 시 함께 전달한다.
+// 레지스트리는 이 ID의 충돌(동일 ID로 다른 IP:Port 등록 등)을 검증하고, 충돌 시 거절한다.
+message RegistryRegisterReq {
+    ServerType server_type = 1;
+    int32 server_id = 2;   // Config에서 로드한 서버 ID (1~999)
+    string ip = 3;
+    int32 port = 4;
+}
+
+// 서버 등록 응답 (레지스트리 -> 서버)
+message RegistryRegisterRes {
+    bool success   = 1;
+    int32 server_id = 2;   // 검증을 통과한 서버 ID 에코 (요청한 값과 동일)
+    string message = 3;   // 실패 시 오류 메시지 (ID 충돌, IP:Port 충돌 등)
+}
+
+// 다른 서버 정보 통보 (레지스트리 -> 서버): 신규 등록 또는 상태 변경
+message RegistryServerInfoNtf {
+    ServerInfoMsg server_info = 1;
+}
+
+// 서버 목록 폴링 요청 (서버 -> 레지스트리)
+message RegistryPollReq {
+    repeated ServerType target_types = 1;   // 조회할 서버 타입 목록
+}
+
+// 서버 목록 폴링 응답 (레지스트리 -> 서버)
+message RegistryPollRes {
+    repeated ServerInfoMsg servers = 1;
+}
+
+// 하트비트 요청 (레지스트리 -> 서버)
+message RegistryHeartbeatReq {
+    int64 timestamp_ms = 1;
+}
+
+// 하트비트 응답 (서버 -> 레지스트리)
+message RegistryHeartbeatRes {
+    int64 timestamp_ms = 1;
+}
+
+// 접속자 수 보고 (서버 -> 레지스트리)
+message RegistryUserCountNtf {
+    int32 user_count = 1;
+}
+
+// Graceful Shutdown 시작 알림 (서버 -> 레지스트리)
+message RegistryShutdownReq {
+}

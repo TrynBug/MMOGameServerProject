@@ -57,10 +57,30 @@ namespace protobuf {
 namespace Common {
 enum GamePacketId : int {
   GAME_PACKET_ID_NONE = 0,
+  GAME_PACKET_ID_LOGIN_REQ = 101,
+  GAME_PACKET_ID_LOGIN_RES = 102,
+  GAME_PACKET_ID_GAME_ENTER_NTF = 201,
+  GAME_PACKET_ID_GAME_LOGOUT_REQ = 202,
+  GAME_PACKET_ID_FORCE_DISCONNECT_NTF = 203,
   GAME_PACKET_ID_MOVE_REQ = 1001,
   GAME_PACKET_ID_MOVE_NTF = 1002,
   GAME_PACKET_ID_ITEM_USE_REQ = 2001,
   GAME_PACKET_ID_ITEM_USE_RES = 2002,
+  GAME_PACKET_ID_CHAT_SEND_REQ = 3001,
+  GAME_PACKET_ID_CHAT_RECV_NTF = 3002,
+  GAME_PACKET_ID_STAGE_ENTER_NTF = 4001,
+  GAME_PACKET_ID_STAGE_MOVE_REQ = 4002,
+  GAME_PACKET_ID_CROSS_SERVER_STAGE_MOVE_REQ = 4003,
+  GAME_PACKET_ID_CHARACTER_ENTER_NTF = 4004,
+  GAME_PACKET_ID_CHARACTER_LEAVE_NTF = 4005,
+  GAME_PACKET_ID_PUBLIC_DUNGEON_LIST_REQ = 5001,
+  GAME_PACKET_ID_PUBLIC_DUNGEON_LIST_RES = 5002,
+  GAME_PACKET_ID_PUBLIC_DUNGEON_ENTER_REQ = 5003,
+  GAME_PACKET_ID_DUNGEON_ENTER_RES = 5004,
+  GAME_PACKET_ID_USER_DUNGEON_CREATE_REQ = 5005,
+  GAME_PACKET_ID_USER_DUNGEON_CREATE_RES = 5006,
+  GAME_PACKET_ID_USER_DUNGEON_CLOSE_REQ = 5007,
+  GAME_PACKET_ID_DUNGEON_CLOSED_NTF = 5008,
   GamePacketId_INT_MIN_SENTINEL_DO_NOT_USE_ =
       std::numeric_limits<::int32_t>::min(),
   GamePacketId_INT_MAX_SENTINEL_DO_NOT_USE_ =
@@ -70,8 +90,8 @@ enum GamePacketId : int {
 bool GamePacketId_IsValid(int value);
 extern const uint32_t GamePacketId_internal_data_[];
 constexpr GamePacketId GamePacketId_MIN = static_cast<GamePacketId>(0);
-constexpr GamePacketId GamePacketId_MAX = static_cast<GamePacketId>(2002);
-constexpr int GamePacketId_ARRAYSIZE = 2002 + 1;
+constexpr GamePacketId GamePacketId_MAX = static_cast<GamePacketId>(5008);
+constexpr int GamePacketId_ARRAYSIZE = 5008 + 1;
 const ::google::protobuf::EnumDescriptor*
 GamePacketId_descriptor();
 template <typename T>
@@ -89,6 +109,24 @@ enum ServerPacketId : int {
   SERVER_PACKET_ID_NONE = 0,
   SERVER_PACKET_ID_USER_ENTER_NTF = 1001,
   SERVER_PACKET_ID_USER_DISCONNECT_NTF = 1002,
+  SERVER_PACKET_ID_GATEWAY_TO_GAME_PACKET_NTF = 1101,
+  SERVER_PACKET_ID_GAME_TO_GATEWAY_PACKET_NTF = 1102,
+  SERVER_PACKET_ID_GAME_TO_GATEWAY_BROADCAST_NTF = 1103,
+  SERVER_PACKET_ID_USER_MOVE_TO_GAME_SERVER_REQ = 1201,
+  SERVER_PACKET_ID_USER_MOVE_TO_GAME_SERVER_FAIL_NTF = 1202,
+  SERVER_PACKET_ID_LOGIN_AUTH_TOKEN_NTF = 2001,
+  SERVER_PACKET_ID_LOGIN_DUPLICATE_NTF = 2002,
+  SERVER_PACKET_ID_CHAT_BROADCAST_REQ = 3001,
+  SERVER_PACKET_ID_CHAT_BROADCAST_NTF = 3002,
+  SERVER_PACKET_ID_REGISTRY_REGISTER_REQ = 9001,
+  SERVER_PACKET_ID_REGISTRY_REGISTER_RES = 9002,
+  SERVER_PACKET_ID_REGISTRY_SERVER_INFO_NTF = 9003,
+  SERVER_PACKET_ID_REGISTRY_POLL_REQ = 9004,
+  SERVER_PACKET_ID_REGISTRY_POLL_RES = 9005,
+  SERVER_PACKET_ID_REGISTRY_HEARTBEAT_REQ = 9006,
+  SERVER_PACKET_ID_REGISTRY_HEARTBEAT_RES = 9007,
+  SERVER_PACKET_ID_REGISTRY_USER_COUNT_NTF = 9008,
+  SERVER_PACKET_ID_REGISTRY_SHUTDOWN_REQ = 9009,
   ServerPacketId_INT_MIN_SENTINEL_DO_NOT_USE_ =
       std::numeric_limits<::int32_t>::min(),
   ServerPacketId_INT_MAX_SENTINEL_DO_NOT_USE_ =
@@ -98,8 +136,8 @@ enum ServerPacketId : int {
 bool ServerPacketId_IsValid(int value);
 extern const uint32_t ServerPacketId_internal_data_[];
 constexpr ServerPacketId ServerPacketId_MIN = static_cast<ServerPacketId>(0);
-constexpr ServerPacketId ServerPacketId_MAX = static_cast<ServerPacketId>(1002);
-constexpr int ServerPacketId_ARRAYSIZE = 1002 + 1;
+constexpr ServerPacketId ServerPacketId_MAX = static_cast<ServerPacketId>(9009);
+constexpr int ServerPacketId_ARRAYSIZE = 9009 + 1;
 const ::google::protobuf::EnumDescriptor*
 ServerPacketId_descriptor();
 template <typename T>

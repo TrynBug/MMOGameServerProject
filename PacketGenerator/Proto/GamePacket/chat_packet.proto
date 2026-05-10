@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package GamePacket;
+
+import "Common/packet_id.proto";
+
+// ──────────────────────────────────────────────
+// 채팅 패킷 (클라이언트 <-> 게임서버)
+// ──────────────────────────────────────────────
+
+// 채팅 전송 요청 (클라 -> 게임서버)
+message ChatSendReq {
+    string message = 1;
+}
+
+// 채팅 수신 알림 (게임서버 -> 클라 브로드캐스트)
+message ChatRecvNtf {
+    int64 sender_user_id = 1;
+    string sender_name = 2;
+    string message = 3;
+}

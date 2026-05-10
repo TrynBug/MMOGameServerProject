@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package ServerPacket;
+
+import "Common/packet_id.proto";
+
+// ──────────────────────────────────────────────
+// 채팅서버 <-> 게임서버
+// ──────────────────────────────────────────────
+
+// 채팅 브로드캐스트 요청 (게임서버 -> 채팅서버)
+// 게임서버가 클라로부터 채팅 패킷을 받으면 채팅서버로 전달
+message ChatBroadcastReq {
+    int64 sender_user_id = 1;
+    string sender_name = 2;
+    string message = 3;
+}
+
+// 채팅 브로드캐스트 알림 (채팅서버 -> 게임서버들)
+// 채팅서버가 모든 게임서버에게 전달, 게임서버는 자기 서버 유저들에게 브로드캐스트
+message ChatBroadcastNtf {
+    int64 sender_user_id = 1;
+    string sender_name = 2;
+    string message = 3;
+}

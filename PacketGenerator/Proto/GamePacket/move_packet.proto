@@ -15,8 +15,8 @@ message MoveReq {
 // 이동 알림 (서버 -> 클라 브로드캐스트)
 message MoveNtf {
     int64 player_id = 1;
-    float pos_x     = 2;
-    float pos_y     = 3;
-    float pos_z     = 4;
-    float dir_y     = 5;
+    float pos_x = 2;
+    float pos_y = 3;
+    float pos_z = 4;
+    float dir_y = 5;
 }

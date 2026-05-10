@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package DataStructures;
+
+// 캐릭터 기본 정보 (DB 저장)
+message Character {
+    int64 user_id = 1;
+    string name = 2;
+    int32 level = 3;
+    int64 exp = 4;
+    int32 hp = 5;
+    int32 max_hp = 6;
+    int32 mp = 7;
+    int32 max_mp = 8;
+
+    // 마지막 위치
+    int32 last_stage_id = 9;
+    float pos_x = 10;
+    float pos_y = 11;
+    float pos_z = 12;
+    float dir_y = 13;
+}

@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package ServerPacket;
+
+import "Common/packet_id.proto";
+
+// ──────────────────────────────────────────────
+// 게이트웨이 <-> 게임서버: 패킷 전달
+// ──────────────────────────────────────────────
+
+// 클라 -> 게임서버 패킷 전달 (게이트웨이 -> 게임서버)
+// 게이트웨이는 클라에서 받은 패킷을 그대로 래핑하여 게임서버로 전달
+message GatewayToGamePacketNtf {
+    int64 user_id = 1;
+    int32 packet_type = 2;   // GamePacketId 값
+    bytes payload = 3;       // 직렬화된 패킷 바디
+}
+
+// 게임서버 -> 클라 패킷 전달 요청 (게임서버 -> 게이트웨이)
+// 단일 유저에게 전송
+message GameToGatewayPacketNtf {
+    int64 user_id = 1;
+    int32 packet_type = 2;   // GamePacketId 값
+    bytes payload = 3;       // 직렬화된 패킷 바디
+}
+
+// 게임서버 -> 다수 클라 패킷 브로드캐스트 요청 (게임서버 -> 게이트웨이)
+message GameToGatewayBroadcastNtf {
+    repeated int64 user_ids = 1;
+    int32 packet_type = 2;   // GamePacketId 값
+    bytes payload = 3;       // 직렬화된 패킷 바디 (모든 대상 동일)
+}
+
+// ──────────────────────────────────────────────
+// 게임서버 간 유저 이동 (게이트웨이 중계)
+// ──────────────────────────────────────────────
+
+// 유저를 다른 게임서버로 이동 요청 (게임서버 -> 게이트웨이)
+// 현재 게임서버가 DB 저장 완료 후 전송
+message UserMoveToGameServerReq {
+    int64 user_id = 1;
+    int32 target_game_server_id = 2;
+    int32 target_stage_id = 3;
+}
+
+// 유저 이동 실패 응답 (게이트웨이 -> 게임서버)
+// 목적지 게임서버를 찾지 못했을 때
+message UserMoveToGameServerFailNtf {
+    int64 user_id = 1;
+    string reason = 2;
+}

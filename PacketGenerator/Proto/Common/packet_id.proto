@@ -1,25 +1,85 @@
-﻿syntax = "proto3";
+syntax = "proto3";
 
 package Common;
 
-// 게임서버 <-> 클라이언트 패킷 ID
+// 클라이언트 <-> 서버 패킷 ID
+// 클라이언트(실제 유저)와 통신하는 모든 패킷을 여기에 정의한다.
 enum GamePacketId {
     GAME_PACKET_ID_NONE = 0;
 
+    // 100~199: 로그인 서버
+    GAME_PACKET_ID_LOGIN_REQ = 101;   // 클라이언트 -> 로그인서버: 로그인 요청
+    GAME_PACKET_ID_LOGIN_RES = 102;   // 로그인서버 -> 클라이언트: 로그인 결과
+
+    // 200~299: 게임 접속 / 퇴장
+    GAME_PACKET_ID_GAME_ENTER_NTF = 201;         // 게임서버 -> 클라: 게임 입장 완료 알림
+    GAME_PACKET_ID_GAME_LOGOUT_REQ = 202;        // 클라 -> 게이트웨이: 게임 로그아웃 요청
+    GAME_PACKET_ID_FORCE_DISCONNECT_NTF = 203;   // 게이트웨이 -> 클라: 강제 퇴장 알림
+
     // 1000~1999: 이동
-    GAME_PACKET_ID_MOVE_REQ = 1001;
-    GAME_PACKET_ID_MOVE_NTF = 1002;
+    GAME_PACKET_ID_MOVE_REQ = 1001;   // 클라 -> 서버: 이동 요청
+    GAME_PACKET_ID_MOVE_NTF = 1002;   // 서버 -> 클라: 이동 알림 (브로드캐스트)
 
     // 2000~2999: 아이템
-    GAME_PACKET_ID_ITEM_USE_REQ = 2001;
-    GAME_PACKET_ID_ITEM_USE_RES = 2002;
+    GAME_PACKET_ID_ITEM_USE_REQ = 2001;   // 클라 -> 서버: 아이템 사용 요청
+    GAME_PACKET_ID_ITEM_USE_RES = 2002;   // 서버 -> 클라: 아이템 사용 결과
+
+    // 3000~3999: 채팅
+    GAME_PACKET_ID_CHAT_SEND_REQ = 3001;   // 클라 -> 서버: 채팅 전송 요청
+    GAME_PACKET_ID_CHAT_RECV_NTF = 3002;   // 서버 -> 클라: 채팅 수신 알림 (브로드캐스트)
+
+    // 4000~4999: Stage / 주변 캐릭터
+    GAME_PACKET_ID_STAGE_ENTER_NTF = 4001;                // 서버 -> 클라: Stage 입장 완료 알림
+    GAME_PACKET_ID_STAGE_MOVE_REQ = 4002;                // 클라 -> 서버: 동일 게임서버 내 Stage 이동 요청
+    GAME_PACKET_ID_CROSS_SERVER_STAGE_MOVE_REQ = 4003;   // 클라 -> 서버: 다른 게임서버 Stage 이동 요청
+    GAME_PACKET_ID_CHARACTER_ENTER_NTF = 4004;   // 서버 -> 클라: 타 캐릭터 입장 알림 (브로드캐스트)
+    GAME_PACKET_ID_CHARACTER_LEAVE_NTF = 4005;   // 서버 -> 클라: 타 캐릭터 퇴장 알림 (브로드캐스트)
+
+    // 5000~5999: 던전
+    GAME_PACKET_ID_PUBLIC_DUNGEON_LIST_REQ  = 5001;   // 클라 -> 서버: 공용던전 목록 요청
+    GAME_PACKET_ID_PUBLIC_DUNGEON_LIST_RES  = 5002;   // 서버 -> 클라: 공용던전 목록 응답
+    GAME_PACKET_ID_PUBLIC_DUNGEON_ENTER_REQ = 5003;   // 클라 -> 서버: 공용던전 입장 요청
+    GAME_PACKET_ID_DUNGEON_ENTER_RES = 5004;          // 서버 -> 클라: 던전 입장 결과 (공용/유저 공통)
+    GAME_PACKET_ID_USER_DUNGEON_CREATE_REQ  = 5005;   // 클라 -> 서버: 유저던전 생성 요청
+    GAME_PACKET_ID_USER_DUNGEON_CREATE_RES  = 5006;   // 서버 -> 클라: 유저던전 생성 결과
+    GAME_PACKET_ID_USER_DUNGEON_CLOSE_REQ = 5007;     // 클라 -> 서버: 유저던전 닫기 요청
+    GAME_PACKET_ID_DUNGEON_CLOSED_NTF = 5008;   // 서버 -> 클라: 던전 종료 알림 (브로드캐스트)
 }
 
 // 서버 <-> 서버 패킷 ID
+// 서버끼리 통신하는 모든 패킷을 여기에 정의한다.
 enum ServerPacketId {
     SERVER_PACKET_ID_NONE = 0;
 
-    // 1000~1999: 유저 관련
-    SERVER_PACKET_ID_USER_ENTER_NTF      = 1001;
-    SERVER_PACKET_ID_USER_DISCONNECT_NTF = 1002;
+    // 1000~1999: 유저 관련 (게이트웨이 <-> 게임서버)
+    SERVER_PACKET_ID_USER_ENTER_NTF = 1001;         // 게이트웨이 -> 게임서버: 유저 입장 알림
+    SERVER_PACKET_ID_USER_DISCONNECT_NTF = 1002;   // 게이트웨이 -> 게임서버: 유저 연결 끊김 알림
+
+    // 1100~1199: 패킷 전달 (게이트웨이 <-> 게임서버)
+    SERVER_PACKET_ID_GATEWAY_TO_GAME_PACKET_NTF = 1101;      // 게이트웨이 -> 게임서버: 클라 패킷 전달
+    SERVER_PACKET_ID_GAME_TO_GATEWAY_PACKET_NTF = 1102;      // 게임서버 -> 게이트웨이: 단일 유저 패킷 전달
+    SERVER_PACKET_ID_GAME_TO_GATEWAY_BROADCAST_NTF = 1103;   // 게임서버 -> 게이트웨이: 다수 유저 브로드캐스트
+
+    // 1200~1299: 게임서버 간 유저 이동 (게임서버 <-> 게이트웨이)
+    SERVER_PACKET_ID_USER_MOVE_TO_GAME_SERVER_REQ = 1201;        // 게임서버 -> 게이트웨이: 다른 게임서버로 유저 이동 요청
+    SERVER_PACKET_ID_USER_MOVE_TO_GAME_SERVER_FAIL_NTF = 1202;   // 게이트웨이 -> 게임서버: 유저 이동 실패 알림
+
+    // 2000~2999: 로그인 서버 관련
+    SERVER_PACKET_ID_LOGIN_AUTH_TOKEN_NTF = 2001;   // 로그인서버 -> 게이트웨이: 인증 토큰 사전 전달
+    SERVER_PACKET_ID_LOGIN_DUPLICATE_NTF = 2002;    // 로그인서버 -> 게이트웨이: 중복 로그인 알림
+
+    // 3000~3999: 채팅 서버 관련 (게임서버 <-> 채팅서버)
+    SERVER_PACKET_ID_CHAT_BROADCAST_REQ = 3001;   // 게임서버 -> 채팅서버: 채팅 브로드캐스트 요청
+    SERVER_PACKET_ID_CHAT_BROADCAST_NTF = 3002;   // 채팅서버 -> 게임서버: 채팅 브로드캐스트 알림
+
+    // 9000~9999: 레지스트리 서버 관련
+    SERVER_PACKET_ID_REGISTRY_REGISTER_REQ = 9001;       // 서버 -> 레지스트리: 등록 요청
+    SERVER_PACKET_ID_REGISTRY_REGISTER_RES = 9002;       // 레지스트리 -> 서버: 등록 응답
+    SERVER_PACKET_ID_REGISTRY_SERVER_INFO_NTF = 9003;    // 레지스트리 -> 서버: 다른 서버 정보 통보 (신규 등록 / 상태변경)
+    SERVER_PACKET_ID_REGISTRY_POLL_REQ = 9004;           // 서버 -> 레지스트리: 서버 목록 폴링 요청
+    SERVER_PACKET_ID_REGISTRY_POLL_RES = 9005;           // 레지스트리 -> 서버: 서버 목록 폴링 응답
+    SERVER_PACKET_ID_REGISTRY_HEARTBEAT_REQ = 9006;      // 레지스트리 -> 서버: 하트비트 요청
+    SERVER_PACKET_ID_REGISTRY_HEARTBEAT_RES = 9007;      // 서버 -> 레지스트리: 하트비트 응답
+    SERVER_PACKET_ID_REGISTRY_USER_COUNT_NTF = 9008;     // 서버 -> 레지스트리: 접속자 수 보고
+    SERVER_PACKET_ID_REGISTRY_SHUTDOWN_REQ = 9009;       // 서버 -> 레지스트리: Graceful Shutdown 시작 알림
 }

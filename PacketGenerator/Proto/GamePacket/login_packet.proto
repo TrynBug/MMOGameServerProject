@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package GamePacket;
+
+import "Common/packet_id.proto";
+
+// ──────────────────────────────────────────────
+// 로그인 서버 패킷 (클라이언트 <-> 로그인서버)
+// ──────────────────────────────────────────────
+
+// 로그인 요청 (클라이언트 -> 로그인서버)
+message LoginReq {
+    string login_id = 1;
+    string password = 2;
+}
+
+// 로그인 결과 (로그인서버 -> 클라이언트)
+message LoginRes {
+    bool success = 1;
+    string error_msg = 2;   // 실패 시 오류 메시지
+
+    // 성공 시 채워지는 필드
+    int64  user_id = 3;
+    uint64 auth_token = 4;   // 인증 토큰 (8byte 랜덤값)
+    string gateway_ip = 5;   // 접속할 게이트웨이 서버 IP
+    int32  gateway_port = 6;   // 접속할 게이트웨이 서버 Port
+}

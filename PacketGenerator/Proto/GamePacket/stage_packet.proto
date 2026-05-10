@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package GamePacket;
+
+import "Common/packet_id.proto";
+import "DataStructures/character.proto";
+
+// ──────────────────────────────────────────────
+// Stage 이동 / 주변 캐릭터 브로드캐스트
+// ──────────────────────────────────────────────
+
+// 주변 캐릭터 간략 정보 (브로드캐스트용)
+message NearbyCharacterInfo {
+    int64 user_id = 1;
+    string name = 2;
+    int32 level = 3;
+    int32 hp = 4;
+    int32 max_hp = 5;
+    float pos_x = 6;
+    float pos_y = 7;
+    float pos_z = 8;
+    float dir_y = 9;
+}
+
+// Stage 입장 완료 알림 (서버 -> 클라)
+// Stage 이동(동일 게임서버 내 / 다른 게임서버) 완료 후 전송
+message StageEnterNtf {
+    int32 stage_id = 1;
+    DataStructures.Character my_character = 2;             // 내 캐릭터 최신 데이터
+    repeated NearbyCharacterInfo nearby_characters  = 3;   // 같은 Stage의 다른 캐릭터 목록
+}
+
+// 동일 게임서버 내 Stage 이동 요청 (클라 -> 서버)
+message StageMoveReq {
+    int32 target_stage_id = 1;
+}
+
+// 다른 게임서버 Stage로 이동 요청 (클라 -> 서버)
+message CrossServerStageMoveReq {
+    int32 target_game_server_id = 1;
+    int32 target_stage_id = 2;
+}
+
+// 타 캐릭터 입장 알림 (서버 -> 클라 브로드캐스트)
+message CharacterEnterNtf {
+    NearbyCharacterInfo character = 1;
+}
+
+// 타 캐릭터 퇴장 알림 (서버 -> 클라 브로드캐스트)
+message CharacterLeaveNtf {
+    int64 user_id = 1;
+}

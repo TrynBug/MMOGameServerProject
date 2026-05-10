@@ -34,21 +34,62 @@ static constexpr ::_pbi::MigrationSchema* schemas = nullptr;
 static constexpr ::_pb::Message* const* file_default_instances = nullptr;
 const char descriptor_table_protodef_Common_2fpacket_5fid_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\026Common/packet_id.proto\022\006Common*\247\001\n\014Gam"
-    "ePacketId\022\027\n\023GAME_PACKET_ID_NONE\020\000\022\034\n\027GA"
-    "ME_PACKET_ID_MOVE_REQ\020\351\007\022\034\n\027GAME_PACKET_"
-    "ID_MOVE_NTF\020\352\007\022 \n\033GAME_PACKET_ID_ITEM_US"
-    "E_REQ\020\321\017\022 \n\033GAME_PACKET_ID_ITEM_USE_RES\020"
-    "\322\017*|\n\016ServerPacketId\022\031\n\025SERVER_PACKET_ID"
-    "_NONE\020\000\022$\n\037SERVER_PACKET_ID_USER_ENTER_N"
-    "TF\020\351\007\022)\n$SERVER_PACKET_ID_USER_DISCONNEC"
-    "T_NTF\020\352\007b\006proto3"
+    "\n\026Common/packet_id.proto\022\006Common*\305\007\n\014Gam"
+    "ePacketId\022\027\n\023GAME_PACKET_ID_NONE\020\000\022\034\n\030GA"
+    "ME_PACKET_ID_LOGIN_REQ\020e\022\034\n\030GAME_PACKET_"
+    "ID_LOGIN_RES\020f\022\"\n\035GAME_PACKET_ID_GAME_EN"
+    "TER_NTF\020\311\001\022#\n\036GAME_PACKET_ID_GAME_LOGOUT"
+    "_REQ\020\312\001\022(\n#GAME_PACKET_ID_FORCE_DISCONNE"
+    "CT_NTF\020\313\001\022\034\n\027GAME_PACKET_ID_MOVE_REQ\020\351\007\022"
+    "\034\n\027GAME_PACKET_ID_MOVE_NTF\020\352\007\022 \n\033GAME_PA"
+    "CKET_ID_ITEM_USE_REQ\020\321\017\022 \n\033GAME_PACKET_I"
+    "D_ITEM_USE_RES\020\322\017\022!\n\034GAME_PACKET_ID_CHAT"
+    "_SEND_REQ\020\271\027\022!\n\034GAME_PACKET_ID_CHAT_RECV"
+    "_NTF\020\272\027\022#\n\036GAME_PACKET_ID_STAGE_ENTER_NT"
+    "F\020\241\037\022\"\n\035GAME_PACKET_ID_STAGE_MOVE_REQ\020\242\037"
+    "\022/\n*GAME_PACKET_ID_CROSS_SERVER_STAGE_MO"
+    "VE_REQ\020\243\037\022\'\n\"GAME_PACKET_ID_CHARACTER_EN"
+    "TER_NTF\020\244\037\022\'\n\"GAME_PACKET_ID_CHARACTER_L"
+    "EAVE_NTF\020\245\037\022+\n&GAME_PACKET_ID_PUBLIC_DUN"
+    "GEON_LIST_REQ\020\211\'\022+\n&GAME_PACKET_ID_PUBLI"
+    "C_DUNGEON_LIST_RES\020\212\'\022,\n\'GAME_PACKET_ID_"
+    "PUBLIC_DUNGEON_ENTER_REQ\020\213\'\022%\n GAME_PACK"
+    "ET_ID_DUNGEON_ENTER_RES\020\214\'\022+\n&GAME_PACKE"
+    "T_ID_USER_DUNGEON_CREATE_REQ\020\215\'\022+\n&GAME_"
+    "PACKET_ID_USER_DUNGEON_CREATE_RES\020\216\'\022*\n%"
+    "GAME_PACKET_ID_USER_DUNGEON_CLOSE_REQ\020\217\'"
+    "\022&\n!GAME_PACKET_ID_DUNGEON_CLOSED_NTF\020\220\'"
+    "*\301\007\n\016ServerPacketId\022\031\n\025SERVER_PACKET_ID_"
+    "NONE\020\000\022$\n\037SERVER_PACKET_ID_USER_ENTER_NT"
+    "F\020\351\007\022)\n$SERVER_PACKET_ID_USER_DISCONNECT"
+    "_NTF\020\352\007\0220\n+SERVER_PACKET_ID_GATEWAY_TO_G"
+    "AME_PACKET_NTF\020\315\010\0220\n+SERVER_PACKET_ID_GA"
+    "ME_TO_GATEWAY_PACKET_NTF\020\316\010\0223\n.SERVER_PA"
+    "CKET_ID_GAME_TO_GATEWAY_BROADCAST_NTF\020\317\010"
+    "\0222\n-SERVER_PACKET_ID_USER_MOVE_TO_GAME_S"
+    "ERVER_REQ\020\261\t\0227\n2SERVER_PACKET_ID_USER_MO"
+    "VE_TO_GAME_SERVER_FAIL_NTF\020\262\t\022*\n%SERVER_"
+    "PACKET_ID_LOGIN_AUTH_TOKEN_NTF\020\321\017\022)\n$SER"
+    "VER_PACKET_ID_LOGIN_DUPLICATE_NTF\020\322\017\022(\n#"
+    "SERVER_PACKET_ID_CHAT_BROADCAST_REQ\020\271\027\022("
+    "\n#SERVER_PACKET_ID_CHAT_BROADCAST_NTF\020\272\027"
+    "\022+\n&SERVER_PACKET_ID_REGISTRY_REGISTER_R"
+    "EQ\020\251F\022+\n&SERVER_PACKET_ID_REGISTRY_REGIS"
+    "TER_RES\020\252F\022.\n)SERVER_PACKET_ID_REGISTRY_"
+    "SERVER_INFO_NTF\020\253F\022\'\n\"SERVER_PACKET_ID_R"
+    "EGISTRY_POLL_REQ\020\254F\022\'\n\"SERVER_PACKET_ID_"
+    "REGISTRY_POLL_RES\020\255F\022,\n\'SERVER_PACKET_ID"
+    "_REGISTRY_HEARTBEAT_REQ\020\256F\022,\n\'SERVER_PAC"
+    "KET_ID_REGISTRY_HEARTBEAT_RES\020\257F\022-\n(SERV"
+    "ER_PACKET_ID_REGISTRY_USER_COUNT_NTF\020\260F\022"
+    "+\n&SERVER_PACKET_ID_REGISTRY_SHUTDOWN_RE"
+    "Q\020\261Fb\006proto3"
 };
 static ::absl::once_flag descriptor_table_Common_2fpacket_5fid_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_Common_2fpacket_5fid_2eproto = {
     false,
     false,
-    336,
+    1972,
     descriptor_table_protodef_Common_2fpacket_5fid_2eproto,
     "Common/packet_id.proto",
     &descriptor_table_Common_2fpacket_5fid_2eproto_once,
@@ -67,7 +108,7 @@ const ::google::protobuf::EnumDescriptor* GamePacketId_descriptor() {
   return file_level_enum_descriptors_Common_2fpacket_5fid_2eproto[0];
 }
 PROTOBUF_CONSTINIT const uint32_t GamePacketId_internal_data_[] = {
-    65536u, 262144u, 2001u, 1002u, 2002u, 1001u, };
+    65536u, 1572864u, 4005u, 2001u, 5005u, 202u, 4001u, 5003u, 5007u, 102u, 1001u, 3001u, 4003u, 5002u, 5004u, 5006u, 5008u, 101u, 201u, 203u, 1002u, 2002u, 3002u, 4002u, 4004u, 5001u, };
 bool GamePacketId_IsValid(int value) {
   return ::_pbi::ValidateEnum(value, GamePacketId_internal_data_);
 }
@@ -76,7 +117,7 @@ const ::google::protobuf::EnumDescriptor* ServerPacketId_descriptor() {
   return file_level_enum_descriptors_Common_2fpacket_5fid_2eproto[1];
 }
 PROTOBUF_CONSTINIT const uint32_t ServerPacketId_internal_data_[] = {
-    65536u, 131072u, 1002u, 1001u, };
+    65536u, 1310720u, 9002u, 2001u, 9006u, 1102u, 3002u, 9004u, 9008u, 1002u, 1201u, 3001u, 9001u, 9003u, 9005u, 9007u, 9009u, 1001u, 1101u, 1103u, 1202u, 2002u, };
 bool ServerPacketId_IsValid(int value) {
   return ::_pbi::ValidateEnum(value, ServerPacketId_internal_data_);
 }

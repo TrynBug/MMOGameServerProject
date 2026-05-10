@@ -20,10 +20,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Generated\Common\packet_id.pb.cc" />
+    <ClCompile Include="Generated\DataStructures\character.pb.cc" />
     <ClCompile Include="Generated\DataStructures\item.pb.cc" />
+    <ClCompile Include="Generated\GamePacket\chat_packet.pb.cc" />
+    <ClCompile Include="Generated\GamePacket\dungeon_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\item_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\login_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\move_packet.pb.cc" />
+    <ClCompile Include="Generated\GamePacket\session_packet.pb.cc" />
+    <ClCompile Include="Generated\GamePacket\stage_packet.pb.cc" />
+    <ClCompile Include="Generated\ServerPacket\chat_server_packet.pb.cc" />
+    <ClCompile Include="Generated\ServerPacket\gateway_game_packet.pb.cc" />
     <ClCompile Include="Generated\ServerPacket\login_server_packet.pb.cc" />
     <ClCompile Include="Generated\ServerPacket\server_registry_packet.pb.cc" />
     <ClCompile Include="pch.cpp">
@@ -36,10 +43,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Generated\Common\packet_id.pb.h" />
+    <ClInclude Include="Generated\DataStructures\character.pb.h" />
     <ClInclude Include="Generated\DataStructures\item.pb.h" />
+    <ClInclude Include="Generated\GamePacket\chat_packet.pb.h" />
+    <ClInclude Include="Generated\GamePacket\dungeon_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\item_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\login_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\move_packet.pb.h" />
+    <ClInclude Include="Generated\GamePacket\session_packet.pb.h" />
+    <ClInclude Include="Generated\GamePacket\stage_packet.pb.h" />
+    <ClInclude Include="Generated\ServerPacket\chat_server_packet.pb.h" />
+    <ClInclude Include="Generated\ServerPacket\gateway_game_packet.pb.h" />
     <ClInclude Include="Generated\ServerPacket\login_server_packet.pb.h" />
     <ClInclude Include="Generated\ServerPacket\server_registry_packet.pb.h" />
     <ClInclude Include="pch.h" />
@@ -50,10 +64,17 @@
   <ItemGroup>
     <None Include="generate_proto.bat" />
     <None Include="Proto\Common\packet_id.proto" />
+    <None Include="Proto\DataStructures\character.proto" />
     <None Include="Proto\DataStructures\item.proto" />
+    <None Include="Proto\GamePacket\chat_packet.proto" />
+    <None Include="Proto\GamePacket\dungeon_packet.proto" />
     <None Include="Proto\GamePacket\item_packet.proto" />
     <None Include="Proto\GamePacket\login_packet.proto" />
     <None Include="Proto\GamePacket\move_packet.proto" />
+    <None Include="Proto\GamePacket\session_packet.proto" />
+    <None Include="Proto\GamePacket\stage_packet.proto" />
+    <None Include="Proto\ServerPacket\chat_server_packet.proto" />
+    <None Include="Proto\ServerPacket\gateway_game_packet.proto" />
     <None Include="Proto\ServerPacket\login_server_packet.proto" />
     <None Include="Proto\ServerPacket\server_registry_packet.proto" />
   </ItemGroup>

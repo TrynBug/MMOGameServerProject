@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package GamePacket;
+
+import "Common/packet_id.proto";
+import "DataStructures/character.proto";
+
+// ──────────────────────────────────────────────
+// 게임 접속 / 퇴장 패킷 (클라이언트 <-> 게이트웨이/게임서버)
+// ──────────────────────────────────────────────
+
+// 게임 입장 완료 알림 (게임서버 -> 클라)
+// 게이트웨이 인증 후 게임서버가 유저 객체를 생성하고 Stage에 배정 완료됐을 때 전송
+message GameEnterNtf {
+    DataStructures.Character character = 1;   // DB에서 로드한 내 캐릭터 데이터
+    int32 stage_id = 2;   // 배정된 Stage ID
+}
+
+// 게임 로그아웃 요청 (클라 -> 게이트웨이)
+// 클라이언트가 정상적으로 게임을 종료할 때 전송
+message GameLogoutReq {
+}
+
+// 강제 퇴장 알림 (게이트웨이 -> 클라)
+// 서버가 클라이언트 연결을 끊기 직전에 전송. 클라는 이유를 표시하고 연결 종료
+message ForceDisconnectNtf {
+    int32 reason_code = 1;   // ForceDisconnectReason 값
+    string message = 2;   // 선택적 메시지 (빈 문자열 가능)
+}
+
+// 강제 퇴장 사유 코드
+enum ForceDisconnectReason {
+    FORCE_DISCONNECT_REASON_NONE = 0;
+    FORCE_DISCONNECT_REASON_DUPLICATE_LOGIN = 1;   // 중복 로그인
+    FORCE_DISCONNECT_REASON_SERVER_SHUTDOWN = 2;   // 서버 종료
+    FORCE_DISCONNECT_REASON_AUTH_FAILED = 3;   // 인증 실패
+    FORCE_DISCONNECT_REASON_KICKED = 4;   // 관리자 강퇴
+}
