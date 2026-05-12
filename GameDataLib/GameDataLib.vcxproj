@@ -140,12 +140,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GameData.cpp" />
-    <ClCompile Include="GameDataBase_Monster.cpp" />
     <ClCompile Include="GameDataManager.cpp" />
     <ClCompile Include="Generated\Enum\GameEnum_Common.cpp" />
     <ClCompile Include="Generated\Enum\GameEnum_Monster.cpp" />
     <ClCompile Include="Generated\Enum\GameEnum_Stage.cpp" />
     <ClCompile Include="Generated\Enum\GameEnum_Stat.cpp" />
+    <ClCompile Include="Generated\GameDataBase_Monster.cpp" />
     <ClCompile Include="Generated\GameData_Monster.cpp" />
     <ClCompile Include="Generated\Manager\GameDataManagerBase.cpp" />
   </ItemGroup>
@@ -153,13 +153,13 @@
     <ClInclude Include="GameData.h" />
     <ClInclude Include="GameDataLib.h" />
     <ClInclude Include="GameDataManager.h" />
+    <ClInclude Include="GameDataManagerBase.h" />
     <ClInclude Include="Generated\Enum\GameEnum_Common.h" />
     <ClInclude Include="Generated\Enum\GameEnum_Monster.h" />
     <ClInclude Include="Generated\Enum\GameEnum_Stage.h" />
     <ClInclude Include="Generated\Enum\GameEnum_Stat.h" />
     <ClInclude Include="Generated\GameDataBase_Monster.h" />
     <ClInclude Include="Generated\GameData_Monster.h" />
-    <ClInclude Include="Generated\Manager\GameDataManagerBase.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

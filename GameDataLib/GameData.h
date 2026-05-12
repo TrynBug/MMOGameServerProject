@@ -11,17 +11,15 @@ struct GameData
 // 게임데이터파일 기본클래스
 class GameDataTable
 {
-public:
+protected:
     GameDataTable() = default;
     virtual ~GameDataTable() = default;
 
 public:
-    static const std::string& GetDataFilePath() { return sm_dataFilePath; }
-
-    static bool StringToBool(const std::string& str);
-
-public:
     bool LoadData(const std::string& csvPath);
+
+    std::string& GetDataFilePath() { return m_dataFilePath; }
+    bool StringToBool(const std::string& str);
 
 public:
     virtual const char* GetDataName() = 0;
@@ -33,5 +31,5 @@ protected:
     virtual bool makeGameData(const std::string& line) = 0;
 
 protected:
-    inline static std::string sm_dataFilePath; // 읽은 데이터 파일명(경로포함)
+    std::string m_dataFilePath; // 읽은 데이터 파일명(경로포함)
 };

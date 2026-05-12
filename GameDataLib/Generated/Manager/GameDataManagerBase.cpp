@@ -2,7 +2,7 @@
 // 이 파일은 GameDataGenerator 에 의해 자동 생성됩니다. 직접 수정하지 마세요.
 // =====================================================================
 
-#include "GameDataManagerBase.h"
+#include "../GameDataManagerBase.h"
 
 #include "../GameData_Monster.h"
 

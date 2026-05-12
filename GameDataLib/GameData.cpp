@@ -9,29 +9,25 @@
 
 #include "GameData.h"
 
-// string to boolean
-bool GameDataTable::StringToBool(const std::string& str)
-{
-    return (str == "true" || str == "True" || str == "TRUE");
-}
+
 
 bool GameDataTable::LoadData(const std::string& csvPath)
 {
     char lastChar = csvPath.back();
     if (lastChar != '/' && lastChar != '\\') 
     {
-        sm_dataFilePath = csvPath + "/" + GetDataName() + ".csv";
+        m_dataFilePath = csvPath + "/" + GetDataName() + ".csv";
     }
     else
     {
-        sm_dataFilePath = csvPath + GetDataName() + ".csv";
+        m_dataFilePath = csvPath + GetDataName() + ".csv";
     }
 
-    std::ifstream file(sm_dataFilePath);
+    std::ifstream file(m_dataFilePath);
 
     if (!file.is_open()) 
     {
-		LOG_WRITE(LogLevel::Error, std::format("데이터파일을 열 수 없습니다. Path={}", sm_dataFilePath));
+		LOG_WRITE(LogLevel::Error, std::format("데이터파일을 열 수 없습니다. Path={}", m_dataFilePath));
         return false;
     }
 
@@ -58,3 +54,8 @@ bool GameDataTable::LoadData(const std::string& csvPath)
     return true;
 }
 
+// string to boolean
+bool GameDataTable::StringToBool(const std::string& str)
+{
+    return (str == "true" || str == "True" || str == "TRUE");
+}

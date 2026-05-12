@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Generated/Manager/GameDataManagerBase.h"
+#include "GameDataManagerBase.h"
 
 class GameDataManager : public GameDataManagerBase
 {

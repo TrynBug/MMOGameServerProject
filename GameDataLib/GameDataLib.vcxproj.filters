@@ -42,20 +42,17 @@
     <ClCompile Include="Generated\Enum\GameEnum_Stat.cpp">
       <Filter>소스 파일\Generated\Enum</Filter>
     </ClCompile>
-    <ClCompile Include="GameDataBase_Monster.cpp">
-      <Filter>소스 파일\Generated</Filter>
-    </ClCompile>
     <ClCompile Include="GameDataManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Generated\Manager\GameDataManagerBase.cpp">
       <Filter>소스 파일\Generated\Manager</Filter>
     </ClCompile>
+    <ClCompile Include="Generated\GameDataBase_Monster.cpp">
+      <Filter>소스 파일\Generated</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Generated\GameData_Monster.h">
-      <Filter>소스 파일\Generated</Filter>
-    </ClInclude>
     <ClInclude Include="Generated\GameDataBase_Monster.h">
       <Filter>소스 파일\Generated</Filter>
     </ClInclude>
@@ -77,11 +74,14 @@
     <ClInclude Include="GameDataManager.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Generated\Manager\GameDataManagerBase.h">
-      <Filter>소스 파일\Generated\Manager</Filter>
-    </ClInclude>
     <ClInclude Include="GameDataLib.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GameDataManagerBase.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GameData_Monster.h">
+      <Filter>소스 파일\Generated</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

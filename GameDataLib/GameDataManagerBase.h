@@ -1,5 +1,7 @@
 #pragma once
 
+// 참고: 이 파일은 자동생성된 파일이 아닙니다.
+
 #include <map>
 #include <string>
 

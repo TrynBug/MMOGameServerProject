@@ -1,12 +1,11 @@
-// =====================================================================
-// 이 파일은 GameDataGenerator 에 의해 자동 생성됩니다. 직접 수정하지 마세요.
+﻿// =====================================================================
+// 이 파일은 GameDataGenerator 에 의해 자동 생성됩니다.
+// 직접 수정하지 마세요. 데이터 .xlsx 가 변경되면 재생성됩니다.
 // =====================================================================
 
-#include <iostream>
 #include <sstream>
-#include <vector>
 #include <string>
-#include <cstdint>
+#include <format>
 
 #include "GameDataBase_Monster.h"
 #include "GameData_Monster.h"
@@ -16,7 +15,6 @@ const GameData_Monster* GameDataTableBase_Monster::FindData(int64_t key)
     auto iter = sm_dataMap.find(key);
     if (iter == sm_dataMap.cend())
         return nullptr;
-
     return iter->second;
 }
 
@@ -44,18 +42,21 @@ bool GameDataTableBase_Monster::makeGameData(const std::string& line)
     if (pData->Key <= 0)
     {
         LOG_WRITE(LogLevel::Error, std::format("invalid key value. (TableKey = {})", pData->Key));
+        delete pData;
         return false;
     }
 
     if (sm_dataMap.contains(pData->Key))
     {
         LOG_WRITE(LogLevel::Error, std::format("Duplicate table key. (TableKey = {})", pData->Key));
+        delete pData;
         return false;
     }
 
     if (false == pData->Initialize())
     {
         LOG_WRITE(LogLevel::Error, std::format("Failed to initialize data. (TableKey = {})", pData->Key));
+        delete pData;
         return false;
     }
 
