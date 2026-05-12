@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package ServerPacket;
+
+import "Common/packet_id.proto";
+
+// ──────────────────────────────────────────────
+// 게임서버 핸드셰이크 (게임서버 -> 게이트웨이)
+// 게임서버가 게이트웨이에 연결되면 자신의 serverId를 알린다.
+// 게이트웨이는 이 패킷을 받아야 해당 세션을 게임서버로 인식한다.
+// ──────────────────────────────────────────────
+message GameServerHandshakeNtf {
+    int32 server_id = 1;
+}
+
+// ──────────────────────────────────────────────
+// 유저 라우팅 (게이트웨이 -> 게임서버)
+// ──────────────────────────────────────────────
+
+// 유저 입장 알림 (게이트웨이 -> 게임서버)
+// 클라이언트가 인증 완료 후 게임서버로 전달됨
+message GatewayUserEnterNtf {
+    int64  user_id    = 1;
+    int32  gateway_id = 2;   // 유저가 접속한 게이트웨이 ID
+    string client_ip  = 3;
+}
+
+// 유저 연결 끊김 알림 (게이트웨이 -> 게임서버)
+message GatewayUserDisconnectNtf {
+    int64 user_id = 1;
+}
+
+// 유저를 다른 게임서버로 재라우팅 (게이트웨이 -> 목적지 게임서버)
+// 게임서버가 UserMoveToGameServerReq를 보내면 게이트웨이가 목적지 게임서버에 전달
+message GatewayUserRerouteNtf {
+    int64 user_id        = 1;
+    int32 gateway_id     = 2;
+    int32 target_stage_id = 3;
+    string client_ip     = 4;
+}

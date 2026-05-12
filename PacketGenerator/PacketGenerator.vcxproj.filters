@@ -45,9 +45,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="PacketDispatcher.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
     <ClInclude Include="ProtoJsonSerializer.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
@@ -105,15 +102,15 @@
     <ClInclude Include="Generated\GamePacket\session_packet.pb.h">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClInclude>
+    <ClInclude Include="Generated\ServerPacket\gateway_user_packet.pb.h">
+      <Filter>소스 파일\Generated\ServerPacket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ProtoSerializer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="ProtoJsonSerializer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="PacketDispatcher.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="PCH.cpp">
@@ -167,6 +164,9 @@
     <ClCompile Include="Generated\GamePacket\session_packet.pb.cc">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClCompile>
+    <ClCompile Include="Generated\ServerPacket\gateway_user_packet.pb.cc">
+      <Filter>소스 파일\Generated\ServerPacket</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="generate_proto.bat">
@@ -213,6 +213,9 @@
     </None>
     <None Include="Proto\GamePacket\session_packet.proto">
       <Filter>소스 파일\Proto\GamePacket</Filter>
+    </None>
+    <None Include="Proto\ServerPacket\gateway_user_packet.proto">
+      <Filter>소스 파일\Proto\ServerPacket</Filter>
     </None>
   </ItemGroup>
 </Project>

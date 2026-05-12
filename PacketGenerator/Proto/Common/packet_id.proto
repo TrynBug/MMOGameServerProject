@@ -52,8 +52,10 @@ enum ServerPacketId {
     SERVER_PACKET_ID_NONE = 0;
 
     // 1000~1999: 유저 관련 (게이트웨이 <-> 게임서버)
-    SERVER_PACKET_ID_USER_ENTER_NTF = 1001;         // 게이트웨이 -> 게임서버: 유저 입장 알림
-    SERVER_PACKET_ID_USER_DISCONNECT_NTF = 1002;   // 게이트웨이 -> 게임서버: 유저 연결 끊김 알림
+    SERVER_PACKET_ID_USER_ENTER_NTF = 1001;            // 게이트웨이 -> 게임서버: 유저 입장 알림
+    SERVER_PACKET_ID_USER_DISCONNECT_NTF = 1002;       // 게이트웨이 -> 게임서버: 유저 연결 끊김 알림
+    SERVER_PACKET_ID_USER_REROUTE_NTF = 1003;          // 게이트웨이 -> 목적지 게임서버: 유저 재라우팅 알림
+    SERVER_PACKET_ID_GAME_SERVER_HANDSHAKE_NTF = 1004; // 게임서버 -> 게이트웨이: 핸드셰이크 (자신의 serverId 전달)
 
     // 1100~1199: 패킷 전달 (게이트웨이 <-> 게임서버)
     SERVER_PACKET_ID_GATEWAY_TO_GAME_PACKET_NTF = 1101;      // 게이트웨이 -> 게임서버: 클라 패킷 전달
