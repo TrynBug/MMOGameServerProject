@@ -44,13 +44,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Gemerated;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)BIN\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)BIN\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Gemerated;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)BIN\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)BIN\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
@@ -69,7 +69,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;Logger.lib;$(spdlogLibsDebug);$(protobufLibsDebug);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;$(spdlogLibsDebug);$(protobufLibsDebug);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -88,7 +88,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;Logger.lib;$(spdlogLibs);$(protobufLibs);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;$(spdlogLibs);$(protobufLibs);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

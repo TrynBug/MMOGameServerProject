@@ -127,7 +127,7 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
 
     if (!spSession)
     {
-        LOG_WRITE(LogLevel::Error, std::format("Session is null. serverId={}, serverType={}, ip={}, port={}", serverId, type, ip, port));
+        LOG_WRITE(LogLevel::Error, std::format("Session is null. serverId={}, serverType={}, ip={}, port={}", serverId, static_cast<int32>(type), ip, port));
         return;
     }
 
