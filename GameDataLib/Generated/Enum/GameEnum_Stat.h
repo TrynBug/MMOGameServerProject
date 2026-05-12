@@ -1,0 +1,20 @@
+﻿#pragma once
+// =====================================================================
+// 이 파일은 GameDataGenerator 에 의해 자동 생성됩니다.
+// 직접 수정하지 마세요. GameEnum.xlsx 가 변경되면 재생성됩니다.
+// =====================================================================
+
+#include <string>
+
+enum class EStat : int
+{
+    None                 = 0,
+    AddHP                = 1,  // HP추가
+    AddMP                = 2,  // MP추가
+    AddAtk               = 3,  // 공격력추가
+    Max                 
+};
+
+EStat StringToStat(const std::string& v);
+std::string StatToString(EStat v);
+

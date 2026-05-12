@@ -1,4 +1,7 @@
 #include "pch.h"
+
+#include "GameDataLib.h"
+
 #include "ServerBase.h"
 
 #include "IoContext.h"
@@ -11,20 +14,6 @@ namespace serverbase
 bool ServerBase::Initialize(const ServerBaseConfig& config)
 {
     m_config = config;
-
-    // 서버ID 검증 및 즉시 세팅 (Config에서 로드한 값을 부팅 즉시 사용)
-    if (config.serverId <= 0 || config.serverId > 999)
-    {
-        // Logger가 아직 초기화되지 않았을 수 있으므로 stderr에도 출력
-        std::cerr << "ServerBase::Initialize - invalid serverId in config: "
-                  << config.serverId << " (must be 1~999)" << std::endl;
-        return false;
-    }
-
-    m_serverId = config.serverId;
-
-	// ObjectIdGenerator 초기화 (serverId 세팅)
-    m_objectIdGenerator.Initialize(m_serverId);
 
     // Logger 초기화
     std::string serverTypeName;
@@ -40,6 +29,29 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
 
     Logger::Initialize(config.logDir, serverTypeName, config.logLevel);
     LOG_WRITE(LogLevel::Info, serverTypeName + " starting... serverId=" + std::to_string(m_serverId));
+
+    // 서버ID 세팅
+    if (config.serverId <= 0 || config.serverId > 999)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("invalid serverId in config : {} (must be 1~999)", config.serverId));
+        return false;
+    }
+
+    m_serverId = config.serverId;
+
+    // ObjectIdGenerator 초기화
+    m_objectIdGenerator.Initialize(m_serverId);
+
+    // 현재경로 얻기
+    const std::filesystem::path currentDir = std::filesystem::current_path();
+
+    // 게임데이터 초기화
+    const std::filesystem::path gameDataDir = currentDir.parent_path() / "GameData";
+    if (false == GameDataManager::LoadAllGameData(gameDataDir.string()))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GameDataManager::LoadAllGameData failed"));
+        return false;
+    }
 
     // IoContext (IOCP + worker 스레드) 초기화
     if (!m_ioContext.Initialize(config.ioContextConfig))
