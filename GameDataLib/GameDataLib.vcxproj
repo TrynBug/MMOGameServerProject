@@ -146,7 +146,9 @@
     <ClCompile Include="Generated\Enum\GameEnum_Stage.cpp" />
     <ClCompile Include="Generated\Enum\GameEnum_Stat.cpp" />
     <ClCompile Include="Generated\GameDataBase_Monster.cpp" />
+    <ClCompile Include="Generated\GameDataBase_Stage.cpp" />
     <ClCompile Include="Generated\GameData_Monster.cpp" />
+    <ClCompile Include="Generated\GameData_Stage.cpp" />
     <ClCompile Include="Generated\Manager\GameDataManagerBase.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -159,7 +161,9 @@
     <ClInclude Include="Generated\Enum\GameEnum_Stage.h" />
     <ClInclude Include="Generated\Enum\GameEnum_Stat.h" />
     <ClInclude Include="Generated\GameDataBase_Monster.h" />
+    <ClInclude Include="Generated\GameDataBase_Stage.h" />
     <ClInclude Include="Generated\GameData_Monster.h" />
+    <ClInclude Include="Generated\GameData_Stage.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

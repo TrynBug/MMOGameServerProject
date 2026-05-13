@@ -51,6 +51,12 @@
     <ClCompile Include="Generated\GameDataBase_Monster.cpp">
       <Filter>소스 파일\Generated</Filter>
     </ClCompile>
+    <ClCompile Include="Generated\GameData_Stage.cpp">
+      <Filter>소스 파일\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\GameDataBase_Stage.cpp">
+      <Filter>소스 파일\Generated</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Generated\GameDataBase_Monster.h">
@@ -81,6 +87,12 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="Generated\GameData_Monster.h">
+      <Filter>소스 파일\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GameData_Stage.h">
+      <Filter>소스 파일\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GameDataBase_Stage.h">
       <Filter>소스 파일\Generated</Filter>
     </ClInclude>
   </ItemGroup>
