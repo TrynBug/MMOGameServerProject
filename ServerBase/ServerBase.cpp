@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 
 #include "GameDataLib.h"
 
@@ -301,13 +301,13 @@ void ServerBase::DisconnectToServer(netlib::NetClientPtr spClient)
 		return;
 
     std::lock_guard<std::mutex> lock(m_serverConnectionsMutex);
-    auto it = std::find_if(m_serverConnections.begin(), m_serverConnections.end(),
+    auto iter = std::find_if(m_serverConnections.begin(), m_serverConnections.end(),
         [&spClient](const netlib::NetClientPtr& sp) { return sp.get() == spClient.get(); });
 
-    if (it != m_serverConnections.end())
+    if (iter != m_serverConnections.end())
     {
-        (*it)->Shutdown();
-        m_serverConnections.erase(it);
+        (*iter)->Shutdown();
+        m_serverConnections.erase(iter);
     }
 }
 

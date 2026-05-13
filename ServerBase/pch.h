@@ -13,6 +13,7 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <coroutine>
 #include <functional>
 #include <memory>
 #include <mutex>

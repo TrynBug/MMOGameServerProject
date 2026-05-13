@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "pch.h"
 #include "Types.h"
@@ -7,6 +7,8 @@
 #include "ObjectIdGenerator.h"
 #include "ContentsThread.h"
 #include "RegistryClient.h"
+
+#include "DBTask.h"
 
 namespace serverbase
 {
@@ -47,6 +49,15 @@ struct ServerBaseConfig
     LogLevel logLevel = LogLevel::Debug;
 };
 
+// 코루틴이 await 후 재시작될 때 IOCP Worker 스레드에서 재시작되도록 IOCP message 큐에 함수를 post 해주는 컴포넌트
+class CoroutineResumeExecutor : public db::IResumeExecutor
+{
+public:
+    CoroutineResumeExecutor(netlib::IoContext& ioContext) : m_ioContext(ioContext) {}
+    void Post(std::function<void()> fn) override { m_ioContext.Post(std::move(fn)); }
+private:
+    netlib::IoContext& m_ioContext;
+};
 
 // ServerBase 클래스는 모든 서버(레지스트리, 로그인, 게이트웨이, 게임 등)가 상속하는 기반 클래스이다.
 // IoContext(IOCP + worker 스레드), Listen용 NetServer, 서버간 connect용 NetClient, 레지스트리 서버와 통신하는 RegistryClient를 관리한다.
@@ -105,7 +116,11 @@ public:
     Timer&            GetTimer()          { return m_timer; }
     RegistryClient*   GetRegistryClient() { return m_spRegistryClient.get(); }
     netlib::PacketPtr AllocPacket()       { return m_ioContext.GetPacketPool().Alloc(); }
-	netlib::IoContext& GetIoContext()     { return m_ioContext; }
+    netlib::IoContext& GetIoContext()     { return m_ioContext; }
+
+    // co_await ExecuteAsync() 호출 시 pExecutor 인자에 전달한다.
+    // DB worker 완료 후 코루틴을 IOCP Worker 스레드에서 resume한다.
+    db::IResumeExecutor* GetCoroutineResumeExecutor()   { return &m_coroutineResumeExecutor; }
 
 public:
     // ── 패킷 ───────────────────────────────────────────────────
@@ -192,6 +207,8 @@ protected:
     std::atomic<bool> m_bShuttingDown { false };
     std::mutex m_shutdownMutex;
     std::condition_variable m_shutdownCv;
+
+    CoroutineResumeExecutor m_coroutineResumeExecutor { m_ioContext };  // co_await resume 전용 executor
 };
 
 } // namespace serverbase

@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "IoContext.h"
 #include "ISession.h"
 #include "OverlappedEx.h"
@@ -127,6 +127,15 @@ bool IoContext::RegisterSocket(SOCKET socket, ULONG_PTR completionKey)
     return (ret != nullptr);
 }
 
+void IoContext::Post(std::function<void()> fn)
+{
+    // POST_OVERLAPPED을 힙에 생성하고 IOCP 메시지큐에 입력한다.
+    // Worker 스레드가 꺼내서 fn을 실행한 후 delete한다.
+    auto* pPost = new POST_OVERLAPPED();
+    pPost->fn = std::move(fn);
+    ::PostQueuedCompletionStatus(m_hIocp, 0, 0, reinterpret_cast<OVERLAPPED*>(pPost));
+}
+
 // worker 스레드
 void IoContext::workerThreadProc()
 {
@@ -143,6 +152,15 @@ void IoContext::workerThreadProc()
         if (pOverlapped == nullptr && completionKey == 0)
         {
             break;
+        }
+
+        // IO_TYPE::Post 임의 함수 실행
+        if (pOverlapped->ioType == IO_TYPE::Post) // (POST_OVERLAPPED 와 OVERLAPPED_EX 의 ioType 멤버 위치가 같아서 이렇게 검사해도됨)
+        {
+            POST_OVERLAPPED* pPostOverlapped = reinterpret_cast<POST_OVERLAPPED*>(pOverlapped);
+            pPostOverlapped->fn();
+            delete pPostOverlapped;
+            continue;
         }
 
         // Session 얻기
