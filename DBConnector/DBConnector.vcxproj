@@ -89,6 +89,7 @@
   </ItemDefinitionGroup>
   <!-- 헤더 파일 -->
   <ItemGroup>
+    <ClInclude Include="DBTask.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="DBConnectorLib.h" />
     <ClInclude Include="DBTypes.h" />

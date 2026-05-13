@@ -7,3 +7,4 @@
 #include "DBTypes.h"
 #include "DBConnection.h"
 #include "AsyncDBQueue.h"
+#include "DBTask.h"

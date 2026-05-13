@@ -6,6 +6,7 @@
 // STL
 #include <atomic>
 #include <condition_variable>
+#include <coroutine>
 #include <functional>
 #include <memory>
 #include <mutex>

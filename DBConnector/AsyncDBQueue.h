@@ -3,6 +3,7 @@
 #include "pch.h"
 #include "DBTypes.h"
 #include "DBConnection.h"
+#include "DBTask.h"
 
 namespace db
 {
@@ -40,6 +41,10 @@ public:
 
     // 비동기 쿼리 요청
     void Execute(const std::string& query, std::vector<DBParam> params = {});
+
+    // 코루틴용 비동기 쿼리 요청. co_await으로 DBResult를 기다릴 수 있다.
+    // pExecutor: 코루틴 resume을 실행할 스레드 풀. nullptr이면 DB worker 스레드에서 직접 resume.
+    DBResultAwaitable ExecuteAsync(const std::string& query, std::vector<DBParam> params = {}, IResumeExecutor* pExecutor = nullptr);
 
     bool IsOpen() const { return m_bRunning.load(); }
 

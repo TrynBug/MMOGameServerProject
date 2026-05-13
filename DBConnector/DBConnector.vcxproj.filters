@@ -59,5 +59,8 @@
     <ClInclude Include="DBConnectorLib.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
+    <ClInclude Include="DBTask.h">
+      <Filter>소스 파일\Connection</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

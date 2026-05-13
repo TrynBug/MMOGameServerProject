@@ -107,4 +107,17 @@ void AsyncDBQueue::workerProc(int workerIndex)
     }
 }
 
+DBResultAwaitable AsyncDBQueue::ExecuteAsync(const std::string& query, std::vector<DBParam> params, IResumeExecutor* pExecutor)
+{
+    return DBResultAwaitable(
+        query,
+        std::move(params),
+        [this](std::string q, std::vector<DBParam> p, std::function<void(DBResult)> cb)
+        {
+            Execute(std::move(q), std::move(p), std::move(cb));
+        },
+        pExecutor
+    );
+}
+
 } // namespace db
