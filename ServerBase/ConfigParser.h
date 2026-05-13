@@ -18,15 +18,15 @@ namespace serverbase
 //   cfg.Load("server.ini");
 //   int32 port = cfg.GetInt32("Network", "Port", 8080);
 //   std::string ip = cfg.GetString("Network", "IP", "0.0.0.0");
-class Config
+class ConfigParser
 {
 public:
     bool Load(const std::string& filePath);
 
     std::string GetString(const std::string& section, const std::string& key, const std::string& defaultValue = "") const;
-    int32       GetInt32 (const std::string& section, const std::string& key, int32 defaultValue = 0) const;
-    int64       GetInt64 (const std::string& section, const std::string& key, int64 defaultValue = 0) const;
-    bool        GetBool  (const std::string& section, const std::string& key, bool  defaultValue = false) const;
+    int32 GetInt32(const std::string& section, const std::string& key, int32 defaultValue = 0) const;
+    int64 GetInt64(const std::string& section, const std::string& key, int64 defaultValue = 0) const;
+    bool GetBool(const std::string& section, const std::string& key, bool  defaultValue = false) const;
 
 private:
     // m_data[section][key] = value

@@ -7,7 +7,7 @@
 #include "Types.h"
 #include "LoggerLib.h"
 #include "Timer.h"
-#include "Config.h"
+#include "ConfigParser.h"
 #include "ObjectIdGenerator.h"
 #include "Contents.h"
 #include "ContentsThread.h"

@@ -3,7 +3,7 @@
 #include "pch.h"
 #include "Types.h"
 #include "Timer.h"
-#include "Config.h"
+#include "ConfigParser.h"
 #include "ObjectIdGenerator.h"
 #include "ContentsThread.h"
 #include "RegistryClient.h"
@@ -186,7 +186,7 @@ protected:
 
     Timer m_timer;
     ObjectIdGenerator m_objectIdGenerator;
-    Config m_configFile;
+    ConfigParser m_configFile;
 
     std::atomic<bool> m_bRunning { false };
     std::atomic<bool> m_bShuttingDown { false };

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Config.h"
+#include "ConfigParser.h"
 #include "Logger.h"
 
 #include <fstream>
@@ -8,12 +8,12 @@
 namespace serverbase
 {
 
-bool Config::Load(const std::string& filePath)
+bool ConfigParser::Load(const std::string& filePath)
 {
     std::ifstream file(filePath);
     if (!file.is_open())
     {
-        LOG_WRITE(LogLevel::Error, "Config::Load - cannot open file: " + filePath);
+        LOG_WRITE(LogLevel::Error, "ConfigParser::Load - cannot open file: " + filePath);
         return false;
     }
 
@@ -54,11 +54,11 @@ bool Config::Load(const std::string& filePath)
         m_data[currentSection][key] = value;
     }
 
-    LOG_WRITE(LogLevel::Info, "Config loaded: " + filePath);
+    LOG_WRITE(LogLevel::Info, "ConfigParser loaded: " + filePath);
     return true;
 }
 
-std::string Config::GetString(const std::string& section, const std::string& key, const std::string& defaultValue) const
+std::string ConfigParser::GetString(const std::string& section, const std::string& key, const std::string& defaultValue) const
 {
     auto secIt = m_data.find(section);
     if (secIt == m_data.end())
@@ -71,7 +71,7 @@ std::string Config::GetString(const std::string& section, const std::string& key
     return keyIt->second;
 }
 
-int32 Config::GetInt32(const std::string& section, const std::string& key, int32 defaultValue) const
+int32 ConfigParser::GetInt32(const std::string& section, const std::string& key, int32 defaultValue) const
 {
     std::string val = GetString(section, key);
     if (val.empty())
@@ -87,7 +87,7 @@ int32 Config::GetInt32(const std::string& section, const std::string& key, int32
     }
 }
 
-int64 Config::GetInt64(const std::string& section, const std::string& key, int64 defaultValue) const
+int64 ConfigParser::GetInt64(const std::string& section, const std::string& key, int64 defaultValue) const
 {
     std::string val = GetString(section, key);
     if (val.empty())
@@ -103,7 +103,7 @@ int64 Config::GetInt64(const std::string& section, const std::string& key, int64
     }
 }
 
-bool Config::GetBool(const std::string& section, const std::string& key, bool defaultValue) const
+bool ConfigParser::GetBool(const std::string& section, const std::string& key, bool defaultValue) const
 {
     std::string val = GetString(section, key);
     if (val.empty())
@@ -119,7 +119,7 @@ bool Config::GetBool(const std::string& section, const std::string& key, bool de
     return defaultValue;
 }
 
-std::string Config::trim(const std::string& s)
+std::string ConfigParser::trim(const std::string& s)
 {
     const std::string whitespace = " \t\r\n";
     auto start = s.find_first_not_of(whitespace);

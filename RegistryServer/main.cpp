@@ -18,7 +18,7 @@ BOOL WINAPI consoleCtrlHandler(DWORD ctrlType)
 int main()
 {
 	// registry 서버 config 로드
-    serverbase::Config registryConfig;
+    serverbase::ConfigParser registryConfig;
     registryConfig.Load("RegistryServer.ini");
 
     // ServerBaseConfig 만들기

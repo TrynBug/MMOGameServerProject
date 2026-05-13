@@ -95,7 +95,7 @@
     <ClInclude Include="ServerBaseLib.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Timer.h" />
-    <ClInclude Include="Config.h" />
+    <ClInclude Include="ConfigParser.h" />
     <ClInclude Include="ObjectIdGenerator.h" />
     <ClInclude Include="Contents.h" />
     <ClInclude Include="ContentsThread.h" />
@@ -112,7 +112,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="ConfigParser.cpp" />
     <ClCompile Include="ContentsThread.cpp" />
     <ClCompile Include="RegistryClient.cpp" />
     <ClCompile Include="ServerBase.cpp" />
