@@ -36,9 +36,13 @@ struct ServerBaseConfig
     // IoContext 설정(IOCP + 워커 스레드)
     netlib::IoContextConfig ioContextConfig;
 
-    // Listen NetServer (다른 서버/클라이언트의 접속을 기다리는 서버가 사용)
-    bool useListenServer = false;
-    netlib::NetServerConfig listenServerConfig;
+    // 클라이언트 접속을 받는 Listen NetServer
+    bool useClientListenServer = false;
+    netlib::NetServerConfig clientListenServerConfig;
+
+    // 내부 서버(게임서버, 로그인서버 등) 접속을 받는 Listen NetServer
+    bool useInternalListenServer = false;
+    netlib::NetServerConfig internalListenServerConfig;
 
     // 컨텐츠 스레드
     int32 numContentsThreads = 0; // 0이면 컨텐츠 스레드 없음
@@ -178,9 +182,11 @@ protected:
     virtual void OnShutdown() {}
 
     // Listen NetServer 이벤트 핸들러
-    // useListenServer=true인 서버는 반드시 override하여 자신의 FuncEventHandler를 반환해야 한다.
-    // 서버가 클라이언트 접속과 다른서버 접속을 둘다 받아야 하는 경우, 클라패킷인지 서버패킷인지는 FuncEventHandler 내에서 구분해서 처리해야 한다.
-    virtual netlib::FuncEventHandler* GetListenEventHandler() { return nullptr; }
+    // useClientListenServer=true인 서버는 반드시 override하여 클라이언트용 FuncEventHandler를 반환해야 한다.
+    virtual netlib::FuncEventHandler* GetClientListenEventHandler()   { return nullptr; }
+
+    // useInternalListenServer=true인 서버는 반드시 override하여 내부서버용 FuncEventHandler를 반환해야 한다.
+    virtual netlib::FuncEventHandler* GetInternalListenEventHandler() { return nullptr; }
 
 private:
     void shutdownInternal();
@@ -190,7 +196,8 @@ protected:
     int32 m_serverId = 0;
 
     netlib::IoContext m_ioContext; // IOCP + 워커스레드
-    netlib::NetServerUPtr m_spListenServer; // Listen 서버
+    netlib::NetServerUPtr m_spClientListenServer;   // 클라이언트 접속용 Listen 서버
+    netlib::NetServerUPtr m_spInternalListenServer; // 내부 서버 접속용 Listen 서버
 
     std::mutex m_serverConnectionsMutex;
     std::vector<netlib::NetClientPtr> m_serverConnections; // 다른서버와 연결 관리

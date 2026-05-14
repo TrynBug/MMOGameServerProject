@@ -62,26 +62,46 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
 
     LOG_WRITE(LogLevel::Info, "ServerBase::Initialize - IoContext initialized");
 
-	// Listen용 NetServer 초기화 (다른 서버/클라이언트의 접속을 받는 서버만)
-    if (config.useListenServer)
+	// 클라이언트 Listen용 NetServer 초기화
+    if (config.useClientListenServer)
     {
-        netlib::FuncEventHandler* pHandler = GetListenEventHandler();
+        netlib::FuncEventHandler* pHandler = GetClientListenEventHandler();
         if (!pHandler)
         {
-            LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - useListenServer=true but GetListenEventHandler() returned nullptr");
+            LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - useClientListenServer=true but GetClientListenEventHandler() returned nullptr");
             return false;
         }
 
-        m_spListenServer = std::make_unique<netlib::NetServer>(&m_ioContext);
-        if (!m_spListenServer->Initialize(config.listenServerConfig))
+        m_spClientListenServer = std::make_unique<netlib::NetServer>(&m_ioContext);
+        if (!m_spClientListenServer->Initialize(config.clientListenServerConfig))
         {
-            LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - listen NetServer Initialize failed");
+            LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - client listen NetServer Initialize failed");
             return false;
         }
 
-        m_spListenServer->SetEventHandler(pHandler);
+        m_spClientListenServer->SetEventHandler(pHandler);
+        LOG_WRITE(LogLevel::Info, std::format("ServerBase::Initialize - client listen NetServer initialized on port {}", config.clientListenServerConfig.port));
+    }
 
-        LOG_WRITE(LogLevel::Info, std::format("ServerBase::Initialize - listen NetServer initialized on port {}", config.listenServerConfig.port));
+    // 내부 서버 Listen용 NetServer 초기화
+    if (config.useInternalListenServer)
+    {
+        netlib::FuncEventHandler* pHandler = GetInternalListenEventHandler();
+        if (!pHandler)
+        {
+            LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - useInternalListenServer=true but GetInternalListenEventHandler() returned nullptr");
+            return false;
+        }
+
+        m_spInternalListenServer = std::make_unique<netlib::NetServer>(&m_ioContext);
+        if (!m_spInternalListenServer->Initialize(config.internalListenServerConfig))
+        {
+            LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - internal listen NetServer Initialize failed");
+            return false;
+        }
+
+        m_spInternalListenServer->SetEventHandler(pHandler);
+        LOG_WRITE(LogLevel::Info, std::format("ServerBase::Initialize - internal listen NetServer initialized on port {}", config.internalListenServerConfig.port));
     }
 
     // 컨텐츠 스레드 생성
@@ -149,19 +169,35 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
 
 bool ServerBase::StartAccept()
 {
-    if (!m_spListenServer)
+    bool started = false;
+
+    if (m_spClientListenServer)
+    {
+        if (!m_spClientListenServer->StartAccept())
+        {
+            LOG_WRITE(LogLevel::Error, "ServerBase::StartAccept - client listen StartAccept failed");
+            return false;
+        }
+        LOG_WRITE(LogLevel::Info, std::format("ServerBase::StartAccept - accepting client connections on port {}", m_config.clientListenServerConfig.port));
+        started = true;
+    }
+
+    if (m_spInternalListenServer)
+    {
+        if (!m_spInternalListenServer->StartAccept())
+        {
+            LOG_WRITE(LogLevel::Error, "ServerBase::StartAccept - internal listen StartAccept failed");
+            return false;
+        }
+        LOG_WRITE(LogLevel::Info, std::format("ServerBase::StartAccept - accepting internal server connections on port {}", m_config.internalListenServerConfig.port));
+        started = true;
+    }
+
+    if (!started)
     {
         LOG_WRITE(LogLevel::Warn, "ServerBase::StartAccept - no listen NetServer configured");
         return false;
     }
-
-    if (!m_spListenServer->StartAccept())
-    {
-        LOG_WRITE(LogLevel::Error, "ServerBase::StartAccept - StartAccept failed");
-        return false;
-    }
-
-    LOG_WRITE(LogLevel::Info, std::format("ServerBase::StartAccept - accepting connections on port {}", m_config.listenServerConfig.port));
 
     return true;
 }
@@ -202,10 +238,15 @@ void ServerBase::RequestShutdown()
         m_spRegistryClient->SendShutdownNotify();
 
     // Listen 서버 Accept 중단 (신규 접속 차단)
-    if (m_spListenServer)
+    if (m_spClientListenServer)
     {
-        m_spListenServer->StopAccept();
-        LOG_WRITE(LogLevel::Info, "ServerBase::RequestShutdown - listen accept stopped");
+        m_spClientListenServer->StopAccept();
+        LOG_WRITE(LogLevel::Info, "ServerBase::RequestShutdown - client listen accept stopped");
+    }
+    if (m_spInternalListenServer)
+    {
+        m_spInternalListenServer->StopAccept();
+        LOG_WRITE(LogLevel::Info, "ServerBase::RequestShutdown - internal listen accept stopped");
     }
 
     // 서브클래스 훅 (유저 이탈 대기 등)
@@ -251,11 +292,17 @@ void ServerBase::shutdownInternal()
     LOG_WRITE(LogLevel::Info, "ServerBase::shutdownInternal - server connections closed");
 
     // Listen NetServer 종료
-    if (m_spListenServer)
+    if (m_spClientListenServer)
     {
-        m_spListenServer->Shutdown();
-        m_spListenServer.reset();
-        LOG_WRITE(LogLevel::Info, "ServerBase::shutdownInternal - listen NetServer shutdown");
+        m_spClientListenServer->Shutdown();
+        m_spClientListenServer.reset();
+        LOG_WRITE(LogLevel::Info, "ServerBase::shutdownInternal - client listen NetServer shutdown");
+    }
+    if (m_spInternalListenServer)
+    {
+        m_spInternalListenServer->Shutdown();
+        m_spInternalListenServer.reset();
+        LOG_WRITE(LogLevel::Info, "ServerBase::shutdownInternal - internal listen NetServer shutdown");
     }
 
     // IoContext 종료 (Worker 스레드 종료)
