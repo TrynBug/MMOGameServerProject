@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "pch.h"
 #include "ServerEntry.h"
+#include "ThreadSafeUnorderedMap.h"
 
 // 레지스트리 서버는 모든 서버의 연결상태를 관리하는 서버이다.
 // 모든 서버들은 가동되었을 때 레지스트리 서버에 접속하여 자신의 정보를 등록한다. 
@@ -21,7 +22,7 @@ protected:
     // ServerBase 훅
     bool OnInitialize() override;
     void OnBeforeShutdown() override;
-    netlib::FuncEventHandler* GetListenEventHandler() override { return &m_listenEventHandler; }
+    netlib::FuncEventHandler* GetInternalListenEventHandler() override { return &m_listenEventHandler; }
 
 private:
     // 네트워크 이벤트 핸들러
@@ -55,16 +56,13 @@ private:
     int32 findServerIdBySessionId(int64 sessionId);
 
 private:
-    mutable std::shared_mutex m_serverEntriesMutex;
-    std::unordered_map<int32, ServerEntry> m_serverEntries; // 서버정보 목록. Key=serverId, Value=서버정보
+    SharedThreadSafeUnorderedMap<int32, ServerEntry> m_safeServerEntries; // 서버정보 목록. Key=serverId, Value=서버정보
 
-    mutable std::shared_mutex m_sessionIndexMutex;
-	std::unordered_map<int64, int32> m_sessionToServerId; // sessionId -> serverId 역방향 인덱스(빠른 조회용). Key=sessionId, Value=serverId
+    SharedThreadSafeUnorderedMap<int64, int32>        m_safeSessionToServerId; // sessionId -> serverId 역방향 인덱스. Key=sessionId, Value=serverId
 
     // 검증용 DB 데이터 (TODO: RegistryDB 연동)
-    mutable std::mutex m_registrationMutex;
-    std::unordered_map<int32, std::string> m_idToEndpoint;   // Key=serverId, Value="서버타입:ip:port" (ID 중복 검증용)
-    std::unordered_map<std::string, int32> m_endpointToId;   // Key="서버타입:ip:port", Value=serverId (IP:Port 중복 검증용)
+    ExclusiveThreadSafeUnorderedMap<int32, std::string>    m_safeIdToEndpoint;   // Key=serverId, Value="서버타입:ip:port"
+    ExclusiveThreadSafeUnorderedMap<std::string, int32>    m_safeEndpointToId;   // Key="서버타입:ip:port", Value=serverId
 
     // 하트비트 타이머 ID
     int32 m_heartbeatSendTimerId = -1;

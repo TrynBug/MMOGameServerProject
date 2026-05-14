@@ -40,9 +40,11 @@ int main()
     config.ioContextConfig.maxPacketSize = configParser.GetInt32("Network", "MaxPacketSize", 65535);
 
     // 클라이언트가 직접 접속 (Listen 서버 사용)
-    config.useListenServer = true;
-    config.listenServerConfig.ip = config.serverIp;
-    config.listenServerConfig.port = config.serverPort;
+    config.useClientListenServer = true;
+    config.clientListenServerConfig.ip = config.serverIp;
+    config.clientListenServerConfig.port = config.serverPort;
+
+    config.useInternalListenServer = false; // 내부서버 접속 없음
 
     // 컨텐츠 스레드
     config.numContentsThreads = configParser.GetInt32("Contents", "NumContentsThreads", 0);

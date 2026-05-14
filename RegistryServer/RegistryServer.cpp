@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "RegistryServer.h"
 
 #include "ProtoSerializer.h"
@@ -85,36 +85,25 @@ void RegistryServer::onDisconnect(const netlib::ISessionPtr& spSession)
 {
     int64 sessionId = spSession->GetId();
 
-    // sessionId로 serverId 조회
     int32 serverId = 0;
+    if (!m_safeSessionToServerId.EraseAndGet(sessionId, serverId))
     {
-        std::unique_lock<std::shared_mutex> lock(m_sessionIndexMutex);
-        auto iter = m_sessionToServerId.find(sessionId);
-        if (iter == m_sessionToServerId.end())
-        {
-            // 등록 완료 전에 끊긴 경우 (RegisterReq 미수신)
-            LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: unregistered server disconnected. sessionId={}", sessionId));
-            return;
-        }
-        serverId = iter->second;
-        m_sessionToServerId.erase(iter);
+        LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: unregistered server disconnected. sessionId={}", sessionId));
+        return;
     }
 
     // 상태를 Disconnected로 변경하고 세션 참조 해제
-    {
-        std::unique_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-        auto iter = m_serverEntries.find(serverId);
-        if (iter == m_serverEntries.end())
-            return;
+    ServerEntry entry;
+    if (!m_safeServerEntries.Find(serverId, entry))
+        return;
 
-        iter->second.status = ServerStatus::Disconnected;
-        iter->second.spSession = nullptr;
+    entry.status = ServerStatus::Disconnected;
+    entry.spSession = nullptr;
+    m_safeServerEntries.Insert(serverId, entry);
 
-        LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: server disconnected. serverId={} type={}", serverId, static_cast<int>(iter->second.serverType)));
+    LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: server disconnected. serverId={} type={}", serverId, static_cast<int>(entry.serverType)));
 
-        // 연결 끊김을 다른 모든 서버에 브로드캐스트
-        broadcastServerInfo(iter->second);
-    }
+    broadcastServerInfo(entry);
 }
 
 // 서버 등록 요청 처리
@@ -160,16 +149,8 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
     serverEntry.spSession = spSession;
     serverEntry.lastHeartbeatTime = std::chrono::steady_clock::now();
 
-    {
-        std::unique_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-        m_serverEntries[serverId] = serverEntry;
-    }
-
-    // sessionId -> serverId 인덱스 등록
-    {
-        std::unique_lock<std::shared_mutex> lock(m_sessionIndexMutex);
-        m_sessionToServerId[spSession->GetId()] = serverId;
-    }
+    m_safeServerEntries.Insert(serverId, serverEntry);
+    m_safeSessionToServerId.Insert(spSession->GetId(), serverId);
 
     LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server registered. serverId={} type={} ip={}:{}", serverId, static_cast<int>(type), ip, port));
 
@@ -185,19 +166,13 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
     }
 
     // 새로등록된 서버에게 기존 서버목록 전송
+    m_safeServerEntries.ForEach([&](const int32& id, const ServerEntry& entry)
     {
-        std::shared_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-        for (const auto& [id, entry] : m_serverEntries)
-        {
-            if (id == serverId)
-                continue;
+        if (id == serverId || entry.status == ServerStatus::Disconnected)
+            return;
 
-            if (entry.status == ServerStatus::Disconnected)
-                continue;
-
-            sendServerInfoNtf(spSession, entry);
-        }
-    }
+        sendServerInfoNtf(spSession, entry);
+    });
 
     // 기존 서버들에게 새로등록된 서버정보 브로드캐스트
     broadcastServerInfo(serverEntry);
@@ -216,10 +191,12 @@ void RegistryServer::handleHeartbeatRes(const netlib::ISessionPtr& spSession, co
     if (serverId == 0)
         return;
 
-    std::unique_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-    auto it = m_serverEntries.find(serverId);
-    if (it != m_serverEntries.end())
-        it->second.lastHeartbeatTime = std::chrono::steady_clock::now();
+    ServerEntry entry;
+    if (!m_safeServerEntries.Find(serverId, entry))
+        return;
+
+    entry.lastHeartbeatTime = std::chrono::steady_clock::now();
+    m_safeServerEntries.Insert(serverId, entry);
 }
 
 // 서버 목록 폴링 요청 처리
@@ -237,28 +214,22 @@ void RegistryServer::handlePollReq(const netlib::ISessionPtr& spSession, const S
         targetTypes[req.target_types(i)] = true;
 
     ServerPacket::RegistryPollRes res;
+    m_safeServerEntries.ForEach([&](const int32&, const ServerEntry& serverEntry)
     {
-        std::shared_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-        for (const auto& [id, serverEntry] : m_serverEntries)
-        {
-            if (serverEntry.status == ServerStatus::Disconnected)
-                continue;
+        if (serverEntry.status == ServerStatus::Disconnected)
+            return;
 
-            if (!targetTypes.empty())
-            {
-                if(targetTypes.contains(static_cast<int>(serverEntry.serverType)) == false)
-					continue;
-            }
-                
-            ServerPacket::ServerInfoMsg* pInfo = res.add_servers();
-            pInfo->set_server_id(serverEntry.serverId);
-            pInfo->set_server_type(static_cast<ServerPacket::ServerType>(serverEntry.serverType));
-            pInfo->set_status(static_cast<ServerPacket::ServerStatus>(serverEntry.status));
-            pInfo->set_ip(serverEntry.ip);
-            pInfo->set_port(serverEntry.port);
-            pInfo->set_user_count(serverEntry.userCount);
-        }
-    }
+        if (!targetTypes.empty() && !targetTypes.contains(static_cast<int>(serverEntry.serverType)))
+            return;
+
+        ServerPacket::ServerInfoMsg* pInfo = res.add_servers();
+        pInfo->set_server_id(serverEntry.serverId);
+        pInfo->set_server_type(static_cast<ServerPacket::ServerType>(serverEntry.serverType));
+        pInfo->set_status(static_cast<ServerPacket::ServerStatus>(serverEntry.status));
+        pInfo->set_ip(serverEntry.ip);
+        pInfo->set_port(serverEntry.port);
+        pInfo->set_user_count(serverEntry.userCount);
+    });
 
     auto spResPacket = SerializePacket(Common::SERVER_PACKET_ID_REGISTRY_POLL_RES, res);
     if (spResPacket)
@@ -278,10 +249,12 @@ void RegistryServer::handleUserCountNtf(const netlib::ISessionPtr& spSession, co
     if (serverId == 0)
         return;
 
-    std::unique_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-    auto iter = m_serverEntries.find(serverId);
-    if (iter != m_serverEntries.end())
-        iter->second.userCount = ntf.user_count();
+    ServerEntry entry;
+    if (!m_safeServerEntries.Find(serverId, entry))
+        return;
+
+    entry.userCount = ntf.user_count();
+    m_safeServerEntries.Insert(serverId, entry);
 }
 
 // 서버 종료 요청 처리
@@ -297,18 +270,16 @@ void RegistryServer::handleShutdownReq(const netlib::ISessionPtr& spSession, con
     if (serverId == 0)
         return;
 
-    std::unique_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-    auto iter = m_serverEntries.find(serverId);
-    if (iter == m_serverEntries.end())
+    ServerEntry entry;
+    if (!m_safeServerEntries.Find(serverId, entry))
         return;
 
-    // 서버 상태 변경
-    iter->second.status = ServerStatus::ShuttingDown;
+    entry.status = ServerStatus::ShuttingDown;
+    m_safeServerEntries.Insert(serverId, entry);
 
-    LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server shutdown requested. serverId={} type={}", serverId, static_cast<int>(iter->second.serverType)));
+    LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server shutdown requested. serverId={} type={}", serverId, static_cast<int>(entry.serverType)));
 
-    // 서버상태변경을 다른 서버들에게 브로드캐스트
-    broadcastServerInfo(iter->second);
+    broadcastServerInfo(entry);
 }
 
 
@@ -317,29 +288,25 @@ bool RegistryServer::validateRegistration(int32 serverId, ServerType type, const
 {
     std::string endpoint = std::to_string(static_cast<int>(type)) + ":" + ip + ":" + std::to_string(port);
 
-    std::lock_guard<std::mutex> lock(m_registrationMutex);
-
     // 동일 serverId가 이미 등록되어 있는지 확인
-    auto iterId = m_idToEndpoint.find(serverId);
-    if (iterId != m_idToEndpoint.end() && iterId->second != endpoint)
+    std::string existingEndpoint;
+    if (m_safeIdToEndpoint.Find(serverId, existingEndpoint) && existingEndpoint != endpoint)
     {
-        outErrorMsg = std::format("serverId={} is already registered with different endpoint: {}", serverId, iterId->second);
+        outErrorMsg = std::format("serverId={} is already registered with different endpoint: {}", serverId, existingEndpoint);
         return false;
     }
 
     // 동일 IP:Port가 이미 등록되어 있는지 확인
-    auto iterEp = m_endpointToId.find(endpoint);
-    if (iterEp != m_endpointToId.end() && iterEp->second != serverId)
+    int32 existingId = 0;
+    if (m_safeEndpointToId.Find(endpoint, existingId) && existingId != serverId)
     {
-        outErrorMsg = std::format("endpoint={} is already registered with different serverId={}", endpoint, iterEp->second);
+        outErrorMsg = std::format("endpoint={} is already registered with different serverId={}", endpoint, existingId);
         return false;
     }
 
-    // 검증 통과
-    m_idToEndpoint[serverId] = endpoint;
-    m_endpointToId[endpoint] = serverId;
+    m_safeIdToEndpoint.Insert(serverId, endpoint);
+    m_safeEndpointToId.Insert(endpoint, serverId);
 
-    // TODO: RegistryDB에 저장
     return true;
 }
 
@@ -364,18 +331,12 @@ void RegistryServer::broadcastServerInfo(const ServerEntry& serverEntry)
         return;
     }
 
-    // 자기 자신을 제외한 연결된 모든 서버에 전송
-    std::shared_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-    for (const auto& [id, entry] : m_serverEntries)
+    m_safeServerEntries.ForEach([&](const int32& id, const ServerEntry& entry)
     {
-        if (id == serverEntry.serverId)
-            continue;
-
-        if (!entry.spSession)
-            continue;
-
+        if (id == serverEntry.serverId || !entry.spSession)
+            return;
         entry.spSession->Send(spPacket);
-    }
+    });
 }
 
 void RegistryServer::sendServerInfoNtf(netlib::ISessionPtr spSession, const ServerEntry& serverEntry)
@@ -405,12 +366,11 @@ void RegistryServer::sendHeartbeatToAll()
     if (!spPacket)
         return;
 
-    std::shared_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-    for (const auto& [id, serverEntry] : m_serverEntries)
+    m_safeServerEntries.ForEach([&](const int32&, const ServerEntry& serverEntry)
     {
         if (serverEntry.spSession)
             serverEntry.spSession->Send(spPacket);
-    }
+    });
 }
 
 void RegistryServer::checkHeartbeatTimeout()
@@ -418,37 +378,26 @@ void RegistryServer::checkHeartbeatTimeout()
     auto now = std::chrono::steady_clock::now();
 
     // 하트비트 타임아웃된 서버 목록 수집
-    std::vector<int32> timedOutIds;
-    {
-        std::shared_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-        for (const auto& [id, serverEntry] : m_serverEntries)
+    std::vector<int32> timedOutIds = m_safeServerEntries.CollectKeys(
+        [now](const int32&, const ServerEntry& entry)
         {
-            if (!serverEntry.spSession)
-                continue;
-
-            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - serverEntry.lastHeartbeatTime).count();
-
-            if (elapsed >= k_heartbeatTimeoutMs)
-                timedOutIds.push_back(id);
-        }
-    }
+            if (!entry.spSession) return false;
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - entry.lastHeartbeatTime).count();
+            return elapsed >= k_heartbeatTimeoutMs;
+        });
 
     // 타임아웃된 서버 연결 끊기
     // onDisconnect 콜백이 자동으로 상태 업데이트 및 브로드캐스트 처리
     for (int32 serverId : timedOutIds)
     {
-        netlib::ISessionPtr spSession;
-        {
-            std::shared_lock<std::shared_mutex> lock(m_serverEntriesMutex);
-            auto iter = m_serverEntries.find(serverId);
-            if (iter != m_serverEntries.end())
-                spSession = iter->second.spSession;
-        }
+        ServerEntry entry;
+        if (!m_safeServerEntries.Find(serverId, entry))
+            continue;
 
-        if (spSession)
+        if (entry.spSession)
         {
             LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: heartbeat timeout. serverId={} disconnecting...", serverId));
-            spSession->Disconnect();
+            entry.spSession->Disconnect();
         }
     }
 }
@@ -456,10 +405,7 @@ void RegistryServer::checkHeartbeatTimeout()
 
 int32 RegistryServer::findServerIdBySessionId(int64 sessionId)
 {
-    std::shared_lock<std::shared_mutex> lock(m_sessionIndexMutex);
-    auto iter = m_sessionToServerId.find(sessionId);
-    if(iter != m_sessionToServerId.end())
-		return iter->second;
-
-    return 0;
+    int32 result = 0;
+    m_safeSessionToServerId.Find(sessionId, result);
+    return result;
 }

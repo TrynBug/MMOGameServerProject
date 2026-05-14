@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "pch.h"
 #include "Types.h"
 #include "Timer.h"
+#include "ThreadSafeUnorderedMap.h"
 
 namespace serverbase
 {
@@ -107,13 +108,12 @@ private:
     std::atomic<bool> m_bRegistered { false };
     std::atomic<int32> m_userCount { 0 };
 
-    // 현재 연결된 레지스트리 세션 (OnConnect에서 저장, OnDisconnect에서 제거)
+    // 현재 연결된 레지스트리 세션
     std::mutex m_sessionMutex;
     netlib::ISessionPtr m_spSession;
 
     // 알려진 서버 목록
-    mutable std::shared_mutex m_serversMutex;
-    std::unordered_map<int32, ServerInfo> m_servers;   // key = serverId
+    SharedThreadSafeUnorderedMap<int32, ServerInfo> m_safeServerInfos;   // key = serverId
 
     // 타이머 (폴링, 접속자 수 보고)
     Timer m_timer;

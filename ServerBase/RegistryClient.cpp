@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "RegistryClient.h"
 #include "Logger.h"
 
@@ -373,10 +373,7 @@ void RegistryClient::handleHeartbeatReq(const netlib::Packet& packet)
 // 서버 정보 업데이트 적용 내부로직
 void RegistryClient::applyServerInfo(const ServerInfo& info)
 {
-    {
-        std::unique_lock<std::shared_mutex> lock(m_serversMutex);
-        m_servers[info.serverId] = info;
-    }
+    m_safeServerInfos.Insert(info.serverId, info);
 
     LOG_WRITE(LogLevel::Info, std::format("RegistryClient: server info updated. serverId={} type={} status={}", info.serverId, static_cast<int>(info.serverType), static_cast<int>(info.status)));
 
@@ -387,12 +384,11 @@ void RegistryClient::applyServerInfo(const ServerInfo& info)
 std::vector<ServerInfo> RegistryClient::GetServerList(ServerType type) const
 {
     std::vector<ServerInfo> result;
-    std::shared_lock<std::shared_mutex> lock(m_serversMutex);
-    for (const auto& [id, info] : m_servers)
+    m_safeServerInfos.ForEach([&](const int32&, const ServerInfo& info)
     {
         if (info.serverType == type)
             result.push_back(info);
-    }
+    });
     return result;
 }
 

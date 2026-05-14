@@ -69,13 +69,10 @@ void LoginServer::OnServerInfoUpdated(const ServerInfo& info)
         return;
 
     // 게이트웨이 정보 캐시 갱신
-    {
-        std::unique_lock<std::shared_mutex> lock(m_gatewayInfosMutex);
-        if (info.status == ServerStatus::Disconnected)
-            m_gatewayInfos.erase(info.serverId);
-        else
-            m_gatewayInfos[info.serverId] = info;
-    }
+    if (info.status == ServerStatus::Disconnected)
+        m_safeGatewayInfos.Erase(info.serverId);
+    else
+        m_safeGatewayInfos.Insert(info.serverId, info);
 
     if (info.status == ServerStatus::Running)
     {
@@ -125,24 +122,13 @@ void LoginServer::onGatewayDisconnect(const netlib::ISessionPtr& spSession)
 
     // sessionId -> gatewayServerId 조회 후 정리
     int32 gatewayId = 0;
+    if (!m_safeSessionToGatewayId.EraseAndGet(sessionId, gatewayId))
     {
-        std::unique_lock<std::shared_mutex> lock(m_sessionToGatewayMutex);
-        auto iter = m_sessionToGatewayId.find(sessionId);
-        if (iter == m_sessionToGatewayId.end())
-        {
-            // 핸드셰이크 전에 끊긴 경우
-            LOG_WRITE(LogLevel::Warn, std::format("LoginServer: gateway disconnected before handshake. sessionId={}", sessionId));
-            return;
-        }
-
-        gatewayId = iter->second;
-        m_sessionToGatewayId.erase(iter);
+        LOG_WRITE(LogLevel::Warn, std::format("LoginServer: gateway disconnected before handshake. sessionId={}", sessionId));
+        return;
     }
 
-    {
-        std::unique_lock<std::shared_mutex> lock(m_gatewaySessionsMutex);
-        m_gatewaySessions.erase(gatewayId);
-    }
+    m_safeGatewaySessions.Erase(gatewayId);
 
     LOG_WRITE(LogLevel::Warn, std::format("LoginServer: gateway disconnected. gatewayId={}", gatewayId));
 }
@@ -218,15 +204,8 @@ void LoginServer::handleGatewayHandshake(const netlib::ISessionPtr& spSession, c
     int32 gatewayId = ntf.server_id();
     int64 sessionId = spSession->GetId();
 
-    {
-        std::unique_lock<std::shared_mutex> lock(m_gatewaySessionsMutex);
-        m_gatewaySessions[gatewayId] = spSession;
-    }
-
-    {
-        std::unique_lock<std::shared_mutex> lock(m_sessionToGatewayMutex);
-        m_sessionToGatewayId[sessionId] = gatewayId;
-    }
+    m_safeGatewaySessions.Insert(gatewayId, spSession);
+    m_safeSessionToGatewayId.Insert(sessionId, gatewayId);
 
     LOG_WRITE(LogLevel::Info, std::format("LoginServer: gateway handshake complete. gatewayId={} sessionId={}", gatewayId, sessionId));
 }
@@ -262,14 +241,13 @@ void LoginServer::sendLoginFailed(const netlib::ISessionPtr& spSession, const st
 // 게이트웨이서버에 연결
 void LoginServer::connectToGateway(int32 gatewayId, const std::string& ip, uint16 port)
 {
-    std::lock_guard<std::mutex> lock(m_gatewayClientsMutex);
-    if (m_gatewayClients.contains(gatewayId))
+    if (m_safeGatewayClients.Contains(gatewayId))
         return;
 
     netlib::NetClientPtr spClient = ConnectToServer(ip, port, m_gatewayEventHandler);
     if (spClient)
     {
-        m_gatewayClients[gatewayId] = spClient;
+        m_safeGatewayClients.Insert(gatewayId, spClient);
         LOG_WRITE(LogLevel::Info, std::format("LoginServer: connecting to gateway {} {}:{}", gatewayId, ip, port));
     }
 }
@@ -277,16 +255,9 @@ void LoginServer::connectToGateway(int32 gatewayId, const std::string& ip, uint1
 // 게이트웨이서버의 연결을 끊음
 void LoginServer::disconnectFromGateway(int32 gatewayId)
 {
-    netlib::NetClientPtr spClient = nullptr;
-    {
-        std::lock_guard<std::mutex> lock(m_gatewayClientsMutex);
-        auto iter = m_gatewayClients.find(gatewayId);
-        if (iter == m_gatewayClients.end())
-            return;
-
-        spClient = iter->second;
-        m_gatewayClients.erase(iter);
-    }
+    netlib::NetClientPtr spClient;
+    if (!m_safeGatewayClients.EraseAndGet(gatewayId, spClient))
+        return;
 
     if (spClient)
         DisconnectToServer(spClient);
@@ -298,56 +269,47 @@ void LoginServer::disconnectFromGateway(int32 gatewayId)
 
 std::optional<ServerInfo> LoginServer::selectGateway(int64 userId) const
 {
-    std::shared_lock<std::shared_mutex> lock(m_gatewayInfosMutex);
-
-    if (m_gatewayInfos.empty())
+    if (m_safeGatewayInfos.Empty())
         return std::nullopt;
 
     // 이전 접속 게이트웨이 우선 선택 (5분 TTL)
+    PrevGatewayEntry prevEntry;
+    if (m_safePrevGatewayMap.Find(userId, prevEntry))
     {
-        std::shared_lock<std::shared_mutex> prevLock(m_prevGatewayMutex);
-        auto iter = m_prevGatewayMap.find(userId);
-        if (iter != m_prevGatewayMap.end())
+        if (std::chrono::steady_clock::now() < prevEntry.expireTime)
         {
-            auto now = std::chrono::steady_clock::now();
-            if (now < iter->second.expireTime)
+            ServerInfo prevInfo;
+            if (m_safeGatewayInfos.Find(prevEntry.gatewayServerId, prevInfo))
             {
-                int32 prevGatewayId = iter->second.gatewayServerId;
-                auto iterInfo = m_gatewayInfos.find(prevGatewayId);
-                if (iterInfo != m_gatewayInfos.end() &&
-                    iterInfo->second.status == ServerStatus::Running)
+                if (prevInfo.status == ServerStatus::Running)
                 {
-                    return iterInfo->second;
+                    return prevInfo;
                 }
             }
         }
     }
 
     // 유저 수가 가장 적은 Running 게이트웨이 선택
-    const ServerInfo* pBestServer = nullptr;
-    for (const auto& [id, info] : m_gatewayInfos)
+    std::optional<ServerInfo> best;
+    m_safeGatewayInfos.ForEach([&](const int32&, const ServerInfo& info)
     {
         if (info.status != ServerStatus::Running)
-            continue;
-        if (!pBestServer || info.userCount < pBestServer->userCount)
-            pBestServer = &info;
-    }
+            return;
 
-    return pBestServer ? std::optional<ServerInfo>(*pBestServer) : std::nullopt;
+        if (!best.has_value() || info.userCount < best->userCount)
+            best = info;
+    });
+
+    return best;
 }
 
 void LoginServer::sendAuthTokenToGateway(int32 gatewayId, int64 userId, uint64 authToken, int64 expireTimeMs)
 {
     netlib::ISessionPtr spSession;
+    if (!m_safeGatewaySessions.Find(gatewayId, spSession))
     {
-        std::shared_lock<std::shared_mutex> lock(m_gatewaySessionsMutex);
-        auto iter = m_gatewaySessions.find(gatewayId);
-        if (iter == m_gatewaySessions.end())
-        {
-            LOG_WRITE(LogLevel::Warn, std::format("LoginServer::sendAuthTokenToGateway - no session for gatewayId={}", gatewayId));
-            return;
-        }
-        spSession = iter->second;
+        LOG_WRITE(LogLevel::Warn, std::format("LoginServer::sendAuthTokenToGateway - no session for gatewayId={}", gatewayId));
+        return;
     }
 
     ServerPacket::LoginAuthTokenNtf ntf;
@@ -363,13 +325,8 @@ void LoginServer::sendAuthTokenToGateway(int32 gatewayId, int64 userId, uint64 a
 void LoginServer::sendDuplicateLoginToGateway(int32 gatewayId, int64 userId)
 {
     netlib::ISessionPtr spSession;
-    {
-        std::shared_lock<std::shared_mutex> lock(m_gatewaySessionsMutex);
-        auto iter = m_gatewaySessions.find(gatewayId);
-        if (iter == m_gatewaySessions.end())
-            return;
-        spSession = iter->second;
-    }
+    if (!m_safeGatewaySessions.Find(gatewayId, spSession))
+        return;
 
     ServerPacket::LoginDuplicateNtf ntf;
     ntf.set_user_id(userId);
@@ -385,48 +342,33 @@ void LoginServer::upsertLoginEntry(int64 userId, int32 gatewayServerId)
 {
     auto now = std::chrono::steady_clock::now();
 
-    {
-        std::unique_lock<std::shared_mutex> lock(m_loginMapMutex);
-        m_loginMap[userId] = { userId, gatewayServerId };
-    }
-
-    // 이전 게이트웨이 정보 갱신 (5분 TTL)
-    {
-        std::unique_lock<std::shared_mutex> lock(m_prevGatewayMutex);
-        m_prevGatewayMap[userId] = {
-            gatewayServerId,
-            now + std::chrono::milliseconds(k_prevGatewayTtlMs)
-        };
-    }
+    m_safeLoginMap.Insert(userId, { userId, gatewayServerId });
+    m_safePrevGatewayMap.Insert(userId, { gatewayServerId, now + std::chrono::milliseconds(k_prevGatewayTtlMs) });
 }
 
 void LoginServer::removeLoginEntry(int64 userId)
 {
-    std::unique_lock<std::shared_mutex> lock(m_loginMapMutex);
-    m_loginMap.erase(userId);
+    m_safeLoginMap.Erase(userId);
 }
 
 std::optional<LoginServer::LoginEntry> LoginServer::findLoginEntry(int64 userId) const
 {
-    std::shared_lock<std::shared_mutex> lock(m_loginMapMutex);
-    auto iter = m_loginMap.find(userId);
-    if (iter == m_loginMap.end())
+    LoginEntry entry;
+    if (!m_safeLoginMap.Find(userId, entry))
         return std::nullopt;
-    return iter->second;
+
+    return entry;
 }
 
 void LoginServer::cleanupExpiredPrevGateway()
 {
     auto now = std::chrono::steady_clock::now();
 
-    std::unique_lock<std::shared_mutex> lock(m_prevGatewayMutex);
-    for (auto iter = m_prevGatewayMap.begin(); iter != m_prevGatewayMap.end(); )
-    {
-        if (now >= iter->second.expireTime)
-            iter = m_prevGatewayMap.erase(iter);
-        else
-            ++iter;
-    }
+    std::vector<int64> expiredKeys = m_safePrevGatewayMap.CollectKeys(
+        [now](const int64&, const PrevGatewayEntry& e) { return now >= e.expireTime; });
+
+    for (int64 key : expiredKeys)
+        m_safePrevGatewayMap.Erase(key);
 }
 
 // 게이트웨이서버에서 유저 접속끊김 노티를 받음

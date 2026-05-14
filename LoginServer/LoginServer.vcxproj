@@ -44,13 +44,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Gemerated;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Gemerated;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)BIN\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)BIN\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Gemerated;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Gemerated;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)BIN\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)BIN\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>

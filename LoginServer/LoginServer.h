@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "pch.h"
+#include "ThreadSafeUnorderedMap.h"
 
 
 // 로그인서버는 클라이언트의 최초 접속 및 로그인을 처리한다. 
@@ -21,7 +22,7 @@ protected:
     bool OnInitialize()                              override;
     void OnServerInfoUpdated(const ServerInfo& info) override;
     void OnBeforeShutdown()                          override;
-    netlib::FuncEventHandler* GetListenEventHandler() override { return &m_listenEventHandler; }
+    netlib::FuncEventHandler* GetClientListenEventHandler() override { return &m_listenEventHandler; }
 
 private:
     // ── 클라이언트 네트워크 이벤트 핸들러 ─────────────────────────
@@ -82,31 +83,25 @@ private:
     uint64 generateAuthToken();
 
 private:
-    mutable std::shared_mutex             m_loginMapMutex;
-    std::unordered_map<int64, LoginEntry> m_loginMap;       // key=userId
+    SharedThreadSafeUnorderedMap<int64, LoginEntry>       m_safeLoginMap;       // key=userId
 
-    mutable std::shared_mutex                   m_prevGatewayMutex;
-    std::unordered_map<int64, PrevGatewayEntry> m_prevGatewayMap; // key=userId
+    SharedThreadSafeUnorderedMap<int64, PrevGatewayEntry>  m_safePrevGatewayMap; // key=userId
 
     static constexpr int64 k_authTokenTtlMs  = 5 * 60 * 1000;   // 인증토큰 유효시간 5분
     static constexpr int64 k_prevGatewayTtlMs = 5 * 60 * 1000;   // 이전 게이트웨이 캐시 유효시간 5분
 
     
     // 게이트웨이서버 세션 
-    mutable std::shared_mutex                      m_gatewaySessionsMutex;
-    std::unordered_map<int32, netlib::ISessionPtr> m_gatewaySessions; // key=gatewayServerId
+    SharedThreadSafeUnorderedMap<int32, netlib::ISessionPtr> m_safeGatewaySessions; // key=gatewayServerId
 
     // 게이트웨이서버 sessionId -> gatewayServerId 인덱스
-    mutable std::shared_mutex         m_sessionToGatewayMutex;
-    std::unordered_map<int64, int32>  m_sessionToGatewayId;  // key=gateway sessionId
+    SharedThreadSafeUnorderedMap<int64, int32>  m_safeSessionToGatewayId;  // key=gateway sessionId
 
     // 게이트웨이서버 NetClient
-    mutable std::mutex                                 m_gatewayClientsMutex;
-    std::unordered_map<int32, netlib::NetClientPtr>    m_gatewayClients;  // key=gatewayServerId
+    ExclusiveThreadSafeUnorderedMap<int32, netlib::NetClientPtr> m_safeGatewayClients;  // key=gatewayServerId
 
     // 게이트웨이 서버 정보 캐시 (레지스트리서버 폴링으로 갱신)
-    mutable std::shared_mutex              m_gatewayInfosMutex;
-    std::unordered_map<int32, ServerInfo>  m_gatewayInfos;  //  key=gatewayServerId
+    SharedThreadSafeUnorderedMap<int32, ServerInfo>  m_safeGatewayInfos;  //  key=gatewayServerId
 
     // 랜덤값 생성
     mutable std::mutex  m_rngMutex;

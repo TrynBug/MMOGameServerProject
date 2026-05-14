@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "RegistryServer.h"
 
 static RegistryServer* g_pServer = nullptr;
@@ -36,10 +36,12 @@ int main()
     config.ioContextConfig.initPacketSize = configParser.GetInt32("Network", "InitPacketSize", 512);
     config.ioContextConfig.maxPacketSize = configParser.GetInt32("Network", "MaxPacketSize", 65535);
 
-    // Listen 서버 사용 (다른 서버들이 이 서버로 접속)
-    config.useListenServer = true;
-    config.listenServerConfig.ip = config.serverIp;
-    config.listenServerConfig.port = config.serverPort;
+    // 내부서버용 Listen 서버 사용 (다른 서버들이 이 서버로 접속)
+    config.useInternalListenServer = true;
+    config.internalListenServerConfig.ip = config.serverIp;
+    config.internalListenServerConfig.port = config.serverPort;
+
+    config.useClientListenServer = false; // 클라이언트 접속 없음
 
     // 컨텐츠 스레드
     config.numContentsThreads = configParser.GetInt32("Contents", "NumContentsThreads", 0);
