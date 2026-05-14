@@ -8,7 +8,7 @@ void ObjectIdGenerator::Initialize(int32 serverId)
 {
     if (m_bInitialized)
     {
-        LOG_WRITE(LogLevel::Error, "ObjectIdGenerator::Initialize - already initialized. ignoring. current=" + std::to_string(m_serverId) + " requested=" + std::to_string(serverId));
+        LOG_WRITE(LogLevel::Error, std::format("ObjectIdGenerator::Initialize - already initialized. ignoring. current={} requested={}", m_serverId, serverId));
         return;
     }
     m_serverId = serverId;

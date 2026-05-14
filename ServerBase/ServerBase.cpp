@@ -28,7 +28,7 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
     }
 
     Logger::Initialize(config.logDir, serverTypeName, config.logLevel);
-    LOG_WRITE(LogLevel::Info, serverTypeName + " starting... serverId=" + std::to_string(m_serverId));
+    LOG_WRITE(LogLevel::Info, std::format("{} starting... serverId={}", serverTypeName, m_serverId));
 
     // 서버ID 세팅
     if (config.serverId <= 0 || config.serverId > 999)
@@ -81,7 +81,7 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
 
         m_spListenServer->SetEventHandler(pHandler);
 
-        LOG_WRITE(LogLevel::Info, "ServerBase::Initialize - listen NetServer initialized on port " + std::to_string(config.listenServerConfig.port));
+        LOG_WRITE(LogLevel::Info, std::format("ServerBase::Initialize - listen NetServer initialized on port {}", config.listenServerConfig.port));
     }
 
     // 컨텐츠 스레드 생성
@@ -94,7 +94,7 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
             m_contentsThreads.push_back(std::move(spThread));
         }
 
-        LOG_WRITE(LogLevel::Info, "ServerBase::Initialize - " + std::to_string(config.numContentsThreads) + " contents thread(s) started");
+        LOG_WRITE(LogLevel::Info, std::format("ServerBase::Initialize - {} contents thread(s) started", config.numContentsThreads));
     }
 
     // 타이머 시작
@@ -123,7 +123,7 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
         // 등록 거부 시 서버 종료
         m_spRegistryClient->SetRegisterRejectedCallback([this](const std::string& reason)
         {
-            LOG_WRITE(LogLevel::Error, "ServerBase: register rejected by registry - " + reason + ". shutting down.");
+            LOG_WRITE(LogLevel::Error, std::format("ServerBase: register rejected by registry - {}. shutting down.", reason));
             RequestShutdown();
         });
 
@@ -143,7 +143,7 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
     }
 
     m_bRunning = true;
-    LOG_WRITE(LogLevel::Info, "ServerBase::Initialize - " + serverTypeName + " initialized successfully");
+    LOG_WRITE(LogLevel::Info, std::format("ServerBase::Initialize - {} initialized successfully", serverTypeName));
     return true;
 }
 
@@ -161,7 +161,7 @@ bool ServerBase::StartAccept()
         return false;
     }
 
-    LOG_WRITE(LogLevel::Info, "ServerBase::StartAccept - accepting connections on port " + std::to_string(m_config.listenServerConfig.port));
+    LOG_WRITE(LogLevel::Info, std::format("ServerBase::StartAccept - accepting connections on port {}", m_config.listenServerConfig.port));
 
     return true;
 }
@@ -279,7 +279,7 @@ netlib::NetClientPtr ServerBase::ConnectToServer(const std::string& ip, uint16 p
     auto spClient = std::make_shared<netlib::NetClient>(&m_ioContext);
     if (!spClient->Initialize(clientConfig))
     {
-        LOG_WRITE(LogLevel::Error, "ServerBase::ConnectToServer - Initialize failed for " + ip + ":" + std::to_string(port));
+        LOG_WRITE(LogLevel::Error, std::format("ServerBase::ConnectToServer - Initialize failed for {}:{}", ip, port));
         return nullptr;
     }
 
@@ -291,7 +291,7 @@ netlib::NetClientPtr ServerBase::ConnectToServer(const std::string& ip, uint16 p
         m_serverConnections.push_back(spClient);
     }
 
-    LOG_WRITE(LogLevel::Info, "ServerBase::ConnectToServer - connecting to " + ip + ":" + std::to_string(port));
+    LOG_WRITE(LogLevel::Info, std::format("ServerBase::ConnectToServer - connecting to {}:{}", ip, port));
     return spClient;
 }
 
@@ -315,7 +315,7 @@ void ServerBase::AssignContents(int32 threadIndex, ContentsPtr spContents)
 {
     if (threadIndex < 0 || threadIndex >= static_cast<int32>(m_contentsThreads.size()))
     {
-        LOG_WRITE(LogLevel::Error, "ServerBase::AssignContents - invalid threadIndex: " + std::to_string(threadIndex));
+        LOG_WRITE(LogLevel::Error, std::format("ServerBase::AssignContents - invalid threadIndex: {}", threadIndex));
         return;
     }
     m_contentsThreads[threadIndex]->AddContents(std::move(spContents));
@@ -325,7 +325,7 @@ void ServerBase::RemoveContents(int32 threadIndex, ContentsPtr spContents)
 {
     if (threadIndex < 0 || threadIndex >= static_cast<int32>(m_contentsThreads.size()))
     {
-        LOG_WRITE(LogLevel::Error, "ServerBase::RemoveContents - invalid threadIndex: " + std::to_string(threadIndex));
+        LOG_WRITE(LogLevel::Error, std::format("ServerBase::RemoveContents - invalid threadIndex: {}", threadIndex));
         return;
     }
     m_contentsThreads[threadIndex]->RemoveContents(std::move(spContents));

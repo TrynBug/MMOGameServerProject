@@ -9,23 +9,23 @@ bool RegistryServer::OnInitialize()
 {
     // 패킷ID와 핸들러 등록
     m_packetDispatcher.Register<ServerPacket::RegistryRegisterReq>(Common::SERVER_PACKET_ID_REGISTRY_REGISTER_REQ,
-        [this](const netlib::ISessionPtr& spSession, const ServerPacket::RegistryRegisterReq& msg) { handleRegisterReq(spSession, msg); });
+        [this](auto& spSession, auto& msg) { handleRegisterReq(spSession, msg); });
 
     m_packetDispatcher.Register<ServerPacket::RegistryHeartbeatRes>(Common::SERVER_PACKET_ID_REGISTRY_HEARTBEAT_RES,
-        [this](const netlib::ISessionPtr& spSession, const ServerPacket::RegistryHeartbeatRes& msg) { handleHeartbeatRes(spSession, msg); });
+        [this](auto& spSession, auto& msg) { handleHeartbeatRes(spSession, msg); });
 
     m_packetDispatcher.Register<ServerPacket::RegistryPollReq>(Common::SERVER_PACKET_ID_REGISTRY_POLL_REQ,
-        [this](const netlib::ISessionPtr& spSession, const ServerPacket::RegistryPollReq& msg) { handlePollReq(spSession, msg); });
+        [this](auto& spSession, auto& msg) { handlePollReq(spSession, msg); });
 
     m_packetDispatcher.Register<ServerPacket::RegistryUserCountNtf>(Common::SERVER_PACKET_ID_REGISTRY_USER_COUNT_NTF,
-        [this](const netlib::ISessionPtr& spSession, const ServerPacket::RegistryUserCountNtf& msg) { handleUserCountNtf(spSession, msg); });
+        [this](auto& spSession, auto& msg) { handleUserCountNtf(spSession, msg); });
 
     m_packetDispatcher.Register<ServerPacket::RegistryShutdownReq>(Common::SERVER_PACKET_ID_REGISTRY_SHUTDOWN_REQ,
-        [this](const netlib::ISessionPtr& spSession, const ServerPacket::RegistryShutdownReq& msg) { handleShutdownReq(spSession, msg); });
+        [this](auto& spSession, auto& msg) { handleShutdownReq(spSession, msg); });
 
     m_packetDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
     {
-        LOG_WRITE(LogLevel::Warn, "RegistryServer: unknown packetId=" + std::to_string(spPacket->GetHeader()->type) + " sessionId=" + std::to_string(spSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: unknown packetId={} sessionId={}", spPacket->GetHeader()->type, spSession->GetId()));
     });
 
     // 네트워크 이벤트 핸들러 콜백 등록
@@ -78,7 +78,7 @@ void RegistryServer::onConnect(const netlib::ISessionPtr& spSession)
 {
     // 아직 등록 요청 전이므로 세션만 기록해둔다.
     // ServerEntry는 RegistryRegisterReq 수신 후 생성한다.
-    LOG_WRITE(LogLevel::Info, "RegistryServer: server connected. sessionId=" + std::to_string(spSession->GetId()));
+    LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server connected. sessionId={}", spSession->GetId()));
 }
 
 void RegistryServer::onDisconnect(const netlib::ISessionPtr& spSession)
@@ -93,7 +93,7 @@ void RegistryServer::onDisconnect(const netlib::ISessionPtr& spSession)
         if (iter == m_sessionToServerId.end())
         {
             // 등록 완료 전에 끊긴 경우 (RegisterReq 미수신)
-            LOG_WRITE(LogLevel::Warn, "RegistryServer: unregistered server disconnected. sessionId=" + std::to_string(sessionId));
+            LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: unregistered server disconnected. sessionId={}", sessionId));
             return;
         }
         serverId = iter->second;
@@ -110,7 +110,7 @@ void RegistryServer::onDisconnect(const netlib::ISessionPtr& spSession)
         iter->second.status = ServerStatus::Disconnected;
         iter->second.spSession = nullptr;
 
-        LOG_WRITE(LogLevel::Warn, "RegistryServer: server disconnected. serverId=" + std::to_string(serverId) + " type=" + std::to_string(static_cast<int>(iter->second.serverType)));
+        LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: server disconnected. serverId={} type={}", serverId, static_cast<int>(iter->second.serverType)));
 
         // 연결 끊김을 다른 모든 서버에 브로드캐스트
         broadcastServerInfo(iter->second);
@@ -135,7 +135,7 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
     std::string errorMsg;
     if (!validateRegistration(serverId, type, ip, port, errorMsg))
     {
-        LOG_WRITE(LogLevel::Error, "RegistryServer: registration rejected. serverId=" + std::to_string(serverId) + " reason=" + errorMsg);
+        LOG_WRITE(LogLevel::Error, std::format("RegistryServer: registration rejected. serverId={} reason={}", serverId, errorMsg));
 
         ServerPacket::RegistryRegisterRes res;
         res.set_success(false);
@@ -171,10 +171,7 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
         m_sessionToServerId[spSession->GetId()] = serverId;
     }
 
-    LOG_WRITE(LogLevel::Info, "RegistryServer: server registered."
-             + std::string(" serverId=") + std::to_string(serverId)
-             + " type=" + std::to_string(static_cast<int>(type))
-             + " ip=" + ip + ":" + std::to_string(port));
+    LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server registered. serverId={} type={} ip={}:{}", serverId, static_cast<int>(type), ip, port));
 
     // 서버 등록 완료 응답
     {
@@ -308,8 +305,7 @@ void RegistryServer::handleShutdownReq(const netlib::ISessionPtr& spSession, con
     // 서버 상태 변경
     iter->second.status = ServerStatus::ShuttingDown;
 
-    LOG_WRITE(LogLevel::Info, "RegistryServer: server shutdown requested. serverId=" + std::to_string(serverId)
-             + " type=" + std::to_string(static_cast<int>(iter->second.serverType)));
+    LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server shutdown requested. serverId={} type={}", serverId, static_cast<int>(iter->second.serverType)));
 
     // 서버상태변경을 다른 서버들에게 브로드캐스트
     broadcastServerInfo(iter->second);
@@ -327,7 +323,7 @@ bool RegistryServer::validateRegistration(int32 serverId, ServerType type, const
     auto iterId = m_idToEndpoint.find(serverId);
     if (iterId != m_idToEndpoint.end() && iterId->second != endpoint)
     {
-        outErrorMsg = "serverId=" + std::to_string(serverId) + " is already registered with different endpoint: " + iterId->second;
+        outErrorMsg = std::format("serverId={} is already registered with different endpoint: {}", serverId, iterId->second);
         return false;
     }
 
@@ -335,7 +331,7 @@ bool RegistryServer::validateRegistration(int32 serverId, ServerType type, const
     auto iterEp = m_endpointToId.find(endpoint);
     if (iterEp != m_endpointToId.end() && iterEp->second != serverId)
     {
-        outErrorMsg = "endpoint=" + endpoint + " is already registered with different serverId=" + std::to_string(iterEp->second);
+        outErrorMsg = std::format("endpoint={} is already registered with different serverId={}", endpoint, iterEp->second);
         return false;
     }
 
@@ -451,7 +447,7 @@ void RegistryServer::checkHeartbeatTimeout()
 
         if (spSession)
         {
-            LOG_WRITE(LogLevel::Warn, "RegistryServer: heartbeat timeout. serverId=" + std::to_string(serverId) + " disconnecting...");
+            LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: heartbeat timeout. serverId={} disconnecting...", serverId));
             spSession->Disconnect();
         }
     }

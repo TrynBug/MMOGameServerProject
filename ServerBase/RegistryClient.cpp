@@ -24,7 +24,7 @@ bool RegistryClient::Initialize(ServerBase* pServerBase, const Config& config)
 
     if (m_config.myServerId <= 0)
     {
-        LOG_WRITE(LogLevel::Error, "RegistryClient::Initialize - invalid serverId: " + std::to_string(m_config.myServerId));
+        LOG_WRITE(LogLevel::Error, std::format("RegistryClient::Initialize - invalid serverId: {}", m_config.myServerId));
         return false;
     }
 
@@ -52,7 +52,7 @@ void RegistryClient::Start()
     m_timer.Start();
 
     m_upNetClient->Connect(m_config.registryIp, m_config.registryPort);
-    LOG_WRITE(LogLevel::Info, "RegistryClient: connecting to registry " + m_config.registryIp + ":" + std::to_string(m_config.registryPort));
+    LOG_WRITE(LogLevel::Info, std::format("RegistryClient: connecting to registry {}:{}", m_config.registryIp, m_config.registryPort));
 }
 
 void RegistryClient::Stop()
@@ -125,7 +125,7 @@ void RegistryClient::OnRecv(const netlib::ISessionPtr& spSession, const netlib::
         break;
 
     default:
-        LOG_WRITE(LogLevel::Warn, "RegistryClient: unknown packet id=" + std::to_string(packetId));
+        LOG_WRITE(LogLevel::Warn, std::format("RegistryClient: unknown packet id={}", packetId));
         break;
     }
 }
@@ -155,7 +155,7 @@ void RegistryClient::OnDisconnect(const netlib::ISessionPtr& spSession)
 void RegistryClient::OnLog(netlib::LogLevel netLogLevel, const netlib::ISessionPtr& spSession, const std::string& msg)
 {
 	const LogLevel logLevel = NetLogLevelToLogLevel(netLogLevel);
-	LOG_WRITE(logLevel, "RegistryClient: " + msg);
+	LOG_WRITE(logLevel, std::format("RegistryClient: {}", msg));
 }
 
 // Send
@@ -279,7 +279,7 @@ void RegistryClient::handleRegisterRes(const netlib::Packet& packet)
     {
         // 등록 거부됨(서버ID 충돌 등). 서버는 종료되어야 함
         std::string reason = res.message();
-        LOG_WRITE(LogLevel::Error, "RegistryClient: register rejected - " + reason + " (serverId=" + std::to_string(m_config.myServerId) + "). server must shut down.");
+        LOG_WRITE(LogLevel::Error, std::format("RegistryClient: register rejected - {} (serverId={}). server must shut down.", reason, m_config.myServerId));
 
         if (m_registerRejectedCallback)
             m_registerRejectedCallback(reason);
@@ -289,7 +289,7 @@ void RegistryClient::handleRegisterRes(const netlib::Packet& packet)
 
     m_bRegistered  = true;
 
-    LOG_WRITE(LogLevel::Info, "RegistryClient: registered successfully. serverId=" + std::to_string(m_config.myServerId));
+    LOG_WRITE(LogLevel::Info, std::format("RegistryClient: registered successfully. serverId={}", m_config.myServerId));
 
     // 서버정보 폴링 타이머 등록
     if (!m_config.pollTargetTypes.empty())
@@ -378,9 +378,7 @@ void RegistryClient::applyServerInfo(const ServerInfo& info)
         m_servers[info.serverId] = info;
     }
 
-    LOG_WRITE(LogLevel::Info, "RegistryClient: server info updated. serverId=" + std::to_string(info.serverId)
-             + " type=" + std::to_string(static_cast<int>(info.serverType))
-             + " status=" + std::to_string(static_cast<int>(info.status)));
+    LOG_WRITE(LogLevel::Info, std::format("RegistryClient: server info updated. serverId={} type={} status={}", info.serverId, static_cast<int>(info.serverType), static_cast<int>(info.status)));
 
     if (m_serverInfoCallback)
         m_serverInfoCallback(info);

@@ -103,7 +103,7 @@ void ContentsThread::threadProc()
                 }
                 catch (const std::exception& e)
                 {
-                    LOG_WRITE(LogLevel::Error, std::string("ContentsThread::Update exception: ") + e.what());
+                    LOG_WRITE(LogLevel::Error, std::format("ContentsThread::Update exception: {}", e.what()));
                 }
             }
         }

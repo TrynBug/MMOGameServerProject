@@ -13,7 +13,7 @@ bool ConfigParser::Load(const std::string& filePath)
     std::ifstream file(filePath);
     if (!file.is_open())
     {
-        LOG_WRITE(LogLevel::Error, "ConfigParser::Load - cannot open file: " + filePath);
+        LOG_WRITE(LogLevel::Error, std::format("ConfigParser::Load - cannot open file: {}", filePath));
         return false;
     }
 
@@ -54,7 +54,7 @@ bool ConfigParser::Load(const std::string& filePath)
         m_data[currentSection][key] = value;
     }
 
-    LOG_WRITE(LogLevel::Info, "ConfigParser loaded: " + filePath);
+    LOG_WRITE(LogLevel::Info, std::format("ConfigParser loaded: {}", filePath));
     return true;
 }
 
