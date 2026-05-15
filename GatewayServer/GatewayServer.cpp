@@ -11,7 +11,7 @@ bool GatewayServer::OnInitialize()
     m_clientDispatcher.Register<GamePacket::GameLogoutReq>(Common::GAME_PACKET_ID_GAME_LOGOUT_REQ,
         [this](auto& spSession, auto& msg) { handleLogoutReq(spSession); });
 
-    // 등록되지 않은 클라이언트 패킷은 게임서버로 relay
+    // 게이트웨이서버가 핸들링하지않는 클라이언트 패킷은 게임서버로 relay
     m_clientDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
     {
         relayToGameServer(spSession, spPacket);
@@ -60,6 +60,7 @@ bool GatewayServer::OnInitialize()
     // 내부 서버 포트 이벤트 핸들러 등록
     m_internalListenEventHandler.onAccept = [this](const netlib::ISessionPtr& spSession) { return onInternalAccept(spSession); };
     m_internalListenEventHandler.onRecv = [this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket) { return onInternalRecv(spSession, spPacket); };
+    m_internalListenEventHandler.onSendComplete = [this](const netlib::ISessionPtr& spSession) { onInternalSendComplete(spSession); };
     m_internalListenEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spSession) { onInternalDisconnect(spSession); };
     m_internalListenEventHandler.onLog = [](netlib::LogLevel netLogLevel, netlib::ISessionPtr, const std::string& msg)
     {
@@ -67,7 +68,7 @@ bool GatewayServer::OnInitialize()
         LOG_WRITE(logLevel, msg);
     };
 
-    // 타이머 (1분마다)
+    // 1분 타이머
     GetTimer().Register(60000, [this]()
     {
         cleanupExpiredTokens();  // 만료된 인증토큰 제거
@@ -196,6 +197,28 @@ bool GatewayServer::onInternalRecv(const netlib::ISessionPtr& spSession, const n
     return true;
 }
 
+// 내부서버 포트 Send 완료
+void GatewayServer::onInternalSendComplete(const netlib::ISessionPtr& spSession)
+{
+    SessionMetaInfo* pMeta = getSessionMeta(spSession);
+    if (!pMeta || pMeta->sessionType != ESessionType::GameServer)
+        return;
+
+    netlib::PacketPool& pool = GetIoContext().GetPacketPool();
+    int32 maxPacketSize = GetIoContext().GetConfig().maxPacketSize;
+
+    netlib::ISessionPtr spGameSession;
+    if (!m_safeGameServerSessions.Find(pMeta->gameServerId, spGameSession))
+        return;
+
+    GameServerSendQueuePtr spQueue = nullptr;
+    m_safeGameServerSendQueues.Find(pMeta->gameServerId, spQueue);
+    if (!spQueue)
+        return;
+
+    spQueue->OnSendComplete(spGameSession, pool, maxPacketSize);
+}
+
 // 내부서버 포트에서 연결 끊김
 void GatewayServer::onInternalDisconnect(const netlib::ISessionPtr& spSession)
 {
@@ -212,6 +235,8 @@ void GatewayServer::onInternalDisconnect(const netlib::ISessionPtr& spSession)
         LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: game server disconnected. gameServerId={}", gameServerId));
 
         m_safeGameServerSessions.Erase(gameServerId);
+
+        m_safeGameServerSendQueues.Erase(gameServerId);
 
         std::vector<int64> affectedUsers = m_safeUsers.CollectKeys(
             [gameServerId](const int64&, const GatewayUserPtr& spUser)
@@ -305,21 +330,25 @@ void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spSession, netl
     if (!pMeta || pMeta->userId == 0 || pMeta->routedGameServerId == 0)
         return;
 
-    ServerPacket::GatewayToGamePacketNtf relay;
-    relay.set_user_id(pMeta->userId);
-    relay.set_packet_type(spPacket->GetHeader()->type);
-    relay.set_payload(spPacket->GetPayload(), spPacket->GetPayloadSize());
+    netlib::PacketPool& pool = GetIoContext().GetPacketPool();
+    int32 maxPacketSize = GetIoContext().GetConfig().maxPacketSize;
 
-    auto spRelayPacket = SerializePacket(Common::SERVER_PACKET_ID_GATEWAY_TO_GAME_PACKET_NTF, relay);
-    if (spRelayPacket)
-        sendToGameServer(pMeta->routedGameServerId, spRelayPacket);
+    netlib::ISessionPtr spGameSession;
+    if (!m_safeGameServerSessions.Find(pMeta->routedGameServerId, spGameSession))
+        return;
+
+    GameServerSendQueuePtr spQueue = nullptr;
+    m_safeGameServerSendQueues.Find(pMeta->routedGameServerId, spQueue);
+    if (!spQueue)
+        return;
+
+    spQueue->EnqueueRelay(pMeta->userId, spPacket, spGameSession, pool, maxPacketSize);
 }
 
 
 // 로그인서버 패킷 핸들러
 void GatewayServer::handleLoginServerPacket(const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket)
 {
-    // 첫 패킷 수신 시 ESessionType를 LoginServer로 확정하고 핸드셰이크 전송
     SessionMetaInfo* pMeta = getSessionMeta(spSession);
     if (pMeta && pMeta->sessionType == ESessionType::Unknown)
     {
@@ -364,7 +393,8 @@ void GatewayServer::handleGameServerHandshake(const netlib::ISessionPtr& spSessi
 
     m_safeGameServerSessions.Insert(gameServerId, spSession);
 
-    // SessionMetaInfo 업데이트
+    m_safeGameServerSendQueues.Insert(gameServerId, std::make_shared<GameServerSendQueue>());
+
     SessionMetaInfo* pMeta = getSessionMeta(spSession);
     if (pMeta)
     {
@@ -412,7 +442,6 @@ void GatewayServer::handleGameToGatewayBroadcast(const netlib::ISessionPtr& /*sp
     );
     std::memcpy(spPacket->GetPayload(), payload.data(), payload.size());
 
-    // ForEach 안에서 Send (Send는 내부적으로 자체 lock을 사용하므로 데드락 없음)
     m_safeUsers.ForEach([&](const int64& userId, const GatewayUserPtr& spUser)
     {
         for (int i = 0; i < msg.user_ids_size(); ++i)
@@ -454,7 +483,6 @@ void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spSe
     spUser->gameServerId = targetGameServerId;
     m_safeUsers.Insert(userId, spUser);
 
-    // 연결된 게임서버ID 업데이트
     SessionMetaInfo* pMeta = getSessionMeta(spUser->spSession);
     if (pMeta)
         pMeta->routedGameServerId = targetGameServerId;
@@ -567,7 +595,7 @@ std::optional<ServerInfo> GatewayServer::selectGameServer(int64 userId) const
 }
 
 
-// 게임서버로 패킷 전달
+// 게임서버로 서버간 패킷 전달
 void GatewayServer::sendToGameServer(int32 gameServerId, netlib::PacketPtr spPacket)
 {
     netlib::ISessionPtr spSession;
@@ -577,7 +605,15 @@ void GatewayServer::sendToGameServer(int32 gameServerId, netlib::PacketPtr spPac
         return;
     }
 
-    spSession->Send(spPacket);
+    GameServerSendQueuePtr spQueue = nullptr;
+    m_safeGameServerSendQueues.Find(gameServerId, spQueue);
+    if (!spQueue)
+        return;
+
+    netlib::PacketPool& pool = GetIoContext().GetPacketPool();
+    int32 maxPacketSize = GetIoContext().GetConfig().maxPacketSize;
+
+    spQueue->EnqueueServer(spPacket, spSession, pool, maxPacketSize);
 }
 
 void GatewayServer::forceDisconnectUser(int64 userId, const std::string& reason)

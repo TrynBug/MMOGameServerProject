@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Types.h"
 #include "PacketHeader.h"
@@ -35,7 +35,10 @@ public:
     int32        GetCapacity()  const { return m_capacity; }
 
     // header를 설정하고 payload 데이터를 write한다.
-    bool WriteData(uint16 type, uint8 flags, const void* payload, int32 payloadSize);
+    bool SetHeaderAndPayload(uint16 type, uint8 flags, const void* payload, int32 payloadSize);
+
+    // payload에 데이터를 추가로 write 한다. 헤더의 size를 갱신한다. (주의: 버퍼 크기 모자라면 write 실패함)
+    bool WritePayload(const char* pData, int32 size);
 
     // header 세팅
     void SetHeader(uint16 size, uint16 type, uint8 flags);
@@ -46,6 +49,7 @@ public:
 private:
     uint8*  m_buffer   = nullptr;
     int32   m_capacity = 0;   // 버퍼 전체 크기
+    int32   m_offset = sizeof(PacketHeader);   // 현재 사용한 버퍼 끝 위치(헤더위치는 기본적으로 사용한것으로 취급함)
 };
 
 using PacketPtr  = std::shared_ptr<Packet>;

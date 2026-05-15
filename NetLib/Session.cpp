@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Session.h"
 #include "INetBase.h"
 #include "INetEventHandler.h"
@@ -348,6 +348,12 @@ void Session::OnSendCompleted(DWORD bytesTransferred)
     {
         m_bSending.store(false);
         return;
+    }
+
+    // Send 완료 콜백
+    if (m_pNetBase != nullptr && m_pNetBase->GetEventHandler() != nullptr)
+    {
+        m_pNetBase->GetEventHandler()->OnSendComplete(shared_from_this());
     }
 
     trySendNext();

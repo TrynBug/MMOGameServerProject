@@ -6,9 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetLib", "NetLib\NetLib.vcxproj", "{A575D888-EB05-493C-97B0-C130882C854F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PacketGenerator", "PacketGenerator\PacketGenerator.vcxproj", "{08D95FD9-2403-4E97-84CD-6368CFCA22D2}"
-	ProjectSection(ProjectDependencies) = postProject
-		{A575D888-EB05-493C-97B0-C130882C854F} = {A575D888-EB05-493C-97B0-C130882C854F}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameServer", "GameServer\GameServer.vcxproj", "{FB91AF3B-368C-47DD-970A-F2E34A8C2409}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -71,6 +68,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Etc", "Etc", "{7564A4AA-223C-4899-B2FD-EEDFDA5D6CBA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoroutineTest", "CoroutineTest\CoroutineTest.vcxproj", "{E1719EF0-8BF8-4CCC-84CD-FE830C53A232}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BCBF772B-9346-44C1-9C17-DAABDAA5F89B} = {BCBF772B-9346-44C1-9C17-DAABDAA5F89B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

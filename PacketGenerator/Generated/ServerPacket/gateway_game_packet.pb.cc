@@ -81,35 +81,6 @@ struct UserMoveToGameServerFailNtfDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserMoveToGameServerFailNtfDefaultTypeInternal _UserMoveToGameServerFailNtf_default_instance_;
 
-inline constexpr GatewayToGamePacketNtf::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : payload_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        user_id_{::int64_t{0}},
-        packet_type_{0},
-        _cached_size_{0} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR GatewayToGamePacketNtf::GatewayToGamePacketNtf(::_pbi::ConstantInitialized)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(_class_data_.base()),
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(),
-#endif  // PROTOBUF_CUSTOM_VTABLE
-      _impl_(::_pbi::ConstantInitialized()) {
-}
-struct GatewayToGamePacketNtfDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR GatewayToGamePacketNtfDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~GatewayToGamePacketNtfDefaultTypeInternal() {}
-  union {
-    GatewayToGamePacketNtf _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GatewayToGamePacketNtfDefaultTypeInternal _GatewayToGamePacketNtf_default_instance_;
-
 inline constexpr GameToGatewayPacketNtf::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : payload_(
@@ -177,17 +148,6 @@ const ::uint32_t
     TableStruct_ServerPacket_2fgateway_5fgame_5fpacket_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
         ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayToGamePacketNtf, _internal_metadata_),
-        ~0u,  // no _extensions_
-        ~0u,  // no _oneof_case_
-        ~0u,  // no _weak_field_map_
-        ~0u,  // no _inlined_string_donated_
-        ~0u,  // no _split_
-        ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayToGamePacketNtf, _impl_.user_id_),
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayToGamePacketNtf, _impl_.packet_type_),
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayToGamePacketNtf, _impl_.payload_),
-        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::ServerPacket::GameToGatewayPacketNtf, _internal_metadata_),
         ~0u,  // no _extensions_
         ~0u,  // no _oneof_case_
@@ -234,14 +194,12 @@ const ::uint32_t
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, -1, -1, sizeof(::ServerPacket::GatewayToGamePacketNtf)},
-        {11, -1, -1, sizeof(::ServerPacket::GameToGatewayPacketNtf)},
-        {22, -1, -1, sizeof(::ServerPacket::GameToGatewayBroadcastNtf)},
-        {33, -1, -1, sizeof(::ServerPacket::UserMoveToGameServerReq)},
-        {44, -1, -1, sizeof(::ServerPacket::UserMoveToGameServerFailNtf)},
+        {0, -1, -1, sizeof(::ServerPacket::GameToGatewayPacketNtf)},
+        {11, -1, -1, sizeof(::ServerPacket::GameToGatewayBroadcastNtf)},
+        {22, -1, -1, sizeof(::ServerPacket::UserMoveToGameServerReq)},
+        {33, -1, -1, sizeof(::ServerPacket::UserMoveToGameServerFailNtf)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
-    &::ServerPacket::_GatewayToGamePacketNtf_default_instance_._instance,
     &::ServerPacket::_GameToGatewayPacketNtf_default_instance_._instance,
     &::ServerPacket::_GameToGatewayBroadcastNtf_default_instance_._instance,
     &::ServerPacket::_UserMoveToGameServerReq_default_instance_._instance,
@@ -251,17 +209,15 @@ const char descriptor_table_protodef_ServerPacket_2fgateway_5fgame_5fpacket_2epr
     protodesc_cold) = {
     "\n&ServerPacket/gateway_game_packet.proto"
     "\022\014ServerPacket\032\026Common/packet_id.proto\"O"
-    "\n\026GatewayToGamePacketNtf\022\017\n\007user_id\030\001 \001("
+    "\n\026GameToGatewayPacketNtf\022\017\n\007user_id\030\001 \001("
     "\003\022\023\n\013packet_type\030\002 \001(\005\022\017\n\007payload\030\003 \001(\014\""
-    "O\n\026GameToGatewayPacketNtf\022\017\n\007user_id\030\001 \001"
-    "(\003\022\023\n\013packet_type\030\002 \001(\005\022\017\n\007payload\030\003 \001(\014"
-    "\"S\n\031GameToGatewayBroadcastNtf\022\020\n\010user_id"
-    "s\030\001 \003(\003\022\023\n\013packet_type\030\002 \001(\005\022\017\n\007payload\030"
-    "\003 \001(\014\"b\n\027UserMoveToGameServerReq\022\017\n\007user"
-    "_id\030\001 \001(\003\022\035\n\025target_game_server_id\030\002 \001(\005"
-    "\022\027\n\017target_stage_id\030\003 \001(\005\">\n\033UserMoveToG"
-    "ameServerFailNtf\022\017\n\007user_id\030\001 \001(\003\022\016\n\006rea"
-    "son\030\002 \001(\tb\006proto3"
+    "S\n\031GameToGatewayBroadcastNtf\022\020\n\010user_ids"
+    "\030\001 \003(\003\022\023\n\013packet_type\030\002 \001(\005\022\017\n\007payload\030\003"
+    " \001(\014\"b\n\027UserMoveToGameServerReq\022\017\n\007user_"
+    "id\030\001 \001(\003\022\035\n\025target_game_server_id\030\002 \001(\005\022"
+    "\027\n\017target_stage_id\030\003 \001(\005\">\n\033UserMoveToGa"
+    "meServerFailNtf\022\017\n\007user_id\030\001 \001(\003\022\016\n\006reas"
+    "on\030\002 \001(\tb\006proto3"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto_deps[1] =
     {
@@ -271,13 +227,13 @@ static ::absl::once_flag descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto = {
     false,
     false,
-    497,
+    416,
     descriptor_table_protodef_ServerPacket_2fgateway_5fgame_5fpacket_2eproto,
     "ServerPacket/gateway_game_packet.proto",
     &descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto_once,
     descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto_deps,
     1,
-    5,
+    4,
     schemas,
     file_default_instances,
     TableStruct_ServerPacket_2fgateway_5fgame_5fpacket_2eproto::offsets,
@@ -285,298 +241,6 @@ PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2
     file_level_service_descriptors_ServerPacket_2fgateway_5fgame_5fpacket_2eproto,
 };
 namespace ServerPacket {
-// ===================================================================
-
-class GatewayToGamePacketNtf::_Internal {
- public:
-};
-
-GatewayToGamePacketNtf::GatewayToGamePacketNtf(::google::protobuf::Arena* arena)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, _class_data_.base()) {
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(arena) {
-#endif  // PROTOBUF_CUSTOM_VTABLE
-  SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:ServerPacket.GatewayToGamePacketNtf)
-}
-inline PROTOBUF_NDEBUG_INLINE GatewayToGamePacketNtf::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
-    const Impl_& from, const ::ServerPacket::GatewayToGamePacketNtf& from_msg)
-      : payload_(arena, from.payload_),
-        _cached_size_{0} {}
-
-GatewayToGamePacketNtf::GatewayToGamePacketNtf(
-    ::google::protobuf::Arena* arena,
-    const GatewayToGamePacketNtf& from)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, _class_data_.base()) {
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(arena) {
-#endif  // PROTOBUF_CUSTOM_VTABLE
-  GatewayToGamePacketNtf* const _this = this;
-  (void)_this;
-  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
-      from._internal_metadata_);
-  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  ::memcpy(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, user_id_),
-           reinterpret_cast<const char *>(&from._impl_) +
-               offsetof(Impl_, user_id_),
-           offsetof(Impl_, packet_type_) -
-               offsetof(Impl_, user_id_) +
-               sizeof(Impl_::packet_type_));
-
-  // @@protoc_insertion_point(copy_constructor:ServerPacket.GatewayToGamePacketNtf)
-}
-inline PROTOBUF_NDEBUG_INLINE GatewayToGamePacketNtf::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility,
-    ::google::protobuf::Arena* arena)
-      : payload_(arena),
-        _cached_size_{0} {}
-
-inline void GatewayToGamePacketNtf::SharedCtor(::_pb::Arena* arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
-  ::memset(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, user_id_),
-           0,
-           offsetof(Impl_, packet_type_) -
-               offsetof(Impl_, user_id_) +
-               sizeof(Impl_::packet_type_));
-}
-GatewayToGamePacketNtf::~GatewayToGamePacketNtf() {
-  // @@protoc_insertion_point(destructor:ServerPacket.GatewayToGamePacketNtf)
-  SharedDtor(*this);
-}
-inline void GatewayToGamePacketNtf::SharedDtor(MessageLite& self) {
-  GatewayToGamePacketNtf& this_ = static_cast<GatewayToGamePacketNtf&>(self);
-  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
-  ABSL_DCHECK(this_.GetArena() == nullptr);
-  this_._impl_.payload_.Destroy();
-  this_._impl_.~Impl_();
-}
-
-inline void* GatewayToGamePacketNtf::PlacementNew_(const void*, void* mem,
-                                        ::google::protobuf::Arena* arena) {
-  return ::new (mem) GatewayToGamePacketNtf(arena);
-}
-constexpr auto GatewayToGamePacketNtf::InternalNewImpl_() {
-  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(GatewayToGamePacketNtf),
-                                            alignof(GatewayToGamePacketNtf));
-}
-PROTOBUF_CONSTINIT
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::google::protobuf::internal::ClassDataFull GatewayToGamePacketNtf::_class_data_ = {
-    ::google::protobuf::internal::ClassData{
-        &_GatewayToGamePacketNtf_default_instance_._instance,
-        &_table_.header,
-        nullptr,  // OnDemandRegisterArenaDtor
-        nullptr,  // IsInitialized
-        &GatewayToGamePacketNtf::MergeImpl,
-        ::google::protobuf::Message::GetNewImpl<GatewayToGamePacketNtf>(),
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-        &GatewayToGamePacketNtf::SharedDtor,
-        ::google::protobuf::Message::GetClearImpl<GatewayToGamePacketNtf>(), &GatewayToGamePacketNtf::ByteSizeLong,
-            &GatewayToGamePacketNtf::_InternalSerialize,
-#endif  // PROTOBUF_CUSTOM_VTABLE
-        PROTOBUF_FIELD_OFFSET(GatewayToGamePacketNtf, _impl_._cached_size_),
-        false,
-    },
-    &GatewayToGamePacketNtf::kDescriptorMethods,
-    &descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto,
-    nullptr,  // tracker
-};
-const ::google::protobuf::internal::ClassData* GatewayToGamePacketNtf::GetClassData() const {
-  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
-  return _class_data_.base();
-}
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 0, 0, 2> GatewayToGamePacketNtf::_table_ = {
-  {
-    0,  // no _has_bits_
-    0, // no _extensions_
-    3, 24,  // max_field_number, fast_idx_mask
-    offsetof(decltype(_table_), field_lookup_table),
-    4294967288,  // skipmap
-    offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
-    _class_data_.base(),
-    nullptr,  // post_loop_handler
-    ::_pbi::TcParser::GenericFallback,  // fallback
-    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::ServerPacket::GatewayToGamePacketNtf>(),  // to_prefetch
-    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
-  }, {{
-    {::_pbi::TcParser::MiniParse, {}},
-    // int64 user_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(GatewayToGamePacketNtf, _impl_.user_id_), 63>(),
-     {8, 63, 0, PROTOBUF_FIELD_OFFSET(GatewayToGamePacketNtf, _impl_.user_id_)}},
-    // int32 packet_type = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(GatewayToGamePacketNtf, _impl_.packet_type_), 63>(),
-     {16, 63, 0, PROTOBUF_FIELD_OFFSET(GatewayToGamePacketNtf, _impl_.packet_type_)}},
-    // bytes payload = 3;
-    {::_pbi::TcParser::FastBS1,
-     {26, 63, 0, PROTOBUF_FIELD_OFFSET(GatewayToGamePacketNtf, _impl_.payload_)}},
-  }}, {{
-    65535, 65535
-  }}, {{
-    // int64 user_id = 1;
-    {PROTOBUF_FIELD_OFFSET(GatewayToGamePacketNtf, _impl_.user_id_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt64)},
-    // int32 packet_type = 2;
-    {PROTOBUF_FIELD_OFFSET(GatewayToGamePacketNtf, _impl_.packet_type_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // bytes payload = 3;
-    {PROTOBUF_FIELD_OFFSET(GatewayToGamePacketNtf, _impl_.payload_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kBytes | ::_fl::kRepAString)},
-  }},
-  // no aux_entries
-  {{
-  }},
-};
-
-PROTOBUF_NOINLINE void GatewayToGamePacketNtf::Clear() {
-// @@protoc_insertion_point(message_clear_start:ServerPacket.GatewayToGamePacketNtf)
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  _impl_.payload_.ClearToEmpty();
-  ::memset(&_impl_.user_id_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.packet_type_) -
-      reinterpret_cast<char*>(&_impl_.user_id_)) + sizeof(_impl_.packet_type_));
-  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
-}
-
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-        ::uint8_t* GatewayToGamePacketNtf::_InternalSerialize(
-            const MessageLite& base, ::uint8_t* target,
-            ::google::protobuf::io::EpsCopyOutputStream* stream) {
-          const GatewayToGamePacketNtf& this_ = static_cast<const GatewayToGamePacketNtf&>(base);
-#else   // PROTOBUF_CUSTOM_VTABLE
-        ::uint8_t* GatewayToGamePacketNtf::_InternalSerialize(
-            ::uint8_t* target,
-            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
-          const GatewayToGamePacketNtf& this_ = *this;
-#endif  // PROTOBUF_CUSTOM_VTABLE
-          // @@protoc_insertion_point(serialize_to_array_start:ServerPacket.GatewayToGamePacketNtf)
-          ::uint32_t cached_has_bits = 0;
-          (void)cached_has_bits;
-
-          // int64 user_id = 1;
-          if (this_._internal_user_id() != 0) {
-            target = ::google::protobuf::internal::WireFormatLite::
-                WriteInt64ToArrayWithField<1>(
-                    stream, this_._internal_user_id(), target);
-          }
-
-          // int32 packet_type = 2;
-          if (this_._internal_packet_type() != 0) {
-            target = ::google::protobuf::internal::WireFormatLite::
-                WriteInt32ToArrayWithField<2>(
-                    stream, this_._internal_packet_type(), target);
-          }
-
-          // bytes payload = 3;
-          if (!this_._internal_payload().empty()) {
-            const std::string& _s = this_._internal_payload();
-            target = stream->WriteBytesMaybeAliased(3, _s, target);
-          }
-
-          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
-            target =
-                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
-          }
-          // @@protoc_insertion_point(serialize_to_array_end:ServerPacket.GatewayToGamePacketNtf)
-          return target;
-        }
-
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-        ::size_t GatewayToGamePacketNtf::ByteSizeLong(const MessageLite& base) {
-          const GatewayToGamePacketNtf& this_ = static_cast<const GatewayToGamePacketNtf&>(base);
-#else   // PROTOBUF_CUSTOM_VTABLE
-        ::size_t GatewayToGamePacketNtf::ByteSizeLong() const {
-          const GatewayToGamePacketNtf& this_ = *this;
-#endif  // PROTOBUF_CUSTOM_VTABLE
-          // @@protoc_insertion_point(message_byte_size_start:ServerPacket.GatewayToGamePacketNtf)
-          ::size_t total_size = 0;
-
-          ::uint32_t cached_has_bits = 0;
-          // Prevent compiler warnings about cached_has_bits being unused
-          (void)cached_has_bits;
-
-          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
-           {
-            // bytes payload = 3;
-            if (!this_._internal_payload().empty()) {
-              total_size += 1 + ::google::protobuf::internal::WireFormatLite::BytesSize(
-                                              this_._internal_payload());
-            }
-            // int64 user_id = 1;
-            if (this_._internal_user_id() != 0) {
-              total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-                  this_._internal_user_id());
-            }
-            // int32 packet_type = 2;
-            if (this_._internal_packet_type() != 0) {
-              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-                  this_._internal_packet_type());
-            }
-          }
-          return this_.MaybeComputeUnknownFieldsSize(total_size,
-                                                     &this_._impl_._cached_size_);
-        }
-
-void GatewayToGamePacketNtf::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
-  auto* const _this = static_cast<GatewayToGamePacketNtf*>(&to_msg);
-  auto& from = static_cast<const GatewayToGamePacketNtf&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:ServerPacket.GatewayToGamePacketNtf)
-  ABSL_DCHECK_NE(&from, _this);
-  ::uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (!from._internal_payload().empty()) {
-    _this->_internal_set_payload(from._internal_payload());
-  }
-  if (from._internal_user_id() != 0) {
-    _this->_impl_.user_id_ = from._impl_.user_id_;
-  }
-  if (from._internal_packet_type() != 0) {
-    _this->_impl_.packet_type_ = from._impl_.packet_type_;
-  }
-  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void GatewayToGamePacketNtf::CopyFrom(const GatewayToGamePacketNtf& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:ServerPacket.GatewayToGamePacketNtf)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-
-void GatewayToGamePacketNtf::InternalSwap(GatewayToGamePacketNtf* PROTOBUF_RESTRICT other) {
-  using std::swap;
-  auto* arena = GetArena();
-  ABSL_DCHECK_EQ(arena, other->GetArena());
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.payload_, &other->_impl_.payload_, arena);
-  ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(GatewayToGamePacketNtf, _impl_.packet_type_)
-      + sizeof(GatewayToGamePacketNtf::_impl_.packet_type_)
-      - PROTOBUF_FIELD_OFFSET(GatewayToGamePacketNtf, _impl_.user_id_)>(
-          reinterpret_cast<char*>(&_impl_.user_id_),
-          reinterpret_cast<char*>(&other->_impl_.user_id_));
-}
-
-::google::protobuf::Metadata GatewayToGamePacketNtf::GetMetadata() const {
-  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
-}
 // ===================================================================
 
 class GameToGatewayPacketNtf::_Internal {

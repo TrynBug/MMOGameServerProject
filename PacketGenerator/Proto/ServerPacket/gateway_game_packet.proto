@@ -1,4 +1,4 @@
-syntax = "proto3";
+﻿syntax = "proto3";
 
 package ServerPacket;
 
@@ -7,14 +7,6 @@ import "Common/packet_id.proto";
 // ──────────────────────────────────────────────
 // 게이트웨이 <-> 게임서버: 패킷 전달
 // ──────────────────────────────────────────────
-
-// 클라 -> 게임서버 패킷 전달 (게이트웨이 -> 게임서버)
-// 게이트웨이는 클라에서 받은 패킷을 그대로 래핑하여 게임서버로 전달
-message GatewayToGamePacketNtf {
-    int64 user_id = 1;
-    int32 packet_type = 2;   // GamePacketId 값
-    bytes payload = 3;       // 직렬화된 패킷 바디
-}
 
 // 게임서버 -> 클라 패킷 전달 요청 (게임서버 -> 게이트웨이)
 // 단일 유저에게 전송

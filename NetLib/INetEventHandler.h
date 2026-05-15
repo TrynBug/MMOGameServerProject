@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "ISession.h"
 #include "Packet.h"
@@ -23,6 +23,9 @@ public:
 
     // 패킷 1개를 수신했을 때 호출
     virtual void OnRecv(const ISessionPtr& spSession, const PacketPtr& spPacket) = 0;
+
+    // Send가 완료되었을 때 호출
+    virtual void OnSendComplete(const ISessionPtr& spSession) = 0;
 
     // Session 연결이 끊겼을 때 호출
     virtual void OnDisconnect(const ISessionPtr& spSession) = 0;

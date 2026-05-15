@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "INetEventHandler.h"
 #include "ISession.h"
@@ -15,17 +15,19 @@ namespace netlib
 //   FuncEventHandler m_gameEventHandler;  // 클래스 멤버변수로 선언
 // 
 //   // 초기화 함수 등에서 콜백 등록
-//   m_gameEventHandler.onConnect    = [this](auto sp)           { onGameConnect(sp); };
-//   m_gameEventHandler.onRecv       = [this](auto sp, auto pkt) { onGameRecv(sp, pkt); };
-//   m_gameEventHandler.onDisconnect = [this](auto sp)           { onGameDisconnect(sp); };
+//   m_gameEventHandler.onConnect      = [this](auto sp)           { onGameConnect(sp); };
+//   m_gameEventHandler.onRecv         = [this](auto sp, auto pkt) { onGameRecv(sp, pkt); };
+//   m_gameEventHandler.onSendComplete = [this](auto sp)           { onGameSendComplete(sp); };
+//   m_gameEventHandler.onDisconnect   = [this](auto sp)           { onGameDisconnect(sp); };
 //   netClient.SetEventHandler(&m_gameEventHandler);
 class FuncEventHandler : public INetEventHandler
 {
 public:
-    std::function<bool(const ISessionPtr&)> onAccept;
-    std::function<void(const ISessionPtr&)> onConnect;
-    std::function<void(const ISessionPtr&, const PacketPtr&)> onRecv;
-    std::function<void(const ISessionPtr&)> onDisconnect;
+    std::function<bool(const ISessionPtr&)>                          onAccept;
+    std::function<void(const ISessionPtr&)>                          onConnect;
+    std::function<void(const ISessionPtr&, const PacketPtr&)>        onRecv;
+    std::function<void(const ISessionPtr&)>                          onSendComplete;
+    std::function<void(const ISessionPtr&)>                          onDisconnect;
     std::function<void(LogLevel, const ISessionPtr&, const std::string&)> onLog;
 
     bool OnAccept(const ISessionPtr& spSession) override
@@ -43,6 +45,12 @@ public:
     {
         if (onRecv)
             onRecv(spSession, spPacket);
+    }
+
+    void OnSendComplete(const ISessionPtr& spSession) override
+    {
+        if (onSendComplete)
+            onSendComplete(spSession);
     }
 
     void OnDisconnect(const ISessionPtr& spSession) override

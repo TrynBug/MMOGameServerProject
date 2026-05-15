@@ -58,10 +58,10 @@ enum ServerPacketId {
     SERVER_PACKET_ID_USER_REROUTE_NTF = 1003;          // 게이트웨이 -> 목적지 게임서버: 유저 재라우팅 알림
     SERVER_PACKET_ID_GAME_SERVER_HANDSHAKE_NTF = 1004; // 게임서버 -> 게이트웨이: 핸드셰이크 (자신의 serverId 전달)
 
-    // 1100~1199: 패킷 전달 (게이트웨이 <-> 게임서버)
-    SERVER_PACKET_ID_GATEWAY_TO_GAME_PACKET_NTF = 1101;      // 게이트웨이 -> 게임서버: 클라 패킷 전달
-    SERVER_PACKET_ID_GAME_TO_GATEWAY_PACKET_NTF = 1102;      // 게임서버 -> 게이트웨이: 단일 유저 패킷 전달
-    SERVER_PACKET_ID_GAME_TO_GATEWAY_BROADCAST_NTF = 1103;   // 게임서버 -> 게이트웨이: 다수 유저 브로드캐스트
+    // 1100~1199: 패킷 전달 (게이트웨이 -> 게임서버)
+    SERVER_PACKET_ID_RELAY_BATCH_NTF = 1101;                      // 게이트웨이 -> 게임서버: 배치 패킷 전달
+    SERVER_PACKET_ID_GAME_TO_GATEWAY_PACKET_NTF = 1103;           // 게임서버 -> 게이트웨이: 단일 유저 패킷 전달
+    SERVER_PACKET_ID_GAME_TO_GATEWAY_BROADCAST_NTF = 1104;        // 게임서버 -> 게이트웨이: 다수 유저 브로드캐스트
 
     // 1200~1299: 게임서버 간 유저 이동 (게임서버 <-> 게이트웨이)
     SERVER_PACKET_ID_USER_MOVE_TO_GAME_SERVER_REQ = 1201;        // 게임서버 -> 게이트웨이: 다른 게임서버로 유저 이동 요청
