@@ -43,6 +43,21 @@ public:
         return m_map.erase(key) > 0;
     }
 
+    // 여러개 한번에 삭제. 삭제된 개수 반환
+    int Erase(const std::vector<TKey>& keys)
+    {
+        int deleted = 0;
+        {
+            WriteLock lock(m_mutex);
+            for (const TKey& key : keys)
+            {
+                deleted += (m_map.erase(key) > 0);
+            }
+        }
+
+        return deleted;
+    }
+
     // 찾아서 꺼내고 삭제. 찾았으면 true 반환
     bool EraseAndGet(const TKey& key, TValue& outValue)
     {
