@@ -1,4 +1,4 @@
-syntax = "proto3";
+﻿syntax = "proto3";
 
 package Common;
 
@@ -12,9 +12,10 @@ enum GamePacketId {
     GAME_PACKET_ID_LOGIN_RES = 102;   // 로그인서버 -> 클라이언트: 로그인 결과
 
     // 200~299: 게임 접속 / 퇴장
-    GAME_PACKET_ID_GAME_ENTER_NTF = 201;         // 게임서버 -> 클라: 게임 입장 완료 알림
-    GAME_PACKET_ID_GAME_LOGOUT_REQ = 202;        // 클라 -> 게이트웨이: 게임 로그아웃 요청
-    GAME_PACKET_ID_FORCE_DISCONNECT_NTF = 203;   // 게이트웨이 -> 클라: 강제 퇴장 알림
+    GAME_PACKET_ID_GATEWAY_AUTH_REQ = 200;           // 클라 -> 게이트웨이: 인증 요청 (게이트웨이 최초 접속 시)
+    GAME_PACKET_ID_GAME_ENTER_NTF = 201;             // 게임서버 -> 클라: 게임 입장 완료 알림
+    GAME_PACKET_ID_GAME_LOGOUT_REQ = 202;            // 클라 -> 게이트웨이: 게임 로그아웃 요청
+    GAME_PACKET_ID_FORCE_DISCONNECT_NTF = 203;       // 게이트웨이 -> 클라: 강제 퇴장 알림
 
     // 1000~1999: 이동
     GAME_PACKET_ID_MOVE_REQ = 1001;   // 클라 -> 서버: 이동 요청

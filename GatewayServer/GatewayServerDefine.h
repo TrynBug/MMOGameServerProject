@@ -12,9 +12,10 @@ enum class ESessionType : uint8
 // 세션 추가 정보
 struct SessionMetaInfo
 {
-    ESessionType sessionType = ESessionType::Unknown;
-    int64        userId = 0;         // sessionType==Client 이고 인증 완료된 경우
-    int32        gameServerId = 0;   // sessionType==GameServer 인 경우
+    ESessionType sessionType       = ESessionType::Unknown;
+    int64        userId            = 0;   // sessionType==Client 이고 인증 완료된 경우
+    int32        gameServerId      = 0;   // sessionType==GameServer 인 경우: 이 세션의 게임서버 ID
+    int32        routedGameServerId = 0;  // sessionType==Client 인 경우: 현재 라우팅된 게임서버 ID
 };
 
 // 이전 접속 게임서버 정보 (5분 TTL)

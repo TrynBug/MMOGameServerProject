@@ -25,6 +25,32 @@ namespace _pb = ::google::protobuf;
 namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 namespace GamePacket {
+
+inline constexpr GatewayAuthReq::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : user_id_{::int64_t{0}},
+        auth_token_{::uint64_t{0u}},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR GatewayAuthReq::GatewayAuthReq(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct GatewayAuthReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR GatewayAuthReqDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~GatewayAuthReqDefaultTypeInternal() {}
+  union {
+    GatewayAuthReq _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GatewayAuthReqDefaultTypeInternal _GatewayAuthReq_default_instance_;
               template <typename>
 PROTOBUF_CONSTEXPR GameLogoutReq::GameLogoutReq(::_pbi::ConstantInitialized)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
@@ -104,6 +130,16 @@ static constexpr const ::_pb::ServiceDescriptor**
 const ::uint32_t
     TableStruct_GamePacket_2fsession_5fpacket_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::GamePacket::GatewayAuthReq, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::GamePacket::GatewayAuthReq, _impl_.user_id_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::GatewayAuthReq, _impl_.auth_token_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::GameEnterNtf, _impl_._has_bits_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::GameEnterNtf, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -138,11 +174,13 @@ const ::uint32_t
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, 10, -1, sizeof(::GamePacket::GameEnterNtf)},
-        {12, -1, -1, sizeof(::GamePacket::GameLogoutReq)},
-        {20, -1, -1, sizeof(::GamePacket::ForceDisconnectNtf)},
+        {0, -1, -1, sizeof(::GamePacket::GatewayAuthReq)},
+        {10, 20, -1, sizeof(::GamePacket::GameEnterNtf)},
+        {22, -1, -1, sizeof(::GamePacket::GameLogoutReq)},
+        {30, -1, -1, sizeof(::GamePacket::ForceDisconnectNtf)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
+    &::GamePacket::_GatewayAuthReq_default_instance_._instance,
     &::GamePacket::_GameEnterNtf_default_instance_._instance,
     &::GamePacket::_GameLogoutReq_default_instance_._instance,
     &::GamePacket::_ForceDisconnectNtf_default_instance_._instance,
@@ -151,17 +189,18 @@ const char descriptor_table_protodef_GamePacket_2fsession_5fpacket_2eproto[] ABS
     protodesc_cold) = {
     "\n\037GamePacket/session_packet.proto\022\nGameP"
     "acket\032\026Common/packet_id.proto\032\036DataStruc"
-    "tures/character.proto\"N\n\014GameEnterNtf\022,\n"
-    "\tcharacter\030\001 \001(\0132\031.DataStructures.Charac"
-    "ter\022\020\n\010stage_id\030\002 \001(\005\"\017\n\rGameLogoutReq\":"
-    "\n\022ForceDisconnectNtf\022\023\n\013reason_code\030\001 \001("
-    "\005\022\017\n\007message\030\002 \001(\t*\340\001\n\025ForceDisconnectRe"
-    "ason\022 \n\034FORCE_DISCONNECT_REASON_NONE\020\000\022+"
-    "\n\'FORCE_DISCONNECT_REASON_DUPLICATE_LOGI"
-    "N\020\001\022+\n\'FORCE_DISCONNECT_REASON_SERVER_SH"
-    "UTDOWN\020\002\022\'\n#FORCE_DISCONNECT_REASON_AUTH"
-    "_FAILED\020\003\022\"\n\036FORCE_DISCONNECT_REASON_KIC"
-    "KED\020\004b\006proto3"
+    "tures/character.proto\"5\n\016GatewayAuthReq\022"
+    "\017\n\007user_id\030\001 \001(\003\022\022\n\nauth_token\030\002 \001(\004\"N\n\014"
+    "GameEnterNtf\022,\n\tcharacter\030\001 \001(\0132\031.DataSt"
+    "ructures.Character\022\020\n\010stage_id\030\002 \001(\005\"\017\n\r"
+    "GameLogoutReq\":\n\022ForceDisconnectNtf\022\023\n\013r"
+    "eason_code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t*\340\001\n\025Fo"
+    "rceDisconnectReason\022 \n\034FORCE_DISCONNECT_"
+    "REASON_NONE\020\000\022+\n\'FORCE_DISCONNECT_REASON"
+    "_DUPLICATE_LOGIN\020\001\022+\n\'FORCE_DISCONNECT_R"
+    "EASON_SERVER_SHUTDOWN\020\002\022\'\n#FORCE_DISCONN"
+    "ECT_REASON_AUTH_FAILED\020\003\022\"\n\036FORCE_DISCON"
+    "NECT_REASON_KICKED\020\004b\006proto3"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_GamePacket_2fsession_5fpacket_2eproto_deps[2] =
     {
@@ -172,13 +211,13 @@ static ::absl::once_flag descriptor_table_GamePacket_2fsession_5fpacket_2eproto_
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fsession_5fpacket_2eproto = {
     false,
     false,
-    493,
+    548,
     descriptor_table_protodef_GamePacket_2fsession_5fpacket_2eproto,
     "GamePacket/session_packet.proto",
     &descriptor_table_GamePacket_2fsession_5fpacket_2eproto_once,
     descriptor_table_GamePacket_2fsession_5fpacket_2eproto_deps,
     2,
-    3,
+    4,
     schemas,
     file_default_instances,
     TableStruct_GamePacket_2fsession_5fpacket_2eproto::offsets,
@@ -194,6 +233,247 @@ PROTOBUF_CONSTINIT const uint32_t ForceDisconnectReason_internal_data_[] = {
     327680u, 0u, };
 bool ForceDisconnectReason_IsValid(int value) {
   return 0 <= value && value <= 4;
+}
+// ===================================================================
+
+class GatewayAuthReq::_Internal {
+ public:
+};
+
+GatewayAuthReq::GatewayAuthReq(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:GamePacket.GatewayAuthReq)
+}
+GatewayAuthReq::GatewayAuthReq(
+    ::google::protobuf::Arena* arena, const GatewayAuthReq& from)
+    : GatewayAuthReq(arena) {
+  MergeFrom(from);
+}
+inline PROTOBUF_NDEBUG_INLINE GatewayAuthReq::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0} {}
+
+inline void GatewayAuthReq::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, user_id_),
+           0,
+           offsetof(Impl_, auth_token_) -
+               offsetof(Impl_, user_id_) +
+               sizeof(Impl_::auth_token_));
+}
+GatewayAuthReq::~GatewayAuthReq() {
+  // @@protoc_insertion_point(destructor:GamePacket.GatewayAuthReq)
+  SharedDtor(*this);
+}
+inline void GatewayAuthReq::SharedDtor(MessageLite& self) {
+  GatewayAuthReq& this_ = static_cast<GatewayAuthReq&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* GatewayAuthReq::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) GatewayAuthReq(arena);
+}
+constexpr auto GatewayAuthReq::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(GatewayAuthReq),
+                                            alignof(GatewayAuthReq));
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull GatewayAuthReq::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_GatewayAuthReq_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &GatewayAuthReq::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<GatewayAuthReq>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &GatewayAuthReq::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<GatewayAuthReq>(), &GatewayAuthReq::ByteSizeLong,
+            &GatewayAuthReq::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_._cached_size_),
+        false,
+    },
+    &GatewayAuthReq::kDescriptorMethods,
+    &descriptor_table_GamePacket_2fsession_5fpacket_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* GatewayAuthReq::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 0, 0, 2> GatewayAuthReq::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::GamePacket::GatewayAuthReq>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // uint64 auth_token = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(GatewayAuthReq, _impl_.auth_token_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.auth_token_)}},
+    // int64 user_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(GatewayAuthReq, _impl_.user_id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.user_id_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int64 user_id = 1;
+    {PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.user_id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt64)},
+    // uint64 auth_token = 2;
+    {PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.auth_token_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUInt64)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+
+PROTOBUF_NOINLINE void GatewayAuthReq::Clear() {
+// @@protoc_insertion_point(message_clear_start:GamePacket.GatewayAuthReq)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::memset(&_impl_.user_id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.auth_token_) -
+      reinterpret_cast<char*>(&_impl_.user_id_)) + sizeof(_impl_.auth_token_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* GatewayAuthReq::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const GatewayAuthReq& this_ = static_cast<const GatewayAuthReq&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* GatewayAuthReq::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const GatewayAuthReq& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:GamePacket.GatewayAuthReq)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // int64 user_id = 1;
+          if (this_._internal_user_id() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt64ToArrayWithField<1>(
+                    stream, this_._internal_user_id(), target);
+          }
+
+          // uint64 auth_token = 2;
+          if (this_._internal_auth_token() != 0) {
+            target = stream->EnsureSpace(target);
+            target = ::_pbi::WireFormatLite::WriteUInt64ToArray(
+                2, this_._internal_auth_token(), target);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:GamePacket.GatewayAuthReq)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t GatewayAuthReq::ByteSizeLong(const MessageLite& base) {
+          const GatewayAuthReq& this_ = static_cast<const GatewayAuthReq&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t GatewayAuthReq::ByteSizeLong() const {
+          const GatewayAuthReq& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:GamePacket.GatewayAuthReq)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+           {
+            // int64 user_id = 1;
+            if (this_._internal_user_id() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+                  this_._internal_user_id());
+            }
+            // uint64 auth_token = 2;
+            if (this_._internal_auth_token() != 0) {
+              total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(
+                  this_._internal_auth_token());
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void GatewayAuthReq::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<GatewayAuthReq*>(&to_msg);
+  auto& from = static_cast<const GatewayAuthReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.GatewayAuthReq)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_user_id() != 0) {
+    _this->_impl_.user_id_ = from._impl_.user_id_;
+  }
+  if (from._internal_auth_token() != 0) {
+    _this->_impl_.auth_token_ = from._impl_.auth_token_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void GatewayAuthReq::CopyFrom(const GatewayAuthReq& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.GatewayAuthReq)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void GatewayAuthReq::InternalSwap(GatewayAuthReq* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.auth_token_)
+      + sizeof(GatewayAuthReq::_impl_.auth_token_)
+      - PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.user_id_)>(
+          reinterpret_cast<char*>(&_impl_.user_id_),
+          reinterpret_cast<char*>(&other->_impl_.user_id_));
+}
+
+::google::protobuf::Metadata GatewayAuthReq::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // ===================================================================
 

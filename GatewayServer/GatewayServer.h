@@ -40,42 +40,32 @@ private:
     void onInternalDisconnect(const netlib::ISessionPtr& spSession);
 
     // ── 클라이언트 패킷 핸들러 ───────────────────────────────────────────
-    void handleClientPacket(const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket);
-
-    // 클라이언트 최초 접속 시 인증토큰 검증 패킷
-    // 문서상 별도 패킷 ID는 없으나 게이트웨이가 처음 받는 패킷을 인증 패킷으로 처리
-    void handleAuthReq     (const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket);
-
-    // 인증 완료 후 일반 클라이언트 패킷 → 게임서버로 relay
-    void relayToGameServer (const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket);
-
-    // 로그아웃 요청 처리
-    void handleLogoutReq   (const netlib::ISessionPtr& spSession);
+    void handleAuthReq    (const netlib::ISessionPtr& spSession, const GamePacket::GatewayAuthReq& msg);
+    void handleLogoutReq  (const netlib::ISessionPtr& spSession);
+    void relayToGameServer(const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket);
 
     // ── 게임서버 패킷 핸들러 ─────────────────────────────────────────────
-    void handleGameServerPacket(const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket);
-
-    void handleGameServerHandshake  (const netlib::ISessionPtr& spSession, const ServerPacket::GameServerHandshakeNtf&    msg);
-    void handleGameToGatewayPacket  (const netlib::ISessionPtr& spSession, const ServerPacket::GameToGatewayPacketNtf&    msg);
+    void handleGameServerPacket      (const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket);
+    void handleGameServerHandshake   (const netlib::ISessionPtr& spSession, const ServerPacket::GameServerHandshakeNtf&    msg);
+    void handleGameToGatewayPacket   (const netlib::ISessionPtr& spSession, const ServerPacket::GameToGatewayPacketNtf&    msg);
     void handleGameToGatewayBroadcast(const netlib::ISessionPtr& spSession, const ServerPacket::GameToGatewayBroadcastNtf& msg);
-    void handleUserMoveToGameServer (const netlib::ISessionPtr& spSession, const ServerPacket::UserMoveToGameServerReq&   msg);
+    void handleUserMoveToGameServer  (const netlib::ISessionPtr& spSession, const ServerPacket::UserMoveToGameServerReq&   msg);
 
     // ── 로그인서버 패킷 핸들러 ───────────────────────────────────────────
-    void handleLoginServerPacket    (const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket);
-    void handleLoginAuthTokenNtf    (const netlib::ISessionPtr& spSession, const ServerPacket::LoginAuthTokenNtf&   msg);
-    void handleLoginDuplicateNtf    (const netlib::ISessionPtr& spSession, const ServerPacket::LoginDuplicateNtf&   msg);
-
+    void handleLoginServerPacket(const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket);
+    void handleLoginAuthTokenNtf(const netlib::ISessionPtr& spSession, const ServerPacket::LoginAuthTokenNtf& msg);
+    void handleLoginDuplicateNtf(const netlib::ISessionPtr& spSession, const ServerPacket::LoginDuplicateNtf& msg);
 
 private:
     // 세션에서 SessionMetaInfo를 꺼낸다.
     static SessionMetaInfo* getSessionMeta(const netlib::ISessionPtr& spSession);
 
     // 로그인서버로부터 사전 전달받은 인증토큰 저장
-    void  storeAuthToken(int64 userId, uint64 authToken, int64 expireTimeMs);
+    void storeAuthToken(int64 userId, uint64 authToken, int64 expireTimeMs);
     // 토큰 검증. 성공 시 true 반환하고 내부 맵에서 제거
-    bool  consumeAuthToken(int64 userId, uint64 authToken);
+    bool consumeAuthToken(int64 userId, uint64 authToken);
     // 만료된 토큰 정리
-    void  cleanupExpiredTokens();
+    void cleanupExpiredTokens();
 
     void upsertPrevGameServer(int64 userId, int32 gameServerId);
     void cleanupExpiredPrevGameServer();
@@ -91,11 +81,9 @@ private:
     void forceDisconnectUser(int64 userId, const std::string& reason);
 
 private:
-    SharedThreadSafeUnorderedMap<int64, AuthTokenEntry> m_safeAuthTokens;   // key=userId
-
-    SharedThreadSafeUnorderedMap<int64, GatewayUserPtr> m_safeUsers;         // key=userId
-
-    SharedThreadSafeUnorderedMap<int64, PrevGameServerEntry> m_safePrevGameServer;   // key=userId
+    SharedThreadSafeUnorderedMap<int64, AuthTokenEntry>      m_safeAuthTokens;       // key=userId
+    SharedThreadSafeUnorderedMap<int64, GatewayUserPtr>      m_safeUsers;             // key=userId
+    SharedThreadSafeUnorderedMap<int64, PrevGameServerEntry> m_safePrevGameServer;    // key=userId
 
     static constexpr int64 k_prevGameServerTtlMs = 5 * 60 * 1000;   // 5분
 
@@ -103,9 +91,10 @@ private:
     SharedThreadSafeUnorderedMap<int32, netlib::ISessionPtr> m_safeGameServerSessions;
 
     // 게임서버 정보 캐시 (레지스트리 폴링으로 갱신)
-    SharedThreadSafeUnorderedMap<int32, ServerInfo>    m_safeGameServerInfos;   // key=gameServerId
+    SharedThreadSafeUnorderedMap<int32, ServerInfo> m_safeGameServerInfos;   // key=gameServerId
 
     // 패킷 디스패처
+    serverbase::PacketDispatcher m_clientDispatcher;
     serverbase::PacketDispatcher m_gameServerDispatcher;
     serverbase::PacketDispatcher m_loginServerDispatcher;
 

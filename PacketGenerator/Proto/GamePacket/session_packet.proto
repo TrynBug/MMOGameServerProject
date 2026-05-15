@@ -1,4 +1,4 @@
-syntax = "proto3";
+﻿syntax = "proto3";
 
 package GamePacket;
 
@@ -8,6 +8,13 @@ import "DataStructures/character.proto";
 // ──────────────────────────────────────────────
 // 게임 접속 / 퇴장 패킷 (클라이언트 <-> 게이트웨이/게임서버)
 // ──────────────────────────────────────────────
+
+// 게이트웨이 인증 요청 (클라 -> 게이트웨이)
+// 로그인서버로부터 받은 userId와 authToken을 게이트웨이에 전달하여 인증
+message GatewayAuthReq {
+    int64  user_id    = 1;
+    uint64 auth_token = 2;
+}
 
 // 게임 입장 완료 알림 (게임서버 -> 클라)
 // 게이트웨이 인증 후 게임서버가 유저 객체를 생성하고 Stage에 배정 완료됐을 때 전송
