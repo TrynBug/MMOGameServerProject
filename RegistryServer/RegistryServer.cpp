@@ -35,10 +35,9 @@ bool RegistryServer::OnInitialize()
     {
         m_packetDispatcher.Dispatch(spSession, spPacket);
     };
-
     m_listenEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spSession) { onDisconnect(spSession); };
-	m_listenEventHandler.onLog = [this](netlib::LogLevel netLogLevel, const netlib::ISessionPtr& spSession, const std::string& msg)
-    { 
+    m_listenEventHandler.onLog = [this](netlib::LogLevel netLogLevel, const netlib::ISessionPtr& spSession, const std::string& msg)
+    {
         const LogLevel logLevel = serverbase::NetLogLevelToLogLevel(netLogLevel);
         LOG_WRITE(logLevel, msg);
     };
@@ -68,29 +67,28 @@ void RegistryServer::OnBeforeShutdown()
     LOG_WRITE(LogLevel::Info, "RegistryServer::OnBeforeShutdown");
 }
 
-bool RegistryServer::onAccept(const netlib::ISessionPtr& spSession )
+bool RegistryServer::onAccept(const netlib::ISessionPtr& spSession)
 {
-    // 레지스트리 서버는 모든 서버의 접속을 허용한다.
+    // accept 시점에 빈 메타정보 설정. 메타정보는 RegisterReq 수신 후 채운다.
+    spSession->SetUserData(std::make_shared<ServerSessionMetaInfo>());
     return true;
 }
 
 void RegistryServer::onConnect(const netlib::ISessionPtr& spSession)
 {
-    // 아직 등록 요청 전이므로 세션만 기록해둔다.
-    // ServerEntry는 RegistryRegisterReq 수신 후 생성한다.
     LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server connected. sessionId={}", spSession->GetId()));
 }
 
 void RegistryServer::onDisconnect(const netlib::ISessionPtr& spSession)
 {
-    int64 sessionId = spSession->GetId();
-
-    int32 serverId = 0;
-    if (!m_safeSessionToServerId.EraseAndGet(sessionId, serverId))
+    ServerSessionMetaInfo* pMeta = getServerSessionMeta(spSession);
+    if (!pMeta || pMeta->serverId == 0)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: unregistered server disconnected. sessionId={}", sessionId));
+        LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: unregistered server disconnected. sessionId={}", spSession->GetId()));
         return;
     }
+
+    int32 serverId = pMeta->serverId;
 
     // 상태를 Disconnected로 변경하고 세션 참조 해제
     ServerEntry entry;
@@ -150,7 +148,11 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
     serverEntry.lastHeartbeatTime = std::chrono::steady_clock::now();
 
     m_safeServerEntries.Insert(serverId, serverEntry);
-    m_safeSessionToServerId.Insert(spSession->GetId(), serverId);
+
+    // 세션에 serverId 기록
+    ServerSessionMetaInfo* pMeta = getServerSessionMeta(spSession);
+    if (pMeta)
+        pMeta->serverId = serverId;
 
     LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server registered. serverId={} type={} ip={}:{}", serverId, static_cast<int>(type), ip, port));
 
@@ -181,33 +183,21 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
 // 하트비트 응답 처리
 void RegistryServer::handleHeartbeatRes(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryHeartbeatRes& msg)
 {
-    if (!spSession)
-    {
-        LOG_WRITE(LogLevel::Error, "Session is null");
-        return;
-    }
-
-    int32 serverId = findServerIdBySessionId(spSession->GetId());
-    if (serverId == 0)
+    ServerSessionMetaInfo* pMeta = getServerSessionMeta(spSession);
+    if (!pMeta || pMeta->serverId == 0)
         return;
 
     ServerEntry entry;
-    if (!m_safeServerEntries.Find(serverId, entry))
+    if (!m_safeServerEntries.Find(pMeta->serverId, entry))
         return;
 
     entry.lastHeartbeatTime = std::chrono::steady_clock::now();
-    m_safeServerEntries.Insert(serverId, entry);
+    m_safeServerEntries.Insert(pMeta->serverId, entry);
 }
 
 // 서버 목록 폴링 요청 처리
 void RegistryServer::handlePollReq(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryPollReq& req)
 {
-    if (!spSession)
-    {
-        LOG_WRITE(LogLevel::Error, "Session is null");
-        return;
-    }
-
     // 요청한 타입 목록으로 필터링
     std::unordered_map<int, bool> targetTypes;
     for (int i = 0; i < req.target_types_size(); ++i)
@@ -239,49 +229,43 @@ void RegistryServer::handlePollReq(const netlib::ISessionPtr& spSession, const S
 // 유저수 변경통지 처리
 void RegistryServer::handleUserCountNtf(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryUserCountNtf& ntf)
 {
-    if (!spSession)
-    {
-        LOG_WRITE(LogLevel::Error, "Session is null");
-        return;
-    }
-
-    int32 serverId = findServerIdBySessionId(spSession->GetId());
-    if (serverId == 0)
+    ServerSessionMetaInfo* pMeta = getServerSessionMeta(spSession);
+    if (!pMeta || pMeta->serverId == 0)
         return;
 
     ServerEntry entry;
-    if (!m_safeServerEntries.Find(serverId, entry))
+    if (!m_safeServerEntries.Find(pMeta->serverId, entry))
         return;
 
     entry.userCount = ntf.user_count();
-    m_safeServerEntries.Insert(serverId, entry);
+    m_safeServerEntries.Insert(pMeta->serverId, entry);
 }
 
 // 서버 종료 요청 처리
 void RegistryServer::handleShutdownReq(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryShutdownReq& msg)
 {
-    if (!spSession)
-    {
-        LOG_WRITE(LogLevel::Error, "Session is null");
-        return;
-    }
-
-    int32 serverId = findServerIdBySessionId(spSession->GetId());
-    if (serverId == 0)
+    ServerSessionMetaInfo* pMeta = getServerSessionMeta(spSession);
+    if (!pMeta || pMeta->serverId == 0)
         return;
 
     ServerEntry entry;
-    if (!m_safeServerEntries.Find(serverId, entry))
+    if (!m_safeServerEntries.Find(pMeta->serverId, entry))
         return;
 
     entry.status = ServerStatus::ShuttingDown;
-    m_safeServerEntries.Insert(serverId, entry);
+    m_safeServerEntries.Insert(pMeta->serverId, entry);
 
-    LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server shutdown requested. serverId={} type={}", serverId, static_cast<int>(entry.serverType)));
+    LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server shutdown requested. serverId={} type={}", pMeta->serverId, static_cast<int>(entry.serverType)));
 
     broadcastServerInfo(entry);
 }
 
+// 세션에서 ServerSessionMetaInfo를 꺼낸다.
+// 주의: ServerSessionMetaInfo* 를 다른곳에 보관해두면 안됨. 세션이 제거될때 함께 제거되기 때문
+ServerSessionMetaInfo* RegistryServer::getServerSessionMeta(const netlib::ISessionPtr& spSession)
+{
+    return static_cast<ServerSessionMetaInfo*>(spSession->GetUserData().get());
+}
 
 // 서버 등록 검증
 bool RegistryServer::validateRegistration(int32 serverId, ServerType type, const std::string& ip, uint16 port, std::string& outErrorMsg)
@@ -309,7 +293,6 @@ bool RegistryServer::validateRegistration(int32 serverId, ServerType type, const
 
     return true;
 }
-
 
 // 브로드캐스트
 void RegistryServer::broadcastServerInfo(const ServerEntry& serverEntry)
@@ -377,7 +360,6 @@ void RegistryServer::checkHeartbeatTimeout()
 {
     auto now = std::chrono::steady_clock::now();
 
-    // 하트비트 타임아웃된 서버 목록 수집
     std::vector<int32> timedOutIds = m_safeServerEntries.CollectKeys(
         [now](const int32&, const ServerEntry& entry)
         {
@@ -386,8 +368,6 @@ void RegistryServer::checkHeartbeatTimeout()
             return elapsed >= k_heartbeatTimeoutMs;
         });
 
-    // 타임아웃된 서버 연결 끊기
-    // onDisconnect 콜백이 자동으로 상태 업데이트 및 브로드캐스트 처리
     for (int32 serverId : timedOutIds)
     {
         ServerEntry entry;
@@ -400,12 +380,4 @@ void RegistryServer::checkHeartbeatTimeout()
             entry.spSession->Disconnect();
         }
     }
-}
-
-
-int32 RegistryServer::findServerIdBySessionId(int64 sessionId)
-{
-    int32 result = 0;
-    m_safeSessionToServerId.Find(sessionId, result);
-    return result;
 }

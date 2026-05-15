@@ -35,5 +35,8 @@
     <ClInclude Include="ServerEntry.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
+    <ClInclude Include="RegistryServerDefine.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

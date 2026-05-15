@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Types.h"
 #include "ISession.h"
@@ -35,6 +35,10 @@ public:
     std::string GetIP()       const override { return m_ip; }
     uint16      GetPort()     const override { return m_port; }
     bool        IsConnected() const override { return m_bConnected.load(); }
+
+    // 사용자 정의 데이터 슬롯. 라이브러리는 이 값을 읽거나 해석하지 않는다.
+    void                  SetUserData(std::shared_ptr<void> spData) override { m_spUserData = std::move(spData); }
+    std::shared_ptr<void> GetUserData() const override                       { return m_spUserData; }
 
     /* Session */
     SOCKET      GetSocket() const { return m_socket; }
@@ -84,6 +88,8 @@ private:
 
     std::atomic<bool>             m_bConnected { false };   // 연결됨 여부
     std::atomic<bool>             m_bClosed    { false };   // 소켓닫힘 여부
+
+    std::shared_ptr<void>         m_spUserData;             // 사용자 정의 데이터 슬롯
 };
 
 using SessionPtr = std::shared_ptr<Session>;

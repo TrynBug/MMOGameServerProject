@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Types.h"
 #include "Packet.h"
@@ -23,6 +23,10 @@ public:
     virtual std::string GetIP()       const         = 0;
     virtual uint16      GetPort()     const         = 0;
     virtual bool        IsConnected() const         = 0;
+
+    // 사용자 정의 데이터 슬롯. 라이브러리는 이 값을 읽거나 해석하지 않는다.
+    virtual void                  SetUserData(std::shared_ptr<void> spData) = 0;
+    virtual std::shared_ptr<void> GetUserData() const                       = 0;
 };
 
 using ISessionPtr  = std::shared_ptr<ISession>;

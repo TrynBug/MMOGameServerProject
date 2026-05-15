@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "pch.h"
+#include "RegistryServerDefine.h"
 #include "ServerEntry.h"
 #include "ThreadSafeUnorderedMap.h"
 
@@ -37,6 +38,9 @@ private:
     void handleUserCountNtf(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryUserCountNtf& msg);
     void handleShutdownReq(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryShutdownReq& msg);
 
+    // 세션에서 ServerSessionMetaInfo를 꺼낸다.
+    static ServerSessionMetaInfo* getServerSessionMeta(const netlib::ISessionPtr& spSession);
+
 private:
     // 등록 요청의 serverId, IP:Port 충돌 여부를 검증한다.
     // 충돌 없으면 true, 충돌 시 outErrorMsg에 이유를 담아 false 반환
@@ -52,13 +56,8 @@ private:
     void sendHeartbeatToAll();
     void checkHeartbeatTimeout();
 
-    // 세션 ID로 serverId를 찾는다. 없으면 0 반환
-    int32 findServerIdBySessionId(int64 sessionId);
-
 private:
     SharedThreadSafeUnorderedMap<int32, ServerEntry> m_safeServerEntries; // 서버정보 목록. Key=serverId, Value=서버정보
-
-    SharedThreadSafeUnorderedMap<int64, int32>        m_safeSessionToServerId; // sessionId -> serverId 역방향 인덱스. Key=sessionId, Value=serverId
 
     // 검증용 DB 데이터 (TODO: RegistryDB 연동)
     ExclusiveThreadSafeUnorderedMap<int32, std::string>    m_safeIdToEndpoint;   // Key=serverId, Value="서버타입:ip:port"

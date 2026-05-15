@@ -67,6 +67,9 @@ private:
 
 
 private:
+    // 세션에서 SessionMetaInfo를 꺼낸다.
+    static SessionMetaInfo* getSessionMeta(const netlib::ISessionPtr& spSession);
+
     // 로그인서버로부터 사전 전달받은 인증토큰 저장
     void  storeAuthToken(int64 userId, uint64 authToken, int64 expireTimeMs);
     // 토큰 검증. 성공 시 true 반환하고 내부 맵에서 제거
@@ -90,12 +93,7 @@ private:
 private:
     SharedThreadSafeUnorderedMap<int64, AuthTokenEntry> m_safeAuthTokens;   // key=userId
 
-    SharedThreadSafeUnorderedMap<int64, SessionMetaInfo> m_safeSessionMetaInfos;   // key=sessionId
-
     SharedThreadSafeUnorderedMap<int64, GatewayUserPtr> m_safeUsers;         // key=userId
-
-    // sessionId -> userId
-    SharedThreadSafeUnorderedMap<int64, int64> m_safeSessionToUser;
 
     SharedThreadSafeUnorderedMap<int64, PrevGameServerEntry> m_safePrevGameServer;   // key=userId
 

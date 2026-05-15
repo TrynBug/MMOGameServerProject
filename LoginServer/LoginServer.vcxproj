@@ -92,6 +92,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="LoginServerDefine.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="LoginServer.h" />
   </ItemGroup>

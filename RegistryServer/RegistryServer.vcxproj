@@ -93,6 +93,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="RegistryServerDefine.h" />
     <ClInclude Include="ServerEntry.h" />
     <ClInclude Include="RegistryServer.h" />
   </ItemGroup>

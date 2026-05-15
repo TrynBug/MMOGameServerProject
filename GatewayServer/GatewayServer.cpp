@@ -84,24 +84,38 @@ void GatewayServer::OnBeforeShutdown()
 }
 
 
+// 세션에서 SessionMetaInfo를 꺼낸다.
+// 주의: SessionMetaInfo* 를 다른곳에 보관해두면 안됨. 세션이 제거될때 함께 제거되기 때문
+SessionMetaInfo* GatewayServer::getSessionMeta(const netlib::ISessionPtr& spSession)
+{
+    SessionMetaInfo* pMeta = static_cast<SessionMetaInfo*>(spSession->GetUserData().get());
+    if (!pMeta)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("SessionMetaInfo가 null입니다. sessionId={}", spSession->GetId()));
+    }
+
+    return pMeta;
+}
+
+
 // 클라이언트 accept
 bool GatewayServer::onClientAccept(const netlib::ISessionPtr& spSession)
 {
     if (IsShuttingDown())
         return false;
 
-    m_safeSessionMetaInfos.Insert(spSession->GetId(), SessionMetaInfo{ ESessionType::Client });
+    spSession->SetUserData(std::make_shared<SessionMetaInfo>(ESessionType::Client));
     return true;
 }
 
 // 클라이언트에게 패킷받음
 bool GatewayServer::onClientRecv(const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
 {
-    SessionMetaInfo meta;
-    if (!m_safeSessionMetaInfos.Find(spSession->GetId(), meta))
+    SessionMetaInfo* pMeta = getSessionMeta(spSession);
+    if (!pMeta)
         return true;
 
-    if (meta.userId == 0)
+    if (pMeta->userId == 0)
         handleAuthReq(spSession, spPacket);
     else
         handleClientPacket(spSession, spPacket);
@@ -112,19 +126,16 @@ bool GatewayServer::onClientRecv(const netlib::ISessionPtr& spSession, const net
 // 클라이언트 연결끊김
 void GatewayServer::onClientDisconnect(const netlib::ISessionPtr& spSession)
 {
-    int64 sessionId = spSession->GetId();
-
-    SessionMetaInfo meta;
-    if (!m_safeSessionMetaInfos.EraseAndGet(sessionId, meta))
+    SessionMetaInfo* pMeta = getSessionMeta(spSession);
+    if (!pMeta)
         return;
 
-    int64 userId = meta.userId;
+    int64 userId = pMeta->userId;
     if (userId == 0)
         return;
 
     GatewayUserPtr spUser;
     m_safeUsers.EraseAndGet(userId, spUser);
-    m_safeSessionToUser.Erase(sessionId);
 
     if (!spUser)
         return;
@@ -146,18 +157,18 @@ void GatewayServer::onClientDisconnect(const netlib::ISessionPtr& spSession)
 // 내부서버 포트에서 accept 함
 bool GatewayServer::onInternalAccept(const netlib::ISessionPtr& spSession)
 {
-    m_safeSessionMetaInfos.Insert(spSession->GetId(), SessionMetaInfo{ ESessionType::Unknown });
+    spSession->SetUserData(std::make_shared<SessionMetaInfo>(ESessionType::Unknown));
     return true;
 }
 
 // 내부서버 포트 패킷 recv
 bool GatewayServer::onInternalRecv(const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
 {
-    SessionMetaInfo meta;
-    if (!m_safeSessionMetaInfos.Find(spSession->GetId(), meta))
+    SessionMetaInfo* pMeta = getSessionMeta(spSession);
+    if (!pMeta)
         return true;
 
-    switch (meta.sessionType)
+    switch (pMeta->sessionType)
     {
     case ESessionType::Unknown:
         // 첫 패킷으로 게임서버인지 로그인서버인지 판단
@@ -185,15 +196,13 @@ bool GatewayServer::onInternalRecv(const netlib::ISessionPtr& spSession, const n
 // 내부서버 포트에서 연결 끊김
 void GatewayServer::onInternalDisconnect(const netlib::ISessionPtr& spSession)
 {
-    int64 sessionId = spSession->GetId();
-
-    SessionMetaInfo meta;
-    if (!m_safeSessionMetaInfos.EraseAndGet(sessionId, meta))
+    SessionMetaInfo* pMeta = getSessionMeta(spSession);
+    if (!pMeta)
         return;
 
-    if (meta.sessionType == ESessionType::GameServer)
+    if (pMeta->sessionType == ESessionType::GameServer)
     {
-        int32 gameServerId = meta.gameServerId;
+        int32 gameServerId = pMeta->gameServerId;
         if (gameServerId == 0)
             return;
 
@@ -210,9 +219,9 @@ void GatewayServer::onInternalDisconnect(const netlib::ISessionPtr& spSession)
         for (int64 userId : affectedUsers)
             forceDisconnectUser(userId, "Game server disconnected");
     }
-    else if (meta.sessionType == ESessionType::LoginServer)
+    else if (pMeta->sessionType == ESessionType::LoginServer)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: login server disconnected. sessionId={}", sessionId));
+        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: login server disconnected. sessionId={}", spSession->GetId()));
     }
 }
 
@@ -262,11 +271,11 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spSession, netlib::
     spUser->spSession = spSession;
 
     m_safeUsers.Insert(userId, spUser);
-    m_safeSessionToUser.Insert(spSession->GetId(), userId);
 
     // SessionMetaInfo 업데이트
-    SessionMetaInfo meta{ ESessionType::Client, userId, 0 };
-    m_safeSessionMetaInfos.Insert(spSession->GetId(), meta);
+    SessionMetaInfo* pMeta = getSessionMeta(spSession);
+    if (pMeta)
+        pMeta->userId = userId;
 
     upsertPrevGameServer(userId, gameServer->serverId);
 
@@ -296,12 +305,12 @@ void GatewayServer::handleClientPacket(const netlib::ISessionPtr& spSession, net
 
 void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket)
 {
-    int64 userId = 0;
-    if (!m_safeSessionToUser.Find(spSession->GetId(), userId))
+    SessionMetaInfo* pMeta = getSessionMeta(spSession);
+    if (!pMeta || pMeta->userId == 0)
         return;
 
     GatewayUserPtr spUser;
-    if (!m_safeUsers.Find(userId, spUser))
+    if (!m_safeUsers.Find(pMeta->userId, spUser))
         return;
 
     int32 gameServerId = spUser->gameServerId;
@@ -309,7 +318,7 @@ void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spSession, netl
         return;
 
     ServerPacket::GatewayToGamePacketNtf relay;
-    relay.set_user_id(userId);
+    relay.set_user_id(pMeta->userId);
     relay.set_packet_type(spPacket->GetHeader()->type);
     relay.set_payload(spPacket->GetPayload(), spPacket->GetPayloadSize());
 
@@ -328,23 +337,19 @@ void GatewayServer::handleLogoutReq(const netlib::ISessionPtr& spSession)
 void GatewayServer::handleLoginServerPacket(const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket)
 {
     // 첫 패킷 수신 시 ESessionType를 LoginServer로 확정하고 핸드셰이크 전송
-    SessionMetaInfo meta;
-    if (m_safeSessionMetaInfos.Find(spSession->GetId(), meta))
+    SessionMetaInfo* pMeta = getSessionMeta(spSession);
+    if (pMeta && pMeta->sessionType == ESessionType::Unknown)
     {
-        if (meta.sessionType == ESessionType::Unknown)
-        {
-            meta.sessionType = ESessionType::LoginServer;
-            m_safeSessionMetaInfos.Insert(spSession->GetId(), meta);
+        pMeta->sessionType = ESessionType::LoginServer;
 
-            ServerPacket::GatewayHandshakeNtf handshake;
-            handshake.set_server_id(GetServerId());
+        ServerPacket::GatewayHandshakeNtf handshake;
+        handshake.set_server_id(GetServerId());
 
-            auto spHandshakePacket = SerializePacket(Common::SERVER_PACKET_ID_LOGIN_GATEWAY_HANDSHAKE_NTF, handshake);
-            if (spHandshakePacket)
-                spSession->Send(spHandshakePacket);
+        auto spHandshakePacket = SerializePacket(Common::SERVER_PACKET_ID_LOGIN_GATEWAY_HANDSHAKE_NTF, handshake);
+        if (spHandshakePacket)
+            spSession->Send(spHandshakePacket);
 
-            LOG_WRITE(LogLevel::Info, std::format("GatewayServer: login server connected. sent handshake. sessionId={}", spSession->GetId()));
-        }
+        LOG_WRITE(LogLevel::Info, std::format("GatewayServer: login server connected. sent handshake. sessionId={}", spSession->GetId()));
     }
 
     m_loginServerDispatcher.Dispatch(spSession, spPacket);
@@ -373,17 +378,15 @@ void GatewayServer::handleGameServerPacket(const netlib::ISessionPtr& spSession,
 void GatewayServer::handleGameServerHandshake(const netlib::ISessionPtr& spSession, const ServerPacket::GameServerHandshakeNtf& msg)
 {
     int32 gameServerId = msg.server_id();
-    int64 sessionId    = spSession->GetId();
 
     m_safeGameServerSessions.Insert(gameServerId, spSession);
 
     // SessionMetaInfo 업데이트
-    SessionMetaInfo meta;
-    if (m_safeSessionMetaInfos.Find(sessionId, meta))
+    SessionMetaInfo* pMeta = getSessionMeta(spSession);
+    if (pMeta)
     {
-        meta.sessionType = ESessionType::GameServer;
-        meta.gameServerId = gameServerId;
-        m_safeSessionMetaInfos.Insert(sessionId, meta);
+        pMeta->sessionType = ESessionType::GameServer;
+        pMeta->gameServerId = gameServerId;
     }
 
     LOG_WRITE(LogLevel::Info, std::format("GatewayServer: game server handshake complete. gameServerId={}", gameServerId));

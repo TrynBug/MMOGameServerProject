@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "pch.h"
+#include "LoginServerDefine.h"
 #include "ThreadSafeUnorderedMap.h"
 
 
@@ -57,6 +58,9 @@ private:
     // 이미 로그인 중인 게이트웨이에 중복 로그인 알림
     void sendDuplicateLoginToGateway(int32 gatewayId, int64 userId);
 
+    // 세션에서 GatewaySessionMetaInfo를 꺼낸다.
+    static GatewaySessionMetaInfo* getGatewaySessionMeta(const netlib::ISessionPtr& spSession);
+
     // 로그인한 유저 정보
     struct LoginEntry
     {
@@ -90,12 +94,8 @@ private:
     static constexpr int64 k_authTokenTtlMs  = 5 * 60 * 1000;   // 인증토큰 유효시간 5분
     static constexpr int64 k_prevGatewayTtlMs = 5 * 60 * 1000;   // 이전 게이트웨이 캐시 유효시간 5분
 
-    
-    // 게이트웨이서버 세션 
+    // 게이트웨이서버 세션
     SharedThreadSafeUnorderedMap<int32, netlib::ISessionPtr> m_safeGatewaySessions; // key=gatewayServerId
-
-    // 게이트웨이서버 sessionId -> gatewayServerId 인덱스
-    SharedThreadSafeUnorderedMap<int64, int32>  m_safeSessionToGatewayId;  // key=gateway sessionId
 
     // 게이트웨이서버 NetClient
     ExclusiveThreadSafeUnorderedMap<int32, netlib::NetClientPtr> m_safeGatewayClients;  // key=gatewayServerId

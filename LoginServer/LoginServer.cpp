@@ -110,24 +110,23 @@ void LoginServer::onClientDisconnect(const netlib::ISessionPtr& /*spSession*/)
 // 게이트웨이 서버에 연결성공
 void LoginServer::onGatewayConnect(const netlib::ISessionPtr& spSession)
 {
-    // 아직 핸드셰이크 전이므로 세션만 기록해둔다.
-    // m_gatewaySessions 등록은 GatewayHandshakeNtf 수신 후 처리한다.
+    // 아직 핸드셰이크 전이므로 세션에 빈 메타 정보만 설정해둔다.
+    // gatewayServerId는 GatewayHandshakeNtf 수신 후 채운다.
+    spSession->SetUserData(std::make_shared<GatewaySessionMetaInfo>());
     LOG_WRITE(LogLevel::Info, std::format("LoginServer: gateway connected. sessionId={}", spSession->GetId()));
 }
 
 // 게이트웨이서버 연결끊김
 void LoginServer::onGatewayDisconnect(const netlib::ISessionPtr& spSession)
 {
-    int64 sessionId = spSession->GetId();
-
-    // sessionId -> gatewayServerId 조회 후 정리
-    int32 gatewayId = 0;
-    if (!m_safeSessionToGatewayId.EraseAndGet(sessionId, gatewayId))
+    GatewaySessionMetaInfo* pMeta = getGatewaySessionMeta(spSession);
+    if (!pMeta || pMeta->gatewayServerId == 0)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("LoginServer: gateway disconnected before handshake. sessionId={}", sessionId));
+        LOG_WRITE(LogLevel::Warn, std::format("LoginServer: gateway disconnected before handshake. sessionId={}", spSession->GetId()));
         return;
     }
 
+    int32 gatewayId = pMeta->gatewayServerId;
     m_safeGatewaySessions.Erase(gatewayId);
 
     LOG_WRITE(LogLevel::Warn, std::format("LoginServer: gateway disconnected. gatewayId={}", gatewayId));
@@ -202,12 +201,14 @@ db::DBTask<void> LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Game
 void LoginServer::handleGatewayHandshake(const netlib::ISessionPtr& spSession, const ServerPacket::GatewayHandshakeNtf& ntf)
 {
     int32 gatewayId = ntf.server_id();
-    int64 sessionId = spSession->GetId();
 
     m_safeGatewaySessions.Insert(gatewayId, spSession);
-    m_safeSessionToGatewayId.Insert(sessionId, gatewayId);
 
-    LOG_WRITE(LogLevel::Info, std::format("LoginServer: gateway handshake complete. gatewayId={} sessionId={}", gatewayId, sessionId));
+    GatewaySessionMetaInfo* pMeta = getGatewaySessionMeta(spSession);
+    if (pMeta)
+        pMeta->gatewayServerId = gatewayId;
+
+    LOG_WRITE(LogLevel::Info, std::format("LoginServer: gateway handshake complete. gatewayId={} sessionId={}", gatewayId, spSession->GetId()));
 }
 
 // 로그인 성공 응답
@@ -262,7 +263,7 @@ void LoginServer::disconnectFromGateway(int32 gatewayId)
     if (spClient)
         DisconnectToServer(spClient);
 
-    // m_gatewaySessions, m_sessionToGatewayId 정리는 onGatewayDisconnect 콜백에서 자동 처리됨
+    // m_safeGatewaySessions 정리는 onGatewayDisconnect 콜백에서 자동 처리됨
 
     LOG_WRITE(LogLevel::Info, std::format("LoginServer: disconnected from gateway {}", gatewayId));
 }
@@ -386,6 +387,12 @@ uint64 LoginServer::generateAuthToken()
     return m_rng();
 }
 
+// 세션에서 GatewaySessionMetaInfo를 꺼낸다.
+// 주의: GatewaySessionMetaInfo* 를 다른곳에 보관해두면 안됨. 세션이 제거될때 함께 제거되기 때문
+GatewaySessionMetaInfo* LoginServer::getGatewaySessionMeta(const netlib::ISessionPtr& spSession)
+{
+    return static_cast<GatewaySessionMetaInfo*>(spSession->GetUserData().get());
+}
 
 // AccountDB 스키마 초기화
 void LoginServer::initAccountDB()
