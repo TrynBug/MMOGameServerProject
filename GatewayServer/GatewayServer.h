@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "pch.h"
 #include "ThreadSafeUnorderedMap.h"
@@ -42,21 +42,21 @@ private:
     void onInternalDisconnect(const netlib::ISessionPtr& spSession);
 
     // ── 클라이언트 패킷 핸들러 ───────────────────────────────────────────
-    void handleAuthReq    (const netlib::ISessionPtr& spSession, const GamePacket::GatewayAuthReq& msg);
-    void handleLogoutReq  (const netlib::ISessionPtr& spSession);
-    void relayToGameServer(const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket);
+    void handleAuthReq    (const netlib::ISessionPtr& spClientSession, const GamePacket::GatewayAuthReq& msg);
+    void handleLogoutReq  (const netlib::ISessionPtr& spClientSession);
+    void relayToGameServer(const netlib::ISessionPtr& spClientSession, netlib::PacketPtr spPacket);
 
     // ── 게임서버 패킷 핸들러 ─────────────────────────────────────────────
-    void handleGameServerPacket      (const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket);
-    void handleGameServerHandshake   (const netlib::ISessionPtr& spSession, const ServerPacket::GameServerHandshakeNtf&    msg);
-    void handleGameToGatewayPacket   (const netlib::ISessionPtr& spSession, const ServerPacket::GameToGatewayPacketNtf&    msg);
-    void handleGameToGatewayBroadcast(const netlib::ISessionPtr& spSession, const ServerPacket::GameToGatewayBroadcastNtf& msg);
-    void handleUserMoveToGameServer  (const netlib::ISessionPtr& spSession, const ServerPacket::UserMoveToGameServerReq&   msg);
+    void handleGameServerPacket      (const netlib::ISessionPtr& spGameSession, netlib::PacketPtr spPacket);
+    void handleGameServerHandshake   (const netlib::ISessionPtr& spGameSession, const ServerPacket::GameServerHandshakeNtf&    msg);
+    void handleGameToGatewayPacket   (const netlib::ISessionPtr& spGameSession, const ServerPacket::GameToGatewayPacketNtf&    msg);
+    void handleGameToGatewayBroadcast(const netlib::ISessionPtr& spGameSession, const ServerPacket::GameToGatewayBroadcastNtf& msg);
+    void handleUserMoveToGameServer  (const netlib::ISessionPtr& spGameSession, const ServerPacket::UserMoveToGameServerReq&   msg);
 
     // ── 로그인서버 패킷 핸들러 ───────────────────────────────────────────
-    void handleLoginServerPacket(const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket);
-    void handleLoginAuthTokenNtf(const netlib::ISessionPtr& spSession, const ServerPacket::LoginAuthTokenNtf& msg);
-    void handleLoginDuplicateNtf(const netlib::ISessionPtr& spSession, const ServerPacket::LoginDuplicateNtf& msg);
+    void handleLoginServerPacket(const netlib::ISessionPtr& spLoginSession, netlib::PacketPtr spPacket);
+    void handleLoginAuthTokenNtf(const netlib::ISessionPtr& spLoginSession, const ServerPacket::LoginAuthTokenNtf& msg);
+    void handleLoginDuplicateNtf(const netlib::ISessionPtr& spLoginSession, const ServerPacket::LoginDuplicateNtf& msg);
 
 private:
     // 세션에서 SessionMetaInfo를 꺼낸다.

@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "GatewayServer.h"
 
 
@@ -6,51 +6,51 @@ bool GatewayServer::OnInitialize()
 {
     // 클라이언트 패킷 디스패처 등록
     m_clientDispatcher.Register<GamePacket::GatewayAuthReq>(Common::GAME_PACKET_ID_GATEWAY_AUTH_REQ,
-        [this](auto& spSession, auto& msg) { handleAuthReq(spSession, msg); });
+        [this](auto& spClientSession, auto& msg) { handleAuthReq(spClientSession, msg); });
 
     m_clientDispatcher.Register<GamePacket::GameLogoutReq>(Common::GAME_PACKET_ID_GAME_LOGOUT_REQ,
-        [this](auto& spSession, auto& msg) { handleLogoutReq(spSession); });
+        [this](auto& spClientSession, auto& msg) { handleLogoutReq(spClientSession); });
 
     // 게이트웨이서버가 핸들링하지않는 클라이언트 패킷은 게임서버로 relay
-    m_clientDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
+    m_clientDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spClientSession, const netlib::PacketPtr& spPacket)
     {
-        relayToGameServer(spSession, spPacket);
+        relayToGameServer(spClientSession, spPacket);
     });
 
     // 게임서버 패킷 디스패처 등록
     m_gameServerDispatcher.Register<ServerPacket::GameServerHandshakeNtf>(Common::SERVER_PACKET_ID_GAME_SERVER_HANDSHAKE_NTF,
-        [this](auto& spSession, auto& msg) { handleGameServerHandshake(spSession, msg); });
+        [this](auto& spGameSession, auto& msg) { handleGameServerHandshake(spGameSession, msg); });
 
     m_gameServerDispatcher.Register<ServerPacket::GameToGatewayPacketNtf>(Common::SERVER_PACKET_ID_GAME_TO_GATEWAY_PACKET_NTF,
-        [this](auto& spSession, auto& msg) { handleGameToGatewayPacket(spSession, msg); });
+        [this](auto& spGameSession, auto& msg) { handleGameToGatewayPacket(spGameSession, msg); });
 
     m_gameServerDispatcher.Register<ServerPacket::GameToGatewayBroadcastNtf>(Common::SERVER_PACKET_ID_GAME_TO_GATEWAY_BROADCAST_NTF,
-        [this](auto& spSession, auto& msg) { handleGameToGatewayBroadcast(spSession, msg); });
+        [this](auto& spGameSession, auto& msg) { handleGameToGatewayBroadcast(spGameSession, msg); });
 
     m_gameServerDispatcher.Register<ServerPacket::UserMoveToGameServerReq>(Common::SERVER_PACKET_ID_USER_MOVE_TO_GAME_SERVER_REQ,
-        [this](auto& spSession, auto& msg) { handleUserMoveToGameServer(spSession, msg); });
+        [this](auto& spGameSession, auto& msg) { handleUserMoveToGameServer(spGameSession, msg); });
 
-    m_gameServerDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
+    m_gameServerDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spGameSession, const netlib::PacketPtr& spPacket)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: unknown game server packetId={}, sessionId={}", spPacket->GetHeader()->type, spSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: unknown game server packetId={}, sessionId={}", spPacket->GetHeader()->type, spGameSession->GetId()));
     });
 
     // 로그인서버 패킷 디스패처 등록
     m_loginServerDispatcher.Register<ServerPacket::LoginAuthTokenNtf>(Common::SERVER_PACKET_ID_LOGIN_AUTH_TOKEN_NTF,
-        [this](auto& spSession, auto& msg) { handleLoginAuthTokenNtf(spSession, msg); });
+        [this](auto& spLoginSession, auto& msg) { handleLoginAuthTokenNtf(spLoginSession, msg); });
 
     m_loginServerDispatcher.Register<ServerPacket::LoginDuplicateNtf>(Common::SERVER_PACKET_ID_LOGIN_DUPLICATE_NTF,
-        [this](auto& spSession, auto& msg) { handleLoginDuplicateNtf(spSession, msg); });
+        [this](auto& spLoginSession, auto& msg) { handleLoginDuplicateNtf(spLoginSession, msg); });
 
-    m_loginServerDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
+    m_loginServerDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spLoginSession, const netlib::PacketPtr& spPacket)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: unknown login server packetId={}, sessionId={}", spPacket->GetHeader()->type, spSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: unknown login server packetId={}, sessionId={}", spPacket->GetHeader()->type, spLoginSession->GetId()));
     });
 
     // 클라이언트 포트 이벤트 핸들러 등록
-    m_clientListenEventHandler.onAccept = [this](const netlib::ISessionPtr& spSession) { return onClientAccept(spSession); };
-    m_clientListenEventHandler.onRecv = [this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket) { return onClientRecv(spSession, spPacket); };
-    m_clientListenEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spSession) { onClientDisconnect(spSession); };
+    m_clientListenEventHandler.onAccept = [this](const netlib::ISessionPtr& spClientSession) { return onClientAccept(spClientSession); };
+    m_clientListenEventHandler.onRecv = [this](const netlib::ISessionPtr& spClientSession, const netlib::PacketPtr& spPacket) { return onClientRecv(spClientSession, spPacket); };
+    m_clientListenEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spClientSession) { onClientDisconnect(spClientSession); };
     m_clientListenEventHandler.onLog = [](netlib::LogLevel netLogLevel, netlib::ISessionPtr, const std::string& msg)
     {
         const LogLevel logLevel = serverbase::NetLogLevelToLogLevel(netLogLevel);
@@ -58,11 +58,11 @@ bool GatewayServer::OnInitialize()
     };
 
     // 내부 서버 포트 이벤트 핸들러 등록
-    m_internalListenEventHandler.onAccept = [this](const netlib::ISessionPtr& spSession) { return onInternalAccept(spSession); };
-    m_internalListenEventHandler.onRecv = [this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket) { return onInternalRecv(spSession, spPacket); };
-    m_internalListenEventHandler.onSendComplete = [this](const netlib::ISessionPtr& spSession) { onInternalSendComplete(spSession); };
-    m_internalListenEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spSession) { onInternalDisconnect(spSession); };
-    m_internalListenEventHandler.onLog = [](netlib::LogLevel netLogLevel, netlib::ISessionPtr, const std::string& msg)
+    m_internalListenEventHandler.onAccept = [this](const netlib::ISessionPtr& spServerSession) { return onInternalAccept(spServerSession); };
+    m_internalListenEventHandler.onRecv = [this](const netlib::ISessionPtr& spServerSession, const netlib::PacketPtr& spPacket) { return onInternalRecv(spServerSession, spPacket); };
+    m_internalListenEventHandler.onSendComplete = [this](const netlib::ISessionPtr& spServerSession) { onInternalSendComplete(spServerSession); };
+    m_internalListenEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spServerSession) { onInternalDisconnect(spServerSession); };
+    m_internalListenEventHandler.onLog = [](netlib::LogLevel netLogLevel, netlib::ISessionPtr spServerSession, const std::string& msg)
     {
         const LogLevel logLevel = serverbase::NetLogLevelToLogLevel(netLogLevel);
         LOG_WRITE(logLevel, msg);
@@ -255,14 +255,14 @@ void GatewayServer::onInternalDisconnect(const netlib::ISessionPtr& spSession)
 
 
 // 클라이언트 인증요청 처리
-void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spSession, const GamePacket::GatewayAuthReq& msg)
+void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, const GamePacket::GatewayAuthReq& msg)
 {
     // 이미 인증된 세션이면 비정상 요청
-    SessionMetaInfo* pMeta = getSessionMeta(spSession);
+    SessionMetaInfo* pMeta = getSessionMeta(spClientSession);
     if (!pMeta || pMeta->userId != 0)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: auth req on already authenticated session. sessionId={}", spSession->GetId()));
-        spSession->Disconnect();
+        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: auth req on already authenticated session. sessionId={}", spClientSession->GetId()));
+        spClientSession->Disconnect();
         return;
     }
 
@@ -271,8 +271,8 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spSession, const Ga
 
     if (!consumeAuthToken(userId, authToken))
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: auth failed. userId={}, sessionId={}", userId, spSession->GetId()));
-        spSession->Disconnect();
+        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: auth failed. userId={}, sessionId={}", userId, spClientSession->GetId()));
+        spClientSession->Disconnect();
         return;
     }
 
@@ -281,7 +281,7 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spSession, const Ga
     if (m_safeUsers.Find(userId, spExisting))
     {
         LOG_WRITE(LogLevel::Info, std::format("GatewayServer: duplicate connection. userId={} disconnecting old session.", userId));
-        spExisting->spSession->Disconnect();
+        spExisting->spClientSession->Disconnect();
     }
 
     // 게임서버 선택 (로드밸런싱)
@@ -289,7 +289,7 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spSession, const Ga
     if (!gameServer.has_value())
     {
         LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: no available game server for userId={}", userId));
-        spSession->Disconnect();
+        spClientSession->Disconnect();
         return;
     }
 
@@ -297,7 +297,7 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spSession, const Ga
     auto spUser = std::make_shared<GatewayUser>();
     spUser->userId = userId;
     spUser->gameServerId = gameServer->serverId;
-    spUser->spSession = spSession;
+    spUser->spClientSession = spClientSession;
 
     m_safeUsers.Insert(userId, spUser);
 
@@ -319,14 +319,14 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spSession, const Ga
         sendToGameServer(gameServer->serverId, spNtfPacket);
 }
 
-void GatewayServer::handleLogoutReq(const netlib::ISessionPtr& spSession)
+void GatewayServer::handleLogoutReq(const netlib::ISessionPtr& spClientSession)
 {
-    spSession->Disconnect();
+    spClientSession->Disconnect();
 }
 
-void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket)
+void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spClientSession, netlib::PacketPtr spPacket)
 {
-    SessionMetaInfo* pMeta = getSessionMeta(spSession);
+    SessionMetaInfo* pMeta = getSessionMeta(spClientSession);
     if (!pMeta || pMeta->userId == 0 || pMeta->routedGameServerId == 0)
         return;
 
@@ -347,9 +347,9 @@ void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spSession, netl
 
 
 // 로그인서버 패킷 핸들러
-void GatewayServer::handleLoginServerPacket(const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket)
+void GatewayServer::handleLoginServerPacket(const netlib::ISessionPtr& spLoginSession, netlib::PacketPtr spPacket)
 {
-    SessionMetaInfo* pMeta = getSessionMeta(spSession);
+    SessionMetaInfo* pMeta = getSessionMeta(spLoginSession);
     if (pMeta && pMeta->sessionType == ESessionType::Unknown)
     {
         pMeta->sessionType = ESessionType::LoginServer;
@@ -359,21 +359,21 @@ void GatewayServer::handleLoginServerPacket(const netlib::ISessionPtr& spSession
 
         auto spHandshakePacket = SerializePacket(Common::SERVER_PACKET_ID_LOGIN_GATEWAY_HANDSHAKE_NTF, handshake);
         if (spHandshakePacket)
-            spSession->Send(spHandshakePacket);
+            spLoginSession->Send(spHandshakePacket);
 
-        LOG_WRITE(LogLevel::Info, std::format("GatewayServer: login server connected. sent handshake. sessionId={}", spSession->GetId()));
+        LOG_WRITE(LogLevel::Info, std::format("GatewayServer: login server connected. sent handshake. sessionId={}", spLoginSession->GetId()));
     }
 
-    m_loginServerDispatcher.Dispatch(spSession, spPacket);
+    m_loginServerDispatcher.Dispatch(spLoginSession, spPacket);
 }
 
-void GatewayServer::handleLoginAuthTokenNtf(const netlib::ISessionPtr& /*spSession*/, const ServerPacket::LoginAuthTokenNtf& msg)
+void GatewayServer::handleLoginAuthTokenNtf(const netlib::ISessionPtr& /*spLoginSession*/, const ServerPacket::LoginAuthTokenNtf& msg)
 {
     storeAuthToken(msg.user_id(), msg.auth_token(), msg.expire_time_ms());
     LOG_WRITE(LogLevel::Info, std::format("GatewayServer: auth token stored. userId={}", msg.user_id()));
 }
 
-void GatewayServer::handleLoginDuplicateNtf(const netlib::ISessionPtr& /*spSession*/, const ServerPacket::LoginDuplicateNtf& msg)
+void GatewayServer::handleLoginDuplicateNtf(const netlib::ISessionPtr& /*spLoginSession*/, const ServerPacket::LoginDuplicateNtf& msg)
 {
     int64 userId = msg.user_id();
     LOG_WRITE(LogLevel::Info, std::format("GatewayServer: duplicate login notified. userId={}", userId));
@@ -382,20 +382,20 @@ void GatewayServer::handleLoginDuplicateNtf(const netlib::ISessionPtr& /*spSessi
 
 
 // 게임서버 패킷 핸들러
-void GatewayServer::handleGameServerPacket(const netlib::ISessionPtr& spSession, netlib::PacketPtr spPacket)
+void GatewayServer::handleGameServerPacket(const netlib::ISessionPtr& spGameSession, netlib::PacketPtr spPacket)
 {
-    m_gameServerDispatcher.Dispatch(spSession, spPacket);
+    m_gameServerDispatcher.Dispatch(spGameSession, spPacket);
 }
 
-void GatewayServer::handleGameServerHandshake(const netlib::ISessionPtr& spSession, const ServerPacket::GameServerHandshakeNtf& msg)
+void GatewayServer::handleGameServerHandshake(const netlib::ISessionPtr& spGameSession, const ServerPacket::GameServerHandshakeNtf& msg)
 {
     int32 gameServerId = msg.server_id();
 
-    m_safeGameServerSessions.Insert(gameServerId, spSession);
+    m_safeGameServerSessions.Insert(gameServerId, spGameSession);
 
     m_safeGameServerSendQueues.Insert(gameServerId, std::make_shared<GameServerSendQueue>());
 
-    SessionMetaInfo* pMeta = getSessionMeta(spSession);
+    SessionMetaInfo* pMeta = getSessionMeta(spGameSession);
     if (pMeta)
     {
         pMeta->sessionType = ESessionType::GameServer;
@@ -405,12 +405,12 @@ void GatewayServer::handleGameServerHandshake(const netlib::ISessionPtr& spSessi
     LOG_WRITE(LogLevel::Info, std::format("GatewayServer: game server handshake complete. gameServerId={}", gameServerId));
 }
 
-void GatewayServer::handleGameToGatewayPacket(const netlib::ISessionPtr& /*spSession*/, const ServerPacket::GameToGatewayPacketNtf& msg)
+void GatewayServer::handleGameToGatewayPacket(const netlib::ISessionPtr& /*spGameSession*/, const ServerPacket::GameToGatewayPacketNtf& msg)
 {
     int64 userId = msg.user_id();
 
     GatewayUserPtr spUser;
-    if (!m_safeUsers.Find(userId, spUser) || !spUser->spSession)
+    if (!m_safeUsers.Find(userId, spUser) || !spUser->spClientSession)
         return;
 
     auto spPacket = AllocPacket();
@@ -425,10 +425,10 @@ void GatewayServer::handleGameToGatewayPacket(const netlib::ISessionPtr& /*spSes
     );
     std::memcpy(spPacket->GetPayload(), payload.data(), payload.size());
 
-    spUser->spSession->Send(spPacket);
+    spUser->spClientSession->Send(spPacket);
 }
 
-void GatewayServer::handleGameToGatewayBroadcast(const netlib::ISessionPtr& /*spSession*/, const ServerPacket::GameToGatewayBroadcastNtf& msg)
+void GatewayServer::handleGameToGatewayBroadcast(const netlib::ISessionPtr& /*spGameSession*/, const ServerPacket::GameToGatewayBroadcastNtf& msg)
 {
     const std::string& payload = msg.payload();
     auto spPacket = AllocPacket();
@@ -446,16 +446,16 @@ void GatewayServer::handleGameToGatewayBroadcast(const netlib::ISessionPtr& /*sp
     {
         for (int i = 0; i < msg.user_ids_size(); ++i)
         {
-            if (msg.user_ids(i) == userId && spUser->spSession)
+            if (msg.user_ids(i) == userId && spUser->spClientSession)
             {
-                spUser->spSession->Send(spPacket);
+                spUser->spClientSession->Send(spPacket);
                 break;
             }
         }
     });
 }
 
-void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spSession*/, const ServerPacket::UserMoveToGameServerReq& msg)
+void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spGameSession*/, const ServerPacket::UserMoveToGameServerReq& msg)
 {
     int64 userId             = msg.user_id();
     int32 targetGameServerId = msg.target_game_server_id();
@@ -483,7 +483,7 @@ void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spSe
     spUser->gameServerId = targetGameServerId;
     m_safeUsers.Insert(userId, spUser);
 
-    SessionMetaInfo* pMeta = getSessionMeta(spUser->spSession);
+    SessionMetaInfo* pMeta = getSessionMeta(spUser->spClientSession);
     if (pMeta)
         pMeta->routedGameServerId = targetGameServerId;
 
@@ -619,7 +619,7 @@ void GatewayServer::sendToGameServer(int32 gameServerId, netlib::PacketPtr spPac
 void GatewayServer::forceDisconnectUser(int64 userId, const std::string& reason)
 {
     GatewayUserPtr spUser;
-    if (!m_safeUsers.Find(userId, spUser) || !spUser->spSession)
+    if (!m_safeUsers.Find(userId, spUser) || !spUser->spClientSession)
         return;
 
     LOG_WRITE(LogLevel::Info, std::format("GatewayServer: force disconnecting userId={}, reason={}", userId, reason));
@@ -630,7 +630,7 @@ void GatewayServer::forceDisconnectUser(int64 userId, const std::string& reason)
 
     auto spPacket = SerializePacket(Common::GAME_PACKET_ID_FORCE_DISCONNECT_NTF, ntf);
     if (spPacket)
-        spUser->spSession->Send(spPacket);
+        spUser->spClientSession->Send(spPacket);
 
-    spUser->spSession->Disconnect();
+    spUser->spClientSession->Disconnect();
 }

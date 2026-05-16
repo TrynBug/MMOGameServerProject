@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "pch.h"
 
@@ -8,10 +8,10 @@ struct GatewayUser
 {
     int64               userId        = 0;
     int32               gameServerId  = 0;   // 현재 라우팅된 게임서버 ID (0 = 미배정)
-    netlib::ISessionPtr spSession;
+    netlib::ISessionPtr spClientSession;
     std::string         clientIp;
 
-    bool IsValid() const { return spSession != nullptr && userId != 0; }
+    bool IsValid() const { return spClientSession != nullptr && userId != 0; }
 };
 
 using GatewayUserPtr = std::shared_ptr<GatewayUser>;

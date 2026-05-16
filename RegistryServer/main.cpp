@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "RegistryServer.h"
 
 static RegistryServer* g_pServer = nullptr;
