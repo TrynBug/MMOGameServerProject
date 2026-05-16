@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 
 #include "GameDataLib.h"
 
@@ -123,13 +123,14 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
     // Registry 서버와 연결하는 RegistryClient 초기화 (레지스트리 서버 자신은 사용안함)
     if (config.useRegistry)
     {
-        RegistryClient::Config regConfig;
+        RegistryClient::RegistryClientConfig regConfig;
         regConfig.registryIp        = config.registryIp;
         regConfig.registryPort      = config.registryPort;
         regConfig.myServerType      = config.serverType;
         regConfig.myServerId        = m_serverId;            // config에서 로드한 ID 전달
         regConfig.myIp              = config.serverIp;
-        regConfig.myPort            = config.serverPort;
+        regConfig.myClientPort      = config.clientListenServerConfig.port;
+        regConfig.myInternalPort    = config.internalListenServerConfig.port;
         regConfig.pollTargetTypes   = config.pollTargetTypes;
         regConfig.userCountReportMs = config.userCountReportMs;
 

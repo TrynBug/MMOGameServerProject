@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "GatewayServer.h"
 
 static GatewayServer* g_pServer = nullptr;
@@ -27,7 +27,6 @@ int main()
     config.serverType = ServerType::Gateway;
     config.serverId = configParser.GetInt32("Server", "Id", -1);
     config.serverIp = configParser.GetString("Server", "IP", "0.0.0.0");
-    config.serverPort = static_cast<uint16>(configParser.GetInt32("Server", "Port", -1));
 
     config.registryIp = configParser.GetString("Registry", "IP", "127.0.0.1");
     config.registryPort = static_cast<uint16>(configParser.GetInt32("Registry", "Port", 10001));
@@ -45,13 +44,12 @@ int main()
     // 클라이언트용 포트 (외부 인터넷에서 접속)
     config.useClientListenServer = true;
     config.clientListenServerConfig.ip   = config.serverIp;
-    config.clientListenServerConfig.port = config.serverPort;
+    config.clientListenServerConfig.port = static_cast<uint16>(configParser.GetInt32("Server", "ClientPort", -1));;
 
     // 내부 서버용 포트 (게임서버/로그인서버 접속. 방화벽으로 외부 차단 권장)
-    const uint16 internalPort = static_cast<uint16>(configParser.GetInt32("Server", "InternalPort", 8101));
     config.useInternalListenServer = true;
     config.internalListenServerConfig.ip   = config.serverIp;
-    config.internalListenServerConfig.port = internalPort;
+    config.internalListenServerConfig.port = static_cast<uint16>(configParser.GetInt32("Server", "InternalPort", -1));
 
     // 컨텐츠 스레드
     config.numContentsThreads = configParser.GetInt32("Contents", "NumContentsThreads", 0);

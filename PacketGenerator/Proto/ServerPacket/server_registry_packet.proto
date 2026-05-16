@@ -48,8 +48,9 @@ message ServerInfoMsg {
     ServerType server_type = 2;
     ServerStatus status = 3;
     string ip = 4;
-    int32 port = 5;
-    int32 user_count = 6;
+    int32 client_port = 5;    // 클라이언트 통신용 포트
+    int32 internal_port = 6;  // 내부 통신용 포트
+    int32 user_count = 7;
 }
 
 // 서버 등록 요청 (서버 -> 레지스트리)
@@ -59,7 +60,8 @@ message RegistryRegisterReq {
     ServerType server_type = 1;
     int32 server_id = 2;   // Config에서 로드한 서버 ID (1~999)
     string ip = 3;
-    int32 port = 4;
+    int32 client_port = 4;    // 클라이언트 통신용 포트
+    int32 internal_port = 5;  // 내부 통신용 포트
 }
 
 // 서버 등록 응답 (레지스트리 -> 서버)

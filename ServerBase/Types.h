@@ -43,6 +43,7 @@ struct ServerInfo
     ServerType   serverType = ServerType::Unknown;
     ServerStatus status     = ServerStatus::Unknown;
     std::string  ip;
-    uint16       port       = 0;
+    uint16       clientPort = 0;
+    uint16       internalPort = 0;
     int32        userCount  = 0;   // 접속자 수 (게이트웨이, 게임서버만 유효)
 };

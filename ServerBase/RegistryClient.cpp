@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "RegistryClient.h"
 #include "Logger.h"
 
@@ -17,7 +17,7 @@ RegistryClient::~RegistryClient()
     Stop();
 }
 
-bool RegistryClient::Initialize(ServerBase* pServerBase, const Config& config)
+bool RegistryClient::Initialize(ServerBase* pServerBase, const RegistryClientConfig& config)
 {
     m_config = config;
     m_pServerBase = pServerBase;
@@ -173,7 +173,8 @@ void RegistryClient::sendRegisterReq()
     req.set_server_type(static_cast<ServerPacket::ServerType>(m_config.myServerType));
     req.set_server_id(m_config.myServerId);
     req.set_ip(m_config.myIp);
-    req.set_port(m_config.myPort);
+    req.set_client_port(m_config.myClientPort);
+    req.set_internal_port(m_config.myInternalPort);
 
     auto spPacket = m_pServerBase->SerializePacket(Common::SERVER_PACKET_ID_REGISTRY_REGISTER_REQ, req);
 
@@ -326,7 +327,8 @@ void RegistryClient::handleServerInfoNtf(const netlib::Packet& packet)
     info.serverType = static_cast<ServerType>(msgInfo.server_type());
     info.status     = static_cast<ServerStatus>(msgInfo.status());
     info.ip         = msgInfo.ip();
-    info.port       = static_cast<uint16>(msgInfo.port());
+    info.clientPort = static_cast<uint16>(msgInfo.client_port());
+    info.internalPort = static_cast<uint16>(msgInfo.internal_port());
     info.userCount  = msgInfo.user_count();
 
     applyServerInfo(info);
@@ -349,7 +351,8 @@ void RegistryClient::handlePollRes(const netlib::Packet& packet)
         info.serverType = static_cast<ServerType>(msgInfo.server_type());
         info.status     = static_cast<ServerStatus>(msgInfo.status());
         info.ip         = msgInfo.ip();
-        info.port       = static_cast<uint16>(msgInfo.port());
+        info.clientPort = static_cast<uint16>(msgInfo.client_port());
+        info.internalPort = static_cast<uint16>(msgInfo.internal_port());
         info.userCount  = msgInfo.user_count();
 
         applyServerInfo(info);

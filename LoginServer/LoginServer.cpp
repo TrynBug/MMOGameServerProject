@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "LoginServer.h"
 
 bool LoginServer::OnInitialize()
@@ -76,7 +76,7 @@ void LoginServer::OnServerInfoUpdated(const ServerInfo& info)
 
     if (info.status == ServerStatus::Running)
     {
-        connectToGateway(info.serverId, info.ip, info.port);
+        connectToGateway(info.serverId, info.ip, info.internalPort);
     }
     else if (info.status == ServerStatus::Disconnected)
     {
@@ -194,7 +194,7 @@ db::DBTask<void> LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Game
     upsertLoginEntry(userId, gateway->serverId);
     sendLoginSuccess(spSession, userId, authToken, *gateway);
 
-    LOG_WRITE(LogLevel::Info, std::format("LoginServer: login success. userId={} gateway={}:{}", userId, gateway->ip, gateway->port));
+    LOG_WRITE(LogLevel::Info, std::format("LoginServer: login success. userId={} gateway={}:{}", userId, gateway->ip, gateway->internalPort));
 }
 
 // 게이트웨이서버 접속 성공후 게이트웨이서버가 자신의 정보를 보냄
@@ -219,7 +219,7 @@ void LoginServer::sendLoginSuccess(const netlib::ISessionPtr& spSession, int64 u
     res.set_user_id(userId);
     res.set_auth_token(authToken);
     res.set_gateway_ip(gatewayInfo.ip);
-    res.set_gateway_port(gatewayInfo.port);
+    res.set_gateway_port(gatewayInfo.clientPort);
 
     auto spPacket = SerializePacket(Common::GAME_PACKET_ID_LOGIN_RES, res);
     if (spPacket)

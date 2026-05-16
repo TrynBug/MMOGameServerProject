@@ -26,7 +26,6 @@ int main()
     config.serverType = ServerType::Registry;
     config.serverId = configParser.GetInt32("Server", "Id", 1);
     config.serverIp = configParser.GetString("Server", "IP", "0.0.0.0");
-    config.serverPort = static_cast<uint16>(configParser.GetInt32("Server", "Port", 10001));
 
     // 레지스트리 서버는 자신이 레지스트리이므로 RegistryClient 불필요
     config.useRegistry = false;
@@ -39,7 +38,7 @@ int main()
     // 내부서버용 Listen 서버 사용 (다른 서버들이 이 서버로 접속)
     config.useInternalListenServer = true;
     config.internalListenServerConfig.ip = config.serverIp;
-    config.internalListenServerConfig.port = config.serverPort;
+    config.internalListenServerConfig.port = static_cast<uint16>(configParser.GetInt32("Server", "InternalPort", -1));
 
     config.useClientListenServer = false; // 클라이언트 접속 없음
 

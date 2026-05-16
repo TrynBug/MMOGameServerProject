@@ -88,7 +88,8 @@ inline constexpr ServerInfoMsg::Impl_::Impl_(
         server_id_{0},
         server_type_{static_cast< ::ServerPacket::ServerType >(0)},
         status_{static_cast< ::ServerPacket::ServerStatus >(0)},
-        port_{0},
+        client_port_{0},
+        internal_port_{0},
         user_count_{0},
         _cached_size_{0} {}
 
@@ -191,7 +192,8 @@ inline constexpr RegistryRegisterReq::Impl_::Impl_(
             ::_pbi::ConstantInitialized()),
         server_type_{static_cast< ::ServerPacket::ServerType >(0)},
         server_id_{0},
-        port_{0},
+        client_port_{0},
+        internal_port_{0},
         _cached_size_{0} {}
 
 template <typename>
@@ -378,7 +380,8 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::ServerPacket::ServerInfoMsg, _impl_.server_type_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::ServerInfoMsg, _impl_.status_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::ServerInfoMsg, _impl_.ip_),
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::ServerInfoMsg, _impl_.port_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::ServerInfoMsg, _impl_.client_port_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::ServerInfoMsg, _impl_.internal_port_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::ServerInfoMsg, _impl_.user_count_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::ServerPacket::RegistryRegisterReq, _internal_metadata_),
@@ -391,7 +394,8 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::ServerPacket::RegistryRegisterReq, _impl_.server_type_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::RegistryRegisterReq, _impl_.server_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::RegistryRegisterReq, _impl_.ip_),
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::RegistryRegisterReq, _impl_.port_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::RegistryRegisterReq, _impl_.client_port_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::RegistryRegisterReq, _impl_.internal_port_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::ServerPacket::RegistryRegisterRes, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -473,15 +477,15 @@ static const ::_pbi::MigrationSchema
         {0, -1, -1, sizeof(::ServerPacket::UserEnterNtf)},
         {11, -1, -1, sizeof(::ServerPacket::UserDisconnectNtf)},
         {20, -1, -1, sizeof(::ServerPacket::ServerInfoMsg)},
-        {34, -1, -1, sizeof(::ServerPacket::RegistryRegisterReq)},
-        {46, -1, -1, sizeof(::ServerPacket::RegistryRegisterRes)},
-        {57, 66, -1, sizeof(::ServerPacket::RegistryServerInfoNtf)},
-        {67, -1, -1, sizeof(::ServerPacket::RegistryPollReq)},
-        {76, -1, -1, sizeof(::ServerPacket::RegistryPollRes)},
-        {85, -1, -1, sizeof(::ServerPacket::RegistryHeartbeatReq)},
-        {94, -1, -1, sizeof(::ServerPacket::RegistryHeartbeatRes)},
-        {103, -1, -1, sizeof(::ServerPacket::RegistryUserCountNtf)},
-        {112, -1, -1, sizeof(::ServerPacket::RegistryShutdownReq)},
+        {35, -1, -1, sizeof(::ServerPacket::RegistryRegisterReq)},
+        {48, -1, -1, sizeof(::ServerPacket::RegistryRegisterRes)},
+        {59, 68, -1, sizeof(::ServerPacket::RegistryServerInfoNtf)},
+        {69, -1, -1, sizeof(::ServerPacket::RegistryPollReq)},
+        {78, -1, -1, sizeof(::ServerPacket::RegistryPollRes)},
+        {87, -1, -1, sizeof(::ServerPacket::RegistryHeartbeatReq)},
+        {96, -1, -1, sizeof(::ServerPacket::RegistryHeartbeatRes)},
+        {105, -1, -1, sizeof(::ServerPacket::RegistryUserCountNtf)},
+        {114, -1, -1, sizeof(::ServerPacket::RegistryShutdownReq)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::ServerPacket::_UserEnterNtf_default_instance_._instance,
@@ -503,33 +507,34 @@ const char descriptor_table_protodef_ServerPacket_2fserver_5fregistry_5fpacket_2
     "oto\022\014ServerPacket\032\026Common/packet_id.prot"
     "o\"\?\n\014UserEnterNtf\022\017\n\007user_id\030\001 \001(\003\022\022\n\nga"
     "teway_id\030\002 \001(\005\022\n\n\002ip\030\003 \001(\t\"$\n\021UserDiscon"
-    "nectNtf\022\017\n\007user_id\030\001 \001(\003\"\253\001\n\rServerInfoM"
+    "nectNtf\022\017\n\007user_id\030\001 \001(\003\"\311\001\n\rServerInfoM"
     "sg\022\021\n\tserver_id\030\001 \001(\005\022-\n\013server_type\030\002 \001"
     "(\0162\030.ServerPacket.ServerType\022*\n\006status\030\003"
     " \001(\0162\032.ServerPacket.ServerStatus\022\n\n\002ip\030\004"
-    " \001(\t\022\014\n\004port\030\005 \001(\005\022\022\n\nuser_count\030\006 \001(\005\"q"
-    "\n\023RegistryRegisterReq\022-\n\013server_type\030\001 \001"
-    "(\0162\030.ServerPacket.ServerType\022\021\n\tserver_i"
-    "d\030\002 \001(\005\022\n\n\002ip\030\003 \001(\t\022\014\n\004port\030\004 \001(\005\"J\n\023Reg"
-    "istryRegisterRes\022\017\n\007success\030\001 \001(\010\022\021\n\tser"
-    "ver_id\030\002 \001(\005\022\017\n\007message\030\003 \001(\t\"I\n\025Registr"
-    "yServerInfoNtf\0220\n\013server_info\030\001 \001(\0132\033.Se"
-    "rverPacket.ServerInfoMsg\"A\n\017RegistryPoll"
-    "Req\022.\n\014target_types\030\001 \003(\0162\030.ServerPacket"
-    ".ServerType\"\?\n\017RegistryPollRes\022,\n\007server"
-    "s\030\001 \003(\0132\033.ServerPacket.ServerInfoMsg\",\n\024"
-    "RegistryHeartbeatReq\022\024\n\014timestamp_ms\030\001 \001"
-    "(\003\",\n\024RegistryHeartbeatRes\022\024\n\014timestamp_"
-    "ms\030\001 \001(\003\"*\n\024RegistryUserCountNtf\022\022\n\nuser"
-    "_count\030\001 \001(\005\"\025\n\023RegistryShutdownReq*\233\001\n\n"
-    "ServerType\022\027\n\023SERVER_TYPE_UNKNOWN\020\000\022\030\n\024S"
-    "ERVER_TYPE_REGISTRY\020\001\022\025\n\021SERVER_TYPE_LOG"
-    "IN\020\002\022\027\n\023SERVER_TYPE_GATEWAY\020\003\022\024\n\020SERVER_"
-    "TYPE_GAME\020\004\022\024\n\020SERVER_TYPE_CHAT\020\005*\205\001\n\014Se"
-    "rverStatus\022\031\n\025SERVER_STATUS_UNKNOWN\020\000\022\031\n"
-    "\025SERVER_STATUS_RUNNING\020\001\022\037\n\033SERVER_STATU"
-    "S_SHUTTING_DOWN\020\002\022\036\n\032SERVER_STATUS_DISCO"
-    "NNECTED\020\003b\006proto3"
+    " \001(\t\022\023\n\013client_port\030\005 \001(\005\022\025\n\rinternal_po"
+    "rt\030\006 \001(\005\022\022\n\nuser_count\030\007 \001(\005\"\217\001\n\023Registr"
+    "yRegisterReq\022-\n\013server_type\030\001 \001(\0162\030.Serv"
+    "erPacket.ServerType\022\021\n\tserver_id\030\002 \001(\005\022\n"
+    "\n\002ip\030\003 \001(\t\022\023\n\013client_port\030\004 \001(\005\022\025\n\rinter"
+    "nal_port\030\005 \001(\005\"J\n\023RegistryRegisterRes\022\017\n"
+    "\007success\030\001 \001(\010\022\021\n\tserver_id\030\002 \001(\005\022\017\n\007mes"
+    "sage\030\003 \001(\t\"I\n\025RegistryServerInfoNtf\0220\n\013s"
+    "erver_info\030\001 \001(\0132\033.ServerPacket.ServerIn"
+    "foMsg\"A\n\017RegistryPollReq\022.\n\014target_types"
+    "\030\001 \003(\0162\030.ServerPacket.ServerType\"\?\n\017Regi"
+    "stryPollRes\022,\n\007servers\030\001 \003(\0132\033.ServerPac"
+    "ket.ServerInfoMsg\",\n\024RegistryHeartbeatRe"
+    "q\022\024\n\014timestamp_ms\030\001 \001(\003\",\n\024RegistryHeart"
+    "beatRes\022\024\n\014timestamp_ms\030\001 \001(\003\"*\n\024Registr"
+    "yUserCountNtf\022\022\n\nuser_count\030\001 \001(\005\"\025\n\023Reg"
+    "istryShutdownReq*\233\001\n\nServerType\022\027\n\023SERVE"
+    "R_TYPE_UNKNOWN\020\000\022\030\n\024SERVER_TYPE_REGISTRY"
+    "\020\001\022\025\n\021SERVER_TYPE_LOGIN\020\002\022\027\n\023SERVER_TYPE"
+    "_GATEWAY\020\003\022\024\n\020SERVER_TYPE_GAME\020\004\022\024\n\020SERV"
+    "ER_TYPE_CHAT\020\005*\205\001\n\014ServerStatus\022\031\n\025SERVE"
+    "R_STATUS_UNKNOWN\020\000\022\031\n\025SERVER_STATUS_RUNN"
+    "ING\020\001\022\037\n\033SERVER_STATUS_SHUTTING_DOWN\020\002\022\036"
+    "\n\032SERVER_STATUS_DISCONNECTED\020\003b\006proto3"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_ServerPacket_2fserver_5fregistry_5fpacket_2eproto_deps[1] =
     {
@@ -539,7 +544,7 @@ static ::absl::once_flag descriptor_table_ServerPacket_2fserver_5fregistry_5fpac
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2fserver_5fregistry_5fpacket_2eproto = {
     false,
     false,
-    1217,
+    1278,
     descriptor_table_protodef_ServerPacket_2fserver_5fregistry_5fpacket_2eproto,
     "ServerPacket/server_registry_packet.proto",
     &descriptor_table_ServerPacket_2fserver_5fregistry_5fpacket_2eproto_once,
@@ -1182,15 +1187,15 @@ const ::google::protobuf::internal::ClassData* ServerInfoMsg::GetClassData() con
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 6, 0, 37, 2> ServerInfoMsg::_table_ = {
+const ::_pbi::TcParseTable<3, 7, 0, 37, 2> ServerInfoMsg::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    6, 56,  // max_field_number, fast_idx_mask
+    7, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967232,  // skipmap
+    4294967168,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    6,  // num_field_entries
+    7,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     _class_data_.base(),
@@ -1213,13 +1218,15 @@ const ::_pbi::TcParseTable<3, 6, 0, 37, 2> ServerInfoMsg::_table_ = {
     // string ip = 4;
     {::_pbi::TcParser::FastUS1,
      {34, 63, 0, PROTOBUF_FIELD_OFFSET(ServerInfoMsg, _impl_.ip_)}},
-    // int32 port = 5;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ServerInfoMsg, _impl_.port_), 63>(),
-     {40, 63, 0, PROTOBUF_FIELD_OFFSET(ServerInfoMsg, _impl_.port_)}},
-    // int32 user_count = 6;
+    // int32 client_port = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ServerInfoMsg, _impl_.client_port_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(ServerInfoMsg, _impl_.client_port_)}},
+    // int32 internal_port = 6;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ServerInfoMsg, _impl_.internal_port_), 63>(),
+     {48, 63, 0, PROTOBUF_FIELD_OFFSET(ServerInfoMsg, _impl_.internal_port_)}},
+    // int32 user_count = 7;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ServerInfoMsg, _impl_.user_count_), 63>(),
-     {48, 63, 0, PROTOBUF_FIELD_OFFSET(ServerInfoMsg, _impl_.user_count_)}},
-    {::_pbi::TcParser::MiniParse, {}},
+     {56, 63, 0, PROTOBUF_FIELD_OFFSET(ServerInfoMsg, _impl_.user_count_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -1235,10 +1242,13 @@ const ::_pbi::TcParseTable<3, 6, 0, 37, 2> ServerInfoMsg::_table_ = {
     // string ip = 4;
     {PROTOBUF_FIELD_OFFSET(ServerInfoMsg, _impl_.ip_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // int32 port = 5;
-    {PROTOBUF_FIELD_OFFSET(ServerInfoMsg, _impl_.port_), 0, 0,
+    // int32 client_port = 5;
+    {PROTOBUF_FIELD_OFFSET(ServerInfoMsg, _impl_.client_port_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // int32 user_count = 6;
+    // int32 internal_port = 6;
+    {PROTOBUF_FIELD_OFFSET(ServerInfoMsg, _impl_.internal_port_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 user_count = 7;
     {PROTOBUF_FIELD_OFFSET(ServerInfoMsg, _impl_.user_count_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
   }},
@@ -1308,17 +1318,24 @@ PROTOBUF_NOINLINE void ServerInfoMsg::Clear() {
             target = stream->WriteStringMaybeAliased(4, _s, target);
           }
 
-          // int32 port = 5;
-          if (this_._internal_port() != 0) {
+          // int32 client_port = 5;
+          if (this_._internal_client_port() != 0) {
             target = ::google::protobuf::internal::WireFormatLite::
                 WriteInt32ToArrayWithField<5>(
-                    stream, this_._internal_port(), target);
+                    stream, this_._internal_client_port(), target);
           }
 
-          // int32 user_count = 6;
-          if (this_._internal_user_count() != 0) {
+          // int32 internal_port = 6;
+          if (this_._internal_internal_port() != 0) {
             target = ::google::protobuf::internal::WireFormatLite::
                 WriteInt32ToArrayWithField<6>(
+                    stream, this_._internal_internal_port(), target);
+          }
+
+          // int32 user_count = 7;
+          if (this_._internal_user_count() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<7>(
                     stream, this_._internal_user_count(), target);
           }
 
@@ -1367,12 +1384,17 @@ PROTOBUF_NOINLINE void ServerInfoMsg::Clear() {
               total_size += 1 +
                             ::_pbi::WireFormatLite::EnumSize(this_._internal_status());
             }
-            // int32 port = 5;
-            if (this_._internal_port() != 0) {
+            // int32 client_port = 5;
+            if (this_._internal_client_port() != 0) {
               total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-                  this_._internal_port());
+                  this_._internal_client_port());
             }
-            // int32 user_count = 6;
+            // int32 internal_port = 6;
+            if (this_._internal_internal_port() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_internal_port());
+            }
+            // int32 user_count = 7;
             if (this_._internal_user_count() != 0) {
               total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
                   this_._internal_user_count());
@@ -1402,8 +1424,11 @@ void ServerInfoMsg::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::g
   if (from._internal_status() != 0) {
     _this->_impl_.status_ = from._impl_.status_;
   }
-  if (from._internal_port() != 0) {
-    _this->_impl_.port_ = from._impl_.port_;
+  if (from._internal_client_port() != 0) {
+    _this->_impl_.client_port_ = from._impl_.client_port_;
+  }
+  if (from._internal_internal_port() != 0) {
+    _this->_impl_.internal_port_ = from._impl_.internal_port_;
   }
   if (from._internal_user_count() != 0) {
     _this->_impl_.user_count_ = from._impl_.user_count_;
@@ -1474,9 +1499,9 @@ RegistryRegisterReq::RegistryRegisterReq(
                offsetof(Impl_, server_type_),
            reinterpret_cast<const char *>(&from._impl_) +
                offsetof(Impl_, server_type_),
-           offsetof(Impl_, port_) -
+           offsetof(Impl_, internal_port_) -
                offsetof(Impl_, server_type_) +
-               sizeof(Impl_::port_));
+               sizeof(Impl_::internal_port_));
 
   // @@protoc_insertion_point(copy_constructor:ServerPacket.RegistryRegisterReq)
 }
@@ -1491,9 +1516,9 @@ inline void RegistryRegisterReq::SharedCtor(::_pb::Arena* arena) {
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, server_type_),
            0,
-           offsetof(Impl_, port_) -
+           offsetof(Impl_, internal_port_) -
                offsetof(Impl_, server_type_) +
-               sizeof(Impl_::port_));
+               sizeof(Impl_::internal_port_));
 }
 RegistryRegisterReq::~RegistryRegisterReq() {
   // @@protoc_insertion_point(destructor:ServerPacket.RegistryRegisterReq)
@@ -1543,15 +1568,15 @@ const ::google::protobuf::internal::ClassData* RegistryRegisterReq::GetClassData
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 4, 0, 43, 2> RegistryRegisterReq::_table_ = {
+const ::_pbi::TcParseTable<3, 5, 0, 43, 2> RegistryRegisterReq::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    4, 24,  // max_field_number, fast_idx_mask
+    5, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967280,  // skipmap
+    4294967264,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    4,  // num_field_entries
+    5,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     _class_data_.base(),
@@ -1561,9 +1586,7 @@ const ::_pbi::TcParseTable<2, 4, 0, 43, 2> RegistryRegisterReq::_table_ = {
     ::_pbi::TcParser::GetTable<::ServerPacket::RegistryRegisterReq>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // int32 port = 4;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RegistryRegisterReq, _impl_.port_), 63>(),
-     {32, 63, 0, PROTOBUF_FIELD_OFFSET(RegistryRegisterReq, _impl_.port_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // .ServerPacket.ServerType server_type = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RegistryRegisterReq, _impl_.server_type_), 63>(),
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(RegistryRegisterReq, _impl_.server_type_)}},
@@ -1573,6 +1596,14 @@ const ::_pbi::TcParseTable<2, 4, 0, 43, 2> RegistryRegisterReq::_table_ = {
     // string ip = 3;
     {::_pbi::TcParser::FastUS1,
      {26, 63, 0, PROTOBUF_FIELD_OFFSET(RegistryRegisterReq, _impl_.ip_)}},
+    // int32 client_port = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RegistryRegisterReq, _impl_.client_port_), 63>(),
+     {32, 63, 0, PROTOBUF_FIELD_OFFSET(RegistryRegisterReq, _impl_.client_port_)}},
+    // int32 internal_port = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RegistryRegisterReq, _impl_.internal_port_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(RegistryRegisterReq, _impl_.internal_port_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -1585,8 +1616,11 @@ const ::_pbi::TcParseTable<2, 4, 0, 43, 2> RegistryRegisterReq::_table_ = {
     // string ip = 3;
     {PROTOBUF_FIELD_OFFSET(RegistryRegisterReq, _impl_.ip_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // int32 port = 4;
-    {PROTOBUF_FIELD_OFFSET(RegistryRegisterReq, _impl_.port_), 0, 0,
+    // int32 client_port = 4;
+    {PROTOBUF_FIELD_OFFSET(RegistryRegisterReq, _impl_.client_port_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 internal_port = 5;
+    {PROTOBUF_FIELD_OFFSET(RegistryRegisterReq, _impl_.internal_port_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
   }},
   // no aux_entries
@@ -1606,8 +1640,8 @@ PROTOBUF_NOINLINE void RegistryRegisterReq::Clear() {
 
   _impl_.ip_.ClearToEmpty();
   ::memset(&_impl_.server_type_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.port_) -
-      reinterpret_cast<char*>(&_impl_.server_type_)) + sizeof(_impl_.port_));
+      reinterpret_cast<char*>(&_impl_.internal_port_) -
+      reinterpret_cast<char*>(&_impl_.server_type_)) + sizeof(_impl_.internal_port_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -1648,11 +1682,18 @@ PROTOBUF_NOINLINE void RegistryRegisterReq::Clear() {
             target = stream->WriteStringMaybeAliased(3, _s, target);
           }
 
-          // int32 port = 4;
-          if (this_._internal_port() != 0) {
+          // int32 client_port = 4;
+          if (this_._internal_client_port() != 0) {
             target = ::google::protobuf::internal::WireFormatLite::
                 WriteInt32ToArrayWithField<4>(
-                    stream, this_._internal_port(), target);
+                    stream, this_._internal_client_port(), target);
+          }
+
+          // int32 internal_port = 5;
+          if (this_._internal_internal_port() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<5>(
+                    stream, this_._internal_internal_port(), target);
           }
 
           if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
@@ -1695,10 +1736,15 @@ PROTOBUF_NOINLINE void RegistryRegisterReq::Clear() {
               total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
                   this_._internal_server_id());
             }
-            // int32 port = 4;
-            if (this_._internal_port() != 0) {
+            // int32 client_port = 4;
+            if (this_._internal_client_port() != 0) {
               total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-                  this_._internal_port());
+                  this_._internal_client_port());
+            }
+            // int32 internal_port = 5;
+            if (this_._internal_internal_port() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_internal_port());
             }
           }
           return this_.MaybeComputeUnknownFieldsSize(total_size,
@@ -1722,8 +1768,11 @@ void RegistryRegisterReq::MergeImpl(::google::protobuf::MessageLite& to_msg, con
   if (from._internal_server_id() != 0) {
     _this->_impl_.server_id_ = from._impl_.server_id_;
   }
-  if (from._internal_port() != 0) {
-    _this->_impl_.port_ = from._impl_.port_;
+  if (from._internal_client_port() != 0) {
+    _this->_impl_.client_port_ = from._impl_.client_port_;
+  }
+  if (from._internal_internal_port() != 0) {
+    _this->_impl_.internal_port_ = from._impl_.internal_port_;
   }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -1743,8 +1792,8 @@ void RegistryRegisterReq::InternalSwap(RegistryRegisterReq* PROTOBUF_RESTRICT ot
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.ip_, &other->_impl_.ip_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(RegistryRegisterReq, _impl_.port_)
-      + sizeof(RegistryRegisterReq::_impl_.port_)
+      PROTOBUF_FIELD_OFFSET(RegistryRegisterReq, _impl_.internal_port_)
+      + sizeof(RegistryRegisterReq::_impl_.internal_port_)
       - PROTOBUF_FIELD_OFFSET(RegistryRegisterReq, _impl_.server_type_)>(
           reinterpret_cast<char*>(&_impl_.server_type_),
           reinterpret_cast<char*>(&other->_impl_.server_type_));

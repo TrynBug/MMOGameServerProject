@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "pch.h"
 #include "RegistryServerDefine.h"
@@ -42,9 +42,9 @@ private:
     static ServerSessionMetaInfo* getServerSessionMeta(const netlib::ISessionPtr& spSession);
 
 private:
-    // 등록 요청의 serverId, IP:Port 충돌 여부를 검증한다.
+    // 등록 요청의 serverId, IP:Port 충돌 여부를 검증한다. internalPort 에는 서버간 통신 포트를 입력해야 한다.
     // 충돌 없으면 true, 충돌 시 outErrorMsg에 이유를 담아 false 반환
-    bool validateRegistration(int32 serverId, ServerType type, const std::string& ip, uint16 port, std::string& outErrorMsg);
+    bool validateRegistration(int32 serverId, ServerType type, const std::string& ip, uint16 internalPort, std::string& outErrorMsg);
 
     // 등록된 서버 정보를 현재 연결된 모든 서버에 브로드캐스트한다.
     void broadcastServerInfo(const ServerEntry& serverEntry);

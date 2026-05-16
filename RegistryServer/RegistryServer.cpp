@@ -110,17 +110,18 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
     int32 serverId = req.server_id();
     ServerType type = static_cast<ServerType>(req.server_type());
     std::string ip = req.ip();
-    uint16 port = static_cast<uint16>(req.port());
+    uint16 clientPort = static_cast<uint16>(req.client_port());
+    uint16 internalPort = static_cast<uint16>(req.internal_port());
 
     if (!spSession)
     {
-        LOG_WRITE(LogLevel::Error, std::format("Session is null. serverId={}, serverType={}, ip={}, port={}", serverId, static_cast<int32>(type), ip, port));
+        LOG_WRITE(LogLevel::Error, std::format("Session is null. serverId={}, serverType={}, ip={}, clientPort={}, internalPort={}", serverId, static_cast<int32>(type), ip, clientPort, internalPort));
         return;
     }
 
     // 충돌 검증
     std::string errorMsg;
-    if (!validateRegistration(serverId, type, ip, port, errorMsg))
+    if (!validateRegistration(serverId, type, ip, internalPort, errorMsg))
     {
         LOG_WRITE(LogLevel::Error, std::format("RegistryServer: registration rejected. serverId={} reason={}", serverId, errorMsg));
 
@@ -143,7 +144,8 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
     serverEntry.serverType = type;
     serverEntry.status = ServerStatus::Running;
     serverEntry.ip = ip;
-    serverEntry.port = port;
+    serverEntry.clientPort = clientPort;
+    serverEntry.internalPort = internalPort;
     serverEntry.spSession = spSession;
     serverEntry.lastHeartbeatTime = std::chrono::steady_clock::now();
 
@@ -154,7 +156,7 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
     if (pMeta)
         pMeta->serverId = serverId;
 
-    LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server registered. serverId={} type={} ip={}:{}", serverId, static_cast<int>(type), ip, port));
+    LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server registered. serverId={} type={} ip={}, clientPort={}, internalPort={}", serverId, static_cast<int>(type), ip, clientPort, internalPort));
 
     // 서버 등록 완료 응답
     {
@@ -217,7 +219,8 @@ void RegistryServer::handlePollReq(const netlib::ISessionPtr& spSession, const S
         pInfo->set_server_type(static_cast<ServerPacket::ServerType>(serverEntry.serverType));
         pInfo->set_status(static_cast<ServerPacket::ServerStatus>(serverEntry.status));
         pInfo->set_ip(serverEntry.ip);
-        pInfo->set_port(serverEntry.port);
+        pInfo->set_client_port(serverEntry.clientPort);
+        pInfo->set_internal_port(serverEntry.internalPort);
         pInfo->set_user_count(serverEntry.userCount);
     });
 
@@ -268,9 +271,9 @@ ServerSessionMetaInfo* RegistryServer::getServerSessionMeta(const netlib::ISessi
 }
 
 // 서버 등록 검증
-bool RegistryServer::validateRegistration(int32 serverId, ServerType type, const std::string& ip, uint16 port, std::string& outErrorMsg)
+bool RegistryServer::validateRegistration(int32 serverId, ServerType type, const std::string& ip, uint16 internalPort, std::string& outErrorMsg)
 {
-    std::string endpoint = std::to_string(static_cast<int>(type)) + ":" + ip + ":" + std::to_string(port);
+    std::string endpoint = std::to_string(static_cast<int>(type)) + ":" + ip + ":" + std::to_string(internalPort);
 
     // 동일 serverId가 이미 등록되어 있는지 확인
     std::string existingEndpoint;
@@ -303,7 +306,8 @@ void RegistryServer::broadcastServerInfo(const ServerEntry& serverEntry)
     pInfo->set_server_type(static_cast<ServerPacket::ServerType>(serverEntry.serverType));
     pInfo->set_status(static_cast<ServerPacket::ServerStatus>(serverEntry.status));
     pInfo->set_ip(serverEntry.ip);
-    pInfo->set_port(serverEntry.port);
+    pInfo->set_client_port(serverEntry.clientPort);
+    pInfo->set_internal_port(serverEntry.internalPort);
     pInfo->set_user_count(serverEntry.userCount);
 
     auto spPacket = SerializePacket(Common::SERVER_PACKET_ID_REGISTRY_SERVER_INFO_NTF, ntf);
@@ -330,7 +334,8 @@ void RegistryServer::sendServerInfoNtf(netlib::ISessionPtr spSession, const Serv
     pInfo->set_server_type(static_cast<ServerPacket::ServerType>(serverEntry.serverType));
     pInfo->set_status(static_cast<ServerPacket::ServerStatus>(serverEntry.status));
     pInfo->set_ip(serverEntry.ip);
-    pInfo->set_port(serverEntry.port);
+    pInfo->set_client_port(serverEntry.clientPort);
+    pInfo->set_internal_port(serverEntry.internalPort);
     pInfo->set_user_count(serverEntry.userCount);
 
     auto spPacket = SerializePacket(Common::SERVER_PACKET_ID_REGISTRY_SERVER_INFO_NTF, ntf);

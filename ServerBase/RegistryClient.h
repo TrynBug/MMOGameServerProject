@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "pch.h"
 #include "Types.h"
@@ -30,7 +30,7 @@ public:
     RegistryClient& operator=(const RegistryClient&) = delete;
 
 public:
-    struct Config
+    struct RegistryClientConfig
     {
         std::string  registryIp;
         uint16       registryPort        = 0;
@@ -38,7 +38,8 @@ public:
         ServerType   myServerType        = ServerType::Unknown;
         int32        myServerId          = 0; 
         std::string  myIp;
-        uint16       myPort              = 0;
+        uint16       myClientPort        = 0;
+        uint16       myInternalPort      = 0;
 
         // 폴링할 서버 타입 목록. 각 서버가 자신에게 필요한 타입만 등록한다.
         std::vector<ServerType> pollTargetTypes;
@@ -52,7 +53,7 @@ public:
 
 public:
     // 초기화. IoContext는 ServerBase에서 관리하는 것을 공유한다.
-    bool Initialize(ServerBase* pServerBase, const Config& config);
+    bool Initialize(ServerBase* pServerBase, const RegistryClientConfig& config);
 
     // 레지스트리 서버 연결시작
     void Start();
@@ -101,7 +102,7 @@ private:
     void applyServerInfo(const ServerInfo& info);
 
 private:
-    Config m_config;
+    RegistryClientConfig m_config;
     netlib::NetClientUPtr m_upNetClient;
 
     ServerBase* m_pServerBase = nullptr;  // 자신이 속한 ServerBase

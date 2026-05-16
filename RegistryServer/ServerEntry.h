@@ -11,7 +11,8 @@ struct ServerEntry
     ServerType   serverType = ServerType::Unknown;
     ServerStatus status     = ServerStatus::Unknown;
     std::string  ip;
-    uint16       port       = 0;
+    uint16       clientPort = 0;   // 클라 통신용 포트
+    uint16       internalPort = 0; // 서버간 통신용 포트
     int32        userCount  = 0;
 
     // 연결된 세션 (서버가 끊기면 nullptr)
@@ -28,7 +29,8 @@ struct ServerEntry
         info.serverType = serverType;
         info.status     = status;
         info.ip         = ip;
-        info.port       = port;
+        info.clientPort = clientPort;
+        info.internalPort = internalPort;
         info.userCount  = userCount;
         return info;
     }

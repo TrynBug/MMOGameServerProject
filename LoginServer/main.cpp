@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "LoginServer.h"
 
 static LoginServer* g_pServer = nullptr;
@@ -24,7 +24,6 @@ int main()
     config.serverType = ServerType::Login;
     config.serverId = configParser.GetInt32("Server", "Id", 0);
     config.serverIp = configParser.GetString("Server", "IP", "0.0.0.0");
-    config.serverPort = static_cast<uint16>(configParser.GetInt32("Server", "Port", 10010));
 
     config.registryIp = configParser.GetString("Registry", "IP", "127.0.0.1");
     config.registryPort = static_cast<uint16>(configParser.GetInt32("Registry", "Port", 10001));
@@ -42,7 +41,7 @@ int main()
     // 클라이언트가 직접 접속 (Listen 서버 사용)
     config.useClientListenServer = true;
     config.clientListenServerConfig.ip = config.serverIp;
-    config.clientListenServerConfig.port = config.serverPort;
+    config.clientListenServerConfig.port = static_cast<uint16>(configParser.GetInt32("Server", "ClientPort", -1));
 
     config.useInternalListenServer = false; // 내부서버 접속 없음
 

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "pch.h"
 #include "Types.h"
@@ -20,7 +20,6 @@ struct ServerBaseConfig
     ServerType serverType = ServerType::Unknown;
     int32 serverId = 0;   // 서버 ID (1~999)
     std::string serverIp;
-    uint16 serverPort = 0;
 
     // 레지스트리 서버 접속정보
     std::string registryIp;

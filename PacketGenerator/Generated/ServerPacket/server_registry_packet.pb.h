@@ -736,8 +736,9 @@ class ServerInfoMsg final : public ::google::protobuf::Message
     kServerIdFieldNumber = 1,
     kServerTypeFieldNumber = 2,
     kStatusFieldNumber = 3,
-    kPortFieldNumber = 5,
-    kUserCountFieldNumber = 6,
+    kClientPortFieldNumber = 5,
+    kInternalPortFieldNumber = 6,
+    kUserCountFieldNumber = 7,
   };
   // string ip = 4;
   void clear_ip() ;
@@ -785,17 +786,27 @@ class ServerInfoMsg final : public ::google::protobuf::Message
   void _internal_set_status(::ServerPacket::ServerStatus value);
 
   public:
-  // int32 port = 5;
-  void clear_port() ;
-  ::int32_t port() const;
-  void set_port(::int32_t value);
+  // int32 client_port = 5;
+  void clear_client_port() ;
+  ::int32_t client_port() const;
+  void set_client_port(::int32_t value);
 
   private:
-  ::int32_t _internal_port() const;
-  void _internal_set_port(::int32_t value);
+  ::int32_t _internal_client_port() const;
+  void _internal_set_client_port(::int32_t value);
 
   public:
-  // int32 user_count = 6;
+  // int32 internal_port = 6;
+  void clear_internal_port() ;
+  ::int32_t internal_port() const;
+  void set_internal_port(::int32_t value);
+
+  private:
+  ::int32_t _internal_internal_port() const;
+  void _internal_set_internal_port(::int32_t value);
+
+  public:
+  // int32 user_count = 7;
   void clear_user_count() ;
   ::int32_t user_count() const;
   void set_user_count(::int32_t value);
@@ -810,7 +821,7 @@ class ServerInfoMsg final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      3, 6, 0,
+      3, 7, 0,
       37, 2>
       _table_;
 
@@ -832,7 +843,8 @@ class ServerInfoMsg final : public ::google::protobuf::Message
     ::int32_t server_id_;
     int server_type_;
     int status_;
-    ::int32_t port_;
+    ::int32_t client_port_;
+    ::int32_t internal_port_;
     ::int32_t user_count_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -1546,7 +1558,8 @@ class RegistryRegisterReq final : public ::google::protobuf::Message
     kIpFieldNumber = 3,
     kServerTypeFieldNumber = 1,
     kServerIdFieldNumber = 2,
-    kPortFieldNumber = 4,
+    kClientPortFieldNumber = 4,
+    kInternalPortFieldNumber = 5,
   };
   // string ip = 3;
   void clear_ip() ;
@@ -1584,14 +1597,24 @@ class RegistryRegisterReq final : public ::google::protobuf::Message
   void _internal_set_server_id(::int32_t value);
 
   public:
-  // int32 port = 4;
-  void clear_port() ;
-  ::int32_t port() const;
-  void set_port(::int32_t value);
+  // int32 client_port = 4;
+  void clear_client_port() ;
+  ::int32_t client_port() const;
+  void set_client_port(::int32_t value);
 
   private:
-  ::int32_t _internal_port() const;
-  void _internal_set_port(::int32_t value);
+  ::int32_t _internal_client_port() const;
+  void _internal_set_client_port(::int32_t value);
+
+  public:
+  // int32 internal_port = 5;
+  void clear_internal_port() ;
+  ::int32_t internal_port() const;
+  void set_internal_port(::int32_t value);
+
+  private:
+  ::int32_t _internal_internal_port() const;
+  void _internal_set_internal_port(::int32_t value);
 
   public:
   // @@protoc_insertion_point(class_scope:ServerPacket.RegistryRegisterReq)
@@ -1599,7 +1622,7 @@ class RegistryRegisterReq final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      2, 4, 0,
+      3, 5, 0,
       43, 2>
       _table_;
 
@@ -1620,7 +1643,8 @@ class RegistryRegisterReq final : public ::google::protobuf::Message
     ::google::protobuf::internal::ArenaStringPtr ip_;
     int server_type_;
     ::int32_t server_id_;
-    ::int32_t port_;
+    ::int32_t client_port_;
+    ::int32_t internal_port_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -2853,29 +2877,51 @@ inline void ServerInfoMsg::set_allocated_ip(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:ServerPacket.ServerInfoMsg.ip)
 }
 
-// int32 port = 5;
-inline void ServerInfoMsg::clear_port() {
+// int32 client_port = 5;
+inline void ServerInfoMsg::clear_client_port() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.port_ = 0;
+  _impl_.client_port_ = 0;
 }
-inline ::int32_t ServerInfoMsg::port() const {
-  // @@protoc_insertion_point(field_get:ServerPacket.ServerInfoMsg.port)
-  return _internal_port();
+inline ::int32_t ServerInfoMsg::client_port() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.ServerInfoMsg.client_port)
+  return _internal_client_port();
 }
-inline void ServerInfoMsg::set_port(::int32_t value) {
-  _internal_set_port(value);
-  // @@protoc_insertion_point(field_set:ServerPacket.ServerInfoMsg.port)
+inline void ServerInfoMsg::set_client_port(::int32_t value) {
+  _internal_set_client_port(value);
+  // @@protoc_insertion_point(field_set:ServerPacket.ServerInfoMsg.client_port)
 }
-inline ::int32_t ServerInfoMsg::_internal_port() const {
+inline ::int32_t ServerInfoMsg::_internal_client_port() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.port_;
+  return _impl_.client_port_;
 }
-inline void ServerInfoMsg::_internal_set_port(::int32_t value) {
+inline void ServerInfoMsg::_internal_set_client_port(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.port_ = value;
+  _impl_.client_port_ = value;
 }
 
-// int32 user_count = 6;
+// int32 internal_port = 6;
+inline void ServerInfoMsg::clear_internal_port() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.internal_port_ = 0;
+}
+inline ::int32_t ServerInfoMsg::internal_port() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.ServerInfoMsg.internal_port)
+  return _internal_internal_port();
+}
+inline void ServerInfoMsg::set_internal_port(::int32_t value) {
+  _internal_set_internal_port(value);
+  // @@protoc_insertion_point(field_set:ServerPacket.ServerInfoMsg.internal_port)
+}
+inline ::int32_t ServerInfoMsg::_internal_internal_port() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.internal_port_;
+}
+inline void ServerInfoMsg::_internal_set_internal_port(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.internal_port_ = value;
+}
+
+// int32 user_count = 7;
 inline void ServerInfoMsg::clear_user_count() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.user_count_ = 0;
@@ -2993,26 +3039,48 @@ inline void RegistryRegisterReq::set_allocated_ip(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:ServerPacket.RegistryRegisterReq.ip)
 }
 
-// int32 port = 4;
-inline void RegistryRegisterReq::clear_port() {
+// int32 client_port = 4;
+inline void RegistryRegisterReq::clear_client_port() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.port_ = 0;
+  _impl_.client_port_ = 0;
 }
-inline ::int32_t RegistryRegisterReq::port() const {
-  // @@protoc_insertion_point(field_get:ServerPacket.RegistryRegisterReq.port)
-  return _internal_port();
+inline ::int32_t RegistryRegisterReq::client_port() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.RegistryRegisterReq.client_port)
+  return _internal_client_port();
 }
-inline void RegistryRegisterReq::set_port(::int32_t value) {
-  _internal_set_port(value);
-  // @@protoc_insertion_point(field_set:ServerPacket.RegistryRegisterReq.port)
+inline void RegistryRegisterReq::set_client_port(::int32_t value) {
+  _internal_set_client_port(value);
+  // @@protoc_insertion_point(field_set:ServerPacket.RegistryRegisterReq.client_port)
 }
-inline ::int32_t RegistryRegisterReq::_internal_port() const {
+inline ::int32_t RegistryRegisterReq::_internal_client_port() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.port_;
+  return _impl_.client_port_;
 }
-inline void RegistryRegisterReq::_internal_set_port(::int32_t value) {
+inline void RegistryRegisterReq::_internal_set_client_port(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.port_ = value;
+  _impl_.client_port_ = value;
+}
+
+// int32 internal_port = 5;
+inline void RegistryRegisterReq::clear_internal_port() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.internal_port_ = 0;
+}
+inline ::int32_t RegistryRegisterReq::internal_port() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.RegistryRegisterReq.internal_port)
+  return _internal_internal_port();
+}
+inline void RegistryRegisterReq::set_internal_port(::int32_t value) {
+  _internal_set_internal_port(value);
+  // @@protoc_insertion_point(field_set:ServerPacket.RegistryRegisterReq.internal_port)
+}
+inline ::int32_t RegistryRegisterReq::_internal_internal_port() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.internal_port_;
+}
+inline void RegistryRegisterReq::_internal_set_internal_port(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.internal_port_ = value;
 }
 
 // -------------------------------------------------------------------
