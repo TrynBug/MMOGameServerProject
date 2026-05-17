@@ -1,0 +1,13 @@
+# 설치 명령어
+vcpkg install protobuf --overlay-triplets=D:/project/MMOGameServerProject/Development/Server/vcpkg/triplets/ --triplet=x64-windows-static-md-2022 --x-install-root=D:/project/MMOGameServerProject/Development/Server/vcpkg
+
+# 설치한 라이브러리 목록
+vcpkg list --x-install-root=D:/project/MMOGameServerProject/Development/Server/vcpkg
+
+
+
+# 설치한 라이브러리
+
+
+protobuf
+spdlog

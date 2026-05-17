@@ -134,16 +134,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)BIN\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <IncludePath>$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(ProjectDir)Generated\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)BIN\$(Configuration)\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)OUTPUT\$(Configuration)\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)BIN\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <IncludePath>$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(ProjectDir)Generated\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)BIN\$(Configuration)\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)OUTPUT\$(Configuration)\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PreBuildEvent>

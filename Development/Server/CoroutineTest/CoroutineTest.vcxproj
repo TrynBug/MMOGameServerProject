@@ -72,11 +72,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)GameDataLib\Gemerated;$(SolutionDir)GameDataLib;$(SolutionDir)DBConnector;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)PacketGenerator;$(SolutionDir)NetLib;$(SolutionDir)ServerBase;$(SolutionDir)Logger;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)BIN\$(Configuration)\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)OUTPUT\$(Configuration)\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)GameDataLib\Gemerated;$(SolutionDir)GameDataLib;$(SolutionDir)DBConnector;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)PacketGenerator;$(SolutionDir)NetLib;$(SolutionDir)ServerBase;$(SolutionDir)Logger;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)BIN\$(Configuration)\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)OUTPUT\$(Configuration)\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
