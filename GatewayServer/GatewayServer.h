@@ -4,10 +4,9 @@
 #include "ThreadSafeUnorderedMap.h"
 #include "GatewayServerDefine.h"
 #include "GatewayUser.h"
-#include "GameServerSendQueue.h"
 
 // 게이트웨이서버는 클라이언트가 게임플레이를위해 통신하는 서버이다.
-// 클라이언트는 게이트웨이서버에 접속하여 통신하고, 게이트웨이서버는 클라이언트에게 받은 패킷을 게임서버에 전달한다(게임서버별로 패킷을 모아서 한번에 보냄). 
+// 클라이언트는 게이트웨이서버에 접속하여 통신하고, 게이트웨이서버는 클라이언트에게 받은 패킷을 게임서버에 전달한다(원본 패킷에 Sidecar로 userId를 삽입해서 전달함)
 // 그리고 게임서버에서 받은 패킷을 클라이언트에게 전달한다(GameToGatewayPacketNtf / BroadcastNtf).
 // 클라이언트가 게이트웨이서버에 처음 접속할 때는 로그인서버에서 받은 인증토큰을 검증한다.
 // 클라이언트의 이전 접속 게임서버 정보를 관리하여, 클라이언트가 빠른시간내에 재접속 시 이전에 접속했던 게임서버로 접속하게 한다.
@@ -38,7 +37,6 @@ private:
     // ── 네트워크 이벤트 (내부 서버 포트) ─────────────────────────────────
     bool onInternalAccept(const netlib::ISessionPtr& spSession);
     bool onInternalRecv  (const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket);
-    void onInternalSendComplete(const netlib::ISessionPtr& spSession);
     void onInternalDisconnect(const netlib::ISessionPtr& spSession);
 
     // ── 클라이언트 패킷 핸들러 ───────────────────────────────────────────
@@ -94,10 +92,6 @@ private:
 
     // 게임서버 정보 캐시 (레지스트리 폴링으로 갱신)
     SharedThreadSafeUnorderedMap<int32, ServerInfo> m_safeGameServerInfos;
-
-    // 게임서버별 송신 큐 (key=gameServerId)
-    // 게임서버 핸드셰이크 시 추가, 연결 끊김 시 제거
-    SharedThreadSafeUnorderedMap<int32, GameServerSendQueuePtr> m_safeGameServerSendQueues;
 
     // 패킷 디스패처
     serverbase::PacketDispatcher m_clientDispatcher;
