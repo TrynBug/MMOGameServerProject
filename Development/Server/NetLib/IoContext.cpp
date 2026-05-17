@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "IoContext.h"
 #include "ISession.h"
 #include "OverlappedEx.h"
@@ -127,7 +127,7 @@ bool IoContext::RegisterSocket(SOCKET socket, ULONG_PTR completionKey)
     return (ret != nullptr);
 }
 
-void IoContext::Post(std::function<void()> fn)
+void IoContext::PostMsg(std::function<void()> fn)
 {
     // POST_OVERLAPPED을 힙에 생성하고 IOCP 메시지큐에 입력한다.
     // Worker 스레드가 꺼내서 fn을 실행한 후 delete한다.

@@ -2,7 +2,7 @@
 REM ============================================================
 REM GameDB 초기화 배치파일
 REM ============================================================
-REM DBSchema.sql과 DBDataSample.sql을 BIN/Debug/GameDB.db에 적용한다.
+REM DBSchema.sql과 DBDataSample.sql을 OUTPUT/Debug/GameDB.db에 적용한다.
 REM
 REM 전제: sqlite3.exe가 PATH에 있어야 함.
 REM        없다면 https://www.sqlite.org/download.html 에서 다운로드 후 PATH 설정.

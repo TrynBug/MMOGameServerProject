@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "Types.h"
 #include "NetConfig.h"
@@ -38,7 +38,7 @@ public:
     bool RegisterSocket(SOCKET socket, ULONG_PTR completionKey);
 
     // IOCP 메시지큐에 Worker 스레드에서 실행할 함수 입력
-    void Post(std::function<void()> fn);
+    void PostMsg(std::function<void()> fn);
 
 private:
     void workerThreadProc();

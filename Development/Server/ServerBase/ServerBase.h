@@ -57,7 +57,7 @@ class CoroutineResumeExecutor : public db::IResumeExecutor
 {
 public:
     CoroutineResumeExecutor(netlib::IoContext& ioContext) : m_ioContext(ioContext) {}
-    void Post(std::function<void()> fn) override { m_ioContext.Post(std::move(fn)); }
+    void Post(std::function<void()> fn) override { m_ioContext.PostMsg(std::move(fn)); }
 private:
     netlib::IoContext& m_ioContext;
 };
