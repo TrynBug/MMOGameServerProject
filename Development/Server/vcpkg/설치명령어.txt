@@ -1,13 +1,26 @@
+# vcpkg 버전
+vcpkg package management program version 2026-04-08-e0612b42ce44e55a0e630f2ee9d3c533a63d8bc1
+
 # 설치 명령어
 vcpkg install protobuf --overlay-triplets=D:/project/MMOGameServerProject/Development/Server/vcpkg/triplets/ --triplet=x64-windows-static-md-2022 --x-install-root=D:/project/MMOGameServerProject/Development/Server/vcpkg
 
 # 설치한 라이브러리 목록
 vcpkg list --x-install-root=D:/project/MMOGameServerProject/Development/Server/vcpkg
 
+abseil:x64-windows                                20260107.1#2        Abseil is an open-source collection of C++ libra...
+abseil:x64-windows-static-md-2022                 20260107.1#2        Abseil is an open-source collection of C++ libra...
+fmt:x64-windows-static-md-2022                    12.1.0              {fmt} is an open-source formatting library provi...
+protobuf:x64-windows                              6.33.4#2            Google's language-neutral, platform-neutral, ext...
+protobuf:x64-windows-static-md-2022               6.33.4#2            Google's language-neutral, platform-neutral, ext...
+spdlog:x64-windows-static-md-2022                 1.17.0              Very fast, header-only/compiled, C++ logging lib...
+spdlog[fmt]:x64-windows-static-md-2022                                Use fmt library
+spdlog[tz-offset]:x64-windows-static-md-2022                          Omit %z timezone offset (use on platforms withou...
+utf8-range:x64-windows                            6.33.4              Fast UTF-8 validation with Range algorithm (NEON...
+utf8-range:x64-windows-static-md-2022             6.33.4              Fast UTF-8 validation with Range algorithm (NEON...
+vcpkg-cmake-config:x64-windows                    2024-05-23
+vcpkg-cmake:x64-windows                           2024-04-23
 
 
-# 설치한 라이브러리
-
-
+# 설치한 라이브러리 이름
 protobuf
 spdlog
