@@ -69,7 +69,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;Logger.lib;$(spdlogLibsDebug);$(protobufLibsDebug);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;Logger.lib;DBConnector.lib;$(spdlogLibsDebug);$(protobufLibsDebug);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -88,7 +88,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;Logger.lib;$(spdlogLibs);$(protobufLibs);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;Logger.lib;DBConnector.lib;$(spdlogLibs);$(protobufLibs);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <!-- 헤더 파일 -->
@@ -97,6 +97,7 @@
     <ClInclude Include="GameServerDefine.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="OpenField.h" />
+    <ClInclude Include="User.h" />
     <ClInclude Include="GameServer.h" />
   </ItemGroup>
   <!-- 소스 파일 -->
@@ -106,6 +107,7 @@
     </ClCompile>
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="OpenField.cpp" />
+    <ClCompile Include="User.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

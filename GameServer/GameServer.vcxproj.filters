@@ -24,6 +24,9 @@
     <ClCompile Include="OpenField.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="User.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="GameServer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -45,6 +48,9 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="OpenField.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="User.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>
