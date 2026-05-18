@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 // 세션 타입
 enum class ESessionType : uint8 
@@ -9,7 +9,7 @@ enum class ESessionType : uint8
     LoginServer  // 내부 포트, 로그인서버 핸드셰이크 완료
 };
 
-// 세션 추가 정보
+// 클라 세션 추가 정보
 struct SessionMetaInfo
 {
     ESessionType sessionType        = ESessionType::Unknown;
@@ -30,4 +30,13 @@ struct AuthTokenEntry
 {
     uint64 authToken   = 0;
     int64  expireTimeMs = 0;   // Unix timestamp ms
+};
+
+// 내부서버 세션 추가 데이터
+struct InternalSessionMeta
+{
+    bool       handshakeDone = false;     // Handshake 완료여부
+    ServerType peerServerType = ServerType::Unknown;   // 서버 타입
+    int32      peerServerId = 0;         // 서버ID
+    bool       isConnector = false;      // true: 이 서버가 connect한 세션, false: 이 서버가 accept한 세션
 };

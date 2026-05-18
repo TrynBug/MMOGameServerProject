@@ -30,6 +30,9 @@ bool GameServer::OnInitialize()
     m_gatewayDispatcher.Register<ServerPacket::GatewayUserDisconnectNtf>(Common::SERVER_PACKET_ID_USER_DISCONNECT_NTF,
         [this](auto& spSession, auto& msg) { handleGatewayUserDisconnect(spSession, msg); });
 
+    m_gatewayDispatcher.Register<ServerPacket::ServerHandshakeRes>(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_RES,
+        [this](auto& spSession, auto& msg) { handleGatewayHandshakeRes(spSession, msg); });
+
     m_gatewayDispatcher.SetUnknownPacketHandler([](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
     {
         LOG_WRITE(LogLevel::Warn, std::format("GameServer: unknown gateway packetId={} sessionId={}",
@@ -160,24 +163,25 @@ void GameServer::onInternalDisconnect(const netlib::ISessionPtr& spSession)
 void GameServer::onGatewayConnect(const netlib::ISessionPtr& spSession)
 {
     // 세션에 빈 메타 정보를 부착한다. gatewayServerId는 handshake 전송 시 채운다.
-    spSession->SetUserData(std::make_shared<GatewaySessionMetaInfo>());
+    spSession->SetUserData(std::make_shared<InternalSessionMeta>());
 
     LOG_WRITE(LogLevel::Info, std::format("GameServer: gateway connected. sessionId={}", spSession->GetId()));
 
     // 핸드셰이크 전송
-    sendGameServerHandshake(spSession);
+    sendGameServerHandshakeReq(spSession);
 }
 
 void GameServer::onGatewayDisconnect(const netlib::ISessionPtr& spSession)
 {
-    GatewaySessionMetaInfo* pMeta = getGatewaySessionMeta(spSession);
-    if (!pMeta || pMeta->gatewayServerId == 0)
+    // 세션 메타정보 peer 서버 ID 조회
+    InternalSessionMeta* pMeta = getInternalSessionMeta(spSession);
+    if (!pMeta || !pMeta->handshakeDone)
     {
         LOG_WRITE(LogLevel::Warn, std::format("GameServer: gateway disconnected before handshake. sessionId={}", spSession->GetId()));
         return;
     }
 
-    int32 gatewayId = pMeta->gatewayServerId;
+    int32 gatewayId = pMeta->peerServerId;
     m_safeGatewaySessions.Erase(gatewayId);
 
     LOG_WRITE(LogLevel::Warn, std::format("GameServer: gateway disconnected. gatewayId={}", gatewayId));
@@ -212,7 +216,7 @@ void GameServer::disconnectFromGateway(int32 gatewayId)
     LOG_WRITE(LogLevel::Info, std::format("GameServer: disconnected from gateway {}", gatewayId));
 }
 
-void GameServer::sendGameServerHandshake(const netlib::ISessionPtr& spGatewaySession)
+void GameServer::sendGameServerHandshakeReq(const netlib::ISessionPtr& spGatewaySession)
 {
     // 이 세션이 어떤 게이트웨이의 넷클라이언트의 세션인지 조회한다.
     int32 gatewayId = 0;
@@ -239,18 +243,22 @@ void GameServer::sendGameServerHandshake(const netlib::ISessionPtr& spGatewaySes
     }
 
     // 세션 메타에 gatewayId 기록
-    GatewaySessionMetaInfo* pMeta = getGatewaySessionMeta(spGatewaySession);
-    if (pMeta)
-        pMeta->gatewayServerId = gatewayId;
+    InternalSessionMeta* pMeta = getInternalSessionMeta(spGatewaySession);
+    pMeta->handshakeDone = false;
+    pMeta->isConnector = true;
+    pMeta->peerServerId = gatewayId;
+    pMeta->peerServerType = ServerType::Gateway;
 
     // 세션 등록 (핸드셰이크 전송 이전에 등록. 이 이후 이 세션으로 도착하는 패킷이 곳 처리될 수 있도록)
     m_safeGatewaySessions.Insert(gatewayId, spGatewaySession);
 
     // 핸드셰이크 패킷 전송
-    ServerPacket::GameServerHandshakeNtf ntf;
-    ntf.set_server_id(GetServerId());
+    // 게이트웨이 서버에 Handshake Req 전송
+    ServerPacket::ServerHandshakeReq req;
+    req.set_server_type(static_cast<int32>(ServerType::Game));
+    req.set_server_id(m_serverId);
 
-    auto spPacket = SerializePacket(Common::SERVER_PACKET_ID_GAME_SERVER_HANDSHAKE_NTF, ntf);
+    auto spPacket = SerializePacket(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_REQ, req);
     if (!spPacket)
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: failed to serialize GameServerHandshakeNtf. gatewayId={}", gatewayId));
@@ -263,9 +271,9 @@ void GameServer::sendGameServerHandshake(const netlib::ISessionPtr& spGatewaySes
         GetServerId(), gatewayId));
 }
 
-GatewaySessionMetaInfo* GameServer::getGatewaySessionMeta(const netlib::ISessionPtr& spSession)
+InternalSessionMeta* GameServer::getInternalSessionMeta(const netlib::ISessionPtr& spSession)
 {
-    return static_cast<GatewaySessionMetaInfo*>(spSession->GetUserData().get());
+    return static_cast<InternalSessionMeta*>(spSession->GetUserData().get());
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -416,6 +424,23 @@ void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSess
     {
         m_spOpenField->EnqueueMessage(StageMsg_UserLeave{userId});
     }
+}
+
+// 게이트웨이서버로부터 HandshakeRes를 받음
+void GameServer::handleGatewayHandshakeRes(const netlib::ISessionPtr& spSession, const ServerPacket::ServerHandshakeRes& msg)
+{
+    int32 gatewayId = msg.server_id();
+
+    if (!msg.success())
+    {
+        LOG_WRITE(LogLevel::Error, std::format("gateway handshake failed. gatewayId={} error='{}'", gatewayId, msg.error_msg()));
+        return;
+    }
+
+    InternalSessionMeta* pMeta = getInternalSessionMeta(spSession);
+    pMeta->handshakeDone = true;
+
+    LOG_WRITE(LogLevel::Info, std::format("gateway handshake complete. gatewayId={}, sessionId={}", gatewayId, spSession->GetId()));
 }
 
 // ──────────────────────────────────────────────────────────────

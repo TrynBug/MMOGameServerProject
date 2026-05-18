@@ -34,6 +34,7 @@
 #include "ProtoSerializer.h"
 #include "Generated/Common/packet_id.pb.h"
 #include "Generated/ServerPacket/server_registry_packet.pb.h"
+#include "Generated/ServerPacket/server_handshake_packet.pb.h"
 
 // Logger
 #include "LoggerLib.h"

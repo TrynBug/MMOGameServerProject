@@ -37,7 +37,7 @@ private:
     bool onInternalAccept(const netlib::ISessionPtr& spSession);
     void onInternalDisconnect(const netlib::ISessionPtr& spSession);
 
-    // ── 게이트웨이서버 네트워크 이벤트 핸들러 (게임서버 → 게이트웨이서버 connect) ───
+    // ── 게이트웨이서버 네트워크 이벤트 핸들러 (게임서버 -> 게이트웨이서버 connect) ───
     void onGatewayConnect(const netlib::ISessionPtr& spSession);
     void onGatewayDisconnect(const netlib::ISessionPtr& spSession);
 
@@ -45,17 +45,18 @@ private:
     void connectToGateway(int32 gatewayId, const std::string& ip, uint16 port);
     void disconnectFromGateway(int32 gatewayId);
 
-    // 게이트웨이로 GameServerHandshakeNtf 전송
-    void sendGameServerHandshake(const netlib::ISessionPtr& spGatewaySession);
+    // 게이트웨이로 ServerHandshakeReq 전송
+    void sendGameServerHandshakeReq(const netlib::ISessionPtr& spGatewaySession);
 
-    // 세션에서 GatewaySessionMetaInfo를 꺼낸다.
-    static GatewaySessionMetaInfo* getGatewaySessionMeta(const netlib::ISessionPtr& spSession);
+    // 세션에서 InternalSessionMeta를 꺼낸다.
+    static InternalSessionMeta* getInternalSessionMeta(const netlib::ISessionPtr& spSession);
 
     // ── 게이트웨이로부터 받은 유저 관련 패킷 핸들러 ────────────────
     // PacketDispatcher::Register<T>가 자동 역직렬화 후 호출하므로 메시지 객체로 받는다.
     // handleGatewayUserEnter는 DB 조회를 위해 코루틴으로 작성한다.
     db::DetachedCoTask handleGatewayUserEnter(netlib::ISessionPtr spSession, ServerPacket::GatewayUserEnterNtf msg);
     void handleGatewayUserDisconnect(const netlib::ISessionPtr& spSession, const ServerPacket::GatewayUserDisconnectNtf& msg);
+    void handleGatewayHandshakeRes(const netlib::ISessionPtr& spSession, const ServerPacket::ServerHandshakeRes& msg);
 
     // 게이트웨이로부터 받은 클라 패킷 (사이드카 있음) 처리.
     // 사이드카에서 userId 추출 후 해당 유저의 패킷 큐에 push.

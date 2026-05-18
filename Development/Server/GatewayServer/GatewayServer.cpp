@@ -18,9 +18,8 @@ bool GatewayServer::OnInitialize()
     });
 
     // 게임서버 패킷 디스패처 등록
-    m_gameServerDispatcher.Register<ServerPacket::GameServerHandshakeNtf>(Common::SERVER_PACKET_ID_GAME_SERVER_HANDSHAKE_NTF,
-        [this](auto& spGameSession, auto& msg) { handleGameServerHandshake(spGameSession, msg); });
-
+    m_gameServerDispatcher.Register<ServerPacket::ServerHandshakeReq>(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_REQ,
+        [this](auto& spGameSession, auto& msg) { handleGameServerHandshakeReq(spGameSession, msg); });
     m_gameServerDispatcher.Register<ServerPacket::GameToGatewayPacketNtf>(Common::SERVER_PACKET_ID_GAME_TO_GATEWAY_PACKET_NTF,
         [this](auto& spGameSession, auto& msg) { handleGameToGatewayPacket(spGameSession, msg); });
 
@@ -36,6 +35,9 @@ bool GatewayServer::OnInitialize()
     });
 
     // 로그인서버 패킷 디스패처 등록
+    m_loginServerDispatcher.Register<ServerPacket::ServerHandshakeReq>(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_REQ,
+        [this](auto& spLoginSession, auto& msg) { handleLoginServerHandshakeReq(spLoginSession, msg); });
+
     m_loginServerDispatcher.Register<ServerPacket::LoginAuthTokenNtf>(Common::SERVER_PACKET_ID_LOGIN_AUTH_TOKEN_NTF,
         [this](auto& spLoginSession, auto& msg) { handleLoginAuthTokenNtf(spLoginSession, msg); });
 
@@ -95,7 +97,6 @@ void GatewayServer::OnBeforeShutdown()
     LOG_WRITE(LogLevel::Info, "GatewayServer::OnBeforeShutdown");
 }
 
-
 // 세션에서 SessionMetaInfo를 꺼낸다.
 // 주의: SessionMetaInfo* 를 다른곳에 보관해두면 안됨. 세션이 제거될때 함께 제거되기 때문
 SessionMetaInfo* GatewayServer::getSessionMeta(const netlib::ISessionPtr& spSession)
@@ -107,6 +108,13 @@ SessionMetaInfo* GatewayServer::getSessionMeta(const netlib::ISessionPtr& spSess
     }
 
     return pMeta;
+}
+
+// 세션에서 InternalSessionMeta를 꺼낸다.
+// 주의: InternalSessionMeta* 를 다른곳에 보관해두면 안됨. 세션이 제거될때 함께 제거되기 때문
+InternalSessionMeta* GatewayServer::getInternalSessionMeta(const netlib::ISessionPtr& spSession)
+{
+    return static_cast<InternalSessionMeta*>(spSession->GetUserData().get());
 }
 
 
@@ -161,36 +169,63 @@ void GatewayServer::onClientDisconnect(const netlib::ISessionPtr& spSession)
 // 내부서버 포트에서 accept 함
 bool GatewayServer::onInternalAccept(const netlib::ISessionPtr& spSession)
 {
-    spSession->SetUserData(std::make_shared<SessionMetaInfo>(ESessionType::Unknown));
+    spSession->SetUserData(std::make_shared<InternalSessionMeta>());
     return true;
 }
 
 // 내부서버 포트 패킷 recv
 bool GatewayServer::onInternalRecv(const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
 {
-    SessionMetaInfo* pMeta = getSessionMeta(spSession);
-    if (!pMeta)
-        return true;
-
-    switch (pMeta->sessionType)
+    InternalSessionMeta* pMeta = getInternalSessionMeta(spSession);
+    switch (pMeta->peerServerType)
     {
-    case ESessionType::Unknown:
-        if (spPacket->GetHeader()->type == Common::SERVER_PACKET_ID_GAME_SERVER_HANDSHAKE_NTF)
-            handleGameServerPacket(spSession, spPacket);
-        else
-            handleLoginServerPacket(spSession, spPacket);
-        break;
+    case ServerType::Unknown:
+    {
+        // 서버타입이 Unknown 이면 Accept는 했는데 아직 handshake를 주고받지 않은 경우이다.
+        // 그리고 Accept한 다음 처음으로 받은 패킷은 반드시 handshake req 패킷이어야 한다.
+        if (spPacket->GetHeader()->type != Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_REQ)
+        {
+            LOG_WRITE(LogLevel::Error, std::format("Accept 후 처음 받는 패킷이 handshake req가 아님. PacketType={}, IP={}:{}", spPacket->GetHeader()->type, spSession->GetIP(), spSession->GetPort()));
+            return false;
+        }
 
-    case ESessionType::GameServer:
+        // ServerHandshakeReq 메시지 확인
+        ServerPacket::ServerHandshakeReq req;
+        if (!DeserializePacket(*spPacket, req))
+        {
+            LOG_WRITE(LogLevel::Error, std::format("failed to deserialize ServerHandshakeReq, IP={}:{}", spSession->GetIP(), spSession->GetPort()));
+            return false;
+        }
+
+        // meta에 ServerType을 입력해준다.
+        pMeta->peerServerType = static_cast<ServerType>(req.server_type());
+        if (ServerType::Unknown == pMeta->peerServerType)
+        {
+            LOG_WRITE(LogLevel::Error, std::format("ServerHandshakeReq ServerType이 Unknown 입니다. ServerType={}, IP={}:{}", req.server_type(), spSession->GetIP(), spSession->GetPort()));
+            return false;
+        }
+
+        // onInternalRecv 한번 더 호출해줌
+        return onInternalRecv(spSession, spPacket);
+    }
+
+    case ServerType::Game:
+    {
         handleGameServerPacket(spSession, spPacket);
         break;
+    }
 
-    case ESessionType::LoginServer:
+    case ServerType::Login:
+    {
         handleLoginServerPacket(spSession, spPacket);
         break;
+    }
 
     default:
+    {
+        LOG_WRITE(LogLevel::Error, std::format("Invalid ServerType, ServerType={}, IP={}:{}", static_cast<int32>(pMeta->peerServerType), spSession->GetIP(), spSession->GetPort()));
         break;
+    }
     }
 
     return true;
@@ -324,22 +359,44 @@ void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spClientSession
 // 로그인서버 패킷 핸들러
 void GatewayServer::handleLoginServerPacket(const netlib::ISessionPtr& spLoginSession, netlib::PacketPtr spPacket)
 {
-    SessionMetaInfo* pMeta = getSessionMeta(spLoginSession);
-    if (pMeta && pMeta->sessionType == ESessionType::Unknown)
+    // 공용 핸드셰이크는 ServerBase가 직접 처리하므로
+    // 이 지점에 온 패킷은 핸드셰이크 완료 후의 일반 패킷이다.
+    m_loginServerDispatcher.Dispatch(spLoginSession, spPacket);
+}
+
+void GatewayServer::handleLoginServerHandshakeReq(const netlib::ISessionPtr& spLoginSession, const ServerPacket::ServerHandshakeReq& msg)
+{
+    InternalSessionMeta* pMeta = getInternalSessionMeta(spLoginSession);
+    if (!pMeta)
+        return;
+
+    int32 loginServerId = msg.server_id();
+    ServerType loginServerType = static_cast<ServerType>(msg.server_type());
+    if (ServerType::Login != loginServerType)
     {
-        pMeta->sessionType = ESessionType::LoginServer;
-
-        ServerPacket::GatewayHandshakeNtf handshake;
-        handshake.set_server_id(GetServerId());
-
-        auto spHandshakePacket = SerializePacket(Common::SERVER_PACKET_ID_LOGIN_GATEWAY_HANDSHAKE_NTF, handshake);
-        if (spHandshakePacket)
-            spLoginSession->Send(spHandshakePacket);
-
-        LOG_WRITE(LogLevel::Info, std::format("GatewayServer: login server connected. sent handshake. sessionId={}", spLoginSession->GetId()));
+        LOG_WRITE(LogLevel::Error, std::format("GatewayServer: login server handshake invalid server type. loginServerId={}, serverType={}", loginServerId, msg.server_type()));
+        return;
     }
 
-    m_loginServerDispatcher.Dispatch(spLoginSession, spPacket);
+    if (pMeta->handshakeDone)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("duplicated login server handshake request. loginServerId={}", loginServerId));
+        return;
+    }
+
+    pMeta->handshakeDone = true;
+    pMeta->isConnector = false;
+    pMeta->peerServerId = loginServerId;
+    pMeta->peerServerType = loginServerType;
+
+    // 로그인서버에 Handshake Res 전송
+    ServerPacket::ServerHandshakeRes res;
+    res.set_success(true);
+    res.set_server_id(m_serverId);
+    netlib::PacketPtr spPacket = SerializePacket(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_RES, res);
+    spLoginSession->Send(spPacket);
+
+    LOG_WRITE(LogLevel::Info, std::format("GatewayServer: login server handshake complete. loginServerId={}", loginServerId));
 }
 
 void GatewayServer::handleLoginAuthTokenNtf(const netlib::ISessionPtr& /*spLoginSession*/, const ServerPacket::LoginAuthTokenNtf& msg)
@@ -362,18 +419,40 @@ void GatewayServer::handleGameServerPacket(const netlib::ISessionPtr& spGameSess
     m_gameServerDispatcher.Dispatch(spGameSession, spPacket);
 }
 
-void GatewayServer::handleGameServerHandshake(const netlib::ISessionPtr& spGameSession, const ServerPacket::GameServerHandshakeNtf& msg)
+// 게임서버의 handshake req 처리
+void GatewayServer::handleGameServerHandshakeReq(const netlib::ISessionPtr& spGameSession, const ServerPacket::ServerHandshakeReq& msg)
 {
+    InternalSessionMeta* pMeta = getInternalSessionMeta(spGameSession);
+    if (!pMeta)
+        return;
+
     int32 gameServerId = msg.server_id();
+    ServerType gameServerType = static_cast<ServerType>(msg.server_type());
+    if (ServerType::Game != gameServerType)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GatewayServer: game server handshake invalid server type. gameServerId={}, serverType={}", gameServerId, msg.server_type()));
+        return;
+    }
+
+    if (pMeta->handshakeDone)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("duplicated game server handshake request. gameServerId={}", gameServerId));
+        return;
+    }
+
+    pMeta->handshakeDone = true;
+    pMeta->isConnector = false;
+    pMeta->peerServerId = gameServerId;
+    pMeta->peerServerType = gameServerType;
 
     m_safeGameServerSessions.Insert(gameServerId, spGameSession);
 
-    SessionMetaInfo* pMeta = getSessionMeta(spGameSession);
-    if (pMeta)
-    {
-        pMeta->sessionType = ESessionType::GameServer;
-        pMeta->gameServerId = gameServerId;
-    }
+    // 게임서버에 Handshake Res 전송
+    ServerPacket::ServerHandshakeRes res;
+    res.set_success(true);
+    res.set_server_id(m_serverId);
+    netlib::PacketPtr spPacket = SerializePacket(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_RES, res);
+    spGameSession->Send(spPacket);
 
     LOG_WRITE(LogLevel::Info, std::format("GatewayServer: game server handshake complete. gameServerId={}", gameServerId));
 }

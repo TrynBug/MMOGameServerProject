@@ -14,9 +14,8 @@ bool LoginServer::OnInitialize()
     });
 
     // 게이트웨이 패킷의 패킷핸들러 등록
-    m_gatewayDispatcher.Register<ServerPacket::GatewayHandshakeNtf>(Common::SERVER_PACKET_ID_LOGIN_GATEWAY_HANDSHAKE_NTF,
-        [this](auto& spSession, auto& msg) { handleGatewayHandshake(spSession, msg); });
-
+    m_gatewayDispatcher.Register<ServerPacket::ServerHandshakeRes>(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_RES,
+        [this](auto& spSession, auto& msg) { handleGatewayHandshakeRes(spSession, msg); });
     m_gatewayDispatcher.Register<ServerPacket::UserDisconnectNtf>(Common::SERVER_PACKET_ID_USER_DISCONNECT_NTF,
         [this](auto& spSession, auto& msg) { handleUserDisconnectNtf(spSession, msg); });
 
@@ -43,6 +42,7 @@ bool LoginServer::OnInitialize()
 
     // AccountDB 초기화
     // TODO: 경로를 설정 파일에서 읽도록 개선
+    LOG_WRITE(LogLevel::Info, std::format("Resolved DB path={}", std::filesystem::absolute("AccountDB.db").string()));
     if (!m_dbQueue.Open("AccountDB.db", 1))
     {
         LOG_WRITE(LogLevel::Error, "LoginServer::OnInitialize - failed to open AccountDB");
@@ -108,22 +108,29 @@ void LoginServer::onClientDisconnect(const netlib::ISessionPtr& /*spSession*/)
 void LoginServer::onGatewayConnect(const netlib::ISessionPtr& spSession)
 {
     // 아직 핸드셰이크 전이므로 세션에 빈 메타 정보만 설정해둔다.
-    // gatewayServerId는 GatewayHandshakeNtf 수신 후 채운다.
-    spSession->SetUserData(std::make_shared<GatewaySessionMetaInfo>());
-    LOG_WRITE(LogLevel::Info, std::format("LoginServer: gateway connected. sessionId={}", spSession->GetId()));
-}
+    // 메타정보는 handleGatewayHandshakeRes 에서 채운다.
+    spSession->SetUserData(std::make_shared<InternalSessionMeta>());
 
+    // 게이트웨이 서버에 Handshake Req 전송
+    ServerPacket::ServerHandshakeReq req;
+    req.set_server_type(static_cast<int32>(ServerType::Login));
+    req.set_server_id(m_serverId);
+    netlib::PacketPtr spPacket = SerializePacket(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_REQ, req);
+    spSession->Send(spPacket);
+
+    LOG_WRITE(LogLevel::Info, std::format("LoginServer: gateway connected. send handshake req. sessionId={}", spSession->GetId()));
+}
 // 게이트웨이서버 연결끊김
 void LoginServer::onGatewayDisconnect(const netlib::ISessionPtr& spSession)
 {
-    GatewaySessionMetaInfo* pMeta = getGatewaySessionMeta(spSession);
-    if (!pMeta || pMeta->gatewayServerId == 0)
+    InternalSessionMeta* pMeta = getInternalSessionMeta(spSession);
+    if (!pMeta || !pMeta->handshakeDone)
     {
         LOG_WRITE(LogLevel::Warn, std::format("LoginServer: gateway disconnected before handshake. sessionId={}", spSession->GetId()));
         return;
     }
 
-    int32 gatewayId = pMeta->gatewayServerId;
+    int32 gatewayId = pMeta->peerServerId;
     m_safeGatewaySessions.Erase(gatewayId);
 
     LOG_WRITE(LogLevel::Warn, std::format("LoginServer: gateway disconnected. gatewayId={}", gatewayId));
@@ -194,18 +201,32 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     LOG_WRITE(LogLevel::Info, std::format("LoginServer: login success. userId={} gateway={}:{}", userId, gateway->ip, gateway->internalPort));
 }
 
-// 게이트웨이서버 접속 성공후 게이트웨이서버가 자신의 정보를 보냄
-void LoginServer::handleGatewayHandshake(const netlib::ISessionPtr& spSession, const ServerPacket::GatewayHandshakeNtf& ntf)
+// 게이트웨이서버로부터 HandshakeRes를 받음
+void LoginServer::handleGatewayHandshakeRes(const netlib::ISessionPtr& spSession, const ServerPacket::ServerHandshakeRes& msg)
 {
-    int32 gatewayId = ntf.server_id();
+    int32 gatewayId = msg.server_id();
 
+    if (!msg.success())
+    {
+        LOG_WRITE(LogLevel::Error, std::format("gateway handshake failed. gatewayId={} error='{}'", gatewayId, msg.error_msg()));
+        return;
+    }
+
+    InternalSessionMeta* pMeta = getInternalSessionMeta(spSession);
+    if (pMeta->handshakeDone)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GatewayServer의 HandshakeRes가 중복으로 들어옴. gatewayId={}", gatewayId));
+        return;
+    }
+    
+    pMeta->handshakeDone = true;
+    pMeta->isConnector = true;
+    pMeta->peerServerId = gatewayId;
+    pMeta->peerServerType = ServerType::Gateway;
+    
     m_safeGatewaySessions.Insert(gatewayId, spSession);
 
-    GatewaySessionMetaInfo* pMeta = getGatewaySessionMeta(spSession);
-    if (pMeta)
-        pMeta->gatewayServerId = gatewayId;
-
-    LOG_WRITE(LogLevel::Info, std::format("LoginServer: gateway handshake complete. gatewayId={} sessionId={}", gatewayId, spSession->GetId()));
+    LOG_WRITE(LogLevel::Info, std::format("gateway handshake complete. gatewayId={}, sessionId={}", gatewayId, spSession->GetId()));
 }
 
 // 로그인 성공 응답
@@ -384,9 +405,9 @@ uint64 LoginServer::generateAuthToken()
     return m_rng();
 }
 
-// 세션에서 GatewaySessionMetaInfo를 꺼낸다.
-// 주의: GatewaySessionMetaInfo* 를 다른곳에 보관해두면 안됨. 세션이 제거될때 함께 제거되기 때문
-GatewaySessionMetaInfo* LoginServer::getGatewaySessionMeta(const netlib::ISessionPtr& spSession)
+// 세션에서 InternalSessionMeta를 꺼낸다.
+// 주의: InternalSessionMeta* 를 다른곳에 보관해두면 안됨. 세션이 제거될때 함께 제거되기 때문
+InternalSessionMeta* LoginServer::getInternalSessionMeta(const netlib::ISessionPtr& spSession)
 {
-    return static_cast<GatewaySessionMetaInfo*>(spSession->GetUserData().get());
+    return static_cast<InternalSessionMeta*>(spSession->GetUserData().get());
 }

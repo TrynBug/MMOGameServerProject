@@ -33,6 +33,7 @@
     <ClCompile Include="Generated\ServerPacket\gateway_game_packet.pb.cc" />
     <ClCompile Include="Generated\ServerPacket\gateway_user_packet.pb.cc" />
     <ClCompile Include="Generated\ServerPacket\login_server_packet.pb.cc" />
+    <ClCompile Include="Generated\ServerPacket\server_handshake_packet.pb.cc" />
     <ClCompile Include="Generated\ServerPacket\server_registry_packet.pb.cc" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -56,6 +57,7 @@
     <ClInclude Include="Generated\ServerPacket\gateway_game_packet.pb.h" />
     <ClInclude Include="Generated\ServerPacket\gateway_user_packet.pb.h" />
     <ClInclude Include="Generated\ServerPacket\login_server_packet.pb.h" />
+    <ClInclude Include="Generated\ServerPacket\server_handshake_packet.pb.h" />
     <ClInclude Include="Generated\ServerPacket\server_registry_packet.pb.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ProtoSerializer.h" />
@@ -77,6 +79,7 @@
     <None Include="Proto\ServerPacket\gateway_game_packet.proto" />
     <None Include="Proto\ServerPacket\gateway_user_packet.proto" />
     <None Include="Proto\ServerPacket\login_server_packet.proto" />
+    <None Include="Proto\ServerPacket\server_handshake_packet.proto" />
     <None Include="Proto\ServerPacket\server_registry_packet.proto" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

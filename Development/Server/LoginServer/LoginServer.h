@@ -38,7 +38,7 @@ private:
     db::DetachedCoTask handleLoginReq(netlib::ISessionPtr spSession, GamePacket::LoginReq msg);
 
     // ── 게이트웨이서버 패킷 핸들러 ─────────────────────────────────
-    void handleGatewayHandshake(const netlib::ISessionPtr& spSession, const ServerPacket::GatewayHandshakeNtf& msg);
+    void handleGatewayHandshakeRes(const netlib::ISessionPtr& spSession, const ServerPacket::ServerHandshakeRes& msg);
     void handleUserDisconnectNtf(const netlib::ISessionPtr& spSession, const ServerPacket::UserDisconnectNtf& msg);
 
     // 로그인 응답 전송
@@ -58,8 +58,8 @@ private:
     // 이미 로그인 중인 게이트웨이에 중복 로그인 알림
     void sendDuplicateLoginToGateway(int32 gatewayId, int64 userId);
 
-    // 세션에서 GatewaySessionMetaInfo를 꺼낸다.
-    static GatewaySessionMetaInfo* getGatewaySessionMeta(const netlib::ISessionPtr& spSession);
+    // 세션에서 InternalSessionMeta를 꺼낸다.
+    static InternalSessionMeta* getInternalSessionMeta(const netlib::ISessionPtr& spSession);
 
     // 로그인한 유저 정보
     struct LoginEntry

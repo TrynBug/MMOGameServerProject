@@ -54,10 +54,6 @@ extern "C" {
 extern const ::google::protobuf::internal::DescriptorTable descriptor_table_ServerPacket_2fgateway_5fuser_5fpacket_2eproto;
 }  // extern "C"
 namespace ServerPacket {
-class GameServerHandshakeNtf;
-struct GameServerHandshakeNtfDefaultTypeInternal;
-extern GameServerHandshakeNtfDefaultTypeInternal _GameServerHandshakeNtf_default_instance_;
-extern const ::google::protobuf::internal::ClassDataFull GameServerHandshakeNtf_class_data_;
 class GatewayUserDisconnectNtf;
 struct GatewayUserDisconnectNtfDefaultTypeInternal;
 extern GatewayUserDisconnectNtfDefaultTypeInternal _GatewayUserDisconnectNtf_default_instance_;
@@ -138,7 +134,7 @@ class GatewayUserRerouteNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const GatewayUserRerouteNtf*>(
         &_GatewayUserRerouteNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 3;
+  static constexpr int kIndexInFileMessages = 2;
   friend void swap(GatewayUserRerouteNtf& a, GatewayUserRerouteNtf& b) { a.Swap(&b); }
   inline void Swap(GatewayUserRerouteNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -369,7 +365,7 @@ class GatewayUserEnterNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const GatewayUserEnterNtf*>(
         &_GatewayUserEnterNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 0;
   friend void swap(GatewayUserEnterNtf& a, GatewayUserEnterNtf& b) { a.Swap(&b); }
   inline void Swap(GatewayUserEnterNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -588,7 +584,7 @@ class GatewayUserDisconnectNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const GatewayUserDisconnectNtf*>(
         &_GatewayUserDisconnectNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 2;
+  static constexpr int kIndexInFileMessages = 1;
   friend void swap(GatewayUserDisconnectNtf& a, GatewayUserDisconnectNtf& b) { a.Swap(&b); }
   inline void Swap(GatewayUserDisconnectNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -721,196 +717,6 @@ class GatewayUserDisconnectNtf final : public ::google::protobuf::Message
 };
 
 extern const ::google::protobuf::internal::ClassDataFull GatewayUserDisconnectNtf_class_data_;
-// -------------------------------------------------------------------
-
-class GameServerHandshakeNtf final : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:ServerPacket.GameServerHandshakeNtf) */ {
- public:
-  inline GameServerHandshakeNtf() : GameServerHandshakeNtf(nullptr) {}
-  ~GameServerHandshakeNtf() PROTOBUF_FINAL;
-
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-  void operator delete(GameServerHandshakeNtf* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
-    SharedDtor(*msg);
-    ::google::protobuf::internal::SizedDelete(msg, sizeof(GameServerHandshakeNtf));
-  }
-#endif
-
-  template <typename = void>
-  explicit PROTOBUF_CONSTEXPR GameServerHandshakeNtf(::google::protobuf::internal::ConstantInitialized);
-
-  inline GameServerHandshakeNtf(const GameServerHandshakeNtf& from) : GameServerHandshakeNtf(nullptr, from) {}
-  inline GameServerHandshakeNtf(GameServerHandshakeNtf&& from) noexcept
-      : GameServerHandshakeNtf(nullptr, ::std::move(from)) {}
-  inline GameServerHandshakeNtf& operator=(const GameServerHandshakeNtf& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline GameServerHandshakeNtf& operator=(GameServerHandshakeNtf&& from) noexcept {
-    if (this == &from) return *this;
-    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
-  }
-  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
-  }
-
-  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
-    return GetDescriptor();
-  }
-  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const GameServerHandshakeNtf& default_instance() {
-    return *reinterpret_cast<const GameServerHandshakeNtf*>(
-        &_GameServerHandshakeNtf_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages = 0;
-  friend void swap(GameServerHandshakeNtf& a, GameServerHandshakeNtf& b) { a.Swap(&b); }
-  inline void Swap(GameServerHandshakeNtf* PROTOBUF_NONNULL other) {
-    if (other == this) return;
-    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
-      InternalSwap(other);
-    } else {
-      ::google::protobuf::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(GameServerHandshakeNtf* PROTOBUF_NONNULL other) {
-    if (other == this) return;
-    ABSL_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  GameServerHandshakeNtf* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
-    return ::google::protobuf::Message::DefaultConstruct<GameServerHandshakeNtf>(arena);
-  }
-  using ::google::protobuf::Message::CopyFrom;
-  void CopyFrom(const GameServerHandshakeNtf& from);
-  using ::google::protobuf::Message::MergeFrom;
-  void MergeFrom(const GameServerHandshakeNtf& from) { GameServerHandshakeNtf::MergeImpl(*this, from); }
-
-  private:
-  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
-                        const ::google::protobuf::MessageLite& from_msg);
-
-  public:
-  bool IsInitialized() const {
-    return true;
-  }
-  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
-  #if defined(PROTOBUF_CUSTOM_VTABLE)
-  private:
-  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
-  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
-      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
-      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
-
-  public:
-  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
-  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
-      ::uint8_t* PROTOBUF_NONNULL target,
-      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
-    return _InternalSerialize(*this, target, stream);
-  }
-  #else   // PROTOBUF_CUSTOM_VTABLE
-  ::size_t ByteSizeLong() const final;
-  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
-      ::uint8_t* PROTOBUF_NONNULL target,
-      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
-  #endif  // PROTOBUF_CUSTOM_VTABLE
-  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
-  static void SharedDtor(MessageLite& self);
-  void InternalSwap(GameServerHandshakeNtf* PROTOBUF_NONNULL other);
- private:
-  template <typename T>
-  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
-  static ::absl::string_view FullMessageName() { return "ServerPacket.GameServerHandshakeNtf"; }
-
-  explicit GameServerHandshakeNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
-  GameServerHandshakeNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const GameServerHandshakeNtf& from);
-  GameServerHandshakeNtf(
-      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, GameServerHandshakeNtf&& from) noexcept
-      : GameServerHandshakeNtf(arena) {
-    *this = ::std::move(from);
-  }
-  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
-  static void* PROTOBUF_NONNULL PlacementNew_(
-      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
-      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
-  static constexpr auto InternalNewImpl_();
-
- public:
-  static constexpr auto InternalGenerateClassData_();
-
-  ::google::protobuf::Metadata GetMetadata() const;
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-  enum : int {
-    kServerIdFieldNumber = 1,
-  };
-  // int32 server_id = 1;
-  void clear_server_id() ;
-  ::int32_t server_id() const;
-  void set_server_id(::int32_t value);
-
-  private:
-  ::int32_t _internal_server_id() const;
-  void _internal_set_server_id(::int32_t value);
-
-  public:
-  // @@protoc_insertion_point(class_scope:ServerPacket.GameServerHandshakeNtf)
- private:
-  class _Internal;
-  friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<0, 1,
-                                   0, 0,
-                                   2>
-      _table_;
-
-  friend class ::google::protobuf::MessageLite;
-  friend class ::google::protobuf::Arena;
-  template <typename T>
-  friend class ::google::protobuf::Arena::InternalHelper;
-  using InternalArenaConstructable_ = void;
-  using DestructorSkippable_ = void;
-  struct Impl_ {
-    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
-    inline explicit Impl_(
-        ::google::protobuf::internal::InternalVisibility visibility,
-        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
-    inline explicit Impl_(
-        ::google::protobuf::internal::InternalVisibility visibility,
-        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
-        const GameServerHandshakeNtf& from_msg);
-    ::google::protobuf::internal::HasBits<1> _has_bits_;
-    ::google::protobuf::internal::CachedSize _cached_size_;
-    ::int32_t server_id_;
-    PROTOBUF_TSAN_DECLARE_MEMBER
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_ServerPacket_2fgateway_5fuser_5fpacket_2eproto;
-};
-
-extern const ::google::protobuf::internal::ClassDataFull GameServerHandshakeNtf_class_data_;
 
 // ===================================================================
 
@@ -924,35 +730,6 @@ extern const ::google::protobuf::internal::ClassDataFull GameServerHandshakeNtf_
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
-// -------------------------------------------------------------------
-
-// GameServerHandshakeNtf
-
-// int32 server_id = 1;
-inline void GameServerHandshakeNtf::clear_server_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.server_id_ = 0;
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00000001U);
-}
-inline ::int32_t GameServerHandshakeNtf::server_id() const {
-  // @@protoc_insertion_point(field_get:ServerPacket.GameServerHandshakeNtf.server_id)
-  return _internal_server_id();
-}
-inline void GameServerHandshakeNtf::set_server_id(::int32_t value) {
-  _internal_set_server_id(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  // @@protoc_insertion_point(field_set:ServerPacket.GameServerHandshakeNtf.server_id)
-}
-inline ::int32_t GameServerHandshakeNtf::_internal_server_id() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.server_id_;
-}
-inline void GameServerHandshakeNtf::_internal_set_server_id(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.server_id_ = value;
-}
-
 // -------------------------------------------------------------------
 
 // GatewayUserEnterNtf

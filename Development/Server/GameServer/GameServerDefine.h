@@ -9,11 +9,11 @@ constexpr int32 k_openFieldThreadIndex = 0;
 // 오픈필드 Stage ID (고정)
 constexpr int64 k_openFieldStageId = 1;
 
-
-// 게이트웨이서버 세션 추가 데이터
-// GameServer가 게이트웨이서버에 connect 한 NetClient의 세션에 부착된다.
-// onConnect에서 빈 메타를 부착하고, 핸드셰이크 송신 후 gatewayServerId를 채운다.
-struct GatewaySessionMetaInfo
+// 내부서버 세션 추가 데이터
+struct InternalSessionMeta
 {
-    int32 gatewayServerId = 0;
+    bool       handshakeDone = false;     // Handshake 완료여부
+    ServerType peerServerType = ServerType::Unknown;   // 서버 타입
+    int32      peerServerId = 0;         // 서버ID
+    bool       isConnector = false;      // true: 이 서버가 connect한 세션, false: 이 서버가 accept한 세션
 };

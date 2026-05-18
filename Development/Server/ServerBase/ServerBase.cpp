@@ -99,7 +99,7 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
             LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - internal listen NetServer Initialize failed");
             return false;
         }
-
+        
         m_spInternalListenServer->SetEventHandler(pHandler);
         LOG_WRITE(LogLevel::Info, std::format("ServerBase::Initialize - internal listen NetServer initialized on port {}", config.internalListenServerConfig.port));
     }

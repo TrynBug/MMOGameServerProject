@@ -46,12 +46,13 @@ private:
 
     // ── 게임서버 패킷 핸들러 ─────────────────────────────────────────────
     void handleGameServerPacket      (const netlib::ISessionPtr& spGameSession, netlib::PacketPtr spPacket);
-    void handleGameServerHandshake   (const netlib::ISessionPtr& spGameSession, const ServerPacket::GameServerHandshakeNtf&    msg);
+    void handleGameServerHandshakeReq(const netlib::ISessionPtr& spGameSession, const ServerPacket::ServerHandshakeReq& msg);
     void handleGameToGatewayPacket   (const netlib::ISessionPtr& spGameSession, const ServerPacket::GameToGatewayPacketNtf&    msg);
     void handleGameToGatewayBroadcast(const netlib::ISessionPtr& spGameSession, const ServerPacket::GameToGatewayBroadcastNtf& msg);
     void handleUserMoveToGameServer  (const netlib::ISessionPtr& spGameSession, const ServerPacket::UserMoveToGameServerReq&   msg);
 
     // ── 로그인서버 패킷 핸들러 ───────────────────────────────────────────
+    void handleLoginServerHandshakeReq(const netlib::ISessionPtr& spLoginSession, const ServerPacket::ServerHandshakeReq& msg);
     void handleLoginServerPacket(const netlib::ISessionPtr& spLoginSession, netlib::PacketPtr spPacket);
     void handleLoginAuthTokenNtf(const netlib::ISessionPtr& spLoginSession, const ServerPacket::LoginAuthTokenNtf& msg);
     void handleLoginDuplicateNtf(const netlib::ISessionPtr& spLoginSession, const ServerPacket::LoginDuplicateNtf& msg);
@@ -59,6 +60,9 @@ private:
 private:
     // 세션에서 SessionMetaInfo를 꺼낸다.
     static SessionMetaInfo* getSessionMeta(const netlib::ISessionPtr& spSession);
+
+    // 세션에서 InternalSessionMeta를 꺼낸다.
+    static InternalSessionMeta* getInternalSessionMeta(const netlib::ISessionPtr& spSession);
 
     // 로그인서버로부터 사전 전달받은 인증토큰 저장
     void storeAuthToken(int64 userId, uint64 authToken, int64 expireTimeMs);

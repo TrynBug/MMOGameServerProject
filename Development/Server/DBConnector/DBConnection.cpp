@@ -98,7 +98,7 @@ void DBConnection::bindParam(sqlite3_stmt* pStmt, int index, const DBParam& para
         }
         else if constexpr (std::is_same_v<T, std::string>)
         {
-            sqlite3_bind_text(pStmt, index, val.c_str(), static_cast<int>(val.size()), SQLITE_TRANSIENT);
+            sqlite3_bind_text(pStmt, index, val.c_str(), -1, SQLITE_TRANSIENT);
         }
         else if constexpr (std::is_same_v<T, std::vector<uint8_t>>)
         {

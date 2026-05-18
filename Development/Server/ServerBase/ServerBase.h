@@ -7,6 +7,7 @@
 #include "ObjectIdGenerator.h"
 #include "ContentsThread.h"
 #include "RegistryClient.h"
+#include "ThreadSafeUnorderedMap.h"
 
 #include "DBTask.h"
 
@@ -93,8 +94,8 @@ public:
     // ── 다른 서버와 연결관리 ─────────────────────────────────────
 
 	// 다른 서버와 연결한다. 내부적으로 NetClient을 생성하여 연결한다. NetClient는 ServerBase가 관리한다.
-    // 연결을 끊으려면 DisconnectToServer 사용
-    netlib::NetClientPtr ConnectToServer(const std::string& ip, uint16 port, netlib::FuncEventHandler& handler);
+	// 연결을 끊으려면 DisconnectToServer 사용
+	netlib::NetClientPtr ConnectToServer(const std::string& ip, uint16 port, netlib::FuncEventHandler& handler);
 
     // 다른 서버와의 연결을 끊는다.
     void DisconnectToServer(netlib::NetClientPtr spClient);

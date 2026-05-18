@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package ServerPacket;
+
+import "Common/packet_id.proto";
+
+// ──────────────────────────────────────────────
+// 내부 서버 사이의 핸드셰이크 (모든 서버 간 연결의 첫 패킷)
+// 레지스트리 서버와의 연결을 제외한 모든 서버 간 연결에 사용됨
+// ──────────────────────────────────────────────
+
+// Connector -> Listener
+// 서버 간 연결이 수립된 직후 Connector가 가장 먼저 전송한다.
+// Listener는 server_id가 레지스트리에 등록된 서버인지 검증한다.
+message ServerHandshakeReq {
+    int32 server_type = 1;   // ServerType enum (Login=2, Gateway=3, Game=4, Chat=5)
+    int32 server_id   = 2;   // 자신의 서버 ID
+}
+
+// Listener -> Connector
+// 핸드셰이크 검증 결과 응답.
+// success=false 면 Connector는 연결을 끊고 재연결을 시도해야 한다.
+message ServerHandshakeRes {
+    bool   success    = 1;
+    int32  server_id  = 2;   // Listener의 서버 ID (Connector가 캐시에 저장)
+    string error_msg  = 3;   // 실패 시 사유
+}
