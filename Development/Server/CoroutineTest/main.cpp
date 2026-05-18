@@ -10,7 +10,7 @@
 //   예시 2. 콜백 중첩 vs 코루틴 비교 (동일한 로직 두 가지 방식으로)
 //   예시 3. 여러 DB 요청을 순차적으로 처리
 //   예시 4. 코루틴에서 오류 처리
-//   예시 5. 코루틴을 리턴값(DBTask<T>)으로 조합하기
+//   예시 5. 코루틴을 리턴값(AwaitableCoTask<T>)으로 조합하기
 //   예시 6. executor를 통한 resume 스레드 제어
 
 #define WIN32_LEAN_AND_MEAN
@@ -149,13 +149,13 @@ void initTestDB(db::DBConnection& conn)
 // 예시 1. 가장 기본적인 co_await 사용법
 //
 // 핵심 개념:
-//   - 함수 반환타입을 db::DBTask<void>로 선언하면 코루틴이 됨
+//   - 함수 반환타입을 db::AwaitableCoTask<void>로 선언하면 코루틴이 됨
 //   - co_await dbQueue.ExecuteAsync(...) 로 DB 결과를 기다림
 //   - DB worker가 처리 완료되면 코루틴이 재개됨
 //   - 코드 흐름이 위에서 아래로 직선적 (콜백 중첩 없음)
 //
 // =============================================================================
-db::DBTask<void> example1_basic(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool)
+db::AwaitableCoTask<void> example1_basic(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool)
 {
     std::cout << "[예시1] SELECT 시작\n";
 
@@ -212,7 +212,7 @@ void example2_callback(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool)
 }
 
 // 2-B. 코루틴 방식 (동일 로직)
-db::DBTask<void> example2_coroutine(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool)
+db::AwaitableCoTask<void> example2_coroutine(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool)
 {
     std::cout << "[예시2-코루틴] 시작\n";
 
@@ -246,7 +246,7 @@ db::DBTask<void> example2_coroutine(db::AsyncDBQueue& dbQueue, SimpleThreadPool&
 //   - 로그인 처리 흐름과 유사한 패턴
 //
 // =============================================================================
-db::DBTask<void> example3_sequential(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool)
+db::AwaitableCoTask<void> example3_sequential(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool)
 {
     std::cout << "[예시3] 순차 처리 시작\n";
 
@@ -290,7 +290,7 @@ db::DBTask<void> example3_sequential(db::AsyncDBQueue& dbQueue, SimpleThreadPool
 //   - 실패 시 중간에 co_return으로 빠져나오거나 복구 로직 실행
 //
 // =============================================================================
-db::DBTask<void> example4_errorHandling(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool)
+db::AwaitableCoTask<void> example4_errorHandling(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool)
 {
     std::cout << "[예시4] 오류 처리 시작\n";
 
@@ -315,17 +315,17 @@ db::DBTask<void> example4_errorHandling(db::AsyncDBQueue& dbQueue, SimpleThreadP
 
 // =============================================================================
 //
-// 예시 5. DBTask<T>로 코루틴 조합하기
+// 예시 5. AwaitableCoTask<T>로 코루틴 조합하기
 //
 // 핵심 개념:
-//   - 코루틴이 값을 리턴할 수 있음 (DBTask<int64_t> 등)
+//   - 코루틴이 값을 리턴할 수 있음 (AwaitableCoTask<int64_t> 등)
 //   - 코루틴을 함수처럼 co_await로 호출해서 조합 가능
 //   - 복잡한 로직을 작은 코루틴으로 분리하는 패턴
 //
 // =============================================================================
 
 // 유저 ID를 받아서 점수를 리턴하는 코루틴
-db::DBTask<int64_t> getScore(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool, int64_t userId)
+db::AwaitableCoTask<int64_t> getScore(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool, int64_t userId)
 {
     db::DBResult r = co_await dbQueue.ExecuteAsync(
         "SELECT score FROM users WHERE id = ?", { userId }, &pool);
@@ -337,7 +337,7 @@ db::DBTask<int64_t> getScore(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool, 
 }
 
 // getScore 코루틴을 co_await로 조합하는 코루틴
-db::DBTask<void> example5_composition(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool)
+db::AwaitableCoTask<void> example5_composition(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool)
 {
     std::cout << "[예시5] 코루틴 조합 시작\n";
 
@@ -371,7 +371,7 @@ db::DBTask<void> example5_composition(db::AsyncDBQueue& dbQueue, SimpleThreadPoo
 //   - 실제 서버에서는 executor로 IOCP Worker 스레드 풀을 연결하면 됨
 //
 // =============================================================================
-db::DBTask<void> example6_executor(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool)
+db::AwaitableCoTask<void> example6_executor(db::AsyncDBQueue& dbQueue, SimpleThreadPool& pool)
 {
     std::cout << "[예시6] executor 제어 시작\n";
 
@@ -428,7 +428,7 @@ int main()
     // Resume 스레드 풀: 스레드 2개
     SimpleThreadPool pool(2);
 
-    // DBTask 객체를 변수에 보관해야 한다.
+    // AwaitableCoTask 객체를 변수에 보관해야 한다.
     // 리턴값을 버리면 소멸자가 코루틴 프레임을 즉시 해제하고,
     // 이후 DB worker가 resume을 시도할 때 크래시가 발생한다.
 

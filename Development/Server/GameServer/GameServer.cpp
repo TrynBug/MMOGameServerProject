@@ -277,7 +277,7 @@ GatewaySessionMetaInfo* GameServer::getGatewaySessionMeta(const netlib::ISession
 // 2) 없으면 기본값 캐릭터 생성 후 DB에 INSERT
 // 3) 유저 객체 생성, 글로벌 맵 등록, 오픈필드에 입장 메시지 push
 // 4) GameEnterNtf 응답
-db::DBTask<void> GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSession*/, ServerPacket::GatewayUserEnterNtf msg)
+db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSession*/, ServerPacket::GatewayUserEnterNtf msg)
 {
     const int64 userId    = msg.user_id();
     const int32 gatewayId = msg.gateway_id();

@@ -54,7 +54,7 @@ private:
     // ── 게이트웨이로부터 받은 유저 관련 패킷 핸들러 ────────────────
     // PacketDispatcher::Register<T>가 자동 역직렬화 후 호출하므로 메시지 객체로 받는다.
     // handleGatewayUserEnter는 DB 조회를 위해 코루틴으로 작성한다.
-    db::DBTask<void> handleGatewayUserEnter(netlib::ISessionPtr spSession, ServerPacket::GatewayUserEnterNtf msg);
+    db::DetachedCoTask handleGatewayUserEnter(netlib::ISessionPtr spSession, ServerPacket::GatewayUserEnterNtf msg);
     void handleGatewayUserDisconnect(const netlib::ISessionPtr& spSession, const ServerPacket::GatewayUserDisconnectNtf& msg);
 
     // 게이트웨이로부터 받은 클라 패킷 (사이드카 있음) 처리.

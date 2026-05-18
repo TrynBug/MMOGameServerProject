@@ -49,9 +49,6 @@ bool LoginServer::OnInitialize()
         return false;
     }
 
-    // AccountDB 스키마 초기화 (테이블이 없으면 생성)
-    initAccountDB();
-
     // prevGatewayMap TTL 정리 타이머 (1분마다)
     GetTimer().Register(60000, [this]()
     {
@@ -133,7 +130,7 @@ void LoginServer::onGatewayDisconnect(const netlib::ISessionPtr& spSession)
 }
 
 // 로그인 요청 처리 (코루틴 함수)
-db::DBTask<void> LoginServer::handleLoginReq(netlib::ISessionPtr spSession, GamePacket::LoginReq req)
+db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, GamePacket::LoginReq req)
 {
     const std::string loginId = req.login_id();
     const std::string password = req.password();
@@ -392,27 +389,4 @@ uint64 LoginServer::generateAuthToken()
 GatewaySessionMetaInfo* LoginServer::getGatewaySessionMeta(const netlib::ISessionPtr& spSession)
 {
     return static_cast<GatewaySessionMetaInfo*>(spSession->GetUserData().get());
-}
-
-// AccountDB 스키마 초기화
-void LoginServer::initAccountDB()
-{
-    // 동기 DBConnection으로 스키마 초기화 (서버 시작 시 1회)
-    db::DBConnection conn;
-    if (!conn.Open("AccountDB.db"))
-    {
-        LOG_WRITE(LogLevel::Error, "LoginServer::initAccountDB - failed to open DB");
-        return;
-    }
-
-    conn.Execute(R"(
-        CREATE TABLE IF NOT EXISTS accounts (
-            user_id       INTEGER PRIMARY KEY AUTOINCREMENT,
-            login_id      TEXT    NOT NULL UNIQUE,
-            password_hash TEXT    NOT NULL,
-            created_at    INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000)
-        )
-    )");
-
-    LOG_WRITE(LogLevel::Info, "LoginServer::initAccountDB - schema ready");
 }

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "pch.h"
 #include "LoginServerDefine.h"
@@ -35,7 +35,7 @@ private:
     void onGatewayDisconnect(const netlib::ISessionPtr& spSession);
 
     // ── 클라이언트 패킷 핸들러 ─────────────────────────────────
-    db::DBTask<void> handleLoginReq(netlib::ISessionPtr spSession, GamePacket::LoginReq msg);
+    db::DetachedCoTask handleLoginReq(netlib::ISessionPtr spSession, GamePacket::LoginReq msg);
 
     // ── 게이트웨이서버 패킷 핸들러 ─────────────────────────────────
     void handleGatewayHandshake(const netlib::ISessionPtr& spSession, const ServerPacket::GatewayHandshakeNtf& msg);
@@ -81,7 +81,6 @@ private:
     std::optional<LoginEntry> findLoginEntry(int64 userId) const;
 
     void cleanupExpiredPrevGateway(); // prevGatewayMap TTL 만료 항목 정리
-    void initAccountDB();             // AccountDB 스키마 초기화 (시작 시 1회)
 
     // 인증 토큰 생성
     uint64 generateAuthToken();

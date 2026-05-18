@@ -27,13 +27,13 @@ public:
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DBTask<T>
+// AwaitableCoTask<T>
 //
 // AsyncDBQueue::ExecuteAsync()가 리턴하는 코루틴 타입.
-// co_await으로 DBResult를 기다릴 수 있다.
+// 반드시 co_await으로 호출해야 하며 DBResult를 기다릴 수 있다.
 //
 // 사용 예:
-//   db::DBTask<db::DBResult> MyCoroutine(db::AsyncDBQueue& dbQueue)
+//   db::AwaitableCoTask<db::DBResult> MyCoroutine(db::AsyncDBQueue& dbQueue)
 //   {
 //       db::DBResult r1 = co_await dbQueue.ExecuteAsync("SELECT ...", {});
 //       db::DBResult r2 = co_await dbQueue.ExecuteAsync("UPDATE ...", {r1.GetInt64(0, "id")});
@@ -41,7 +41,7 @@ public:
 //   }
 // ─────────────────────────────────────────────────────────────────────────────
 template<typename T = void>
-class DBTask
+class AwaitableCoTask
 {
 public:
     // ── promise_type ────────────────────────────────────────────────────────
@@ -51,9 +51,9 @@ public:
         std::exception_ptr       exception;
         std::coroutine_handle<>  continuation; // 이 태스크를 co_await 하는 바깥 코루틴
 
-        DBTask get_return_object()
+        AwaitableCoTask get_return_object()
         {
-            return DBTask{ std::coroutine_handle<promise_type>::from_promise(*this) };
+            return AwaitableCoTask{ std::coroutine_handle<promise_type>::from_promise(*this) };
         }
 
         // 코루틴 시작 시 바로 실행 (suspend 없이)
@@ -78,7 +78,7 @@ public:
         void unhandled_exception() { exception = std::current_exception(); }
     };
 
-    // ── awaitable (co_await DBTask<T> 할 때 사용) ──────────────────────────
+    // ── awaitable (co_await AwaitableCoTask<T> 할 때 사용) ──────────────────────────
     bool await_ready() const noexcept
     {
         return m_handle && m_handle.done();
@@ -98,12 +98,12 @@ public:
     }
 
     // ── 생성/소멸 ────────────────────────────────────────────────────────────
-    explicit DBTask(std::coroutine_handle<promise_type> h) : m_handle(h) {}
-    DBTask(DBTask&& other) noexcept : m_handle(std::exchange(other.m_handle, {})) {}
-    ~DBTask() { if (m_handle) m_handle.destroy(); }
+    explicit AwaitableCoTask(std::coroutine_handle<promise_type> h) : m_handle(h) {}
+    AwaitableCoTask(AwaitableCoTask&& other) noexcept : m_handle(std::exchange(other.m_handle, {})) {}
+    ~AwaitableCoTask() { if (m_handle) m_handle.destroy(); }
 
-    DBTask(const DBTask&) = delete;
-    DBTask& operator=(const DBTask&) = delete;
+    AwaitableCoTask(const AwaitableCoTask&) = delete;
+    AwaitableCoTask& operator=(const AwaitableCoTask&) = delete;
 
 private:
     std::coroutine_handle<promise_type> m_handle;
@@ -112,7 +112,7 @@ private:
 
 // void 특수화
 template<>
-class DBTask<void>
+class AwaitableCoTask<void>
 {
 public:
     struct promise_type
@@ -120,9 +120,9 @@ public:
         std::exception_ptr      exception;
         std::coroutine_handle<> continuation;
 
-        DBTask get_return_object()
+        AwaitableCoTask get_return_object()
         {
-            return DBTask{ std::coroutine_handle<promise_type>::from_promise(*this) };
+            return AwaitableCoTask{ std::coroutine_handle<promise_type>::from_promise(*this) };
         }
 
         std::suspend_never initial_suspend() noexcept { return {}; }
@@ -156,15 +156,69 @@ public:
             std::rethrow_exception(m_handle.promise().exception);
     }
 
-    explicit DBTask(std::coroutine_handle<promise_type> h) : m_handle(h) {}
-    DBTask(DBTask&& other) noexcept : m_handle(std::exchange(other.m_handle, {})) {}
-    ~DBTask() { if (m_handle) m_handle.destroy(); }
+    explicit AwaitableCoTask(std::coroutine_handle<promise_type> h) : m_handle(h) {}
+    AwaitableCoTask(AwaitableCoTask&& other) noexcept : m_handle(std::exchange(other.m_handle, {})) {}
+    ~AwaitableCoTask() { if (m_handle) m_handle.destroy(); }
 
-    DBTask(const DBTask&) = delete;
-    DBTask& operator=(const DBTask&) = delete;
+    AwaitableCoTask(const AwaitableCoTask&) = delete;
+    AwaitableCoTask& operator=(const AwaitableCoTask&) = delete;
 
 private:
     std::coroutine_handle<promise_type> m_handle;
+};
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DetachedCoTask
+//
+// fire-and-forget 코루틴 진입점용 태스크 타입.
+// 호출자가 반환값을 보관할 필요가 없으며, 코루틴이 종료되면 자기 자신을 파괴한다.
+//
+// AwaitableCoTask<T>는 다른 코루틴에서 co_await으로 결과를 받는 용도이므로
+// 호출자가 핸들을 보관해야 한다. 반면 패킷 핸들러 같은 최상위 진입점은
+// 반환값을 받아 보관할 곳이 없기 때문에 AwaitableCoTask<void>를 그대로 쓰면
+// 호출 즉시 AwaitableCoTask 임시 객체가 소멸하면서 코루틴 프레임이 destroy 되어버린다.
+// 이후 DB 콜백이 핸들을 resume하면 use-after-free.
+//
+// DetachedCoTask는 final_suspend에서 suspend_never를 리턴하여 코루틴 종료 시
+// 컴파일러가 자동으로 프레임을 파괴하도록 한다. get_return_object는 비어있는
+// 객체를 리턴하므로 호출자가 반환값을 그대로 버려도 안전하다.
+//
+// 사용 예:
+//   db::DetachedCoTask MyHandler(SessionPtr s, Packet p)
+//   {
+//       db::DBResult r = co_await dbQueue.ExecuteAsync(...);
+//       // ... 처리 ...
+//       co_return;
+//   }
+//
+// [주의] 코루틴 본문에서 던진 예외는 외부로 전파할 방법이 없으므로
+// unhandled_exception에서 디버그 출력만 하고 swallow 한다.
+// 사용자가 정교한 예외 처리를 원한다면 코루틴 본문에서 try/catch 해야 한다.
+// ─────────────────────────────────────────────────────────────────────────────
+struct DetachedCoTask
+{
+    struct promise_type
+    {
+        DetachedCoTask get_return_object() noexcept { return {}; }
+        std::suspend_never initial_suspend() noexcept { return {}; }
+        std::suspend_never final_suspend() noexcept { return {}; }
+        void return_void() noexcept {}
+        void unhandled_exception() noexcept
+        {
+            try { std::rethrow_exception(std::current_exception()); }
+            catch (const std::exception& e)
+            {
+                ::OutputDebugStringA("DetachedCoTask unhandled exception: ");
+                ::OutputDebugStringA(e.what());
+                ::OutputDebugStringA("\r\n");
+            }
+            catch (...)
+            {
+                ::OutputDebugStringA("DetachedCoTask unhandled unknown exception\r\n");
+            }
+        }
+    };
 };
 
 
