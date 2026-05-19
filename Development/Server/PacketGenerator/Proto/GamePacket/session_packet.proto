@@ -17,10 +17,12 @@ message GatewayAuthReq {
 }
 
 // 게임 입장 완료 알림 (게임서버 -> 클라)
-// 게이트웨이 인증 후 게임서버가 유저 객체를 생성하고 Stage에 배정 완료됐을 때 전송
+// 게이트웨이 인증 후 게임서버가 User 객체를 생성하고 SystemStage에 배정완료 됐을 때 전송.
+// 이 시점에서 클라이언트는 캐릭터 선택 단계에 있다. 따라서 캐릭터 데이터는 포함되지 않고,
+// 캐릭터 목록은 별도의 CharacterListNtf로 바로 이어서 전송된다.
+// 실제 게임 플레이용 Stage (Town 등) 입장 완료 알림은 StageEnterNtf로 별도 전송.
 message GameEnterNtf {
-    DataStructures.Character character = 1;   // DB에서 로드한 내 캐릭터 데이터
-    int32 stage_id = 2;   // 배정된 Stage ID
+    int64 stage_id = 1;   // 입장한 Stage ID (현재는 SystemStage)
 }
 
 // 게임 로그아웃 요청 (클라 -> 게이트웨이)

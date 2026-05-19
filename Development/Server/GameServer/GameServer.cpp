@@ -58,18 +58,25 @@ bool GameServer::OnInitialize()
     m_gatewayEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spSession) { onGatewayDisconnect(spSession); };
 
     // ── 오픈필드 생성 및 컨텐츠 스레드 0번에 배정 ──────────────
-    if (GetContentsThreadCount() <= k_openFieldThreadIndex)
+    // 고정 Stage 객체 생성 (SystemStage, Town).
+    // 스레드 배정: stageId mod GetContentsThreadCount().
+    if (GetContentsThreadCount() <= 0)
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - not enough contents threads. need at least {} threads.",
-            k_openFieldThreadIndex + 1));
+        LOG_WRITE(LogLevel::Error, "GameServer::OnInitialize - no contents threads available.");
         return false;
     }
 
-    m_spOpenField = std::make_shared<OpenField>(k_openFieldStageId);
-    AssignContents(k_openFieldThreadIndex, m_spOpenField);
+    m_spSystemStage = std::make_shared<SystemStage>(k_systemStageId);
+    const int32 systemThreadIdx = computeStageThreadIndex(k_systemStageId);
+    AssignContents(systemThreadIdx, m_spSystemStage);
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: SystemStage created. stageId={} assignedThreadIndex={}",
+        k_systemStageId, systemThreadIdx));
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: OpenField created. stageId={} assignedThreadIndex={}",
-        k_openFieldStageId, k_openFieldThreadIndex));
+    m_spTown = std::make_shared<Town>(k_townStageId);
+    const int32 townThreadIdx = computeStageThreadIndex(k_townStageId);
+    AssignContents(townThreadIdx, m_spTown);
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: Town created. stageId={} assignedThreadIndex={}",
+        k_townStageId, townThreadIdx));
 
     // ── GameDB 열기 ────────────────────────────────────────────
     if (!m_dbQueue.Open(k_gameDBPath, 1))
@@ -126,9 +133,13 @@ void GameServer::OnBeforeShutdown()
         disconnectFromGateway(gatewayId);
 
     // 오픈필드를 컨텐츠 스레드에서 제거
-    if (m_spOpenField)
+    if (m_spSystemStage)
     {
-        RemoveContents(k_openFieldThreadIndex, m_spOpenField);
+        RemoveContents(computeStageThreadIndex(m_spSystemStage->GetStageId()), m_spSystemStage);
+    }
+    if (m_spTown)
+    {
+        RemoveContents(computeStageThreadIndex(m_spTown->GetStageId()), m_spTown);
     }
 
     // GameDB 닫기 (큐에 남은 요청 처리 후 종료)
@@ -138,6 +149,14 @@ void GameServer::OnBeforeShutdown()
 void GameServer::OnShutdown()
 {
     LOG_WRITE(LogLevel::Info, "GameServer::OnShutdown");
+}
+
+int32 GameServer::computeStageThreadIndex(int64 stageId) const
+{
+    const int32 threadCount = GetContentsThreadCount();
+    if (threadCount <= 0)
+        return 0;
+    return static_cast<int32>(stageId % threadCount);
 }
 
 // 내부 서버 연결 수락 (채팅서버 등)
@@ -303,7 +322,7 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
 
     // ── 1) DB에서 캐릭터 조회 ────────────────────────────────────
     db::DBResult result = co_await m_dbQueue.ExecuteAsync(
-        "SELECT data FROM Characters WHERE user_id = ? LIMIT 1",
+        "SELECT data FROM Characters WHERE user_id = ?",
         { userId },
         GetCoroutineResumeExecutor()
     );
@@ -314,92 +333,140 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
         co_return;
     }
 
-    DataStructures::Character character;
-    bool needInsert = false;
-
-    if (result.IsEmpty())
+    // 조회된 모든 캐릭터를 protobuf 메시지로 역직렬화하여 목록에 적재.
+    std::vector<DataStructures::Character> characters;
+    characters.reserve(result.RowCount());
+    for (int row = 0; row < result.RowCount(); ++row)
     {
-        // ── 2) 캐릭터 없음 → 기본값으로 생성 ────────────────────
-        character.set_user_id(userId);
-        character.set_name(std::format("User_{}", userId));
-        character.set_level(1);
-        character.set_exp(0);
-        character.set_hp(100);
-        character.set_max_hp(100);
-        character.set_mp(50);
-        character.set_max_mp(50);
-        character.set_last_stage_id(static_cast<int32>(k_openFieldStageId));
-        character.set_pos_x(0.0f);
-        character.set_pos_y(0.0f);
-        character.set_pos_z(0.0f);
-        character.set_dir_y(0.0f);
-        needInsert = true;
-
-        LOG_WRITE(LogLevel::Info, std::format("GameServer: character not found in DB. created default. userId={}", userId));
-    }
-    else
-    {
-        // 캐릭터 데이터 JSON을 protobuf 메시지로 역직렬화
-        const std::string dataJson = result.GetString(0, "data");
+        const std::string dataJson = result.GetString(row, "data");
+        DataStructures::Character character;
         if (!packet::ProtoJsonSerializer::FromJson(dataJson, character))
         {
-            LOG_WRITE(LogLevel::Error, std::format("GameServer: failed to parse character JSON. userId={}", userId));
-            co_return;
+            LOG_WRITE(LogLevel::Error, std::format("GameServer: failed to parse character JSON. userId={} row={}", userId, row));
+            continue;
         }
-
-        LOG_WRITE(LogLevel::Info, std::format("GameServer: character loaded from DB. userId={} name={} level={}",
-            userId, character.name(), character.level()));
+        characters.push_back(std::move(character));
     }
+
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: characters loaded from DB. userId={} count={}",
+        userId, characters.size()));
 
     // ── 3) 캐릭터 신규 생성 시 DB에 INSERT ──────────────────────
-    if (needInsert)
-    {
-        std::string dataJson;
-        if (!packet::ProtoJsonSerializer::ToJson(character, dataJson))
-        {
-            LOG_WRITE(LogLevel::Error, std::format("GameServer: failed to serialize character to JSON. userId={}", userId));
-            co_return;
-        }
-
-        db::DBResult insertResult = co_await m_dbQueue.ExecuteAsync(
-            "INSERT OR IGNORE INTO Characters (user_id, data) VALUES (?, ?)",
-            { userId, dataJson },
-            GetCoroutineResumeExecutor()
-        );
-
-        if (!insertResult.success)
-        {
-            LOG_WRITE(LogLevel::Error, std::format("GameServer: DB insert failed. userId={} err={}", userId, insertResult.errorMsg));
-            co_return;
-        }
-    }
-
     // ── 4) 유저 객체 생성 및 글로벌 맵 등록 ──────────────────────
     UserPtr spUser = std::make_shared<User>(userId, gatewayId, clientIp);
     m_safeUsers.Insert(userId, spUser);
 
-    // 오픈필드에 입장 메시지 push (다음 tick에서 Stage가 처리)
-    if (m_spOpenField)
+    // SystemStage에 입장 메시지 push.
+    // Phase A 임시 로직: 입장 = SystemStage(캐릭터 선택창). Phase B에서 정식 흐름으로 교체 예정.
+    if (m_spSystemStage)
     {
-        m_spOpenField->EnqueueMessage(StageMsg_UserEnter{spUser});
+        m_spSystemStage->EnqueueMessage(StageMsg_UserEnter{spUser});
     }
     else
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer: open field is null. userId={}", userId));
+        LOG_WRITE(LogLevel::Error, std::format("GameServer: system stage is null. userId={}", userId));
         co_return;
     }
 
     // ── 5) GameEnterNtf 응답 (게이트웨이를 통해 클라에게) ────────
-    sendGameEnterNtf(userId, character);
+    sendGameEnterNtf(userId);
+    sendCharacterListNtf(userId, characters);
 }
 
-void GameServer::sendGameEnterNtf(int64 userId, const DataStructures::Character& character)
+void GameServer::sendGameEnterNtf(int64 userId)
 {
     GamePacket::GameEnterNtf ntf;
-    *ntf.mutable_character() = character;
-    ntf.set_stage_id(static_cast<int32>(k_openFieldStageId));
+    ntf.set_stage_id(k_systemStageId);
 
     sendPacketToUser(userId, Common::GAME_PACKET_ID_GAME_ENTER_NTF, ntf);
+}
+
+void GameServer::sendCharacterListNtf(int64 userId, const std::vector<DataStructures::Character>& characters)
+{
+    GamePacket::CharacterListNtf ntf;
+    for (const auto& character : characters)
+    {
+        *ntf.add_characters() = character;
+    }
+    sendPacketToUser(userId, Common::GAME_PACKET_ID_CHARACTER_LIST_NTF, ntf);
+
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterListNtf sent. userId={} count={}",
+        userId, characters.size()));
+}
+
+// 클라이언트 캐릭터 생성 요청 처리 → 코루틴
+// 1) 명칭 검증 (빈 문자열만 거부, 상세 검증은 향후 추가)
+// 2) ObjectId 발급 + 기본값 캐릭터 구성
+// 3) DB INSERT
+// 4) CharacterCreateRes 전송 (성공/실패)
+db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 userId, GamePacket::CharacterCreateReq req)
+{
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterCreateReq received. userId={} name='{}' jobId={}",
+        userId, req.name(), req.job_id()));
+
+    // ── 1) 명칭 검증 ────────────────────────────────────────
+    if (req.name().empty())
+    {
+        sendCharacterCreateRes(userId, EResultCode::Fail, "name is empty", nullptr);
+        co_return;
+    }
+
+    // ── 2) 캐릭터 구성 ──────────────────────────────────────
+    DataStructures::Character character;
+    character.set_character_id(GenerateObjectId());
+    character.set_owner_user_id(userId);
+    character.set_name(req.name());
+    character.set_job_id(req.job_id());
+    character.set_level(1);
+    character.set_exp(0);
+    character.set_hp(100);
+    character.set_max_hp(100);
+    character.set_mp(50);
+    character.set_max_mp(50);
+    character.set_last_stage_id(k_townStageId);
+    character.set_pos_x(0.0f);
+    character.set_pos_y(0.0f);
+    character.set_yaw(0.0f);
+
+    // ── 3) DB INSERT ──────────────────────────────────────────
+    std::string dataJson;
+    if (!packet::ProtoJsonSerializer::ToJson(character, dataJson))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GameServer: failed to serialize character to JSON. userId={}", userId));
+        sendCharacterCreateRes(userId, EResultCode::Fail, "server error: serialize", nullptr);
+        co_return;
+    }
+
+    db::DBResult insertResult = co_await m_dbQueue.ExecuteAsync(
+        "INSERT INTO Characters (user_id, character_id, data) VALUES (?, ?, ?)",
+        { userId, character.character_id(), dataJson },
+        GetCoroutineResumeExecutor()
+    );
+
+    if (!insertResult.success)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterCreate DB insert failed. userId={} err={}", userId, insertResult.errorMsg));
+        sendCharacterCreateRes(userId, EResultCode::Fail, "server error: db insert", nullptr);
+        co_return;
+    }
+
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: character created. userId={} characterId={} name='{}'",
+        userId, character.character_id(), character.name()));
+
+    // ── 4) 성공 응답 ────────────────────────────────────────────
+    sendCharacterCreateRes(userId, EResultCode::Success, "", &character);
+}
+
+void GameServer::sendCharacterCreateRes(int64 userId, EResultCode resultCode, const std::string& errorMsg, const DataStructures::Character* pNewCharacter)
+{
+    GamePacket::CharacterCreateRes res;
+    res.set_result_code(static_cast<int32>(resultCode));
+    res.set_error_msg(errorMsg);
+    if (pNewCharacter)
+    {
+        *res.mutable_new_character() = *pNewCharacter;
+    }
+    sendPacketToUser(userId, Common::GAME_PACKET_ID_CHARACTER_CREATE_RES, res);
 }
 
 // 게이트웨이로부터 GatewayUserDisconnectNtf 수신
@@ -417,12 +484,16 @@ void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSess
         return;
     }
 
-    // 현재 Stage에 퇴장 메시지 push
-    // 4단계에서는 오픈필드만 존재하므로 오픈필드에 push.
-    // 향후 다중 Stage 구현 시 spUser->GetCurrentStageId()로 정확한 Stage를 찾아 push해야 함.
-    if (m_spOpenField)
+    // 현재 Stage에 퇴장 메시지 push.
+    // Phase A 임시: 일단 SystemStage와 Town 양쪽에 퇴장 메시지 push. Phase B에서
+    // User가 현재 속한 Stage를 정확히 추적하여 정확한 Stage에만 push하도록 개선 예정.
+    if (m_spSystemStage)
     {
-        m_spOpenField->EnqueueMessage(StageMsg_UserLeave{userId});
+        m_spSystemStage->EnqueueMessage(StageMsg_UserLeave{userId});
+    }
+    if (m_spTown)
+    {
+        m_spTown->EnqueueMessage(StageMsg_UserLeave{userId});
     }
 }
 
@@ -476,7 +547,27 @@ void GameServer::handleRelayedClientPacket(const netlib::PacketPtr& spPacket)
         return;
     }
 
-    // 유저 패킷 큐에 push (Stage 스레드가 다음 tick에서 drain해서 처리)
+    // 캐릭터 선택/생성 단계 패킷은 GameServer가 직접 처리 (DB 코루틴 필요).
+    // 그외 게임 플레이 패킷은 User 패킷큐에 push → Stage가 처리.
+    const uint16 packetType = spPacket->GetHeader()->type;
+    switch (packetType)
+    {
+    case Common::GAME_PACKET_ID_CHARACTER_CREATE_REQ:
+    {
+        GamePacket::CharacterCreateReq req;
+        if (!DeserializePacket(*spPacket, req))
+        {
+            LOG_WRITE(LogLevel::Warn, std::format("GameServer: failed to deserialize CharacterCreateReq. userId={}", userId));
+            return;
+        }
+        handleClientCharacterCreate(userId, std::move(req));
+        return;
+    }
+    default:
+        break;
+    }
+
+    // 기본: User 패킷 큐에 push (Stage 스레드가 다음 tick에서 drain해서 처리)
     spUser->EnqueuePacket(spPacket);
 }
 
@@ -494,9 +585,11 @@ void GameServer::initGameDB()
 
     auto res = conn.Execute(R"(
         CREATE TABLE IF NOT EXISTS Characters (
-            user_id       INTEGER PRIMARY KEY,
+            user_id       INTEGER NOT NULL,
+            character_id  INTEGER NOT NULL,
             data          TEXT    NOT NULL,
-            last_updated  INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000)
+            last_updated  INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
+            PRIMARY KEY (user_id, character_id)
         )
     )");
 

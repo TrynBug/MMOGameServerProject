@@ -212,21 +212,22 @@ class Character final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kNameFieldNumber = 2,
-    kUserIdFieldNumber = 1,
-    kExpFieldNumber = 4,
-    kLevelFieldNumber = 3,
-    kHpFieldNumber = 5,
-    kMaxHpFieldNumber = 6,
-    kMpFieldNumber = 7,
-    kMaxMpFieldNumber = 8,
-    kLastStageIdFieldNumber = 9,
-    kPosXFieldNumber = 10,
-    kPosYFieldNumber = 11,
-    kPosZFieldNumber = 12,
-    kDirYFieldNumber = 13,
+    kNameFieldNumber = 3,
+    kCharacterIdFieldNumber = 1,
+    kOwnerUserIdFieldNumber = 2,
+    kJobIdFieldNumber = 4,
+    kLevelFieldNumber = 5,
+    kExpFieldNumber = 6,
+    kHpFieldNumber = 7,
+    kMaxHpFieldNumber = 8,
+    kMpFieldNumber = 9,
+    kMaxMpFieldNumber = 10,
+    kLastStageIdFieldNumber = 11,
+    kPosXFieldNumber = 12,
+    kPosYFieldNumber = 13,
+    kYawFieldNumber = 14,
   };
-  // string name = 2;
+  // string name = 3;
   void clear_name() ;
   const ::std::string& name() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
@@ -241,27 +242,37 @@ class Character final : public ::google::protobuf::Message
   ::std::string* PROTOBUF_NONNULL _internal_mutable_name();
 
   public:
-  // int64 user_id = 1;
-  void clear_user_id() ;
-  ::int64_t user_id() const;
-  void set_user_id(::int64_t value);
+  // int64 character_id = 1;
+  void clear_character_id() ;
+  ::int64_t character_id() const;
+  void set_character_id(::int64_t value);
 
   private:
-  ::int64_t _internal_user_id() const;
-  void _internal_set_user_id(::int64_t value);
+  ::int64_t _internal_character_id() const;
+  void _internal_set_character_id(::int64_t value);
 
   public:
-  // int64 exp = 4;
-  void clear_exp() ;
-  ::int64_t exp() const;
-  void set_exp(::int64_t value);
+  // int64 owner_user_id = 2;
+  void clear_owner_user_id() ;
+  ::int64_t owner_user_id() const;
+  void set_owner_user_id(::int64_t value);
 
   private:
-  ::int64_t _internal_exp() const;
-  void _internal_set_exp(::int64_t value);
+  ::int64_t _internal_owner_user_id() const;
+  void _internal_set_owner_user_id(::int64_t value);
 
   public:
-  // int32 level = 3;
+  // int32 job_id = 4;
+  void clear_job_id() ;
+  ::int32_t job_id() const;
+  void set_job_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_job_id() const;
+  void _internal_set_job_id(::int32_t value);
+
+  public:
+  // int32 level = 5;
   void clear_level() ;
   ::int32_t level() const;
   void set_level(::int32_t value);
@@ -271,7 +282,17 @@ class Character final : public ::google::protobuf::Message
   void _internal_set_level(::int32_t value);
 
   public:
-  // int32 hp = 5;
+  // int64 exp = 6;
+  void clear_exp() ;
+  ::int64_t exp() const;
+  void set_exp(::int64_t value);
+
+  private:
+  ::int64_t _internal_exp() const;
+  void _internal_set_exp(::int64_t value);
+
+  public:
+  // int32 hp = 7;
   void clear_hp() ;
   ::int32_t hp() const;
   void set_hp(::int32_t value);
@@ -281,7 +302,7 @@ class Character final : public ::google::protobuf::Message
   void _internal_set_hp(::int32_t value);
 
   public:
-  // int32 max_hp = 6;
+  // int32 max_hp = 8;
   void clear_max_hp() ;
   ::int32_t max_hp() const;
   void set_max_hp(::int32_t value);
@@ -291,7 +312,7 @@ class Character final : public ::google::protobuf::Message
   void _internal_set_max_hp(::int32_t value);
 
   public:
-  // int32 mp = 7;
+  // int32 mp = 9;
   void clear_mp() ;
   ::int32_t mp() const;
   void set_mp(::int32_t value);
@@ -301,7 +322,7 @@ class Character final : public ::google::protobuf::Message
   void _internal_set_mp(::int32_t value);
 
   public:
-  // int32 max_mp = 8;
+  // int32 max_mp = 10;
   void clear_max_mp() ;
   ::int32_t max_mp() const;
   void set_max_mp(::int32_t value);
@@ -311,17 +332,17 @@ class Character final : public ::google::protobuf::Message
   void _internal_set_max_mp(::int32_t value);
 
   public:
-  // int32 last_stage_id = 9;
+  // int64 last_stage_id = 11;
   void clear_last_stage_id() ;
-  ::int32_t last_stage_id() const;
-  void set_last_stage_id(::int32_t value);
+  ::int64_t last_stage_id() const;
+  void set_last_stage_id(::int64_t value);
 
   private:
-  ::int32_t _internal_last_stage_id() const;
-  void _internal_set_last_stage_id(::int32_t value);
+  ::int64_t _internal_last_stage_id() const;
+  void _internal_set_last_stage_id(::int64_t value);
 
   public:
-  // float pos_x = 10;
+  // float pos_x = 12;
   void clear_pos_x() ;
   float pos_x() const;
   void set_pos_x(float value);
@@ -331,7 +352,7 @@ class Character final : public ::google::protobuf::Message
   void _internal_set_pos_x(float value);
 
   public:
-  // float pos_y = 11;
+  // float pos_y = 13;
   void clear_pos_y() ;
   float pos_y() const;
   void set_pos_y(float value);
@@ -341,31 +362,21 @@ class Character final : public ::google::protobuf::Message
   void _internal_set_pos_y(float value);
 
   public:
-  // float pos_z = 12;
-  void clear_pos_z() ;
-  float pos_z() const;
-  void set_pos_z(float value);
+  // float yaw = 14;
+  void clear_yaw() ;
+  float yaw() const;
+  void set_yaw(float value);
 
   private:
-  float _internal_pos_z() const;
-  void _internal_set_pos_z(float value);
-
-  public:
-  // float dir_y = 13;
-  void clear_dir_y() ;
-  float dir_y() const;
-  void set_dir_y(float value);
-
-  private:
-  float _internal_dir_y() const;
-  void _internal_set_dir_y(float value);
+  float _internal_yaw() const;
+  void _internal_set_yaw(float value);
 
   public:
   // @@protoc_insertion_point(class_scope:DataStructures.Character)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<4, 13,
+  static const ::google::protobuf::internal::TcParseTable<4, 14,
                                    0, 45,
                                    2>
       _table_;
@@ -388,18 +399,19 @@ class Character final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr name_;
-    ::int64_t user_id_;
-    ::int64_t exp_;
+    ::int64_t character_id_;
+    ::int64_t owner_user_id_;
+    ::int32_t job_id_;
     ::int32_t level_;
+    ::int64_t exp_;
     ::int32_t hp_;
     ::int32_t max_hp_;
     ::int32_t mp_;
     ::int32_t max_mp_;
-    ::int32_t last_stage_id_;
+    ::int64_t last_stage_id_;
     float pos_x_;
     float pos_y_;
-    float pos_z_;
-    float dir_y_;
+    float yaw_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -424,32 +436,57 @@ extern const ::google::protobuf::internal::ClassDataFull Character_class_data_;
 
 // Character
 
-// int64 user_id = 1;
-inline void Character::clear_user_id() {
+// int64 character_id = 1;
+inline void Character::clear_character_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = ::int64_t{0};
+  _impl_.character_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000002U);
 }
-inline ::int64_t Character::user_id() const {
-  // @@protoc_insertion_point(field_get:DataStructures.Character.user_id)
-  return _internal_user_id();
+inline ::int64_t Character::character_id() const {
+  // @@protoc_insertion_point(field_get:DataStructures.Character.character_id)
+  return _internal_character_id();
 }
-inline void Character::set_user_id(::int64_t value) {
-  _internal_set_user_id(value);
+inline void Character::set_character_id(::int64_t value) {
+  _internal_set_character_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000002U);
-  // @@protoc_insertion_point(field_set:DataStructures.Character.user_id)
+  // @@protoc_insertion_point(field_set:DataStructures.Character.character_id)
 }
-inline ::int64_t Character::_internal_user_id() const {
+inline ::int64_t Character::_internal_character_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.user_id_;
+  return _impl_.character_id_;
 }
-inline void Character::_internal_set_user_id(::int64_t value) {
+inline void Character::_internal_set_character_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = value;
+  _impl_.character_id_ = value;
 }
 
-// string name = 2;
+// int64 owner_user_id = 2;
+inline void Character::clear_owner_user_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.owner_user_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline ::int64_t Character::owner_user_id() const {
+  // @@protoc_insertion_point(field_get:DataStructures.Character.owner_user_id)
+  return _internal_owner_user_id();
+}
+inline void Character::set_owner_user_id(::int64_t value) {
+  _internal_set_owner_user_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:DataStructures.Character.owner_user_id)
+}
+inline ::int64_t Character::_internal_owner_user_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.owner_user_id_;
+}
+inline void Character::_internal_set_owner_user_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.owner_user_id_ = value;
+}
+
+// string name = 3;
 inline void Character::clear_name() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.name_.ClearToEmpty();
@@ -514,12 +551,37 @@ inline void Character::set_allocated_name(::std::string* PROTOBUF_NULLABLE value
   // @@protoc_insertion_point(field_set_allocated:DataStructures.Character.name)
 }
 
-// int32 level = 3;
+// int32 job_id = 4;
+inline void Character::clear_job_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.job_id_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline ::int32_t Character::job_id() const {
+  // @@protoc_insertion_point(field_get:DataStructures.Character.job_id)
+  return _internal_job_id();
+}
+inline void Character::set_job_id(::int32_t value) {
+  _internal_set_job_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:DataStructures.Character.job_id)
+}
+inline ::int32_t Character::_internal_job_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.job_id_;
+}
+inline void Character::_internal_set_job_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.job_id_ = value;
+}
+
+// int32 level = 5;
 inline void Character::clear_level() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.level_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000008U);
+                  0x00000010U);
 }
 inline ::int32_t Character::level() const {
   // @@protoc_insertion_point(field_get:DataStructures.Character.level)
@@ -527,7 +589,7 @@ inline ::int32_t Character::level() const {
 }
 inline void Character::set_level(::int32_t value) {
   _internal_set_level(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
   // @@protoc_insertion_point(field_set:DataStructures.Character.level)
 }
 inline ::int32_t Character::_internal_level() const {
@@ -539,12 +601,12 @@ inline void Character::_internal_set_level(::int32_t value) {
   _impl_.level_ = value;
 }
 
-// int64 exp = 4;
+// int64 exp = 6;
 inline void Character::clear_exp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.exp_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000020U);
 }
 inline ::int64_t Character::exp() const {
   // @@protoc_insertion_point(field_get:DataStructures.Character.exp)
@@ -552,7 +614,7 @@ inline ::int64_t Character::exp() const {
 }
 inline void Character::set_exp(::int64_t value) {
   _internal_set_exp(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
   // @@protoc_insertion_point(field_set:DataStructures.Character.exp)
 }
 inline ::int64_t Character::_internal_exp() const {
@@ -564,12 +626,12 @@ inline void Character::_internal_set_exp(::int64_t value) {
   _impl_.exp_ = value;
 }
 
-// int32 hp = 5;
+// int32 hp = 7;
 inline void Character::clear_hp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.hp_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000010U);
+                  0x00000040U);
 }
 inline ::int32_t Character::hp() const {
   // @@protoc_insertion_point(field_get:DataStructures.Character.hp)
@@ -577,7 +639,7 @@ inline ::int32_t Character::hp() const {
 }
 inline void Character::set_hp(::int32_t value) {
   _internal_set_hp(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
   // @@protoc_insertion_point(field_set:DataStructures.Character.hp)
 }
 inline ::int32_t Character::_internal_hp() const {
@@ -589,12 +651,12 @@ inline void Character::_internal_set_hp(::int32_t value) {
   _impl_.hp_ = value;
 }
 
-// int32 max_hp = 6;
+// int32 max_hp = 8;
 inline void Character::clear_max_hp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.max_hp_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000020U);
+                  0x00000080U);
 }
 inline ::int32_t Character::max_hp() const {
   // @@protoc_insertion_point(field_get:DataStructures.Character.max_hp)
@@ -602,7 +664,7 @@ inline ::int32_t Character::max_hp() const {
 }
 inline void Character::set_max_hp(::int32_t value) {
   _internal_set_max_hp(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000080U);
   // @@protoc_insertion_point(field_set:DataStructures.Character.max_hp)
 }
 inline ::int32_t Character::_internal_max_hp() const {
@@ -614,12 +676,12 @@ inline void Character::_internal_set_max_hp(::int32_t value) {
   _impl_.max_hp_ = value;
 }
 
-// int32 mp = 7;
+// int32 mp = 9;
 inline void Character::clear_mp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.mp_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000040U);
+                  0x00000100U);
 }
 inline ::int32_t Character::mp() const {
   // @@protoc_insertion_point(field_get:DataStructures.Character.mp)
@@ -627,7 +689,7 @@ inline ::int32_t Character::mp() const {
 }
 inline void Character::set_mp(::int32_t value) {
   _internal_set_mp(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000100U);
   // @@protoc_insertion_point(field_set:DataStructures.Character.mp)
 }
 inline ::int32_t Character::_internal_mp() const {
@@ -639,12 +701,12 @@ inline void Character::_internal_set_mp(::int32_t value) {
   _impl_.mp_ = value;
 }
 
-// int32 max_mp = 8;
+// int32 max_mp = 10;
 inline void Character::clear_max_mp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.max_mp_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000080U);
+                  0x00000200U);
 }
 inline ::int32_t Character::max_mp() const {
   // @@protoc_insertion_point(field_get:DataStructures.Character.max_mp)
@@ -652,7 +714,7 @@ inline ::int32_t Character::max_mp() const {
 }
 inline void Character::set_max_mp(::int32_t value) {
   _internal_set_max_mp(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000080U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000200U);
   // @@protoc_insertion_point(field_set:DataStructures.Character.max_mp)
 }
 inline ::int32_t Character::_internal_max_mp() const {
@@ -664,37 +726,37 @@ inline void Character::_internal_set_max_mp(::int32_t value) {
   _impl_.max_mp_ = value;
 }
 
-// int32 last_stage_id = 9;
+// int64 last_stage_id = 11;
 inline void Character::clear_last_stage_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.last_stage_id_ = 0;
+  _impl_.last_stage_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000100U);
+                  0x00000400U);
 }
-inline ::int32_t Character::last_stage_id() const {
+inline ::int64_t Character::last_stage_id() const {
   // @@protoc_insertion_point(field_get:DataStructures.Character.last_stage_id)
   return _internal_last_stage_id();
 }
-inline void Character::set_last_stage_id(::int32_t value) {
+inline void Character::set_last_stage_id(::int64_t value) {
   _internal_set_last_stage_id(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000100U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000400U);
   // @@protoc_insertion_point(field_set:DataStructures.Character.last_stage_id)
 }
-inline ::int32_t Character::_internal_last_stage_id() const {
+inline ::int64_t Character::_internal_last_stage_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.last_stage_id_;
 }
-inline void Character::_internal_set_last_stage_id(::int32_t value) {
+inline void Character::_internal_set_last_stage_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.last_stage_id_ = value;
 }
 
-// float pos_x = 10;
+// float pos_x = 12;
 inline void Character::clear_pos_x() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_x_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000200U);
+                  0x00000800U);
 }
 inline float Character::pos_x() const {
   // @@protoc_insertion_point(field_get:DataStructures.Character.pos_x)
@@ -702,7 +764,7 @@ inline float Character::pos_x() const {
 }
 inline void Character::set_pos_x(float value) {
   _internal_set_pos_x(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000200U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000800U);
   // @@protoc_insertion_point(field_set:DataStructures.Character.pos_x)
 }
 inline float Character::_internal_pos_x() const {
@@ -714,12 +776,12 @@ inline void Character::_internal_set_pos_x(float value) {
   _impl_.pos_x_ = value;
 }
 
-// float pos_y = 11;
+// float pos_y = 13;
 inline void Character::clear_pos_y() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_y_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000400U);
+                  0x00001000U);
 }
 inline float Character::pos_y() const {
   // @@protoc_insertion_point(field_get:DataStructures.Character.pos_y)
@@ -727,7 +789,7 @@ inline float Character::pos_y() const {
 }
 inline void Character::set_pos_y(float value) {
   _internal_set_pos_y(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000400U);
+  SetHasBit(_impl_._has_bits_[0], 0x00001000U);
   // @@protoc_insertion_point(field_set:DataStructures.Character.pos_y)
 }
 inline float Character::_internal_pos_y() const {
@@ -739,54 +801,29 @@ inline void Character::_internal_set_pos_y(float value) {
   _impl_.pos_y_ = value;
 }
 
-// float pos_z = 12;
-inline void Character::clear_pos_z() {
+// float yaw = 14;
+inline void Character::clear_yaw() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_z_ = 0;
+  _impl_.yaw_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000800U);
+                  0x00002000U);
 }
-inline float Character::pos_z() const {
-  // @@protoc_insertion_point(field_get:DataStructures.Character.pos_z)
-  return _internal_pos_z();
+inline float Character::yaw() const {
+  // @@protoc_insertion_point(field_get:DataStructures.Character.yaw)
+  return _internal_yaw();
 }
-inline void Character::set_pos_z(float value) {
-  _internal_set_pos_z(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000800U);
-  // @@protoc_insertion_point(field_set:DataStructures.Character.pos_z)
+inline void Character::set_yaw(float value) {
+  _internal_set_yaw(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00002000U);
+  // @@protoc_insertion_point(field_set:DataStructures.Character.yaw)
 }
-inline float Character::_internal_pos_z() const {
+inline float Character::_internal_yaw() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.pos_z_;
+  return _impl_.yaw_;
 }
-inline void Character::_internal_set_pos_z(float value) {
+inline void Character::_internal_set_yaw(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_z_ = value;
-}
-
-// float dir_y = 13;
-inline void Character::clear_dir_y() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.dir_y_ = 0;
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00001000U);
-}
-inline float Character::dir_y() const {
-  // @@protoc_insertion_point(field_get:DataStructures.Character.dir_y)
-  return _internal_dir_y();
-}
-inline void Character::set_dir_y(float value) {
-  _internal_set_dir_y(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00001000U);
-  // @@protoc_insertion_point(field_set:DataStructures.Character.dir_y)
-}
-inline float Character::_internal_dir_y() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.dir_y_;
-}
-inline void Character::_internal_set_dir_y(float value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.dir_y_ = value;
+  _impl_.yaw_ = value;
 }
 
 #ifdef __GNUC__

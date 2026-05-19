@@ -108,6 +108,9 @@
     <ClInclude Include="Generated\ServerPacket\server_handshake_packet.pb.h">
       <Filter>소스 파일\Generated\ServerPacket</Filter>
     </ClInclude>
+    <ClInclude Include="Generated\GamePacket\character_packet.pb.h">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ProtoSerializer.cpp">
@@ -173,6 +176,9 @@
     <ClCompile Include="Generated\ServerPacket\server_handshake_packet.pb.cc">
       <Filter>소스 파일\Generated\ServerPacket</Filter>
     </ClCompile>
+    <ClCompile Include="Generated\GamePacket\character_packet.pb.cc">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="generate_proto.bat">
@@ -225,6 +231,9 @@
     </None>
     <None Include="Proto\ServerPacket\server_handshake_packet.proto">
       <Filter>소스 파일\Proto\ServerPacket</Filter>
+    </None>
+    <None Include="Proto\GamePacket\character_packet.proto">
+      <Filter>소스 파일\Proto\GamePacket</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -20,6 +20,11 @@ struct GameDataBase_Stage : public GameData
 {
     int64_t              Key                  = 0;
     EStageType           StageType            = EStageType::None;
+    double               worldMinX            = 0;
+    double               worldMinY            = 0;
+    double               worldMaxX            = 0;
+    double               worldMaxY            = 0;
+    double               sectorSize           = 0;
 };
 
 

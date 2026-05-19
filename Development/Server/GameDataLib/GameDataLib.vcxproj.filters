@@ -42,9 +42,6 @@
     <ClCompile Include="Generated\Enum\GameEnum_Stat.cpp">
       <Filter>소스 파일\Generated\Enum</Filter>
     </ClCompile>
-    <ClCompile Include="GameDataManager.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Generated\Manager\GameDataManagerBase.cpp">
       <Filter>소스 파일\Generated\Manager</Filter>
     </ClCompile>
@@ -56,6 +53,9 @@
     </ClCompile>
     <ClCompile Include="Generated\GameDataBase_Stage.cpp">
       <Filter>소스 파일\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="GameDataManager.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -2,21 +2,26 @@ syntax = "proto3";
 
 package DataStructures;
 
-// 캐릭터 기본 정보 (DB 저장)
+// 캐릭터 기본 정보 (DB 저장, 클라이언트에도 전송)
+//
+// - character_id 는 캐릭터 생성 시 ObjectIdGenerator로 발급되어 영구 유지됨.
+// - 클라이언트에 보낼 때는 별도 메시지로 감싸거나 그대로 사용 가능.
+// - 인벤토리/장비/스킬은 별도 메시지/테이블로 관리.
 message Character {
-    int64 user_id = 1;
-    string name = 2;
-    int32 level = 3;
-    int64 exp = 4;
-    int32 hp = 5;
-    int32 max_hp = 6;
-    int32 mp = 7;
-    int32 max_mp = 8;
+    int64 character_id = 1;       // 영구 ObjectId (DB 저장, 캐릭터 생성 시 발급)
+    int64 owner_user_id = 2;      // 소유자 User ID
+    string name = 3;              // 캐릭터 이름
+    int32 job_id = 4;             // 직업 (GameData로 관리, 마법사/전사 등)
+    int32 level = 5;
+    int64 exp = 6;
+    int32 hp = 7;
+    int32 max_hp = 8;
+    int32 mp = 9;
+    int32 max_mp = 10;
 
-    // 마지막 위치
-    int32 last_stage_id = 9;
-    float pos_x = 10;
-    float pos_y = 11;
-    float pos_z = 12;
-    float dir_y = 13;
+    // 마지막 위치 (게임서버 입장 시 이 위치로 복귀)
+    int64 last_stage_id = 11;
+    float pos_x = 12;
+    float pos_y = 13;
+    float yaw = 14;               // 회전 (단위는 추후 클라와 맞춤)
 }

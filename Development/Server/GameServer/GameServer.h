@@ -2,7 +2,8 @@
 
 #include "pch.h"
 #include "GameServerDefine.h"
-#include "OpenField.h"
+#include "SystemStage.h"
+#include "Town.h"
 #include "User.h"
 #include "ThreadSafeUnorderedMap.h"
 
@@ -67,8 +68,18 @@ private:
     template <typename TMessage>
     void sendPacketToUser(int64 userId, int32 packetType, const TMessage& message);
 
-    // 유저 입장 완료 알림 (GameEnterNtf) 전송
-    void sendGameEnterNtf(int64 userId, const DataStructures::Character& character);
+    // 유저 입장 완료 알림 (GameEnterNtf) 전송. 현재 SystemStage 입장 단계 완료 시 전송.
+    void sendGameEnterNtf(int64 userId);
+
+    // 캐릭터 목록 전송 (CharacterListNtf). 게임 입장 직후 자동 전송.
+    void sendCharacterListNtf(int64 userId, const std::vector<DataStructures::Character>& characters);
+
+    // 캐릭터 생성 요청 핸들러. DB INSERT 코루틴.
+    db::DetachedCoTask handleClientCharacterCreate(int64 userId, GamePacket::CharacterCreateReq req);
+
+    // 캐릭터 생성 결과 전송 (CharacterCreateRes).
+    // 성공 시 pNewCharacter에 생성된 캐릭터, 실패 시 nullptr.
+    void sendCharacterCreateRes(int64 userId, EResultCode resultCode, const std::string& errorMsg, const DataStructures::Character* pNewCharacter);
 
     // ── GameDB ────────────────────────────────────────────────────
     // GameDB 스키마 초기화 (서버 시작 시 1회, CREATE TABLE IF NOT EXISTS).
@@ -77,7 +88,10 @@ private:
 
 private:
     // 오픈필드 (게임서버당 1개, 컨텐츠 스레드 0번에 배정)
-    OpenFieldPtr m_spOpenField;
+    SystemStagePtr m_spSystemStage;
+    TownPtr        m_spTown;
+
+    int32 computeStageThreadIndex(int64 stageId) const;
 
     // ── 내부 서버용 이벤트 핸들러, 패킷 디스패처 ───────────────────
     netlib::FuncEventHandler     m_internalListenEventHandler;

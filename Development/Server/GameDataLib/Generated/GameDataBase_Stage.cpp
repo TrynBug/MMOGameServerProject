@@ -27,6 +27,11 @@ bool GameDataTableBase_Stage::makeGameData(const std::string& line)
     // 컬럼 순서대로 파싱
     std::getline(ss, field, ','); pData->Key = std::stoll(field);
     std::getline(ss, field, ','); pData->StageType = static_cast<EStageType>(std::stoi(field));
+    std::getline(ss, field, ','); pData->worldMinX = std::stod(field);
+    std::getline(ss, field, ','); pData->worldMinY = std::stod(field);
+    std::getline(ss, field, ','); pData->worldMaxX = std::stod(field);
+    std::getline(ss, field, ','); pData->worldMaxY = std::stod(field);
+    std::getline(ss, field, ','); pData->sectorSize = std::stod(field);
 
     if (pData->Key <= 0)
     {

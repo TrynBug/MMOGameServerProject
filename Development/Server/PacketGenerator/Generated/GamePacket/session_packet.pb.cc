@@ -70,6 +70,31 @@ struct GameLogoutReqDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GameLogoutReqDefaultTypeInternal _GameLogoutReq_default_instance_;
 
+inline constexpr GameEnterNtf::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        stage_id_{::int64_t{0}} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR GameEnterNtf::GameEnterNtf(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(GameEnterNtf_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct GameEnterNtfDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR GameEnterNtfDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~GameEnterNtfDefaultTypeInternal() {}
+  union {
+    GameEnterNtf _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GameEnterNtfDefaultTypeInternal _GameEnterNtf_default_instance_;
+
 inline constexpr ForceDisconnectNtf::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -97,32 +122,6 @@ struct ForceDisconnectNtfDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ForceDisconnectNtfDefaultTypeInternal _ForceDisconnectNtf_default_instance_;
-
-inline constexpr GameEnterNtf::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : _cached_size_{0},
-        character_{nullptr},
-        stage_id_{0} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR GameEnterNtf::GameEnterNtf(::_pbi::ConstantInitialized)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(GameEnterNtf_class_data_.base()),
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(),
-#endif  // PROTOBUF_CUSTOM_VTABLE
-      _impl_(::_pbi::ConstantInitialized()) {
-}
-struct GameEnterNtfDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR GameEnterNtfDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~GameEnterNtfDefaultTypeInternal() {}
-  union {
-    GameEnterNtf _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GameEnterNtfDefaultTypeInternal _GameEnterNtf_default_instance_;
 }  // namespace GamePacket
 static const ::_pb::EnumDescriptor* PROTOBUF_NONNULL
     file_level_enum_descriptors_GamePacket_2fsession_5fpacket_2eproto[1];
@@ -140,11 +139,9 @@ const ::uint32_t
         1,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::GameEnterNtf, _impl_._has_bits_),
-        5, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::GamePacket::GameEnterNtf, _impl_.character_),
+        4, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GamePacket::GameEnterNtf, _impl_.stage_id_),
         0,
-        1,
         0x000, // bitmap
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::ForceDisconnectNtf, _impl_._has_bits_),
@@ -159,8 +156,8 @@ static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, sizeof(::GamePacket::GatewayAuthReq)},
         {7, sizeof(::GamePacket::GameEnterNtf)},
-        {14, sizeof(::GamePacket::GameLogoutReq)},
-        {15, sizeof(::GamePacket::ForceDisconnectNtf)},
+        {12, sizeof(::GamePacket::GameLogoutReq)},
+        {13, sizeof(::GamePacket::ForceDisconnectNtf)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::GamePacket::_GatewayAuthReq_default_instance_._instance,
@@ -173,17 +170,16 @@ const char descriptor_table_protodef_GamePacket_2fsession_5fpacket_2eproto[] ABS
     "\n\037GamePacket/session_packet.proto\022\nGameP"
     "acket\032\026Common/packet_id.proto\032\036DataStruc"
     "tures/character.proto\"5\n\016GatewayAuthReq\022"
-    "\017\n\007user_id\030\001 \001(\003\022\022\n\nauth_token\030\002 \001(\004\"N\n\014"
-    "GameEnterNtf\022,\n\tcharacter\030\001 \001(\0132\031.DataSt"
-    "ructures.Character\022\020\n\010stage_id\030\002 \001(\005\"\017\n\r"
-    "GameLogoutReq\":\n\022ForceDisconnectNtf\022\023\n\013r"
-    "eason_code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t*\340\001\n\025Fo"
-    "rceDisconnectReason\022 \n\034FORCE_DISCONNECT_"
-    "REASON_NONE\020\000\022+\n\'FORCE_DISCONNECT_REASON"
-    "_DUPLICATE_LOGIN\020\001\022+\n\'FORCE_DISCONNECT_R"
-    "EASON_SERVER_SHUTDOWN\020\002\022\'\n#FORCE_DISCONN"
-    "ECT_REASON_AUTH_FAILED\020\003\022\"\n\036FORCE_DISCON"
-    "NECT_REASON_KICKED\020\004b\006proto3"
+    "\017\n\007user_id\030\001 \001(\003\022\022\n\nauth_token\030\002 \001(\004\" \n\014"
+    "GameEnterNtf\022\020\n\010stage_id\030\001 \001(\003\"\017\n\rGameLo"
+    "goutReq\":\n\022ForceDisconnectNtf\022\023\n\013reason_"
+    "code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t*\340\001\n\025ForceDis"
+    "connectReason\022 \n\034FORCE_DISCONNECT_REASON"
+    "_NONE\020\000\022+\n\'FORCE_DISCONNECT_REASON_DUPLI"
+    "CATE_LOGIN\020\001\022+\n\'FORCE_DISCONNECT_REASON_"
+    "SERVER_SHUTDOWN\020\002\022\'\n#FORCE_DISCONNECT_RE"
+    "ASON_AUTH_FAILED\020\003\022\"\n\036FORCE_DISCONNECT_R"
+    "EASON_KICKED\020\004b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_GamePacket_2fsession_5fpacket_2eproto_deps[2] = {
@@ -194,7 +190,7 @@ static ::absl::once_flag descriptor_table_GamePacket_2fsession_5fpacket_2eproto_
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fsession_5fpacket_2eproto = {
     false,
     false,
-    548,
+    502,
     descriptor_table_protodef_GamePacket_2fsession_5fpacket_2eproto,
     "GamePacket/session_packet.proto",
     &descriptor_table_GamePacket_2fsession_5fpacket_2eproto_once,
@@ -517,12 +513,6 @@ class GameEnterNtf::_Internal {
       8 * PROTOBUF_FIELD_OFFSET(GameEnterNtf, _impl_._has_bits_);
 };
 
-void GameEnterNtf::clear_character() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (_impl_.character_ != nullptr) _impl_.character_->Clear();
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00000001U);
-}
 GameEnterNtf::GameEnterNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
     : ::google::protobuf::Message(arena, GameEnterNtf_class_data_.base()) {
@@ -532,33 +522,16 @@ GameEnterNtf::GameEnterNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
   SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:GamePacket.GameEnterNtf)
 }
-PROTOBUF_NDEBUG_INLINE GameEnterNtf::Impl_::Impl_(
-    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
-    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
-    [[maybe_unused]] const ::GamePacket::GameEnterNtf& from_msg)
-      : _has_bits_{from._has_bits_},
-        _cached_size_{0} {}
-
 GameEnterNtf::GameEnterNtf(
-    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
-    const GameEnterNtf& from)
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const GameEnterNtf& from)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, GameEnterNtf_class_data_.base()) {
+    : ::google::protobuf::Message(arena, GameEnterNtf_class_data_.base()),
 #else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(arena) {
+    : ::google::protobuf::Message(arena),
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  GameEnterNtf* const _this = this;
-  (void)_this;
+      _impl_(from._impl_) {
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
-  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
-  _impl_.character_ = (CheckHasBit(cached_has_bits, 0x00000001U))
-                ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.character_)
-                : nullptr;
-  _impl_.stage_id_ = from._impl_.stage_id_;
-
-  // @@protoc_insertion_point(copy_constructor:GamePacket.GameEnterNtf)
 }
 PROTOBUF_NDEBUG_INLINE GameEnterNtf::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
@@ -567,12 +540,7 @@ PROTOBUF_NDEBUG_INLINE GameEnterNtf::Impl_::Impl_(
 
 inline void GameEnterNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, character_),
-           0,
-           offsetof(Impl_, stage_id_) -
-               offsetof(Impl_, character_) +
-               sizeof(Impl_::stage_id_));
+  _impl_.stage_id_ = {};
 }
 GameEnterNtf::~GameEnterNtf() {
   // @@protoc_insertion_point(destructor:GamePacket.GameEnterNtf)
@@ -585,7 +553,6 @@ inline void GameEnterNtf::SharedDtor(MessageLite& self) {
   }
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
-  delete this_._impl_.character_;
   this_._impl_.~Impl_();
 }
 
@@ -632,18 +599,18 @@ GameEnterNtf::GetClassData() const {
   return GameEnterNtf_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<1, 2, 1, 0, 2>
+const ::_pbi::TcParseTable<0, 1, 0, 0, 2>
 GameEnterNtf::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(GameEnterNtf, _impl_._has_bits_),
     0, // no _extensions_
-    2, 8,  // max_field_number, fast_idx_mask
+    1, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967292,  // skipmap
+    4294967294,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    2,  // num_field_entries
-    1,  // num_aux_entries
-    offsetof(decltype(_table_), aux_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
     GameEnterNtf_class_data_.base(),
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
@@ -651,25 +618,17 @@ GameEnterNtf::_table_ = {
     ::_pbi::TcParser::GetTable<::GamePacket::GameEnterNtf>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // int32 stage_id = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(GameEnterNtf, _impl_.stage_id_), 1>(),
-     {16, 1, 0,
+    // int64 stage_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(GameEnterNtf, _impl_.stage_id_), 0>(),
+     {8, 0, 0,
       PROTOBUF_FIELD_OFFSET(GameEnterNtf, _impl_.stage_id_)}},
-    // .DataStructures.Character character = 1;
-    {::_pbi::TcParser::FastMtS1,
-     {10, 0, 0,
-      PROTOBUF_FIELD_OFFSET(GameEnterNtf, _impl_.character_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // .DataStructures.Character character = 1;
-    {PROTOBUF_FIELD_OFFSET(GameEnterNtf, _impl_.character_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
-    // int32 stage_id = 2;
-    {PROTOBUF_FIELD_OFFSET(GameEnterNtf, _impl_.stage_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int64 stage_id = 1;
+    {PROTOBUF_FIELD_OFFSET(GameEnterNtf, _impl_.stage_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
   }},
-  {{
-      {::_pbi::TcParser::GetTable<::DataStructures::Character>()},
-  }},
+  // no aux_entries
   {{
   }},
 };
@@ -680,12 +639,7 @@ PROTOBUF_NOINLINE void GameEnterNtf::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  cached_has_bits = _impl_._has_bits_[0];
-  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    ABSL_DCHECK(_impl_.character_ != nullptr);
-    _impl_.character_->Clear();
-  }
-  _impl_.stage_id_ = 0;
+  _impl_.stage_id_ = ::int64_t{0};
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -709,18 +663,11 @@ PROTOBUF_NOINLINE void GameEnterNtf::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // .DataStructures.Character character = 1;
+  // int64 stage_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-        1, *this_._impl_.character_, this_._impl_.character_->GetCachedSize(), target,
-        stream);
-  }
-
-  // int32 stage_id = 2;
-  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
     if (this_._internal_stage_id() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<2>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
               stream, this_._internal_stage_id(), target);
     }
   }
@@ -748,18 +695,12 @@ PROTOBUF_NOINLINE void GameEnterNtf::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void)cached_has_bits;
 
-  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
-  cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
-    // .DataStructures.Character character = 1;
+   {
+    // int64 stage_id = 1;
+    cached_has_bits = this_._impl_._has_bits_[0];
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      total_size += 1 +
-                    ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.character_);
-    }
-    // int32 stage_id = 2;
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
       if (this_._internal_stage_id() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
             this_._internal_stage_id());
       }
     }
@@ -776,26 +717,15 @@ void GameEnterNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     from.CheckHasBitConsistency();
   }
-  ::google::protobuf::Arena* arena = _this->GetArena();
   // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.GameEnterNtf)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
-    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      ABSL_DCHECK(from._impl_.character_ != nullptr);
-      if (_this->_impl_.character_ == nullptr) {
-        _this->_impl_.character_ = ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.character_);
-      } else {
-        _this->_impl_.character_->MergeFrom(*from._impl_.character_);
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (from._internal_stage_id() != 0) {
-        _this->_impl_.stage_id_ = from._impl_.stage_id_;
-      }
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (from._internal_stage_id() != 0) {
+      _this->_impl_.stage_id_ = from._impl_.stage_id_;
     }
   }
   _this->_impl_._has_bits_[0] |= cached_has_bits;
@@ -815,12 +745,7 @@ void GameEnterNtf::InternalSwap(GameEnterNtf* PROTOBUF_RESTRICT PROTOBUF_NONNULL
   using ::std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(GameEnterNtf, _impl_.stage_id_)
-      + sizeof(GameEnterNtf::_impl_.stage_id_)
-      - PROTOBUF_FIELD_OFFSET(GameEnterNtf, _impl_.character_)>(
-          reinterpret_cast<char*>(&_impl_.character_),
-          reinterpret_cast<char*>(&other->_impl_.character_));
+  swap(_impl_.stage_id_, other->_impl_.stage_id_);
 }
 
 ::google::protobuf::Metadata GameEnterNtf::GetMetadata() const {

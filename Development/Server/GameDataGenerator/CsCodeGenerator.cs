@@ -74,6 +74,7 @@ namespace GameDataGenerator
             sb.AppendLine("// =====================================================================");
             sb.AppendLine();
             sb.AppendLine("using System.Collections.Generic;");
+            sb.AppendLine("using System.IO;");
             sb.AppendLine();
 
             // GameDataBase_Xxx

@@ -32,18 +32,19 @@ inline constexpr Character::Impl_::Impl_(
         name_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        user_id_{::int64_t{0}},
-        exp_{::int64_t{0}},
+        character_id_{::int64_t{0}},
+        owner_user_id_{::int64_t{0}},
+        job_id_{0},
         level_{0},
+        exp_{::int64_t{0}},
         hp_{0},
         max_hp_{0},
         mp_{0},
         max_mp_{0},
-        last_stage_id_{0},
+        last_stage_id_{::int64_t{0}},
         pos_x_{0},
         pos_y_{0},
-        pos_z_{0},
-        dir_y_{0} {}
+        yaw_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR Character::Character(::_pbi::ConstantInitialized)
@@ -74,9 +75,11 @@ const ::uint32_t
         protodesc_cold) = {
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_._has_bits_),
-        16, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.user_id_),
+        17, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.character_id_),
+        PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.owner_user_id_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.name_),
+        PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.job_id_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.level_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.exp_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.hp_),
@@ -86,12 +89,11 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.last_stage_id_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.pos_x_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.pos_y_),
-        PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.pos_z_),
-        PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.dir_y_),
+        PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.yaw_),
         1,
+        2,
         0,
         3,
-        2,
         4,
         5,
         6,
@@ -101,6 +103,7 @@ const ::uint32_t
         10,
         11,
         12,
+        13,
 };
 
 static const ::_pbi::MigrationSchema
@@ -113,18 +116,19 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_DataStructures_2fcharacter_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\036DataStructures/character.proto\022\016DataSt"
-    "ructures\"\321\001\n\tCharacter\022\017\n\007user_id\030\001 \001(\003\022"
-    "\014\n\004name\030\002 \001(\t\022\r\n\005level\030\003 \001(\005\022\013\n\003exp\030\004 \001("
-    "\003\022\n\n\002hp\030\005 \001(\005\022\016\n\006max_hp\030\006 \001(\005\022\n\n\002mp\030\007 \001("
-    "\005\022\016\n\006max_mp\030\010 \001(\005\022\025\n\rlast_stage_id\030\t \001(\005"
-    "\022\r\n\005pos_x\030\n \001(\002\022\r\n\005pos_y\030\013 \001(\002\022\r\n\005pos_z\030"
-    "\014 \001(\002\022\r\n\005dir_y\030\r \001(\002b\006proto3"
+    "ructures\"\354\001\n\tCharacter\022\024\n\014character_id\030\001"
+    " \001(\003\022\025\n\rowner_user_id\030\002 \001(\003\022\014\n\004name\030\003 \001("
+    "\t\022\016\n\006job_id\030\004 \001(\005\022\r\n\005level\030\005 \001(\005\022\013\n\003exp\030"
+    "\006 \001(\003\022\n\n\002hp\030\007 \001(\005\022\016\n\006max_hp\030\010 \001(\005\022\n\n\002mp\030"
+    "\t \001(\005\022\016\n\006max_mp\030\n \001(\005\022\025\n\rlast_stage_id\030\013"
+    " \001(\003\022\r\n\005pos_x\030\014 \001(\002\022\r\n\005pos_y\030\r \001(\002\022\013\n\003ya"
+    "w\030\016 \001(\002b\006proto3"
 };
 static ::absl::once_flag descriptor_table_DataStructures_2fcharacter_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_DataStructures_2fcharacter_2eproto = {
     false,
     false,
-    268,
+    295,
     descriptor_table_protodef_DataStructures_2fcharacter_2eproto,
     "DataStructures/character.proto",
     &descriptor_table_DataStructures_2fcharacter_2eproto_once,
@@ -179,12 +183,12 @@ Character::Character(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
   ::memcpy(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, user_id_),
+               offsetof(Impl_, character_id_),
            reinterpret_cast<const char*>(&from._impl_) +
-               offsetof(Impl_, user_id_),
-           offsetof(Impl_, dir_y_) -
-               offsetof(Impl_, user_id_) +
-               sizeof(Impl_::dir_y_));
+               offsetof(Impl_, character_id_),
+           offsetof(Impl_, yaw_) -
+               offsetof(Impl_, character_id_) +
+               sizeof(Impl_::yaw_));
 
   // @@protoc_insertion_point(copy_constructor:DataStructures.Character)
 }
@@ -197,11 +201,11 @@ PROTOBUF_NDEBUG_INLINE Character::Impl_::Impl_(
 inline void Character::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, user_id_),
+               offsetof(Impl_, character_id_),
            0,
-           offsetof(Impl_, dir_y_) -
-               offsetof(Impl_, user_id_) +
-               sizeof(Impl_::dir_y_));
+           offsetof(Impl_, yaw_) -
+               offsetof(Impl_, character_id_) +
+               sizeof(Impl_::yaw_));
 }
 Character::~Character() {
   // @@protoc_insertion_point(destructor:DataStructures.Character)
@@ -261,16 +265,16 @@ Character::GetClassData() const {
   return Character_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<4, 13, 0, 45, 2>
+const ::_pbi::TcParseTable<4, 14, 0, 45, 2>
 Character::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(Character, _impl_._has_bits_),
     0, // no _extensions_
-    13, 120,  // max_field_number, fast_idx_mask
+    14, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294959104,  // skipmap
+    4294950912,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    13,  // num_field_entries
+    14,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     Character_class_data_.base(),
@@ -281,93 +285,98 @@ Character::_table_ = {
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // int64 user_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Character, _impl_.user_id_), 1>(),
+    // int64 character_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Character, _impl_.character_id_), 1>(),
      {8, 1, 0,
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.user_id_)}},
-    // string name = 2;
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.character_id_)}},
+    // int64 owner_user_id = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Character, _impl_.owner_user_id_), 2>(),
+     {16, 2, 0,
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.owner_user_id_)}},
+    // string name = 3;
     {::_pbi::TcParser::FastUS1,
-     {18, 0, 0,
+     {26, 0, 0,
       PROTOBUF_FIELD_OFFSET(Character, _impl_.name_)}},
-    // int32 level = 3;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Character, _impl_.level_), 3>(),
-     {24, 3, 0,
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.level_)}},
-    // int64 exp = 4;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Character, _impl_.exp_), 2>(),
-     {32, 2, 0,
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.exp_)}},
-    // int32 hp = 5;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Character, _impl_.hp_), 4>(),
+    // int32 job_id = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Character, _impl_.job_id_), 3>(),
+     {32, 3, 0,
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.job_id_)}},
+    // int32 level = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Character, _impl_.level_), 4>(),
      {40, 4, 0,
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.hp_)}},
-    // int32 max_hp = 6;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Character, _impl_.max_hp_), 5>(),
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.level_)}},
+    // int64 exp = 6;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Character, _impl_.exp_), 5>(),
      {48, 5, 0,
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.max_hp_)}},
-    // int32 mp = 7;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Character, _impl_.mp_), 6>(),
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.exp_)}},
+    // int32 hp = 7;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Character, _impl_.hp_), 6>(),
      {56, 6, 0,
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.mp_)}},
-    // int32 max_mp = 8;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Character, _impl_.max_mp_), 7>(),
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.hp_)}},
+    // int32 max_hp = 8;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Character, _impl_.max_hp_), 7>(),
      {64, 7, 0,
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.max_mp_)}},
-    // int32 last_stage_id = 9;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Character, _impl_.last_stage_id_), 8>(),
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.max_hp_)}},
+    // int32 mp = 9;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Character, _impl_.mp_), 8>(),
      {72, 8, 0,
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.mp_)}},
+    // int32 max_mp = 10;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Character, _impl_.max_mp_), 9>(),
+     {80, 9, 0,
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.max_mp_)}},
+    // int64 last_stage_id = 11;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Character, _impl_.last_stage_id_), 10>(),
+     {88, 10, 0,
       PROTOBUF_FIELD_OFFSET(Character, _impl_.last_stage_id_)}},
-    // float pos_x = 10;
-    {::_pbi::TcParser::FastF32S1,
-     {85, 9, 0,
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.pos_x_)}},
-    // float pos_y = 11;
-    {::_pbi::TcParser::FastF32S1,
-     {93, 10, 0,
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.pos_y_)}},
-    // float pos_z = 12;
+    // float pos_x = 12;
     {::_pbi::TcParser::FastF32S1,
      {101, 11, 0,
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.pos_z_)}},
-    // float dir_y = 13;
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.pos_x_)}},
+    // float pos_y = 13;
     {::_pbi::TcParser::FastF32S1,
      {109, 12, 0,
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.dir_y_)}},
-    {::_pbi::TcParser::MiniParse, {}},
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.pos_y_)}},
+    // float yaw = 14;
+    {::_pbi::TcParser::FastF32S1,
+     {117, 13, 0,
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.yaw_)}},
     {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
-    // int64 user_id = 1;
-    {PROTOBUF_FIELD_OFFSET(Character, _impl_.user_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
-    // string name = 2;
+    // int64 character_id = 1;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.character_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 owner_user_id = 2;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.owner_user_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // string name = 3;
     {PROTOBUF_FIELD_OFFSET(Character, _impl_.name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // int32 level = 3;
-    {PROTOBUF_FIELD_OFFSET(Character, _impl_.level_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // int64 exp = 4;
-    {PROTOBUF_FIELD_OFFSET(Character, _impl_.exp_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
-    // int32 hp = 5;
-    {PROTOBUF_FIELD_OFFSET(Character, _impl_.hp_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // int32 max_hp = 6;
-    {PROTOBUF_FIELD_OFFSET(Character, _impl_.max_hp_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // int32 mp = 7;
-    {PROTOBUF_FIELD_OFFSET(Character, _impl_.mp_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // int32 max_mp = 8;
-    {PROTOBUF_FIELD_OFFSET(Character, _impl_.max_mp_), _Internal::kHasBitsOffset + 7, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // int32 last_stage_id = 9;
-    {PROTOBUF_FIELD_OFFSET(Character, _impl_.last_stage_id_), _Internal::kHasBitsOffset + 8, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // float pos_x = 10;
-    {PROTOBUF_FIELD_OFFSET(Character, _impl_.pos_x_), _Internal::kHasBitsOffset + 9, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float pos_y = 11;
-    {PROTOBUF_FIELD_OFFSET(Character, _impl_.pos_y_), _Internal::kHasBitsOffset + 10, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float pos_z = 12;
-    {PROTOBUF_FIELD_OFFSET(Character, _impl_.pos_z_), _Internal::kHasBitsOffset + 11, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float dir_y = 13;
-    {PROTOBUF_FIELD_OFFSET(Character, _impl_.dir_y_), _Internal::kHasBitsOffset + 12, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // int32 job_id = 4;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.job_id_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int32 level = 5;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.level_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int64 exp = 6;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.exp_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int32 hp = 7;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.hp_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int32 max_hp = 8;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.max_hp_), _Internal::kHasBitsOffset + 7, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int32 mp = 9;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.mp_), _Internal::kHasBitsOffset + 8, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int32 max_mp = 10;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.max_mp_), _Internal::kHasBitsOffset + 9, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int64 last_stage_id = 11;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.last_stage_id_), _Internal::kHasBitsOffset + 10, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // float pos_x = 12;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.pos_x_), _Internal::kHasBitsOffset + 11, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float pos_y = 13;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.pos_y_), _Internal::kHasBitsOffset + 12, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float yaw = 14;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.yaw_), _Internal::kHasBitsOffset + 13, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
   }},
   // no aux_entries
   {{
-    "\30\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    "\30\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0"
     "DataStructures.Character"
     "name"
   }},
@@ -384,14 +393,14 @@ PROTOBUF_NOINLINE void Character::Clear() {
     _impl_.name_.ClearNonDefaultToEmpty();
   }
   if (BatchCheckHasBit(cached_has_bits, 0x000000feU)) {
-    ::memset(&_impl_.user_id_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.max_mp_) -
-        reinterpret_cast<char*>(&_impl_.user_id_)) + sizeof(_impl_.max_mp_));
+    ::memset(&_impl_.character_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.max_hp_) -
+        reinterpret_cast<char*>(&_impl_.character_id_)) + sizeof(_impl_.max_hp_));
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x00001f00U)) {
-    ::memset(&_impl_.last_stage_id_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.dir_y_) -
-        reinterpret_cast<char*>(&_impl_.last_stage_id_)) + sizeof(_impl_.dir_y_));
+  if (BatchCheckHasBit(cached_has_bits, 0x00003f00U)) {
+    ::memset(&_impl_.mp_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.yaw_) -
+        reinterpret_cast<char*>(&_impl_.mp_)) + sizeof(_impl_.yaw_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -416,121 +425,130 @@ PROTOBUF_NOINLINE void Character::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 user_id = 1;
+  // int64 character_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-    if (this_._internal_user_id() != 0) {
+    if (this_._internal_character_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_user_id(), target);
+              stream, this_._internal_character_id(), target);
     }
   }
 
-  // string name = 2;
+  // int64 owner_user_id = 2;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (this_._internal_owner_user_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<2>(
+              stream, this_._internal_owner_user_id(), target);
+    }
+  }
+
+  // string name = 3;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
     if (!this_._internal_name().empty()) {
       const ::std::string& _s = this_._internal_name();
       ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
           _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "DataStructures.Character.name");
-      target = stream->WriteStringMaybeAliased(2, _s, target);
+      target = stream->WriteStringMaybeAliased(3, _s, target);
     }
   }
 
-  // int32 level = 3;
+  // int32 job_id = 4;
   if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (this_._internal_job_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<4>(
+              stream, this_._internal_job_id(), target);
+    }
+  }
+
+  // int32 level = 5;
+  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
     if (this_._internal_level() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<3>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<5>(
               stream, this_._internal_level(), target);
     }
   }
 
-  // int64 exp = 4;
-  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+  // int64 exp = 6;
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
     if (this_._internal_exp() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<4>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<6>(
               stream, this_._internal_exp(), target);
     }
   }
 
-  // int32 hp = 5;
-  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+  // int32 hp = 7;
+  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
     if (this_._internal_hp() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<5>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<7>(
               stream, this_._internal_hp(), target);
     }
   }
 
-  // int32 max_hp = 6;
-  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+  // int32 max_hp = 8;
+  if (CheckHasBit(cached_has_bits, 0x00000080U)) {
     if (this_._internal_max_hp() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<6>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<8>(
               stream, this_._internal_max_hp(), target);
     }
   }
 
-  // int32 mp = 7;
-  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+  // int32 mp = 9;
+  if (CheckHasBit(cached_has_bits, 0x00000100U)) {
     if (this_._internal_mp() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<7>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<9>(
               stream, this_._internal_mp(), target);
     }
   }
 
-  // int32 max_mp = 8;
-  if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+  // int32 max_mp = 10;
+  if (CheckHasBit(cached_has_bits, 0x00000200U)) {
     if (this_._internal_max_mp() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<8>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<10>(
               stream, this_._internal_max_mp(), target);
     }
   }
 
-  // int32 last_stage_id = 9;
-  if (CheckHasBit(cached_has_bits, 0x00000100U)) {
+  // int64 last_stage_id = 11;
+  if (CheckHasBit(cached_has_bits, 0x00000400U)) {
     if (this_._internal_last_stage_id() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<9>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<11>(
               stream, this_._internal_last_stage_id(), target);
     }
   }
 
-  // float pos_x = 10;
-  if (CheckHasBit(cached_has_bits, 0x00000200U)) {
+  // float pos_x = 12;
+  if (CheckHasBit(cached_has_bits, 0x00000800U)) {
     if (::absl::bit_cast<::uint32_t>(this_._internal_pos_x()) != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          10, this_._internal_pos_x(), target);
+          12, this_._internal_pos_x(), target);
     }
   }
 
-  // float pos_y = 11;
-  if (CheckHasBit(cached_has_bits, 0x00000400U)) {
+  // float pos_y = 13;
+  if (CheckHasBit(cached_has_bits, 0x00001000U)) {
     if (::absl::bit_cast<::uint32_t>(this_._internal_pos_y()) != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          11, this_._internal_pos_y(), target);
+          13, this_._internal_pos_y(), target);
     }
   }
 
-  // float pos_z = 12;
-  if (CheckHasBit(cached_has_bits, 0x00000800U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_pos_z()) != 0) {
+  // float yaw = 14;
+  if (CheckHasBit(cached_has_bits, 0x00002000U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_yaw()) != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          12, this_._internal_pos_z(), target);
-    }
-  }
-
-  // float dir_y = 13;
-  if (CheckHasBit(cached_has_bits, 0x00001000U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_dir_y()) != 0) {
-      target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          13, this_._internal_dir_y(), target);
+          14, this_._internal_yaw(), target);
     }
   }
 
@@ -560,92 +578,100 @@ PROTOBUF_NOINLINE void Character::Clear() {
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x000000ffU)) {
-    // string name = 2;
+    // string name = 3;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (!this_._internal_name().empty()) {
         total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                         this_._internal_name());
       }
     }
-    // int64 user_id = 1;
+    // int64 character_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (this_._internal_user_id() != 0) {
+      if (this_._internal_character_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_user_id());
+            this_._internal_character_id());
       }
     }
-    // int64 exp = 4;
+    // int64 owner_user_id = 2;
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (this_._internal_exp() != 0) {
+      if (this_._internal_owner_user_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_exp());
+            this_._internal_owner_user_id());
       }
     }
-    // int32 level = 3;
+    // int32 job_id = 4;
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (this_._internal_job_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_job_id());
+      }
+    }
+    // int32 level = 5;
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
       if (this_._internal_level() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_level());
       }
     }
-    // int32 hp = 5;
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    // int64 exp = 6;
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (this_._internal_exp() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_exp());
+      }
+    }
+    // int32 hp = 7;
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
       if (this_._internal_hp() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_hp());
       }
     }
-    // int32 max_hp = 6;
-    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    // int32 max_hp = 8;
+    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
       if (this_._internal_max_hp() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_max_hp());
       }
     }
-    // int32 mp = 7;
-    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+  }
+  if (BatchCheckHasBit(cached_has_bits, 0x00003f00U)) {
+    // int32 mp = 9;
+    if (CheckHasBit(cached_has_bits, 0x00000100U)) {
       if (this_._internal_mp() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_mp());
       }
     }
-    // int32 max_mp = 8;
-    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+    // int32 max_mp = 10;
+    if (CheckHasBit(cached_has_bits, 0x00000200U)) {
       if (this_._internal_max_mp() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_max_mp());
       }
     }
-  }
-  if (BatchCheckHasBit(cached_has_bits, 0x00001f00U)) {
-    // int32 last_stage_id = 9;
-    if (CheckHasBit(cached_has_bits, 0x00000100U)) {
+    // int64 last_stage_id = 11;
+    if (CheckHasBit(cached_has_bits, 0x00000400U)) {
       if (this_._internal_last_stage_id() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
             this_._internal_last_stage_id());
       }
     }
-    // float pos_x = 10;
-    if (CheckHasBit(cached_has_bits, 0x00000200U)) {
+    // float pos_x = 12;
+    if (CheckHasBit(cached_has_bits, 0x00000800U)) {
       if (::absl::bit_cast<::uint32_t>(this_._internal_pos_x()) != 0) {
         total_size += 5;
       }
     }
-    // float pos_y = 11;
-    if (CheckHasBit(cached_has_bits, 0x00000400U)) {
+    // float pos_y = 13;
+    if (CheckHasBit(cached_has_bits, 0x00001000U)) {
       if (::absl::bit_cast<::uint32_t>(this_._internal_pos_y()) != 0) {
         total_size += 5;
       }
     }
-    // float pos_z = 12;
-    if (CheckHasBit(cached_has_bits, 0x00000800U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_pos_z()) != 0) {
-        total_size += 5;
-      }
-    }
-    // float dir_y = 13;
-    if (CheckHasBit(cached_has_bits, 0x00001000U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_dir_y()) != 0) {
+    // float yaw = 14;
+    if (CheckHasBit(cached_has_bits, 0x00002000U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_yaw()) != 0) {
         total_size += 5;
       }
     }
@@ -679,65 +705,70 @@ void Character::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (from._internal_user_id() != 0) {
-        _this->_impl_.user_id_ = from._impl_.user_id_;
+      if (from._internal_character_id() != 0) {
+        _this->_impl_.character_id_ = from._impl_.character_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (from._internal_exp() != 0) {
-        _this->_impl_.exp_ = from._impl_.exp_;
+      if (from._internal_owner_user_id() != 0) {
+        _this->_impl_.owner_user_id_ = from._impl_.owner_user_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (from._internal_job_id() != 0) {
+        _this->_impl_.job_id_ = from._impl_.job_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
       if (from._internal_level() != 0) {
         _this->_impl_.level_ = from._impl_.level_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (from._internal_exp() != 0) {
+        _this->_impl_.exp_ = from._impl_.exp_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
       if (from._internal_hp() != 0) {
         _this->_impl_.hp_ = from._impl_.hp_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
       if (from._internal_max_hp() != 0) {
         _this->_impl_.max_hp_ = from._impl_.max_hp_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+  }
+  if (BatchCheckHasBit(cached_has_bits, 0x00003f00U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000100U)) {
       if (from._internal_mp() != 0) {
         _this->_impl_.mp_ = from._impl_.mp_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000200U)) {
       if (from._internal_max_mp() != 0) {
         _this->_impl_.max_mp_ = from._impl_.max_mp_;
       }
     }
-  }
-  if (BatchCheckHasBit(cached_has_bits, 0x00001f00U)) {
-    if (CheckHasBit(cached_has_bits, 0x00000100U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000400U)) {
       if (from._internal_last_stage_id() != 0) {
         _this->_impl_.last_stage_id_ = from._impl_.last_stage_id_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000200U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000800U)) {
       if (::absl::bit_cast<::uint32_t>(from._internal_pos_x()) != 0) {
         _this->_impl_.pos_x_ = from._impl_.pos_x_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000400U)) {
+    if (CheckHasBit(cached_has_bits, 0x00001000U)) {
       if (::absl::bit_cast<::uint32_t>(from._internal_pos_y()) != 0) {
         _this->_impl_.pos_y_ = from._impl_.pos_y_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000800U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_pos_z()) != 0) {
-        _this->_impl_.pos_z_ = from._impl_.pos_z_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00001000U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_dir_y()) != 0) {
-        _this->_impl_.dir_y_ = from._impl_.dir_y_;
+    if (CheckHasBit(cached_has_bits, 0x00002000U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_yaw()) != 0) {
+        _this->_impl_.yaw_ = from._impl_.yaw_;
       }
     }
   }
@@ -762,11 +793,11 @@ void Character::InternalSwap(Character* PROTOBUF_RESTRICT PROTOBUF_NONNULL other
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.dir_y_)
-      + sizeof(Character::_impl_.dir_y_)
-      - PROTOBUF_FIELD_OFFSET(Character, _impl_.user_id_)>(
-          reinterpret_cast<char*>(&_impl_.user_id_),
-          reinterpret_cast<char*>(&other->_impl_.user_id_));
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.yaw_)
+      + sizeof(Character::_impl_.yaw_)
+      - PROTOBUF_FIELD_OFFSET(Character, _impl_.character_id_)>(
+          reinterpret_cast<char*>(&_impl_.character_id_),
+          reinterpret_cast<char*>(&other->_impl_.character_id_));
 }
 
 ::google::protobuf::Metadata Character::GetMetadata() const {

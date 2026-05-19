@@ -28,6 +28,11 @@
 #include "ProtoJsonSerializer.h"
 #include "Generated/Common/packet_id.pb.h"
 #include "Generated/DataStructures/character.pb.h"
+#include "Generated/GamePacket/character_packet.pb.h"
 #include "Generated/GamePacket/session_packet.pb.h"
 #include "Generated/ServerPacket/gateway_user_packet.pb.h"
 #include "Generated/ServerPacket/gateway_game_packet.pb.h"
+
+// GameDataLib enum
+#include "Enum/GameEnum_Common.h"
+#include "Enum/GameEnum_Stage.h"

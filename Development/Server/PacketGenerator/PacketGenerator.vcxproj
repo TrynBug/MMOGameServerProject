@@ -22,6 +22,7 @@
     <ClCompile Include="Generated\Common\packet_id.pb.cc" />
     <ClCompile Include="Generated\DataStructures\character.pb.cc" />
     <ClCompile Include="Generated\DataStructures\item.pb.cc" />
+    <ClCompile Include="Generated\GamePacket\character_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\chat_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\dungeon_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\item_packet.pb.cc" />
@@ -46,6 +47,7 @@
     <ClInclude Include="Generated\Common\packet_id.pb.h" />
     <ClInclude Include="Generated\DataStructures\character.pb.h" />
     <ClInclude Include="Generated\DataStructures\item.pb.h" />
+    <ClInclude Include="Generated\GamePacket\character_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\chat_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\dungeon_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\item_packet.pb.h" />
@@ -68,6 +70,7 @@
     <None Include="Proto\Common\packet_id.proto" />
     <None Include="Proto\DataStructures\character.proto" />
     <None Include="Proto\DataStructures\item.proto" />
+    <None Include="Proto\GamePacket\character_packet.proto" />
     <None Include="Proto\GamePacket\chat_packet.proto" />
     <None Include="Proto\GamePacket\dungeon_packet.proto" />
     <None Include="Proto\GamePacket\item_packet.proto" />

@@ -17,3 +17,27 @@ enum class ETeam : int
 ETeam StringToTeam(const std::string& v);
 std::string TeamToString(ETeam v);
 
+enum class EObjectType : int
+{
+    None                 = 0,
+    User                 = 1,  // 유저
+    Monster              = 2,  // 몬스터
+    Prop                 = 3,  // 프랍
+    Drop                 = 4,  // 드롭아이템
+    Max                 
+};
+
+EObjectType StringToObjectType(const std::string& v);
+std::string ObjectTypeToString(EObjectType v);
+
+enum class EResultCode : int
+{
+    None                 = 0,
+    Success              = 1,  // 성공
+    Fail                 = 2,  // 실패
+    Max                 
+};
+
+EResultCode StringToResultCode(const std::string& v);
+std::string ResultCodeToString(EResultCode v);
+

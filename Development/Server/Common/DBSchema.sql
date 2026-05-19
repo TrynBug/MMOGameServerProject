@@ -14,8 +14,12 @@
 -- ────────────────────────────────────────────────────────────────
 
 -- 캐릭터 (DataStructures.Character protobuf 메시지를 JSON으로 저장)
+-- 1명의 유저는 여러개의 캐릭터를 가질 수 있다.
+-- PK는 (user_id, character_id). character_id는 ObjectIdGenerator로 발급된 영구 ID.
 CREATE TABLE IF NOT EXISTS Characters (
-    user_id       INTEGER PRIMARY KEY,
+    user_id       INTEGER NOT NULL,
+    character_id  INTEGER NOT NULL,
     data          TEXT    NOT NULL,
-    last_updated  INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000)
+    last_updated  INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
+    PRIMARY KEY (user_id, character_id)
 );

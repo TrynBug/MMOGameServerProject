@@ -8,6 +8,7 @@
 EStageType StringToStageType(const std::string& v)
 {
     if (v == "None") return EStageType::None;
+    if (v == "System") return EStageType::System;
     if (v == "Town") return EStageType::Town;
     if (v == "Field") return EStageType::Field;
     if (v == "Dungeon") return EStageType::Dungeon;
@@ -19,6 +20,7 @@ std::string StageTypeToString(EStageType v)
     switch (v)
     {
     case EStageType::None: return "None";
+    case EStageType::System: return "System";
     case EStageType::Town: return "Town";
     case EStageType::Field: return "Field";
     case EStageType::Dungeon: return "Dungeon";

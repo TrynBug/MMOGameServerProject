@@ -21,7 +21,19 @@
     <ClCompile Include="Stage.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="StageObject.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Sector.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="OpenField.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemStage.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Town.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="User.cpp">
@@ -47,7 +59,19 @@
     <ClInclude Include="Stage.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
+    <ClInclude Include="StageObject.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Sector.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
     <ClInclude Include="OpenField.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemStage.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Town.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="User.h">

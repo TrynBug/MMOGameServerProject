@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package GamePacket;
+
+import "DataStructures/character.proto";
+
+// ──────────────────────────────────────────────
+// 캐릭터 선택 / 생성 패킷 (클라이언트 <-> 게임서버)
+// ──────────────────────────────────────────────
+//
+// 입장 흐름:
+//   1) 클라이언트가 게임서버에 입장하면 게임서버가 자동으로 CharacterListNtf 전송
+//   2) 클라이언트는 캐릭터가 있으면 CharacterSelectReq, 없으면 CharacterCreateReq 전송
+//   3) CharacterCreateReq에 대해 CharacterCreateRes 응답 → 클라이언트는 다시 CharacterSelectReq
+//   4) CharacterSelectReq 성공 시 GameEnterNtf, 실패 시 CharacterSelectFailNtf
+
+// 캐릭터 목록 알림 (게임서버 -> 클라)
+// 유저가 게임서버에 입장하면 게임서버가 자동으로 전송한다.
+// 목록이 비어있으면 클라이언트가 캐릭터 생성으로 진행한다.
+message CharacterListNtf {
+    repeated DataStructures.Character characters = 1;
+}
+
+// 캐릭터 생성 요청 (클라 -> 게임서버)
+message CharacterCreateReq {
+    string name = 1;     // 캐릭터 이름
+    int32 job_id = 2;    // 직업 ID (GameData로 관리)
+}
+
+// 캐릭터 생성 결과 (게임서버 -> 클라)
+// result_code 는 EResultCode (1=Success, 2=Fail). 0은 사용하지 않음.
+message CharacterCreateRes {
+    int32 result_code = 1;                          // EResultCode 값
+    string error_msg = 2;                           // 실패 시 사유 메시지 (성공 시 빈 문자열)
+    DataStructures.Character new_character = 3;     // 성공 시 생성된 캐릭터 (실패 시 비어있음)
+}
+
+// 캐릭터 선택 요청 (클라 -> 게임서버)
+// 성공 시 게임서버는 GameEnterNtf를 보낸다. 실패 시 CharacterSelectFailNtf를 보낸다.
+message CharacterSelectReq {
+    int64 character_id = 1;
+}
+
+// 캐릭터 선택 실패 알림 (게임서버 -> 클라)
+// 캐릭터 선택은 성공/실패로 응답 패킷이 분기된다.
+//   - 성공: GameEnterNtf (game 입장 완료 = 캐릭터 선택 완료)
+//   - 실패: CharacterSelectFailNtf
+message CharacterSelectFailNtf {
+    int32 reason_code = 1;   // 실패 사유 코드 (당분간 free-form, 필요해지면 enum화)
+    string message = 2;      // 사람이 읽을 수 있는 사유 메시지
+}

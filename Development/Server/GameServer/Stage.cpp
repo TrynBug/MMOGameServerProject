@@ -1,15 +1,159 @@
 #include "pch.h"
 #include "Stage.h"
 
+#include "Generated/GameData_Stage.h"
+
+#include <cmath>
+
 namespace
 {
     constexpr int64 k_heartbeatIntervalMs = 5000;   // 5초마다 1번 heartbeat 로그
+
+    // GameData_Stage 로딩 실패 시 fallback grid 값.
+    // 데이터가 제대로 로드되지 않더라도 객체 자체는 동작하도록 안전망.
+    constexpr double k_fallbackWorldMinX  = -500.0;
+    constexpr double k_fallbackWorldMinY  = -500.0;
+    constexpr double k_fallbackWorldMaxX  =  500.0;
+    constexpr double k_fallbackWorldMaxY  =  500.0;
+    constexpr double k_fallbackSectorSize =   50.0;
 }
 
-Stage::Stage(int64 stageId, StageType stageType)
+StageGridParams LoadStageGridParams(int64 stageId)
+{
+    StageGridParams params;
+    const GameData_Stage* pData = GameDataTable_Stage::FindData(stageId);
+    if (!pData)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("LoadStageGridParams: GameData_Stage not found. stageId={}. using fallback grid.", stageId));
+        params.stageType  = EStageType::None;
+        params.worldMinX  = k_fallbackWorldMinX;
+        params.worldMinY  = k_fallbackWorldMinY;
+        params.worldMaxX  = k_fallbackWorldMaxX;
+        params.worldMaxY  = k_fallbackWorldMaxY;
+        params.sectorSize = k_fallbackSectorSize;
+    }
+    else
+    {
+        params.stageType  = pData->StageType;
+        params.worldMinX  = pData->worldMinX;
+        params.worldMinY  = pData->worldMinY;
+        params.worldMaxX  = pData->worldMaxX;
+        params.worldMaxY  = pData->worldMaxY;
+        params.sectorSize = pData->sectorSize;
+    }
+    return params;
+}
+
+Stage::Stage(int64 stageId, EStageType stageType,
+             double worldMinX, double worldMinY,
+             double worldMaxX, double worldMaxY,
+             double sectorSize)
     : m_stageId(stageId)
     , m_stageType(stageType)
+    , m_worldMinX(worldMinX)
+    , m_worldMinY(worldMinY)
+    , m_worldMaxX(worldMaxX)
+    , m_worldMaxY(worldMaxY)
+    , m_sectorSize(sectorSize)
 {
+    initializeSectorGrid();
+}
+
+void Stage::initializeSectorGrid()
+{
+    // 입력값 검증
+    if (m_sectorSize <= 0.0)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("Stage::initializeSectorGrid - invalid sectorSize={}. stageId={}",
+            m_sectorSize, m_stageId));
+        return;
+    }
+
+    if (m_worldMaxX <= m_worldMinX || m_worldMaxY <= m_worldMinY)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("Stage::initializeSectorGrid - invalid world bounds. stageId={} min=({},{}) max=({},{})",
+            m_stageId, m_worldMinX, m_worldMinY, m_worldMaxX, m_worldMaxY));
+        return;
+    }
+
+    // 섹터 개수 계산 (ceil로 올림하여 맵 영역이 섹터로 빠짐없이 커버되도록).
+    const double worldSizeX = m_worldMaxX - m_worldMinX;
+    const double worldSizeY = m_worldMaxY - m_worldMinY;
+    m_sectorCountX = static_cast<int32>(std::ceil(worldSizeX / m_sectorSize));
+    m_sectorCountY = static_cast<int32>(std::ceil(worldSizeY / m_sectorSize));
+
+    if (m_sectorCountX <= 0 || m_sectorCountY <= 0)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("Stage::initializeSectorGrid - sector count <= 0. stageId={} count=({}x{})",
+            m_stageId, m_sectorCountX, m_sectorCountY));
+        return;
+    }
+
+    // 섹터 그리드 생성 + 각 섹터에 인덱스 설정
+    const int32 totalSectors = m_sectorCountX * m_sectorCountY;
+    m_sectors.resize(totalSectors);
+
+    for (int32 y = 0; y < m_sectorCountY; ++y)
+    {
+        for (int32 x = 0; x < m_sectorCountX; ++x)
+        {
+            m_sectors[sectorIndexToFlat(x, y)].SetIndex(x, y);
+        }
+    }
+
+    LOG_WRITE(LogLevel::Info, std::format("Stage::initializeSectorGrid - stageId={} world=({},{})~({},{}) sectorSize={} grid={}x{} totalSectors={}",
+        m_stageId,
+        m_worldMinX, m_worldMinY, m_worldMaxX, m_worldMaxY,
+        m_sectorSize, m_sectorCountX, m_sectorCountY, totalSectors));
+}
+
+bool Stage::GetSectorIndex(float posX, float posY, int32& outSectorX, int32& outSectorY) const
+{
+    if (m_sectorSize <= 0.0)
+        return false;
+
+    // float와 double 비교: float가 double로 의존적으로 승격. 경계는 정확히 처리됨.
+    if (posX < m_worldMinX || posX >= m_worldMaxX || posY < m_worldMinY || posY >= m_worldMaxY)
+        return false;
+
+    // 계산은 double로 수행하고 결과만 int32로 캐스팅.
+    outSectorX = static_cast<int32>((static_cast<double>(posX) - m_worldMinX) / m_sectorSize);
+    outSectorY = static_cast<int32>((static_cast<double>(posY) - m_worldMinY) / m_sectorSize);
+
+    // 부동소수점 오차로 인한 경계값 안전장치
+    if (outSectorX >= m_sectorCountX) outSectorX = m_sectorCountX - 1;
+    if (outSectorY >= m_sectorCountY) outSectorY = m_sectorCountY - 1;
+
+    return true;
+}
+
+bool Stage::IsValidSectorIndex(int32 sectorX, int32 sectorY) const
+{
+    return sectorX >= 0 && sectorX < m_sectorCountX
+        && sectorY >= 0 && sectorY < m_sectorCountY;
+}
+
+Sector* Stage::GetSector(int32 sectorX, int32 sectorY)
+{
+    if (!IsValidSectorIndex(sectorX, sectorY))
+        return nullptr;
+    return &m_sectors[sectorIndexToFlat(sectorX, sectorY)];
+}
+
+const Sector* Stage::GetSector(int32 sectorX, int32 sectorY) const
+{
+    if (!IsValidSectorIndex(sectorX, sectorY))
+        return nullptr;
+    return &m_sectors[sectorIndexToFlat(sectorX, sectorY)];
+}
+
+Sector* Stage::GetSectorByPos(float posX, float posY)
+{
+    int32 sectorX = 0;
+    int32 sectorY = 0;
+    if (!GetSectorIndex(posX, posY, sectorX, sectorY))
+        return nullptr;
+    return GetSector(sectorX, sectorY);
 }
 
 void Stage::OnStart()
