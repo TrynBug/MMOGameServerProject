@@ -7,7 +7,15 @@
 
 # 프로그래밍
 - 프로그래밍언어 : C++ 20
-- protobuf 버전 : 5.29.5
+- protobuf 버전 : 6.33.4  (클라이언트는 NuGet
+
+# 서버의 언어 버전
+- C++ 20
+
+# 클라이언트의 언어 버전
+- Unity 6.4
+- .Net 버전: standard 2.1
+- C# 언어 버전: 11.0
 
 # PacketGenerator 프로젝트 구조
 PacketGenerator/

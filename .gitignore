@@ -208,6 +208,8 @@ DB.Browser.for.SQLite-v3.13.1-win64/
 
 **/Server/OUTPUT/Tools/
 
+# visual studio user file
+*.slnLaunch.user
 
 # ==========================================
 # 5. 클라 사용자 추가섹션

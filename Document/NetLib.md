@@ -55,24 +55,26 @@ MMORPG용 C++ 네트워크 라이브러리 입니다.
 # INetEventHandler 인터페이스
 - INetEventHandler 인터페이스는 사용자가 네트워크 이벤트 처리방식을 정의하는 인터페이스 입니다.
 ```cpp
-class INetEventHandler {
+class INetEventHandler
+{
 public:
-    virtual ~INetEventHandler() = default;
-	
-	// Accept 되었을때 호출됩니다. 사용자가 true를 리턴하면 네트워크 라이브러리는 Session객체를 생성합니다. 사용자가 false를 리턴하면 연결을 끊습니다.
-    virtual bool OnAccept(std::shared_ptr<ISession> spSession) = 0;
-	
-	// Session 객체가 생성되었을 때 호출됩니다.
-    virtual void OnConnect(std::shared_ptr<ISession> spSession) = 0;
-	
-	// 패킷 1개를 수신했을 때 호출됩니다. 게임서버는 이 함수에 '유저객체의 메시지큐에 패킷 삽입' 로직만 작성할 예정입니다.
-    virtual void OnRecv(std::shared_ptr<ISession> spSession, shared_ptr<Packet> spPacket) = 0;
-	
-	// Session 연결이 끊겼을때 호출됩니다.
-    virtual void OnDisconnect(std::shared_ptr<ISession> spSession) = 0;
-	
-	// 오류가 발생했을 때 호출됩니다.
-    virtual void OnError(std::shared_ptr<ISession> spSession, const std::string& msg) = 0;
+    // Accept 되었을 때 호출. 사용자가 true를 리턴하면 Session 객체 생성, false면 연결 끊음. (NetClient에서는 호출되지 않음)
+    virtual bool OnAccept(const ISessionPtr& spSession) = 0;
+
+    // Session 객체가 생성되고 연결이 완료되었을 때 호출
+    virtual void OnConnect(const ISessionPtr& spSession) = 0;
+
+    // 패킷 1개를 수신했을 때 호출
+    virtual void OnRecv(const ISessionPtr& spSession, const PacketPtr& spPacket) = 0;
+
+    // Send가 완료되었을 때 호출
+    virtual void OnSendComplete(const ISessionPtr& spSession) = 0;
+
+    // Session 연결이 끊겼을 때 호출
+    virtual void OnDisconnect(const ISessionPtr& spSession) = 0;
+
+    // 오류가 발생했을 때 호출
+    virtual void OnLog(LogLevel logLevel, const ISessionPtr& spSession, const std::string& msg) = 0;
 };
 ```
 
@@ -165,4 +167,4 @@ static_assert(sizeof(PacketHeader) == 6);
 직렬화/역직렬화 할때는 PacketGenerator 라이브러리의 직렬화/역직렬화 기능을 사용합니다.  
 
 # 패킷 암호화
-- ChaCha20 알고리즘으로 패킷을 암호화 한다.
+- 암호화는 넣어야 하는데 아직 개발되지는 않았습니다. (암호화 알고리즘 후보: ChaCha20)
