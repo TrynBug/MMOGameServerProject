@@ -6,9 +6,10 @@
 public enum EStageType
 {
     None                 = 0,
-    Town                 = 1,  // 마을
-    Field                = 2,  // 필드
-    Dungeon              = 3,  // 던전
+    System               = 1,  // 시스템
+    Town                 = 2,  // 마을
+    Field                = 3,  // 필드
+    Dungeon              = 4,  // 던전
     Max                 
 }
 

@@ -25,15 +25,16 @@ namespace DataStructures {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Ch5EYXRhU3RydWN0dXJlcy9jaGFyYWN0ZXIucHJvdG8SDkRhdGFTdHJ1Y3R1",
-            "cmVzItEBCglDaGFyYWN0ZXISDwoHdXNlcl9pZBgBIAEoAxIMCgRuYW1lGAIg",
-            "ASgJEg0KBWxldmVsGAMgASgFEgsKA2V4cBgEIAEoAxIKCgJocBgFIAEoBRIO",
-            "CgZtYXhfaHAYBiABKAUSCgoCbXAYByABKAUSDgoGbWF4X21wGAggASgFEhUK",
-            "DWxhc3Rfc3RhZ2VfaWQYCSABKAUSDQoFcG9zX3gYCiABKAISDQoFcG9zX3kY",
-            "CyABKAISDQoFcG9zX3oYDCABKAISDQoFZGlyX3kYDSABKAJiBnByb3RvMw=="));
+            "cmVzIuwBCglDaGFyYWN0ZXISFAoMY2hhcmFjdGVyX2lkGAEgASgDEhUKDW93",
+            "bmVyX3VzZXJfaWQYAiABKAMSDAoEbmFtZRgDIAEoCRIOCgZqb2JfaWQYBCAB",
+            "KAUSDQoFbGV2ZWwYBSABKAUSCwoDZXhwGAYgASgDEgoKAmhwGAcgASgFEg4K",
+            "Bm1heF9ocBgIIAEoBRIKCgJtcBgJIAEoBRIOCgZtYXhfbXAYCiABKAUSFQoN",
+            "bGFzdF9zdGFnZV9pZBgLIAEoAxINCgVwb3NfeBgMIAEoAhINCgVwb3NfeRgN",
+            "IAEoAhILCgN5YXcYDiABKAJiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::DataStructures.Character), global::DataStructures.Character.Parser, new[]{ "UserId", "Name", "Level", "Exp", "Hp", "MaxHp", "Mp", "MaxMp", "LastStageId", "PosX", "PosY", "PosZ", "DirY" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::DataStructures.Character), global::DataStructures.Character.Parser, new[]{ "CharacterId", "OwnerUserId", "Name", "JobId", "Level", "Exp", "Hp", "MaxHp", "Mp", "MaxMp", "LastStageId", "PosX", "PosY", "Yaw" }, null, null, null, null)
           }));
     }
     #endregion
@@ -41,7 +42,11 @@ namespace DataStructures {
   }
   #region Messages
   /// <summary>
-  /// 캐릭터 기본 정보 (DB 저장)
+  /// 캐릭터 기본 정보 (DB 저장, 클라이언트에도 전송)
+  ///
+  /// - character_id 는 캐릭터 생성 시 ObjectIdGenerator로 발급되어 영구 유지됨.
+  /// - 클라이언트에 보낼 때는 별도 메시지로 감싸거나 그대로 사용 가능.
+  /// - 인벤토리/장비/스킬은 별도 메시지/테이블로 관리.
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class Character : pb::IMessage<Character>
@@ -78,8 +83,10 @@ namespace DataStructures {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public Character(Character other) : this() {
-      userId_ = other.userId_;
+      characterId_ = other.characterId_;
+      ownerUserId_ = other.ownerUserId_;
       name_ = other.name_;
+      jobId_ = other.jobId_;
       level_ = other.level_;
       exp_ = other.exp_;
       hp_ = other.hp_;
@@ -89,8 +96,7 @@ namespace DataStructures {
       lastStageId_ = other.lastStageId_;
       posX_ = other.posX_;
       posY_ = other.posY_;
-      posZ_ = other.posZ_;
-      dirY_ = other.dirY_;
+      yaw_ = other.yaw_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -100,21 +106,42 @@ namespace DataStructures {
       return new Character(this);
     }
 
-    /// <summary>Field number for the "user_id" field.</summary>
-    public const int UserIdFieldNumber = 1;
-    private long userId_;
+    /// <summary>Field number for the "character_id" field.</summary>
+    public const int CharacterIdFieldNumber = 1;
+    private long characterId_;
+    /// <summary>
+    /// 영구 ObjectId (DB 저장, 캐릭터 생성 시 발급)
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long UserId {
-      get { return userId_; }
+    public long CharacterId {
+      get { return characterId_; }
       set {
-        userId_ = value;
+        characterId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "owner_user_id" field.</summary>
+    public const int OwnerUserIdFieldNumber = 2;
+    private long ownerUserId_;
+    /// <summary>
+    /// 소유자 User ID
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long OwnerUserId {
+      get { return ownerUserId_; }
+      set {
+        ownerUserId_ = value;
       }
     }
 
     /// <summary>Field number for the "name" field.</summary>
-    public const int NameFieldNumber = 2;
+    public const int NameFieldNumber = 3;
     private string name_ = "";
+    /// <summary>
+    /// 캐릭터 이름
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public string Name {
@@ -124,8 +151,23 @@ namespace DataStructures {
       }
     }
 
+    /// <summary>Field number for the "job_id" field.</summary>
+    public const int JobIdFieldNumber = 4;
+    private int jobId_;
+    /// <summary>
+    /// 직업 (GameData로 관리, 마법사/전사 등)
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int JobId {
+      get { return jobId_; }
+      set {
+        jobId_ = value;
+      }
+    }
+
     /// <summary>Field number for the "level" field.</summary>
-    public const int LevelFieldNumber = 3;
+    public const int LevelFieldNumber = 5;
     private int level_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -137,7 +179,7 @@ namespace DataStructures {
     }
 
     /// <summary>Field number for the "exp" field.</summary>
-    public const int ExpFieldNumber = 4;
+    public const int ExpFieldNumber = 6;
     private long exp_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -149,7 +191,7 @@ namespace DataStructures {
     }
 
     /// <summary>Field number for the "hp" field.</summary>
-    public const int HpFieldNumber = 5;
+    public const int HpFieldNumber = 7;
     private int hp_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -161,7 +203,7 @@ namespace DataStructures {
     }
 
     /// <summary>Field number for the "max_hp" field.</summary>
-    public const int MaxHpFieldNumber = 6;
+    public const int MaxHpFieldNumber = 8;
     private int maxHp_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -173,7 +215,7 @@ namespace DataStructures {
     }
 
     /// <summary>Field number for the "mp" field.</summary>
-    public const int MpFieldNumber = 7;
+    public const int MpFieldNumber = 9;
     private int mp_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -185,7 +227,7 @@ namespace DataStructures {
     }
 
     /// <summary>Field number for the "max_mp" field.</summary>
-    public const int MaxMpFieldNumber = 8;
+    public const int MaxMpFieldNumber = 10;
     private int maxMp_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -197,14 +239,14 @@ namespace DataStructures {
     }
 
     /// <summary>Field number for the "last_stage_id" field.</summary>
-    public const int LastStageIdFieldNumber = 9;
-    private int lastStageId_;
+    public const int LastStageIdFieldNumber = 11;
+    private long lastStageId_;
     /// <summary>
-    /// 마지막 위치
+    /// 마지막 위치 (게임서버 입장 시 이 위치로 복귀)
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int LastStageId {
+    public long LastStageId {
       get { return lastStageId_; }
       set {
         lastStageId_ = value;
@@ -212,7 +254,7 @@ namespace DataStructures {
     }
 
     /// <summary>Field number for the "pos_x" field.</summary>
-    public const int PosXFieldNumber = 10;
+    public const int PosXFieldNumber = 12;
     private float posX_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -224,7 +266,7 @@ namespace DataStructures {
     }
 
     /// <summary>Field number for the "pos_y" field.</summary>
-    public const int PosYFieldNumber = 11;
+    public const int PosYFieldNumber = 13;
     private float posY_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -235,27 +277,18 @@ namespace DataStructures {
       }
     }
 
-    /// <summary>Field number for the "pos_z" field.</summary>
-    public const int PosZFieldNumber = 12;
-    private float posZ_;
+    /// <summary>Field number for the "yaw" field.</summary>
+    public const int YawFieldNumber = 14;
+    private float yaw_;
+    /// <summary>
+    /// 회전 (단위는 추후 클라와 맞춤)
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float PosZ {
-      get { return posZ_; }
+    public float Yaw {
+      get { return yaw_; }
       set {
-        posZ_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "dir_y" field.</summary>
-    public const int DirYFieldNumber = 13;
-    private float dirY_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float DirY {
-      get { return dirY_; }
-      set {
-        dirY_ = value;
+        yaw_ = value;
       }
     }
 
@@ -274,8 +307,10 @@ namespace DataStructures {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (UserId != other.UserId) return false;
+      if (CharacterId != other.CharacterId) return false;
+      if (OwnerUserId != other.OwnerUserId) return false;
       if (Name != other.Name) return false;
+      if (JobId != other.JobId) return false;
       if (Level != other.Level) return false;
       if (Exp != other.Exp) return false;
       if (Hp != other.Hp) return false;
@@ -285,8 +320,7 @@ namespace DataStructures {
       if (LastStageId != other.LastStageId) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosX, other.PosX)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(DirY, other.DirY)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Yaw, other.Yaw)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -294,19 +328,20 @@ namespace DataStructures {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
-      if (UserId != 0L) hash ^= UserId.GetHashCode();
+      if (CharacterId != 0L) hash ^= CharacterId.GetHashCode();
+      if (OwnerUserId != 0L) hash ^= OwnerUserId.GetHashCode();
       if (Name.Length != 0) hash ^= Name.GetHashCode();
+      if (JobId != 0) hash ^= JobId.GetHashCode();
       if (Level != 0) hash ^= Level.GetHashCode();
       if (Exp != 0L) hash ^= Exp.GetHashCode();
       if (Hp != 0) hash ^= Hp.GetHashCode();
       if (MaxHp != 0) hash ^= MaxHp.GetHashCode();
       if (Mp != 0) hash ^= Mp.GetHashCode();
       if (MaxMp != 0) hash ^= MaxMp.GetHashCode();
-      if (LastStageId != 0) hash ^= LastStageId.GetHashCode();
+      if (LastStageId != 0L) hash ^= LastStageId.GetHashCode();
       if (PosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosX);
       if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
-      if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
-      if (DirY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(DirY);
+      if (Yaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Yaw);
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -325,57 +360,61 @@ namespace DataStructures {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (UserId != 0L) {
+      if (CharacterId != 0L) {
         output.WriteRawTag(8);
-        output.WriteInt64(UserId);
+        output.WriteInt64(CharacterId);
+      }
+      if (OwnerUserId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(OwnerUserId);
       }
       if (Name.Length != 0) {
-        output.WriteRawTag(18);
+        output.WriteRawTag(26);
         output.WriteString(Name);
       }
+      if (JobId != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(JobId);
+      }
       if (Level != 0) {
-        output.WriteRawTag(24);
+        output.WriteRawTag(40);
         output.WriteInt32(Level);
       }
       if (Exp != 0L) {
-        output.WriteRawTag(32);
+        output.WriteRawTag(48);
         output.WriteInt64(Exp);
       }
       if (Hp != 0) {
-        output.WriteRawTag(40);
+        output.WriteRawTag(56);
         output.WriteInt32(Hp);
       }
       if (MaxHp != 0) {
-        output.WriteRawTag(48);
+        output.WriteRawTag(64);
         output.WriteInt32(MaxHp);
       }
       if (Mp != 0) {
-        output.WriteRawTag(56);
+        output.WriteRawTag(72);
         output.WriteInt32(Mp);
       }
       if (MaxMp != 0) {
-        output.WriteRawTag(64);
+        output.WriteRawTag(80);
         output.WriteInt32(MaxMp);
       }
-      if (LastStageId != 0) {
-        output.WriteRawTag(72);
-        output.WriteInt32(LastStageId);
+      if (LastStageId != 0L) {
+        output.WriteRawTag(88);
+        output.WriteInt64(LastStageId);
       }
       if (PosX != 0F) {
-        output.WriteRawTag(85);
+        output.WriteRawTag(101);
         output.WriteFloat(PosX);
       }
       if (PosY != 0F) {
-        output.WriteRawTag(93);
+        output.WriteRawTag(109);
         output.WriteFloat(PosY);
       }
-      if (PosZ != 0F) {
-        output.WriteRawTag(101);
-        output.WriteFloat(PosZ);
-      }
-      if (DirY != 0F) {
-        output.WriteRawTag(109);
-        output.WriteFloat(DirY);
+      if (Yaw != 0F) {
+        output.WriteRawTag(117);
+        output.WriteFloat(Yaw);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -387,57 +426,61 @@ namespace DataStructures {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (UserId != 0L) {
+      if (CharacterId != 0L) {
         output.WriteRawTag(8);
-        output.WriteInt64(UserId);
+        output.WriteInt64(CharacterId);
+      }
+      if (OwnerUserId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(OwnerUserId);
       }
       if (Name.Length != 0) {
-        output.WriteRawTag(18);
+        output.WriteRawTag(26);
         output.WriteString(Name);
       }
+      if (JobId != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(JobId);
+      }
       if (Level != 0) {
-        output.WriteRawTag(24);
+        output.WriteRawTag(40);
         output.WriteInt32(Level);
       }
       if (Exp != 0L) {
-        output.WriteRawTag(32);
+        output.WriteRawTag(48);
         output.WriteInt64(Exp);
       }
       if (Hp != 0) {
-        output.WriteRawTag(40);
+        output.WriteRawTag(56);
         output.WriteInt32(Hp);
       }
       if (MaxHp != 0) {
-        output.WriteRawTag(48);
+        output.WriteRawTag(64);
         output.WriteInt32(MaxHp);
       }
       if (Mp != 0) {
-        output.WriteRawTag(56);
+        output.WriteRawTag(72);
         output.WriteInt32(Mp);
       }
       if (MaxMp != 0) {
-        output.WriteRawTag(64);
+        output.WriteRawTag(80);
         output.WriteInt32(MaxMp);
       }
-      if (LastStageId != 0) {
-        output.WriteRawTag(72);
-        output.WriteInt32(LastStageId);
+      if (LastStageId != 0L) {
+        output.WriteRawTag(88);
+        output.WriteInt64(LastStageId);
       }
       if (PosX != 0F) {
-        output.WriteRawTag(85);
+        output.WriteRawTag(101);
         output.WriteFloat(PosX);
       }
       if (PosY != 0F) {
-        output.WriteRawTag(93);
+        output.WriteRawTag(109);
         output.WriteFloat(PosY);
       }
-      if (PosZ != 0F) {
-        output.WriteRawTag(101);
-        output.WriteFloat(PosZ);
-      }
-      if (DirY != 0F) {
-        output.WriteRawTag(109);
-        output.WriteFloat(DirY);
+      if (Yaw != 0F) {
+        output.WriteRawTag(117);
+        output.WriteFloat(Yaw);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -449,11 +492,17 @@ namespace DataStructures {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
-      if (UserId != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(UserId);
+      if (CharacterId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(CharacterId);
+      }
+      if (OwnerUserId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(OwnerUserId);
       }
       if (Name.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
+      }
+      if (JobId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(JobId);
       }
       if (Level != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Level);
@@ -473,8 +522,8 @@ namespace DataStructures {
       if (MaxMp != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(MaxMp);
       }
-      if (LastStageId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(LastStageId);
+      if (LastStageId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(LastStageId);
       }
       if (PosX != 0F) {
         size += 1 + 4;
@@ -482,10 +531,7 @@ namespace DataStructures {
       if (PosY != 0F) {
         size += 1 + 4;
       }
-      if (PosZ != 0F) {
-        size += 1 + 4;
-      }
-      if (DirY != 0F) {
+      if (Yaw != 0F) {
         size += 1 + 4;
       }
       if (_unknownFields != null) {
@@ -500,11 +546,17 @@ namespace DataStructures {
       if (other == null) {
         return;
       }
-      if (other.UserId != 0L) {
-        UserId = other.UserId;
+      if (other.CharacterId != 0L) {
+        CharacterId = other.CharacterId;
+      }
+      if (other.OwnerUserId != 0L) {
+        OwnerUserId = other.OwnerUserId;
       }
       if (other.Name.Length != 0) {
         Name = other.Name;
+      }
+      if (other.JobId != 0) {
+        JobId = other.JobId;
       }
       if (other.Level != 0) {
         Level = other.Level;
@@ -524,7 +576,7 @@ namespace DataStructures {
       if (other.MaxMp != 0) {
         MaxMp = other.MaxMp;
       }
-      if (other.LastStageId != 0) {
+      if (other.LastStageId != 0L) {
         LastStageId = other.LastStageId;
       }
       if (other.PosX != 0F) {
@@ -533,11 +585,8 @@ namespace DataStructures {
       if (other.PosY != 0F) {
         PosY = other.PosY;
       }
-      if (other.PosZ != 0F) {
-        PosZ = other.PosZ;
-      }
-      if (other.DirY != 0F) {
-        DirY = other.DirY;
+      if (other.Yaw != 0F) {
+        Yaw = other.Yaw;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -559,55 +608,59 @@ namespace DataStructures {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            UserId = input.ReadInt64();
+            CharacterId = input.ReadInt64();
             break;
           }
-          case 18: {
+          case 16: {
+            OwnerUserId = input.ReadInt64();
+            break;
+          }
+          case 26: {
             Name = input.ReadString();
             break;
           }
-          case 24: {
-            Level = input.ReadInt32();
-            break;
-          }
           case 32: {
-            Exp = input.ReadInt64();
+            JobId = input.ReadInt32();
             break;
           }
           case 40: {
-            Hp = input.ReadInt32();
+            Level = input.ReadInt32();
             break;
           }
           case 48: {
-            MaxHp = input.ReadInt32();
+            Exp = input.ReadInt64();
             break;
           }
           case 56: {
-            Mp = input.ReadInt32();
+            Hp = input.ReadInt32();
             break;
           }
           case 64: {
-            MaxMp = input.ReadInt32();
+            MaxHp = input.ReadInt32();
             break;
           }
           case 72: {
-            LastStageId = input.ReadInt32();
+            Mp = input.ReadInt32();
             break;
           }
-          case 85: {
-            PosX = input.ReadFloat();
+          case 80: {
+            MaxMp = input.ReadInt32();
             break;
           }
-          case 93: {
-            PosY = input.ReadFloat();
+          case 88: {
+            LastStageId = input.ReadInt64();
             break;
           }
           case 101: {
-            PosZ = input.ReadFloat();
+            PosX = input.ReadFloat();
             break;
           }
           case 109: {
-            DirY = input.ReadFloat();
+            PosY = input.ReadFloat();
+            break;
+          }
+          case 117: {
+            Yaw = input.ReadFloat();
             break;
           }
         }
@@ -630,55 +683,59 @@ namespace DataStructures {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 8: {
-            UserId = input.ReadInt64();
+            CharacterId = input.ReadInt64();
             break;
           }
-          case 18: {
+          case 16: {
+            OwnerUserId = input.ReadInt64();
+            break;
+          }
+          case 26: {
             Name = input.ReadString();
             break;
           }
-          case 24: {
-            Level = input.ReadInt32();
-            break;
-          }
           case 32: {
-            Exp = input.ReadInt64();
+            JobId = input.ReadInt32();
             break;
           }
           case 40: {
-            Hp = input.ReadInt32();
+            Level = input.ReadInt32();
             break;
           }
           case 48: {
-            MaxHp = input.ReadInt32();
+            Exp = input.ReadInt64();
             break;
           }
           case 56: {
-            Mp = input.ReadInt32();
+            Hp = input.ReadInt32();
             break;
           }
           case 64: {
-            MaxMp = input.ReadInt32();
+            MaxHp = input.ReadInt32();
             break;
           }
           case 72: {
-            LastStageId = input.ReadInt32();
+            Mp = input.ReadInt32();
             break;
           }
-          case 85: {
-            PosX = input.ReadFloat();
+          case 80: {
+            MaxMp = input.ReadInt32();
             break;
           }
-          case 93: {
-            PosY = input.ReadFloat();
+          case 88: {
+            LastStageId = input.ReadInt64();
             break;
           }
           case 101: {
-            PosZ = input.ReadFloat();
+            PosX = input.ReadFloat();
             break;
           }
           case 109: {
-            DirY = input.ReadFloat();
+            PosY = input.ReadFloat();
+            break;
+          }
+          case 117: {
+            Yaw = input.ReadFloat();
             break;
           }
         }

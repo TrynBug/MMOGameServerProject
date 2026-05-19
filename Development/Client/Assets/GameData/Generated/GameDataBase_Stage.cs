@@ -4,12 +4,18 @@
 // =====================================================================
 
 using System.Collections.Generic;
+using System.IO;
 
 public class GameDataBase_Stage
 {
     public long                 Key = 0;
     public string               Name = "";
     public EStageType           StageType = EStageType.None;
+    public double               worldMinX = 0;
+    public double               worldMinY = 0;
+    public double               worldMaxX = 0;
+    public double               worldMaxY = 0;
+    public double               sectorSize = 0;
 }
 
 public class GameDataTableBase_Stage
@@ -54,6 +60,11 @@ public class GameDataTableBase_Stage
         data.Key = long.Parse(fields[0]);
         data.Name = fields[1];
         data.StageType = (EStageType)int.Parse(fields[2]);
+        data.worldMinX = double.Parse(fields[3]);
+        data.worldMinY = double.Parse(fields[4]);
+        data.worldMaxX = double.Parse(fields[5]);
+        data.worldMaxY = double.Parse(fields[6]);
+        data.sectorSize = double.Parse(fields[7]);
 
         if (data.Key <= 0)
             return false;

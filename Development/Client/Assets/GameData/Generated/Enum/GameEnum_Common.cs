@@ -11,3 +11,21 @@ public enum ETeam
     Max                 
 }
 
+public enum EObjectType
+{
+    None                 = 0,
+    User                 = 1,  // 유저
+    Monster              = 2,  // 몬스터
+    Prop                 = 3,  // 프랍
+    Drop                 = 4,  // 드롭아이템
+    Max                 
+}
+
+public enum EResultCode
+{
+    None                 = 0,
+    Success              = 1,  // 성공
+    Fail                 = 2,  // 실패
+    Max                 
+}
+
