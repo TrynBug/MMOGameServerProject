@@ -51,6 +51,34 @@ struct StageMoveReqDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StageMoveReqDefaultTypeInternal _StageMoveReq_default_instance_;
 
+inline constexpr StageEnterNtf::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        stage_id_{::int64_t{0}},
+        my_pos_x_{0},
+        my_pos_y_{0},
+        my_yaw_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR StageEnterNtf::StageEnterNtf(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(StageEnterNtf_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct StageEnterNtfDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR StageEnterNtfDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~StageEnterNtfDefaultTypeInternal() {}
+  union {
+    StageEnterNtf _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StageEnterNtfDefaultTypeInternal _StageEnterNtf_default_instance_;
+
 inline constexpr NearbyCharacterInfo::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -137,33 +165,6 @@ struct CharacterLeaveNtfDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 CharacterLeaveNtfDefaultTypeInternal _CharacterLeaveNtf_default_instance_;
 
-inline constexpr StageEnterNtf::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : _cached_size_{0},
-        nearby_characters_{},
-        my_character_{nullptr},
-        stage_id_{0} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR StageEnterNtf::StageEnterNtf(::_pbi::ConstantInitialized)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(StageEnterNtf_class_data_.base()),
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(),
-#endif  // PROTOBUF_CUSTOM_VTABLE
-      _impl_(::_pbi::ConstantInitialized()) {
-}
-struct StageEnterNtfDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR StageEnterNtfDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~StageEnterNtfDefaultTypeInternal() {}
-  union {
-    StageEnterNtf _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StageEnterNtfDefaultTypeInternal _StageEnterNtf_default_instance_;
-
 inline constexpr CharacterEnterNtf::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -219,13 +220,15 @@ const ::uint32_t
         8,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_._has_bits_),
-        6, // hasbit index offset
+        7, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_.stage_id_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_.my_character_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_.nearby_characters_),
-        2,
-        1,
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_.my_pos_x_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_.my_pos_y_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_.my_yaw_),
         0,
+        1,
+        2,
+        3,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::StageMoveReq, _impl_._has_bits_),
         4, // hasbit index offset
@@ -254,10 +257,10 @@ static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, sizeof(::GamePacket::NearbyCharacterInfo)},
         {21, sizeof(::GamePacket::StageEnterNtf)},
-        {30, sizeof(::GamePacket::StageMoveReq)},
-        {35, sizeof(::GamePacket::CrossServerStageMoveReq)},
-        {42, sizeof(::GamePacket::CharacterEnterNtf)},
-        {47, sizeof(::GamePacket::CharacterLeaveNtf)},
+        {32, sizeof(::GamePacket::StageMoveReq)},
+        {37, sizeof(::GamePacket::CrossServerStageMoveReq)},
+        {44, sizeof(::GamePacket::CharacterEnterNtf)},
+        {49, sizeof(::GamePacket::CharacterLeaveNtf)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::GamePacket::_NearbyCharacterInfo_default_instance_._instance,
@@ -275,17 +278,15 @@ const char descriptor_table_protodef_GamePacket_2fstage_5fpacket_2eproto[] ABSL_
     "nfo\022\017\n\007user_id\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\022\r\n\005le"
     "vel\030\003 \001(\005\022\n\n\002hp\030\004 \001(\005\022\016\n\006max_hp\030\005 \001(\005\022\r\n"
     "\005pos_x\030\006 \001(\002\022\r\n\005pos_y\030\007 \001(\002\022\r\n\005pos_z\030\010 \001"
-    "(\002\022\r\n\005dir_y\030\t \001(\002\"\216\001\n\rStageEnterNtf\022\020\n\010s"
-    "tage_id\030\001 \001(\005\022/\n\014my_character\030\002 \001(\0132\031.Da"
-    "taStructures.Character\022:\n\021nearby_charact"
-    "ers\030\003 \003(\0132\037.GamePacket.NearbyCharacterIn"
-    "fo\"\'\n\014StageMoveReq\022\027\n\017target_stage_id\030\001 "
-    "\001(\005\"Q\n\027CrossServerStageMoveReq\022\035\n\025target"
-    "_game_server_id\030\001 \001(\005\022\027\n\017target_stage_id"
-    "\030\002 \001(\005\"G\n\021CharacterEnterNtf\0222\n\tcharacter"
-    "\030\001 \001(\0132\037.GamePacket.NearbyCharacterInfo\""
-    "$\n\021CharacterLeaveNtf\022\017\n\007user_id\030\001 \001(\003b\006p"
-    "roto3"
+    "(\002\022\r\n\005dir_y\030\t \001(\002\"U\n\rStageEnterNtf\022\020\n\010st"
+    "age_id\030\001 \001(\003\022\020\n\010my_pos_x\030\002 \001(\002\022\020\n\010my_pos"
+    "_y\030\003 \001(\002\022\016\n\006my_yaw\030\004 \001(\002\"\'\n\014StageMoveReq"
+    "\022\027\n\017target_stage_id\030\001 \001(\005\"Q\n\027CrossServer"
+    "StageMoveReq\022\035\n\025target_game_server_id\030\001 "
+    "\001(\005\022\027\n\017target_stage_id\030\002 \001(\005\"G\n\021Characte"
+    "rEnterNtf\0222\n\tcharacter\030\001 \001(\0132\037.GamePacke"
+    "t.NearbyCharacterInfo\"$\n\021CharacterLeaveN"
+    "tf\022\017\n\007user_id\030\001 \001(\003b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_GamePacket_2fstage_5fpacket_2eproto_deps[2] = {
@@ -296,7 +297,7 @@ static ::absl::once_flag descriptor_table_GamePacket_2fstage_5fpacket_2eproto_on
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fstage_5fpacket_2eproto = {
     false,
     false,
-    645,
+    587,
     descriptor_table_protodef_GamePacket_2fstage_5fpacket_2eproto,
     "GamePacket/stage_packet.proto",
     &descriptor_table_GamePacket_2fstage_5fpacket_2eproto_once,
@@ -844,12 +845,6 @@ class StageEnterNtf::_Internal {
       8 * PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_._has_bits_);
 };
 
-void StageEnterNtf::clear_my_character() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (_impl_.my_character_ != nullptr) _impl_.my_character_->Clear();
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00000002U);
-}
 StageEnterNtf::StageEnterNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
     : ::google::protobuf::Message(arena, StageEnterNtf_class_data_.base()) {
@@ -859,49 +854,30 @@ StageEnterNtf::StageEnterNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
   SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:GamePacket.StageEnterNtf)
 }
-PROTOBUF_NDEBUG_INLINE StageEnterNtf::Impl_::Impl_(
-    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
-    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
-    [[maybe_unused]] const ::GamePacket::StageEnterNtf& from_msg)
-      : _has_bits_{from._has_bits_},
-        _cached_size_{0},
-        nearby_characters_{visibility, arena, from.nearby_characters_} {}
-
 StageEnterNtf::StageEnterNtf(
-    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
-    const StageEnterNtf& from)
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const StageEnterNtf& from)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, StageEnterNtf_class_data_.base()) {
+    : ::google::protobuf::Message(arena, StageEnterNtf_class_data_.base()),
 #else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(arena) {
+    : ::google::protobuf::Message(arena),
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  StageEnterNtf* const _this = this;
-  (void)_this;
+      _impl_(from._impl_) {
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
-  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
-  _impl_.my_character_ = (CheckHasBit(cached_has_bits, 0x00000002U))
-                ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.my_character_)
-                : nullptr;
-  _impl_.stage_id_ = from._impl_.stage_id_;
-
-  // @@protoc_insertion_point(copy_constructor:GamePacket.StageEnterNtf)
 }
 PROTOBUF_NDEBUG_INLINE StageEnterNtf::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
-      : _cached_size_{0},
-        nearby_characters_{visibility, arena} {}
+      : _cached_size_{0} {}
 
 inline void StageEnterNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, my_character_),
+               offsetof(Impl_, stage_id_),
            0,
-           offsetof(Impl_, stage_id_) -
-               offsetof(Impl_, my_character_) +
-               sizeof(Impl_::stage_id_));
+           offsetof(Impl_, my_yaw_) -
+               offsetof(Impl_, stage_id_) +
+               sizeof(Impl_::my_yaw_));
 }
 StageEnterNtf::~StageEnterNtf() {
   // @@protoc_insertion_point(destructor:GamePacket.StageEnterNtf)
@@ -914,7 +890,6 @@ inline void StageEnterNtf::SharedDtor(MessageLite& self) {
   }
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
-  delete this_._impl_.my_character_;
   this_._impl_.~Impl_();
 }
 
@@ -924,20 +899,8 @@ inline void* PROTOBUF_NONNULL StageEnterNtf::PlacementNew_(
   return ::new (mem) StageEnterNtf(arena);
 }
 constexpr auto StageEnterNtf::InternalNewImpl_() {
-  constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
-      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.nearby_characters_) +
-          decltype(StageEnterNtf::_impl_.nearby_characters_)::
-              InternalGetArenaOffset(
-                  ::google::protobuf::Message::internal_visibility()),
-  });
-  if (arena_bits.has_value()) {
-    return ::google::protobuf::internal::MessageCreator::ZeroInit(
-        sizeof(StageEnterNtf), alignof(StageEnterNtf), *arena_bits);
-  } else {
-    return ::google::protobuf::internal::MessageCreator(&StageEnterNtf::PlacementNew_,
-                                 sizeof(StageEnterNtf),
-                                 alignof(StageEnterNtf));
-  }
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(StageEnterNtf),
+                                            alignof(StageEnterNtf));
 }
 constexpr auto StageEnterNtf::InternalGenerateClassData_() {
   return ::google::protobuf::internal::ClassDataFull{
@@ -973,18 +936,18 @@ StageEnterNtf::GetClassData() const {
   return StageEnterNtf_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 2, 0, 2>
+const ::_pbi::TcParseTable<2, 4, 0, 0, 2>
 StageEnterNtf::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_._has_bits_),
     0, // no _extensions_
-    3, 24,  // max_field_number, fast_idx_mask
+    4, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967288,  // skipmap
+    4294967280,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
-    2,  // num_aux_entries
-    offsetof(decltype(_table_), aux_entries),
+    4,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
     StageEnterNtf_class_data_.base(),
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
@@ -992,33 +955,35 @@ StageEnterNtf::_table_ = {
     ::_pbi::TcParser::GetTable<::GamePacket::StageEnterNtf>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
-    // int32 stage_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(StageEnterNtf, _impl_.stage_id_), 2>(),
-     {8, 2, 0,
+    // float my_yaw = 4;
+    {::_pbi::TcParser::FastF32S1,
+     {37, 3, 0,
+      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_yaw_)}},
+    // int64 stage_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(StageEnterNtf, _impl_.stage_id_), 0>(),
+     {8, 0, 0,
       PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.stage_id_)}},
-    // .DataStructures.Character my_character = 2;
-    {::_pbi::TcParser::FastMtS1,
-     {18, 1, 0,
-      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_character_)}},
-    // repeated .GamePacket.NearbyCharacterInfo nearby_characters = 3;
-    {::_pbi::TcParser::FastMtR1,
-     {26, 0, 1,
-      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.nearby_characters_)}},
+    // float my_pos_x = 2;
+    {::_pbi::TcParser::FastF32S1,
+     {21, 1, 0,
+      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_pos_x_)}},
+    // float my_pos_y = 3;
+    {::_pbi::TcParser::FastF32S1,
+     {29, 2, 0,
+      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_pos_y_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // int32 stage_id = 1;
-    {PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.stage_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // .DataStructures.Character my_character = 2;
-    {PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_character_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
-    // repeated .GamePacket.NearbyCharacterInfo nearby_characters = 3;
-    {PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.nearby_characters_), _Internal::kHasBitsOffset + 0, 1, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+    // int64 stage_id = 1;
+    {PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.stage_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // float my_pos_x = 2;
+    {PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_pos_x_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float my_pos_y = 3;
+    {PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_pos_y_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float my_yaw = 4;
+    {PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_yaw_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
   }},
-  {{
-      {::_pbi::TcParser::GetTable<::DataStructures::Character>()},
-      {::_pbi::TcParser::GetTable<::GamePacket::NearbyCharacterInfo>()},
-  }},
+  // no aux_entries
   {{
   }},
 };
@@ -1030,16 +995,11 @@ PROTOBUF_NOINLINE void StageEnterNtf::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
-    if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
-      _impl_.nearby_characters_.Clear();
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      ABSL_DCHECK(_impl_.my_character_ != nullptr);
-      _impl_.my_character_->Clear();
-    }
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+    ::memset(&_impl_.stage_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.my_yaw_) -
+        reinterpret_cast<char*>(&_impl_.stage_id_)) + sizeof(_impl_.my_yaw_));
   }
-  _impl_.stage_id_ = 0;
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -1063,32 +1023,39 @@ PROTOBUF_NOINLINE void StageEnterNtf::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int32 stage_id = 1;
-  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+  // int64 stage_id = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
     if (this_._internal_stage_id() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<1>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
               stream, this_._internal_stage_id(), target);
     }
   }
 
-  // .DataStructures.Character my_character = 2;
+  // float my_pos_x = 2;
   if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-    target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-        2, *this_._impl_.my_character_, this_._impl_.my_character_->GetCachedSize(), target,
-        stream);
+    if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_x()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          2, this_._internal_my_pos_x(), target);
+    }
   }
 
-  // repeated .GamePacket.NearbyCharacterInfo nearby_characters = 3;
-  if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
-    for (unsigned i = 0, n = static_cast<unsigned>(
-                             this_._internal_nearby_characters_size());
-         i < n; i++) {
-      const auto& repfield = this_._internal_nearby_characters().Get(i);
-      target =
-          ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-              3, repfield, repfield.GetCachedSize(),
-              target, stream);
+  // float my_pos_y = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_y()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          3, this_._internal_my_pos_y(), target);
+    }
+  }
+
+  // float my_yaw = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_my_yaw()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          4, this_._internal_my_yaw(), target);
     }
   }
 
@@ -1117,24 +1084,30 @@ PROTOBUF_NOINLINE void StageEnterNtf::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
-    // repeated .GamePacket.NearbyCharacterInfo nearby_characters = 3;
-    if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
-      total_size += 1UL * this_._internal_nearby_characters_size();
-      for (const auto& msg : this_._internal_nearby_characters()) {
-        total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+    // int64 stage_id = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (this_._internal_stage_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_stage_id());
       }
     }
-    // .DataStructures.Character my_character = 2;
+    // float my_pos_x = 2;
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      total_size += 1 +
-                    ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.my_character_);
+      if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_x()) != 0) {
+        total_size += 5;
+      }
     }
-    // int32 stage_id = 1;
+    // float my_pos_y = 3;
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (this_._internal_stage_id() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-            this_._internal_stage_id());
+      if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_y()) != 0) {
+        total_size += 5;
+      }
+    }
+    // float my_yaw = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_my_yaw()) != 0) {
+        total_size += 5;
       }
     }
   }
@@ -1150,30 +1123,31 @@ void StageEnterNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     from.CheckHasBitConsistency();
   }
-  ::google::protobuf::Arena* arena = _this->GetArena();
   // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.StageEnterNtf)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
-    if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
-      _this->_internal_mutable_nearby_characters()->InternalMergeFromWithArena(
-          ::google::protobuf::MessageLite::internal_visibility(), arena,
-          from._internal_nearby_characters());
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (from._internal_stage_id() != 0) {
+        _this->_impl_.stage_id_ = from._impl_.stage_id_;
+      }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      ABSL_DCHECK(from._impl_.my_character_ != nullptr);
-      if (_this->_impl_.my_character_ == nullptr) {
-        _this->_impl_.my_character_ = ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.my_character_);
-      } else {
-        _this->_impl_.my_character_->MergeFrom(*from._impl_.my_character_);
+      if (::absl::bit_cast<::uint32_t>(from._internal_my_pos_x()) != 0) {
+        _this->_impl_.my_pos_x_ = from._impl_.my_pos_x_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (from._internal_stage_id() != 0) {
-        _this->_impl_.stage_id_ = from._impl_.stage_id_;
+      if (::absl::bit_cast<::uint32_t>(from._internal_my_pos_y()) != 0) {
+        _this->_impl_.my_pos_y_ = from._impl_.my_pos_y_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_my_yaw()) != 0) {
+        _this->_impl_.my_yaw_ = from._impl_.my_yaw_;
       }
     }
   }
@@ -1194,13 +1168,12 @@ void StageEnterNtf::InternalSwap(StageEnterNtf* PROTOBUF_RESTRICT PROTOBUF_NONNU
   using ::std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  _impl_.nearby_characters_.InternalSwap(&other->_impl_.nearby_characters_);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.stage_id_)
-      + sizeof(StageEnterNtf::_impl_.stage_id_)
-      - PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_character_)>(
-          reinterpret_cast<char*>(&_impl_.my_character_),
-          reinterpret_cast<char*>(&other->_impl_.my_character_));
+      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_yaw_)
+      + sizeof(StageEnterNtf::_impl_.my_yaw_)
+      - PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.stage_id_)>(
+          reinterpret_cast<char*>(&_impl_.stage_id_),
+          reinterpret_cast<char*>(&other->_impl_.stage_id_));
 }
 
 ::google::protobuf::Metadata StageEnterNtf::GetMetadata() const {

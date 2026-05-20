@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "GameServer.h"
+#include "Character.h"   // handleClientCharacterSelect에서 Character 객체 생성
 
 namespace
 {
@@ -67,12 +68,14 @@ bool GameServer::OnInitialize()
     }
 
     m_spSystemStage = std::make_shared<SystemStage>(k_systemStageId);
+    m_spSystemStage->SetGameServer(this);
     const int32 systemThreadIdx = computeStageThreadIndex(k_systemStageId);
     AssignContents(systemThreadIdx, m_spSystemStage);
     LOG_WRITE(LogLevel::Info, std::format("GameServer: SystemStage created. stageId={} assignedThreadIndex={}",
         k_systemStageId, systemThreadIdx));
 
     m_spTown = std::make_shared<Town>(k_townStageId);
+    m_spTown->SetGameServer(this);
     const int32 townThreadIdx = computeStageThreadIndex(k_townStageId);
     AssignContents(townThreadIdx, m_spTown);
     LOG_WRITE(LogLevel::Info, std::format("GameServer: Town created. stageId={} assignedThreadIndex={}",
@@ -360,7 +363,7 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
     // Phase A 임시 로직: 입장 = SystemStage(캐릭터 선택창). Phase B에서 정식 흐름으로 교체 예정.
     if (m_spSystemStage)
     {
-        m_spSystemStage->EnqueueMessage(StageMsg_UserEnter{spUser});
+        m_spSystemStage->EnqueueMessage(StageMsg_UserEnter{spUser, nullptr});
     }
     else
     {
@@ -469,6 +472,141 @@ void GameServer::sendCharacterCreateRes(int64 userId, EResultCode resultCode, co
     sendPacketToUser(userId, Common::GAME_PACKET_ID_CHARACTER_CREATE_RES, res);
 }
 
+void GameServer::SendStageEnterNtf(int64 userId, int64 stageId, float myPosX, float myPosY, float myYaw)
+{
+    GamePacket::StageEnterNtf ntf;
+    ntf.set_stage_id(stageId);
+    ntf.set_my_pos_x(myPosX);
+    ntf.set_my_pos_y(myPosY);
+    ntf.set_my_yaw(myYaw);
+
+    sendPacketToUser(userId, Common::GAME_PACKET_ID_STAGE_ENTER_NTF, ntf);
+
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: StageEnterNtf sent. userId={} stageId={} pos=({},{}) yaw={}",
+        userId, stageId, myPosX, myPosY, myYaw));
+}
+
+void GameServer::SendObjectVisibilityNtf(int64 userId,
+                                         const std::vector<GamePacket::CharacterSpawnInfo>& characterSpawns,
+                                         const std::vector<int64>& despawnIds)
+{
+    GamePacket::ObjectVisibilityNtf ntf;
+    for (const auto& spawn : characterSpawns)
+    {
+        *ntf.add_character_spawns() = spawn;
+    }
+    for (int64 id : despawnIds)
+    {
+        ntf.add_despawn_ids(id);
+    }
+
+    sendPacketToUser(userId, Common::GAME_PACKET_ID_OBJECT_VISIBILITY_NTF, ntf);
+
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: ObjectVisibilityNtf sent. userId={} characterSpawns={} despawns={}",
+        userId, characterSpawns.size(), despawnIds.size()));
+}
+
+// 클라이언트 캐릭터 선택 요청 처리 → 코루틴
+// 1) DB에서 (user_id, character_id) 로 캐릭터 조회
+// 2) 없는 캐릭터면 CharacterSelectFailNtf 전송 후 종료
+// 3) owner_user_id 검증 (DB 쇄괴 방어)
+// 4) User에 현재 캐릭터 설정
+// 5) SystemStage에서 제거 (UserLeave push)
+// 6) Town으로 입장 (UserEnter push) → Town이 StageEnterNtf 전송
+db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePacket::CharacterSelectReq req)
+{
+    const int64 characterId = req.character_id();
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterSelectReq received. userId={} characterId={}",
+        userId, characterId));
+
+    // ── 1) DB에서 해당 캐릭터 조회 ─────────────────────────────
+    db::DBResult result = co_await m_dbQueue.ExecuteAsync(
+        "SELECT data FROM Characters WHERE user_id = ? AND character_id = ?",
+        { userId, characterId },
+        GetCoroutineResumeExecutor()
+    );
+
+    if (!result.success)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect DB select failed. userId={} err={}", userId, result.errorMsg));
+        sendCharacterSelectFailNtf(userId, 3, "server error: db select");
+        co_return;
+    }
+
+    // ── 2) 없는 캐릭터 ─────────────────────────────────────────────
+    if (result.IsEmpty())
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("GameServer: CharacterSelect - character not found. userId={} characterId={}",
+            userId, characterId));
+        sendCharacterSelectFailNtf(userId, 1, "character not found");
+        co_return;
+    }
+
+    DataStructures::Character character;
+    const std::string dataJson = result.GetString(0, "data");
+    if (!packet::ProtoJsonSerializer::FromJson(dataJson, character))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - failed to parse character JSON. userId={} characterId={}",
+            userId, characterId));
+        sendCharacterSelectFailNtf(userId, 3, "server error: parse");
+        co_return;
+    }
+
+    // ── 3) owner_user_id 검증 (PK가 (user_id, character_id) 이므로 이론상 통과해야 함, 안전장치) ──────────────────
+    if (character.owner_user_id() != userId)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - owner mismatch. userId={} characterOwner={} characterId={}",
+            userId, character.owner_user_id(), characterId));
+        sendCharacterSelectFailNtf(userId, 2, "not character owner");
+        co_return;
+    }
+
+    // ── 4) User에 현재 캐릭터 설정 ──────────────────────────────────────
+    UserPtr spUser;
+    if (!m_safeUsers.Find(userId, spUser) || !spUser)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("GameServer: CharacterSelect - user not found in global map. userId={}", userId));
+        co_return;
+    }
+
+    // Character 객체 생성. 라이프타임은 Town이 최종소유 (StageMsg_UserEnter로 전달 후).
+    // 여기서는 임시로 shared_ptr을 들고 Town으로 넘겨주면 Town이 m_objects에 등록.
+    CharacterPtr spCharacter = std::make_shared<Character>(character);
+    spCharacter->SetUser(spUser);   // Character -> User weak_ptr
+    spUser->SetCurrentCharacter(spCharacter);   // User -> Character weak_ptr
+
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: character selected. userId={} characterId={} name='{}'",
+        userId, character.character_id(), character.name()));
+
+    // ── 5) SystemStage에서 제거 ──────────────────────────────────────────
+    if (m_spSystemStage)
+    {
+        m_spSystemStage->EnqueueMessage(StageMsg_UserLeave{userId});
+    }
+
+    // ── 6) Town으로 입장 ───────────────────────────────────────────────
+    // Town이 OnUserEnter override로 StageEnterNtf를 전송한다.
+    if (m_spTown)
+    {
+        m_spTown->EnqueueMessage(StageMsg_UserEnter{spUser, spCharacter});
+    }
+    else
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - Town is null. userId={}", userId));
+    }
+}
+
+void GameServer::sendCharacterSelectFailNtf(int64 userId, int32 reasonCode, const std::string& message)
+{
+    GamePacket::CharacterSelectFailNtf ntf;
+    ntf.set_reason_code(reasonCode);
+    ntf.set_message(message);
+    sendPacketToUser(userId, Common::GAME_PACKET_ID_CHARACTER_SELECT_FAIL_NTF, ntf);
+
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterSelectFailNtf sent. userId={} reasonCode={} message='{}'",
+        userId, reasonCode, message));
+}
+
 // 게이트웨이로부터 GatewayUserDisconnectNtf 수신
 // → 글로벌 맵에서 제거, 현재 Stage에 퇴장 메시지 push
 void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSession*/, const ServerPacket::GatewayUserDisconnectNtf& msg)
@@ -484,16 +622,20 @@ void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSess
         return;
     }
 
-    // 현재 Stage에 퇴장 메시지 push.
-    // Phase A 임시: 일단 SystemStage와 Town 양쪽에 퇴장 메시지 push. Phase B에서
-    // User가 현재 속한 Stage를 정확히 추적하여 정확한 Stage에만 push하도록 개선 예정.
-    if (m_spSystemStage)
+    // 유저가 속한 Stage에만 퇴장 메시지 push.
+    const int64 currentStageId = spUser->GetCurrentStageId();
+    if (currentStageId == k_systemStageId && m_spSystemStage)
     {
         m_spSystemStage->EnqueueMessage(StageMsg_UserLeave{userId});
     }
-    if (m_spTown)
+    else if (currentStageId == k_townStageId && m_spTown)
     {
         m_spTown->EnqueueMessage(StageMsg_UserLeave{userId});
+    }
+    else
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("GameServer: user disconnect - unknown stageId. userId={} stageId={}",
+            userId, currentStageId));
     }
 }
 
@@ -561,6 +703,17 @@ void GameServer::handleRelayedClientPacket(const netlib::PacketPtr& spPacket)
             return;
         }
         handleClientCharacterCreate(userId, std::move(req));
+        return;
+    }
+    case Common::GAME_PACKET_ID_CHARACTER_SELECT_REQ:
+    {
+        GamePacket::CharacterSelectReq req;
+        if (!DeserializePacket(*spPacket, req))
+        {
+            LOG_WRITE(LogLevel::Warn, std::format("GameServer: failed to deserialize CharacterSelectReq. userId={}", userId));
+            return;
+        }
+        handleClientCharacterSelect(userId, std::move(req));
         return;
     }
     default:

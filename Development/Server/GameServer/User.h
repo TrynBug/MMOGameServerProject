@@ -2,6 +2,11 @@
 
 #include "pch.h"
 
+// Character와의 순환 의존을 피하기 위한 forward declaration.
+class Character;
+using CharacterPtr  = std::shared_ptr<Character>;
+using CharacterWPtr = std::weak_ptr<Character>;
+
 // 유저(클라이언트) 1명을 나타내는 클래스
 // 서버구조개요.md의 '유저 클래스' 절 참조.
 //
@@ -30,6 +35,13 @@ public:
     int64              GetCurrentStageId() const { return m_currentStageId; }
     void               SetCurrentStageId(int64 stageId) { m_currentStageId = stageId; }
 
+    // 현재 선택된 캐릭터 (Stage가 강한 소유자, User는 weak_ptr로만 참조).
+    // 캐릭터 선택 전이거나 Stage 입장 전이면 expired.
+    CharacterPtr  GetCurrentCharacter() const { return m_wpCurrentCharacter.lock(); }
+    CharacterWPtr GetCurrentCharacterWeak() const { return m_wpCurrentCharacter; }
+    void          SetCurrentCharacter(const CharacterWPtr& wpCharacter) { m_wpCurrentCharacter = wpCharacter; }
+    bool          HasSelectedCharacter() const { return !m_wpCurrentCharacter.expired(); }
+
     // ── 클라 패킷 큐 ────────────────────────────────────────────
     // IOCP Worker가 push (thread-safe)
     void EnqueuePacket(netlib::PacketPtr spPacket);
@@ -45,6 +57,10 @@ private:
 
     // 현재 소속 Stage ID. 입장 시 설정되고, Stage 이동 시 갱신된다.
     int64       m_currentStageId = 0;
+
+    // 현재 선택된 캐릭터 (weak_ptr).
+    // 라이프타임: Stage가 강한 소유자. User는 weak로만 참조.
+    CharacterWPtr m_wpCurrentCharacter;
 
     // ── 클라 패킷 큐 ────────────────────────────────────────────
     std::mutex                       m_packetQueueMutex;

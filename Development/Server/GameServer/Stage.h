@@ -10,6 +10,15 @@
 #include <variant>
 
 
+// GameServer와의 직접 의존을 피하기 위한 forward declaration.
+// (Stage 파생 클래스에서 GameServer의 서비스(패킷 전송 등)를 호출해야 할 때 사용.)
+class GameServer;
+
+// Character forward declaration (StageMsg_UserEnter 등에서 사용).
+class Character;
+using CharacterPtr = std::shared_ptr<Character>;
+
+
 // StageGridParams: GameData_Stage에서 읽어온 Stage 공간 정보.
 // Stage 파생 클래스가 생성자에서 LoadStageGridParams를 1회 호출한 다음
 // 그 결과를 Stage 기본 생성자에 펼쳐서 전달한다.
@@ -33,10 +42,14 @@ StageGridParams LoadStageGridParams(int64 stageId);
 // std::variant로 표현하여 핸들러 분기를 깔끔하게 처리한다.
 // ─────────────────────────────────────────────────────────────
 
-// 유저 입장 (게이트웨이로부터 GatewayUserEnterNtf 수신 시)
+// 유저 입장.
+// spCharacter가 있으면 Character도 함께 Stage 객체 컨테이너(m_objects, m_userObjects)에 등록된다.
+// SystemStage 입장 시에는 spCharacter == nullptr (캐릭터 선택 전).
+// Town/Field/Dungeon 입장 시에는 spCharacter가 설정되어야 한다.
 struct StageMsg_UserEnter
 {
-    UserPtr spUser;
+    UserPtr      spUser;
+    CharacterPtr spCharacter;   // 선택된 캐릭터 객체. 없으면 nullptr.
 };
 
 // 유저 퇴장 (게이트웨이로부터 GatewayUserDisconnectNtf 수신 시,
@@ -127,6 +140,11 @@ public:
     // 좌표로 섹터 직접 조회. 맵 영역 바깥이면 nullptr.
     Sector*       GetSectorByPos(float posX, float posY);
 
+    // GameServer 주입. 생성 직후 소유자가 설정한다.
+    // Stage 파생 클래스가 패킷 전송 등을 위해 사용.
+    void          SetGameServer(GameServer* pGameServer) { m_pGameServer = pGameServer; }
+    GameServer*   GetGameServer() const                  { return m_pGameServer; }
+
     // 외부 스레드에서 시스템 메시지를 push (thread-safe).
     // 다음 OnUpdate에서 처리된다.
     void      EnqueueMessage(StageMessage msg);
@@ -143,7 +161,8 @@ protected:
 
     // ── 시스템 메시지 처리 hooks (파생 클래스가 override 가능) ──
     // 기본 동작: 유저 추가/제거 및 로그 출력.
-    virtual void OnUserEnter(const UserPtr& spUser);
+    // spCharacter가 nullptr이 아니면 Character를 m_objects/m_userObjects에도 등록.
+    virtual void OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter);
     virtual void OnUserLeave(int64 userId);
 
     // 유저가 클라이언트로부터 보낸 패킷 처리 hook (파생 클래스가 override 가능).
@@ -169,6 +188,10 @@ private:
 private:
     int64      m_stageId   = 0;
     EStageType m_stageType = EStageType::None;
+
+    // GameServer 포인터 (소유권 없음, 주입자가 lifetime 보장).
+    // SetGameServer로 주입되며, Stage 파생이 패킷 전송 등을 하기 위해 사용.
+    GameServer* m_pGameServer = nullptr;
 
     // 5초 주기 heartbeat 로그용 누적 시간
     int64      m_heartbeatAccumMs = 0;

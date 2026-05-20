@@ -39,6 +39,9 @@
     <ClCompile Include="User.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Character.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="GameServer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -75,6 +78,9 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="User.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Character.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

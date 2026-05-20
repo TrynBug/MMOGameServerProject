@@ -13,7 +13,7 @@ REM   2) 기존 GameDB.db에 IF NOT EXISTS / OR IGNORE 로 안전하게 적용�
 REM ============================================================
 
 setlocal
-set "DB_DIR=%~dp0..\BIN\Debug"
+set "DB_DIR=%~dp0..\OUTPUT\Debug"
 set "DB_PATH=%DB_DIR%\GameDB.db"
 set "SCHEMA_SQL=%~dp0DBSchema.sql"
 set "SAMPLE_SQL=%~dp0DBDataSample.sql"

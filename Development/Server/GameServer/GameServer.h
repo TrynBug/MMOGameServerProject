@@ -23,6 +23,17 @@ public:
     GameServer(const GameServer&) = delete;
     GameServer& operator=(const GameServer&) = delete;
 
+    // ── Stage 파생 클래스가 호출하는 public 서비스 ────────────────
+    // Stage 입장 완료 알림 전송 (StageEnterNtf).
+    // 서버가 결정한 spawn 위치/회전만 포함. 다른 주변 오브젝트 정보는 ObjectVisibilityNtf로 별도 전송.
+    void SendStageEnterNtf(int64 userId, int64 stageId, float myPosX, float myPosY, float myYaw);
+
+    // 오브젝트 가시성 알림 전송 (ObjectVisibilityNtf).
+    // userId에게 spawns/despawnIds 전송.
+    void SendObjectVisibilityNtf(int64 userId,
+                                 const std::vector<GamePacket::CharacterSpawnInfo>& characterSpawns,
+                                 const std::vector<int64>& despawnIds);
+
 protected:
     // ServerBase 훅
     bool OnInitialize()                              override;
@@ -80,6 +91,12 @@ private:
     // 캐릭터 생성 결과 전송 (CharacterCreateRes).
     // 성공 시 pNewCharacter에 생성된 캐릭터, 실패 시 nullptr.
     void sendCharacterCreateRes(int64 userId, EResultCode resultCode, const std::string& errorMsg, const DataStructures::Character* pNewCharacter);
+
+    // 캐릭터 선택 요청 핸들러. DB SELECT 이후 SystemStage → Town 이동.
+    db::DetachedCoTask handleClientCharacterSelect(int64 userId, GamePacket::CharacterSelectReq req);
+
+    // 캐릭터 선택 실패 알림 전송 (CharacterSelectFailNtf).
+    void sendCharacterSelectFailNtf(int64 userId, int32 reasonCode, const std::string& message);
 
     // ── GameDB ────────────────────────────────────────────────────
     // GameDB 스키마 초기화 (서버 시작 시 1회, CREATE TABLE IF NOT EXISTS).

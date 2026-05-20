@@ -23,11 +23,15 @@ message NearbyCharacterInfo {
 }
 
 // Stage 입장 완료 알림 (서버 -> 클라)
-// Stage 이동(동일 게임서버 내 / 다른 게임서버) 완료 후 전송
+// Stage 이동(동일 게임서버 내 / 다른 게임서버) 완료 후 전송.
+// 조괄됨: Stage 자체 정보(맵/엔티티)는 이 패킷에 넣지 않는다.
+// - 맵 경계 등 정적 정보는 클라이 GameData_Stage에서 조회한다.
+// - 주변 오브젝트 정보는 별도의 ObjectVisibilityNtf로 전달된다.
 message StageEnterNtf {
-    int32 stage_id = 1;
-    DataStructures.Character my_character = 2;             // 내 캐릭터 최신 데이터
-    repeated NearbyCharacterInfo nearby_characters  = 3;   // 같은 Stage의 다른 캐릭터 목록
+    int64 stage_id = 1;
+    float my_pos_x = 2;     // 서버가 결정한 내 spawn 위치
+    float my_pos_y = 3;
+    float my_yaw   = 4;
 }
 
 // 동일 게임서버 내 Stage 이동 요청 (클라 -> 서버)

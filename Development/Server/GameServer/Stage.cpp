@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "Stage.h"
+#include "Character.h"   // OnUserEnter에서 Character를 m_objects에 등록하기 위해 완전타입 필요
+#include "GameServer.h"   // OnUserEnter/OnUserLeave에서 visibility 패킷 전송 언어서 필요
 
 #include "Generated/GameData_Stage.h"
 
@@ -7,6 +9,27 @@
 
 namespace
 {
+    // Character 정보를 CharacterSpawnInfo (패킷) 형식으로 채웁니다.
+    GamePacket::CharacterSpawnInfo makeCharacterSpawnInfo(const Character& character)
+    {
+        const DataStructures::Character& proto = character.GetProto();
+        GamePacket::CharacterSpawnInfo info;
+        info.set_object_id(character.GetObjectId());
+        info.set_owner_user_id(proto.owner_user_id());
+        info.set_name(proto.name());
+        info.set_job_id(proto.job_id());
+        info.set_level(proto.level());
+        info.set_hp(proto.hp());
+        info.set_max_hp(proto.max_hp());
+        info.set_mp(proto.mp());
+        info.set_max_mp(proto.max_mp());
+        // 좌표는 런타임이 진실의 원천. StageObject에서 가져온다.
+        info.set_pos_x(character.GetPosX());
+        info.set_pos_y(character.GetPosY());
+        info.set_yaw(character.GetYaw());
+        return info;
+    }
+
     constexpr int64 k_heartbeatIntervalMs = 5000;   // 5초마다 1번 heartbeat 로그
 
     // GameData_Stage 로딩 실패 시 fallback grid 값.
@@ -216,7 +239,7 @@ void Stage::processSystemMessages()
             using T = std::decay_t<decltype(m)>;
             if constexpr (std::is_same_v<T, StageMsg_UserEnter>)
             {
-                OnUserEnter(m.spUser);
+                OnUserEnter(m.spUser, m.spCharacter);
             }
             else if constexpr (std::is_same_v<T, StageMsg_UserLeave>)
             {
@@ -226,7 +249,7 @@ void Stage::processSystemMessages()
     }
 }
 
-void Stage::OnUserEnter(const UserPtr& spUser)
+void Stage::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
 {
     if (!spUser)
         return;
@@ -235,8 +258,51 @@ void Stage::OnUserEnter(const UserPtr& spUser)
     m_users[userId] = spUser;
     spUser->SetCurrentStageId(m_stageId);
 
-    LOG_WRITE(LogLevel::Info, std::format("Stage::OnUserEnter - stageId={} userId={} totalUsers={}",
-        m_stageId, userId, m_users.size()));
+    // 캐릭터가 함께 입장하면 Stage 객체 컨테이너에도 등록.
+    if (spCharacter)
+    {
+        const int64 objectId = spCharacter->GetObjectId();
+        m_objects[objectId] = spCharacter;
+        m_userObjects[objectId] = spCharacter;
+        spCharacter->SetStage(this);
+
+        LOG_WRITE(LogLevel::Info, std::format("Stage::OnUserEnter - stageId={} userId={} characterId={} totalUsers={} totalObjects={}",
+            m_stageId, userId, objectId, m_users.size(), m_objects.size()));
+
+        // ── visibility 전파 ────────────────────────────────────
+        // 아직 Sector 도입 전이므로 Stage 전체 범위로 처리 (과도기 동작).
+        // 향후 Phase D 이후에 sector AOI 기반으로 전환 예정.
+        if (GameServer* pServer = GetGameServer())
+        {
+            const GamePacket::CharacterSpawnInfo myInfo = makeCharacterSpawnInfo(*spCharacter);
+
+            // 1) 나에게: Stage 내 모든 캐릭터 spawn 정보 (나 포함).
+            std::vector<GamePacket::CharacterSpawnInfo> allSpawns;
+            allSpawns.reserve(m_userObjects.size());
+            for (const auto& [objId, spObj] : m_userObjects)
+            {
+                if (auto* pCharacter = dynamic_cast<Character*>(spObj.get()))
+                {
+                    allSpawns.push_back(makeCharacterSpawnInfo(*pCharacter));
+                }
+            }
+            pServer->SendObjectVisibilityNtf(userId, allSpawns, {});
+
+            // 2) 다른 유저들에게: 내 spawn 1개 (broadcast).
+            std::vector<GamePacket::CharacterSpawnInfo> singleSpawn = { myInfo };
+            for (const auto& [otherUserId, spOtherUser] : m_users)
+            {
+                if (otherUserId == userId)
+                    continue;   // 자기 자신은 제외
+                pServer->SendObjectVisibilityNtf(otherUserId, singleSpawn, {});
+            }
+        }
+    }
+    else
+    {
+        LOG_WRITE(LogLevel::Info, std::format("Stage::OnUserEnter - stageId={} userId={} (no character) totalUsers={}",
+            m_stageId, userId, m_users.size()));
+    }
 }
 
 void Stage::OnUserLeave(int64 userId)
@@ -249,10 +315,38 @@ void Stage::OnUserLeave(int64 userId)
         return;
     }
 
+    // User에 연결된 Character가 있으면 m_objects/m_userObjects에서 제거.
+    int64 leavingObjectId = 0;
+    UserPtr spUser = iter->second;
+    if (spUser)
+    {
+        CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+        if (spCharacter && spCharacter->GetStage() == this)
+        {
+            leavingObjectId = spCharacter->GetObjectId();
+            m_userObjects.erase(leavingObjectId);
+            m_objects.erase(leavingObjectId);
+            spCharacter->SetStage(nullptr);
+        }
+    }
+
     m_users.erase(iter);
 
-    LOG_WRITE(LogLevel::Info, std::format("Stage::OnUserLeave - stageId={} userId={} totalUsers={}",
-        m_stageId, userId, m_users.size()));
+    LOG_WRITE(LogLevel::Info, std::format("Stage::OnUserLeave - stageId={} userId={} totalUsers={} totalObjects={}",
+        m_stageId, userId, m_users.size(), m_objects.size()));
+
+    // 캐릭터가 있었다면 남은 유저들에게 despawn broadcast.
+    if (leavingObjectId != 0)
+    {
+        if (GameServer* pServer = GetGameServer())
+        {
+            std::vector<int64> despawnIds = { leavingObjectId };
+            for (const auto& [otherUserId, spOtherUser] : m_users)
+            {
+                pServer->SendObjectVisibilityNtf(otherUserId, {}, despawnIds);
+            }
+        }
+    }
 }
 
 void Stage::OnUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
