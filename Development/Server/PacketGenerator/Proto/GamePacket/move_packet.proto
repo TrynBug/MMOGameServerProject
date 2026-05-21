@@ -1,22 +1,47 @@
-﻿syntax = "proto3";
+syntax = "proto3";
 
 package GamePacket;
 
 import "Common/packet_id.proto";
 
-// 이동 요청 (클라 -> 서버)
-message MoveReq {
+// ──────────────────────────────────────────────
+// 이동 패킷
+// ──────────────────────────────────────────────
+//
+// 흐름 (클라이언트.md 참조):
+// - 클라이언트가 마우스 좌클릭으로 땅을 찍으면 → MoveDestReq 전송 (목적지)
+// - 마우스를 계속 누르고 있는 동안 화면을 따라 마우스가 움직이므로 약 500ms 마다 MoveDestReq 재전송
+// - 마우스를 떼면 → MoveStopReq 전송 (현재 위치)
+// - 서버는 매 tick 캐릭터를 직선 이동시키고, 목적지 도달 또는 정지 시 MoveNtf로 주변에 알린다.
+// - 클라/서버 동기화 오차 검증은 향후 단계에서 추가.
+
+// 목적지로 이동 시작/갱신 (클라 -> 서버)
+// 캐릭터를 (dest_x, dest_y)로 직선 이동시켜달라는 요청.
+// 이미 이동 중일 때 다시 받으면 목적지를 갱신한다.
+message MoveDestReq {
+    float dest_x = 1;
+    float dest_y = 2;
+}
+
+// 즉시 정지 + 현재 위치 동기화 (클라 -> 서버)
+// 캐릭터를 즉시 멈추고, 클라가 보낸 현재 위치를 서버 위치와 비교한다.
+// 오차 범위 내면 클라 위치를 인정 (위치 보정 패킷은 향후 추가).
+message MoveStopReq {
     float pos_x = 1;
     float pos_y = 2;
-    float pos_z = 3;
-    float dir_y = 4;
+    float yaw   = 3;
 }
 
 // 이동 알림 (서버 -> 클라 브로드캐스트)
+// 상태 변화(이동 시작/목적지 변경/정지) 시점에 주변 유저에게 broadcast.
+// 클라는 이를 받아 해당 object의 위치/목적지를 갱신한다.
+// 클라/서버가 같은 직선 이동 시뮬레이션을 수행한다고 가정.
 message MoveNtf {
-    int64 player_id = 1;
-    float pos_x = 2;
-    float pos_y = 3;
-    float pos_z = 4;
-    float dir_y = 5;
+    int64 object_id = 1;     // = character_id (현재는)
+    float pos_x     = 2;     // 현재 위치
+    float pos_y     = 3;
+    float yaw       = 4;
+    float dest_x    = 5;     // 이동 목적지 (정지 상태면 pos와 동일)
+    float dest_y    = 6;
+    bool  is_moving = 7;     // 이동 중 여부
 }

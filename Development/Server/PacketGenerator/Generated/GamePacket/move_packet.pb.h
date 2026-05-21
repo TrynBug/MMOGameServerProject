@@ -54,14 +54,18 @@ extern "C" {
 extern const ::google::protobuf::internal::DescriptorTable descriptor_table_GamePacket_2fmove_5fpacket_2eproto;
 }  // extern "C"
 namespace GamePacket {
+class MoveDestReq;
+struct MoveDestReqDefaultTypeInternal;
+extern MoveDestReqDefaultTypeInternal _MoveDestReq_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull MoveDestReq_class_data_;
 class MoveNtf;
 struct MoveNtfDefaultTypeInternal;
 extern MoveNtfDefaultTypeInternal _MoveNtf_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull MoveNtf_class_data_;
-class MoveReq;
-struct MoveReqDefaultTypeInternal;
-extern MoveReqDefaultTypeInternal _MoveReq_default_instance_;
-extern const ::google::protobuf::internal::ClassDataFull MoveReq_class_data_;
+class MoveStopReq;
+struct MoveStopReqDefaultTypeInternal;
+extern MoveStopReqDefaultTypeInternal _MoveStopReq_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull MoveStopReq_class_data_;
 }  // namespace GamePacket
 namespace google {
 namespace protobuf {
@@ -75,30 +79,30 @@ namespace GamePacket {
 
 // -------------------------------------------------------------------
 
-class MoveReq final : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:GamePacket.MoveReq) */ {
+class MoveStopReq final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.MoveStopReq) */ {
  public:
-  inline MoveReq() : MoveReq(nullptr) {}
-  ~MoveReq() PROTOBUF_FINAL;
+  inline MoveStopReq() : MoveStopReq(nullptr) {}
+  ~MoveStopReq() PROTOBUF_FINAL;
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-  void operator delete(MoveReq* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+  void operator delete(MoveStopReq* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
     SharedDtor(*msg);
-    ::google::protobuf::internal::SizedDelete(msg, sizeof(MoveReq));
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(MoveStopReq));
   }
 #endif
 
   template <typename = void>
-  explicit PROTOBUF_CONSTEXPR MoveReq(::google::protobuf::internal::ConstantInitialized);
+  explicit PROTOBUF_CONSTEXPR MoveStopReq(::google::protobuf::internal::ConstantInitialized);
 
-  inline MoveReq(const MoveReq& from) : MoveReq(nullptr, from) {}
-  inline MoveReq(MoveReq&& from) noexcept
-      : MoveReq(nullptr, ::std::move(from)) {}
-  inline MoveReq& operator=(const MoveReq& from) {
+  inline MoveStopReq(const MoveStopReq& from) : MoveStopReq(nullptr, from) {}
+  inline MoveStopReq(MoveStopReq&& from) noexcept
+      : MoveStopReq(nullptr, ::std::move(from)) {}
+  inline MoveStopReq& operator=(const MoveStopReq& from) {
     CopyFrom(from);
     return *this;
   }
-  inline MoveReq& operator=(MoveReq&& from) noexcept {
+  inline MoveStopReq& operator=(MoveStopReq&& from) noexcept {
     if (this == &from) return *this;
     if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
       InternalSwap(&from);
@@ -126,13 +130,13 @@ class MoveReq final : public ::google::protobuf::Message
   static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
     return default_instance().GetMetadata().reflection;
   }
-  static const MoveReq& default_instance() {
-    return *reinterpret_cast<const MoveReq*>(
-        &_MoveReq_default_instance_);
+  static const MoveStopReq& default_instance() {
+    return *reinterpret_cast<const MoveStopReq*>(
+        &_MoveStopReq_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 0;
-  friend void swap(MoveReq& a, MoveReq& b) { a.Swap(&b); }
-  inline void Swap(MoveReq* PROTOBUF_NONNULL other) {
+  static constexpr int kIndexInFileMessages = 1;
+  friend void swap(MoveStopReq& a, MoveStopReq& b) { a.Swap(&b); }
+  inline void Swap(MoveStopReq* PROTOBUF_NONNULL other) {
     if (other == this) return;
     if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
       InternalSwap(other);
@@ -140,7 +144,7 @@ class MoveReq final : public ::google::protobuf::Message
       ::google::protobuf::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(MoveReq* PROTOBUF_NONNULL other) {
+  void UnsafeArenaSwap(MoveStopReq* PROTOBUF_NONNULL other) {
     if (other == this) return;
     ABSL_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -148,13 +152,13 @@ class MoveReq final : public ::google::protobuf::Message
 
   // implements Message ----------------------------------------------
 
-  MoveReq* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
-    return ::google::protobuf::Message::DefaultConstruct<MoveReq>(arena);
+  MoveStopReq* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<MoveStopReq>(arena);
   }
   using ::google::protobuf::Message::CopyFrom;
-  void CopyFrom(const MoveReq& from);
+  void CopyFrom(const MoveStopReq& from);
   using ::google::protobuf::Message::MergeFrom;
-  void MergeFrom(const MoveReq& from) { MoveReq::MergeImpl(*this, from); }
+  void MergeFrom(const MoveStopReq& from) { MoveStopReq::MergeImpl(*this, from); }
 
   private:
   static void MergeImpl(::google::protobuf::MessageLite& to_msg,
@@ -190,17 +194,17 @@ class MoveReq final : public ::google::protobuf::Message
   private:
   void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
   static void SharedDtor(MessageLite& self);
-  void InternalSwap(MoveReq* PROTOBUF_NONNULL other);
+  void InternalSwap(MoveStopReq* PROTOBUF_NONNULL other);
  private:
   template <typename T>
   friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
-  static ::absl::string_view FullMessageName() { return "GamePacket.MoveReq"; }
+  static ::absl::string_view FullMessageName() { return "GamePacket.MoveStopReq"; }
 
-  explicit MoveReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
-  MoveReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const MoveReq& from);
-  MoveReq(
-      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, MoveReq&& from) noexcept
-      : MoveReq(arena) {
+  explicit MoveStopReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  MoveStopReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const MoveStopReq& from);
+  MoveStopReq(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, MoveStopReq&& from) noexcept
+      : MoveStopReq(arena) {
     *this = ::std::move(from);
   }
   const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
@@ -219,8 +223,7 @@ class MoveReq final : public ::google::protobuf::Message
   enum : int {
     kPosXFieldNumber = 1,
     kPosYFieldNumber = 2,
-    kPosZFieldNumber = 3,
-    kDirYFieldNumber = 4,
+    kYawFieldNumber = 3,
   };
   // float pos_x = 1;
   void clear_pos_x() ;
@@ -242,31 +245,21 @@ class MoveReq final : public ::google::protobuf::Message
   void _internal_set_pos_y(float value);
 
   public:
-  // float pos_z = 3;
-  void clear_pos_z() ;
-  float pos_z() const;
-  void set_pos_z(float value);
+  // float yaw = 3;
+  void clear_yaw() ;
+  float yaw() const;
+  void set_yaw(float value);
 
   private:
-  float _internal_pos_z() const;
-  void _internal_set_pos_z(float value);
+  float _internal_yaw() const;
+  void _internal_set_yaw(float value);
 
   public:
-  // float dir_y = 4;
-  void clear_dir_y() ;
-  float dir_y() const;
-  void set_dir_y(float value);
-
-  private:
-  float _internal_dir_y() const;
-  void _internal_set_dir_y(float value);
-
-  public:
-  // @@protoc_insertion_point(class_scope:GamePacket.MoveReq)
+  // @@protoc_insertion_point(class_scope:GamePacket.MoveStopReq)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 4,
+  static const ::google::protobuf::internal::TcParseTable<2, 3,
                                    0, 0,
                                    2>
       _table_;
@@ -285,20 +278,19 @@ class MoveReq final : public ::google::protobuf::Message
     inline explicit Impl_(
         ::google::protobuf::internal::InternalVisibility visibility,
         ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
-        const MoveReq& from_msg);
+        const MoveStopReq& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     float pos_x_;
     float pos_y_;
-    float pos_z_;
-    float dir_y_;
+    float yaw_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_GamePacket_2fmove_5fpacket_2eproto;
 };
 
-extern const ::google::protobuf::internal::ClassDataFull MoveReq_class_data_;
+extern const ::google::protobuf::internal::ClassDataFull MoveStopReq_class_data_;
 // -------------------------------------------------------------------
 
 class MoveNtf final : public ::google::protobuf::Message
@@ -356,7 +348,7 @@ class MoveNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const MoveNtf*>(
         &_MoveNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 2;
   friend void swap(MoveNtf& a, MoveNtf& b) { a.Swap(&b); }
   inline void Swap(MoveNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -443,20 +435,22 @@ class MoveNtf final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kPlayerIdFieldNumber = 1,
+    kObjectIdFieldNumber = 1,
     kPosXFieldNumber = 2,
     kPosYFieldNumber = 3,
-    kPosZFieldNumber = 4,
-    kDirYFieldNumber = 5,
+    kYawFieldNumber = 4,
+    kDestXFieldNumber = 5,
+    kDestYFieldNumber = 6,
+    kIsMovingFieldNumber = 7,
   };
-  // int64 player_id = 1;
-  void clear_player_id() ;
-  ::int64_t player_id() const;
-  void set_player_id(::int64_t value);
+  // int64 object_id = 1;
+  void clear_object_id() ;
+  ::int64_t object_id() const;
+  void set_object_id(::int64_t value);
 
   private:
-  ::int64_t _internal_player_id() const;
-  void _internal_set_player_id(::int64_t value);
+  ::int64_t _internal_object_id() const;
+  void _internal_set_object_id(::int64_t value);
 
   public:
   // float pos_x = 2;
@@ -479,31 +473,51 @@ class MoveNtf final : public ::google::protobuf::Message
   void _internal_set_pos_y(float value);
 
   public:
-  // float pos_z = 4;
-  void clear_pos_z() ;
-  float pos_z() const;
-  void set_pos_z(float value);
+  // float yaw = 4;
+  void clear_yaw() ;
+  float yaw() const;
+  void set_yaw(float value);
 
   private:
-  float _internal_pos_z() const;
-  void _internal_set_pos_z(float value);
+  float _internal_yaw() const;
+  void _internal_set_yaw(float value);
 
   public:
-  // float dir_y = 5;
-  void clear_dir_y() ;
-  float dir_y() const;
-  void set_dir_y(float value);
+  // float dest_x = 5;
+  void clear_dest_x() ;
+  float dest_x() const;
+  void set_dest_x(float value);
 
   private:
-  float _internal_dir_y() const;
-  void _internal_set_dir_y(float value);
+  float _internal_dest_x() const;
+  void _internal_set_dest_x(float value);
+
+  public:
+  // float dest_y = 6;
+  void clear_dest_y() ;
+  float dest_y() const;
+  void set_dest_y(float value);
+
+  private:
+  float _internal_dest_y() const;
+  void _internal_set_dest_y(float value);
+
+  public:
+  // bool is_moving = 7;
+  void clear_is_moving() ;
+  bool is_moving() const;
+  void set_is_moving(bool value);
+
+  private:
+  bool _internal_is_moving() const;
+  void _internal_set_is_moving(bool value);
 
   public:
   // @@protoc_insertion_point(class_scope:GamePacket.MoveNtf)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 5,
+  static const ::google::protobuf::internal::TcParseTable<3, 7,
                                    0, 0,
                                    2>
       _table_;
@@ -525,11 +539,13 @@ class MoveNtf final : public ::google::protobuf::Message
         const MoveNtf& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::int64_t player_id_;
+    ::int64_t object_id_;
     float pos_x_;
     float pos_y_;
-    float pos_z_;
-    float dir_y_;
+    float yaw_;
+    float dest_x_;
+    float dest_y_;
+    bool is_moving_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -537,6 +553,208 @@ class MoveNtf final : public ::google::protobuf::Message
 };
 
 extern const ::google::protobuf::internal::ClassDataFull MoveNtf_class_data_;
+// -------------------------------------------------------------------
+
+class MoveDestReq final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.MoveDestReq) */ {
+ public:
+  inline MoveDestReq() : MoveDestReq(nullptr) {}
+  ~MoveDestReq() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(MoveDestReq* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(MoveDestReq));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR MoveDestReq(::google::protobuf::internal::ConstantInitialized);
+
+  inline MoveDestReq(const MoveDestReq& from) : MoveDestReq(nullptr, from) {}
+  inline MoveDestReq(MoveDestReq&& from) noexcept
+      : MoveDestReq(nullptr, ::std::move(from)) {}
+  inline MoveDestReq& operator=(const MoveDestReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MoveDestReq& operator=(MoveDestReq&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const MoveDestReq& default_instance() {
+    return *reinterpret_cast<const MoveDestReq*>(
+        &_MoveDestReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 0;
+  friend void swap(MoveDestReq& a, MoveDestReq& b) { a.Swap(&b); }
+  inline void Swap(MoveDestReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MoveDestReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  MoveDestReq* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<MoveDestReq>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const MoveDestReq& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const MoveDestReq& from) { MoveDestReq::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(MoveDestReq* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.MoveDestReq"; }
+
+  explicit MoveDestReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  MoveDestReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const MoveDestReq& from);
+  MoveDestReq(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, MoveDestReq&& from) noexcept
+      : MoveDestReq(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kDestXFieldNumber = 1,
+    kDestYFieldNumber = 2,
+  };
+  // float dest_x = 1;
+  void clear_dest_x() ;
+  float dest_x() const;
+  void set_dest_x(float value);
+
+  private:
+  float _internal_dest_x() const;
+  void _internal_set_dest_x(float value);
+
+  public:
+  // float dest_y = 2;
+  void clear_dest_y() ;
+  float dest_y() const;
+  void set_dest_y(float value);
+
+  private:
+  float _internal_dest_y() const;
+  void _internal_set_dest_y(float value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.MoveDestReq)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<1, 2,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const MoveDestReq& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    float dest_x_;
+    float dest_y_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fmove_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull MoveDestReq_class_data_;
 
 // ===================================================================
 
@@ -552,135 +770,164 @@ extern const ::google::protobuf::internal::ClassDataFull MoveNtf_class_data_;
 #endif  // __GNUC__
 // -------------------------------------------------------------------
 
-// MoveReq
+// MoveDestReq
+
+// float dest_x = 1;
+inline void MoveDestReq::clear_dest_x() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.dest_x_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline float MoveDestReq::dest_x() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveDestReq.dest_x)
+  return _internal_dest_x();
+}
+inline void MoveDestReq::set_dest_x(float value) {
+  _internal_set_dest_x(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_set:GamePacket.MoveDestReq.dest_x)
+}
+inline float MoveDestReq::_internal_dest_x() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.dest_x_;
+}
+inline void MoveDestReq::_internal_set_dest_x(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.dest_x_ = value;
+}
+
+// float dest_y = 2;
+inline void MoveDestReq::clear_dest_y() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.dest_y_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline float MoveDestReq::dest_y() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveDestReq.dest_y)
+  return _internal_dest_y();
+}
+inline void MoveDestReq::set_dest_y(float value) {
+  _internal_set_dest_y(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:GamePacket.MoveDestReq.dest_y)
+}
+inline float MoveDestReq::_internal_dest_y() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.dest_y_;
+}
+inline void MoveDestReq::_internal_set_dest_y(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.dest_y_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// MoveStopReq
 
 // float pos_x = 1;
-inline void MoveReq::clear_pos_x() {
+inline void MoveStopReq::clear_pos_x() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_x_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline float MoveReq::pos_x() const {
-  // @@protoc_insertion_point(field_get:GamePacket.MoveReq.pos_x)
+inline float MoveStopReq::pos_x() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveStopReq.pos_x)
   return _internal_pos_x();
 }
-inline void MoveReq::set_pos_x(float value) {
+inline void MoveStopReq::set_pos_x(float value) {
   _internal_set_pos_x(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  // @@protoc_insertion_point(field_set:GamePacket.MoveReq.pos_x)
+  // @@protoc_insertion_point(field_set:GamePacket.MoveStopReq.pos_x)
 }
-inline float MoveReq::_internal_pos_x() const {
+inline float MoveStopReq::_internal_pos_x() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.pos_x_;
 }
-inline void MoveReq::_internal_set_pos_x(float value) {
+inline void MoveStopReq::_internal_set_pos_x(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_x_ = value;
 }
 
 // float pos_y = 2;
-inline void MoveReq::clear_pos_y() {
+inline void MoveStopReq::clear_pos_y() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_y_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000002U);
 }
-inline float MoveReq::pos_y() const {
-  // @@protoc_insertion_point(field_get:GamePacket.MoveReq.pos_y)
+inline float MoveStopReq::pos_y() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveStopReq.pos_y)
   return _internal_pos_y();
 }
-inline void MoveReq::set_pos_y(float value) {
+inline void MoveStopReq::set_pos_y(float value) {
   _internal_set_pos_y(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000002U);
-  // @@protoc_insertion_point(field_set:GamePacket.MoveReq.pos_y)
+  // @@protoc_insertion_point(field_set:GamePacket.MoveStopReq.pos_y)
 }
-inline float MoveReq::_internal_pos_y() const {
+inline float MoveStopReq::_internal_pos_y() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.pos_y_;
 }
-inline void MoveReq::_internal_set_pos_y(float value) {
+inline void MoveStopReq::_internal_set_pos_y(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_y_ = value;
 }
 
-// float pos_z = 3;
-inline void MoveReq::clear_pos_z() {
+// float yaw = 3;
+inline void MoveStopReq::clear_yaw() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_z_ = 0;
+  _impl_.yaw_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000004U);
 }
-inline float MoveReq::pos_z() const {
-  // @@protoc_insertion_point(field_get:GamePacket.MoveReq.pos_z)
-  return _internal_pos_z();
+inline float MoveStopReq::yaw() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveStopReq.yaw)
+  return _internal_yaw();
 }
-inline void MoveReq::set_pos_z(float value) {
-  _internal_set_pos_z(value);
+inline void MoveStopReq::set_yaw(float value) {
+  _internal_set_yaw(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000004U);
-  // @@protoc_insertion_point(field_set:GamePacket.MoveReq.pos_z)
+  // @@protoc_insertion_point(field_set:GamePacket.MoveStopReq.yaw)
 }
-inline float MoveReq::_internal_pos_z() const {
+inline float MoveStopReq::_internal_yaw() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.pos_z_;
+  return _impl_.yaw_;
 }
-inline void MoveReq::_internal_set_pos_z(float value) {
+inline void MoveStopReq::_internal_set_yaw(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_z_ = value;
-}
-
-// float dir_y = 4;
-inline void MoveReq::clear_dir_y() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.dir_y_ = 0;
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00000008U);
-}
-inline float MoveReq::dir_y() const {
-  // @@protoc_insertion_point(field_get:GamePacket.MoveReq.dir_y)
-  return _internal_dir_y();
-}
-inline void MoveReq::set_dir_y(float value) {
-  _internal_set_dir_y(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
-  // @@protoc_insertion_point(field_set:GamePacket.MoveReq.dir_y)
-}
-inline float MoveReq::_internal_dir_y() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.dir_y_;
-}
-inline void MoveReq::_internal_set_dir_y(float value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.dir_y_ = value;
+  _impl_.yaw_ = value;
 }
 
 // -------------------------------------------------------------------
 
 // MoveNtf
 
-// int64 player_id = 1;
-inline void MoveNtf::clear_player_id() {
+// int64 object_id = 1;
+inline void MoveNtf::clear_object_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.player_id_ = ::int64_t{0};
+  _impl_.object_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline ::int64_t MoveNtf::player_id() const {
-  // @@protoc_insertion_point(field_get:GamePacket.MoveNtf.player_id)
-  return _internal_player_id();
+inline ::int64_t MoveNtf::object_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveNtf.object_id)
+  return _internal_object_id();
 }
-inline void MoveNtf::set_player_id(::int64_t value) {
-  _internal_set_player_id(value);
+inline void MoveNtf::set_object_id(::int64_t value) {
+  _internal_set_object_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  // @@protoc_insertion_point(field_set:GamePacket.MoveNtf.player_id)
+  // @@protoc_insertion_point(field_set:GamePacket.MoveNtf.object_id)
 }
-inline ::int64_t MoveNtf::_internal_player_id() const {
+inline ::int64_t MoveNtf::_internal_object_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.player_id_;
+  return _impl_.object_id_;
 }
-inline void MoveNtf::_internal_set_player_id(::int64_t value) {
+inline void MoveNtf::_internal_set_object_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.player_id_ = value;
+  _impl_.object_id_ = value;
 }
 
 // float pos_x = 2;
@@ -733,54 +980,104 @@ inline void MoveNtf::_internal_set_pos_y(float value) {
   _impl_.pos_y_ = value;
 }
 
-// float pos_z = 4;
-inline void MoveNtf::clear_pos_z() {
+// float yaw = 4;
+inline void MoveNtf::clear_yaw() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_z_ = 0;
+  _impl_.yaw_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000008U);
 }
-inline float MoveNtf::pos_z() const {
-  // @@protoc_insertion_point(field_get:GamePacket.MoveNtf.pos_z)
-  return _internal_pos_z();
+inline float MoveNtf::yaw() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveNtf.yaw)
+  return _internal_yaw();
 }
-inline void MoveNtf::set_pos_z(float value) {
-  _internal_set_pos_z(value);
+inline void MoveNtf::set_yaw(float value) {
+  _internal_set_yaw(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000008U);
-  // @@protoc_insertion_point(field_set:GamePacket.MoveNtf.pos_z)
+  // @@protoc_insertion_point(field_set:GamePacket.MoveNtf.yaw)
 }
-inline float MoveNtf::_internal_pos_z() const {
+inline float MoveNtf::_internal_yaw() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.pos_z_;
+  return _impl_.yaw_;
 }
-inline void MoveNtf::_internal_set_pos_z(float value) {
+inline void MoveNtf::_internal_set_yaw(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_z_ = value;
+  _impl_.yaw_ = value;
 }
 
-// float dir_y = 5;
-inline void MoveNtf::clear_dir_y() {
+// float dest_x = 5;
+inline void MoveNtf::clear_dest_x() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.dir_y_ = 0;
+  _impl_.dest_x_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000010U);
 }
-inline float MoveNtf::dir_y() const {
-  // @@protoc_insertion_point(field_get:GamePacket.MoveNtf.dir_y)
-  return _internal_dir_y();
+inline float MoveNtf::dest_x() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveNtf.dest_x)
+  return _internal_dest_x();
 }
-inline void MoveNtf::set_dir_y(float value) {
-  _internal_set_dir_y(value);
+inline void MoveNtf::set_dest_x(float value) {
+  _internal_set_dest_x(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000010U);
-  // @@protoc_insertion_point(field_set:GamePacket.MoveNtf.dir_y)
+  // @@protoc_insertion_point(field_set:GamePacket.MoveNtf.dest_x)
 }
-inline float MoveNtf::_internal_dir_y() const {
+inline float MoveNtf::_internal_dest_x() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.dir_y_;
+  return _impl_.dest_x_;
 }
-inline void MoveNtf::_internal_set_dir_y(float value) {
+inline void MoveNtf::_internal_set_dest_x(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.dir_y_ = value;
+  _impl_.dest_x_ = value;
+}
+
+// float dest_y = 6;
+inline void MoveNtf::clear_dest_y() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.dest_y_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000020U);
+}
+inline float MoveNtf::dest_y() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveNtf.dest_y)
+  return _internal_dest_y();
+}
+inline void MoveNtf::set_dest_y(float value) {
+  _internal_set_dest_y(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
+  // @@protoc_insertion_point(field_set:GamePacket.MoveNtf.dest_y)
+}
+inline float MoveNtf::_internal_dest_y() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.dest_y_;
+}
+inline void MoveNtf::_internal_set_dest_y(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.dest_y_ = value;
+}
+
+// bool is_moving = 7;
+inline void MoveNtf::clear_is_moving() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_moving_ = false;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000040U);
+}
+inline bool MoveNtf::is_moving() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveNtf.is_moving)
+  return _internal_is_moving();
+}
+inline void MoveNtf::set_is_moving(bool value) {
+  _internal_set_is_moving(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
+  // @@protoc_insertion_point(field_set:GamePacket.MoveNtf.is_moving)
+}
+inline bool MoveNtf::_internal_is_moving() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.is_moving_;
+}
+inline void MoveNtf::_internal_set_is_moving(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_moving_ = value;
 }
 
 #ifdef __GNUC__

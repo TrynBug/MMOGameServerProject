@@ -111,6 +111,9 @@
     <ClInclude Include="Generated\GamePacket\character_packet.pb.h">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClInclude>
+    <ClInclude Include="Generated\GamePacket\object_visibility_packet.pb.h">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ProtoSerializer.cpp">
@@ -179,6 +182,9 @@
     <ClCompile Include="Generated\GamePacket\character_packet.pb.cc">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClCompile>
+    <ClCompile Include="Generated\GamePacket\object_visibility_packet.pb.cc">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="generate_proto.bat">
@@ -233,6 +239,9 @@
       <Filter>소스 파일\Proto\ServerPacket</Filter>
     </None>
     <None Include="Proto\GamePacket\character_packet.proto">
+      <Filter>소스 파일\Proto\GamePacket</Filter>
+    </None>
+    <None Include="Proto\GamePacket\object_visibility_packet.proto">
       <Filter>소스 파일\Proto\GamePacket</Filter>
     </None>
   </ItemGroup>

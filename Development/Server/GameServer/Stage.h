@@ -149,6 +149,32 @@ public:
     // 다음 OnUpdate에서 처리된다.
     void      EnqueueMessage(StageMessage msg);
 
+    // 객체의 새 좌표 기준으로 sector 소속이 바뀌었으면 갱신한다.
+    // Character::Update 등 이동 처리 이후 호출. sector 변경 없으면 no-op.
+    // visibility 갱신은 D-3에서 추가 예정.
+    void      UpdateObjectSector(StageObject* pObject);
+
+    // (centerX, centerY) sector를 중심으로 range 거리 내의 sector를 순회.
+    // range=1이면 3x3, range=2면 5x5. 맵 범위 밖 sector는 자동 스킵.
+    // 콜백은 Sector*를 받는다 (nullptr은 전달되지 않음).
+    template <typename Func>
+    void ForEachAdjacentSector(int32 centerX, int32 centerY, int32 range, Func&& callback)
+    {
+        for (int32 dy = -range; dy <= range; ++dy)
+        {
+            const int32 y = centerY + dy;
+            if (y < 0 || y >= m_sectorCountY)
+                continue;
+            for (int32 dx = -range; dx <= range; ++dx)
+            {
+                const int32 x = centerX + dx;
+                if (x < 0 || x >= m_sectorCountX)
+                    continue;
+                callback(&m_sectors[sectorIndexToFlat(x, y)]);
+            }
+        }
+    }
+
 protected:
     // serverbase::Contents 훅
     void OnStart()              override;
@@ -179,11 +205,32 @@ private:
     // 각 유저의 클라 패킷 큐 drain 및 처리
     void processUserPackets();
 
+    // m_userObjects 순회하면서 Character::Update 호출 + sector 갱신.
+    void updateCharacters(int64 deltaMs);
+
+    // Character의 현재 이동 상태를 그 주변 sector의 모든 캐릭터(자기 포함)에게 MoveNtf로 알린다.
+    // 이동 시작/정지/도착 등 *상태 변화 시점*에서 호출.
+    void broadcastMoveNtf(const Character& character);
+
+    // Character가 sector를 바꿔을 때 visibility 갱신.
+    // oldAOI − newAOI 안의 캐릭터들에게는 despawn (나, 상대 서로),
+    // newAOI − oldAOI 안의 캐릭터들에게는 spawn (나, 상대 서로) 전송.
+    void updateVisibilityOnSectorChange(Character& character,
+                                        int32 oldSectorX, int32 oldSectorY,
+                                        int32 newSectorX, int32 newSectorY);
+
     // 섹터 그리드 초기화 (생성자에서 1회 호출)
     void initializeSectorGrid();
 
     // 2D 섹터 좌표 → 1D 배열 인덱스 변환
     int32 sectorIndexToFlat(int32 sectorX, int32 sectorY) const { return sectorY * m_sectorCountX + sectorX; }
+
+    // 객체를 자신의 현재 좌표 기준으로 sector에 등록.
+    // pObject->m_curSectorX/Y를 갱신. 맵 범위 밖이면 등록 안 함.
+    void addObjectToSector(StageObject* pObject);
+
+    // 객체를 현재 등록된 sector에서 제거. curSectorX/Y를 -1로 설정.
+    void removeObjectFromSector(StageObject* pObject);
 
 private:
     int64      m_stageId   = 0;

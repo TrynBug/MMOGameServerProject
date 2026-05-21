@@ -26,42 +26,43 @@ namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 namespace GamePacket {
 
-inline constexpr MoveReq::Impl_::Impl_(
+inline constexpr MoveStopReq::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
         pos_x_{0},
         pos_y_{0},
-        pos_z_{0},
-        dir_y_{0} {}
+        yaw_{0} {}
 
 template <typename>
-PROTOBUF_CONSTEXPR MoveReq::MoveReq(::_pbi::ConstantInitialized)
+PROTOBUF_CONSTEXPR MoveStopReq::MoveStopReq(::_pbi::ConstantInitialized)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(MoveReq_class_data_.base()),
+    : ::google::protobuf::Message(MoveStopReq_class_data_.base()),
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(),
 #endif  // PROTOBUF_CUSTOM_VTABLE
       _impl_(::_pbi::ConstantInitialized()) {
 }
-struct MoveReqDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR MoveReqDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~MoveReqDefaultTypeInternal() {}
+struct MoveStopReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR MoveStopReqDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~MoveStopReqDefaultTypeInternal() {}
   union {
-    MoveReq _instance;
+    MoveStopReq _instance;
   };
 };
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MoveReqDefaultTypeInternal _MoveReq_default_instance_;
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MoveStopReqDefaultTypeInternal _MoveStopReq_default_instance_;
 
 inline constexpr MoveNtf::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        player_id_{::int64_t{0}},
+        object_id_{::int64_t{0}},
         pos_x_{0},
         pos_y_{0},
-        pos_z_{0},
-        dir_y_{0} {}
+        yaw_{0},
+        dest_x_{0},
+        dest_y_{0},
+        is_moving_{false} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR MoveNtf::MoveNtf(::_pbi::ConstantInitialized)
@@ -82,6 +83,32 @@ struct MoveNtfDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MoveNtfDefaultTypeInternal _MoveNtf_default_instance_;
+
+inline constexpr MoveDestReq::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        dest_x_{0},
+        dest_y_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR MoveDestReq::MoveDestReq(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(MoveDestReq_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct MoveDestReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR MoveDestReqDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~MoveDestReqDefaultTypeInternal() {}
+  union {
+    MoveDestReq _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MoveDestReqDefaultTypeInternal _MoveDestReq_default_instance_;
 }  // namespace GamePacket
 static constexpr const ::_pb::EnumDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_enum_descriptors_GamePacket_2fmove_5fpacket_2eproto = nullptr;
@@ -91,48 +118,61 @@ const ::uint32_t
     TableStruct_GamePacket_2fmove_5fpacket_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
         0x081, // bitmap
-        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveReq, _impl_._has_bits_),
-        7, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveReq, _impl_.pos_x_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveReq, _impl_.pos_y_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveReq, _impl_.pos_z_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveReq, _impl_.dir_y_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveDestReq, _impl_._has_bits_),
+        5, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveDestReq, _impl_.dest_x_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveDestReq, _impl_.dest_y_),
+        0,
+        1,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveStopReq, _impl_._has_bits_),
+        6, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveStopReq, _impl_.pos_x_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveStopReq, _impl_.pos_y_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveStopReq, _impl_.yaw_),
         0,
         1,
         2,
-        3,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::MoveNtf, _impl_._has_bits_),
-        8, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveNtf, _impl_.player_id_),
+        10, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveNtf, _impl_.object_id_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::MoveNtf, _impl_.pos_x_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::MoveNtf, _impl_.pos_y_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveNtf, _impl_.pos_z_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveNtf, _impl_.dir_y_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveNtf, _impl_.yaw_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveNtf, _impl_.dest_x_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveNtf, _impl_.dest_y_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::MoveNtf, _impl_.is_moving_),
         0,
         1,
         2,
         3,
         4,
+        5,
+        6,
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, sizeof(::GamePacket::MoveReq)},
-        {11, sizeof(::GamePacket::MoveNtf)},
+        {0, sizeof(::GamePacket::MoveDestReq)},
+        {7, sizeof(::GamePacket::MoveStopReq)},
+        {16, sizeof(::GamePacket::MoveNtf)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
-    &::GamePacket::_MoveReq_default_instance_._instance,
+    &::GamePacket::_MoveDestReq_default_instance_._instance,
+    &::GamePacket::_MoveStopReq_default_instance_._instance,
     &::GamePacket::_MoveNtf_default_instance_._instance,
 };
 const char descriptor_table_protodef_GamePacket_2fmove_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\034GamePacket/move_packet.proto\022\nGamePack"
-    "et\032\026Common/packet_id.proto\"E\n\007MoveReq\022\r\n"
-    "\005pos_x\030\001 \001(\002\022\r\n\005pos_y\030\002 \001(\002\022\r\n\005pos_z\030\003 \001"
-    "(\002\022\r\n\005dir_y\030\004 \001(\002\"X\n\007MoveNtf\022\021\n\tplayer_i"
-    "d\030\001 \001(\003\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y\030\003 \001(\002\022\r\n"
-    "\005pos_z\030\004 \001(\002\022\r\n\005dir_y\030\005 \001(\002b\006proto3"
+    "et\032\026Common/packet_id.proto\"-\n\013MoveDestRe"
+    "q\022\016\n\006dest_x\030\001 \001(\002\022\016\n\006dest_y\030\002 \001(\002\"8\n\013Mov"
+    "eStopReq\022\r\n\005pos_x\030\001 \001(\002\022\r\n\005pos_y\030\002 \001(\002\022\013"
+    "\n\003yaw\030\003 \001(\002\"z\n\007MoveNtf\022\021\n\tobject_id\030\001 \001("
+    "\003\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y\030\003 \001(\002\022\013\n\003yaw\030\004"
+    " \001(\002\022\016\n\006dest_x\030\005 \001(\002\022\016\n\006dest_y\030\006 \001(\002\022\021\n\t"
+    "is_moving\030\007 \001(\010b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_GamePacket_2fmove_5fpacket_2eproto_deps[1] = {
@@ -142,13 +182,13 @@ static ::absl::once_flag descriptor_table_GamePacket_2fmove_5fpacket_2eproto_onc
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fmove_5fpacket_2eproto = {
     false,
     false,
-    235,
+    303,
     descriptor_table_protodef_GamePacket_2fmove_5fpacket_2eproto,
     "GamePacket/move_packet.proto",
     &descriptor_table_GamePacket_2fmove_5fpacket_2eproto_once,
     descriptor_table_GamePacket_2fmove_5fpacket_2eproto_deps,
     1,
-    2,
+    3,
     schemas,
     file_default_instances,
     TableStruct_GamePacket_2fmove_5fpacket_2eproto::offsets,
@@ -158,27 +198,27 @@ PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fm
 namespace GamePacket {
 // ===================================================================
 
-class MoveReq::_Internal {
+class MoveDestReq::_Internal {
  public:
   using HasBits =
-      decltype(::std::declval<MoveReq>()._impl_._has_bits_);
+      decltype(::std::declval<MoveDestReq>()._impl_._has_bits_);
   static constexpr ::int32_t kHasBitsOffset =
-      8 * PROTOBUF_FIELD_OFFSET(MoveReq, _impl_._has_bits_);
+      8 * PROTOBUF_FIELD_OFFSET(MoveDestReq, _impl_._has_bits_);
 };
 
-MoveReq::MoveReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+MoveDestReq::MoveDestReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, MoveReq_class_data_.base()) {
+    : ::google::protobuf::Message(arena, MoveDestReq_class_data_.base()) {
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
   SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:GamePacket.MoveReq)
+  // @@protoc_insertion_point(arena_constructor:GamePacket.MoveDestReq)
 }
-MoveReq::MoveReq(
-    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const MoveReq& from)
+MoveDestReq::MoveDestReq(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const MoveDestReq& from)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, MoveReq_class_data_.base()),
+    : ::google::protobuf::Message(arena, MoveDestReq_class_data_.base()),
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(arena),
 #endif  // PROTOBUF_CUSTOM_VTABLE
@@ -186,26 +226,26 @@ MoveReq::MoveReq(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
 }
-PROTOBUF_NDEBUG_INLINE MoveReq::Impl_::Impl_(
+PROTOBUF_NDEBUG_INLINE MoveDestReq::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0} {}
 
-inline void MoveReq::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+inline void MoveDestReq::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, pos_x_),
+               offsetof(Impl_, dest_x_),
            0,
-           offsetof(Impl_, dir_y_) -
-               offsetof(Impl_, pos_x_) +
-               sizeof(Impl_::dir_y_));
+           offsetof(Impl_, dest_y_) -
+               offsetof(Impl_, dest_x_) +
+               sizeof(Impl_::dest_y_));
 }
-MoveReq::~MoveReq() {
-  // @@protoc_insertion_point(destructor:GamePacket.MoveReq)
+MoveDestReq::~MoveDestReq() {
+  // @@protoc_insertion_point(destructor:GamePacket.MoveDestReq)
   SharedDtor(*this);
 }
-inline void MoveReq::SharedDtor(MessageLite& self) {
-  MoveReq& this_ = static_cast<MoveReq&>(self);
+inline void MoveDestReq::SharedDtor(MessageLite& self) {
+  MoveDestReq& this_ = static_cast<MoveDestReq&>(self);
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     this_.CheckHasBitConsistency();
   }
@@ -214,132 +254,418 @@ inline void MoveReq::SharedDtor(MessageLite& self) {
   this_._impl_.~Impl_();
 }
 
-inline void* PROTOBUF_NONNULL MoveReq::PlacementNew_(
+inline void* PROTOBUF_NONNULL MoveDestReq::PlacementNew_(
     const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
-  return ::new (mem) MoveReq(arena);
+  return ::new (mem) MoveDestReq(arena);
 }
-constexpr auto MoveReq::InternalNewImpl_() {
-  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(MoveReq),
-                                            alignof(MoveReq));
+constexpr auto MoveDestReq::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(MoveDestReq),
+                                            alignof(MoveDestReq));
 }
-constexpr auto MoveReq::InternalGenerateClassData_() {
+constexpr auto MoveDestReq::InternalGenerateClassData_() {
   return ::google::protobuf::internal::ClassDataFull{
       ::google::protobuf::internal::ClassData{
-          &_MoveReq_default_instance_._instance,
+          &_MoveDestReq_default_instance_._instance,
           &_table_.header,
           nullptr,  // OnDemandRegisterArenaDtor
           nullptr,  // IsInitialized
-          &MoveReq::MergeImpl,
-          ::google::protobuf::Message::GetNewImpl<MoveReq>(),
+          &MoveDestReq::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<MoveDestReq>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-          &MoveReq::SharedDtor,
-          ::google::protobuf::Message::GetClearImpl<MoveReq>(), &MoveReq::ByteSizeLong,
-              &MoveReq::_InternalSerialize,
+          &MoveDestReq::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<MoveDestReq>(), &MoveDestReq::ByteSizeLong,
+              &MoveDestReq::_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          PROTOBUF_FIELD_OFFSET(MoveReq, _impl_._cached_size_),
+          PROTOBUF_FIELD_OFFSET(MoveDestReq, _impl_._cached_size_),
           false,
       },
-      &MoveReq::kDescriptorMethods,
+      &MoveDestReq::kDescriptorMethods,
       &descriptor_table_GamePacket_2fmove_5fpacket_2eproto,
       nullptr,  // tracker
   };
 }
 
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
-    ::google::protobuf::internal::ClassDataFull MoveReq_class_data_ =
-        MoveReq::InternalGenerateClassData_();
+    ::google::protobuf::internal::ClassDataFull MoveDestReq_class_data_ =
+        MoveDestReq::InternalGenerateClassData_();
 
 PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
-MoveReq::GetClassData() const {
-  ::google::protobuf::internal::PrefetchToLocalCache(&MoveReq_class_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(MoveReq_class_data_.tc_table);
-  return MoveReq_class_data_.base();
+MoveDestReq::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&MoveDestReq_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(MoveDestReq_class_data_.tc_table);
+  return MoveDestReq_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 4, 0, 0, 2>
-MoveReq::_table_ = {
+const ::_pbi::TcParseTable<1, 2, 0, 0, 2>
+MoveDestReq::_table_ = {
   {
-    PROTOBUF_FIELD_OFFSET(MoveReq, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(MoveDestReq, _impl_._has_bits_),
     0, // no _extensions_
-    4, 24,  // max_field_number, fast_idx_mask
+    2, 8,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967280,  // skipmap
+    4294967292,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    4,  // num_field_entries
+    2,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
-    MoveReq_class_data_.base(),
+    MoveDestReq_class_data_.base(),
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
     #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::GamePacket::MoveReq>(),  // to_prefetch
+    ::_pbi::TcParser::GetTable<::GamePacket::MoveDestReq>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // float dir_y = 4;
-    {::_pbi::TcParser::FastF32S1,
-     {37, 3, 0,
-      PROTOBUF_FIELD_OFFSET(MoveReq, _impl_.dir_y_)}},
-    // float pos_x = 1;
-    {::_pbi::TcParser::FastF32S1,
-     {13, 0, 0,
-      PROTOBUF_FIELD_OFFSET(MoveReq, _impl_.pos_x_)}},
-    // float pos_y = 2;
+    // float dest_y = 2;
     {::_pbi::TcParser::FastF32S1,
      {21, 1, 0,
-      PROTOBUF_FIELD_OFFSET(MoveReq, _impl_.pos_y_)}},
-    // float pos_z = 3;
+      PROTOBUF_FIELD_OFFSET(MoveDestReq, _impl_.dest_y_)}},
+    // float dest_x = 1;
     {::_pbi::TcParser::FastF32S1,
-     {29, 2, 0,
-      PROTOBUF_FIELD_OFFSET(MoveReq, _impl_.pos_z_)}},
+     {13, 0, 0,
+      PROTOBUF_FIELD_OFFSET(MoveDestReq, _impl_.dest_x_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // float pos_x = 1;
-    {PROTOBUF_FIELD_OFFSET(MoveReq, _impl_.pos_x_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float pos_y = 2;
-    {PROTOBUF_FIELD_OFFSET(MoveReq, _impl_.pos_y_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float pos_z = 3;
-    {PROTOBUF_FIELD_OFFSET(MoveReq, _impl_.pos_z_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float dir_y = 4;
-    {PROTOBUF_FIELD_OFFSET(MoveReq, _impl_.dir_y_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float dest_x = 1;
+    {PROTOBUF_FIELD_OFFSET(MoveDestReq, _impl_.dest_x_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float dest_y = 2;
+    {PROTOBUF_FIELD_OFFSET(MoveDestReq, _impl_.dest_y_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
   }},
   // no aux_entries
   {{
   }},
 };
-PROTOBUF_NOINLINE void MoveReq::Clear() {
-// @@protoc_insertion_point(message_clear_start:GamePacket.MoveReq)
+PROTOBUF_NOINLINE void MoveDestReq::Clear() {
+// @@protoc_insertion_point(message_clear_start:GamePacket.MoveDestReq)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
-    ::memset(&_impl_.pos_x_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.dir_y_) -
-        reinterpret_cast<char*>(&_impl_.pos_x_)) + sizeof(_impl_.dir_y_));
+  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+    ::memset(&_impl_.dest_x_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.dest_y_) -
+        reinterpret_cast<char*>(&_impl_.dest_x_)) + sizeof(_impl_.dest_y_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL MoveReq::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL MoveDestReq::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
-  const MoveReq& this_ = static_cast<const MoveReq&>(base);
+  const MoveDestReq& this_ = static_cast<const MoveDestReq&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
-::uint8_t* PROTOBUF_NONNULL MoveReq::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL MoveDestReq::_InternalSerialize(
     ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
-  const MoveReq& this_ = *this;
+  const MoveDestReq& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     this_.CheckHasBitConsistency();
   }
-  // @@protoc_insertion_point(serialize_to_array_start:GamePacket.MoveReq)
+  // @@protoc_insertion_point(serialize_to_array_start:GamePacket.MoveDestReq)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // float dest_x = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_dest_x()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          1, this_._internal_dest_x(), target);
+    }
+  }
+
+  // float dest_y = 2;
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_dest_y()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          2, this_._internal_dest_y(), target);
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:GamePacket.MoveDestReq)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t MoveDestReq::ByteSizeLong(const MessageLite& base) {
+  const MoveDestReq& this_ = static_cast<const MoveDestReq&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t MoveDestReq::ByteSizeLong() const {
+  const MoveDestReq& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:GamePacket.MoveDestReq)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+  cached_has_bits = this_._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+    // float dest_x = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_dest_x()) != 0) {
+        total_size += 5;
+      }
+    }
+    // float dest_y = 2;
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_dest_y()) != 0) {
+        total_size += 5;
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void MoveDestReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<MoveDestReq*>(&to_msg);
+  auto& from = static_cast<const MoveDestReq&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.MoveDestReq)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_dest_x()) != 0) {
+        _this->_impl_.dest_x_ = from._impl_.dest_x_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_dest_y()) != 0) {
+        _this->_impl_.dest_y_ = from._impl_.dest_y_;
+      }
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void MoveDestReq::CopyFrom(const MoveDestReq& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.MoveDestReq)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void MoveDestReq::InternalSwap(MoveDestReq* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(MoveDestReq, _impl_.dest_y_)
+      + sizeof(MoveDestReq::_impl_.dest_y_)
+      - PROTOBUF_FIELD_OFFSET(MoveDestReq, _impl_.dest_x_)>(
+          reinterpret_cast<char*>(&_impl_.dest_x_),
+          reinterpret_cast<char*>(&other->_impl_.dest_x_));
+}
+
+::google::protobuf::Metadata MoveDestReq::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class MoveStopReq::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<MoveStopReq>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(MoveStopReq, _impl_._has_bits_);
+};
+
+MoveStopReq::MoveStopReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, MoveStopReq_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:GamePacket.MoveStopReq)
+}
+MoveStopReq::MoveStopReq(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const MoveStopReq& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, MoveStopReq_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(from._impl_) {
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+PROTOBUF_NDEBUG_INLINE MoveStopReq::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0} {}
+
+inline void MoveStopReq::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, pos_x_),
+           0,
+           offsetof(Impl_, yaw_) -
+               offsetof(Impl_, pos_x_) +
+               sizeof(Impl_::yaw_));
+}
+MoveStopReq::~MoveStopReq() {
+  // @@protoc_insertion_point(destructor:GamePacket.MoveStopReq)
+  SharedDtor(*this);
+}
+inline void MoveStopReq::SharedDtor(MessageLite& self) {
+  MoveStopReq& this_ = static_cast<MoveStopReq&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL MoveStopReq::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) MoveStopReq(arena);
+}
+constexpr auto MoveStopReq::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(MoveStopReq),
+                                            alignof(MoveStopReq));
+}
+constexpr auto MoveStopReq::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_MoveStopReq_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &MoveStopReq::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<MoveStopReq>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &MoveStopReq::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<MoveStopReq>(), &MoveStopReq::ByteSizeLong,
+              &MoveStopReq::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(MoveStopReq, _impl_._cached_size_),
+          false,
+      },
+      &MoveStopReq::kDescriptorMethods,
+      &descriptor_table_GamePacket_2fmove_5fpacket_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull MoveStopReq_class_data_ =
+        MoveStopReq::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+MoveStopReq::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&MoveStopReq_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(MoveStopReq_class_data_.tc_table);
+  return MoveStopReq_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 3, 0, 0, 2>
+MoveStopReq::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(MoveStopReq, _impl_._has_bits_),
+    0, // no _extensions_
+    3, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967288,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    3,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    MoveStopReq_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::GamePacket::MoveStopReq>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // float pos_x = 1;
+    {::_pbi::TcParser::FastF32S1,
+     {13, 0, 0,
+      PROTOBUF_FIELD_OFFSET(MoveStopReq, _impl_.pos_x_)}},
+    // float pos_y = 2;
+    {::_pbi::TcParser::FastF32S1,
+     {21, 1, 0,
+      PROTOBUF_FIELD_OFFSET(MoveStopReq, _impl_.pos_y_)}},
+    // float yaw = 3;
+    {::_pbi::TcParser::FastF32S1,
+     {29, 2, 0,
+      PROTOBUF_FIELD_OFFSET(MoveStopReq, _impl_.yaw_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // float pos_x = 1;
+    {PROTOBUF_FIELD_OFFSET(MoveStopReq, _impl_.pos_x_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float pos_y = 2;
+    {PROTOBUF_FIELD_OFFSET(MoveStopReq, _impl_.pos_y_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float yaw = 3;
+    {PROTOBUF_FIELD_OFFSET(MoveStopReq, _impl_.yaw_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+PROTOBUF_NOINLINE void MoveStopReq::Clear() {
+// @@protoc_insertion_point(message_clear_start:GamePacket.MoveStopReq)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+    ::memset(&_impl_.pos_x_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.yaw_) -
+        reinterpret_cast<char*>(&_impl_.pos_x_)) + sizeof(_impl_.yaw_));
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL MoveStopReq::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const MoveStopReq& this_ = static_cast<const MoveStopReq&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL MoveStopReq::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const MoveStopReq& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:GamePacket.MoveStopReq)
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
@@ -362,21 +688,12 @@ PROTOBUF_NOINLINE void MoveReq::Clear() {
     }
   }
 
-  // float pos_z = 3;
+  // float yaw = 3;
   if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_pos_z()) != 0) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_yaw()) != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          3, this_._internal_pos_z(), target);
-    }
-  }
-
-  // float dir_y = 4;
-  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_dir_y()) != 0) {
-      target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          4, this_._internal_dir_y(), target);
+          3, this_._internal_yaw(), target);
     }
   }
 
@@ -385,18 +702,18 @@ PROTOBUF_NOINLINE void MoveReq::Clear() {
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
             this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:GamePacket.MoveReq)
+  // @@protoc_insertion_point(serialize_to_array_end:GamePacket.MoveStopReq)
   return target;
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t MoveReq::ByteSizeLong(const MessageLite& base) {
-  const MoveReq& this_ = static_cast<const MoveReq&>(base);
+::size_t MoveStopReq::ByteSizeLong(const MessageLite& base) {
+  const MoveStopReq& this_ = static_cast<const MoveStopReq&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
-::size_t MoveReq::ByteSizeLong() const {
-  const MoveReq& this_ = *this;
+::size_t MoveStopReq::ByteSizeLong() const {
+  const MoveStopReq& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  // @@protoc_insertion_point(message_byte_size_start:GamePacket.MoveReq)
+  // @@protoc_insertion_point(message_byte_size_start:GamePacket.MoveStopReq)
   ::size_t total_size = 0;
 
   ::uint32_t cached_has_bits = 0;
@@ -405,7 +722,7 @@ PROTOBUF_NOINLINE void MoveReq::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
     // float pos_x = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (::absl::bit_cast<::uint32_t>(this_._internal_pos_x()) != 0) {
@@ -418,15 +735,9 @@ PROTOBUF_NOINLINE void MoveReq::Clear() {
         total_size += 5;
       }
     }
-    // float pos_z = 3;
+    // float yaw = 3;
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_pos_z()) != 0) {
-        total_size += 5;
-      }
-    }
-    // float dir_y = 4;
-    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_dir_y()) != 0) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_yaw()) != 0) {
         total_size += 5;
       }
     }
@@ -435,21 +746,21 @@ PROTOBUF_NOINLINE void MoveReq::Clear() {
                                              &this_._impl_._cached_size_);
 }
 
-void MoveReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
+void MoveStopReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
                             const ::google::protobuf::MessageLite& from_msg) {
    auto* const _this =
-      static_cast<MoveReq*>(&to_msg);
-  auto& from = static_cast<const MoveReq&>(from_msg);
+      static_cast<MoveStopReq*>(&to_msg);
+  auto& from = static_cast<const MoveStopReq&>(from_msg);
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     from.CheckHasBitConsistency();
   }
-  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.MoveReq)
+  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.MoveStopReq)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (::absl::bit_cast<::uint32_t>(from._internal_pos_x()) != 0) {
         _this->_impl_.pos_x_ = from._impl_.pos_x_;
@@ -461,13 +772,8 @@ void MoveReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_pos_z()) != 0) {
-        _this->_impl_.pos_z_ = from._impl_.pos_z_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_dir_y()) != 0) {
-        _this->_impl_.dir_y_ = from._impl_.dir_y_;
+      if (::absl::bit_cast<::uint32_t>(from._internal_yaw()) != 0) {
+        _this->_impl_.yaw_ = from._impl_.yaw_;
       }
     }
   }
@@ -476,27 +782,27 @@ void MoveReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
       from._internal_metadata_);
 }
 
-void MoveReq::CopyFrom(const MoveReq& from) {
-  // @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.MoveReq)
+void MoveStopReq::CopyFrom(const MoveStopReq& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.MoveStopReq)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
 
-void MoveReq::InternalSwap(MoveReq* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+void MoveStopReq::InternalSwap(MoveStopReq* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
   using ::std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(MoveReq, _impl_.dir_y_)
-      + sizeof(MoveReq::_impl_.dir_y_)
-      - PROTOBUF_FIELD_OFFSET(MoveReq, _impl_.pos_x_)>(
+      PROTOBUF_FIELD_OFFSET(MoveStopReq, _impl_.yaw_)
+      + sizeof(MoveStopReq::_impl_.yaw_)
+      - PROTOBUF_FIELD_OFFSET(MoveStopReq, _impl_.pos_x_)>(
           reinterpret_cast<char*>(&_impl_.pos_x_),
           reinterpret_cast<char*>(&other->_impl_.pos_x_));
 }
 
-::google::protobuf::Metadata MoveReq::GetMetadata() const {
+::google::protobuf::Metadata MoveStopReq::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // ===================================================================
@@ -537,11 +843,11 @@ PROTOBUF_NDEBUG_INLINE MoveNtf::Impl_::Impl_(
 inline void MoveNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, player_id_),
+               offsetof(Impl_, object_id_),
            0,
-           offsetof(Impl_, dir_y_) -
-               offsetof(Impl_, player_id_) +
-               sizeof(Impl_::dir_y_));
+           offsetof(Impl_, is_moving_) -
+               offsetof(Impl_, object_id_) +
+               sizeof(Impl_::is_moving_));
 }
 MoveNtf::~MoveNtf() {
   // @@protoc_insertion_point(destructor:GamePacket.MoveNtf)
@@ -600,16 +906,16 @@ MoveNtf::GetClassData() const {
   return MoveNtf_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 5, 0, 0, 2>
+const ::_pbi::TcParseTable<3, 7, 0, 0, 2>
 MoveNtf::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_._has_bits_),
     0, // no _extensions_
-    5, 56,  // max_field_number, fast_idx_mask
+    7, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967264,  // skipmap
+    4294967168,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    5,  // num_field_entries
+    7,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     MoveNtf_class_data_.base(),
@@ -620,10 +926,10 @@ MoveNtf::_table_ = {
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // int64 player_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(MoveNtf, _impl_.player_id_), 0>(),
+    // int64 object_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(MoveNtf, _impl_.object_id_), 0>(),
      {8, 0, 0,
-      PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.player_id_)}},
+      PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.object_id_)}},
     // float pos_x = 2;
     {::_pbi::TcParser::FastF32S1,
      {21, 1, 0,
@@ -632,29 +938,39 @@ MoveNtf::_table_ = {
     {::_pbi::TcParser::FastF32S1,
      {29, 2, 0,
       PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.pos_y_)}},
-    // float pos_z = 4;
+    // float yaw = 4;
     {::_pbi::TcParser::FastF32S1,
      {37, 3, 0,
-      PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.pos_z_)}},
-    // float dir_y = 5;
+      PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.yaw_)}},
+    // float dest_x = 5;
     {::_pbi::TcParser::FastF32S1,
      {45, 4, 0,
-      PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.dir_y_)}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
+      PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.dest_x_)}},
+    // float dest_y = 6;
+    {::_pbi::TcParser::FastF32S1,
+     {53, 5, 0,
+      PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.dest_y_)}},
+    // bool is_moving = 7;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(MoveNtf, _impl_.is_moving_), 6>(),
+     {56, 6, 0,
+      PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.is_moving_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // int64 player_id = 1;
-    {PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.player_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 object_id = 1;
+    {PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.object_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // float pos_x = 2;
     {PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.pos_x_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
     // float pos_y = 3;
     {PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.pos_y_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float pos_z = 4;
-    {PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.pos_z_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float dir_y = 5;
-    {PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.dir_y_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float yaw = 4;
+    {PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.yaw_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float dest_x = 5;
+    {PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.dest_x_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float dest_y = 6;
+    {PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.dest_y_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // bool is_moving = 7;
+    {PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.is_moving_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
   }},
   // no aux_entries
   {{
@@ -668,10 +984,10 @@ PROTOBUF_NOINLINE void MoveNtf::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
-    ::memset(&_impl_.player_id_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.dir_y_) -
-        reinterpret_cast<char*>(&_impl_.player_id_)) + sizeof(_impl_.dir_y_));
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
+    ::memset(&_impl_.object_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.is_moving_) -
+        reinterpret_cast<char*>(&_impl_.object_id_)) + sizeof(_impl_.is_moving_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -696,12 +1012,12 @@ PROTOBUF_NOINLINE void MoveNtf::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 player_id = 1;
+  // int64 object_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (this_._internal_player_id() != 0) {
+    if (this_._internal_object_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_player_id(), target);
+              stream, this_._internal_object_id(), target);
     }
   }
 
@@ -723,21 +1039,39 @@ PROTOBUF_NOINLINE void MoveNtf::Clear() {
     }
   }
 
-  // float pos_z = 4;
+  // float yaw = 4;
   if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_pos_z()) != 0) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_yaw()) != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          4, this_._internal_pos_z(), target);
+          4, this_._internal_yaw(), target);
     }
   }
 
-  // float dir_y = 5;
+  // float dest_x = 5;
   if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_dir_y()) != 0) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_dest_x()) != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          5, this_._internal_dir_y(), target);
+          5, this_._internal_dest_x(), target);
+    }
+  }
+
+  // float dest_y = 6;
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_dest_y()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          6, this_._internal_dest_y(), target);
+    }
+  }
+
+  // bool is_moving = 7;
+  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+    if (this_._internal_is_moving() != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteBoolToArray(
+          7, this_._internal_is_moving(), target);
     }
   }
 
@@ -766,12 +1100,12 @@ PROTOBUF_NOINLINE void MoveNtf::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
-    // int64 player_id = 1;
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
+    // int64 object_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (this_._internal_player_id() != 0) {
+      if (this_._internal_object_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_player_id());
+            this_._internal_object_id());
       }
     }
     // float pos_x = 2;
@@ -786,16 +1120,28 @@ PROTOBUF_NOINLINE void MoveNtf::Clear() {
         total_size += 5;
       }
     }
-    // float pos_z = 4;
+    // float yaw = 4;
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_pos_z()) != 0) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_yaw()) != 0) {
         total_size += 5;
       }
     }
-    // float dir_y = 5;
+    // float dest_x = 5;
     if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_dir_y()) != 0) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_dest_x()) != 0) {
         total_size += 5;
+      }
+    }
+    // float dest_y = 6;
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_dest_y()) != 0) {
+        total_size += 5;
+      }
+    }
+    // bool is_moving = 7;
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (this_._internal_is_moving() != 0) {
+        total_size += 2;
       }
     }
   }
@@ -817,10 +1163,10 @@ void MoveNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (from._internal_player_id() != 0) {
-        _this->_impl_.player_id_ = from._impl_.player_id_;
+      if (from._internal_object_id() != 0) {
+        _this->_impl_.object_id_ = from._impl_.object_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
@@ -834,13 +1180,23 @@ void MoveNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_pos_z()) != 0) {
-        _this->_impl_.pos_z_ = from._impl_.pos_z_;
+      if (::absl::bit_cast<::uint32_t>(from._internal_yaw()) != 0) {
+        _this->_impl_.yaw_ = from._impl_.yaw_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_dir_y()) != 0) {
-        _this->_impl_.dir_y_ = from._impl_.dir_y_;
+      if (::absl::bit_cast<::uint32_t>(from._internal_dest_x()) != 0) {
+        _this->_impl_.dest_x_ = from._impl_.dest_x_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_dest_y()) != 0) {
+        _this->_impl_.dest_y_ = from._impl_.dest_y_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (from._internal_is_moving() != 0) {
+        _this->_impl_.is_moving_ = from._impl_.is_moving_;
       }
     }
   }
@@ -862,11 +1218,11 @@ void MoveNtf::InternalSwap(MoveNtf* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.dir_y_)
-      + sizeof(MoveNtf::_impl_.dir_y_)
-      - PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.player_id_)>(
-          reinterpret_cast<char*>(&_impl_.player_id_),
-          reinterpret_cast<char*>(&other->_impl_.player_id_));
+      PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.is_moving_)
+      + sizeof(MoveNtf::_impl_.is_moving_)
+      - PROTOBUF_FIELD_OFFSET(MoveNtf, _impl_.object_id_)>(
+          reinterpret_cast<char*>(&_impl_.object_id_),
+          reinterpret_cast<char*>(&other->_impl_.object_id_));
 }
 
 ::google::protobuf::Metadata MoveNtf::GetMetadata() const {

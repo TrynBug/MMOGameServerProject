@@ -36,7 +36,7 @@ static constexpr ::_pb::Message* PROTOBUF_NONNULL const* PROTOBUF_NULLABLE
     file_default_instances = nullptr;
 const char descriptor_table_protodef_Common_2fpacket_5fid_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\026Common/packet_id.proto\022\006Common*\353\t\n\014Gam"
+    "\n\026Common/packet_id.proto\022\006Common*\223\n\n\014Gam"
     "ePacketId\022\027\n\023GAME_PACKET_ID_NONE\020\000\022\034\n\030GA"
     "ME_PACKET_ID_LOGIN_REQ\020e\022\034\n\030GAME_PACKET_"
     "ID_LOGIN_RES\020f\022$\n\037GAME_PACKET_ID_GATEWAY"
@@ -48,8 +48,9 @@ const char descriptor_table_protodef_Common_2fpacket_5fid_2eproto[] ABSL_ATTRIBU
     "TE_REQ\020\256\002\022(\n#GAME_PACKET_ID_CHARACTER_CR"
     "EATE_RES\020\257\002\022(\n#GAME_PACKET_ID_CHARACTER_"
     "SELECT_REQ\020\260\002\022-\n(GAME_PACKET_ID_CHARACTE"
-    "R_SELECT_FAIL_NTF\020\261\002\022\034\n\027GAME_PACKET_ID_M"
-    "OVE_REQ\020\351\007\022\034\n\027GAME_PACKET_ID_MOVE_NTF\020\352\007"
+    "R_SELECT_FAIL_NTF\020\261\002\022!\n\034GAME_PACKET_ID_M"
+    "OVE_DEST_REQ\020\351\007\022!\n\034GAME_PACKET_ID_MOVE_S"
+    "TOP_REQ\020\352\007\022\034\n\027GAME_PACKET_ID_MOVE_NTF\020\353\007"
     "\022 \n\033GAME_PACKET_ID_ITEM_USE_REQ\020\321\017\022 \n\033GA"
     "ME_PACKET_ID_ITEM_USE_RES\020\322\017\022!\n\034GAME_PAC"
     "KET_ID_CHAT_SEND_REQ\020\271\027\022!\n\034GAME_PACKET_I"
@@ -101,7 +102,7 @@ static ::absl::once_flag descriptor_table_Common_2fpacket_5fid_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_Common_2fpacket_5fid_2eproto = {
     false,
     false,
-    2381,
+    2421,
     descriptor_table_protodef_Common_2fpacket_5fid_2eproto,
     "Common/packet_id.proto",
     &descriptor_table_Common_2fpacket_5fid_2eproto_once,
@@ -120,7 +121,7 @@ const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL GamePacketId_descript
   return file_level_enum_descriptors_Common_2fpacket_5fid_2eproto[0];
 }
 PROTOBUF_CONSTINIT const uint32_t GamePacketId_internal_data_[] = {
-    65536u, 1311040u, 0u, 0u, 0u, 48u, 0u, 0u, 1920u, 0u, 0u, 126976u, 5001u, 4002u, 5005u, 2002u, 4005u, 5003u, 5007u, 1002u, 3002u, 4004u, 4006u, 5002u, 5004u, 5006u, 5008u, 1001u, 2001u, 3001u, 4001u, 4003u, };
+    65536u, 1376576u, 0u, 0u, 0u, 48u, 0u, 0u, 1920u, 0u, 0u, 126976u, 5001u, 4001u, 5005u, 2001u, 4005u, 5003u, 5007u, 1002u, 3001u, 4003u, 4006u, 5002u, 5004u, 5006u, 5008u, 1001u, 1003u, 2002u, 3002u, 4002u, 4004u, };
 const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL ServerPacketId_descriptor() {
   ::google::protobuf::internal::AssignDescriptors(&descriptor_table_Common_2fpacket_5fid_2eproto);
   return file_level_enum_descriptors_Common_2fpacket_5fid_2eproto[1];

@@ -506,6 +506,22 @@ void GameServer::SendObjectVisibilityNtf(int64 userId,
         userId, characterSpawns.size(), despawnIds.size()));
 }
 
+void GameServer::SendMoveNtf(int64 userId, int64 objectId,
+                             float posX, float posY, float yaw,
+                             float destX, float destY, bool isMoving)
+{
+    GamePacket::MoveNtf ntf;
+    ntf.set_object_id(objectId);
+    ntf.set_pos_x(posX);
+    ntf.set_pos_y(posY);
+    ntf.set_yaw(yaw);
+    ntf.set_dest_x(destX);
+    ntf.set_dest_y(destY);
+    ntf.set_is_moving(isMoving);
+
+    sendPacketToUser(userId, Common::GAME_PACKET_ID_MOVE_NTF, ntf);
+}
+
 // 클라이언트 캐릭터 선택 요청 처리 → 코루틴
 // 1) DB에서 (user_id, character_id) 로 캐릭터 조회
 // 2) 없는 캐릭터면 CharacterSelectFailNtf 전송 후 종료

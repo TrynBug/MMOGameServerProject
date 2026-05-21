@@ -52,9 +52,30 @@ public:
     // 런타임 좌표/yaw를 m_protoData에 복사한다. DB 직렬화 직전에 호출.
     void SyncRuntimeToProto();
 
+    // ── 이동 ──────────────────────────────────────────────────────────
+    bool  IsMoving()    const { return m_isMoving; }
+    float GetDestX()    const { return m_destX; }
+    float GetDestY()    const { return m_destY; }
+
+    // 목적지 설정 + 이동 시작. yaw는 목적지 방향으로 자동 계산.
+    // 목적지가 현재 위치와 각은 위치면 yaw만 갱신하고 이동은 시작 안 함.
+    void SetDestination(float destX, float destY);
+
+    // 즉시 정지 + 현재 위치/yaw 설정. MoveStopReq 처리용.
+    void StopAt(float posX, float posY, float yaw);
+
+    // 매 tick 호출. 목적지 방향으로 직선 이동. 도달 시 정지.
+    // 리턴값: 도달했는지 여부 (true면 정지 상태로 전환됨).
+    bool Update(int64 deltaMs);
+
 private:
     DataStructures::Character m_protoData;
     UserWPtr                  m_wpUser;
+
+    // 이동 중 여부. true면 m_destX/Y를 목표로 직선 이동.
+    bool  m_isMoving = false;
+    float m_destX    = 0.0f;
+    float m_destY    = 0.0f;
 };
 
 using CharacterPtr  = std::shared_ptr<Character>;

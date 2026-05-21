@@ -34,6 +34,11 @@ public:
                                  const std::vector<GamePacket::CharacterSpawnInfo>& characterSpawns,
                                  const std::vector<int64>& despawnIds);
 
+    // 이동 알림 전송 (MoveNtf). 상태 변화 시점에 Stage가 sector AOI 순회하면서 unicast.
+    void SendMoveNtf(int64 userId, int64 objectId,
+                     float posX, float posY, float yaw,
+                     float destX, float destY, bool isMoving);
+
 protected:
     // ServerBase 훅
     bool OnInitialize()                              override;
