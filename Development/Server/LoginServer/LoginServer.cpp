@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "LoginServer.h"
 
+#include "Generated/DataStructures/user.pb.h"
+#include "ProtoJsonSerializer.h"
+
 bool LoginServer::OnInitialize()
 {
     // 클라이언트 패킷의 패킷핸들러 등록
@@ -40,7 +43,7 @@ bool LoginServer::OnInitialize()
     };
     m_gatewayEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spSession) { onGatewayDisconnect(spSession); };
 
-    // AccountDB 초기화
+    // AccountDB 열기
     // TODO: 경로를 설정 파일에서 읽도록 개선
     LOG_WRITE(LogLevel::Info, std::format("Resolved DB path={}", std::filesystem::absolute("AccountDB.db").string()));
     if (!m_dbQueue.Open("AccountDB.db", 1))
@@ -148,9 +151,10 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
         co_return;
     }
 
+
     // DB 비동기 조회. 완료될 때까지 suspend, 이후 IOCP Worker에서 코루틴 resume
     db::DBResult result = co_await m_dbQueue.ExecuteAsync(
-        "SELECT user_id, password_hash FROM accounts WHERE login_id = ? LIMIT 1",
+        "SELECT data FROM Users WHERE login_name = ? LIMIT 1",
         { loginId },
         GetCoroutineResumeExecutor()   // IOCP Worker 스레드에서 resume
     );
@@ -162,11 +166,21 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
         co_return;
     }
 
-    int64 userId = result.GetInt64(0, "user_id");
-    std::string passwordHash = result.GetString(0, "password_hash");
+    // 조회된 모든 캐릭터를 protobuf 메시지로 역직렬화하여 목록에 적재.
+    DataStructures::User user;
+    const std::string dataJson = result.GetString(0, "data");
+    if (!packet::ProtoJsonSerializer::FromJson(dataJson, user))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("failed to parse user JSON. loginId={}", loginId));
+        co_return;
+    }
+
+
+    int64 userId = user.user_id();
+    std::string passwordHash = user.login_password_hash();
 
     // TODO: 실제 해시 검증으로 교체 (bcrypt 등)
-    if (passwordHash != password)
+    if (password != user.login_password_hash())
     {
         LOG_WRITE(LogLevel::Info, std::format("LoginServer: login failed - wrong password. loginId={}", loginId));
         sendLoginFailed(spSession, "Invalid ID or password");

@@ -10,16 +10,28 @@
 --
 -- 적용 방법:
 --   1) Common/init_gamedb.bat 실행, 또는
---   2) sqlite3 GameDB.db < DBSchema.sql
+--   2) sqlite3 GameDB.db < GameDBSchema.sql
 -- ────────────────────────────────────────────────────────────────
 
 -- 캐릭터 (DataStructures.Character protobuf 메시지를 JSON으로 저장)
 -- 1명의 유저는 여러개의 캐릭터를 가질 수 있다.
 -- PK는 (user_id, character_id). character_id는 ObjectIdGenerator로 발급된 영구 ID.
-CREATE TABLE IF NOT EXISTS Characters (
-    user_id       INTEGER NOT NULL,
-    character_id  INTEGER NOT NULL,
-    data          TEXT    NOT NULL,
-    last_updated  INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
+DROP TABLE IF EXISTS Characters;
+
+CREATE TABLE Characters (
+    user_id      INTEGER NOT NULL,
+    character_id INTEGER NOT NULL,
+    data         TEXT    NOT NULL,
+    created_at   INTEGER NOT NULL DEFAULT (CAST(ROUND(unixepoch('subsecond') * 1000) AS INTEGER)),
+    updated_at   INTEGER NOT NULL DEFAULT (CAST(ROUND(unixepoch('subsecond') * 1000) AS INTEGER)),
     PRIMARY KEY (user_id, character_id)
 );
+
+CREATE TRIGGER IF NOT EXISTS Update_Characters_UpdatedAt
+AFTER UPDATE ON Characters
+FOR EACH ROW
+BEGIN
+    UPDATE Characters 
+    SET updated_at = CAST(ROUND(unixepoch('subsecond') * 1000) AS INTEGER)
+    WHERE user_id = OLD.user_id AND character_id = OLD.character_id;
+END;

@@ -27,9 +27,6 @@
     <ClCompile Include="Sector.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="OpenField.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="SystemStage.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -40,6 +37,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Character.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="StageManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="GameServer.cpp">
@@ -68,9 +68,6 @@
     <ClInclude Include="Sector.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="OpenField.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
     <ClInclude Include="SystemStage.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
@@ -81,6 +78,9 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="Character.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="StageManager.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

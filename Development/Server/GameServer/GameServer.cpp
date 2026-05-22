@@ -58,28 +58,27 @@ bool GameServer::OnInitialize()
     };
     m_gatewayEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spSession) { onGatewayDisconnect(spSession); };
 
-    // ── 오픈필드 생성 및 컨텐츠 스레드 0번에 배정 ──────────────
-    // 고정 Stage 객체 생성 (SystemStage, Town).
-    // 스레드 배정: stageId mod GetContentsThreadCount().
+    // ── StageManager 초기화 + 고정 Stage 생성 ──────────────────
+    // StageManager가 Stage 생성 + SetGameServer + AssignContents까지 처리.
     if (GetContentsThreadCount() <= 0)
     {
         LOG_WRITE(LogLevel::Error, "GameServer::OnInitialize - no contents threads available.");
         return false;
     }
 
-    m_spSystemStage = std::make_shared<SystemStage>(k_systemStageId);
-    m_spSystemStage->SetGameServer(this);
-    const int32 systemThreadIdx = computeStageThreadIndex(k_systemStageId);
-    AssignContents(systemThreadIdx, m_spSystemStage);
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: SystemStage created. stageId={} assignedThreadIndex={}",
-        k_systemStageId, systemThreadIdx));
+    m_stageManager.Initialize(this, GetContentsThreadCount());
 
-    m_spTown = std::make_shared<Town>(k_townStageId);
-    m_spTown->SetGameServer(this);
-    const int32 townThreadIdx = computeStageThreadIndex(k_townStageId);
-    AssignContents(townThreadIdx, m_spTown);
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: Town created. stageId={} assignedThreadIndex={}",
-        k_townStageId, townThreadIdx));
+    if (!m_stageManager.CreateSystemStage(k_systemStageId))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to create SystemStage. stageId={}", k_systemStageId));
+        return false;
+    }
+
+    if (!m_stageManager.CreateTown(k_townStageId))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to create Town. stageId={}", k_townStageId));
+        return false;
+    }
 
     // ── GameDB 열기 ────────────────────────────────────────────
     if (!m_dbQueue.Open(k_gameDBPath, 1))
@@ -87,8 +86,6 @@ bool GameServer::OnInitialize()
         LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to open GameDB at {}", k_gameDBPath));
         return false;
     }
-
-    initGameDB();
 
     LOG_WRITE(LogLevel::Info, std::format("GameServer::OnInitialize complete. serverId={}", GetServerId()));
     return true;
@@ -135,15 +132,8 @@ void GameServer::OnBeforeShutdown()
     for (int32 gatewayId : gatewayIds)
         disconnectFromGateway(gatewayId);
 
-    // 오픈필드를 컨텐츠 스레드에서 제거
-    if (m_spSystemStage)
-    {
-        RemoveContents(computeStageThreadIndex(m_spSystemStage->GetStageId()), m_spSystemStage);
-    }
-    if (m_spTown)
-    {
-        RemoveContents(computeStageThreadIndex(m_spTown->GetStageId()), m_spTown);
-    }
+    // Stage들을 컨텐츠 스레드에서 제거 + StageManager 비우기
+    m_stageManager.Clear();
 
     // GameDB 닫기 (큐에 남은 요청 처리 후 종료)
     m_dbQueue.Close();
@@ -152,14 +142,6 @@ void GameServer::OnBeforeShutdown()
 void GameServer::OnShutdown()
 {
     LOG_WRITE(LogLevel::Info, "GameServer::OnShutdown");
-}
-
-int32 GameServer::computeStageThreadIndex(int64 stageId) const
-{
-    const int32 threadCount = GetContentsThreadCount();
-    if (threadCount <= 0)
-        return 0;
-    return static_cast<int32>(stageId % threadCount);
 }
 
 // 내부 서버 연결 수락 (채팅서버 등)
@@ -303,10 +285,10 @@ InternalSessionMeta* GameServer::getInternalSessionMeta(const netlib::ISessionPt
 // ──────────────────────────────────────────────────────────────
 
 // 게이트웨이로부터 GatewayUserEnterNtf 수신 → 코루틴
-// 1) DB에서 캐릭터 JSON 조회
-// 2) 없으면 기본값 캐릭터 생성 후 DB에 INSERT
-// 3) 유저 객체 생성, 글로벌 맵 등록, 오픈필드에 입장 메시지 push
-// 4) GameEnterNtf 응답
+// 1) DB에서 캐릭터 목록 조회 (없으면 빈 목록)
+// 2) 유저 객체 생성 및 글로벌 맵 등록
+// 3) SystemStage(캐릭터 선택창)에 입장 메시지 push
+// 4) GameEnterNtf + CharacterListNtf 응답
 db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSession*/, ServerPacket::GatewayUserEnterNtf msg)
 {
     const int64 userId    = msg.user_id();
@@ -354,16 +336,16 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
     LOG_WRITE(LogLevel::Info, std::format("GameServer: characters loaded from DB. userId={} count={}",
         userId, characters.size()));
 
-    // ── 3) 캐릭터 신규 생성 시 DB에 INSERT ──────────────────────
-    // ── 4) 유저 객체 생성 및 글로벌 맵 등록 ──────────────────────
+    // ── 2) 유저 객체 생성 및 글로벌 맵 등록 ────────────────────
     UserPtr spUser = std::make_shared<User>(userId, gatewayId, clientIp);
     m_safeUsers.Insert(userId, spUser);
 
-    // SystemStage에 입장 메시지 push.
-    // Phase A 임시 로직: 입장 = SystemStage(캐릭터 선택창). Phase B에서 정식 흐름으로 교체 예정.
-    if (m_spSystemStage)
+    // ── 3) SystemStage(캐릭터 선택창)에 입장 메시지 push ──────────
+    // 캐릭터 선택이 끝나면 handleClientCharacterSelect에서 Town으로 이동시킨다.
+    SystemStagePtr spSystemStage = m_stageManager.GetSystemStage();
+    if (spSystemStage)
     {
-        m_spSystemStage->EnqueueMessage(StageMsg_UserEnter{spUser, nullptr});
+        spSystemStage->EnqueueMessage(StageMsg_UserEnter{spUser, nullptr});
     }
     else
     {
@@ -371,7 +353,7 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
         co_return;
     }
 
-    // ── 5) GameEnterNtf 응답 (게이트웨이를 통해 클라에게) ────────
+    // ── 4) GameEnterNtf + CharacterListNtf 응답 (게이트웨이 통해 클라에게) ──
     sendGameEnterNtf(userId);
     sendCharacterListNtf(userId, characters);
 }
@@ -595,16 +577,16 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
         userId, character.character_id(), character.name()));
 
     // ── 5) SystemStage에서 제거 ──────────────────────────────────────────
-    if (m_spSystemStage)
+    if (SystemStagePtr spSystemStage = m_stageManager.GetSystemStage())
     {
-        m_spSystemStage->EnqueueMessage(StageMsg_UserLeave{userId});
+        spSystemStage->EnqueueMessage(StageMsg_UserLeave{userId});
     }
 
     // ── 6) Town으로 입장 ───────────────────────────────────────────────
     // Town이 OnUserEnter override로 StageEnterNtf를 전송한다.
-    if (m_spTown)
+    if (TownPtr spTown = m_stageManager.GetTown())
     {
-        m_spTown->EnqueueMessage(StageMsg_UserEnter{spUser, spCharacter});
+        spTown->EnqueueMessage(StageMsg_UserEnter{spUser, spCharacter});
     }
     else
     {
@@ -640,13 +622,9 @@ void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSess
 
     // 유저가 속한 Stage에만 퇴장 메시지 push.
     const int64 currentStageId = spUser->GetCurrentStageId();
-    if (currentStageId == k_systemStageId && m_spSystemStage)
+    if (StagePtr spStage = m_stageManager.Find(currentStageId))
     {
-        m_spSystemStage->EnqueueMessage(StageMsg_UserLeave{userId});
-    }
-    else if (currentStageId == k_townStageId && m_spTown)
-    {
-        m_spTown->EnqueueMessage(StageMsg_UserLeave{userId});
+        spStage->EnqueueMessage(StageMsg_UserLeave{userId});
     }
     else
     {
@@ -738,35 +716,4 @@ void GameServer::handleRelayedClientPacket(const netlib::PacketPtr& spPacket)
 
     // 기본: User 패킷 큐에 push (Stage 스레드가 다음 tick에서 drain해서 처리)
     spUser->EnqueuePacket(spPacket);
-}
-
-void GameServer::initGameDB()
-{
-    // 동기 DBConnection으로 스키마 점검 (서버 시작 시 1회)
-    // 정식 스키마 생성은 Common/init_gamedb.bat으로 수동 처리하지만,
-    // 안전을 위해 CREATE TABLE IF NOT EXISTS도 여기서 한 번 실행한다.
-    db::DBConnection conn;
-    if (!conn.Open(k_gameDBPath))
-    {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer::initGameDB - failed to open DB at {}", k_gameDBPath));
-        return;
-    }
-
-    auto res = conn.Execute(R"(
-        CREATE TABLE IF NOT EXISTS Characters (
-            user_id       INTEGER NOT NULL,
-            character_id  INTEGER NOT NULL,
-            data          TEXT    NOT NULL,
-            last_updated  INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
-            PRIMARY KEY (user_id, character_id)
-        )
-    )");
-
-    if (!res.success)
-    {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer::initGameDB - schema execute failed: {}", res.errorMsg));
-        return;
-    }
-
-    LOG_WRITE(LogLevel::Info, "GameServer::initGameDB - schema ready");
 }

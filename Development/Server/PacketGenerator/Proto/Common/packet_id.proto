@@ -41,8 +41,7 @@ enum GamePacketId {
     GAME_PACKET_ID_STAGE_ENTER_NTF = 4001;                // 서버 -> 클라: Stage 입장 완료 알림
     GAME_PACKET_ID_STAGE_MOVE_REQ = 4002;                // 클라 -> 서버: 동일 게임서버 내 Stage 이동 요청
     GAME_PACKET_ID_CROSS_SERVER_STAGE_MOVE_REQ = 4003;   // 클라 -> 서버: 다른 게임서버 Stage 이동 요청
-    GAME_PACKET_ID_CHARACTER_ENTER_NTF = 4004;   // 서버 -> 클라: 타 캐릭터 입장 알림 (브로드캐스트) [DEPRECATED: ObjectVisibilityNtf로 통합 예정]
-    GAME_PACKET_ID_CHARACTER_LEAVE_NTF = 4005;   // 서버 -> 클라: 타 캐릭터 퇴장 알림 (브로드캐스트) [DEPRECATED: ObjectVisibilityNtf로 통합 예정]
+    // 4004, 4005: 과거 CHARACTER_ENTER_NTF / CHARACTER_LEAVE_NTF 자리. ObjectVisibilityNtf로 통합되어 제거됨.
     GAME_PACKET_ID_OBJECT_VISIBILITY_NTF = 4006;   // 서버 -> 클라: 오브젝트 가시성 변경 (생성/제거 리스트)
 
     // 5000~5999: 던전

@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package DataStructures;
+
+// 유저(계정) 정보 (DB 저장)
+message User {
+    int64 user_id = 1;
+    string login_name = 2;          // 로그인할때 쓰는 name
+    string login_password_hash = 3; // 로그인 password hash
+}

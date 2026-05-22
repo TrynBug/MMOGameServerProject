@@ -1,22 +1,22 @@
 @echo off
 REM ============================================================
-REM GameDB 초기화 배치파일
+REM AccountDB 초기화 배치파일
 REM ============================================================
-REM GameDBSchema.sql과 GameDBDataSample.sql을 OUTPUT/Debug/GameDB.db에 적용한다.
+REM AccountDBSchema.sql과 AccountDBDataSample.sql을 OUTPUT/Debug/AccountDB.db에 적용한다.
 REM
 REM 전제: sqlite3.exe가 PATH에 있어야 함.
 REM        없다면 https://www.sqlite.org/download.html 에서 다운로드 후 PATH 설정.
 REM
 REM 사용:
 REM   1) 이 배치파일을 더블클릭하거나 명령 프롬프트에서 실행
-REM   2) 기존 GameDB.db에 IF NOT EXISTS / OR IGNORE 로 안전하게 적용됨
+REM   2) 기존 AccountDB.db에 IF NOT EXISTS / OR IGNORE 로 안전하게 적용됨
 REM ============================================================
 
 setlocal
 set "DB_DIR=%~dp0..\OUTPUT\Debug"
-set "DB_PATH=%DB_DIR%\GameDB.db"
-set "SCHEMA_SQL=%~dp0GameDBSchema.sql"
-set "SAMPLE_SQL=%~dp0GameDBDataSample.sql"
+set "DB_PATH=%DB_DIR%\AccountDB.db"
+set "SCHEMA_SQL=%~dp0AccountDBSchema.sql"
+set "SAMPLE_SQL=%~dp0AccountDBDataSample.sql"
 
 REM 대상 폴더가 없으면 생성
 if not exist "%DB_DIR%" mkdir "%DB_DIR%"
@@ -37,5 +37,5 @@ if errorlevel 1 (
 )
 
 echo.
-echo Done. GameDB.db is ready at %DB_PATH%
+echo Done. AccountDB.db is ready at %DB_PATH%
 endlocal

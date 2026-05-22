@@ -5,6 +5,7 @@
 #include "SystemStage.h"
 #include "Town.h"
 #include "User.h"
+#include "StageManager.h"
 #include "ThreadSafeUnorderedMap.h"
 
 
@@ -103,17 +104,10 @@ private:
     // 캐릭터 선택 실패 알림 전송 (CharacterSelectFailNtf).
     void sendCharacterSelectFailNtf(int64 userId, int32 reasonCode, const std::string& message);
 
-    // ── GameDB ────────────────────────────────────────────────────
-    // GameDB 스키마 초기화 (서버 시작 시 1회, CREATE TABLE IF NOT EXISTS).
-    // 샘플 데이터는 적용하지 않는다 (init_gamedb.bat에서 수동 처리).
-    void initGameDB();
-
 private:
-    // 오픈필드 (게임서버당 1개, 컨텐츠 스레드 0번에 배정)
-    SystemStagePtr m_spSystemStage;
-    TownPtr        m_spTown;
-
-    int32 computeStageThreadIndex(int64 stageId) const;
+    // 모든 Stage(SystemStage / Town / Field / Dungeon)를 관리한다.
+    // 생성, 조회, 컨텐츠 스레드 배정, GameServer 주입을 캡슐화.
+    StageManager m_stageManager;
 
     // ── 내부 서버용 이벤트 핸들러, 패킷 디스패처 ───────────────────
     netlib::FuncEventHandler     m_internalListenEventHandler;
