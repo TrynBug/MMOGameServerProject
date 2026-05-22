@@ -1,19 +1,22 @@
 # PacketGenerator 프로젝트
 - .proto 파일로 C++, C# message 구조체를 생성합니다. C# 구조체는 서버 프로젝트 외부의 클라이언트 프로젝트 경로에 생성됩니다.  
-- 생성된 message 구조체는 게임로직에 그대로 사용됩니다. 주로 해당 구조체를 멤버로 가지는 래퍼 클래스를 만들어 사용할 예정입니다.   
+- 모든 패킷ID는 packet_id.proto 파일로 관리됩니다.
+- 서버/클라가 주고받는 패킷 구조체, 서버/클라가 공유하는 데이터 구조체, DB 데이터를 표현하는 구조체 모두 .proto 파일로 관리됩니다.
+- 생성된 message 구조체는 게임로직에 그대로 사용됩니다. 주로 해당 구조체를 멤버로 가지는 래퍼 클래스를 만들어 사용합니다. 예를들면 Character 클래스는 Character message를 멤버로 가집니다.  
 - 출력은 static 라이브러리 입니다.  
-- 각각의 서버에서는 자신에게 필요한 message 구조체만 include하여 사용할 예정입니다.
-- PacketGenerator를 빌드하기 전, Custom Build Tool 로 protoc를 자동으로 실행하게 합니다. 작업내용: C++ message 생성, C# message 생성, .proto가 바뀌었을 때만 재실행 하도록 함
+- 각각의 서버에서는 자신에게 필요한 message 구조체만 include하여 사용합니다. 구조체가 변경되었을 때 재빌드 영향을 최소화하기 위해서입니다.
+- PacketGenerator/generate_proto.bat 파일을 실행하면 protoc가 실행됩니다. 작업내용: C++ message 생성, C# message 생성
+- PacketGenerator 프로젝트를 빌드하기 전에, generate_proto.bat 를 실행하여 .proto 파일을 코드파일(.pb.h 등)로 변환해야 합니다. 그리고 새로생성된 코드파일은 PacketGenerator 프로젝트에 직접 추가한다음 빌드해야 합니다.
 
 # 프로그래밍
 - 프로그래밍언어 : C++ 20
-- protobuf 버전 : 6.33.4  (클라이언트는 NuGet
+- protobuf 버전 : 6.33.4  (클라이언트는 NuGet protobuf 3.33.4 사용)
 
 # 서버의 언어 버전
 - C++ 20
 
-# 클라이언트의 언어 버전
-- Unity 6.4
+# 클라의 언어 버전
+- Unity 6.4 (6000.4.7f1)
 - .Net 버전: standard 2.1
 - C# 언어 버전: 11.0
 

@@ -1,5 +1,5 @@
 # 개요
-MMORPG용 C++ 네트워크 라이브러리 입니다.
+서버용 C++ 네트워크 라이브러리 입니다.
 - 세션을 관리합니다. 세션은 소켓을 가지고 있습니다.
 - IOCP로 네트워크 통신 기능을 제공합니다.
 - 패킷 버퍼 pool을 제공합니다.
@@ -20,40 +20,22 @@ MMORPG용 C++ 네트워크 라이브러리 입니다.
 - 출력물
 	- static 라이브러리
 
-# 네트워크 라이브러리의 초기화 파라미터
-- IP
-- Port
-- NumConcurrentThread : IOCP 동시실행 가능한 worker 스레드 수
-- NumWorkerThread: 생성할 IOCP Worker 스레드 수
-- bUseNagle : Nagle 알고리즘 사용여부
-- InitPacketSize : 패킷버퍼 초기 크기
-- MaxPacketSize : 패킷버퍼가 늘어날 수 있는 최대 크기
-- RecvBufSize : 소켓 수신버퍼(링버퍼) 고정크기
-
-# NetServer 클래스
-- IOCP, Worker 스레드를 소유합니다.
-- Accept 스레드를 소유합니다.
-- Session을 관리합니다.
-	- key=SessionID, value=shared_ptr<Session> 인 map으로 관리합니다.
-	
-- Initialize 함수
-	- IOCP, Worker 스레드 생성
-	- Worker 스레드 시작
-- StartAccept 함수
-	- Accept 소켓을 생성하고, Accept 스레드를 시작하고, Accept를 시작합니다.
-- StopAccept 함수
-	- Accept를 중지합니다.
-- Shutdown 함수
-	- Accept를 중지합니다.
-	- 모든 Session의 연결을 끊습니다.
-	- 모든 Worker 스레드를 종료합니다.
-	- IOCP를 닫습니다.
-	
-- INetEventHandler 인터페이스 등록 함수
-	- INetEventHandler 등록(하나만 등록가능)
+# IoContext 클래스
+- IOCP, Worker 스레드, PacketPool 등을 관리합니다. 
+- IOCP에 세션을 등록하는 기능을 제공합니다.
+- 하나의 프로세스에 보통 IoContext 한 개를 두고, 여러 NetServer, NetClient가 IoContext를 공유해서 사용합니다. IoContext를 공유해서 사용하는 이유는 IOCP, 패킷풀 등은 공유해서 사용하는 것이 효율적이기 때문입니다.
+- IoContext의 Worker 스레드는 recv 완료통지를 받았을 때 세션 객체 안의 m_pNetBase 멤버를 통해 세션이 어떤 NetServer 또는 NetClient와 연결되어 있는지 알수 있습니다. 그래서 해당 NetServer 또는 NetClient 에게로 패킷 처리를 넘깁니다.
+- Overlapped 구조체는 OVERLAPPED를 확장한 OVERLAPPED_EX를 사용하는데, 여기에는 std::shared_ptr<ISession> 멤버가 있습니다. IoContext의 Worker 스레드는 이 멤버에서 세션을 얻습니다.
+- 초기화 파라미터:
+	- numConcurrentThread : IOCP 동시실행가능 worker스레드 수 (0 = CPU 코어 수)
+	- numWorkerThread : IOCP Worker스레드 수 (0 = CPU 코어 수 * 2)
+	- initPacketSize : 패킷 풀 최소 버킷 크기 (bytes)
+	- maxPacketSize : 패킷 풀 최대 버킷 크기 (bytes)
  
-# INetEventHandler 인터페이스
+# INetEventHandler 인터페이스, FuncEventHandler 핸들러
 - INetEventHandler 인터페이스는 사용자가 네트워크 이벤트 처리방식을 정의하는 인터페이스 입니다.
+- FuncEventHandler는 INetEventHandler를 상속받아서 사용자 함수를 등록할 수 있게 구현한 클래스 입니다.
+- 사용자는 INetEventHandler를 상속받는방식, FuncEventHandler를 컴포넌트로 소유하는방식 둘중 하나를 사용하면 됩니다.
 ```cpp
 class INetEventHandler
 {
@@ -78,44 +60,44 @@ public:
 };
 ```
 
+# INetBase 클래스
+- NetServer, NetClient 클래스가 상속받는 클래스 입니다.
+- 특별한 기능이 있지는 않습니다.
+
+# NetServer 클래스
+- accept를 받아야 하는 서버가 네트워크 기능 사용을 위해 컴포넌트로 소유하는 클래스 입니다.
+- INetBase를 상속받습니다.
+- IoContext의 포인터를 멤버로 가집니다. 네트워크 기능, 패킷풀은 IoContext를 통해 사용합니다.
+- Listen Socket, Accept 스레드, 세션 map(key=SessionID, value=shared_ptr<Session>)을 멤버로 가집니다.	
+- accept한 소켓에는 SO_LINGER 옵션으로 연결 종료 시 4-way handshake 없이 바로 끊기도록 설정합니다. 
+- INetEventHandler 인터페이스를 멤버로 가집니다. 사용자는 NetServer에 INetEventHandler를 등록(하나만 등록가능)해야 이것을 통해 네트워크 이벤트를 받을 수 있습니다.
+- 초기화 파라미터:
+    - ip : 서버 IP
+    - port : 서버 port
+    - bUseNagle : Nagle 알고리즘 사용 여부
+    - recvBufSize : Session 수신용 링버퍼 크기 (bytes)
+    - backlog : listen backlog
+
+# NetClient 클래스
+- 다른 서버에 connect 해야하는 서버가 네트워크 기능 사용을 위해 컴포넌트로 소유하는 클래스 입니다.
+- INetBase를 상속받습니다.
+- IoContext의 포인터를 멤버로 가집니다. 네트워크 기능, 패킷풀은 IoContext를 통해 사용합니다.
+- 1개의 connect용 세션을 멤버로 가집니다. Connect 기능을 제공합니다.
+- connect가 실패했을 경우 계속해서 재연결을 시도하는 기능을 제공합니다.
+- INetEventHandler 인터페이스를 멤버로 가집니다. 사용자는 NetClient에 INetEventHandler를 등록(하나만 등록가능)해야 이것을 통해 네트워크 이벤트를 받을 수 있습니다.
+- 초기화 파라미터:
+    - bUseNagle : Nagle 알고리즘 사용 여부
+
 # ISession 인터페이스
-- 사용자에게 노출하는 Session객체 입니다.
+- NetLib가 사용자에게 노출하는 Session 클래스 입니다.
 - Send, Disconnect, GetIP, GetPort 등의 순수가상함수만 가집니다.
-```cpp
-class ISession {
-public:
-    virtual ~ISession() = default;
-	// 게임서버가 호출할 수 있는 최소한의 메서드만
-    virtual void     Send(const Packet& pkt) = 0;
-    virtual void     Disconnect() = 0;
-    virtual int64_t  GetId() const = 0;
-};
-```
+- Session의 중요 멤버들을 노출하지 않기 위해 사용됩니다.
 
 # Session 클래스
 - ISession 인터페이스를 상속받습니다.
-```cpp
-// 라이브러리 내부 구현 (게임서버에는 안 보임)
-class Session : public ISession {
-    SOCKET            m_socket;
-    RingBuffer        m_recvBuf;     // 수신용 링버퍼
-	OVERLAPPED_EX     m_recvOverlapped; // 수신용 Overlapped 구조체
-    LockfreeQueue<std::shared_ptr<Packet>>   m_sendQueue;  // 보낼 패킷 큐
-	OVERLAPPED_EX     m_sendOverlapped; // 송신용 Overlapped 구조체
-    // ... 진짜 구현 디테일
-public:
-    void Send(std::shared_ptr<Packet> spPacket) override    { /* ... */ }
-    void Disconnect() override                { /* ... */ }
-    int64_t GetId() const override            { /* ... */ }
-};
-```
-
-
-# IOCP
-- CompletionKey에는 세션 포인터를 입력합니다.
-
-# 소켓 옵션
-- SO_LINGER 옵션으로 연결 종료 시 4-way handshake 없이 바로 끊기도록 합니다.
+- INetBase 포인터를 멤버로 가집니다. 세션이 속한 Network 객체입니다. INetBase를 통해서 세션의 네트워크 이벤트를 자신이 속한 네트워크에 전달합니다. 세션이 생성될 때 INetBase가 제공되어야 합니다. 
+- 소켓, 수신버퍼, 수신용 Overlapped 구조체, 송신버퍼, 송신용 Overlapped 구조체 등을 가집니다.
+- 사용자 데이터 슬롯(std::shared_ptr<void> 타입) 멤버를 가집니다. 사용자는 이 멤버를 통해 세션에 데이터를 등록할 수 있습니다.
 
 # OVERLAPPED_EX 구조체
 WSARecv, WSASend 할때 이 Overlapped 구조체를 사용합니다.
@@ -146,25 +128,49 @@ struct OVERLAPPED_EX
 	
 # 패킷 헤더
 ```cpp
+// 패킷 헤더
 #pragma pack(push, 1)
-struct PacketHeader {
-    uint16_t size;      // 헤더 포함 전체 패킷 크기 (라이브러리가 해석)
-    uint16_t type;      // 메시지 ID (상위 레이어가 해석, 라이브러리는 투과)
-    uint8_t  flags;     // 전송 레벨 플래그 (압축, 암호화, ...)
-    uint8_t  reserved;  // 정렬 및 확장 여유
+struct PacketHeader
+{
+    uint16 size;      // 헤더 포함 전체 패킷 크기 (NetLib 사용)
+    uint16 type;      // 메시지 ID (서버가 사용. NetLib는 사용안함)
+    uint8  flags;     // 패킷 압축, 암호화 등의 플래그
+    uint8  reserved;  // 메모리정렬, 추후 확장용 예약 필드
 };
 #pragma pack(pop)
-static_assert(sizeof(PacketHeader) == 6);
+
+// 패킷 플래그 비트
+namespace PacketFlags
+{
+    constexpr uint8 None       = 0x00;
+    constexpr uint8 Encrypted  = 0x01;  // 암호화됨
+    constexpr uint8 Compressed = 0x02;  // 압축됨
+    constexpr uint8 Sidecar    = 0x04;  // payload 앞에 Sidecar(부가 데이터)가 있음
+}
 ```
 
-# 패킷 pool
-네트워크 라이브러리는 패킷(패킷버퍼) pool을 제공합니다.  
-리턴 타입은 shared_ptr<Packet> 입니다.  
-사용자(게임서버)는 Send할 때 패킷 pool에서 shared_ptr<Packet>을 할당받아 여기에 직렬화 합니다.  
-그리고 OnRecv 함수로 shared_ptr<Packet> 형태의 패킷을 전달받아 사용자(게임서버)가 역직렬화 하여 사용합니다.  
+# Sidecar 헤더
+```cpp
+struct SidecarHeader
+{
+    uint16 size;      // Sidecar 데이터 크기 (헤더 자체 4바이트는 미포함)
+    uint16 reserved;  // 메모리정렬, 추후 확장
+};
+#pragma pack(pop)
+```
 
-참고로 패킷 구조체는 protobuf로 생성되며, PacketGenerator 프로젝트가 protobuf 기능을 담당합니다.  
-직렬화/역직렬화 할때는 PacketGenerator 라이브러리의 직렬화/역직렬화 기능을 사용합니다.  
+- Sidecar 헤더는 패킷 payload 데이터는 그대로 유지하면서 패킷에 추가적인 정보를 넣을 때 사용합니다. Sidecar 헤더는 게이트웨이서버가 클라이언트의 패킷을 게임서버로 relay할 때, 클라이언트 UserId를 원본 클라패킷에 집어넣기 위해서 개발되었습다.
+- 사용법: PacketHeader의 flags에 PacketFlags::Sidecar를 세팅합니다. 그런다음 payload 데이터를 memmove로 뒤로 밀고 그 사이에 SidecarHeader와 데이터(UserId 등)를 memcpy로 집어넣습니다. 이렇게 되면 패킷버퍼의 바이트구조는 `[PacketHeader][SidecarHeader][Sidecar 데이터(size)][payload]` 가 됩니다.
+- 패킷을 받는 쪽에서는 flags & PacketFlags::Sidecar 를 통해 패킷에 Sidecar 데이터가 있는것을 체크하고, Sidecar 데이터가 있다면 적절히 꺼내서 사용하면 됩니다.
+- 패킷에 Sidecar 데이터를 넣거나 읽는 기능은 Packet 클래스가 제공합니다.
+- Sidecar는 NetLib의 네트워크 기능에 영향을 미치지 않습니다. 패킷에 Sidecar 데이터가 있으면 단지 패킷의 size가 증가하고 payload 위치가 뒤로 밀릴 뿐입니다. Sidecar를 넣거나 읽는 것은 사용자의 영역입니다. NetLib는 오직 패킷의 size와 payload만 신경씁니다.
+
+# 패킷 pool
+IoContext는 패킷(패킷버퍼) pool을 제공합니다. 패킷할당 함수의 리턴 타입은 shared_ptr<Packet> 입니다.  
+사용자(서버)는 Send할 때 패킷 pool에서 shared_ptr<Packet>을 할당받아 여기에 직렬화 합니다.  
+그리고 사용자(서버)는 수신된 데이터를 전달받을 때 shared_ptr<Packet> 형태의 패킷을 전달받아 직접 역직렬화 하여 사용합니다.  
+
+참고로 직렬화/역직렬화 할때는 PacketGenerator 라이브러리의 직렬화/역직렬화 기능을 사용합니다.  
 
 # 패킷 암호화
 - 암호화는 넣어야 하는데 아직 개발되지는 않았습니다. (암호화 알고리즘 후보: ChaCha20)
