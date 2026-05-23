@@ -29,21 +29,20 @@ namespace GamePacket {
             "dGVyLnByb3RvIpsBChNOZWFyYnlDaGFyYWN0ZXJJbmZvEg8KB3VzZXJfaWQY",
             "ASABKAMSDAoEbmFtZRgCIAEoCRINCgVsZXZlbBgDIAEoBRIKCgJocBgEIAEo",
             "BRIOCgZtYXhfaHAYBSABKAUSDQoFcG9zX3gYBiABKAISDQoFcG9zX3kYByAB",
-            "KAISDQoFcG9zX3oYCCABKAISDQoFZGlyX3kYCSABKAIijgEKDVN0YWdlRW50",
-            "ZXJOdGYSEAoIc3RhZ2VfaWQYASABKAUSLwoMbXlfY2hhcmFjdGVyGAIgASgL",
-            "MhkuRGF0YVN0cnVjdHVyZXMuQ2hhcmFjdGVyEjoKEW5lYXJieV9jaGFyYWN0",
-            "ZXJzGAMgAygLMh8uR2FtZVBhY2tldC5OZWFyYnlDaGFyYWN0ZXJJbmZvIicK",
-            "DFN0YWdlTW92ZVJlcRIXCg90YXJnZXRfc3RhZ2VfaWQYASABKAUiUQoXQ3Jv",
-            "c3NTZXJ2ZXJTdGFnZU1vdmVSZXESHQoVdGFyZ2V0X2dhbWVfc2VydmVyX2lk",
-            "GAEgASgFEhcKD3RhcmdldF9zdGFnZV9pZBgCIAEoBSJHChFDaGFyYWN0ZXJF",
-            "bnRlck50ZhIyCgljaGFyYWN0ZXIYASABKAsyHy5HYW1lUGFja2V0Lk5lYXJi",
-            "eUNoYXJhY3RlckluZm8iJAoRQ2hhcmFjdGVyTGVhdmVOdGYSDwoHdXNlcl9p",
-            "ZBgBIAEoA2IGcHJvdG8z"));
+            "KAISDQoFcG9zX3oYCCABKAISDQoFZGlyX3kYCSABKAIiVQoNU3RhZ2VFbnRl",
+            "ck50ZhIQCghzdGFnZV9pZBgBIAEoAxIQCghteV9wb3NfeBgCIAEoAhIQCght",
+            "eV9wb3NfeRgDIAEoAhIOCgZteV95YXcYBCABKAIiJwoMU3RhZ2VNb3ZlUmVx",
+            "EhcKD3RhcmdldF9zdGFnZV9pZBgBIAEoBSJRChdDcm9zc1NlcnZlclN0YWdl",
+            "TW92ZVJlcRIdChV0YXJnZXRfZ2FtZV9zZXJ2ZXJfaWQYASABKAUSFwoPdGFy",
+            "Z2V0X3N0YWdlX2lkGAIgASgFIkcKEUNoYXJhY3RlckVudGVyTnRmEjIKCWNo",
+            "YXJhY3RlchgBIAEoCzIfLkdhbWVQYWNrZXQuTmVhcmJ5Q2hhcmFjdGVySW5m",
+            "byIkChFDaGFyYWN0ZXJMZWF2ZU50ZhIPCgd1c2VyX2lkGAEgASgDYgZwcm90",
+            "bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, global::DataStructures.CharacterReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.NearbyCharacterInfo), global::GamePacket.NearbyCharacterInfo.Parser, new[]{ "UserId", "Name", "Level", "Hp", "MaxHp", "PosX", "PosY", "PosZ", "DirY" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageEnterNtf), global::GamePacket.StageEnterNtf.Parser, new[]{ "StageId", "MyCharacter", "NearbyCharacters" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageEnterNtf), global::GamePacket.StageEnterNtf.Parser, new[]{ "StageId", "MyPosX", "MyPosY", "MyYaw" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageMoveReq), global::GamePacket.StageMoveReq.Parser, new[]{ "TargetStageId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CrossServerStageMoveReq), global::GamePacket.CrossServerStageMoveReq.Parser, new[]{ "TargetGameServerId", "TargetStageId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterEnterNtf), global::GamePacket.CharacterEnterNtf.Parser, new[]{ "Character" }, null, null, null, null),
@@ -553,7 +552,10 @@ namespace GamePacket {
 
   /// <summary>
   /// Stage 입장 완료 알림 (서버 -> 클라)
-  /// Stage 이동(동일 게임서버 내 / 다른 게임서버) 완료 후 전송
+  /// Stage 이동(동일 게임서버 내 / 다른 게임서버) 완료 후 전송.
+  /// 조괄됨: Stage 자체 정보(맵/엔티티)는 이 패킷에 넣지 않는다.
+  /// - 맵 경계 등 정적 정보는 클라이 GameData_Stage에서 조회한다.
+  /// - 주변 오브젝트 정보는 별도의 ObjectVisibilityNtf로 전달된다.
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class StageEnterNtf : pb::IMessage<StageEnterNtf>
@@ -591,8 +593,9 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public StageEnterNtf(StageEnterNtf other) : this() {
       stageId_ = other.stageId_;
-      myCharacter_ = other.myCharacter_ != null ? other.myCharacter_.Clone() : null;
-      nearbyCharacters_ = other.nearbyCharacters_.Clone();
+      myPosX_ = other.myPosX_;
+      myPosY_ = other.myPosY_;
+      myYaw_ = other.myYaw_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -604,43 +607,53 @@ namespace GamePacket {
 
     /// <summary>Field number for the "stage_id" field.</summary>
     public const int StageIdFieldNumber = 1;
-    private int stageId_;
+    private long stageId_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int StageId {
+    public long StageId {
       get { return stageId_; }
       set {
         stageId_ = value;
       }
     }
 
-    /// <summary>Field number for the "my_character" field.</summary>
-    public const int MyCharacterFieldNumber = 2;
-    private global::DataStructures.Character myCharacter_;
+    /// <summary>Field number for the "my_pos_x" field.</summary>
+    public const int MyPosXFieldNumber = 2;
+    private float myPosX_;
     /// <summary>
-    /// 내 캐릭터 최신 데이터
+    /// 서버가 결정한 내 spawn 위치
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::DataStructures.Character MyCharacter {
-      get { return myCharacter_; }
+    public float MyPosX {
+      get { return myPosX_; }
       set {
-        myCharacter_ = value;
+        myPosX_ = value;
       }
     }
 
-    /// <summary>Field number for the "nearby_characters" field.</summary>
-    public const int NearbyCharactersFieldNumber = 3;
-    private static readonly pb::FieldCodec<global::GamePacket.NearbyCharacterInfo> _repeated_nearbyCharacters_codec
-        = pb::FieldCodec.ForMessage(26, global::GamePacket.NearbyCharacterInfo.Parser);
-    private readonly pbc::RepeatedField<global::GamePacket.NearbyCharacterInfo> nearbyCharacters_ = new pbc::RepeatedField<global::GamePacket.NearbyCharacterInfo>();
-    /// <summary>
-    /// 같은 Stage의 다른 캐릭터 목록
-    /// </summary>
+    /// <summary>Field number for the "my_pos_y" field.</summary>
+    public const int MyPosYFieldNumber = 3;
+    private float myPosY_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pbc::RepeatedField<global::GamePacket.NearbyCharacterInfo> NearbyCharacters {
-      get { return nearbyCharacters_; }
+    public float MyPosY {
+      get { return myPosY_; }
+      set {
+        myPosY_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "my_yaw" field.</summary>
+    public const int MyYawFieldNumber = 4;
+    private float myYaw_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float MyYaw {
+      get { return myYaw_; }
+      set {
+        myYaw_ = value;
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -659,8 +672,9 @@ namespace GamePacket {
         return true;
       }
       if (StageId != other.StageId) return false;
-      if (!object.Equals(MyCharacter, other.MyCharacter)) return false;
-      if(!nearbyCharacters_.Equals(other.nearbyCharacters_)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosX, other.MyPosX)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosY, other.MyPosY)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyYaw, other.MyYaw)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -668,9 +682,10 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
-      if (StageId != 0) hash ^= StageId.GetHashCode();
-      if (myCharacter_ != null) hash ^= MyCharacter.GetHashCode();
-      hash ^= nearbyCharacters_.GetHashCode();
+      if (StageId != 0L) hash ^= StageId.GetHashCode();
+      if (MyPosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosX);
+      if (MyPosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosY);
+      if (MyYaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyYaw);
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -689,15 +704,22 @@ namespace GamePacket {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (StageId != 0) {
+      if (StageId != 0L) {
         output.WriteRawTag(8);
-        output.WriteInt32(StageId);
+        output.WriteInt64(StageId);
       }
-      if (myCharacter_ != null) {
-        output.WriteRawTag(18);
-        output.WriteMessage(MyCharacter);
+      if (MyPosX != 0F) {
+        output.WriteRawTag(21);
+        output.WriteFloat(MyPosX);
       }
-      nearbyCharacters_.WriteTo(output, _repeated_nearbyCharacters_codec);
+      if (MyPosY != 0F) {
+        output.WriteRawTag(29);
+        output.WriteFloat(MyPosY);
+      }
+      if (MyYaw != 0F) {
+        output.WriteRawTag(37);
+        output.WriteFloat(MyYaw);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -708,15 +730,22 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (StageId != 0) {
+      if (StageId != 0L) {
         output.WriteRawTag(8);
-        output.WriteInt32(StageId);
+        output.WriteInt64(StageId);
       }
-      if (myCharacter_ != null) {
-        output.WriteRawTag(18);
-        output.WriteMessage(MyCharacter);
+      if (MyPosX != 0F) {
+        output.WriteRawTag(21);
+        output.WriteFloat(MyPosX);
       }
-      nearbyCharacters_.WriteTo(ref output, _repeated_nearbyCharacters_codec);
+      if (MyPosY != 0F) {
+        output.WriteRawTag(29);
+        output.WriteFloat(MyPosY);
+      }
+      if (MyYaw != 0F) {
+        output.WriteRawTag(37);
+        output.WriteFloat(MyYaw);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -727,13 +756,18 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
-      if (StageId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(StageId);
+      if (StageId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageId);
       }
-      if (myCharacter_ != null) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(MyCharacter);
+      if (MyPosX != 0F) {
+        size += 1 + 4;
       }
-      size += nearbyCharacters_.CalculateSize(_repeated_nearbyCharacters_codec);
+      if (MyPosY != 0F) {
+        size += 1 + 4;
+      }
+      if (MyYaw != 0F) {
+        size += 1 + 4;
+      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -746,16 +780,18 @@ namespace GamePacket {
       if (other == null) {
         return;
       }
-      if (other.StageId != 0) {
+      if (other.StageId != 0L) {
         StageId = other.StageId;
       }
-      if (other.myCharacter_ != null) {
-        if (myCharacter_ == null) {
-          MyCharacter = new global::DataStructures.Character();
-        }
-        MyCharacter.MergeFrom(other.MyCharacter);
+      if (other.MyPosX != 0F) {
+        MyPosX = other.MyPosX;
       }
-      nearbyCharacters_.Add(other.nearbyCharacters_);
+      if (other.MyPosY != 0F) {
+        MyPosY = other.MyPosY;
+      }
+      if (other.MyYaw != 0F) {
+        MyYaw = other.MyYaw;
+      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -776,18 +812,19 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            StageId = input.ReadInt32();
+            StageId = input.ReadInt64();
             break;
           }
-          case 18: {
-            if (myCharacter_ == null) {
-              MyCharacter = new global::DataStructures.Character();
-            }
-            input.ReadMessage(MyCharacter);
+          case 21: {
+            MyPosX = input.ReadFloat();
             break;
           }
-          case 26: {
-            nearbyCharacters_.AddEntriesFrom(input, _repeated_nearbyCharacters_codec);
+          case 29: {
+            MyPosY = input.ReadFloat();
+            break;
+          }
+          case 37: {
+            MyYaw = input.ReadFloat();
             break;
           }
         }
@@ -810,18 +847,19 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 8: {
-            StageId = input.ReadInt32();
+            StageId = input.ReadInt64();
             break;
           }
-          case 18: {
-            if (myCharacter_ == null) {
-              MyCharacter = new global::DataStructures.Character();
-            }
-            input.ReadMessage(MyCharacter);
+          case 21: {
+            MyPosX = input.ReadFloat();
             break;
           }
-          case 26: {
-            nearbyCharacters_.AddEntriesFrom(ref input, _repeated_nearbyCharacters_codec);
+          case 29: {
+            MyPosY = input.ReadFloat();
+            break;
+          }
+          case 37: {
+            MyYaw = input.ReadFloat();
             break;
           }
         }

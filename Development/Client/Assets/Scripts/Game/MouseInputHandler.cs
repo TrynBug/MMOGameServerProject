@@ -13,7 +13,6 @@ namespace Client.Game
     //   - 뗀 순간: 서버에 MoveReq(현재 위치) 1회
     //
     // 서버 측은 현재 MoveReq를 받기만 하고 처리는 안 함 (Stage::OnUserPacket이 로그만 찍음).
-    // → 서버 콘솔에 packetType 로그가 뜨면 A-3 통과.
     public class MouseInputHandler : MonoBehaviour
     {
         [SerializeField] private Camera m_camera;
@@ -77,7 +76,7 @@ namespace Client.Game
                     {
                         if (!m_hasLastSent || (worldPoint - m_lastSentDest).sqrMagnitude > 0.01f)
                         {
-                            sendMoveReq(worldPoint, local.transform.eulerAngles.y);
+                            sendMoveDestReq(worldPoint, local.transform.eulerAngles.y);
                             m_lastSentDest = worldPoint;
                             m_hasLastSent = true;
                             m_timeSinceLastSend = 0f;
@@ -97,7 +96,7 @@ namespace Client.Game
                     }
                     // 떼는 순간 현재 캐릭터 위치를 서버에 알림
                     Vector3 curPos = local.transform.position;
-                    sendMoveReq(curPos, local.transform.eulerAngles.y);
+                    sendMoveStopReq(curPos, local.transform.eulerAngles.y);
                     m_hasLastSent = false;
                     m_timeSinceLastSend = 0f;
                 }
@@ -106,25 +105,43 @@ namespace Client.Game
             m_wasPressed = isPressed;
         }
 
-        private void sendMoveReq(Vector3 pos, float dirY)
+        private void sendMoveDestReq(Vector3 pos, float dirY)
         {
             NetworkManager net = NetworkManager.Instance;
             if (net == null || !net.IsConnected) return;
 
-            MoveReq req = new MoveReq
+            MoveDestReq req = new MoveDestReq
             {
-                PosX = pos.x,
-                PosY = pos.y,
-                PosZ = pos.z,
-                DirY = dirY
+                DestX = pos.x,
+                DestY = pos.y,
             };
-            net.Send(GamePacketId.MoveReq, req);
+            net.Send(GamePacketId.MoveDestReq, req);
 
             if (m_debugLog)
             {
-                Debug.Log($"[MouseInput] Sent MoveReq pos=({pos.x:F2},{pos.y:F2},{pos.z:F2}) dirY={dirY:F1}");
+                Debug.Log($"[MouseInput] Sent MoveDestReq pos=({pos.x:F2},{pos.y:F2},{pos.z:F2}) dirY={dirY:F1}");
             }
         }
+
+        private void sendMoveStopReq(Vector3 pos, float dirY)
+        {
+            NetworkManager net = NetworkManager.Instance;
+            if (net == null || !net.IsConnected) return;
+
+            MoveStopReq req = new MoveStopReq
+            {
+                PosX = pos.x,
+                PosY = pos.y,
+                Yaw = dirY,
+            };
+            net.Send(GamePacketId.MoveDestReq, req);
+
+            if (m_debugLog)
+            {
+                Debug.Log($"[MouseInput] Sent MoveStopReq pos=({pos.x:F2},{pos.y:F2},{pos.z:F2}) dirY={dirY:F1}");
+            }
+        }
+
 
         // 마우스 화면좌표에서 ray를 쏴서 LocalPlayer 자신을 제외한 첫 충돌점을 구한다.
         private bool tryGetGroundPoint(Vector2 screenPos, PlayerCharacter selfToIgnore, out Vector3 worldPoint)

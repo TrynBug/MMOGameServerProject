@@ -4,9 +4,6 @@ namespace Client.Game
 {
     // 1명의 캐릭터(내 캐릭터 또는 다른 유저)를 표현하는 컴포넌트.
     // StageManager가 GameEnterNtf/StageEnterNtf/CharacterEnterNtf 수신 시 동적으로 생성한다.
-    //
-    // A-1: 위치 표시.
-    // A-2: 선형보간 이동 (클라 측만, 서버 통신 없음).
     public class PlayerCharacter : MonoBehaviour
     {
         // 캐릭터 식별자
@@ -49,7 +46,7 @@ namespace Client.Game
         }
 
         // 서버에서 위치 갱신 패킷이 왔을 때 호출
-        // 일단은 보간 없이 즉시 텔레포트. 보간은 A-5에서.
+        // 일단은 보간 없이 즉시 텔레포트. 보간은 나중에.
         public void SetPosition(Vector3 pos, float dirY)
         {
             transform.position = pos;
