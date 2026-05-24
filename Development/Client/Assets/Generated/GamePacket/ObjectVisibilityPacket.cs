@@ -25,18 +25,19 @@ namespace GamePacket {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "CilHYW1lUGFja2V0L29iamVjdF92aXNpYmlsaXR5X3BhY2tldC5wcm90bxIK",
-            "R2FtZVBhY2tldBoWQ29tbW9uL3BhY2tldF9pZC5wcm90byLOAQoSQ2hhcmFj",
+            "R2FtZVBhY2tldBoWQ29tbW9uL3BhY2tldF9pZC5wcm90byLdAQoSQ2hhcmFj",
             "dGVyU3Bhd25JbmZvEhEKCW9iamVjdF9pZBgBIAEoAxIVCg1vd25lcl91c2Vy",
             "X2lkGAIgASgDEgwKBG5hbWUYAyABKAkSDgoGam9iX2lkGAQgASgFEg0KBWxl",
             "dmVsGAUgASgFEgoKAmhwGAYgASgFEg4KBm1heF9ocBgHIAEoBRIKCgJtcBgI",
             "IAEoBRIOCgZtYXhfbXAYCSABKAUSDQoFcG9zX3gYCiABKAISDQoFcG9zX3kY",
-            "CyABKAISCwoDeWF3GAwgASgCImQKE09iamVjdFZpc2liaWxpdHlOdGYSOAoQ",
-            "Y2hhcmFjdGVyX3NwYXducxgBIAMoCzIeLkdhbWVQYWNrZXQuQ2hhcmFjdGVy",
-            "U3Bhd25JbmZvEhMKC2Rlc3Bhd25faWRzGAogAygDYgZwcm90bzM="));
+            "CyABKAISCwoDeWF3GAwgASgCEg0KBXBvc196GA0gASgCImQKE09iamVjdFZp",
+            "c2liaWxpdHlOdGYSOAoQY2hhcmFjdGVyX3NwYXducxgBIAMoCzIeLkdhbWVQ",
+            "YWNrZXQuQ2hhcmFjdGVyU3Bhd25JbmZvEhMKC2Rlc3Bhd25faWRzGAogAygD",
+            "YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSpawnInfo), global::GamePacket.CharacterSpawnInfo.Parser, new[]{ "ObjectId", "OwnerUserId", "Name", "JobId", "Level", "Hp", "MaxHp", "Mp", "MaxMp", "PosX", "PosY", "Yaw" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSpawnInfo), global::GamePacket.CharacterSpawnInfo.Parser, new[]{ "ObjectId", "OwnerUserId", "Name", "JobId", "Level", "Hp", "MaxHp", "Mp", "MaxMp", "PosX", "PosY", "Yaw", "PosZ" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ObjectVisibilityNtf), global::GamePacket.ObjectVisibilityNtf.Parser, new[]{ "CharacterSpawns", "DespawnIds" }, null, null, null, null)
           }));
     }
@@ -46,6 +47,7 @@ namespace GamePacket {
   #region Messages
   /// <summary>
   /// 캐릭터 spawn 정보. 클라이언트가 화면에 캐릭터를 표시하는데 필요한 최소 정보.
+  /// 좌표계: Unity 와 동일. Y가 높이, X-Z 가 평면.
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class CharacterSpawnInfo : pb::IMessage<CharacterSpawnInfo>
@@ -94,6 +96,7 @@ namespace GamePacket {
       posX_ = other.posX_;
       posY_ = other.posY_;
       yaw_ = other.yaw_;
+      posZ_ = other.posZ_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -229,6 +232,9 @@ namespace GamePacket {
     /// <summary>Field number for the "pos_y" field.</summary>
     public const int PosYFieldNumber = 11;
     private float posY_;
+    /// <summary>
+    /// 높이
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public float PosY {
@@ -241,12 +247,30 @@ namespace GamePacket {
     /// <summary>Field number for the "yaw" field.</summary>
     public const int YawFieldNumber = 12;
     private float yaw_;
+    /// <summary>
+    /// Y축 회전, degree 단위
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public float Yaw {
       get { return yaw_; }
       set {
         yaw_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pos_z" field.</summary>
+    public const int PosZFieldNumber = 13;
+    private float posZ_;
+    /// <summary>
+    /// 평면 깊이축
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float PosZ {
+      get { return posZ_; }
+      set {
+        posZ_ = value;
       }
     }
 
@@ -277,6 +301,7 @@ namespace GamePacket {
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosX, other.PosX)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Yaw, other.Yaw)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -296,6 +321,7 @@ namespace GamePacket {
       if (PosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosX);
       if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
       if (Yaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Yaw);
+      if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -362,6 +388,10 @@ namespace GamePacket {
         output.WriteRawTag(101);
         output.WriteFloat(Yaw);
       }
+      if (PosZ != 0F) {
+        output.WriteRawTag(109);
+        output.WriteFloat(PosZ);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -420,6 +450,10 @@ namespace GamePacket {
         output.WriteRawTag(101);
         output.WriteFloat(Yaw);
       }
+      if (PosZ != 0F) {
+        output.WriteRawTag(109);
+        output.WriteFloat(PosZ);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -464,6 +498,9 @@ namespace GamePacket {
         size += 1 + 4;
       }
       if (Yaw != 0F) {
+        size += 1 + 4;
+      }
+      if (PosZ != 0F) {
         size += 1 + 4;
       }
       if (_unknownFields != null) {
@@ -513,6 +550,9 @@ namespace GamePacket {
       }
       if (other.Yaw != 0F) {
         Yaw = other.Yaw;
+      }
+      if (other.PosZ != 0F) {
+        PosZ = other.PosZ;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -581,6 +621,10 @@ namespace GamePacket {
             Yaw = input.ReadFloat();
             break;
           }
+          case 109: {
+            PosZ = input.ReadFloat();
+            break;
+          }
         }
       }
     #endif
@@ -646,6 +690,10 @@ namespace GamePacket {
           }
           case 101: {
             Yaw = input.ReadFloat();
+            break;
+          }
+          case 109: {
+            PosZ = input.ReadFloat();
             break;
           }
         }

@@ -25,16 +25,16 @@ namespace DataStructures {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Ch5EYXRhU3RydWN0dXJlcy9jaGFyYWN0ZXIucHJvdG8SDkRhdGFTdHJ1Y3R1",
-            "cmVzIuwBCglDaGFyYWN0ZXISFAoMY2hhcmFjdGVyX2lkGAEgASgDEhUKDW93",
+            "cmVzIvsBCglDaGFyYWN0ZXISFAoMY2hhcmFjdGVyX2lkGAEgASgDEhUKDW93",
             "bmVyX3VzZXJfaWQYAiABKAMSDAoEbmFtZRgDIAEoCRIOCgZqb2JfaWQYBCAB",
             "KAUSDQoFbGV2ZWwYBSABKAUSCwoDZXhwGAYgASgDEgoKAmhwGAcgASgFEg4K",
             "Bm1heF9ocBgIIAEoBRIKCgJtcBgJIAEoBRIOCgZtYXhfbXAYCiABKAUSFQoN",
             "bGFzdF9zdGFnZV9pZBgLIAEoAxINCgVwb3NfeBgMIAEoAhINCgVwb3NfeRgN",
-            "IAEoAhILCgN5YXcYDiABKAJiBnByb3RvMw=="));
+            "IAEoAhILCgN5YXcYDiABKAISDQoFcG9zX3oYDyABKAJiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::DataStructures.Character), global::DataStructures.Character.Parser, new[]{ "CharacterId", "OwnerUserId", "Name", "JobId", "Level", "Exp", "Hp", "MaxHp", "Mp", "MaxMp", "LastStageId", "PosX", "PosY", "Yaw" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::DataStructures.Character), global::DataStructures.Character.Parser, new[]{ "CharacterId", "OwnerUserId", "Name", "JobId", "Level", "Exp", "Hp", "MaxHp", "Mp", "MaxMp", "LastStageId", "PosX", "PosY", "Yaw", "PosZ" }, null, null, null, null)
           }));
     }
     #endregion
@@ -97,6 +97,7 @@ namespace DataStructures {
       posX_ = other.posX_;
       posY_ = other.posY_;
       yaw_ = other.yaw_;
+      posZ_ = other.posZ_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -243,6 +244,7 @@ namespace DataStructures {
     private long lastStageId_;
     /// <summary>
     /// 마지막 위치 (게임서버 입장 시 이 위치로 복귀)
+    /// 좌표계: Unity 와 동일 (X, Y, Z). Y 가 높이, X-Z 가 평면.
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -268,6 +270,9 @@ namespace DataStructures {
     /// <summary>Field number for the "pos_y" field.</summary>
     public const int PosYFieldNumber = 13;
     private float posY_;
+    /// <summary>
+    /// 높이
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public float PosY {
@@ -281,7 +286,7 @@ namespace DataStructures {
     public const int YawFieldNumber = 14;
     private float yaw_;
     /// <summary>
-    /// 회전 (단위는 추후 클라와 맞춤)
+    /// Y축 회전, degree 단위
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -289,6 +294,21 @@ namespace DataStructures {
       get { return yaw_; }
       set {
         yaw_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pos_z" field.</summary>
+    public const int PosZFieldNumber = 15;
+    private float posZ_;
+    /// <summary>
+    /// 평면 깊이축
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float PosZ {
+      get { return posZ_; }
+      set {
+        posZ_ = value;
       }
     }
 
@@ -321,6 +341,7 @@ namespace DataStructures {
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosX, other.PosX)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Yaw, other.Yaw)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -342,6 +363,7 @@ namespace DataStructures {
       if (PosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosX);
       if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
       if (Yaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Yaw);
+      if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -416,6 +438,10 @@ namespace DataStructures {
         output.WriteRawTag(117);
         output.WriteFloat(Yaw);
       }
+      if (PosZ != 0F) {
+        output.WriteRawTag(125);
+        output.WriteFloat(PosZ);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -482,6 +508,10 @@ namespace DataStructures {
         output.WriteRawTag(117);
         output.WriteFloat(Yaw);
       }
+      if (PosZ != 0F) {
+        output.WriteRawTag(125);
+        output.WriteFloat(PosZ);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -532,6 +562,9 @@ namespace DataStructures {
         size += 1 + 4;
       }
       if (Yaw != 0F) {
+        size += 1 + 4;
+      }
+      if (PosZ != 0F) {
         size += 1 + 4;
       }
       if (_unknownFields != null) {
@@ -587,6 +620,9 @@ namespace DataStructures {
       }
       if (other.Yaw != 0F) {
         Yaw = other.Yaw;
+      }
+      if (other.PosZ != 0F) {
+        PosZ = other.PosZ;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -663,6 +699,10 @@ namespace DataStructures {
             Yaw = input.ReadFloat();
             break;
           }
+          case 125: {
+            PosZ = input.ReadFloat();
+            break;
+          }
         }
       }
     #endif
@@ -736,6 +776,10 @@ namespace DataStructures {
           }
           case 117: {
             Yaw = input.ReadFloat();
+            break;
+          }
+          case 125: {
+            PosZ = input.ReadFloat();
             break;
           }
         }

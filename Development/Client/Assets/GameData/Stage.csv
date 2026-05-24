@@ -1,4 +1,4 @@
-﻿Key,Name,StageType,worldMinX,worldMinY,worldMaxX,worldMaxY,sectorSize
+﻿Key,Name,StageType,worldMinX,worldMinZ,worldMaxX,worldMaxZ,sectorSize
 1,캐릭터 선택창,1,0,0,100,100,100
 100,마을,2,-100,-100,100,100,10
 101,필드1,3,-100,-100,100,100,10

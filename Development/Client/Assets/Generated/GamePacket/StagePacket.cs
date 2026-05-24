@@ -29,20 +29,20 @@ namespace GamePacket {
             "dGVyLnByb3RvIpsBChNOZWFyYnlDaGFyYWN0ZXJJbmZvEg8KB3VzZXJfaWQY",
             "ASABKAMSDAoEbmFtZRgCIAEoCRINCgVsZXZlbBgDIAEoBRIKCgJocBgEIAEo",
             "BRIOCgZtYXhfaHAYBSABKAUSDQoFcG9zX3gYBiABKAISDQoFcG9zX3kYByAB",
-            "KAISDQoFcG9zX3oYCCABKAISDQoFZGlyX3kYCSABKAIiVQoNU3RhZ2VFbnRl",
+            "KAISDQoFcG9zX3oYCCABKAISDQoFZGlyX3kYCSABKAIiZwoNU3RhZ2VFbnRl",
             "ck50ZhIQCghzdGFnZV9pZBgBIAEoAxIQCghteV9wb3NfeBgCIAEoAhIQCght",
-            "eV9wb3NfeRgDIAEoAhIOCgZteV95YXcYBCABKAIiJwoMU3RhZ2VNb3ZlUmVx",
-            "EhcKD3RhcmdldF9zdGFnZV9pZBgBIAEoBSJRChdDcm9zc1NlcnZlclN0YWdl",
-            "TW92ZVJlcRIdChV0YXJnZXRfZ2FtZV9zZXJ2ZXJfaWQYASABKAUSFwoPdGFy",
-            "Z2V0X3N0YWdlX2lkGAIgASgFIkcKEUNoYXJhY3RlckVudGVyTnRmEjIKCWNo",
-            "YXJhY3RlchgBIAEoCzIfLkdhbWVQYWNrZXQuTmVhcmJ5Q2hhcmFjdGVySW5m",
-            "byIkChFDaGFyYWN0ZXJMZWF2ZU50ZhIPCgd1c2VyX2lkGAEgASgDYgZwcm90",
-            "bzM="));
+            "eV9wb3NfeRgDIAEoAhIOCgZteV95YXcYBCABKAISEAoIbXlfcG9zX3oYBSAB",
+            "KAIiJwoMU3RhZ2VNb3ZlUmVxEhcKD3RhcmdldF9zdGFnZV9pZBgBIAEoBSJR",
+            "ChdDcm9zc1NlcnZlclN0YWdlTW92ZVJlcRIdChV0YXJnZXRfZ2FtZV9zZXJ2",
+            "ZXJfaWQYASABKAUSFwoPdGFyZ2V0X3N0YWdlX2lkGAIgASgFIkcKEUNoYXJh",
+            "Y3RlckVudGVyTnRmEjIKCWNoYXJhY3RlchgBIAEoCzIfLkdhbWVQYWNrZXQu",
+            "TmVhcmJ5Q2hhcmFjdGVySW5mbyIkChFDaGFyYWN0ZXJMZWF2ZU50ZhIPCgd1",
+            "c2VyX2lkGAEgASgDYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, global::DataStructures.CharacterReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.NearbyCharacterInfo), global::GamePacket.NearbyCharacterInfo.Parser, new[]{ "UserId", "Name", "Level", "Hp", "MaxHp", "PosX", "PosY", "PosZ", "DirY" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageEnterNtf), global::GamePacket.StageEnterNtf.Parser, new[]{ "StageId", "MyPosX", "MyPosY", "MyYaw" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageEnterNtf), global::GamePacket.StageEnterNtf.Parser, new[]{ "StageId", "MyPosX", "MyPosY", "MyYaw", "MyPosZ" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageMoveReq), global::GamePacket.StageMoveReq.Parser, new[]{ "TargetStageId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CrossServerStageMoveReq), global::GamePacket.CrossServerStageMoveReq.Parser, new[]{ "TargetGameServerId", "TargetStageId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterEnterNtf), global::GamePacket.CharacterEnterNtf.Parser, new[]{ "Character" }, null, null, null, null),
@@ -55,6 +55,7 @@ namespace GamePacket {
   #region Messages
   /// <summary>
   /// 주변 캐릭터 간략 정보 (브로드캐스트용)
+  /// 좌표계: Unity 와 동일. Y가 높이, X-Z 가 평면.
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class NearbyCharacterInfo : pb::IMessage<NearbyCharacterInfo>
@@ -184,6 +185,9 @@ namespace GamePacket {
     /// <summary>Field number for the "pos_y" field.</summary>
     public const int PosYFieldNumber = 7;
     private float posY_;
+    /// <summary>
+    /// 높이
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public float PosY {
@@ -196,6 +200,9 @@ namespace GamePacket {
     /// <summary>Field number for the "pos_z" field.</summary>
     public const int PosZFieldNumber = 8;
     private float posZ_;
+    /// <summary>
+    /// 평면 깊이축
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public float PosZ {
@@ -208,6 +215,9 @@ namespace GamePacket {
     /// <summary>Field number for the "dir_y" field.</summary>
     public const int DirYFieldNumber = 9;
     private float dirY_;
+    /// <summary>
+    /// Y축 회전, degree 단위
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public float DirY {
@@ -596,6 +606,7 @@ namespace GamePacket {
       myPosX_ = other.myPosX_;
       myPosY_ = other.myPosY_;
       myYaw_ = other.myYaw_;
+      myPosZ_ = other.myPosZ_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -635,6 +646,9 @@ namespace GamePacket {
     /// <summary>Field number for the "my_pos_y" field.</summary>
     public const int MyPosYFieldNumber = 3;
     private float myPosY_;
+    /// <summary>
+    /// 높이
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public float MyPosY {
@@ -647,12 +661,30 @@ namespace GamePacket {
     /// <summary>Field number for the "my_yaw" field.</summary>
     public const int MyYawFieldNumber = 4;
     private float myYaw_;
+    /// <summary>
+    /// degree
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public float MyYaw {
       get { return myYaw_; }
       set {
         myYaw_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "my_pos_z" field.</summary>
+    public const int MyPosZFieldNumber = 5;
+    private float myPosZ_;
+    /// <summary>
+    /// 평면 깊이축
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float MyPosZ {
+      get { return myPosZ_; }
+      set {
+        myPosZ_ = value;
       }
     }
 
@@ -675,6 +707,7 @@ namespace GamePacket {
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosX, other.MyPosX)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosY, other.MyPosY)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyYaw, other.MyYaw)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosZ, other.MyPosZ)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -686,6 +719,7 @@ namespace GamePacket {
       if (MyPosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosX);
       if (MyPosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosY);
       if (MyYaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyYaw);
+      if (MyPosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosZ);
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -720,6 +754,10 @@ namespace GamePacket {
         output.WriteRawTag(37);
         output.WriteFloat(MyYaw);
       }
+      if (MyPosZ != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(MyPosZ);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -746,6 +784,10 @@ namespace GamePacket {
         output.WriteRawTag(37);
         output.WriteFloat(MyYaw);
       }
+      if (MyPosZ != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(MyPosZ);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -766,6 +808,9 @@ namespace GamePacket {
         size += 1 + 4;
       }
       if (MyYaw != 0F) {
+        size += 1 + 4;
+      }
+      if (MyPosZ != 0F) {
         size += 1 + 4;
       }
       if (_unknownFields != null) {
@@ -791,6 +836,9 @@ namespace GamePacket {
       }
       if (other.MyYaw != 0F) {
         MyYaw = other.MyYaw;
+      }
+      if (other.MyPosZ != 0F) {
+        MyPosZ = other.MyPosZ;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -827,6 +875,10 @@ namespace GamePacket {
             MyYaw = input.ReadFloat();
             break;
           }
+          case 45: {
+            MyPosZ = input.ReadFloat();
+            break;
+          }
         }
       }
     #endif
@@ -860,6 +912,10 @@ namespace GamePacket {
           }
           case 37: {
             MyYaw = input.ReadFloat();
+            break;
+          }
+          case 45: {
+            MyPosZ = input.ReadFloat();
             break;
           }
         }

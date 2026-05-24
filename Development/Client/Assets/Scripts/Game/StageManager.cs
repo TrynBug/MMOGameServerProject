@@ -70,14 +70,14 @@ namespace Client.Game
             }
 
             Debug.Log($"[StageManager] CharacterCreateRes: characterId={ch.CharacterId}, name={ch.Name}, " +
-                      $"pos=({ch.PosX}, {ch.PosY}), dir_y={ch.Yaw}");
+                      $"pos=({ch.PosX}, {ch.PosY}, {ch.PosZ}), dir_y={ch.Yaw}");
 
             // 내 캐릭터 생성
             LocalPlayer = createCharacter(
                 userId: ch.CharacterId,
                 name: ch.Name,
                 isLocalPlayer: true,
-                pos: new Vector3(ch.PosX, ch.PosY, 0),
+                pos: new Vector3(ch.PosX, ch.PosY, ch.PosZ),
                 dirY: ch.Yaw);
 
             // 캐릭터 선택 요청 패킷 보내기
@@ -105,14 +105,14 @@ namespace Client.Game
             }
 
             Debug.Log($"[StageManager] GameEnterNtf: characterId={ch.CharacterId}, name={ch.Name}, " +
-                      $"pos=({ch.PosX}, {ch.PosY}), dir_y={ch.Yaw}");
+                      $"pos=({ch.PosX}, {ch.PosY}, {ch.PosZ}), dir_y={ch.Yaw}");
 
             // 내 캐릭터 생성
             LocalPlayer = createCharacter(
                 userId: ch.CharacterId,
                 name: ch.Name,
                 isLocalPlayer: true,
-                pos: new Vector3(ch.PosX, ch.PosY, 0),
+                pos: new Vector3(ch.PosX, ch.PosY, ch.PosZ),
                 dirY: ch.Yaw);
 
             // 캐릭터 선택 요청 패킷 보내기
@@ -127,7 +127,7 @@ namespace Client.Game
             // 위치/스탯이 최신화됐을 수 있으니 내 캐릭터 위치 동기화
             if (LocalPlayer != null)
             {
-                LocalPlayer.SetPosition(new Vector3(ntf.MyPosX, ntf.MyPosY, 0), ntf.MyYaw);
+                LocalPlayer.SetPosition(new Vector3(ntf.MyPosX, ntf.MyPosY, ntf.MyPosZ), ntf.MyYaw);
             }
 
             CurrentStageId = ntf.StageId;
@@ -153,7 +153,7 @@ namespace Client.Game
                     userId: characterSpawnInfo.ObjectId,
                     name: characterSpawnInfo.Name,
                     isLocalPlayer: false,
-                    pos: new Vector3(characterSpawnInfo.PosX, characterSpawnInfo.PosY, 0),
+                    pos: new Vector3(characterSpawnInfo.PosX, characterSpawnInfo.PosY, characterSpawnInfo.PosZ),
                     dirY: characterSpawnInfo.Yaw);
                 
                 Debug.Log($"[StageManager] ObjectVisibilityNtf: CharacterSpawnInfo characterId={characterSpawnInfo.ObjectId}");
@@ -196,10 +196,10 @@ namespace Client.Game
             {
                 // 오브젝트 이동 패킷을 받았으면, 오브젝트를 tick마다 업데이트하며 이동시켜야 함.
                 // 지금은 그런로직이 없기 때문에 위치만 바꿔줌
-                character.SetPosition(new Vector3(ntf.PosX, ntf.PosY, 0), ntf.Yaw);
+                character.SetPosition(new Vector3(ntf.PosX, ntf.PosY, ntf.PosZ), ntf.Yaw);
             }
 
-            Debug.Log($"[StageManager] MoveNtf: ObjectId={ntf.ObjectId}, PosX={ntf.PosX}, PosY={ntf.PosY}, Yaw={ntf.Yaw}, DestX={ntf.DestX}, DestY={ntf.DestY}, IsMoving={ntf.IsMoving}");
+            Debug.Log($"[StageManager] MoveNtf: ObjectId={ntf.ObjectId}, Pos=({ntf.PosX},{ntf.PosY},{ntf.PosZ}), Yaw={ntf.Yaw}, Dest=({ntf.DestX},{ntf.DestY},{ntf.DestZ}), IsMoving={ntf.IsMoving}");
         }
 
         // ─── 내부 유틸 ──────────────────────────────────────────────────

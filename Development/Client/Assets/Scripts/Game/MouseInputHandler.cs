@@ -110,10 +110,12 @@ namespace Client.Game
             NetworkManager net = NetworkManager.Instance;
             if (net == null || !net.IsConnected) return;
 
+            // 좌표계: Unity 와 동일 (X, Y, Z). 서버와 그대로 매핑.
             MoveDestReq req = new MoveDestReq
             {
                 DestX = pos.x,
                 DestY = pos.y,
+                DestZ = pos.z,
             };
             net.Send(GamePacketId.MoveDestReq, req);
 
@@ -132,9 +134,11 @@ namespace Client.Game
             {
                 PosX = pos.x,
                 PosY = pos.y,
+                PosZ = pos.z,
                 Yaw = dirY,
             };
-            net.Send(GamePacketId.MoveDestReq, req);
+            // 이전 코드 버그: MoveStopReq인데 GamePacketId.MoveDestReq로 보냄. 수정.
+            net.Send(GamePacketId.MoveStopReq, req);
 
             if (m_debugLog)
             {
