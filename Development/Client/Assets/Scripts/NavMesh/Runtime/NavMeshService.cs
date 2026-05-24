@@ -115,6 +115,21 @@ namespace MMO.Client.Navigation
             return sm_current.SamplePosition(input, searchRadius, out result);
         }
 
+        /// <summary>
+        /// 임의 위치를 "from 에서 갈 수 있는 NavMesh 상의 가장 먼 점"으로 클램프한다.
+        /// 마우스가 NavMesh 바깥을 가리켜도 캐릭터가 갈 수 있는 데까지 움직이게 하는 용도.
+        /// NavMesh 가 로드되지 않았으면 false 반환.
+        /// </summary>
+        public static bool ClampToNavMesh(Vector3 from, Vector3 target, out Vector3 result)
+        {
+            if (sm_current == null)
+            {
+                result = from;
+                return false;
+            }
+            return sm_current.ClampToNavMesh(from, target, out result);
+        }
+
         // ---------------------------------------------------------------------
         // 경로 규칙
         // ---------------------------------------------------------------------

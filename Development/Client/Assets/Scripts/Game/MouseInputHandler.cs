@@ -144,14 +144,22 @@ namespace Client.Game
 
 
         // 마우스 화면좌표에서 ray를 쏴서 LocalPlayer 자신을 제외한 첫 충돌점을 구한다.
+        //
+        // 1단계: Physics.RaycastAll 로 콜라이더 충돌 찾기 (기존 동작).
+        //        평면 메시 안쪽에 마우스가 있으면 정확한 ground 점 반환.
+        // 2단계 (fallback): 콜라이더에 안 닿으면 (마우스가 평면 너머 허공),
+        //        캐릭터 y 평면과 ray 의 수학적 교차점 계산.
+        //        NavMesh 바깥점이 ClampToNavMesh 로 전달되어 가장자리까지 이동하게 함.
+        //
+        // 이 fallback 이 없으면 마우스가 콜라이더 바깥일 때 SetMoveDestination 자체가 호출 안 되어
+        // 캐릭터가 입력에 반응하지 않게 된다 (클릭 무브 게임에서 매우 부자연스러움).
         private bool tryGetGroundPoint(Vector2 screenPos, PlayerCharacter selfToIgnore, out Vector3 worldPoint)
         {
             worldPoint = Vector3.zero;
             Ray ray = m_camera.ScreenPointToRay(screenPos);
 
+            // 1단계: 콜라이더 hit 찾기
             RaycastHit[] hits = Physics.RaycastAll(ray, m_rayMaxDistance);
-            if (hits.Length == 0) return false;
-
             float bestDist = float.MaxValue;
             bool found = false;
 
@@ -169,7 +177,25 @@ namespace Client.Game
                 }
             }
 
-            return found;
+            if (found) return true;
+
+            // 2단계 fallback: 캐릭터 y 의 무한 평면과 ray 의 교차점.
+            // 평면 방정식: (P - planePoint) · normal = 0, normal = (0,1,0).
+            // ray: P(t) = ray.origin + t * ray.direction
+            // 풀면: t = (planeY - ray.origin.y) / ray.direction.y
+            float planeY = (selfToIgnore != null) ? selfToIgnore.transform.position.y : 0f;
+            float denom = ray.direction.y;
+
+            // 카메라가 거의 수평이면 ray.direction.y 가 0 근처라 교차점이 무한대로 멀어짐.
+            // 쿼터뷰에서는 거의 발생 안 하지만 안전 가드.
+            if (Mathf.Abs(denom) < 1e-4f) return false;
+
+            float t = (planeY - ray.origin.y) / denom;
+            // ray 가 평면 "뒤" 방향이면 (카메라 위쪽 하늘 클릭 같은 경우) 음수 t. 무시.
+            if (t < 0f) return false;
+
+            worldPoint = ray.origin + ray.direction * t;
+            return true;
         }
     }
 }

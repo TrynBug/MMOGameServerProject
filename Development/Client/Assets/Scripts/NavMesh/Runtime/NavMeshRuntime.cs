@@ -14,7 +14,7 @@ namespace MMO.Client.Navigation
     /// 책임:
     /// - .bin 파일을 로드해서 DtNavMesh 인스턴스 생성
     /// - DtNavMeshQuery 와 IDtQueryFilter 보유
-    /// - FindPath / SamplePosition 같은 게임 코드용 API 제공 (Unity Vector3 인터페이스)
+    /// - FindPath / SamplePosition / ClampToNavMesh 같은 게임 코드용 API 제공 (Unity Vector3 인터페이스)
     ///
     /// 사용자는 보통 NavMeshService 를 통해 간접적으로 사용하고, 이 클래스를 직접 만들지는 않는다.
     /// 다만 두 개 이상의 NavMesh 를 동시에 관리하고 싶을 때를 위해 public 으로 노출되어 있다.
@@ -178,6 +178,87 @@ namespace MMO.Client.Navigation
                 return false;
 
             result = ToUnity(nearest);
+            return true;
+        }
+
+        // =====================================================================
+        // 클램프: 마우스 따라가기 용 "갈 수 있는 가장 먼 점"
+        // =====================================================================
+
+        // 이분 탐색에서 mid 점이 NavMesh 위인지 확인할 때 쓰는 작은 반경.
+        // 너무 작으면 NavMesh 위 점도 "바깥" 으로 오판할 수 있고, 너무 크면 가장자리 너머도 "안쪽" 으로 오판.
+        // 0.3 이면 cellSize(0.3) 정도라 폴리곤 한 칸 안쪽인지 명확히 판정.
+        private const float ClampProbeRadius = 0.3f;
+        // 이분 탐색 반복 횟수. 10회면 (target-from) 거리의 1/1024 정밀도. 100m 입력이어도 10cm 이하 오차.
+        private const int ClampBinarySearchIters = 10;
+
+        /// <summary>
+        /// 임의 위치를 "from 에서 갈 수 있는 NavMesh 상의 가장 먼 점"으로 클램프한다.
+        ///
+        /// 마우스 입력이 NavMesh 바깥을 가리킬 때 "일단 갈 수 있는 데까지" 캐릭터가 움직이게 하는 용도.
+        /// (클릭 무브 게임의 표준 방식)
+        ///
+        /// 동작:
+        ///   1. target 이 NavMesh 위에 있으면 좌표를 그대로 보정해서 돌려줌.
+        ///   2. 아니면 from(NavMesh 위) ~ target(바깥) 사이를 이분 탐색해서 NavMesh 경계 점을 찾음.
+        ///   3. from 도 NavMesh 위에 없으면 false (드문 예외 상황).
+        ///
+        /// 이분 탐색을 쓰는 이유:
+        ///   - DotRecast 의 Raycast 는 2D(xz) 투영 기반이라 NavMesh 바깥 끝점일 때 동작이 직관과 다름.
+        ///   - 이분 탐색은 SamplePosition (이미 잘 동작하는 API) 만으로 구현 가능하고 결과가 정확함.
+        ///   - 비용: SamplePosition 약 10회 호출. 200ms 주기로만 호출되니까 부담 없음.
+        /// </summary>
+        /// <param name="from">시작점 (보통 캐릭터 현재 위치)</param>
+        /// <param name="target">사용자가 가리킨 목표 점 (NavMesh 위가 아닐 수 있음)</param>
+        /// <param name="result">클램프된 결과 위치</param>
+        /// <returns>성공 시 true</returns>
+        public bool ClampToNavMesh(Vector3 from, Vector3 target, out Vector3 result)
+        {
+            result = from;
+
+            // 1. target 이 NavMesh 위에 있는지 먼저 체크 (일반적인 좋은 경우, 가장 빈번).
+            //    기본 반경 (2m) 으로 시도.
+            if (SamplePosition(target, sm_findPolyHalfExtents.X, out Vector3 onNav))
+            {
+                result = onNav;
+                return true;
+            }
+
+            // 2. target 이 바깥. from 이 NavMesh 위에 있는지 확인하고, 있으면 이분 탐색 시작.
+            //    from 자체가 살짝 떠 있을 수도 있어서 좁은 반경으로 한 번 스냅 시도.
+            if (!SamplePosition(from, ClampProbeRadius, out Vector3 fromOnNav))
+            {
+                // from 도 NavMesh 위에 없음. 캐릭터가 NavMesh 밖에 있는 드문 상황. 처리 불가.
+                return false;
+            }
+
+            // 이분 탐색:
+            //   lo = NavMesh 위에 있는 것이 보장된 점 (안쪽)
+            //   hi = NavMesh 바깥인 것이 보장된 점 (바깥)
+            //   mid 가 NavMesh 위면 lo = mid, 아니면 hi = mid
+            //   반복 후 lo 가 "갈 수 있는 가장 먼 점".
+            Vector3 lo = fromOnNav;  // NavMesh 위 (확인됨)
+            Vector3 hi = target;     // NavMesh 바깥 (1단계에서 확인됨)
+
+            for (int i = 0; i < ClampBinarySearchIters; i++)
+            {
+                Vector3 mid = (lo + hi) * 0.5f;
+                if (SamplePosition(mid, ClampProbeRadius, out Vector3 midOnNav))
+                {
+                    // mid 가 NavMesh 위. 더 멀리 갈 수 있다. midOnNav 를 새 lo 로
+                    // (mid 자체보다 보정된 midOnNav 가 NavMesh 위에 확실히 있으므로 더 안전).
+                    lo = midOnNav;
+                }
+                else
+                {
+                    // mid 가 NavMesh 바깥. 너무 멀리 갔으므로 hi 를 mid 로.
+                    hi = mid;
+                }
+            }
+
+            // 캐릭터의 y 는 유지하고 싶지만 일단 NavMesh 위 점을 그대로 반환.
+            // 호출자(PlayerCharacter)가 y 를 적절히 조정함.
+            result = lo;
             return true;
         }
 

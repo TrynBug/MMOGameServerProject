@@ -806,6 +806,7 @@ GameObject:
   - component: {fileID: 1715034638}
   - component: {fileID: 1715034637}
   - component: {fileID: 1715034640}
+  - component: {fileID: 1715034641}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -931,6 +932,23 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &1715034641
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1715034636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df0a25e1d3ac06944b322d0220793360, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Client.Game.CameraFollow
+  m_pitchDeg: 50
+  m_yawDeg: 45
+  m_distance: 12
+  m_lookOffset: {x: 0, y: 1, z: 0}
+  m_smoothTime: 0.15
 --- !u!1 &1938109304
 GameObject:
   m_ObjectHideFlags: 0
