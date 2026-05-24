@@ -1,9 +1,9 @@
-﻿Key,Name,StageType,worldMinX,worldMinZ,worldMaxX,worldMaxZ,sectorSize
-1,캐릭터 선택창,1,0,0,100,100,100
-100,마을,2,-100,-100,100,100,10
-101,필드1,3,-100,-100,100,100,10
-102,필드2,3,-100,-100,100,100,10
-103,필드3,3,-100,-100,100,100,10
-104,던전1,4,-100,-100,100,100,10
-105,던전2,4,-100,-100,100,100,10
-106,던전3,4,-100,-100,100,100,10
+﻿Key,Name,StageType,NavMeshFileName,sectorSize
+1,캐릭터 선택창,1,NetworkTestScene,100
+100,마을,2,NetworkTestScene,10
+101,필드1,3,NetworkTestScene,10
+102,필드2,3,NetworkTestScene,10
+103,필드3,3,NetworkTestScene,10
+104,던전1,4,NetworkTestScene,10
+105,던전2,4,NetworkTestScene,10
+106,던전3,4,NetworkTestScene,10

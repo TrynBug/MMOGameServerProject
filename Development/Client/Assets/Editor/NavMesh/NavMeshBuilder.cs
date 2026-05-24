@@ -272,12 +272,19 @@ namespace MMO.Client.Navigation.Editor
             // -----------------------------------------------------------------
             // WriteNavMeshBin 은 DotRecast 의 표준 .bin 포맷으로 저장.
             // 양쪽 경로 모두에 같은 데이터를 쓴다 (서버 자동 동기화).
+            //
+            // .bin 옆에 .navmeta.json 도 같이 출력한다. 서버는 NavMesh 로드 시 메타를 읽어
+            // Stage 의 sector grid 크기(world bounds)를 결정한다.
             // =================================================================
             try
             {
                 WriteNavMeshBin(navMesh, clientPath);
+                WriteNavMeshMeta(navMesh, clientPath, addedTiles, totalPolys);
                 if (serverPath != null)
+                {
                     WriteNavMeshBin(navMesh, serverPath);
+                    WriteNavMeshMeta(navMesh, serverPath, addedTiles, totalPolys);
+                }
             }
             catch (Exception ex)
             {
@@ -458,6 +465,99 @@ namespace MMO.Client.Navigation.Editor
             using var fs = File.Create(path);
             using var bw = new BinaryWriter(fs);
             writer.Write(bw, navMesh, RcByteOrder.LITTLE_ENDIAN, cCompatibility: true);
+        }
+
+        // =====================================================================
+        // 메타 파일 쓰기
+        // ---------------------------------------------------------------------
+        // .bin 옆에 나란히 .navmeta.json 을 둔다. 서버는 이 메타를 읽어
+        // Stage 의 sector grid 크기(world bounds)를 설정하고,
+        // .bin 의 실제 데이터와 대조 검증한다.
+        //
+        // 포맷 (JSON):
+        //   {
+        //     "navmesh_file": "<basename>.bin",
+        //     "bounds": { "min_x": ..., "min_z": ..., "max_x": ..., "max_z": ... },
+        //     "tiles_count": <int>,
+        //     "walkable_polygons_count": <int>,
+        //     "generated_at": "<ISO8601 UTC>",
+        //     "generator_version": "1.0"
+        //   }
+        //
+        // X-Z bounds 는 모든 타일의 bmin/bmax 를 순회해서 계산. (Y 는 서버에서 안 쓰므로 제외)
+        // =====================================================================
+        private static void WriteNavMeshMeta(DtNavMesh navMesh, string binPath, int tilesCount, int walkablePolygonsCount)
+        {
+            // 상수: JSON 포맷 버전. 서버가 파싱 로직을 바꿀 때 바꿔야 함.
+            const string generatorVersion = "1.0";
+
+            // .bin 파일 이름과 짝이 맞는지 확인할 수 있도록 단순 파일명만 저장 (경로 아님)
+            string binFileName = Path.GetFileName(binPath);
+
+            // 모든 타일 순회해서 X-Z AABB 계산.
+            // GetTile(i) 는 빈 슬롯도 돌려주므로 data == null 체크 필수.
+            double minX = double.MaxValue;
+            double minZ = double.MaxValue;
+            double maxX = double.MinValue;
+            double maxZ = double.MinValue;
+            int validTileCount = 0;
+
+            int maxTiles = navMesh.GetMaxTiles();
+            for (int i = 0; i < maxTiles; ++i)
+            {
+                DtMeshTile tile = navMesh.GetTile(i);
+                if (tile == null || tile.data == null || tile.data.header == null)
+                    continue;
+
+                var h = tile.data.header;
+                if (h.bmin.X < minX) minX = h.bmin.X;
+                if (h.bmin.Z < minZ) minZ = h.bmin.Z;
+                if (h.bmax.X > maxX) maxX = h.bmax.X;
+                if (h.bmax.Z > maxZ) maxZ = h.bmax.Z;
+                ++validTileCount;
+            }
+
+            if (validTileCount == 0)
+            {
+                // 호출자가 addedTiles > 0 을 확인한 이후에만 이 함수가 닿으면 발생할 이유 없음.
+                // 방어적으로 bounds 를 0 으로 세팅해서 쓰고 경고.
+                Debug.LogWarning($"NavMeshBuilder.WriteNavMeshMeta: navMesh 에 유효한 tile 이 0 개. bounds 는 0 으로 적힌다.");
+                minX = 0; minZ = 0; maxX = 0; maxZ = 0;
+            }
+
+            // 수제 JSON. 필드 구조가 고정이라 외부 직렬화 라이브러리 도입은 오버키릴.
+            // 일반 부동소수 포맷("G17")으로 제공해 round-trip 안전.
+            string nowIso = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            var ci = System.Globalization.CultureInfo.InvariantCulture;
+            string json =
+                "{\n" +
+                $"  \"navmesh_file\": \"{EscapeJsonString(binFileName)}\",\n" +
+                "  \"bounds\": {\n" +
+                $"    \"min_x\": {minX.ToString("G17", ci)},\n" +
+                $"    \"min_z\": {minZ.ToString("G17", ci)},\n" +
+                $"    \"max_x\": {maxX.ToString("G17", ci)},\n" +
+                $"    \"max_z\": {maxZ.ToString("G17", ci)}\n" +
+                "  },\n" +
+                $"  \"tiles_count\": {tilesCount},\n" +
+                $"  \"walkable_polygons_count\": {walkablePolygonsCount},\n" +
+                $"  \"generated_at\": \"{nowIso}\",\n" +
+                $"  \"generator_version\": \"{generatorVersion}\"\n" +
+                "}\n";
+
+            string metaPath = binPath + ".navmeta.json";
+
+            string dir = Path.GetDirectoryName(metaPath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            File.WriteAllText(metaPath, json, new System.Text.UTF8Encoding(false));
+        }
+
+        /// <summary>JSON 문자열 필드의 최소 이스케이프. 파일명에는 이상한 문자가 거의 없으므로 간단 처리.</summary>
+        private static string EscapeJsonString(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return string.Empty;
+            return s.Replace("\\", "\\\\").Replace("\"", "\\\"");
         }
     }
 }

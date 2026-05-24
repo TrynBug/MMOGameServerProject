@@ -11,10 +11,7 @@ public class GameDataBase_Stage
     public long                 Key = 0;
     public string               Name = "";
     public EStageType           StageType = EStageType.None;
-    public double               worldMinX = 0;
-    public double               worldMinZ = 0;
-    public double               worldMaxX = 0;
-    public double               worldMaxZ = 0;
+    public string               NavMeshFileName = "";
     public double               sectorSize = 0;
 }
 
@@ -60,11 +57,8 @@ public class GameDataTableBase_Stage
         data.Key = long.Parse(fields[0]);
         data.Name = fields[1];
         data.StageType = (EStageType)int.Parse(fields[2]);
-        data.worldMinX = double.Parse(fields[3]);
-        data.worldMinZ = double.Parse(fields[4]);
-        data.worldMaxX = double.Parse(fields[5]);
-        data.worldMaxZ = double.Parse(fields[6]);
-        data.sectorSize = double.Parse(fields[7]);
+        data.NavMeshFileName = fields[3];
+        data.sectorSize = double.Parse(fields[4]);
 
         if (data.Key <= 0)
             return false;
