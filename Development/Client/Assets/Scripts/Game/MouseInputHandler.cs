@@ -76,7 +76,7 @@ namespace Client.Game
                     {
                         if (!m_hasLastSent || (worldPoint - m_lastSentDest).sqrMagnitude > 0.01f)
                         {
-                            sendMoveDestReq(worldPoint, local.transform.eulerAngles.y);
+                            sendMoveDestReq(worldPoint, local.transform.position, local.transform.eulerAngles.y);
                             m_lastSentDest = worldPoint;
                             m_hasLastSent = true;
                             m_timeSinceLastSend = 0f;
@@ -105,23 +105,27 @@ namespace Client.Game
             m_wasPressed = isPressed;
         }
 
-        private void sendMoveDestReq(Vector3 pos, float dirY)
+        private void sendMoveDestReq(Vector3 dest, Vector3 curPos, float dirY)
         {
             NetworkManager net = NetworkManager.Instance;
             if (net == null || !net.IsConnected) return;
 
             // 좌표계: Unity 와 동일 (X, Y, Z). 서버와 그대로 매핑.
+            // dest = 도착할 목적지, curPos = 클라 현재 위치 (서버가 검증에 사용).
             MoveDestReq req = new MoveDestReq
             {
-                DestX = pos.x,
-                DestY = pos.y,
-                DestZ = pos.z,
+                DestX = dest.x,
+                DestY = dest.y,
+                DestZ = dest.z,
+                PosX  = curPos.x,
+                PosY  = curPos.y,
+                PosZ  = curPos.z,
             };
             net.Send(GamePacketId.MoveDestReq, req);
 
             if (m_debugLog)
             {
-                Debug.Log($"[MouseInput] Sent MoveDestReq pos=({pos.x:F2},{pos.y:F2},{pos.z:F2}) dirY={dirY:F1}");
+                Debug.Log($"[MouseInput] Sent MoveDestReq dest=({dest.x:F2},{dest.y:F2},{dest.z:F2}) pos=({curPos.x:F2},{curPos.y:F2},{curPos.z:F2}) dirY={dirY:F1}");
             }
         }
 

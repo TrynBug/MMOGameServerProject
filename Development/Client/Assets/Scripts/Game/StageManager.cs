@@ -40,6 +40,7 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<StageEnterNtf>(GamePacketId.StageEnterNtf, onStageEnterNtf);
             PacketDispatcher.Instance.Register<ObjectVisibilityNtf>(GamePacketId.ObjectVisibilityNtf, onObjectVisibilityNtf);
             PacketDispatcher.Instance.Register<MoveNtf>(GamePacketId.MoveNtf, onMoveNtf);
+            PacketDispatcher.Instance.Register<MovePosCorrectNtf>(GamePacketId.MovePosCorrectNtf, onMovePosCorrectNtf);
 
             Debug.Log("[StageManager] Ready. Waiting for GameEnterNtf...");
         }
@@ -200,6 +201,20 @@ namespace Client.Game
             }
 
             Debug.Log($"[StageManager] MoveNtf: ObjectId={ntf.ObjectId}, Pos=({ntf.PosX},{ntf.PosY},{ntf.PosZ}), Yaw={ntf.Yaw}, Dest=({ntf.DestX},{ntf.DestY},{ntf.DestZ}), IsMoving={ntf.IsMoving}");
+        }
+
+        // 서버가 내 위치와 서버 위치의 오차가 허용 이상이라고 판단했을 때 보내는 패킷.
+        // 내 캐릭터를 서버 위치로 즉시 스냅한다.
+        // 마우스를 누르고 있는 상태라면 다음 프레임에 MouseInputHandler 가 자동으로 새 목적지를
+        // SetMoveDestination 으로 설정하여 새 위치 기준으로 경로를 다시 계산하고 이어간다.
+        private void onMovePosCorrectNtf(MovePosCorrectNtf ntf)
+        {
+            Debug.LogWarning($"[StageManager] MovePosCorrectNtf: pos=({ntf.PosX:F2},{ntf.PosY:F2},{ntf.PosZ:F2}) yaw={ntf.Yaw:F1}");
+
+            if (LocalPlayer != null)
+            {
+                LocalPlayer.SetPosition(new Vector3(ntf.PosX, ntf.PosY, ntf.PosZ), ntf.Yaw);
+            }
         }
 
         // ─── 내부 유틸 ──────────────────────────────────────────────────
