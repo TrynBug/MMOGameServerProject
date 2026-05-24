@@ -19,10 +19,15 @@ import "Common/packet_id.proto";
 // 캐릭터를 (dest_x, dest_y, dest_z)로 이동시켜달라는 요청.
 // 좌표계: Unity 와 동일. Y는 높이, X-Z 가 평면.
 // 이미 이동 중일 때 다시 받으면 목적지를 갱신한다.
+// pos_x/y/z는 클라의 현재 위치. 서버가 이를 서버 위치와 비교하여 오차가 크면
+// MovePosCorrectNtf를 보낸다. 서버 위치 자체는 이 요청으로 변경되지 않음.
 message MoveDestReq {
     float dest_x = 1;
     float dest_y = 2;             // 높이
     float dest_z = 3;             // 평면 깊이축
+    float pos_x  = 4;             // 클라 현재 위치 (검증용)
+    float pos_y  = 5;             // 높이
+    float pos_z  = 6;             // 평면 깊이축
 }
 
 // 즉시 정지 + 현재 위치 동기화 (클라 -> 서버)
@@ -49,4 +54,16 @@ message MoveNtf {
     bool  is_moving = 7;     // 이동 중 여부
     float pos_z     = 8;     // 현재 위치 평면 깊이축
     float dest_z    = 9;     // 목적지 평면 깊이축
+}
+
+// 위치 보정 알림 (서버 -> 해당 클라만 unicast)
+// 서버가 클라 위치와 서버 위치가 허용 오차를 초과한 것을 감지했을 때 전송.
+// 클라는 이를 받으면 자신의 캐릭터를 서버 위치로 즉시 스냅하고,
+// 진행 중이던 이동이 있다면 새 위치 기준으로 경로를 다시 계산하여 이어감.
+// 좌표계: Unity 와 동일. yaw는 degree.
+message MovePosCorrectNtf {
+    float pos_x = 1;
+    float pos_y = 2;             // 높이
+    float pos_z = 3;             // 평면 깊이축
+    float yaw   = 4;             // degree
 }

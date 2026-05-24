@@ -54,6 +54,9 @@
     <ClCompile Include="Map\NavMeshManager.cpp">
       <Filter>소스 파일\Map</Filter>
     </ClCompile>
+    <ClCompile Include="StageNavMesh.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameServer.h">
@@ -91,6 +94,9 @@
     </ClInclude>
     <ClInclude Include="Map\NavMeshManager.h">
       <Filter>소스 파일\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="StageNavMesh.h">
+      <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

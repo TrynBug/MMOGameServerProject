@@ -3,6 +3,8 @@
 #include "pch.h"
 #include "StageObject.h"
 
+#include <vector>
+
 // 전방선언 (User <-> Character 양방향 참조의 한쪽)
 class User;
 using UserWPtr = std::weak_ptr<User>;
@@ -28,6 +30,12 @@ using UserWPtr = std::weak_ptr<User>;
 // ── 좌표계 ──
 // Unity 와 동일. (X, Y, Z) 3D. Y는 높이, X-Z 가 평면.
 // yaw 는 Y축 회전, degree 단위.
+//
+// ── 이동 (NavMesh 기반) ──
+// SetDestination 호출 시 Stage::FindPath 로 waypoint 리스트를 얻어 따라간다.
+// 길찾기 실패 시 [목적지] 한 점으로만 채워 직선 이동 fallback.
+// MoveNtf 의 dest 는 "최종 목적지" 의미 (waypoint 중간점이 아님).
+// 클라는 받은 dest 로 자기 NavMesh 길찾기를 따로 수행하여 같은 경로를 재현한다.
 class Character : public StageObject
 {
 public:
@@ -58,33 +66,55 @@ public:
 
     // ── 이동 ──────────────────────────────────────────────────────────
     // 좌표계: Unity 와 동일. Y는 높이, X-Z 가 평면. yaw는 Y축 회전, degree.
+    // dest 는 "최종 목적지" 의미 (waypoint 중간점이 아님). MoveNtf 송신에 사용.
     bool  IsMoving()    const { return m_isMoving; }
     float GetDestX()    const { return m_destX; }
     float GetDestY()    const { return m_destY; }   // 높이
     float GetDestZ()    const { return m_destZ; }   // 평면 깊이축
 
-    // 목적지 설정 + 이동 시작. yaw는 X-Z 평면상 목적지 방향으로 자동 계산 (degree).
-    // 목적지가 현재 위치와 거의 같은 위치면 이동 시작 안 함.
+    // 목적지 설정 + 이동 시작.
+    // Stage::FindPath 로 waypoint 리스트를 얻어 따라가기 시작.
+    // 길찾기 실패 시 직선 이동 fallback (waypoint = [목적지] 한 개).
+    // 목적지가 현재 위치와 거의 같으면 이동 시작 안 함.
+    // yaw 는 첫 waypoint 방향으로 자동 계산.
     void SetDestination(float destX, float destY, float destZ);
 
     // 즉시 정지 + 현재 위치/yaw 설정. MoveStopReq 처리용.
+    // waypoint 리스트도 비운다.
     void StopAt(float posX, float posY, float posZ, float yaw);
 
-    // 매 tick 호출. 목적지 방향으로 직선 이동. 도달 시 정지.
-    // (X-Z 평면 상에서 이동. Y는 목적지의 Y로 보간.)
-    // 리턴값: 도달했는지 여부 (true면 정지 상태로 전환됨).
+    // 매 tick 호출. 현재 waypoint 향해 이동, 도달하면 다음 waypoint, 마지막 도달 시 정지.
+    // (X-Z 평면 거리로 도달 판정. Y는 waypoint Y로 직접 보간.)
+    // waypoint 도달 시점마다 yaw 재계산.
+    // 리턴값: 최종 목적지에 도달했는지 여부 (true면 정지 상태로 전환됨).
     bool Update(int64 deltaMs);
 
 private:
+    // 현재 waypoint 를 향해 이동 시작 시점에 yaw 를 갱신.
+    // (X-Z 평면 상의 방향. Unity 호환 degree.)
+    void faceCurrentWaypoint();
+
     DataStructures::Character m_protoData;
     UserWPtr                  m_wpUser;
 
-    // 이동 중 여부. true면 m_destX/Y/Z를 목표로 직선 이동.
-    // (다음 세션에서 NavMesh waypoint 리스트로 교체 예정)
+    // ── 이동 상태 ────────────────────────────────────────────
+    // m_isMoving = false 면 다른 멤버는 의미 없음 (단, m_destX/Y/Z 는 마지막 정지 위치를 보관).
     bool  m_isMoving = false;
-    float m_destX    = 0.0f;
-    float m_destY    = 0.0f;   // 높이
-    float m_destZ    = 0.0f;   // 평면 깊이축
+
+    // 최종 목적지 (SetDestination 인자). MoveNtf 의 dest 필드로 송신.
+    float m_destX = 0.0f;
+    float m_destY = 0.0f;   // 높이
+    float m_destZ = 0.0f;   // 평면 깊이축
+
+    // Waypoint 리스트. (x, y, z) 트리플 순서로 floats * 3N 개.
+    // 비어있지 않으면 [0..2] 는 첫 번째 waypoint, [3..5] 는 두 번째, ...
+    // 마지막 waypoint 가 최종 목적지에 해당.
+    // m_isMoving=true 동안만 의미 있음.
+    std::vector<float> m_waypoints;
+
+    // m_waypoints 에서 현재 향해가는 waypoint 인덱스 (트리플 단위, 0-based).
+    // 0 이면 m_waypoints[0..2] 를 향함. 도달 시 ++.
+    int32 m_curWaypointIdx = 0;
 };
 
 using CharacterPtr  = std::shared_ptr<Character>;

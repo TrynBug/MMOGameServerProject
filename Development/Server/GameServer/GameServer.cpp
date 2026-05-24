@@ -520,6 +520,20 @@ void GameServer::SendMoveNtf(int64 userId, int64 objectId,
     sendPacketToUser(userId, Common::GAME_PACKET_ID_MOVE_NTF, ntf);
 }
 
+void GameServer::SendMovePosCorrectNtf(int64 userId, float posX, float posY, float posZ, float yaw)
+{
+    GamePacket::MovePosCorrectNtf ntf;
+    ntf.set_pos_x(posX);
+    ntf.set_pos_y(posY);
+    ntf.set_pos_z(posZ);
+    ntf.set_yaw(yaw);
+
+    sendPacketToUser(userId, Common::GAME_PACKET_ID_MOVE_POS_CORRECT_NTF, ntf);
+
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: MovePosCorrectNtf sent. userId={} pos=({},{},{}) yaw={}",
+        userId, posX, posY, posZ, yaw));
+}
+
 // 클라이언트 캐릭터 선택 요청 처리 → 코루틴
 // 1) DB에서 (user_id, character_id) 로 캐릭터 조회
 // 2) 없는 캐릭터면 CharacterSelectFailNtf 전송 후 종료

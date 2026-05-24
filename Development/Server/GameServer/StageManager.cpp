@@ -81,6 +81,16 @@ TownPtr StageManager::CreateTown(int64 stageId)
     TownPtr spStage = std::make_shared<Town>(stageId);
     spStage->SetGameServer(m_pGameServer);
 
+    // NavMesh 설정. 지금은 "NetworkTestScene" 하드코딩.
+    // (향후 GameData_Stage 에 navmesh 파일명 컴럼 추가 예정)
+    const dtNavMesh* pNavMesh = m_pGameServer->GetNavMeshManager().Find("NetworkTestScene");
+    if (!pNavMesh)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("StageManager::CreateTown - NavMesh 'NetworkTestScene' not found. stageId={} (길찾기 비활성화)",
+            stageId));
+    }
+    spStage->SetNavMesh(pNavMesh);
+
     const int32 threadIdx = computeStageThreadIndex(stageId);
     m_pGameServer->AssignContents(threadIdx, spStage);
 

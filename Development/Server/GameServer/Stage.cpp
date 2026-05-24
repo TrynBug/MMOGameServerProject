@@ -2,6 +2,7 @@
 #include "Stage.h"
 #include "Character.h"   // OnUserEnter에서 Character를 m_objects에 등록하기 위해 완전타입 필요
 #include "GameServer.h"   // OnUserEnter/OnUserLeave에서 visibility 패킷 전송 위해 필요
+#include "StageNavMesh.h"  // SetNavMesh 구현에서 StageNavMesh 완전타입 필요
 
 #include "Generated/GameData_Stage.h"
 
@@ -82,6 +83,35 @@ Stage::Stage(int64 stageId, EStageType stageType,
     , m_sectorSize(sectorSize)
 {
     initializeSectorGrid();
+}
+
+Stage::~Stage()
+{
+    // m_pStageNavMesh 의 unique_ptr 소멸자가 자동으로 StageNavMesh::~StageNavMesh() 호출.
+    // StageNavMesh 의 완전타입을 .cpp 에서만 알 수 있으므로 destructor 는 여기에 있어야 한다.
+}
+
+void Stage::SetNavMesh(const dtNavMesh* pNavMesh)
+{
+    // 이전것 정리 후 새로 생성.
+    // pNavMesh 가 nullptr 이면 StageNavMesh 생성자가 IsReady()=false 로 둘다.
+    m_pStageNavMesh = std::make_unique<StageNavMesh>(pNavMesh);
+
+    LOG_WRITE(LogLevel::Info, std::format("Stage::SetNavMesh - stageId={} ready={}",
+        m_stageId, m_pStageNavMesh->IsReady()));
+}
+
+bool Stage::FindPath(float startX, float startY, float startZ,
+                     float endX,   float endY,   float endZ,
+                     std::vector<float>& outWaypoints) const
+{
+    outWaypoints.clear();
+    if (!m_pStageNavMesh)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("Stage::FindPath - StageNavMesh not set. stageId={}", m_stageId));
+        return false;
+    }
+    return m_pStageNavMesh->FindPath(startX, startY, startZ, endX, endY, endZ, outWaypoints);
 }
 
 void Stage::initializeSectorGrid()
@@ -501,6 +531,26 @@ void Stage::OnUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacke
                 m_stageId, spUser->GetUserId()));
             return;
         }
+
+        // 클라가 보낸 현재 위치와 서버 위치의 X-Z 오차 검증.
+        // 오차가 허용 이상이면 MovePosCorrectNtf 송신 (서버 위치는 변경 안 함).
+        // dest 처리는 그대로 수행한다.
+        const float dx = req.pos_x() - spCharacter->GetPosX();
+        const float dz = req.pos_z() - spCharacter->GetPosZ();
+        const float distSq = dx * dx + dz * dz;
+        const float tolSq  = k_movePositionTolerance * k_movePositionTolerance;
+
+        if (distSq > tolSq)
+        {
+            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveDestReq position out of tolerance. stageId={} userId={} clientPos=({},{},{}) serverPos=({},{},{}) sending MovePosCorrectNtf",
+                m_stageId, spUser->GetUserId(),
+                req.pos_x(), req.pos_y(), req.pos_z(),
+                spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ()));
+            GetGameServer()->SendMovePosCorrectNtf(spUser->GetUserId(),
+                spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(),
+                spCharacter->GetYaw());
+        }
+
         spCharacter->SetDestination(req.dest_x(), req.dest_y(), req.dest_z());
         broadcastMoveNtf(*spCharacter);
         return;
@@ -534,12 +584,15 @@ void Stage::OnUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacke
         }
         else
         {
-            // 서버 위치로 고정. 향후 위치 보정 패킷 추가 예정.
-            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveStopReq position out of tolerance. stageId={} userId={} clientPos=({},{},{}) serverPos=({},{},{})",
+            // 서버 위치로 고정 + 보정 패킷 송신.
+            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveStopReq position out of tolerance. stageId={} userId={} clientPos=({},{},{}) serverPos=({},{},{}) sending MovePosCorrectNtf",
                 m_stageId, spUser->GetUserId(),
                 req.pos_x(), req.pos_y(), req.pos_z(),
                 spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ()));
             spCharacter->StopAt(spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), req.yaw());
+            GetGameServer()->SendMovePosCorrectNtf(spUser->GetUserId(),
+                spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(),
+                spCharacter->GetYaw());
         }
         broadcastMoveNtf(*spCharacter);
         return;

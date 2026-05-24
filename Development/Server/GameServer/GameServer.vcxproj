@@ -97,6 +97,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="GameServerDefine.h" />
     <ClInclude Include="Stage.h" />
+    <ClInclude Include="StageNavMesh.h" />
     <ClInclude Include="StageObject.h" />
     <ClInclude Include="Sector.h" />
     <ClInclude Include="SystemStage.h" />
@@ -113,6 +114,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="StageNavMesh.cpp" />
     <ClCompile Include="StageObject.cpp" />
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="SystemStage.cpp" />

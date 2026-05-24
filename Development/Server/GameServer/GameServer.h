@@ -40,6 +40,14 @@ public:
                      float posX, float posY, float posZ, float yaw,
                      float destX, float destY, float destZ, bool isMoving);
 
+    // 위치 보정 알림 전송 (MovePosCorrectNtf). 서버가 클라 위치와 서버 위치의 오차가
+    // 너무 크다고 판단했을 때 해당 유저에게 unicast.
+    void SendMovePosCorrectNtf(int64 userId, float posX, float posY, float posZ, float yaw);
+
+    // NavMesh 데이터에 접근. Stage 가 자신의 NavMesh 를 설정할 때 사용.
+    NavMeshManager&       GetNavMeshManager()       { return m_navMeshManager; }
+    const NavMeshManager& GetNavMeshManager() const { return m_navMeshManager; }
+
 protected:
     // ServerBase 훅
     bool OnInitialize()                              override;

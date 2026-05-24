@@ -16,9 +16,16 @@ constexpr int32 k_aoiRange = 1;
 // 캐릭터 이동 속도 (유닛/초). 향후 GameData_Job으로 이관 예정.
 constexpr float k_characterMoveSpeed = 5.0f;
 
-// MoveStopReq 수신 시 클라 위치와 서버 위치의 허용 오차 (유닛).
-// 이 범위 내면 클라 위치를 인정, 밖이면 서버 위치로 보정 예정 (보정 패킷은 아직 없음).
-constexpr float k_movePositionTolerance = 1.0f;
+// MoveStopReq 수신 시 클라 위치와 서버 위치의 허용 오차 (X-Z 평면 거리, 유닛).
+// MoveDestReq/MoveStopReq 둘 다 이 값을 사용.
+// 이 범위 내면 클라 위치 인정, 초과면 MovePosCorrectNtf 송신.
+//
+// 값 결정 근거:
+//   - 이동 방향이 바뀌면 클라가 200ms 주기로 더 자주 경로를 다시 잡는 동안 서버는 500ms 동안 옷 경로를
+//     따라가기 때문에 1~1.5m 정도의 누적 오차가 자연스럽게 발생.
+//   - 3.0m 면 이런 정상 플레이에서는 통과, 텍일포트 수준의 이상 이동만 감지.
+//   - 향후 이동중 vs 정지시 동적 tolerance, 속도 기반 검증 등으로 개선 예정.
+constexpr float k_movePositionTolerance = 3.0f;
 
 // 내부서버 세션 추가 데이터
 struct InternalSessionMeta

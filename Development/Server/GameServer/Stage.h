@@ -9,6 +9,14 @@
 
 #include <variant>
 
+// Detour forward declaration.
+// SetNavMesh 가 const dtNavMesh* 를 받기 위해서만 필요. 다른 dtXxx 는 StageNavMesh 가 흡수.
+class dtNavMesh;
+
+// NavMesh 길찾기 헬퍼는 StageNavMesh 로 분리되어 있다 (Sector 처럼).
+// 헤더에서는 전방선언만, 멤버는 unique_ptr 로 보관 (Stage 소멸자가 .cpp 에 있어야 함).
+class StageNavMesh;
+
 
 // GameServer와의 직접 의존을 피하기 위한 forward declaration.
 // (Stage 파생 클래스에서 GameServer의 서비스(패킷 전송 등)를 호출해야 할 때 사용.)
@@ -107,7 +115,8 @@ public:
           double worldMaxX, double worldMaxZ,
           double sectorSize);
 
-    ~Stage() override = default;
+    // 다형성 소멸자 + dtNavMeshQuery / dtQueryFilter 정리 필요해 .cpp 에서 구현.
+    ~Stage() override;
 
     Stage(const Stage&) = delete;
     Stage& operator=(const Stage&) = delete;
@@ -139,6 +148,19 @@ public:
 
     // 좌표로 섹터 직접 조회. 맵 영역 바깥이면 nullptr.
     Sector*       GetSectorByPos(float posX, float posZ);
+
+    // ── NavMesh 길찾기 ───────────────────────────────────
+    // 실제 길찾기 로직은 StageNavMesh 에 위임. Stage 는 lifetime 관리만.
+    //
+    // SetNavMesh: NavMeshManager 로부터 받은 dtNavMesh 로 StageNavMesh 인스턴스 생성.
+    //   StageManager 가 Stage 생성 직후 호출한다. nullptr 도 허용 (길찾기 비활성화).
+    void SetNavMesh(const dtNavMesh* pNavMesh);
+
+    // 길찾기. StageNavMesh 가 초기화 안 됐거나 nullptr 이면 false.
+    // 좌표계: Unity 와 동일. outWaypoints 는 (x,y,z) 세트 순서로 채워짐.
+    bool FindPath(float startX, float startY, float startZ,
+                  float endX,   float endY,   float endZ,
+                  std::vector<float>& outWaypoints) const;
 
     // GameServer 주입. 생성 직후 소유자가 설정한다.
     // Stage 파생 클래스가 패킷 전송 등을 위해 사용.
@@ -279,6 +301,11 @@ private:
     std::unordered_map<int64, StageObjectPtr> m_monsterObjects;
     std::unordered_map<int64, StageObjectPtr> m_propObjects;
     std::unordered_map<int64, StageObjectPtr> m_dropObjects;
+
+    // ── NavMesh ────────────────────────────────────────────
+    // 길찾기 로직 + dtNavMeshQuery/dtQueryFilter lifetime 은 StageNavMesh 가 담당.
+    // Stage 가 nullptr 이면 NavMesh 미설정 상태 (길찾기 비활성화).
+    std::unique_ptr<StageNavMesh> m_pStageNavMesh;
 };
 
 using StagePtr  = std::shared_ptr<Stage>;
