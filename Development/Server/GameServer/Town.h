@@ -9,8 +9,13 @@
 class Town : public Stage
 {
 public:
-    // GameData_Stage 키로 생성. 해당 데이터의 stageType/world bounds/sectorSize를 사용.
+    // GameData_Stage 키로 생성. 해당 데이터의 stageType/sectorSize 는 사용하고,
+    // worldMin/Max 는 LoadStageGridParams 의 fallback 값이 사용된다 (NavMesh 메타가 없을 때용).
     explicit Town(int64 stageId);
+
+    // 명시적 params 로 생성. StageManager 에서 NavMesh 메타로 worldMin/Max 를 덮어쓴 params 를 보낸다.
+    Town(int64 stageId, const StageGridParams& params);
+
     ~Town() override = default;
 
     Town(const Town&) = delete;
@@ -22,10 +27,6 @@ protected:
     // 유저 입장 처리 override.
     // Stage::OnUserEnter 호출하여 User/Character를 등록한 후, StageEnterNtf를 클라에게 전송.
     void OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter) override;
-
-private:
-    // 위임 생성자용 private 생성자. StageGridParams를 1회만 평가하기 위해 사용.
-    Town(int64 stageId, const StageGridParams& params);
 };
 
 using TownPtr = std::shared_ptr<Town>;

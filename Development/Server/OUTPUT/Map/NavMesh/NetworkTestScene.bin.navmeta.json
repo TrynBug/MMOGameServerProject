@@ -1,0 +1,13 @@
+{
+  "navmesh_file": "NetworkTestScene.bin",
+  "bounds": {
+    "min_x": -25,
+    "min_z": -25,
+    "max_x": 32.600002288818359,
+    "max_z": 32.600002288818359
+  },
+  "tiles_count": 36,
+  "walkable_polygons_count": 47,
+  "generated_at": "2026-05-24T15:07:30Z",
+  "generator_version": "1.0"
+}

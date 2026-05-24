@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "StageManager.h"
 #include "GameServer.h"   // AssignContents/RemoveContents/GetContentsThreadCount 호출
+#include "Stage.h"        // LoadStageGridParams
+#include "Map/NavMeshManager.h"  // NavMeshMeta
 
 void StageManager::Initialize(GameServer* pGameServer, int32 contentsThreadCount)
 {
@@ -78,16 +80,47 @@ TownPtr StageManager::CreateTown(int64 stageId)
         return nullptr;
     }
 
-    TownPtr spStage = std::make_shared<Town>(stageId);
+    // 1) GameData_Stage 에서 stageType/navMeshFileName/sectorSize 읽는다. worldMin/Max 는 fallback.
+    StageGridParams params = LoadStageGridParams(stageId);
+
+    // 2) NavMesh 메타가 있으면 worldMin/Max 를 해당 메타의 bounds 로 덮어쓴다.
+    //    메타가 없으면(파일 누락 등) fallback 그대로 사용.
+    const dtNavMesh*   pNavMesh = nullptr;
+    const NavMeshMeta* pMeta    = nullptr;
+    if (!params.navMeshFileName.empty())
+    {
+        pNavMesh = m_pGameServer->GetNavMeshManager().Find(params.navMeshFileName);
+        pMeta    = m_pGameServer->GetNavMeshManager().FindMeta(params.navMeshFileName);
+    }
+
+    if (pMeta)
+    {
+        params.worldMinX = pMeta->minX;
+        params.worldMinZ = pMeta->minZ;
+        params.worldMaxX = pMeta->maxX;
+        params.worldMaxZ = pMeta->maxZ;
+        LOG_WRITE(LogLevel::Info, std::format(
+            "StageManager::CreateTown - using NavMesh meta bounds. stageId={} navMesh={} bounds=({:.3f},{:.3f})~({:.3f},{:.3f})",
+            stageId, params.navMeshFileName,
+            params.worldMinX, params.worldMinZ, params.worldMaxX, params.worldMaxZ));
+    }
+    else if (!params.navMeshFileName.empty())
+    {
+        LOG_WRITE(LogLevel::Warn, std::format(
+            "StageManager::CreateTown - NavMesh meta not found, using fallback bounds. stageId={} navMesh={}",
+            stageId, params.navMeshFileName));
+    }
+
+    // 3) Town 생성. 명시적 params 를 전달하는 생성자 사용.
+    TownPtr spStage = std::make_shared<Town>(stageId, params);
     spStage->SetGameServer(m_pGameServer);
 
-    // NavMesh 설정. 지금은 "NetworkTestScene" 하드코딩.
-    // (향후 GameData_Stage 에 navmesh 파일명 컴럼 추가 예정)
-    const dtNavMesh* pNavMesh = m_pGameServer->GetNavMeshManager().Find("NetworkTestScene");
-    if (!pNavMesh)
+    // 4) NavMesh 객체 부착. nullptr 이면 길찾기 비활성화.
+    if (!pNavMesh && !params.navMeshFileName.empty())
     {
-        LOG_WRITE(LogLevel::Warn, std::format("StageManager::CreateTown - NavMesh 'NetworkTestScene' not found. stageId={} (길찾기 비활성화)",
-            stageId));
+        LOG_WRITE(LogLevel::Warn, std::format(
+            "StageManager::CreateTown - NavMesh not found. stageId={} navMesh={} (길찾기 비활성화)",
+            stageId, params.navMeshFileName));
     }
     spStage->SetNavMesh(pNavMesh);
 

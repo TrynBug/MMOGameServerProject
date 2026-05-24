@@ -27,20 +27,22 @@ class Character;
 using CharacterPtr = std::shared_ptr<Character>;
 
 
-// StageGridParams: GameData_Stage에서 읽어온 Stage 공간 정보.
-// Stage 파생 클래스가 생성자에서 LoadStageGridParams를 1회 호출한 다음
-// 그 결과를 Stage 기본 생성자에 펼쳐서 전달한다.
+// StageGridParams: Stage 공간 정보 + NavMesh 매핑.
+// Stage 파생 클래스가 생성자에서 LoadStageGridParams 로 일부 필드를 채우고,
+// 그 뒤에 NavMeshManager 의 NavMeshMeta 로 worldMin/Max 를 채워 Stage 기본 생성자로 전달한다.
 struct StageGridParams
 {
-    EStageType stageType  = EStageType::None;
-    double     worldMinX  = 0.0;
-    double     worldMinZ  = 0.0;
-    double     worldMaxX  = 0.0;
-    double     worldMaxZ  = 0.0;
-    double     sectorSize = 0.0;
+    EStageType  stageType       = EStageType::None;
+    std::string navMeshFileName;     // GameData_Stage::NavMeshFileName. NavMeshManager Find 의 키.
+    double      worldMinX  = 0.0;
+    double      worldMinZ  = 0.0;
+    double      worldMaxX  = 0.0;
+    double      worldMaxZ  = 0.0;
+    double      sectorSize = 0.0;
 };
 
-// stageId로 GameData_Stage를 조회하여 StageGridParams를 채워 리턴한다.
+// stageId로 GameData_Stage를 조회하여 StageGridParams의 stageType / navMeshFileName / sectorSize 를 채운다.
+// worldMin/Max 는 여기서 채우지 않는다 (NavMesh 메타에서 가져와야 하므로 호출자가 채운다).
 // 데이터가 없으면 에러 로그를 남기고 기본값(fallback)을 리턴.
 StageGridParams LoadStageGridParams(int64 stageId);
 

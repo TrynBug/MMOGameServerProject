@@ -35,8 +35,13 @@ namespace
 
     constexpr int64 k_heartbeatIntervalMs = 5000;   // 5초마다 1번 heartbeat 로그
 
-    // GameData_Stage 로딩 실패 시 fallback grid 값. (X-Z 평면)
-    // 데이터가 제대로 로드되지 않더라도 객체 자체는 동작하도록 안전망.
+    // GameData_Stage 에는 worldMin/Max 이 없습니다 (NavMesh 메타에서 가져옵). 그래서 LoadStageGridParams 의
+    // 기본값으로 아래 fallback 을 쓴다. 조건:
+    //   - NavMesh 가 필요한 Stage(Town 등)는 생성 과정에서 NavMeshManager 의 NavMeshMeta 로
+    //     bounds 를 덮어쓰므로 이 fallback 은 사용되지 않는다.
+    //   - NavMesh 가 필요없는 Stage(SystemStage 등)는 sector grid 자체를 쓰지 않으므로
+    //     bounds 값이 무엇이든 완전히 안전하다. 그래도 initializeSectorGrid 이 에러 로그를
+    //     남기지 않도록 수치적으로 유효한 값으로 둔다.
     constexpr double k_fallbackWorldMinX  = -500.0;
     constexpr double k_fallbackWorldMinZ  = -500.0;
     constexpr double k_fallbackWorldMaxX  =  500.0;
@@ -47,25 +52,25 @@ namespace
 StageGridParams LoadStageGridParams(int64 stageId)
 {
     StageGridParams params;
+    // worldMin/Max 는 fallback 으로 기본 세팅. NavMesh 가 있는 Stage 는 호출자가 NavMeshMeta 로 덮어쓴다.
+    params.worldMinX = k_fallbackWorldMinX;
+    params.worldMinZ = k_fallbackWorldMinZ;
+    params.worldMaxX = k_fallbackWorldMaxX;
+    params.worldMaxZ = k_fallbackWorldMaxZ;
+
     const GameData_Stage* pData = GameDataTable_Stage::FindData(stageId);
     if (!pData)
     {
-        LOG_WRITE(LogLevel::Error, std::format("LoadStageGridParams: GameData_Stage not found. stageId={}. using fallback grid.", stageId));
+        LOG_WRITE(LogLevel::Error, std::format("LoadStageGridParams: GameData_Stage not found. stageId={}. using fallback values.", stageId));
         params.stageType  = EStageType::None;
-        params.worldMinX  = k_fallbackWorldMinX;
-        params.worldMinZ  = k_fallbackWorldMinZ;
-        params.worldMaxX  = k_fallbackWorldMaxX;
-        params.worldMaxZ  = k_fallbackWorldMaxZ;
+        params.navMeshFileName.clear();
         params.sectorSize = k_fallbackSectorSize;
     }
     else
     {
-        params.stageType  = pData->StageType;
-        params.worldMinX  = pData->worldMinX;
-        params.worldMinZ  = pData->worldMinZ;
-        params.worldMaxX  = pData->worldMaxX;
-        params.worldMaxZ  = pData->worldMaxZ;
-        params.sectorSize = pData->sectorSize;
+        params.stageType       = pData->StageType;
+        params.navMeshFileName = pData->NavMeshFileName;
+        params.sectorSize      = pData->sectorSize;
     }
     return params;
 }
@@ -531,26 +536,6 @@ void Stage::OnUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacke
                 m_stageId, spUser->GetUserId()));
             return;
         }
-
-        // 클라가 보낸 현재 위치와 서버 위치의 X-Z 오차 검증.
-        // 오차가 허용 이상이면 MovePosCorrectNtf 송신 (서버 위치는 변경 안 함).
-        // dest 처리는 그대로 수행한다.
-        const float dx = req.pos_x() - spCharacter->GetPosX();
-        const float dz = req.pos_z() - spCharacter->GetPosZ();
-        const float distSq = dx * dx + dz * dz;
-        const float tolSq  = k_movePositionTolerance * k_movePositionTolerance;
-
-        if (distSq > tolSq)
-        {
-            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveDestReq position out of tolerance. stageId={} userId={} clientPos=({},{},{}) serverPos=({},{},{}) sending MovePosCorrectNtf",
-                m_stageId, spUser->GetUserId(),
-                req.pos_x(), req.pos_y(), req.pos_z(),
-                spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ()));
-            GetGameServer()->SendMovePosCorrectNtf(spUser->GetUserId(),
-                spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(),
-                spCharacter->GetYaw());
-        }
-
         spCharacter->SetDestination(req.dest_x(), req.dest_y(), req.dest_z());
         broadcastMoveNtf(*spCharacter);
         return;
@@ -584,15 +569,12 @@ void Stage::OnUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacke
         }
         else
         {
-            // 서버 위치로 고정 + 보정 패킷 송신.
-            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveStopReq position out of tolerance. stageId={} userId={} clientPos=({},{},{}) serverPos=({},{},{}) sending MovePosCorrectNtf",
+            // 서버 위치로 고정. 향후 위치 보정 패킷 추가 예정.
+            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveStopReq position out of tolerance. stageId={} userId={} clientPos=({},{},{}) serverPos=({},{},{})",
                 m_stageId, spUser->GetUserId(),
                 req.pos_x(), req.pos_y(), req.pos_z(),
                 spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ()));
             spCharacter->StopAt(spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), req.yaw());
-            GetGameServer()->SendMovePosCorrectNtf(spUser->GetUserId(),
-                spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(),
-                spCharacter->GetYaw());
         }
         broadcastMoveNtf(*spCharacter);
         return;

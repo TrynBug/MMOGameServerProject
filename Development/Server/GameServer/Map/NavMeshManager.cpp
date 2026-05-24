@@ -1,10 +1,14 @@
 #include "pch.h"
 #include "NavMeshManager.h"
 
+#include "nlohmann/json.hpp"  // nlohmann/json
+
+#include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <fstream>
+#include <limits>
 #include <vector>
-
 
 // ─────────────────────────────────────────────────────────────
 // 파일 포맷 정의 (Recast/Detour 공식 데모 Sample_TileMesh)
@@ -31,6 +35,9 @@ namespace
         dtTileRef tileRef;
         int32     dataSize;
     };
+
+    // 메타 검증 시 부동소수 비교 허용 오차. NavMesh 단위는 m 이므로 1mm.
+    constexpr double k_metaBoundsEpsilon = 1e-3;
 }
 
 
@@ -87,10 +94,39 @@ bool NavMeshManager::LoadAll(const std::filesystem::path& dirPath)
 
         LOG_WRITE(LogLevel::Info, std::format("NavMeshManager::LoadAll - loaded. name={} path={}",
             name, filePath.string()));
+
+        // ── 메타 로드 + 검증 ─────────────────────────────────────
+        // 같은 디렉토리의 "<binFileName>.navmeta.json" 을 시도.
+        // (예: NetworkTestScene.bin → NetworkTestScene.bin.navmeta.json)
+        // 메타가 없으면 그냥 패스. 있으면 .bin 실제 데이터와 대조 검증.
+        const fs::path metaPath = filePath.string() + ".navmeta.json";
+        if (!fs::exists(metaPath, ec))
+        {
+            LOG_WRITE(LogLevel::Warn, std::format("NavMeshManager::LoadAll - meta file not found. name={} metaPath={}",
+                name, metaPath.string()));
+            continue;
+        }
+
+        NavMeshMeta meta;
+        if (!loadMetaFromFile(metaPath, meta))
+        {
+            // 파싱 실패. 메타 등록 안 함. 로그는 loadMetaFromFile 안에서.
+            continue;
+        }
+
+        const NavMeshMeta actual = computeMetaFromNavMesh(pNavMesh);
+        validateMeta(name, meta, actual);
+
+        // 검증 결과와 무관하게 메타 등록 (서버는 메타값을 사용).
+        m_navMeshMetas[name] = meta;
+
+        LOG_WRITE(LogLevel::Info, std::format(
+            "NavMeshManager::LoadAll - meta loaded. name={} bounds=({:.3f},{:.3f})~({:.3f},{:.3f}) tilesCount={} walkablePolygonsCount={}",
+            name, meta.minX, meta.minZ, meta.maxX, meta.maxZ, meta.tilesCount, meta.walkablePolygonsCount));
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("NavMeshManager::LoadAll - done. dir={} success={} fail={}",
-        dirPath.string(), successCount, failCount));
+    LOG_WRITE(LogLevel::Info, std::format("NavMeshManager::LoadAll - done. dir={} success={} fail={} metaCount={}",
+        dirPath.string(), successCount, failCount, static_cast<int32>(m_navMeshMetas.size())));
 
     return successCount > 0;
 }
@@ -103,6 +139,14 @@ const dtNavMesh* NavMeshManager::Find(const std::string& name) const
     return iter->second;
 }
 
+const NavMeshMeta* NavMeshManager::FindMeta(const std::string& name) const
+{
+    auto iter = m_navMeshMetas.find(name);
+    if (iter == m_navMeshMetas.end())
+        return nullptr;
+    return &iter->second;
+}
+
 void NavMeshManager::Clear()
 {
     for (auto& [name, pNavMesh] : m_navMeshes)
@@ -111,6 +155,7 @@ void NavMeshManager::Clear()
             dtFreeNavMesh(pNavMesh);
     }
     m_navMeshes.clear();
+    m_navMeshMetas.clear();
 }
 
 dtNavMesh* NavMeshManager::loadNavMeshFromFile(const std::filesystem::path& filePath)
@@ -256,4 +301,123 @@ dtNavMesh* NavMeshManager::loadNavMeshFromFile(const std::filesystem::path& file
 
     std::fclose(pFile);
     return pNavMesh;
+}
+
+NavMeshMeta NavMeshManager::computeMetaFromNavMesh(const dtNavMesh* pNavMesh)
+{
+    // 클라이언트 NavMeshBuilder 와 동일한 방식: 모든 유효 타일의 bmin/bmax X-Z 합으로 AABB,
+    // walkable polygons 는 각 타일 header 의 polyCount 합.
+    NavMeshMeta meta;
+    if (!pNavMesh)
+        return meta;
+
+    double minX =  (std::numeric_limits<double>::max)();
+    double minZ =  (std::numeric_limits<double>::max)();
+    double maxX = -(std::numeric_limits<double>::max)();
+    double maxZ = -(std::numeric_limits<double>::max)();
+    int32  validTileCount = 0;
+    int32  totalPolys = 0;
+
+    const int32 maxTiles = pNavMesh->getMaxTiles();
+    for (int32 i = 0; i < maxTiles; ++i)
+    {
+        const dtMeshTile* pTile = pNavMesh->getTile(i);
+        if (!pTile || !pTile->header)
+            continue;
+
+        const dtMeshHeader* h = pTile->header;
+        if (static_cast<double>(h->bmin[0]) < minX) minX = h->bmin[0];
+        if (static_cast<double>(h->bmin[2]) < minZ) minZ = h->bmin[2];
+        if (static_cast<double>(h->bmax[0]) > maxX) maxX = h->bmax[0];
+        if (static_cast<double>(h->bmax[2]) > maxZ) maxZ = h->bmax[2];
+        totalPolys += h->polyCount;
+        ++validTileCount;
+    }
+
+    if (validTileCount == 0)
+    {
+        // 유효한 tile 이 0 개면 bounds 0으로.
+        meta.minX = 0.0; meta.minZ = 0.0; meta.maxX = 0.0; meta.maxZ = 0.0;
+    }
+    else
+    {
+        meta.minX = minX;
+        meta.minZ = minZ;
+        meta.maxX = maxX;
+        meta.maxZ = maxZ;
+    }
+    meta.tilesCount = validTileCount;
+    meta.walkablePolygonsCount = totalPolys;
+    return meta;
+}
+
+bool NavMeshManager::loadMetaFromFile(const std::filesystem::path& metaPath, NavMeshMeta& outMeta)
+{
+    std::ifstream ifs(metaPath, std::ios::in | std::ios::binary);
+    if (!ifs.is_open())
+    {
+        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadMetaFromFile - failed to open. path={}",
+            metaPath.string()));
+        return false;
+    }
+
+    nlohmann::json j;
+    try
+    {
+        ifs >> j;
+    }
+    catch (const std::exception& ex)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadMetaFromFile - json parse failed. path={} reason={}",
+            metaPath.string(), ex.what()));
+        return false;
+    }
+
+    try
+    {
+        const auto& bounds = j.at("bounds");
+        outMeta.minX = bounds.at("min_x").get<double>();
+        outMeta.minZ = bounds.at("min_z").get<double>();
+        outMeta.maxX = bounds.at("max_x").get<double>();
+        outMeta.maxZ = bounds.at("max_z").get<double>();
+        outMeta.tilesCount = j.at("tiles_count").get<int32>();
+        outMeta.walkablePolygonsCount = j.at("walkable_polygons_count").get<int32>();
+    }
+    catch (const std::exception& ex)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadMetaFromFile - missing/invalid field. path={} reason={}",
+            metaPath.string(), ex.what()));
+        return false;
+    }
+
+    return true;
+}
+
+void NavMeshManager::validateMeta(const std::string& name, const NavMeshMeta& meta, const NavMeshMeta& actual)
+{
+    auto closeEnough = [](double a, double b)
+    {
+        return std::abs(a - b) <= k_metaBoundsEpsilon;
+    };
+
+    const bool boundsOk = closeEnough(meta.minX, actual.minX)
+                       && closeEnough(meta.minZ, actual.minZ)
+                       && closeEnough(meta.maxX, actual.maxX)
+                       && closeEnough(meta.maxZ, actual.maxZ);
+    const bool tilesOk = meta.tilesCount == actual.tilesCount;
+    const bool polysOk = meta.walkablePolygonsCount == actual.walkablePolygonsCount;
+
+    if (boundsOk && tilesOk && polysOk)
+        return;
+
+    LOG_WRITE(LogLevel::Error, std::format(
+        "NavMeshManager::validateMeta - mismatch. name={} "
+        "metaBounds=({:.3f},{:.3f})~({:.3f},{:.3f}) actualBounds=({:.3f},{:.3f})~({:.3f},{:.3f}) "
+        "metaTiles={} actualTiles={} metaPolys={} actualPolys={} "
+        "(NavMesh 를 다시 빌드해 주세요. 서버는 메타 bounds 를 사용해 계속 진행합니다.)",
+        name,
+        meta.minX, meta.minZ, meta.maxX, meta.maxZ,
+        actual.minX, actual.minZ, actual.maxX, actual.maxZ,
+        meta.tilesCount, actual.tilesCount,
+        meta.walkablePolygonsCount, actual.walkablePolygonsCount));
 }
