@@ -9,8 +9,8 @@ SystemStage::SystemStage(int64 stageId)
 SystemStage::SystemStage(int64 stageId, const StageGridParams& params)
     : Stage(stageId,
             params.stageType,
-            params.worldMinX, params.worldMinY,
-            params.worldMaxX, params.worldMaxY,
+            params.worldMinX, params.worldMinZ,
+            params.worldMaxX, params.worldMaxZ,
             params.sectorSize)
 {
 }

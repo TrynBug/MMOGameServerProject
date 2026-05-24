@@ -229,6 +229,7 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
     kPosXFieldNumber = 10,
     kPosYFieldNumber = 11,
     kYawFieldNumber = 12,
+    kPosZFieldNumber = 13,
   };
   // string name = 3;
   void clear_name() ;
@@ -355,11 +356,21 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
   void _internal_set_yaw(float value);
 
   public:
+  // float pos_z = 13;
+  void clear_pos_z() ;
+  float pos_z() const;
+  void set_pos_z(float value);
+
+  private:
+  float _internal_pos_z() const;
+  void _internal_set_pos_z(float value);
+
+  public:
   // @@protoc_insertion_point(class_scope:GamePacket.CharacterSpawnInfo)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<4, 12,
+  static const ::google::protobuf::internal::TcParseTable<4, 13,
                                    0, 50,
                                    2>
       _table_;
@@ -393,6 +404,7 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
     float pos_x_;
     float pos_y_;
     float yaw_;
+    float pos_z_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -973,6 +985,31 @@ inline float CharacterSpawnInfo::_internal_yaw() const {
 inline void CharacterSpawnInfo::_internal_set_yaw(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.yaw_ = value;
+}
+
+// float pos_z = 13;
+inline void CharacterSpawnInfo::clear_pos_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00001000U);
+}
+inline float CharacterSpawnInfo::pos_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.pos_z)
+  return _internal_pos_z();
+}
+inline void CharacterSpawnInfo::set_pos_z(float value) {
+  _internal_set_pos_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00001000U);
+  // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.pos_z)
+}
+inline float CharacterSpawnInfo::_internal_pos_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_z_;
+}
+inline void CharacterSpawnInfo::_internal_set_pos_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = value;
 }
 
 // -------------------------------------------------------------------

@@ -16,11 +16,13 @@ import "Common/packet_id.proto";
 // - 클라/서버 동기화 오차 검증은 향후 단계에서 추가.
 
 // 목적지로 이동 시작/갱신 (클라 -> 서버)
-// 캐릭터를 (dest_x, dest_y)로 직선 이동시켜달라는 요청.
+// 캐릭터를 (dest_x, dest_y, dest_z)로 이동시켜달라는 요청.
+// 좌표계: Unity 와 동일. Y는 높이, X-Z 가 평면.
 // 이미 이동 중일 때 다시 받으면 목적지를 갱신한다.
 message MoveDestReq {
     float dest_x = 1;
-    float dest_y = 2;
+    float dest_y = 2;             // 높이
+    float dest_z = 3;             // 평면 깊이축
 }
 
 // 즉시 정지 + 현재 위치 동기화 (클라 -> 서버)
@@ -28,8 +30,9 @@ message MoveDestReq {
 // 오차 범위 내면 클라 위치를 인정 (위치 보정 패킷은 향후 추가).
 message MoveStopReq {
     float pos_x = 1;
-    float pos_y = 2;
-    float yaw   = 3;
+    float pos_y = 2;             // 높이
+    float yaw   = 3;             // degree
+    float pos_z = 4;             // 평면 깊이축
 }
 
 // 이동 알림 (서버 -> 클라 브로드캐스트)
@@ -39,9 +42,11 @@ message MoveStopReq {
 message MoveNtf {
     int64 object_id = 1;     // = character_id (현재는)
     float pos_x     = 2;     // 현재 위치
-    float pos_y     = 3;
-    float yaw       = 4;
+    float pos_y     = 3;     // 높이
+    float yaw       = 4;     // degree
     float dest_x    = 5;     // 이동 목적지 (정지 상태면 pos와 동일)
-    float dest_y    = 6;
+    float dest_y    = 6;     // 높이
     bool  is_moving = 7;     // 이동 중 여부
+    float pos_z     = 8;     // 현재 위치 평면 깊이축
+    float dest_z    = 9;     // 목적지 평면 깊이축
 }

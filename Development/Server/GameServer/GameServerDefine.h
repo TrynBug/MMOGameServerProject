@@ -14,11 +14,11 @@ constexpr int32 k_aoiRange = 1;
 
 // ── 캐릭터 이동 ──────────────────────────────────────────────
 // 캐릭터 이동 속도 (유닛/초). 향후 GameData_Job으로 이관 예정.
-constexpr float k_characterMoveSpeed = 500.0f;
+constexpr float k_characterMoveSpeed = 5.0f;
 
 // MoveStopReq 수신 시 클라 위치와 서버 위치의 허용 오차 (유닛).
 // 이 범위 내면 클라 위치를 인정, 밖이면 서버 위치로 보정 예정 (보정 패킷은 아직 없음).
-constexpr float k_movePositionTolerance = 100.0f;
+constexpr float k_movePositionTolerance = 1.0f;
 
 // 내부서버 세션 추가 데이터
 struct InternalSessionMeta

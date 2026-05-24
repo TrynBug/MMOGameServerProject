@@ -26,9 +26,9 @@ struct StageGridParams
 {
     EStageType stageType  = EStageType::None;
     double     worldMinX  = 0.0;
-    double     worldMinY  = 0.0;
+    double     worldMinZ  = 0.0;
     double     worldMaxX  = 0.0;
-    double     worldMaxY  = 0.0;
+    double     worldMaxZ  = 0.0;
     double     sectorSize = 0.0;
 };
 
@@ -103,8 +103,8 @@ class Stage : public serverbase::Contents
 public:
     // 명시적 grid 값으로 생성.
     Stage(int64 stageId, EStageType stageType,
-          double worldMinX, double worldMinY,
-          double worldMaxX, double worldMaxY,
+          double worldMinX, double worldMinZ,
+          double worldMaxX, double worldMaxZ,
           double sectorSize);
 
     ~Stage() override = default;
@@ -116,29 +116,29 @@ public:
     int64      GetStageId()   const { return m_stageId; }
     EStageType GetStageType() const { return m_stageType; }
 
-    // ── 맵/섹터 정보 조회 ──
+    // ── 맵/섹터 정보 조회 (X-Z 평면) ──
     double GetWorldMinX()    const { return m_worldMinX; }
-    double GetWorldMinY()    const { return m_worldMinY; }
+    double GetWorldMinZ()    const { return m_worldMinZ; }
     double GetWorldMaxX()    const { return m_worldMaxX; }
-    double GetWorldMaxY()    const { return m_worldMaxY; }
+    double GetWorldMaxZ()    const { return m_worldMaxZ; }
     double GetSectorSize()   const { return m_sectorSize; }
     int32  GetSectorCountX() const { return m_sectorCountX; }
-    int32  GetSectorCountY() const { return m_sectorCountY; }
+    int32  GetSectorCountZ() const { return m_sectorCountZ; }
 
-    // 좌표 (posX, posY) -> 섹터 인덱스 (sectorX, sectorY) 변환.
+    // 좌표 (posX, posZ) -> 섹터 인덱스 (sectorX, sectorZ) 변환.
     // 맵 영역 바깥이면 false 리턴.
-    // posX/Y는 런타임 객체 좌표계(float). 내부 계산은 double로 처리.
-    bool GetSectorIndex(float posX, float posY, int32& outSectorX, int32& outSectorY) const;
+    // posX/Z는 런타임 객체 좌표계(float). 내부 계산은 double로 처리.
+    bool GetSectorIndex(float posX, float posZ, int32& outSectorX, int32& outSectorZ) const;
 
     // 섹터 좌표가 유효한지 확인.
-    bool IsValidSectorIndex(int32 sectorX, int32 sectorY) const;
+    bool IsValidSectorIndex(int32 sectorX, int32 sectorZ) const;
 
     // 섹터 조회 (좌표 유효성 검사 후 포인터 반환). 유효하지 않으면 nullptr.
-    Sector*       GetSector(int32 sectorX, int32 sectorY);
-    const Sector* GetSector(int32 sectorX, int32 sectorY) const;
+    Sector*       GetSector(int32 sectorX, int32 sectorZ);
+    const Sector* GetSector(int32 sectorX, int32 sectorZ) const;
 
     // 좌표로 섹터 직접 조회. 맵 영역 바깥이면 nullptr.
-    Sector*       GetSectorByPos(float posX, float posY);
+    Sector*       GetSectorByPos(float posX, float posZ);
 
     // GameServer 주입. 생성 직후 소유자가 설정한다.
     // Stage 파생 클래스가 패킷 전송 등을 위해 사용.
@@ -154,23 +154,23 @@ public:
     // visibility 갱신은 D-3에서 추가 예정.
     void      UpdateObjectSector(StageObject* pObject);
 
-    // (centerX, centerY) sector를 중심으로 range 거리 내의 sector를 순회.
+    // (centerX, centerZ) sector를 중심으로 range 거리 내의 sector를 순회.
     // range=1이면 3x3, range=2면 5x5. 맵 범위 밖 sector는 자동 스킵.
     // 콜백은 Sector*를 받는다 (nullptr은 전달되지 않음).
     template <typename Func>
-    void ForEachAdjacentSector(int32 centerX, int32 centerY, int32 range, Func&& callback)
+    void ForEachAdjacentSector(int32 centerX, int32 centerZ, int32 range, Func&& callback)
     {
-        for (int32 dy = -range; dy <= range; ++dy)
+        for (int32 dz = -range; dz <= range; ++dz)
         {
-            const int32 y = centerY + dy;
-            if (y < 0 || y >= m_sectorCountY)
+            const int32 z = centerZ + dz;
+            if (z < 0 || z >= m_sectorCountZ)
                 continue;
             for (int32 dx = -range; dx <= range; ++dx)
             {
                 const int32 x = centerX + dx;
                 if (x < 0 || x >= m_sectorCountX)
                     continue;
-                callback(&m_sectors[sectorIndexToFlat(x, y)]);
+                callback(&m_sectors[sectorIndexToFlat(x, z)]);
             }
         }
     }
@@ -216,14 +216,14 @@ private:
     // oldAOI − newAOI 안의 캐릭터들에게는 despawn (나, 상대 서로),
     // newAOI − oldAOI 안의 캐릭터들에게는 spawn (나, 상대 서로) 전송.
     void updateVisibilityOnSectorChange(Character& character,
-                                        int32 oldSectorX, int32 oldSectorY,
-                                        int32 newSectorX, int32 newSectorY);
+                                        int32 oldSectorX, int32 oldSectorZ,
+                                        int32 newSectorX, int32 newSectorZ);
 
     // 섹터 그리드 초기화 (생성자에서 1회 호출)
     void initializeSectorGrid();
 
     // 2D 섹터 좌표 → 1D 배열 인덱스 변환
-    int32 sectorIndexToFlat(int32 sectorX, int32 sectorY) const { return sectorY * m_sectorCountX + sectorX; }
+    int32 sectorIndexToFlat(int32 sectorX, int32 sectorZ) const { return sectorZ * m_sectorCountX + sectorX; }
 
     // 객체를 자신의 현재 좌표 기준으로 sector에 등록.
     // pObject->m_curSectorX/Y를 갱신. 맵 범위 밖이면 등록 안 함.
@@ -248,12 +248,12 @@ private:
     // (런타임 객체 좌표는 float이지만, 맵 영역/섹터 제원은
     //  게임데이터 계산 일관성을 위해 double로 도입한 값을 그대로 보관.)
     double m_worldMinX = 0.0;
-    double m_worldMinY = 0.0;
+    double m_worldMinZ = 0.0;
     double m_worldMaxX = 0.0;
-    double m_worldMaxY = 0.0;
+    double m_worldMaxZ = 0.0;
     double m_sectorSize = 0.0;
     int32  m_sectorCountX = 0;
-    int32  m_sectorCountY = 0;
+    int32  m_sectorCountZ = 0;
 
     // 섹터 그리드 (1D 배열로 저장, sectorIndexToFlat()로 인덱싱).
     // 크기 = m_sectorCountX * m_sectorCountY. 생성자에서 한 번 초기화 후 크기 변경 없음.

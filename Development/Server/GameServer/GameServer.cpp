@@ -423,6 +423,7 @@ db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 userId, GamePac
     character.set_last_stage_id(k_townStageId);
     character.set_pos_x(0.0f);
     character.set_pos_y(0.0f);
+    character.set_pos_z(0.0f);
     character.set_yaw(0.0f);
 
     // ── 3) DB INSERT ──────────────────────────────────────────
@@ -466,18 +467,19 @@ void GameServer::sendCharacterCreateRes(int64 userId, EResultCode resultCode, co
     sendPacketToUser(userId, Common::GAME_PACKET_ID_CHARACTER_CREATE_RES, res);
 }
 
-void GameServer::SendStageEnterNtf(int64 userId, int64 stageId, float myPosX, float myPosY, float myYaw)
+void GameServer::SendStageEnterNtf(int64 userId, int64 stageId, float myPosX, float myPosY, float myPosZ, float myYaw)
 {
     GamePacket::StageEnterNtf ntf;
     ntf.set_stage_id(stageId);
     ntf.set_my_pos_x(myPosX);
     ntf.set_my_pos_y(myPosY);
+    ntf.set_my_pos_z(myPosZ);
     ntf.set_my_yaw(myYaw);
 
     sendPacketToUser(userId, Common::GAME_PACKET_ID_STAGE_ENTER_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: StageEnterNtf sent. userId={} stageId={} pos=({},{}) yaw={}",
-        userId, stageId, myPosX, myPosY, myYaw));
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: StageEnterNtf sent. userId={} stageId={} pos=({},{},{}) yaw={}",
+        userId, stageId, myPosX, myPosY, myPosZ, myYaw));
 }
 
 void GameServer::SendObjectVisibilityNtf(int64 userId,
@@ -501,16 +503,18 @@ void GameServer::SendObjectVisibilityNtf(int64 userId,
 }
 
 void GameServer::SendMoveNtf(int64 userId, int64 objectId,
-                             float posX, float posY, float yaw,
-                             float destX, float destY, bool isMoving)
+                             float posX, float posY, float posZ, float yaw,
+                             float destX, float destY, float destZ, bool isMoving)
 {
     GamePacket::MoveNtf ntf;
     ntf.set_object_id(objectId);
     ntf.set_pos_x(posX);
     ntf.set_pos_y(posY);
+    ntf.set_pos_z(posZ);
     ntf.set_yaw(yaw);
     ntf.set_dest_x(destX);
     ntf.set_dest_y(destY);
+    ntf.set_dest_z(destZ);
     ntf.set_is_moving(isMoving);
 
     sendPacketToUser(userId, Common::GAME_PACKET_ID_MOVE_NTF, ntf);

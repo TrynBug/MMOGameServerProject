@@ -224,6 +224,7 @@ class MoveStopReq final : public ::google::protobuf::Message
     kPosXFieldNumber = 1,
     kPosYFieldNumber = 2,
     kYawFieldNumber = 3,
+    kPosZFieldNumber = 4,
   };
   // float pos_x = 1;
   void clear_pos_x() ;
@@ -255,11 +256,21 @@ class MoveStopReq final : public ::google::protobuf::Message
   void _internal_set_yaw(float value);
 
   public:
+  // float pos_z = 4;
+  void clear_pos_z() ;
+  float pos_z() const;
+  void set_pos_z(float value);
+
+  private:
+  float _internal_pos_z() const;
+  void _internal_set_pos_z(float value);
+
+  public:
   // @@protoc_insertion_point(class_scope:GamePacket.MoveStopReq)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 3,
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
                                    0, 0,
                                    2>
       _table_;
@@ -284,6 +295,7 @@ class MoveStopReq final : public ::google::protobuf::Message
     float pos_x_;
     float pos_y_;
     float yaw_;
+    float pos_z_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -442,6 +454,8 @@ class MoveNtf final : public ::google::protobuf::Message
     kDestXFieldNumber = 5,
     kDestYFieldNumber = 6,
     kIsMovingFieldNumber = 7,
+    kPosZFieldNumber = 8,
+    kDestZFieldNumber = 9,
   };
   // int64 object_id = 1;
   void clear_object_id() ;
@@ -513,11 +527,31 @@ class MoveNtf final : public ::google::protobuf::Message
   void _internal_set_is_moving(bool value);
 
   public:
+  // float pos_z = 8;
+  void clear_pos_z() ;
+  float pos_z() const;
+  void set_pos_z(float value);
+
+  private:
+  float _internal_pos_z() const;
+  void _internal_set_pos_z(float value);
+
+  public:
+  // float dest_z = 9;
+  void clear_dest_z() ;
+  float dest_z() const;
+  void set_dest_z(float value);
+
+  private:
+  float _internal_dest_z() const;
+  void _internal_set_dest_z(float value);
+
+  public:
   // @@protoc_insertion_point(class_scope:GamePacket.MoveNtf)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 7,
+  static const ::google::protobuf::internal::TcParseTable<4, 9,
                                    0, 0,
                                    2>
       _table_;
@@ -546,6 +580,8 @@ class MoveNtf final : public ::google::protobuf::Message
     float dest_x_;
     float dest_y_;
     bool is_moving_;
+    float pos_z_;
+    float dest_z_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -699,6 +735,7 @@ class MoveDestReq final : public ::google::protobuf::Message
   enum : int {
     kDestXFieldNumber = 1,
     kDestYFieldNumber = 2,
+    kDestZFieldNumber = 3,
   };
   // float dest_x = 1;
   void clear_dest_x() ;
@@ -720,11 +757,21 @@ class MoveDestReq final : public ::google::protobuf::Message
   void _internal_set_dest_y(float value);
 
   public:
+  // float dest_z = 3;
+  void clear_dest_z() ;
+  float dest_z() const;
+  void set_dest_z(float value);
+
+  private:
+  float _internal_dest_z() const;
+  void _internal_set_dest_z(float value);
+
+  public:
   // @@protoc_insertion_point(class_scope:GamePacket.MoveDestReq)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<1, 2,
+  static const ::google::protobuf::internal::TcParseTable<2, 3,
                                    0, 0,
                                    2>
       _table_;
@@ -748,6 +795,7 @@ class MoveDestReq final : public ::google::protobuf::Message
     ::google::protobuf::internal::CachedSize _cached_size_;
     float dest_x_;
     float dest_y_;
+    float dest_z_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -820,6 +868,31 @@ inline float MoveDestReq::_internal_dest_y() const {
 inline void MoveDestReq::_internal_set_dest_y(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.dest_y_ = value;
+}
+
+// float dest_z = 3;
+inline void MoveDestReq::clear_dest_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.dest_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline float MoveDestReq::dest_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveDestReq.dest_z)
+  return _internal_dest_z();
+}
+inline void MoveDestReq::set_dest_z(float value) {
+  _internal_set_dest_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:GamePacket.MoveDestReq.dest_z)
+}
+inline float MoveDestReq::_internal_dest_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.dest_z_;
+}
+inline void MoveDestReq::_internal_set_dest_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.dest_z_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -899,6 +972,31 @@ inline float MoveStopReq::_internal_yaw() const {
 inline void MoveStopReq::_internal_set_yaw(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.yaw_ = value;
+}
+
+// float pos_z = 4;
+inline void MoveStopReq::clear_pos_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline float MoveStopReq::pos_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveStopReq.pos_z)
+  return _internal_pos_z();
+}
+inline void MoveStopReq::set_pos_z(float value) {
+  _internal_set_pos_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:GamePacket.MoveStopReq.pos_z)
+}
+inline float MoveStopReq::_internal_pos_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_z_;
+}
+inline void MoveStopReq::_internal_set_pos_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -1078,6 +1176,56 @@ inline bool MoveNtf::_internal_is_moving() const {
 inline void MoveNtf::_internal_set_is_moving(bool value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.is_moving_ = value;
+}
+
+// float pos_z = 8;
+inline void MoveNtf::clear_pos_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000080U);
+}
+inline float MoveNtf::pos_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveNtf.pos_z)
+  return _internal_pos_z();
+}
+inline void MoveNtf::set_pos_z(float value) {
+  _internal_set_pos_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000080U);
+  // @@protoc_insertion_point(field_set:GamePacket.MoveNtf.pos_z)
+}
+inline float MoveNtf::_internal_pos_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_z_;
+}
+inline void MoveNtf::_internal_set_pos_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = value;
+}
+
+// float dest_z = 9;
+inline void MoveNtf::clear_dest_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.dest_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000100U);
+}
+inline float MoveNtf::dest_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MoveNtf.dest_z)
+  return _internal_dest_z();
+}
+inline void MoveNtf::set_dest_z(float value) {
+  _internal_set_dest_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000100U);
+  // @@protoc_insertion_point(field_set:GamePacket.MoveNtf.dest_z)
+}
+inline float MoveNtf::_internal_dest_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.dest_z_;
+}
+inline void MoveNtf::_internal_set_dest_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.dest_z_ = value;
 }
 
 #ifdef __GNUC__

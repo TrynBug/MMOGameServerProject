@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Stage.h"
 #include "Character.h"   // OnUserEnter에서 Character를 m_objects에 등록하기 위해 완전타입 필요
-#include "GameServer.h"   // OnUserEnter/OnUserLeave에서 visibility 패킷 전송 언어서 필요
+#include "GameServer.h"   // OnUserEnter/OnUserLeave에서 visibility 패킷 전송 위해 필요
 
 #include "Generated/GameData_Stage.h"
 
@@ -10,6 +10,7 @@
 namespace
 {
     // Character 정보를 CharacterSpawnInfo (패킷) 형식으로 채웁니다.
+    // 좌표계: Unity 와 동일 (X, Y, Z). Y가 높이, X-Z 가 평면.
     GamePacket::CharacterSpawnInfo makeCharacterSpawnInfo(const Character& character)
     {
         const DataStructures::Character& proto = character.GetProto();
@@ -26,18 +27,19 @@ namespace
         // 좌표는 런타임이 진실의 원천. StageObject에서 가져온다.
         info.set_pos_x(character.GetPosX());
         info.set_pos_y(character.GetPosY());
+        info.set_pos_z(character.GetPosZ());
         info.set_yaw(character.GetYaw());
         return info;
     }
 
     constexpr int64 k_heartbeatIntervalMs = 5000;   // 5초마다 1번 heartbeat 로그
 
-    // GameData_Stage 로딩 실패 시 fallback grid 값.
+    // GameData_Stage 로딩 실패 시 fallback grid 값. (X-Z 평면)
     // 데이터가 제대로 로드되지 않더라도 객체 자체는 동작하도록 안전망.
     constexpr double k_fallbackWorldMinX  = -500.0;
-    constexpr double k_fallbackWorldMinY  = -500.0;
+    constexpr double k_fallbackWorldMinZ  = -500.0;
     constexpr double k_fallbackWorldMaxX  =  500.0;
-    constexpr double k_fallbackWorldMaxY  =  500.0;
+    constexpr double k_fallbackWorldMaxZ  =  500.0;
     constexpr double k_fallbackSectorSize =   50.0;
 }
 
@@ -50,33 +52,33 @@ StageGridParams LoadStageGridParams(int64 stageId)
         LOG_WRITE(LogLevel::Error, std::format("LoadStageGridParams: GameData_Stage not found. stageId={}. using fallback grid.", stageId));
         params.stageType  = EStageType::None;
         params.worldMinX  = k_fallbackWorldMinX;
-        params.worldMinY  = k_fallbackWorldMinY;
+        params.worldMinZ  = k_fallbackWorldMinZ;
         params.worldMaxX  = k_fallbackWorldMaxX;
-        params.worldMaxY  = k_fallbackWorldMaxY;
+        params.worldMaxZ  = k_fallbackWorldMaxZ;
         params.sectorSize = k_fallbackSectorSize;
     }
     else
     {
         params.stageType  = pData->StageType;
         params.worldMinX  = pData->worldMinX;
-        params.worldMinY  = pData->worldMinY;
+        params.worldMinZ  = pData->worldMinZ;
         params.worldMaxX  = pData->worldMaxX;
-        params.worldMaxY  = pData->worldMaxY;
+        params.worldMaxZ  = pData->worldMaxZ;
         params.sectorSize = pData->sectorSize;
     }
     return params;
 }
 
 Stage::Stage(int64 stageId, EStageType stageType,
-             double worldMinX, double worldMinY,
-             double worldMaxX, double worldMaxY,
+             double worldMinX, double worldMinZ,
+             double worldMaxX, double worldMaxZ,
              double sectorSize)
     : m_stageId(stageId)
     , m_stageType(stageType)
     , m_worldMinX(worldMinX)
-    , m_worldMinY(worldMinY)
+    , m_worldMinZ(worldMinZ)
     , m_worldMaxX(worldMaxX)
-    , m_worldMaxY(worldMaxY)
+    , m_worldMaxZ(worldMaxZ)
     , m_sectorSize(sectorSize)
 {
     initializeSectorGrid();
@@ -92,91 +94,91 @@ void Stage::initializeSectorGrid()
         return;
     }
 
-    if (m_worldMaxX <= m_worldMinX || m_worldMaxY <= m_worldMinY)
+    if (m_worldMaxX <= m_worldMinX || m_worldMaxZ <= m_worldMinZ)
     {
         LOG_WRITE(LogLevel::Error, std::format("Stage::initializeSectorGrid - invalid world bounds. stageId={} min=({},{}) max=({},{})",
-            m_stageId, m_worldMinX, m_worldMinY, m_worldMaxX, m_worldMaxY));
+            m_stageId, m_worldMinX, m_worldMinZ, m_worldMaxX, m_worldMaxZ));
         return;
     }
 
     // 섹터 개수 계산 (ceil로 올림하여 맵 영역이 섹터로 빠짐없이 커버되도록).
     const double worldSizeX = m_worldMaxX - m_worldMinX;
-    const double worldSizeY = m_worldMaxY - m_worldMinY;
+    const double worldSizeZ = m_worldMaxZ - m_worldMinZ;
     m_sectorCountX = static_cast<int32>(std::ceil(worldSizeX / m_sectorSize));
-    m_sectorCountY = static_cast<int32>(std::ceil(worldSizeY / m_sectorSize));
+    m_sectorCountZ = static_cast<int32>(std::ceil(worldSizeZ / m_sectorSize));
 
-    if (m_sectorCountX <= 0 || m_sectorCountY <= 0)
+    if (m_sectorCountX <= 0 || m_sectorCountZ <= 0)
     {
         LOG_WRITE(LogLevel::Error, std::format("Stage::initializeSectorGrid - sector count <= 0. stageId={} count=({}x{})",
-            m_stageId, m_sectorCountX, m_sectorCountY));
+            m_stageId, m_sectorCountX, m_sectorCountZ));
         return;
     }
 
     // 섹터 그리드 생성 + 각 섹터에 인덱스 설정
-    const int32 totalSectors = m_sectorCountX * m_sectorCountY;
+    const int32 totalSectors = m_sectorCountX * m_sectorCountZ;
     m_sectors.resize(totalSectors);
 
-    for (int32 y = 0; y < m_sectorCountY; ++y)
+    for (int32 z = 0; z < m_sectorCountZ; ++z)
     {
         for (int32 x = 0; x < m_sectorCountX; ++x)
         {
-            m_sectors[sectorIndexToFlat(x, y)].SetIndex(x, y);
+            m_sectors[sectorIndexToFlat(x, z)].SetIndex(x, z);
         }
     }
 
     LOG_WRITE(LogLevel::Info, std::format("Stage::initializeSectorGrid - stageId={} world=({},{})~({},{}) sectorSize={} grid={}x{} totalSectors={}",
         m_stageId,
-        m_worldMinX, m_worldMinY, m_worldMaxX, m_worldMaxY,
-        m_sectorSize, m_sectorCountX, m_sectorCountY, totalSectors));
+        m_worldMinX, m_worldMinZ, m_worldMaxX, m_worldMaxZ,
+        m_sectorSize, m_sectorCountX, m_sectorCountZ, totalSectors));
 }
 
-bool Stage::GetSectorIndex(float posX, float posY, int32& outSectorX, int32& outSectorY) const
+bool Stage::GetSectorIndex(float posX, float posZ, int32& outSectorX, int32& outSectorZ) const
 {
     if (m_sectorSize <= 0.0)
         return false;
 
-    // float와 double 비교: float가 double로 의존적으로 승격. 경계는 정확히 처리됨.
-    if (posX < m_worldMinX || posX >= m_worldMaxX || posY < m_worldMinY || posY >= m_worldMaxY)
+    // float와 double 비교: float가 double로 묵시적으로 승격. 경계는 정확히 처리됨.
+    if (posX < m_worldMinX || posX >= m_worldMaxX || posZ < m_worldMinZ || posZ >= m_worldMaxZ)
         return false;
 
     // 계산은 double로 수행하고 결과만 int32로 캐스팅.
     outSectorX = static_cast<int32>((static_cast<double>(posX) - m_worldMinX) / m_sectorSize);
-    outSectorY = static_cast<int32>((static_cast<double>(posY) - m_worldMinY) / m_sectorSize);
+    outSectorZ = static_cast<int32>((static_cast<double>(posZ) - m_worldMinZ) / m_sectorSize);
 
     // 부동소수점 오차로 인한 경계값 안전장치
     if (outSectorX >= m_sectorCountX) outSectorX = m_sectorCountX - 1;
-    if (outSectorY >= m_sectorCountY) outSectorY = m_sectorCountY - 1;
+    if (outSectorZ >= m_sectorCountZ) outSectorZ = m_sectorCountZ - 1;
 
     return true;
 }
 
-bool Stage::IsValidSectorIndex(int32 sectorX, int32 sectorY) const
+bool Stage::IsValidSectorIndex(int32 sectorX, int32 sectorZ) const
 {
     return sectorX >= 0 && sectorX < m_sectorCountX
-        && sectorY >= 0 && sectorY < m_sectorCountY;
+        && sectorZ >= 0 && sectorZ < m_sectorCountZ;
 }
 
-Sector* Stage::GetSector(int32 sectorX, int32 sectorY)
+Sector* Stage::GetSector(int32 sectorX, int32 sectorZ)
 {
-    if (!IsValidSectorIndex(sectorX, sectorY))
+    if (!IsValidSectorIndex(sectorX, sectorZ))
         return nullptr;
-    return &m_sectors[sectorIndexToFlat(sectorX, sectorY)];
+    return &m_sectors[sectorIndexToFlat(sectorX, sectorZ)];
 }
 
-const Sector* Stage::GetSector(int32 sectorX, int32 sectorY) const
+const Sector* Stage::GetSector(int32 sectorX, int32 sectorZ) const
 {
-    if (!IsValidSectorIndex(sectorX, sectorY))
+    if (!IsValidSectorIndex(sectorX, sectorZ))
         return nullptr;
-    return &m_sectors[sectorIndexToFlat(sectorX, sectorY)];
+    return &m_sectors[sectorIndexToFlat(sectorX, sectorZ)];
 }
 
-Sector* Stage::GetSectorByPos(float posX, float posY)
+Sector* Stage::GetSectorByPos(float posX, float posZ)
 {
     int32 sectorX = 0;
-    int32 sectorY = 0;
-    if (!GetSectorIndex(posX, posY, sectorX, sectorY))
+    int32 sectorZ = 0;
+    if (!GetSectorIndex(posX, posZ, sectorX, sectorZ))
         return nullptr;
-    return GetSector(sectorX, sectorY);
+    return GetSector(sectorX, sectorZ);
 }
 
 void Stage::OnStart()
@@ -225,6 +227,7 @@ void Stage::EnqueueMessage(StageMessage msg)
 }
 
 // ── sector 등록/제거/이동 헬퍼 ─────────────────────────────
+// 섹터는 X-Z 평면으로만 분할됨. Y(높이)는 섹터 분할에 사용 안 함.
 
 void Stage::addObjectToSector(StageObject* pObject)
 {
@@ -232,27 +235,27 @@ void Stage::addObjectToSector(StageObject* pObject)
         return;
 
     int32 sectorX = 0;
-    int32 sectorY = 0;
-    if (!GetSectorIndex(pObject->GetPosX(), pObject->GetPosY(), sectorX, sectorY))
+    int32 sectorZ = 0;
+    if (!GetSectorIndex(pObject->GetPosX(), pObject->GetPosZ(), sectorX, sectorZ))
     {
-        // 맵 범위 밖. 섭터에 등록 안 함. (-1, -1)로 유지.
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::addObjectToSector - object pos out of world bounds. stageId={} objectId={} pos=({},{})",
-            m_stageId, pObject->GetObjectId(), pObject->GetPosX(), pObject->GetPosY()));
+        // 맵 범위 밖. 섹터에 등록 안 함. (-1, -1)로 유지.
+        LOG_WRITE(LogLevel::Warn, std::format("Stage::addObjectToSector - object pos out of world bounds. stageId={} objectId={} pos=({},{},{})",
+            m_stageId, pObject->GetObjectId(), pObject->GetPosX(), pObject->GetPosY(), pObject->GetPosZ()));
         pObject->SetCurSector(-1, -1);
         return;
     }
 
-    Sector* pSector = GetSector(sectorX, sectorY);
+    Sector* pSector = GetSector(sectorX, sectorZ);
     if (!pSector)
     {
         LOG_WRITE(LogLevel::Error, std::format("Stage::addObjectToSector - sector not found. stageId={} sector=({},{})",
-            m_stageId, sectorX, sectorY));
+            m_stageId, sectorX, sectorZ));
         pObject->SetCurSector(-1, -1);
         return;
     }
 
     pSector->AddObject(pObject);
-    pObject->SetCurSector(sectorX, sectorY);
+    pObject->SetCurSector(sectorX, sectorZ);
 }
 
 void Stage::removeObjectFromSector(StageObject* pObject)
@@ -261,11 +264,11 @@ void Stage::removeObjectFromSector(StageObject* pObject)
         return;
 
     const int32 sectorX = pObject->GetCurSectorX();
-    const int32 sectorY = pObject->GetCurSectorY();
-    if (sectorX < 0 || sectorY < 0)
-        return;   // 섭터에 속한 적 없음.
+    const int32 sectorZ = pObject->GetCurSectorZ();
+    if (sectorX < 0 || sectorZ < 0)
+        return;   // 섹터에 속한 적 없음.
 
-    Sector* pSector = GetSector(sectorX, sectorY);
+    Sector* pSector = GetSector(sectorX, sectorZ);
     if (pSector)
     {
         pSector->RemoveObject(pObject);
@@ -279,18 +282,18 @@ void Stage::UpdateObjectSector(StageObject* pObject)
         return;
 
     int32 newSectorX = 0;
-    int32 newSectorY = 0;
-    const bool bInsideWorld = GetSectorIndex(pObject->GetPosX(), pObject->GetPosY(), newSectorX, newSectorY);
+    int32 newSectorZ = 0;
+    const bool bInsideWorld = GetSectorIndex(pObject->GetPosX(), pObject->GetPosZ(), newSectorX, newSectorZ);
 
     const int32 oldSectorX = pObject->GetCurSectorX();
-    const int32 oldSectorY = pObject->GetCurSectorY();
+    const int32 oldSectorZ = pObject->GetCurSectorZ();
 
     if (!bInsideWorld)
     {
-        // 맵 범위 밖으로 나갔으면 섭터에서 빼고 끝.
-        if (oldSectorX >= 0 && oldSectorY >= 0)
+        // 맵 범위 밖으로 나갔으면 섹터에서 빼고 끝.
+        if (oldSectorX >= 0 && oldSectorZ >= 0)
         {
-            if (Sector* pOldSector = GetSector(oldSectorX, oldSectorY))
+            if (Sector* pOldSector = GetSector(oldSectorX, oldSectorZ))
                 pOldSector->RemoveObject(pObject);
             pObject->SetCurSector(-1, -1);
         }
@@ -298,23 +301,23 @@ void Stage::UpdateObjectSector(StageObject* pObject)
     }
 
     // sector 변경 없으면 no-op.
-    if (oldSectorX == newSectorX && oldSectorY == newSectorY)
+    if (oldSectorX == newSectorX && oldSectorZ == newSectorZ)
         return;
 
     // 이전 sector에서 제거 (있었다면) → 새 sector에 등록.
-    if (oldSectorX >= 0 && oldSectorY >= 0)
+    if (oldSectorX >= 0 && oldSectorZ >= 0)
     {
-        if (Sector* pOldSector = GetSector(oldSectorX, oldSectorY))
+        if (Sector* pOldSector = GetSector(oldSectorX, oldSectorZ))
             pOldSector->RemoveObject(pObject);
     }
-    if (Sector* pNewSector = GetSector(newSectorX, newSectorY))
+    if (Sector* pNewSector = GetSector(newSectorX, newSectorZ))
     {
         pNewSector->AddObject(pObject);
     }
-    pObject->SetCurSector(newSectorX, newSectorY);
+    pObject->SetCurSector(newSectorX, newSectorZ);
 
     LOG_WRITE(LogLevel::Debug, std::format("Stage::UpdateObjectSector - stageId={} objectId={} ({},{}) -> ({},{})",
-        m_stageId, pObject->GetObjectId(), oldSectorX, oldSectorY, newSectorX, newSectorY));
+        m_stageId, pObject->GetObjectId(), oldSectorX, oldSectorZ, newSectorX, newSectorZ));
 }
 
 void Stage::processSystemMessages()
@@ -367,12 +370,11 @@ void Stage::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
 
         LOG_WRITE(LogLevel::Info, std::format("Stage::OnUserEnter - stageId={} userId={} characterId={} sector=({},{}) totalUsers={} totalObjects={}",
             m_stageId, userId, objectId,
-            spCharacter->GetCurSectorX(), spCharacter->GetCurSectorY(),
+            spCharacter->GetCurSectorX(), spCharacter->GetCurSectorZ(),
             m_users.size(), m_objects.size()));
 
         // ── visibility 전파 ────────────────────────────────────
-        // 아직 Sector 도입 전이므로 Stage 전체 범위로 처리 (과도기 동작).
-        // 향후 Phase D 이후에 sector AOI 기반으로 전환 예정.
+        // 주변 sector AOI 기반.
         if (GameServer* pServer = GetGameServer())
         {
             const GamePacket::CharacterSpawnInfo myInfo = makeCharacterSpawnInfo(*spCharacter);
@@ -384,7 +386,7 @@ void Stage::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
             // 다른 캐릭터에게 전송할 용도의 "내 spawn 1개".
             std::vector<GamePacket::CharacterSpawnInfo> singleSpawn = { myInfo };
 
-            ForEachAdjacentSector(spCharacter->GetCurSectorX(), spCharacter->GetCurSectorY(), k_aoiRange,
+            ForEachAdjacentSector(spCharacter->GetCurSectorX(), spCharacter->GetCurSectorZ(), k_aoiRange,
                 [&](Sector* pSector)
                 {
                     for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
@@ -424,7 +426,7 @@ void Stage::OnUserLeave(int64 userId)
     // User에 연결된 Character가 있으면 m_objects/m_userObjects에서 제거.
     int64 leavingObjectId = 0;
     int32 leavingSectorX  = -1;
-    int32 leavingSectorY  = -1;
+    int32 leavingSectorZ  = -1;
     UserPtr spUser = iter->second;
     if (spUser)
     {
@@ -435,7 +437,7 @@ void Stage::OnUserLeave(int64 userId)
 
             // 제거 전에 sector 좌표를 캐시 (despawn broadcast 범위 결정용).
             leavingSectorX = spCharacter->GetCurSectorX();
-            leavingSectorY = spCharacter->GetCurSectorY();
+            leavingSectorZ = spCharacter->GetCurSectorZ();
 
             // sector에서 먼저 제거.
             removeObjectFromSector(spCharacter.get());
@@ -458,7 +460,7 @@ void Stage::OnUserLeave(int64 userId)
         {
             std::vector<int64> despawnIds = { leavingObjectId };
 
-            ForEachAdjacentSector(leavingSectorX, leavingSectorY, k_aoiRange,
+            ForEachAdjacentSector(leavingSectorX, leavingSectorZ, k_aoiRange,
                 [&](Sector* pSector)
                 {
                     for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
@@ -499,7 +501,7 @@ void Stage::OnUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacke
                 m_stageId, spUser->GetUserId()));
             return;
         }
-        spCharacter->SetDestination(req.dest_x(), req.dest_y());
+        spCharacter->SetDestination(req.dest_x(), req.dest_y(), req.dest_z());
         broadcastMoveNtf(*spCharacter);
         return;
     }
@@ -519,23 +521,25 @@ void Stage::OnUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacke
             return;
         }
 
-        // 클라/서버 위치 오차 검증. 오차 범위 내면 클라 위치 인정, 초과면 서버 위치로 고정.
+        // 클라/서버 위치 오차 검증. X-Z 평면 거리로 계산 (Y는 NavMesh가 결정하므로 비교 제외).
+        // 오차 범위 내면 클라 위치 인정, 초과면 서버 위치로 고정.
         const float dx = req.pos_x() - spCharacter->GetPosX();
-        const float dy = req.pos_y() - spCharacter->GetPosY();
-        const float distSq = dx * dx + dy * dy;
+        const float dz = req.pos_z() - spCharacter->GetPosZ();
+        const float distSq = dx * dx + dz * dz;
         const float tolSq  = k_movePositionTolerance * k_movePositionTolerance;
 
         if (distSq <= tolSq)
         {
-            spCharacter->StopAt(req.pos_x(), req.pos_y(), req.yaw());
+            spCharacter->StopAt(req.pos_x(), req.pos_y(), req.pos_z(), req.yaw());
         }
         else
         {
             // 서버 위치로 고정. 향후 위치 보정 패킷 추가 예정.
-            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveStopReq position out of tolerance. stageId={} userId={} clientPos=({},{}) serverPos=({},{})",
+            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveStopReq position out of tolerance. stageId={} userId={} clientPos=({},{},{}) serverPos=({},{},{})",
                 m_stageId, spUser->GetUserId(),
-                req.pos_x(), req.pos_y(), spCharacter->GetPosX(), spCharacter->GetPosY()));
-            spCharacter->StopAt(spCharacter->GetPosX(), spCharacter->GetPosY(), req.yaw());
+                req.pos_x(), req.pos_y(), req.pos_z(),
+                spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ()));
+            spCharacter->StopAt(spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), req.yaw());
         }
         broadcastMoveNtf(*spCharacter);
         return;
@@ -573,14 +577,13 @@ void Stage::updateCharacters(int64 deltaMs)
 {
     // m_userObjects의 모든 Character를 이동 시뮬레이션 한 다음 sector 소속 갱신.
     // 현재 m_userObjects에 들어가는 객체는 모두 Character (EObjectType::User)이므로 static_cast 안전.
-    // 이동 도착시 MoveNtf broadcast, sector 변경시 visibility 갱신은 D-4-b/c에서 추가 예정.
     for (auto& [objectId, spObject] : m_userObjects)
     {
         Character* pCharacter = static_cast<Character*>(spObject.get());
 
         // Update 전 sector 좌표 캐치 (sector 변경 감지용).
         const int32 oldSectorX = pCharacter->GetCurSectorX();
-        const int32 oldSectorY = pCharacter->GetCurSectorY();
+        const int32 oldSectorZ = pCharacter->GetCurSectorZ();
 
         const bool arrived = pCharacter->Update(deltaMs);
 
@@ -589,10 +592,10 @@ void Stage::updateCharacters(int64 deltaMs)
 
         // sector가 바뀐 경우 visibility 갱신.
         const int32 newSectorX = pCharacter->GetCurSectorX();
-        const int32 newSectorY = pCharacter->GetCurSectorY();
-        if (oldSectorX != newSectorX || oldSectorY != newSectorY)
+        const int32 newSectorZ = pCharacter->GetCurSectorZ();
+        if (oldSectorX != newSectorX || oldSectorZ != newSectorZ)
         {
-            updateVisibilityOnSectorChange(*pCharacter, oldSectorX, oldSectorY, newSectorX, newSectorY);
+            updateVisibilityOnSectorChange(*pCharacter, oldSectorX, oldSectorZ, newSectorX, newSectorZ);
         }
 
         // 도착했으면 (이동 → 정지로 상태 변경) 주변에 MoveNtf 알림.
@@ -612,33 +615,35 @@ void Stage::broadcastMoveNtf(const Character& character)
     const int64 objectId = character.GetObjectId();
     const float posX     = character.GetPosX();
     const float posY     = character.GetPosY();
+    const float posZ     = character.GetPosZ();
     const float yaw      = character.GetYaw();
     const float destX    = character.GetDestX();
     const float destY    = character.GetDestY();
+    const float destZ    = character.GetDestZ();
     const bool  isMoving = character.IsMoving();
 
     // 주변 sector의 모든 캐릭터(자기 자신 포함)에게 unicast.
     // 캐릭터의 현재 sector가 -1이면(맵 밖) broadcast 안 함.
     const int32 sx = character.GetCurSectorX();
-    const int32 sy = character.GetCurSectorY();
-    if (sx < 0 || sy < 0)
+    const int32 sz = character.GetCurSectorZ();
+    if (sx < 0 || sz < 0)
         return;
 
-    ForEachAdjacentSector(sx, sy, k_aoiRange,
+    ForEachAdjacentSector(sx, sz, k_aoiRange,
         [&](Sector* pSector)
         {
             for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
             {
                 Character* pOtherChar = static_cast<Character*>(pOtherObj);
                 const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                pServer->SendMoveNtf(otherUserId, objectId, posX, posY, yaw, destX, destY, isMoving);
+                pServer->SendMoveNtf(otherUserId, objectId, posX, posY, posZ, yaw, destX, destY, destZ, isMoving);
             }
         });
 }
 
 void Stage::updateVisibilityOnSectorChange(Character& character,
-                                           int32 oldSectorX, int32 oldSectorY,
-                                           int32 newSectorX, int32 newSectorY)
+                                           int32 oldSectorX, int32 oldSectorZ,
+                                           int32 newSectorX, int32 newSectorZ)
 {
     GameServer* pServer = GetGameServer();
     if (!pServer)
@@ -648,13 +653,13 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
     const int64 myUserId   = character.GetProto().owner_user_id();
     const GamePacket::CharacterSpawnInfo myInfo = makeCharacterSpawnInfo(character);
 
-    // sector (x, y)가 (centerX, centerY) 기준 k_aoiRange 범위 안에 있는지 검사.
+    // sector (x, z)가 (centerX, centerZ) 기준 k_aoiRange 범위 안에 있는지 검사.
     // 단, sector 좌표가 -1이면 (맵 밖) 어떤 범위에도 속하지 않음.
-    auto inAOI = [](int32 x, int32 y, int32 centerX, int32 centerY) -> bool
+    auto inAOI = [](int32 x, int32 z, int32 centerX, int32 centerZ) -> bool
     {
-        if (centerX < 0 || centerY < 0)
+        if (centerX < 0 || centerZ < 0)
             return false;
-        return std::abs(x - centerX) <= k_aoiRange && std::abs(y - centerY) <= k_aoiRange;
+        return std::abs(x - centerX) <= k_aoiRange && std::abs(z - centerZ) <= k_aoiRange;
     };
 
     // ── newAOI 순회 ──
@@ -664,13 +669,13 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
     newlyVisibleSpawnsForMe.reserve(8);
     std::vector<GamePacket::CharacterSpawnInfo> singleSpawnOfMe = { myInfo };
 
-    ForEachAdjacentSector(newSectorX, newSectorY, k_aoiRange,
+    ForEachAdjacentSector(newSectorX, newSectorZ, k_aoiRange,
         [&](Sector* pSector)
         {
             // 이 sector가 oldAOI에도 있으면 skip (계속 보이는 영역).
             const int32 sx = pSector->GetSectorX();
-            const int32 sy = pSector->GetSectorY();
-            if (inAOI(sx, sy, oldSectorX, oldSectorY))
+            const int32 sz = pSector->GetSectorZ();
+            if (inAOI(sx, sz, oldSectorX, oldSectorZ))
                 return;
 
             for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
@@ -697,13 +702,13 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
     despawnIdsForMe.reserve(8);
     std::vector<int64> myDespawnId = { myObjectId };
 
-    ForEachAdjacentSector(oldSectorX, oldSectorY, k_aoiRange,
+    ForEachAdjacentSector(oldSectorX, oldSectorZ, k_aoiRange,
         [&](Sector* pSector)
         {
             // 이 sector가 newAOI에도 있으면 skip (계속 보이는 영역).
             const int32 sx = pSector->GetSectorX();
-            const int32 sy = pSector->GetSectorY();
-            if (inAOI(sx, sy, newSectorX, newSectorY))
+            const int32 sz = pSector->GetSectorZ();
+            if (inAOI(sx, sz, newSectorX, newSectorZ))
                 return;
 
             for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())

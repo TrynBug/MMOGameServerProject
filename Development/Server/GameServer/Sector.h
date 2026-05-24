@@ -30,10 +30,10 @@ public:
     Sector(Sector&&) noexcept = default;
     Sector& operator=(Sector&&) noexcept = default;
 
-    // 섹터 좌표
+    // 섹터 좌표 (X-Z 평면)
     int32 GetSectorX() const { return m_sectorX; }
-    int32 GetSectorY() const { return m_sectorY; }
-    void  SetIndex(int32 sectorX, int32 sectorY) { m_sectorX = sectorX; m_sectorY = sectorY; }
+    int32 GetSectorZ() const { return m_sectorZ; }
+    void  SetIndex(int32 sectorX, int32 sectorZ) { m_sectorX = sectorX; m_sectorZ = sectorZ; }
 
     // ── 객체 추가/제거 ──
     // 타입별 컨테이너에 추가/제거. 객체 타입은 호출자가 알고 있는 상태로 호출하기보다,
@@ -52,7 +52,7 @@ public:
 
 private:
     int32 m_sectorX = -1;
-    int32 m_sectorY = -1;
+    int32 m_sectorZ = -1;
 
     // 타입별 객체 컨테이너 (key=ObjectId, value=StageObject* raw pointer).
     // EObjectType이 늘어나면 여기에 컨테이너 추가 + Add/RemoveObject 분기 추가.

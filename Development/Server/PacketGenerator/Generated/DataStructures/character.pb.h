@@ -226,6 +226,7 @@ class Character final : public ::google::protobuf::Message
     kPosXFieldNumber = 12,
     kPosYFieldNumber = 13,
     kYawFieldNumber = 14,
+    kPosZFieldNumber = 15,
   };
   // string name = 3;
   void clear_name() ;
@@ -372,11 +373,21 @@ class Character final : public ::google::protobuf::Message
   void _internal_set_yaw(float value);
 
   public:
+  // float pos_z = 15;
+  void clear_pos_z() ;
+  float pos_z() const;
+  void set_pos_z(float value);
+
+  private:
+  float _internal_pos_z() const;
+  void _internal_set_pos_z(float value);
+
+  public:
   // @@protoc_insertion_point(class_scope:DataStructures.Character)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<4, 14,
+  static const ::google::protobuf::internal::TcParseTable<4, 15,
                                    0, 45,
                                    2>
       _table_;
@@ -412,6 +423,7 @@ class Character final : public ::google::protobuf::Message
     float pos_x_;
     float pos_y_;
     float yaw_;
+    float pos_z_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -824,6 +836,31 @@ inline float Character::_internal_yaw() const {
 inline void Character::_internal_set_yaw(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.yaw_ = value;
+}
+
+// float pos_z = 15;
+inline void Character::clear_pos_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00004000U);
+}
+inline float Character::pos_z() const {
+  // @@protoc_insertion_point(field_get:DataStructures.Character.pos_z)
+  return _internal_pos_z();
+}
+inline void Character::set_pos_z(float value) {
+  _internal_set_pos_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00004000U);
+  // @@protoc_insertion_point(field_set:DataStructures.Character.pos_z)
+}
+inline float Character::_internal_pos_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_z_;
+}
+inline void Character::_internal_set_pos_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = value;
 }
 
 #ifdef __GNUC__

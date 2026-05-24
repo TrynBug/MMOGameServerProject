@@ -11,8 +11,8 @@ Town::Town(int64 stageId)
 Town::Town(int64 stageId, const StageGridParams& params)
     : Stage(stageId,
             params.stageType,
-            params.worldMinX, params.worldMinY,
-            params.worldMaxX, params.worldMaxY,
+            params.worldMinX, params.worldMinZ,
+            params.worldMaxX, params.worldMaxZ,
             params.sectorSize)
 {
 }
@@ -45,5 +45,5 @@ void Town::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
     }
 
     pGameServer->SendStageEnterNtf(spUser->GetUserId(), GetStageId(),
-        spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetYaw());
+        spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), spCharacter->GetYaw());
 }

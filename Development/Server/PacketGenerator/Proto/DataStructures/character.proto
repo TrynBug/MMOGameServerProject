@@ -20,8 +20,10 @@ message Character {
     int32 max_mp = 10;
 
     // 마지막 위치 (게임서버 입장 시 이 위치로 복귀)
+    // 좌표계: Unity 와 동일 (X, Y, Z). Y 가 높이, X-Z 가 평면.
     int64 last_stage_id = 11;
     float pos_x = 12;
-    float pos_y = 13;
-    float yaw = 14;               // 회전 (단위는 추후 클라와 맞춤)
+    float pos_y = 13;             // 높이
+    float yaw = 14;               // Y축 회전, degree 단위
+    float pos_z = 15;             // 평면 깊이축
 }

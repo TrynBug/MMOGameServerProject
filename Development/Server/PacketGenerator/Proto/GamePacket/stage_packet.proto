@@ -10,6 +10,7 @@ import "DataStructures/character.proto";
 // ──────────────────────────────────────────────
 
 // 주변 캐릭터 간략 정보 (브로드캐스트용)
+// 좌표계: Unity 와 동일. Y가 높이, X-Z 가 평면.
 message NearbyCharacterInfo {
     int64 user_id = 1;
     string name = 2;
@@ -17,9 +18,9 @@ message NearbyCharacterInfo {
     int32 hp = 4;
     int32 max_hp = 5;
     float pos_x = 6;
-    float pos_y = 7;
-    float pos_z = 8;
-    float dir_y = 9;
+    float pos_y = 7;             // 높이
+    float pos_z = 8;             // 평면 깊이축
+    float dir_y = 9;             // Y축 회전, degree 단위
 }
 
 // Stage 입장 완료 알림 (서버 -> 클라)
@@ -30,8 +31,9 @@ message NearbyCharacterInfo {
 message StageEnterNtf {
     int64 stage_id = 1;
     float my_pos_x = 2;     // 서버가 결정한 내 spawn 위치
-    float my_pos_y = 3;
-    float my_yaw   = 4;
+    float my_pos_y = 3;     // 높이
+    float my_yaw   = 4;     // degree
+    float my_pos_z = 5;     // 평면 깊이축
 }
 
 // 동일 게임서버 내 Stage 이동 요청 (클라 -> 서버)
