@@ -58,6 +58,18 @@ bool GameServer::OnInitialize()
     };
     m_gatewayEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spSession) { onGatewayDisconnect(spSession); };
 
+
+
+    const std::filesystem::path currPath = std::filesystem::current_path();
+
+    // NavMeshManager 초기화
+    const std::filesystem::path navMeshDir = currPath.parent_path() / "Map" / "NavMesh";
+    if (!m_navMeshManager.LoadAll(navMeshDir))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to initialize NavMeshManager. navMeshDir={}", navMeshDir.string()));
+        return false;
+    }
+
     // ── StageManager 초기화 + 고정 Stage 생성 ──────────────────
     // StageManager가 Stage 생성 + SetGameServer + AssignContents까지 처리.
     if (GetContentsThreadCount() <= 0)

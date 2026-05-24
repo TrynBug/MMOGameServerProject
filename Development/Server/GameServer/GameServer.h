@@ -6,8 +6,8 @@
 #include "Town.h"
 #include "User.h"
 #include "StageManager.h"
+#include "Map/NavMeshManager.h"
 #include "ThreadSafeUnorderedMap.h"
-
 
 // GameServer는 게임로직(Stage, 유저, 전투, 스킬 등)을 처리하는 서버이다.
 // - 클라이언트와 직접 연결되지 않는다. 게이트웨이서버를 통해 클라이언트와 통신한다.
@@ -105,6 +105,9 @@ private:
     void sendCharacterSelectFailNtf(int64 userId, int32 reasonCode, const std::string& message);
 
 private:
+    // NavMesh 데이터 관리, 길찾기 기능 제공
+    NavMeshManager m_navMeshManager;
+
     // 모든 Stage(SystemStage / Town / Field / Dungeon)를 관리한다.
     // 생성, 조회, 컨텐츠 스레드 배정, GameServer 주입을 캡슐화.
     StageManager m_stageManager;

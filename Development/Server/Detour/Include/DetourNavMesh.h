@@ -25,7 +25,11 @@
 // Undefine (or define in a build config) the following line to use 64bit polyref.
 // Generally not needed, useful for very large worlds.
 // Note: tiles build using 32bit refs are not compatible with 64bit refs!
-//#define DT_POLYREF64 1
+//
+// [MMOGameServerProject] DotRecast (C# 클라이언트) 는 64bit tileRef 를 사용하므로
+// 클라이언트 NavMesh .bin 파일과의 호환을 위해 64bit 로 활성화한다.
+// 또한 MMORPG 의 큰 월드에도 64bit 가 권장된다.
+#define DT_POLYREF64 1
 
 #ifdef DT_POLYREF64
 // TODO: figure out a multiplatform version of uint64_t

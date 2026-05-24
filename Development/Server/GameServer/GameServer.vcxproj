@@ -44,13 +44,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Generated;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Generated;$(SolutionDir)Recast\Include;$(SolutionDir)Detour\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Generated;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Generated;$(SolutionDir)Recast\Include;$(SolutionDir)Detour\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
@@ -93,6 +93,7 @@
   </ItemDefinitionGroup>
   <!-- 헤더 파일 -->
   <ItemGroup>
+    <ClInclude Include="Map\NavMeshManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="GameServerDefine.h" />
     <ClInclude Include="Stage.h" />
@@ -107,6 +108,7 @@
   </ItemGroup>
   <!-- 소스 파일 -->
   <ItemGroup>
+    <ClCompile Include="Map\NavMeshManager.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
