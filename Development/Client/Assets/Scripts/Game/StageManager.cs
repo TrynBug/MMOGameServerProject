@@ -177,26 +177,38 @@ namespace Client.Game
 
         }
 
-        // 스테이지내의 오브젝트가 이동했을때 서버가 보내는 패킷
+        // 스테이지내의 오브젝트가 이동했을때 서버가 보내는 패킷.
+        //
+        // 다른 캐릭터의 위치 동기화 전략:
+        //   - is_moving = true  : pos 무시, dest 로 SetMoveDestination 호출.
+        //                         PlayerCharacter 가 자기 NavMesh 로 경로 계산해 자연스럽게 이동.
+        //                         이미 이동 중이면 PlayerCharacter 의 repath 로직이 처리.
+        //   - is_moving = false : 서버 pos/yaw 로 스냅 (정지 시점은 텔레포트해도 어색하지 않음,
+        //                         그리고 정확한 정지 위치 보장).
+        //   - 자기 캐릭터의 MoveNtf 는 무시. 자기 위치 보정은 MovePosCorrectNtf 가 따로 담당.
         private void onMoveNtf(MoveNtf ntf)
         {
-            if (LocalPlayer)
+            if (LocalPlayer != null && LocalPlayer.UserId == ntf.ObjectId)
             {
-                if(LocalPlayer.UserId == ntf.ObjectId)
-                {
-                    // 내 캐릭터 이동 패킷일 경우, 위치가 어긋나면 보정해야 함
-                    // 지금은 그냥 넘어감
-
-                    return;
-                }
+                // 내 캐릭터 이동 패킷은 무시. 위치 보정은 MovePosCorrectNtf 로 처리됨.
+                return;
             }
 
-            PlayerCharacter character;
-            m_characters.TryGetValue(ntf.ObjectId, out character);
-            if(character)
+            if (!m_characters.TryGetValue(ntf.ObjectId, out PlayerCharacter character) || character == null)
             {
-                // 오브젝트 이동 패킷을 받았으면, 오브젝트를 tick마다 업데이트하며 이동시켜야 함.
-                // 지금은 그런로직이 없기 때문에 위치만 바꿔줌
+                Debug.LogWarning($"[StageManager] MoveNtf: character not found. ObjectId={ntf.ObjectId}");
+                return;
+            }
+
+            if (ntf.IsMoving)
+            {
+                // 이동 중: dest 로 NavMesh 이동 시작.
+                // pos 는 무시 (어차피 비슷할 것이고, 어긋나도 다음 MoveNtf 가 dest 갱신해 줌).
+                character.SetMoveDestination(new Vector3(ntf.DestX, ntf.DestY, ntf.DestZ));
+            }
+            else
+            {
+                // 정지: 서버 pos 로 스냅. SetPosition 내부에서 이동도 중지됨.
                 character.SetPosition(new Vector3(ntf.PosX, ntf.PosY, ntf.PosZ), ntf.Yaw);
             }
 
