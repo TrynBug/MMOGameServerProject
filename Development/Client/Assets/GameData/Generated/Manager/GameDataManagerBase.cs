@@ -1,0 +1,22 @@
+﻿// =====================================================================
+// 이 파일은 GameDataGenerator 에 의해 자동 생성됩니다. 직접 수정하지 마세요.
+// =====================================================================
+
+namespace GameData
+{
+    public class GameDataManagerBase
+    {
+        public static bool LoadAllGameData(string csvPath)
+        {
+            var table_Monster = new GameDataTable_Monster();
+            if (!table_Monster.LoadData(csvPath))
+                return false;
+
+            var table_Stage = new GameDataTable_Stage();
+            if (!table_Stage.LoadData(csvPath))
+                return false;
+
+            return true;
+        }
+    }
+}

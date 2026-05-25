@@ -3,13 +3,15 @@
 // 직접 수정하지 마세요. GameEnum.xlsx 가 변경되면 재생성됩니다.
 // =====================================================================
 
-public enum EMonsterGrade
+namespace GameData
 {
-    None                 = 0,
-    Normal               = 1,  // 일반
-    Magic                = 2,  // 매직
-    Rare                 = 3,  // 레어
-    Boss                 = 4,  // 보스
-    Max                 
+    public enum EMonsterGrade
+    {
+        None                 = 0,
+        Normal               = 1,  // 일반
+        Magic                = 2,  // 매직
+        Rare                 = 3,  // 레어
+        Boss                 = 4,  // 보스
+        Max                 
+    }
 }
-
