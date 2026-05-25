@@ -13,9 +13,11 @@ set SERVER_CODE=%~dp0..\Server\GameDataLib\Generated
 set SERVER_ENUM=%~dp0..\Server\GameDataLib\Generated\Enum
 set SERVER_CSV=%~dp0..\Server\OUTPUT\GameData
 
-set CLIENT_CODE=%~dp0..\Client\Assets\GameData\Generated
+set CLIENT_CODE_BASE=%~dp0..\Client\Assets\GameData\Generated\Base
+set CLIENT_CODE_CUSTOM=%~dp0..\Client\Assets\GameData\Custom
+set CLIENT_CODE_MANAGER=%~dp0..\Client\Assets\GameData\Generated\Manager
 set CLIENT_ENUM=%~dp0..\Client\Assets\GameData\Generated\Enum
-set CLIENT_CSV=%~dp0..\Client\Assets\GameData
+set CLIENT_CSV=%~dp0..\Client\Assets\StreamingAssets\GameData
 
 echo 현재경로 = %~dp0
 echo GameDataGenerator 경로 = %TOOL%
@@ -24,7 +26,9 @@ echo GameData 경로 = %DATA_DIR%
 echo Server 코드파일 경로 = %SERVER_CODE%
 echo Server enum파일 경로 = %SERVER_ENUM%
 echo Server 데이터파일 경로 = %SERVER_CSV%
-echo Client 코드파일 경로 = %CLIENT_CODE%
+echo Client Base 경로    = %CLIENT_CODE_BASE%
+echo Client Custom 경로  = %CLIENT_CODE_CUSTOM%
+echo Client Manager 경로 = %CLIENT_CODE_MANAGER%
 echo Client enum파일 경로 = %CLIENT_ENUM%
 echo Client 데이터파일 경로 = %CLIENT_CSV%
 
@@ -47,7 +51,7 @@ if %ERRORLEVEL% neq 0 (
 echo [2/3] 데이터 생성 중...
 for %%f in (%DATA_DIR%*.xlsx) do (
     echo   처리: %%~nxf
-    "%TOOL%" data "%%f" --enum-xlsx "%ENUM_XLSX%" --server-code "%SERVER_CODE%" --server-csv "%SERVER_CSV%" --client-code "%CLIENT_CODE%" --client-csv "%CLIENT_CSV%" --mode all
+    "%TOOL%" data "%%f" --enum-xlsx "%ENUM_XLSX%" --server-code "%SERVER_CODE%" --server-csv "%SERVER_CSV%" --client-code-base "%CLIENT_CODE_BASE%" --client-code-custom "%CLIENT_CODE_CUSTOM%" --client-csv "%CLIENT_CSV%" --mode all
     if %ERRORLEVEL% neq 0 (
         echo [오류] 데이터 생성 실패: %%~nxf
         pause
@@ -59,7 +63,7 @@ for %%f in (%DATA_DIR%*.xlsx) do (
 :: 3. Manager 파일 생성 (Generated 폴더 스캔 후 createAllGameDataTables 생성)
 :: -------------------------------------------------------
 echo [3/3] Manager 파일 생성 중...
-"%TOOL%" merge --server-code "%SERVER_CODE%" --client-code "%CLIENT_CODE%"
+"%TOOL%" merge --server-code "%SERVER_CODE%" --client-code-custom "%CLIENT_CODE_CUSTOM%" --client-code-manager "%CLIENT_CODE_MANAGER%"
 if %ERRORLEVEL% neq 0 (
     echo [오류] Manager 파일 생성 실패
     pause
