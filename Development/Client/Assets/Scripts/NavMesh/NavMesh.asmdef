@@ -1,0 +1,17 @@
+{
+    "name": "NavMesh",
+    "rootNamespace": "MMO.Client.Navigation",
+    "references": [
+        "DotRecast",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

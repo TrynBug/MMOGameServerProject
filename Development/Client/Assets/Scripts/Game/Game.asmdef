@@ -1,0 +1,21 @@
+{
+    "name": "Game",
+    "rootNamespace": "Client.Game",
+    "references": [
+        "Network",
+        "Packet",
+        "Generated",
+        "NavMesh",
+        "GameData",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

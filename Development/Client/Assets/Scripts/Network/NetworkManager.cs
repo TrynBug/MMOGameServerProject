@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using Client.Packet;
 using Google.Protobuf;
 using UnityEngine;
 
@@ -10,9 +9,12 @@ namespace Client.Network
     //
     // 책임:
     //   1) NetworkClient 소유 및 라이프사이클 관리
-    //   2) 수신 스레드의 RecvQueue 를 Update() 에서 비우고 PacketDispatcher 로 전달
+    //   2) 수신 스레드의 RecvQueue 를 Update() 에서 비우고 OnPacketReceived 이벤트로 전달
     //   3) NetworkClient 의 OnConnected/OnDisconnected 이벤트를 메인 스레드 큐로 마샬링하여
     //      Unity 객체를 안전하게 만질 수 있게 한다.
+    //
+    // NetworkManager 는 Packet 어셈블리에 의존하지 않는다 (의존 방향: Game → Packet → Network).
+    // PacketDispatcher 는 외부(Game)에서 OnPacketReceived 에 구독하여 디스패치를 수행한다.
     public class NetworkManager : MonoBehaviour
     {
         public static NetworkManager Instance { get; private set; }
@@ -22,6 +24,7 @@ namespace Client.Network
         // 메인 스레드에서 호출되는 이벤트 (UI/게임로직에서 안전하게 구독)
         public event Action OnConnected;
         public event Action<string> OnDisconnected; // null = 정상 종료
+        public event Action<RawPacket> OnPacketReceived; // 메인 스레드에서 호출됨
 
         // 임의 스레드에서 오는 이벤트를 메인 스레드로 옮기기 위한 큐
         private readonly ConcurrentQueue<Action> m_mainThreadActions = new ConcurrentQueue<Action>();
@@ -68,7 +71,7 @@ namespace Client.Network
             {
                 try
                 {
-                    PacketDispatcher.Instance.Dispatch(raw);
+                    OnPacketReceived?.Invoke(raw);
                 }
                 catch (Exception e)
                 {

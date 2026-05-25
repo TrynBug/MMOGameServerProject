@@ -18,12 +18,12 @@ namespace Client.Game
 
         private void Start()
         {
-            // NetworkManager가 씬에 없으면 직접 GameObject 만들어서 부착
+            // NetworkManager 는 GameBootstrap 이 이미 생성해둔 상태.
             m_net = NetworkManager.Instance;
             if (m_net == null)
             {
-                GameObject go = new GameObject("NetworkManager");
-                m_net = go.AddComponent<NetworkManager>();
+                Debug.LogError("[NetworkTest] NetworkManager.Instance 가 없습니다. GameBootstrap 이 실행되었는지 확인하세요.");
+                return;
             }
 
             m_net.OnConnected += onConnected;

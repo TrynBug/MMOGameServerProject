@@ -42,12 +42,12 @@ namespace Client.Game
 
         private void Start()
         {
-            // NetworkManager 확보
+            // NetworkManager 는 GameBootstrap 이 이미 생성하고 PacketDispatcher 와도 연결해둔 상태.
             m_net = NetworkManager.Instance;
             if (m_net == null)
             {
-                GameObject go = new GameObject("NetworkManager");
-                m_net = go.AddComponent<NetworkManager>();
+                Debug.LogError("[LoginFlow] NetworkManager.Instance 가 없습니다. GameBootstrap 이 실행되었는지 확인하세요.");
+                return;
             }
 
             // 로그인 관련 핸들러만 등록. GameEnterNtf/StageEnterNtf 는 StageManager가 등록.
