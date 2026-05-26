@@ -1,3 +1,4 @@
+using Client.Managers;
 using Client.Network;
 using Client.Packet;
 using Common;
@@ -16,13 +17,12 @@ namespace Client.Game
     //   - 캐릭터가 없으면 CharacterCreateReq 송신
     //   - CharacterCreateRes 받아서 선택 흐름 진행
     //   - 캐릭터가 있으면 첫 번째 캐릭터 자동 선택 (테스트 단계)
-    //   - 선택된 캐릭터의 LocalPlayer 스폰을 StageManager 에 요청
     //   - 서버에 CharacterSelectReq 송신
+    //   - CharacterSelectRes 받으면 spawn 정보를 캐시에 저장하고 Game 씬으로 전환
     //
     // 책임이 아닌 것:
-    //   - 캐릭터 GameObject 생성 (CharacterFactory 가 함)
-    //   - 캐릭터 컬렉션 관리 (StageManager 가 함)
-    //   - StageEnterNtf 이후의 흐름 (StageManager 가 함)
+    //   - 캐릭터 GameObject 생성 (Game 씬의 StageManager 가 함)
+    //   - StageEnterNtf 이후의 흐름 (Game 씬의 StageManager 가 함)
     public class CharacterSelector : MonoBehaviour
     {
         // 외부 이벤트. UI 가 진행 상태를 표시할 수 있도록.
@@ -30,10 +30,11 @@ namespace Client.Game
 
         private void Start()
         {
-            // CharacterCreateRes 핸들러 등록.
+            // 선택/생성 흐름의 응답 패킷 핸들러 등록.
             // CharacterListNtf 는 일반적으로 Login 씬에서 받아 캐시되므로 다시 받을 필요 없음.
             // 단, 다른 시나리오 대비 fallback 으로 등록은 해둠.
             PacketDispatcher.Instance.Register<CharacterCreateRes>(GamePacketId.CharacterCreateRes, onCharacterCreateRes);
+            PacketDispatcher.Instance.Register<CharacterSelectRes>(GamePacketId.CharacterSelectRes, onCharacterSelectRes);
             PacketDispatcher.Instance.Register<CharacterListNtf>(GamePacketId.CharacterListNtf, onCharacterListNtf);
 
             // 캐시의 캐릭터 목록으로 즉시 처리 시작.
@@ -68,22 +69,6 @@ namespace Client.Game
         private void selectCharacter(Character ch)
         {
             setStatus($"캐릭터 선택 중: {ch.Name}");
-
-            // StageManager 에게 LocalPlayer 스폰을 요청
-            if (StageManager.Instance != null)
-            {
-                StageManager.Instance.SpawnLocalPlayer(
-                    userId: ch.CharacterId,
-                    name: ch.Name,
-                    pos: new Vector3(ch.PosX, ch.PosY, ch.PosZ),
-                    dirY: ch.Yaw);
-            }
-            else
-            {
-                Debug.LogError("[CharacterSelector] StageManager.Instance is null. LocalPlayer 가 스폰되지 못합니다.");
-            }
-
-            // 서버에 선택 요청
             sendCharacterSelectReq(ch.CharacterId);
         }
 
@@ -117,6 +102,34 @@ namespace Client.Game
 
             // 생성된 캐릭터를 곧바로 선택
             selectCharacter(ch);
+        }
+
+        private void onCharacterSelectRes(CharacterSelectRes res)
+        {
+            if ((EResultCode)res.ResultCode != EResultCode.Success)
+            {
+                string msg = $"캐릭터 선택 실패: {res.ErrorMsg} (code={res.ResultCode})";
+                Debug.LogError($"[CharacterSelector] {msg}");
+                setStatus(msg);
+                return;
+            }
+
+            Debug.Log($"[CharacterSelector] CharacterSelectRes OK. characterId={res.CharacterId}, stageId={res.StageId}, pos=({res.PosX:F2},{res.PosY:F2},{res.PosZ:F2})");
+
+            // 선택된 캐릭터 이름은 캐시의 Characters 목록에서 찾아옴.
+            string name = findCharacterName(res.CharacterId);
+
+            // spawn 정보를 캐시에 저장 (Game 씬에서 꺼내 씀)
+            CharacterDataCache.Instance.SetSelectedSpawn(
+                characterId: res.CharacterId,
+                name: name,
+                stageId: res.StageId,
+                pos: new Vector3(res.PosX, res.PosY, res.PosZ),
+                yaw: res.Yaw);
+
+            // Game 씬으로 전환
+            setStatus("게임 입장 중...");
+            Managers.Managers.Scene.LoadScene(SceneManagerEx.SceneNames.Game);
         }
 
         // ─── 송신 ───────────────────────────────────────────────────────
@@ -159,6 +172,15 @@ namespace Client.Game
         }
 
         // ─── 헬퍼 ───────────────────────────────────────────────────────
+
+        private string findCharacterName(long characterId)
+        {
+            foreach (Character ch in CharacterDataCache.Instance.Characters)
+            {
+                if (ch != null && ch.CharacterId == characterId) return ch.Name;
+            }
+            return $"Character_{characterId}";
+        }
 
         private void setStatus(string msg)
         {

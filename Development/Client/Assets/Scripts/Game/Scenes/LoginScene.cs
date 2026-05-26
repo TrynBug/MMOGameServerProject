@@ -6,7 +6,7 @@ namespace Client.Game
     // Login 씬의 BaseScene 구현.
     //
     // Login 씬에 빈 GameObject "@Scene" 을 만들고 이 컴포넌트를 부착하면,
-    // Awake 시점에 Init() 이 호출된다.
+    // Start 시점에 Init() 이 호출된다.
     //
     // 실제 로그인 UI 와 시퀀스는 LoginSceneController 가 담당하므로,
     // 이 클래스는 씬 진입/이탈 시점의 공통 작업만 담당한다.

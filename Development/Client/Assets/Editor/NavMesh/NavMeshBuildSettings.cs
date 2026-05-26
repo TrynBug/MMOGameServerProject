@@ -147,5 +147,20 @@ namespace MMO.Client.Navigation.Editor
 
         [Tooltip("true 일 때 서버 경로에도 자동으로 .bin 을 저장합니다.")]
         public bool writeToServerOutput = true;
+
+        // =====================================================================
+        // 일괄 빌드 설정
+        //
+        // Tools > NavMesh > Build All Scenes 메뉴가 이 폴더 안의 모든 .unity 파일을
+        // 순서대로 열어 NavMesh 를 빌드한다.
+        //
+        // 권장: 게임플레이 씬과 분리된 "빌드 전용 씬" 폴더를 쓴다.
+        //   - 이 씬들은 NavMesh 빌드 목적이므로 Build Settings 에 등록하지 않는다.
+        //   - 메시/프랍은 게임플레이 씬과 공유해도 좋고, 따로 두어도 좋다.
+        // =====================================================================
+
+        [Header("Batch Build")]
+        [Tooltip("일괄 빌드 시 대상 씬이 들어있는 폴더. Assets 기준 상대경로. 이 폴더 안의 모든 .unity 파일이 대상.")]
+        public string batchBuildScenesDir = "Scenes/NavMeshBuild";
     }
 }

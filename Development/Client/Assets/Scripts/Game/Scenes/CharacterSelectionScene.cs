@@ -34,7 +34,7 @@ namespace Client.Game
 
             // 같은 씬의 CharacterSelector 와 연결
             // (CharacterSelector 는 같은 씬의 다른 GameObject 에 부착되어 있음)
-            m_selector = Object.FindFirstObjectByType<CharacterSelector>();
+            m_selector = Object.FindAnyObjectByType<CharacterSelector>();
             if (m_selector != null)
             {
                 m_selector.OnStatusChanged += onStatusChanged;

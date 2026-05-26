@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -157,6 +158,149 @@ namespace MMO.Client.Navigation.Editor
                 stageName = EditorSceneManager.GetActiveScene().name;
 
             return NavMeshBuilder.Build(settings, stageName);
+        }
+
+        // ---------------------------------------------------------------------
+        // 진입점 4: 일괄 빌드 (메뉴 클릭)
+        // ---------------------------------------------------------------------
+        // settings.batchBuildScenesDir 폴더 안의 모든 .unity 파일을 차례로 열어
+        // NavMesh 를 빌드한다. 끝나면 원래 작업 중이던 씬으로 복귀한다.
+        // 주의: 메뉴가 씬을 강제로 열기 때문에, 현재 씬이 dirty 면 먼저 저장/포기를 물어본다.
+        // ---------------------------------------------------------------------
+        [MenuItem("Tools/NavMesh/Build All Scenes", priority = 102)]
+        public static void BuildAllScenes()
+        {
+            var settings = FindSettings();
+            if (settings == null)
+            {
+                EditorUtility.DisplayDialog(
+                    "NavMesh Build All",
+                    "NavMeshBuildSettings 에셋을 찾을 수 없습니다.\n" +
+                    "프로젝트 어디엔가에 Create > MMO > Navigation > NavMesh Build Settings 로 생성하세요.",
+                    "OK");
+                return;
+            }
+
+            // 1) 대상 씬 파일 수집
+            string dir = settings.batchBuildScenesDir;
+            if (string.IsNullOrEmpty(dir))
+            {
+                EditorUtility.DisplayDialog("NavMesh Build All", "NavMeshBuildSettings.batchBuildScenesDir 가 비어 있습니다.", "OK");
+                return;
+            }
+
+            // AssetDatabase 는 경로에 "Assets/" 접두어가 필요하다.
+            string searchFolder = dir.StartsWith("Assets/") ? dir : "Assets/" + dir;
+            if (!AssetDatabase.IsValidFolder(searchFolder))
+            {
+                EditorUtility.DisplayDialog("NavMesh Build All",
+                    $"폴더를 찾을 수 없습니다: {searchFolder}\nNavMeshBuildSettings.batchBuildScenesDir 를 확인하세요.",
+                    "OK");
+                return;
+            }
+
+            string[] sceneGuids = AssetDatabase.FindAssets("t:Scene", new[] { searchFolder });
+            if (sceneGuids == null || sceneGuids.Length == 0)
+            {
+                EditorUtility.DisplayDialog("NavMesh Build All",
+                    $"폴더에 .unity 파일이 없습니다: {searchFolder}",
+                    "OK");
+                return;
+            }
+
+            // 경로로 변환하고 일관된 순서로 정렬 (결과 보고용)
+            var scenePaths = new List<string>(sceneGuids.Length);
+            foreach (string guid in sceneGuids)
+            {
+                scenePaths.Add(AssetDatabase.GUIDToAssetPath(guid));
+            }
+            scenePaths.Sort();
+
+            // 2) 현재 씬 dirty 체크 → 제하면 저장/포기/취소
+            //    SaveCurrentModifiedScenesIfUserWantsTo 는 Unity 의 표준 다이얼로그 (취소 누르면 false 리턴)
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            {
+                Debug.Log("[NavMesh] Build All canceled by user.");
+                return;
+            }
+
+            // 3) 원래 씬 경로 기억 (빌드 끝나면 복귀)
+            string originalScenePath = EditorSceneManager.GetActiveScene().path;
+
+            // 4) 각 씬 차례로 빌드
+            var summary = new List<string>();
+            int successCount = 0;
+            int failCount = 0;
+
+            try
+            {
+                for (int i = 0; i < scenePaths.Count; ++i)
+                {
+                    string scenePath = scenePaths[i];
+                    string stageName = Path.GetFileNameWithoutExtension(scenePath);
+
+                    // 진행률 표시. 취소 버튼 포함.
+                    bool canceled = EditorUtility.DisplayCancelableProgressBar(
+                        "NavMesh Build All",
+                        $"({i + 1}/{scenePaths.Count}) {stageName}",
+                        (float)i / scenePaths.Count);
+                    if (canceled)
+                    {
+                        summary.Add($"[CANCELED] 이후 제외");
+                        break;
+                    }
+
+                    // 씬 열기. Single 모드로 열어서 이전 씬은 자동 언로드.
+                    NavMeshBuilder.BuildResult result;
+                    try
+                    {
+                        EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+                        result = NavMeshBuilder.Build(settings, stageName);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Debug.LogException(ex);
+                        result = new NavMeshBuilder.BuildResult
+                        {
+                            success = false,
+                            message = $"예외: {ex.Message}",
+                        };
+                    }
+
+                    if (result.success)
+                    {
+                        ++successCount;
+                        summary.Add($"[OK] {stageName}: tiles={result.tileCount}, polys={result.totalPolyCount}");
+                        Debug.Log($"[NavMesh] Build All - OK: {stageName}");
+                    }
+                    else
+                    {
+                        ++failCount;
+                        summary.Add($"[FAIL] {stageName}: {result.message}");
+                        Debug.LogError($"[NavMesh] Build All - FAIL: {stageName}: {result.message}");
+                    }
+                }
+            }
+            finally
+            {
+                EditorUtility.ClearProgressBar();
+
+                // 5) 원래 씬으로 복귀 (비어있으면 빈 씬을 연다)
+                if (!string.IsNullOrEmpty(originalScenePath))
+                {
+                    EditorSceneManager.OpenScene(originalScenePath, OpenSceneMode.Single);
+                }
+                else
+                {
+                    EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                }
+            }
+
+            // 6) 결과 요약
+            string header = $"성공 {successCount} / 실패 {failCount} (총 {scenePaths.Count})";
+            string body = header + "\n\n" + string.Join("\n", summary);
+            Debug.Log("[NavMesh] Build All 완료:\n" + body);
+            EditorUtility.DisplayDialog("NavMesh Build All 완료", body, "OK");
         }
     }
 }

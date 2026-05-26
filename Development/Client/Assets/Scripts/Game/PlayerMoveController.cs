@@ -49,10 +49,6 @@ namespace Client.Game
         // 마지막 송신 후 경과 시간 (sec). 큰 값으로 시작해서 첫 호출에 즉시 보내짐.
         private float m_timeSinceLastSend = float.MaxValue;
 
-        // RequestMoveTo 가 이번 프레임에 호출됐는지. Update 끝에 false 로 리셋.
-        // (입력이 끊긴 프레임을 감지하는 용도가 아니라, MouseClickedUp 이벤트로 처리)
-        private bool m_requestedThisFrame;
-
         private void Awake()
         {
             Character = GetComponent<PlayerCharacter>();
@@ -82,10 +78,9 @@ namespace Client.Game
             // 1) 캐릭터에게 즉시 알림 (클라이언트 응답성)
             Character.SetMoveDestination(worldPoint);
 
-            // 2) 송신 대상으로 저장. 실제 송신은 LateUpdate 에서.
+            // 2) 송신 대상으로 저장. 실제 송신은 Update 에서 주기적으로.
             m_pendingDest = worldPoint;
             m_hasPendingDest = true;
-            m_requestedThisFrame = true;
         }
 
         private void Update()
@@ -107,12 +102,6 @@ namespace Client.Game
             m_lastSentDest = m_pendingDest;
             m_hasLastSent = true;
             m_timeSinceLastSend = 0f;
-        }
-
-        private void LateUpdate()
-        {
-            // 다음 프레임을 위해 리셋
-            m_requestedThisFrame = false;
         }
 
         // 마우스 좌클릭을 뗀 순간 InputManager 가 호출.

@@ -2,7 +2,9 @@ using Client.Network;
 using Client.Packet;
 using Common;
 using DataStructures;
+using GameData;
 using GamePacket;
+using MMO.Client.Navigation;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -80,7 +82,12 @@ namespace Client.Game
         {
             Debug.Log($"[StageManager] StageEnterNtf: stage={ntf.StageId}");
 
-            // 위치/스탯이 최신화됐을 수 있으니 내 캐릭터 위치 동기화
+            // 새 Stage 의 NavMesh 로 갈아끼움.
+            // 같은 stage 면 NavMeshService 가 no-op 처리. Game 씬 진입 시에는 GameScene.Init 에서
+            // 먼저 로드되고, 이후 같은 게임서버 내 Stage 이동 시에는 이 파트가 갱신을 담당한다.
+            loadNavMeshForStage(ntf.StageId);
+
+            // 서버가 알려준 spawn 위치/회전으로 내 캐릭터 동기화
             if (LocalPlayer != null)
             {
                 LocalPlayer.SetPosition(new Vector3(ntf.MyPosX, ntf.MyPosY, ntf.MyPosZ), ntf.MyYaw);
@@ -186,6 +193,32 @@ namespace Client.Game
             PlayerCharacter pc = CharacterFactory.Create(userId, name, isLocalPlayer: false, pos, dirY);
             m_characters.Add(userId, pc);
             return pc;
+        }
+
+        // stageId 로 게임데이터를 조회해서 NavMesh 파일을 로드.
+        // 게임데이터가 없거나 NavMeshFileName 이 비어있으면 경고만 남기고 진행
+        // (PlayerCharacter 는 NavMesh 없으면 직선 이동으로 폴백함).
+        // 같은 stage 가 이미 로드되어 있으면 NavMeshService.Load 가 no-op 처리.
+        private static void loadNavMeshForStage(long stageId)
+        {
+            GameData_Stage stageData = GameDataTable_Stage.FindData(stageId);
+            if (stageData == null)
+            {
+                Debug.LogError($"[StageManager] Stage 게임데이터를 찾을 수 없습니다. stageId={stageId}");
+                return;
+            }
+
+            string navMeshName = stageData.NavMeshFileName;
+            if (string.IsNullOrEmpty(navMeshName))
+            {
+                Debug.LogWarning($"[StageManager] Stage 의 NavMeshFileName 이 비어있습니다. stageId={stageId} name={stageData.Name}");
+                return;
+            }
+
+            if (!NavMeshService.Load(navMeshName))
+            {
+                Debug.LogError($"[StageManager] NavMesh 로드 실패. stageId={stageId} navMeshName={navMeshName}");
+            }
         }
     }
 }

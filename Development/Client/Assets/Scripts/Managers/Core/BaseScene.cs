@@ -11,11 +11,17 @@ namespace Client.Managers
     //
     // 부착 방법:
     //   씬에 빈 GameObject "@Scene" 을 만들고 LoginScene / GameScene 등 컴포넌트 추가.
-    //   Awake 에서 자동으로 Init() 호출됨.
+    //   Start 에서 자동으로 Init() 호출됨.
     public abstract class BaseScene : MonoBehaviour
     {
-        // 자식 클래스에서 override 가능. base.Awake() 호출 필수.
-        protected virtual void Awake()
+        // 자식 클래스에서 override 가능. base.Start() 호출 필수.
+        //
+        // Start 를 쓰는 이유:
+        //   씬 안의 다른 GameObject (StageManager 등) 도 BaseScene 과 같이 씬에 배치되어
+        //   있는데, Awake 호출 순서는 보장되지 않는다. 따라서
+        //   Init() 이 어떤 조건 (StageManager.Instance 등) 을 참조하려면
+        //   모든 Awake 가 끝난 다음인 Start 시점에 실행되어야 안전하다.
+        protected virtual void Start()
         {
             Init();
         }

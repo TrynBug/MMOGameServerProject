@@ -31,9 +31,11 @@ namespace GamePacket {
             "KAkSDgoGam9iX2lkGAIgASgFIm4KEkNoYXJhY3RlckNyZWF0ZVJlcxITCgty",
             "ZXN1bHRfY29kZRgBIAEoBRIRCgllcnJvcl9tc2cYAiABKAkSMAoNbmV3X2No",
             "YXJhY3RlchgDIAEoCzIZLkRhdGFTdHJ1Y3R1cmVzLkNoYXJhY3RlciIqChJD",
-            "aGFyYWN0ZXJTZWxlY3RSZXESFAoMY2hhcmFjdGVyX2lkGAEgASgDIj4KFkNo",
-            "YXJhY3RlclNlbGVjdEZhaWxOdGYSEwoLcmVhc29uX2NvZGUYASABKAUSDwoH",
-            "bWVzc2FnZRgCIAEoCWIGcHJvdG8z"));
+            "aGFyYWN0ZXJTZWxlY3RSZXESFAoMY2hhcmFjdGVyX2lkGAEgASgDIp4BChJD",
+            "aGFyYWN0ZXJTZWxlY3RSZXMSEwoLcmVzdWx0X2NvZGUYASABKAUSEQoJZXJy",
+            "b3JfbXNnGAIgASgJEhQKDGNoYXJhY3Rlcl9pZBgDIAEoAxIQCghzdGFnZV9p",
+            "ZBgEIAEoAxINCgVwb3NfeBgFIAEoAhINCgVwb3NfeRgGIAEoAhINCgVwb3Nf",
+            "ehgHIAEoAhILCgN5YXcYCCABKAJiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::DataStructures.CharacterReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -41,7 +43,7 @@ namespace GamePacket {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterCreateReq), global::GamePacket.CharacterCreateReq.Parser, new[]{ "Name", "JobId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterCreateRes), global::GamePacket.CharacterCreateRes.Parser, new[]{ "ResultCode", "ErrorMsg", "NewCharacter" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSelectReq), global::GamePacket.CharacterSelectReq.Parser, new[]{ "CharacterId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSelectFailNtf), global::GamePacket.CharacterSelectFailNtf.Parser, new[]{ "ReasonCode", "Message" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSelectRes), global::GamePacket.CharacterSelectRes.Parser, new[]{ "ResultCode", "ErrorMsg", "CharacterId", "StageId", "PosX", "PosY", "PosZ", "Yaw" }, null, null, null, null)
           }));
     }
     #endregion
@@ -780,7 +782,7 @@ namespace GamePacket {
 
   /// <summary>
   /// 캐릭터 선택 요청 (클라 -> 게임서버)
-  /// 성공 시 게임서버는 GameEnterNtf를 보낸다. 실패 시 CharacterSelectFailNtf를 보낸다.
+  /// 서버는 CharacterSelectRes로 응답한다 (성공/실패 모두).
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class CharacterSelectReq : pb::IMessage<CharacterSelectReq>
@@ -981,22 +983,23 @@ namespace GamePacket {
   }
 
   /// <summary>
-  /// 캐릭터 선택 실패 알림 (게임서버 -> 클라)
-  /// 캐릭터 선택은 성공/실패로 응답 패킷이 분기된다.
-  ///   - 성공: GameEnterNtf (game 입장 완료 = 캐릭터 선택 완료)
-  ///   - 실패: CharacterSelectFailNtf
+  /// 캐릭터 선택 결과 (게임서버 -> 클라)
+  /// result_code 는 EResultCode (1=Success, 2=Fail). 0은 사용하지 않음.
+  ///
+  /// 성공 시: 클라는 이 패킷의 spawn 정보로 LocalPlayer 스폰과 Game 씬 전환을 진행한다.
+  /// 실패 시: error_msg 만 의미 있고 spawn 관련 필드는 기본값.
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
-  public sealed partial class CharacterSelectFailNtf : pb::IMessage<CharacterSelectFailNtf>
+  public sealed partial class CharacterSelectRes : pb::IMessage<CharacterSelectRes>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<CharacterSelectFailNtf> _parser = new pb::MessageParser<CharacterSelectFailNtf>(() => new CharacterSelectFailNtf());
+    private static readonly pb::MessageParser<CharacterSelectRes> _parser = new pb::MessageParser<CharacterSelectRes>(() => new CharacterSelectRes());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<CharacterSelectFailNtf> Parser { get { return _parser; } }
+    public static pb::MessageParser<CharacterSelectRes> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -1012,7 +1015,7 @@ namespace GamePacket {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public CharacterSelectFailNtf() {
+    public CharacterSelectRes() {
       OnConstruction();
     }
 
@@ -1020,65 +1023,167 @@ namespace GamePacket {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public CharacterSelectFailNtf(CharacterSelectFailNtf other) : this() {
-      reasonCode_ = other.reasonCode_;
-      message_ = other.message_;
+    public CharacterSelectRes(CharacterSelectRes other) : this() {
+      resultCode_ = other.resultCode_;
+      errorMsg_ = other.errorMsg_;
+      characterId_ = other.characterId_;
+      stageId_ = other.stageId_;
+      posX_ = other.posX_;
+      posY_ = other.posY_;
+      posZ_ = other.posZ_;
+      yaw_ = other.yaw_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public CharacterSelectFailNtf Clone() {
-      return new CharacterSelectFailNtf(this);
+    public CharacterSelectRes Clone() {
+      return new CharacterSelectRes(this);
     }
 
-    /// <summary>Field number for the "reason_code" field.</summary>
-    public const int ReasonCodeFieldNumber = 1;
-    private int reasonCode_;
+    /// <summary>Field number for the "result_code" field.</summary>
+    public const int ResultCodeFieldNumber = 1;
+    private int resultCode_;
     /// <summary>
-    /// 실패 사유 코드 (당분간 free-form, 필요해지면 enum화)
+    /// EResultCode 값
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int ReasonCode {
-      get { return reasonCode_; }
+    public int ResultCode {
+      get { return resultCode_; }
       set {
-        reasonCode_ = value;
+        resultCode_ = value;
       }
     }
 
-    /// <summary>Field number for the "message" field.</summary>
-    public const int MessageFieldNumber = 2;
-    private string message_ = "";
+    /// <summary>Field number for the "error_msg" field.</summary>
+    public const int ErrorMsgFieldNumber = 2;
+    private string errorMsg_ = "";
     /// <summary>
-    /// 사람이 읽을 수 있는 사유 메시지
+    /// 실패 시 사유 메시지 (성공 시 빈 문자열)
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public string Message {
-      get { return message_; }
+    public string ErrorMsg {
+      get { return errorMsg_; }
       set {
-        message_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        errorMsg_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "character_id" field.</summary>
+    public const int CharacterIdFieldNumber = 3;
+    private long characterId_;
+    /// <summary>
+    /// 선택된 캐릭터 ID (클라 확인용)
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long CharacterId {
+      get { return characterId_; }
+      set {
+        characterId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "stage_id" field.</summary>
+    public const int StageIdFieldNumber = 4;
+    private long stageId_;
+    /// <summary>
+    /// 입장할 Stage ID
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long StageId {
+      get { return stageId_; }
+      set {
+        stageId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pos_x" field.</summary>
+    public const int PosXFieldNumber = 5;
+    private float posX_;
+    /// <summary>
+    /// 스폰 위치 X
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float PosX {
+      get { return posX_; }
+      set {
+        posX_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pos_y" field.</summary>
+    public const int PosYFieldNumber = 6;
+    private float posY_;
+    /// <summary>
+    /// 스폰 위치 Y
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float PosY {
+      get { return posY_; }
+      set {
+        posY_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pos_z" field.</summary>
+    public const int PosZFieldNumber = 7;
+    private float posZ_;
+    /// <summary>
+    /// 스폰 위치 Z
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float PosZ {
+      get { return posZ_; }
+      set {
+        posZ_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "yaw" field.</summary>
+    public const int YawFieldNumber = 8;
+    private float yaw_;
+    /// <summary>
+    /// 스폰 회전 (Y축, degree)
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float Yaw {
+      get { return yaw_; }
+      set {
+        yaw_ = value;
       }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
-      return Equals(other as CharacterSelectFailNtf);
+      return Equals(other as CharacterSelectRes);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(CharacterSelectFailNtf other) {
+    public bool Equals(CharacterSelectRes other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (ReasonCode != other.ReasonCode) return false;
-      if (Message != other.Message) return false;
+      if (ResultCode != other.ResultCode) return false;
+      if (ErrorMsg != other.ErrorMsg) return false;
+      if (CharacterId != other.CharacterId) return false;
+      if (StageId != other.StageId) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosX, other.PosX)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Yaw, other.Yaw)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1086,8 +1191,14 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
-      if (ReasonCode != 0) hash ^= ReasonCode.GetHashCode();
-      if (Message.Length != 0) hash ^= Message.GetHashCode();
+      if (ResultCode != 0) hash ^= ResultCode.GetHashCode();
+      if (ErrorMsg.Length != 0) hash ^= ErrorMsg.GetHashCode();
+      if (CharacterId != 0L) hash ^= CharacterId.GetHashCode();
+      if (StageId != 0L) hash ^= StageId.GetHashCode();
+      if (PosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosX);
+      if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
+      if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
+      if (Yaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Yaw);
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1106,13 +1217,37 @@ namespace GamePacket {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (ReasonCode != 0) {
+      if (ResultCode != 0) {
         output.WriteRawTag(8);
-        output.WriteInt32(ReasonCode);
+        output.WriteInt32(ResultCode);
       }
-      if (Message.Length != 0) {
+      if (ErrorMsg.Length != 0) {
         output.WriteRawTag(18);
-        output.WriteString(Message);
+        output.WriteString(ErrorMsg);
+      }
+      if (CharacterId != 0L) {
+        output.WriteRawTag(24);
+        output.WriteInt64(CharacterId);
+      }
+      if (StageId != 0L) {
+        output.WriteRawTag(32);
+        output.WriteInt64(StageId);
+      }
+      if (PosX != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(PosX);
+      }
+      if (PosY != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(PosY);
+      }
+      if (PosZ != 0F) {
+        output.WriteRawTag(61);
+        output.WriteFloat(PosZ);
+      }
+      if (Yaw != 0F) {
+        output.WriteRawTag(69);
+        output.WriteFloat(Yaw);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -1124,13 +1259,37 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (ReasonCode != 0) {
+      if (ResultCode != 0) {
         output.WriteRawTag(8);
-        output.WriteInt32(ReasonCode);
+        output.WriteInt32(ResultCode);
       }
-      if (Message.Length != 0) {
+      if (ErrorMsg.Length != 0) {
         output.WriteRawTag(18);
-        output.WriteString(Message);
+        output.WriteString(ErrorMsg);
+      }
+      if (CharacterId != 0L) {
+        output.WriteRawTag(24);
+        output.WriteInt64(CharacterId);
+      }
+      if (StageId != 0L) {
+        output.WriteRawTag(32);
+        output.WriteInt64(StageId);
+      }
+      if (PosX != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(PosX);
+      }
+      if (PosY != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(PosY);
+      }
+      if (PosZ != 0F) {
+        output.WriteRawTag(61);
+        output.WriteFloat(PosZ);
+      }
+      if (Yaw != 0F) {
+        output.WriteRawTag(69);
+        output.WriteFloat(Yaw);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -1142,11 +1301,29 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
-      if (ReasonCode != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ReasonCode);
+      if (ResultCode != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ResultCode);
       }
-      if (Message.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Message);
+      if (ErrorMsg.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ErrorMsg);
+      }
+      if (CharacterId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(CharacterId);
+      }
+      if (StageId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageId);
+      }
+      if (PosX != 0F) {
+        size += 1 + 4;
+      }
+      if (PosY != 0F) {
+        size += 1 + 4;
+      }
+      if (PosZ != 0F) {
+        size += 1 + 4;
+      }
+      if (Yaw != 0F) {
+        size += 1 + 4;
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1156,15 +1333,33 @@ namespace GamePacket {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(CharacterSelectFailNtf other) {
+    public void MergeFrom(CharacterSelectRes other) {
       if (other == null) {
         return;
       }
-      if (other.ReasonCode != 0) {
-        ReasonCode = other.ReasonCode;
+      if (other.ResultCode != 0) {
+        ResultCode = other.ResultCode;
       }
-      if (other.Message.Length != 0) {
-        Message = other.Message;
+      if (other.ErrorMsg.Length != 0) {
+        ErrorMsg = other.ErrorMsg;
+      }
+      if (other.CharacterId != 0L) {
+        CharacterId = other.CharacterId;
+      }
+      if (other.StageId != 0L) {
+        StageId = other.StageId;
+      }
+      if (other.PosX != 0F) {
+        PosX = other.PosX;
+      }
+      if (other.PosY != 0F) {
+        PosY = other.PosY;
+      }
+      if (other.PosZ != 0F) {
+        PosZ = other.PosZ;
+      }
+      if (other.Yaw != 0F) {
+        Yaw = other.Yaw;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1186,11 +1381,35 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            ReasonCode = input.ReadInt32();
+            ResultCode = input.ReadInt32();
             break;
           }
           case 18: {
-            Message = input.ReadString();
+            ErrorMsg = input.ReadString();
+            break;
+          }
+          case 24: {
+            CharacterId = input.ReadInt64();
+            break;
+          }
+          case 32: {
+            StageId = input.ReadInt64();
+            break;
+          }
+          case 45: {
+            PosX = input.ReadFloat();
+            break;
+          }
+          case 53: {
+            PosY = input.ReadFloat();
+            break;
+          }
+          case 61: {
+            PosZ = input.ReadFloat();
+            break;
+          }
+          case 69: {
+            Yaw = input.ReadFloat();
             break;
           }
         }
@@ -1213,11 +1432,35 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 8: {
-            ReasonCode = input.ReadInt32();
+            ResultCode = input.ReadInt32();
             break;
           }
           case 18: {
-            Message = input.ReadString();
+            ErrorMsg = input.ReadString();
+            break;
+          }
+          case 24: {
+            CharacterId = input.ReadInt64();
+            break;
+          }
+          case 32: {
+            StageId = input.ReadInt64();
+            break;
+          }
+          case 45: {
+            PosX = input.ReadFloat();
+            break;
+          }
+          case 53: {
+            PosY = input.ReadFloat();
+            break;
+          }
+          case 61: {
+            PosZ = input.ReadFloat();
+            break;
+          }
+          case 69: {
+            Yaw = input.ReadFloat();
             break;
           }
         }
