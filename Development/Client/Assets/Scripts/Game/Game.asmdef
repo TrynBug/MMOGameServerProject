@@ -8,6 +8,7 @@
         "NavMesh",
         "GameData",
         "Managers",
+        "UI",
         "Unity.InputSystem",
         "Unity.TextMeshPro"
     ],

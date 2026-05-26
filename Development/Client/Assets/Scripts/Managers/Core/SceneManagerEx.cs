@@ -20,8 +20,8 @@ namespace Client.Managers
         public static class SceneNames
         {
             public const string Login = "Login";
+            public const string CharacterSelection = "CharacterSelection";
             public const string Game = "Game";
-            // 추후 CharacterSelect 등 추가 가능
         }
 
         // 현재 활성 씬의 BaseScene 컴포넌트.
