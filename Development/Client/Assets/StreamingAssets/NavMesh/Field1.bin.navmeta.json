@@ -1,5 +1,5 @@
 {
-  "navmesh_file": "NetworkTestScene.bin",
+  "navmesh_file": "Field1.bin",
   "bounds": {
     "min_x": -25,
     "min_z": -25,
@@ -7,7 +7,7 @@
     "max_z": 32.600002288818359
   },
   "tiles_count": 36,
-  "walkable_polygons_count": 47,
-  "generated_at": "2026-05-24T15:07:30Z",
+  "walkable_polygons_count": 68,
+  "generated_at": "2026-05-26T14:19:21Z",
   "generator_version": "1.0"
 }

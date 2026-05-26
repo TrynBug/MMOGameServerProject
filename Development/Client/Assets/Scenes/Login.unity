@@ -552,12 +552,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game::Client.Game.LoginSceneController
   m_loginIp: 127.0.0.1
   m_loginPort: 8001
-  m_idInput: {fileID: 0}
-  m_passwordInput: {fileID: 0}
-  m_loginButton: {fileID: 0}
-  m_statusText: {fileID: 0}
-  m_loadNextScene: 0
-  m_nextSceneName: CharacterSelect
   m_connectTimeoutSec: 10
   m_packetTimeoutSec: 10
 --- !u!1660057539 &9223372036854775807
