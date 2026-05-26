@@ -26,6 +26,40 @@ namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 namespace GamePacket {
 
+inline constexpr CharacterSelectRes::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        error_msg_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        character_id_{::int64_t{0}},
+        result_code_{0},
+        pos_x_{0},
+        stage_id_{::int64_t{0}},
+        pos_y_{0},
+        pos_z_{0},
+        yaw_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR CharacterSelectRes::CharacterSelectRes(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(CharacterSelectRes_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct CharacterSelectResDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR CharacterSelectResDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~CharacterSelectResDefaultTypeInternal() {}
+  union {
+    CharacterSelectRes _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 CharacterSelectResDefaultTypeInternal _CharacterSelectRes_default_instance_;
+
 inline constexpr CharacterSelectReq::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -50,34 +84,6 @@ struct CharacterSelectReqDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 CharacterSelectReqDefaultTypeInternal _CharacterSelectReq_default_instance_;
-
-inline constexpr CharacterSelectFailNtf::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : _cached_size_{0},
-        message_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        reason_code_{0} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR CharacterSelectFailNtf::CharacterSelectFailNtf(::_pbi::ConstantInitialized)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(CharacterSelectFailNtf_class_data_.base()),
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(),
-#endif  // PROTOBUF_CUSTOM_VTABLE
-      _impl_(::_pbi::ConstantInitialized()) {
-}
-struct CharacterSelectFailNtfDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR CharacterSelectFailNtfDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~CharacterSelectFailNtfDefaultTypeInternal() {}
-  union {
-    CharacterSelectFailNtf _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 CharacterSelectFailNtfDefaultTypeInternal _CharacterSelectFailNtf_default_instance_;
 
 inline constexpr CharacterCreateReq::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -195,12 +201,24 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectReq, _impl_.character_id_),
         0,
         0x081, // bitmap
-        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectFailNtf, _impl_._has_bits_),
-        5, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectFailNtf, _impl_.reason_code_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectFailNtf, _impl_.message_),
-        1,
+        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectRes, _impl_._has_bits_),
+        11, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectRes, _impl_.result_code_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectRes, _impl_.error_msg_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectRes, _impl_.character_id_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectRes, _impl_.stage_id_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectRes, _impl_.pos_x_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectRes, _impl_.pos_y_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectRes, _impl_.pos_z_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectRes, _impl_.yaw_),
+        2,
         0,
+        1,
+        4,
+        3,
+        5,
+        6,
+        7,
 };
 
 static const ::_pbi::MigrationSchema
@@ -209,14 +227,14 @@ static const ::_pbi::MigrationSchema
         {5, sizeof(::GamePacket::CharacterCreateReq)},
         {12, sizeof(::GamePacket::CharacterCreateRes)},
         {21, sizeof(::GamePacket::CharacterSelectReq)},
-        {26, sizeof(::GamePacket::CharacterSelectFailNtf)},
+        {26, sizeof(::GamePacket::CharacterSelectRes)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::GamePacket::_CharacterListNtf_default_instance_._instance,
     &::GamePacket::_CharacterCreateReq_default_instance_._instance,
     &::GamePacket::_CharacterCreateRes_default_instance_._instance,
     &::GamePacket::_CharacterSelectReq_default_instance_._instance,
-    &::GamePacket::_CharacterSelectFailNtf_default_instance_._instance,
+    &::GamePacket::_CharacterSelectRes_default_instance_._instance,
 };
 const char descriptor_table_protodef_GamePacket_2fcharacter_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
@@ -228,9 +246,12 @@ const char descriptor_table_protodef_GamePacket_2fcharacter_5fpacket_2eproto[] A
     "\n\022CharacterCreateRes\022\023\n\013result_code\030\001 \001("
     "\005\022\021\n\terror_msg\030\002 \001(\t\0220\n\rnew_character\030\003 "
     "\001(\0132\031.DataStructures.Character\"*\n\022Charac"
-    "terSelectReq\022\024\n\014character_id\030\001 \001(\003\">\n\026Ch"
-    "aracterSelectFailNtf\022\023\n\013reason_code\030\001 \001("
-    "\005\022\017\n\007message\030\002 \001(\tb\006proto3"
+    "terSelectReq\022\024\n\014character_id\030\001 \001(\003\"\236\001\n\022C"
+    "haracterSelectRes\022\023\n\013result_code\030\001 \001(\005\022\021"
+    "\n\terror_msg\030\002 \001(\t\022\024\n\014character_id\030\003 \001(\003\022"
+    "\020\n\010stage_id\030\004 \001(\003\022\r\n\005pos_x\030\005 \001(\002\022\r\n\005pos_"
+    "y\030\006 \001(\002\022\r\n\005pos_z\030\007 \001(\002\022\013\n\003yaw\030\010 \001(\002b\006pro"
+    "to3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_GamePacket_2fcharacter_5fpacket_2eproto_deps[1] = {
@@ -240,7 +261,7 @@ static ::absl::once_flag descriptor_table_GamePacket_2fcharacter_5fpacket_2eprot
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fcharacter_5fpacket_2eproto = {
     false,
     false,
-    426,
+    523,
     descriptor_table_protodef_GamePacket_2fcharacter_5fpacket_2eproto,
     "GamePacket/character_packet.proto",
     &descriptor_table_GamePacket_2fcharacter_5fpacket_2eproto_once,
@@ -1469,160 +1490,207 @@ void CharacterSelectReq::InternalSwap(CharacterSelectReq* PROTOBUF_RESTRICT PROT
 }
 // ===================================================================
 
-class CharacterSelectFailNtf::_Internal {
+class CharacterSelectRes::_Internal {
  public:
   using HasBits =
-      decltype(::std::declval<CharacterSelectFailNtf>()._impl_._has_bits_);
+      decltype(::std::declval<CharacterSelectRes>()._impl_._has_bits_);
   static constexpr ::int32_t kHasBitsOffset =
-      8 * PROTOBUF_FIELD_OFFSET(CharacterSelectFailNtf, _impl_._has_bits_);
+      8 * PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_._has_bits_);
 };
 
-CharacterSelectFailNtf::CharacterSelectFailNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+CharacterSelectRes::CharacterSelectRes(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, CharacterSelectFailNtf_class_data_.base()) {
+    : ::google::protobuf::Message(arena, CharacterSelectRes_class_data_.base()) {
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
   SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:GamePacket.CharacterSelectFailNtf)
+  // @@protoc_insertion_point(arena_constructor:GamePacket.CharacterSelectRes)
 }
-PROTOBUF_NDEBUG_INLINE CharacterSelectFailNtf::Impl_::Impl_(
+PROTOBUF_NDEBUG_INLINE CharacterSelectRes::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
-    [[maybe_unused]] const ::GamePacket::CharacterSelectFailNtf& from_msg)
+    [[maybe_unused]] const ::GamePacket::CharacterSelectRes& from_msg)
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
-        message_(arena, from.message_) {}
+        error_msg_(arena, from.error_msg_) {}
 
-CharacterSelectFailNtf::CharacterSelectFailNtf(
+CharacterSelectRes::CharacterSelectRes(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
-    const CharacterSelectFailNtf& from)
+    const CharacterSelectRes& from)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, CharacterSelectFailNtf_class_data_.base()) {
+    : ::google::protobuf::Message(arena, CharacterSelectRes_class_data_.base()) {
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  CharacterSelectFailNtf* const _this = this;
+  CharacterSelectRes* const _this = this;
   (void)_this;
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  _impl_.reason_code_ = from._impl_.reason_code_;
+  ::memcpy(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, character_id_),
+           reinterpret_cast<const char*>(&from._impl_) +
+               offsetof(Impl_, character_id_),
+           offsetof(Impl_, yaw_) -
+               offsetof(Impl_, character_id_) +
+               sizeof(Impl_::yaw_));
 
-  // @@protoc_insertion_point(copy_constructor:GamePacket.CharacterSelectFailNtf)
+  // @@protoc_insertion_point(copy_constructor:GamePacket.CharacterSelectRes)
 }
-PROTOBUF_NDEBUG_INLINE CharacterSelectFailNtf::Impl_::Impl_(
+PROTOBUF_NDEBUG_INLINE CharacterSelectRes::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0},
-        message_(arena) {}
+        error_msg_(arena) {}
 
-inline void CharacterSelectFailNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+inline void CharacterSelectRes::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.reason_code_ = {};
+  ::memset(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, character_id_),
+           0,
+           offsetof(Impl_, yaw_) -
+               offsetof(Impl_, character_id_) +
+               sizeof(Impl_::yaw_));
 }
-CharacterSelectFailNtf::~CharacterSelectFailNtf() {
-  // @@protoc_insertion_point(destructor:GamePacket.CharacterSelectFailNtf)
+CharacterSelectRes::~CharacterSelectRes() {
+  // @@protoc_insertion_point(destructor:GamePacket.CharacterSelectRes)
   SharedDtor(*this);
 }
-inline void CharacterSelectFailNtf::SharedDtor(MessageLite& self) {
-  CharacterSelectFailNtf& this_ = static_cast<CharacterSelectFailNtf&>(self);
+inline void CharacterSelectRes::SharedDtor(MessageLite& self) {
+  CharacterSelectRes& this_ = static_cast<CharacterSelectRes&>(self);
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     this_.CheckHasBitConsistency();
   }
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
-  this_._impl_.message_.Destroy();
+  this_._impl_.error_msg_.Destroy();
   this_._impl_.~Impl_();
 }
 
-inline void* PROTOBUF_NONNULL CharacterSelectFailNtf::PlacementNew_(
+inline void* PROTOBUF_NONNULL CharacterSelectRes::PlacementNew_(
     const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
-  return ::new (mem) CharacterSelectFailNtf(arena);
+  return ::new (mem) CharacterSelectRes(arena);
 }
-constexpr auto CharacterSelectFailNtf::InternalNewImpl_() {
-  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(CharacterSelectFailNtf),
-                                            alignof(CharacterSelectFailNtf));
+constexpr auto CharacterSelectRes::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(CharacterSelectRes),
+                                            alignof(CharacterSelectRes));
 }
-constexpr auto CharacterSelectFailNtf::InternalGenerateClassData_() {
+constexpr auto CharacterSelectRes::InternalGenerateClassData_() {
   return ::google::protobuf::internal::ClassDataFull{
       ::google::protobuf::internal::ClassData{
-          &_CharacterSelectFailNtf_default_instance_._instance,
+          &_CharacterSelectRes_default_instance_._instance,
           &_table_.header,
           nullptr,  // OnDemandRegisterArenaDtor
           nullptr,  // IsInitialized
-          &CharacterSelectFailNtf::MergeImpl,
-          ::google::protobuf::Message::GetNewImpl<CharacterSelectFailNtf>(),
+          &CharacterSelectRes::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<CharacterSelectRes>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-          &CharacterSelectFailNtf::SharedDtor,
-          ::google::protobuf::Message::GetClearImpl<CharacterSelectFailNtf>(), &CharacterSelectFailNtf::ByteSizeLong,
-              &CharacterSelectFailNtf::_InternalSerialize,
+          &CharacterSelectRes::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<CharacterSelectRes>(), &CharacterSelectRes::ByteSizeLong,
+              &CharacterSelectRes::_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          PROTOBUF_FIELD_OFFSET(CharacterSelectFailNtf, _impl_._cached_size_),
+          PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_._cached_size_),
           false,
       },
-      &CharacterSelectFailNtf::kDescriptorMethods,
+      &CharacterSelectRes::kDescriptorMethods,
       &descriptor_table_GamePacket_2fcharacter_5fpacket_2eproto,
       nullptr,  // tracker
   };
 }
 
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
-    ::google::protobuf::internal::ClassDataFull CharacterSelectFailNtf_class_data_ =
-        CharacterSelectFailNtf::InternalGenerateClassData_();
+    ::google::protobuf::internal::ClassDataFull CharacterSelectRes_class_data_ =
+        CharacterSelectRes::InternalGenerateClassData_();
 
 PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
-CharacterSelectFailNtf::GetClassData() const {
-  ::google::protobuf::internal::PrefetchToLocalCache(&CharacterSelectFailNtf_class_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(CharacterSelectFailNtf_class_data_.tc_table);
-  return CharacterSelectFailNtf_class_data_.base();
+CharacterSelectRes::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&CharacterSelectRes_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(CharacterSelectRes_class_data_.tc_table);
+  return CharacterSelectRes_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<1, 2, 0, 49, 2>
-CharacterSelectFailNtf::_table_ = {
+const ::_pbi::TcParseTable<3, 8, 0, 55, 2>
+CharacterSelectRes::_table_ = {
   {
-    PROTOBUF_FIELD_OFFSET(CharacterSelectFailNtf, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_._has_bits_),
     0, // no _extensions_
-    2, 8,  // max_field_number, fast_idx_mask
+    8, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967292,  // skipmap
+    4294967040,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    2,  // num_field_entries
+    8,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
-    CharacterSelectFailNtf_class_data_.base(),
+    CharacterSelectRes_class_data_.base(),
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
     #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::GamePacket::CharacterSelectFailNtf>(),  // to_prefetch
+    ::_pbi::TcParser::GetTable<::GamePacket::CharacterSelectRes>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // string message = 2;
+    // float yaw = 8;
+    {::_pbi::TcParser::FastF32S1,
+     {69, 7, 0,
+      PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.yaw_)}},
+    // int32 result_code = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CharacterSelectRes, _impl_.result_code_), 2>(),
+     {8, 2, 0,
+      PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.result_code_)}},
+    // string error_msg = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 0, 0,
-      PROTOBUF_FIELD_OFFSET(CharacterSelectFailNtf, _impl_.message_)}},
-    // int32 reason_code = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CharacterSelectFailNtf, _impl_.reason_code_), 1>(),
-     {8, 1, 0,
-      PROTOBUF_FIELD_OFFSET(CharacterSelectFailNtf, _impl_.reason_code_)}},
+      PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.error_msg_)}},
+    // int64 character_id = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(CharacterSelectRes, _impl_.character_id_), 1>(),
+     {24, 1, 0,
+      PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.character_id_)}},
+    // int64 stage_id = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(CharacterSelectRes, _impl_.stage_id_), 4>(),
+     {32, 4, 0,
+      PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.stage_id_)}},
+    // float pos_x = 5;
+    {::_pbi::TcParser::FastF32S1,
+     {45, 3, 0,
+      PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.pos_x_)}},
+    // float pos_y = 6;
+    {::_pbi::TcParser::FastF32S1,
+     {53, 5, 0,
+      PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.pos_y_)}},
+    // float pos_z = 7;
+    {::_pbi::TcParser::FastF32S1,
+     {61, 6, 0,
+      PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.pos_z_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // int32 reason_code = 1;
-    {PROTOBUF_FIELD_OFFSET(CharacterSelectFailNtf, _impl_.reason_code_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // string message = 2;
-    {PROTOBUF_FIELD_OFFSET(CharacterSelectFailNtf, _impl_.message_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int32 result_code = 1;
+    {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.result_code_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // string error_msg = 2;
+    {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.error_msg_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int64 character_id = 3;
+    {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.character_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 stage_id = 4;
+    {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.stage_id_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // float pos_x = 5;
+    {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.pos_x_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float pos_y = 6;
+    {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.pos_y_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float pos_z = 7;
+    {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.pos_z_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float yaw = 8;
+    {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.yaw_), _Internal::kHasBitsOffset + 7, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
   }},
   // no aux_entries
   {{
-    "\41\0\7\0\0\0\0\0"
-    "GamePacket.CharacterSelectFailNtf"
-    "message"
+    "\35\0\11\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    "GamePacket.CharacterSelectRes"
+    "error_msg"
   }},
 };
-PROTOBUF_NOINLINE void CharacterSelectFailNtf::Clear() {
-// @@protoc_insertion_point(message_clear_start:GamePacket.CharacterSelectFailNtf)
+PROTOBUF_NOINLINE void CharacterSelectRes::Clear() {
+// @@protoc_insertion_point(message_clear_start:GamePacket.CharacterSelectRes)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
@@ -1630,48 +1698,106 @@ PROTOBUF_NOINLINE void CharacterSelectFailNtf::Clear() {
 
   cached_has_bits = _impl_._has_bits_[0];
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    _impl_.message_.ClearNonDefaultToEmpty();
+    _impl_.error_msg_.ClearNonDefaultToEmpty();
   }
-  _impl_.reason_code_ = 0;
+  if (BatchCheckHasBit(cached_has_bits, 0x000000feU)) {
+    ::memset(&_impl_.character_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.yaw_) -
+        reinterpret_cast<char*>(&_impl_.character_id_)) + sizeof(_impl_.yaw_));
+  }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL CharacterSelectFailNtf::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL CharacterSelectRes::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
-  const CharacterSelectFailNtf& this_ = static_cast<const CharacterSelectFailNtf&>(base);
+  const CharacterSelectRes& this_ = static_cast<const CharacterSelectRes&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
-::uint8_t* PROTOBUF_NONNULL CharacterSelectFailNtf::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL CharacterSelectRes::_InternalSerialize(
     ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
-  const CharacterSelectFailNtf& this_ = *this;
+  const CharacterSelectRes& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     this_.CheckHasBitConsistency();
   }
-  // @@protoc_insertion_point(serialize_to_array_start:GamePacket.CharacterSelectFailNtf)
+  // @@protoc_insertion_point(serialize_to_array_start:GamePacket.CharacterSelectRes)
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int32 reason_code = 1;
-  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-    if (this_._internal_reason_code() != 0) {
+  // int32 result_code = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (this_._internal_result_code() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<1>(
-              stream, this_._internal_reason_code(), target);
+              stream, this_._internal_result_code(), target);
     }
   }
 
-  // string message = 2;
+  // string error_msg = 2;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (!this_._internal_message().empty()) {
-      const ::std::string& _s = this_._internal_message();
+    if (!this_._internal_error_msg().empty()) {
+      const ::std::string& _s = this_._internal_error_msg();
       ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "GamePacket.CharacterSelectFailNtf.message");
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "GamePacket.CharacterSelectRes.error_msg");
       target = stream->WriteStringMaybeAliased(2, _s, target);
+    }
+  }
+
+  // int64 character_id = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    if (this_._internal_character_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<3>(
+              stream, this_._internal_character_id(), target);
+    }
+  }
+
+  // int64 stage_id = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (this_._internal_stage_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<4>(
+              stream, this_._internal_stage_id(), target);
+    }
+  }
+
+  // float pos_x = 5;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_pos_x()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          5, this_._internal_pos_x(), target);
+    }
+  }
+
+  // float pos_y = 6;
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_pos_y()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          6, this_._internal_pos_y(), target);
+    }
+  }
+
+  // float pos_z = 7;
+  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_pos_z()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          7, this_._internal_pos_z(), target);
+    }
+  }
+
+  // float yaw = 8;
+  if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_yaw()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          8, this_._internal_yaw(), target);
     }
   }
 
@@ -1680,18 +1806,18 @@ PROTOBUF_NOINLINE void CharacterSelectFailNtf::Clear() {
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
             this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:GamePacket.CharacterSelectFailNtf)
+  // @@protoc_insertion_point(serialize_to_array_end:GamePacket.CharacterSelectRes)
   return target;
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t CharacterSelectFailNtf::ByteSizeLong(const MessageLite& base) {
-  const CharacterSelectFailNtf& this_ = static_cast<const CharacterSelectFailNtf&>(base);
+::size_t CharacterSelectRes::ByteSizeLong(const MessageLite& base) {
+  const CharacterSelectRes& this_ = static_cast<const CharacterSelectRes&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
-::size_t CharacterSelectFailNtf::ByteSizeLong() const {
-  const CharacterSelectFailNtf& this_ = *this;
+::size_t CharacterSelectRes::ByteSizeLong() const {
+  const CharacterSelectRes& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  // @@protoc_insertion_point(message_byte_size_start:GamePacket.CharacterSelectFailNtf)
+  // @@protoc_insertion_point(message_byte_size_start:GamePacket.CharacterSelectRes)
   ::size_t total_size = 0;
 
   ::uint32_t cached_has_bits = 0;
@@ -1700,19 +1826,57 @@ PROTOBUF_NOINLINE void CharacterSelectFailNtf::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
-    // string message = 2;
+  if (BatchCheckHasBit(cached_has_bits, 0x000000ffU)) {
+    // string error_msg = 2;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (!this_._internal_message().empty()) {
+      if (!this_._internal_error_msg().empty()) {
         total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                        this_._internal_message());
+                                        this_._internal_error_msg());
       }
     }
-    // int32 reason_code = 1;
+    // int64 character_id = 3;
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (this_._internal_reason_code() != 0) {
+      if (this_._internal_character_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_character_id());
+      }
+    }
+    // int32 result_code = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (this_._internal_result_code() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-            this_._internal_reason_code());
+            this_._internal_result_code());
+      }
+    }
+    // float pos_x = 5;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_pos_x()) != 0) {
+        total_size += 5;
+      }
+    }
+    // int64 stage_id = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (this_._internal_stage_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_stage_id());
+      }
+    }
+    // float pos_y = 6;
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_pos_y()) != 0) {
+        total_size += 5;
+      }
+    }
+    // float pos_z = 7;
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_pos_z()) != 0) {
+        total_size += 5;
+      }
+    }
+    // float yaw = 8;
+    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_yaw()) != 0) {
+        total_size += 5;
       }
     }
   }
@@ -1720,33 +1884,63 @@ PROTOBUF_NOINLINE void CharacterSelectFailNtf::Clear() {
                                              &this_._impl_._cached_size_);
 }
 
-void CharacterSelectFailNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
+void CharacterSelectRes::MergeImpl(::google::protobuf::MessageLite& to_msg,
                             const ::google::protobuf::MessageLite& from_msg) {
    auto* const _this =
-      static_cast<CharacterSelectFailNtf*>(&to_msg);
-  auto& from = static_cast<const CharacterSelectFailNtf&>(from_msg);
+      static_cast<CharacterSelectRes*>(&to_msg);
+  auto& from = static_cast<const CharacterSelectRes&>(from_msg);
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     from.CheckHasBitConsistency();
   }
-  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.CharacterSelectFailNtf)
+  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.CharacterSelectRes)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x000000ffU)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (!from._internal_message().empty()) {
-        _this->_internal_set_message(from._internal_message());
+      if (!from._internal_error_msg().empty()) {
+        _this->_internal_set_error_msg(from._internal_error_msg());
       } else {
-        if (_this->_impl_.message_.IsDefault()) {
-          _this->_internal_set_message("");
+        if (_this->_impl_.error_msg_.IsDefault()) {
+          _this->_internal_set_error_msg("");
         }
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (from._internal_reason_code() != 0) {
-        _this->_impl_.reason_code_ = from._impl_.reason_code_;
+      if (from._internal_character_id() != 0) {
+        _this->_impl_.character_id_ = from._impl_.character_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (from._internal_result_code() != 0) {
+        _this->_impl_.result_code_ = from._impl_.result_code_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_pos_x()) != 0) {
+        _this->_impl_.pos_x_ = from._impl_.pos_x_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (from._internal_stage_id() != 0) {
+        _this->_impl_.stage_id_ = from._impl_.stage_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_pos_y()) != 0) {
+        _this->_impl_.pos_y_ = from._impl_.pos_y_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_pos_z()) != 0) {
+        _this->_impl_.pos_z_ = from._impl_.pos_z_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_yaw()) != 0) {
+        _this->_impl_.yaw_ = from._impl_.yaw_;
       }
     }
   }
@@ -1755,25 +1949,30 @@ void CharacterSelectFailNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
       from._internal_metadata_);
 }
 
-void CharacterSelectFailNtf::CopyFrom(const CharacterSelectFailNtf& from) {
-  // @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.CharacterSelectFailNtf)
+void CharacterSelectRes::CopyFrom(const CharacterSelectRes& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.CharacterSelectRes)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
 
-void CharacterSelectFailNtf::InternalSwap(CharacterSelectFailNtf* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+void CharacterSelectRes::InternalSwap(CharacterSelectRes* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
   using ::std::swap;
   auto* arena = GetArena();
   ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, &other->_impl_.message_, arena);
-  swap(_impl_.reason_code_, other->_impl_.reason_code_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.error_msg_, &other->_impl_.error_msg_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.yaw_)
+      + sizeof(CharacterSelectRes::_impl_.yaw_)
+      - PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.character_id_)>(
+          reinterpret_cast<char*>(&_impl_.character_id_),
+          reinterpret_cast<char*>(&other->_impl_.character_id_));
 }
 
-::google::protobuf::Metadata CharacterSelectFailNtf::GetMetadata() const {
+::google::protobuf::Metadata CharacterSelectRes::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)

@@ -536,7 +536,7 @@ void GameServer::SendMovePosCorrectNtf(int64 userId, float posX, float posY, flo
 
 // 클라이언트 캐릭터 선택 요청 처리 → 코루틴
 // 1) DB에서 (user_id, character_id) 로 캐릭터 조회
-// 2) 없는 캐릭터면 CharacterSelectFailNtf 전송 후 종료
+// 2) 없는 캐릭터면 CharacterSelectRes(Fail) 전송 후 종료
 // 3) owner_user_id 검증 (DB 쇄괴 방어)
 // 4) User에 현재 캐릭터 설정
 // 5) SystemStage에서 제거 (UserLeave push)
@@ -557,7 +557,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     if (!result.success)
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect DB select failed. userId={} err={}", userId, result.errorMsg));
-        sendCharacterSelectFailNtf(userId, 3, "server error: db select");
+        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: db select", characterId, 0, 0.f, 0.f, 0.f, 0.f);
         co_return;
     }
 
@@ -566,7 +566,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     {
         LOG_WRITE(LogLevel::Warn, std::format("GameServer: CharacterSelect - character not found. userId={} characterId={}",
             userId, characterId));
-        sendCharacterSelectFailNtf(userId, 1, "character not found");
+        sendCharacterSelectRes(userId, EResultCode::Fail, "character not found", characterId, 0, 0.f, 0.f, 0.f, 0.f);
         co_return;
     }
 
@@ -576,7 +576,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - failed to parse character JSON. userId={} characterId={}",
             userId, characterId));
-        sendCharacterSelectFailNtf(userId, 3, "server error: parse");
+        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: parse", characterId, 0, 0.f, 0.f, 0.f, 0.f);
         co_return;
     }
 
@@ -585,7 +585,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - owner mismatch. userId={} characterOwner={} characterId={}",
             userId, character.owner_user_id(), characterId));
-        sendCharacterSelectFailNtf(userId, 2, "not character owner");
+        sendCharacterSelectRes(userId, EResultCode::Fail, "not character owner", characterId, 0, 0.f, 0.f, 0.f, 0.f);
         co_return;
     }
 
@@ -612,27 +612,43 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
         spSystemStage->EnqueueMessage(StageMsg_UserLeave{userId});
     }
 
-    // ── 6) Town으로 입장 ───────────────────────────────────────────────
-    // Town이 OnUserEnter override로 StageEnterNtf를 전송한다.
-    if (TownPtr spTown = m_stageManager.GetTown())
-    {
-        spTown->EnqueueMessage(StageMsg_UserEnter{spUser, spCharacter});
-    }
-    else
+    // ── 6) 클라에게 CharacterSelectRes(성공) 송신 ─────────────────────────
+    // Town 으로의 입장은 EnqueueMessage 라 비동기지만, 클라는 이 응답을 받자마자
+    // Game 씬 전환을 시작하면 됨. StageEnterNtf 는 Town 의 OnUserEnter 에서 별도 송신.
+    TownPtr spTown = m_stageManager.GetTown();
+    if (!spTown)
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - Town is null. userId={}", userId));
+        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: no town", characterId, 0, 0.f, 0.f, 0.f, 0.f);
+        co_return;
     }
+
+    sendCharacterSelectRes(userId, EResultCode::Success, "",
+        character.character_id(), spTown->GetStageId(),
+        character.pos_x(), character.pos_y(), character.pos_z(), character.yaw());
+
+    // ── 7) Town으로 입장 ───────────────────────────────────────────────
+    // Town이 OnUserEnter override로 StageEnterNtf를 전송한다.
+    spTown->EnqueueMessage(StageMsg_UserEnter{spUser, spCharacter});
 }
 
-void GameServer::sendCharacterSelectFailNtf(int64 userId, int32 reasonCode, const std::string& message)
+void GameServer::sendCharacterSelectRes(int64 userId, EResultCode resultCode, const std::string& errorMsg,
+                                        int64 characterId, int64 stageId,
+                                        float posX, float posY, float posZ, float yaw)
 {
-    GamePacket::CharacterSelectFailNtf ntf;
-    ntf.set_reason_code(reasonCode);
-    ntf.set_message(message);
-    sendPacketToUser(userId, Common::GAME_PACKET_ID_CHARACTER_SELECT_FAIL_NTF, ntf);
+    GamePacket::CharacterSelectRes res;
+    res.set_result_code(static_cast<int32>(resultCode));
+    res.set_error_msg(errorMsg);
+    res.set_character_id(characterId);
+    res.set_stage_id(stageId);
+    res.set_pos_x(posX);
+    res.set_pos_y(posY);
+    res.set_pos_z(posZ);
+    res.set_yaw(yaw);
+    sendPacketToUser(userId, Common::GAME_PACKET_ID_CHARACTER_SELECT_RES, res);
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterSelectFailNtf sent. userId={} reasonCode={} message='{}'",
-        userId, reasonCode, message));
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterSelectRes sent. userId={} resultCode={} characterId={} stageId={}",
+        userId, static_cast<int32>(resultCode), characterId, stageId));
 }
 
 // 게이트웨이로부터 GatewayUserDisconnectNtf 수신

@@ -109,8 +109,12 @@ private:
     // 캐릭터 선택 요청 핸들러. DB SELECT 이후 SystemStage → Town 이동.
     db::DetachedCoTask handleClientCharacterSelect(int64 userId, GamePacket::CharacterSelectReq req);
 
-    // 캐릭터 선택 실패 알림 전송 (CharacterSelectFailNtf).
-    void sendCharacterSelectFailNtf(int64 userId, int32 reasonCode, const std::string& message);
+    // 캐릭터 선택 결과 전송 (CharacterSelectRes). 성공/실패 모두 이 함수로 송신.
+    //   - 성공: resultCode=Success, errorMsg="", spawn 정보(characterId/stageId/pos/yaw) 채움
+    //   - 실패: resultCode=Fail,    errorMsg=사유,   spawn 정보는 모두 기본값
+    void sendCharacterSelectRes(int64 userId, EResultCode resultCode, const std::string& errorMsg,
+                                int64 characterId, int64 stageId,
+                                float posX, float posY, float posZ, float yaw);
 
 private:
     // NavMesh 데이터 관리, 길찾기 기능 제공

@@ -12,7 +12,7 @@ import "DataStructures/character.proto";
 //   1) 클라이언트가 게임서버에 입장하면 게임서버가 자동으로 CharacterListNtf 전송
 //   2) 클라이언트는 캐릭터가 있으면 CharacterSelectReq, 없으면 CharacterCreateReq 전송
 //   3) CharacterCreateReq에 대해 CharacterCreateRes 응답 → 클라이언트는 다시 CharacterSelectReq
-//   4) CharacterSelectReq 성공 시 GameEnterNtf, 실패 시 CharacterSelectFailNtf
+//   4) CharacterSelectReq에 대해 CharacterSelectRes 응답 (성공/실패 모두 포함)
 
 // 캐릭터 목록 알림 (게임서버 -> 클라)
 // 유저가 게임서버에 입장하면 게임서버가 자동으로 전송한다.
@@ -36,16 +36,23 @@ message CharacterCreateRes {
 }
 
 // 캐릭터 선택 요청 (클라 -> 게임서버)
-// 성공 시 게임서버는 GameEnterNtf를 보낸다. 실패 시 CharacterSelectFailNtf를 보낸다.
+// 서버는 CharacterSelectRes로 응답한다 (성공/실패 모두).
 message CharacterSelectReq {
     int64 character_id = 1;
 }
 
-// 캐릭터 선택 실패 알림 (게임서버 -> 클라)
-// 캐릭터 선택은 성공/실패로 응답 패킷이 분기된다.
-//   - 성공: GameEnterNtf (game 입장 완료 = 캐릭터 선택 완료)
-//   - 실패: CharacterSelectFailNtf
-message CharacterSelectFailNtf {
-    int32 reason_code = 1;   // 실패 사유 코드 (당분간 free-form, 필요해지면 enum화)
-    string message = 2;      // 사람이 읽을 수 있는 사유 메시지
+// 캐릭터 선택 결과 (게임서버 -> 클라)
+// result_code 는 EResultCode (1=Success, 2=Fail). 0은 사용하지 않음.
+//
+// 성공 시: 클라는 이 패킷의 spawn 정보로 LocalPlayer 스폰과 Game 씬 전환을 진행한다.
+// 실패 시: error_msg 만 의미 있고 spawn 관련 필드는 기본값.
+message CharacterSelectRes {
+    int32 result_code = 1;       // EResultCode 값
+    string error_msg = 2;        // 실패 시 사유 메시지 (성공 시 빈 문자열)
+    int64 character_id = 3;      // 선택된 캐릭터 ID (클라 확인용)
+    int64 stage_id = 4;          // 입장할 Stage ID
+    float pos_x = 5;             // 스폰 위치 X
+    float pos_y = 6;             // 스폰 위치 Y
+    float pos_z = 7;             // 스폰 위치 Z
+    float yaw = 8;               // 스폰 회전 (Y축, degree)
 }

@@ -21,8 +21,8 @@ enum GamePacketId {
     GAME_PACKET_ID_CHARACTER_LIST_NTF = 301;          // 게임서버 -> 클라: 캐릭터 목록 알림 (입장 시 자동 전송)
     GAME_PACKET_ID_CHARACTER_CREATE_REQ = 302;        // 클라 -> 게임서버: 캐릭터 생성 요청
     GAME_PACKET_ID_CHARACTER_CREATE_RES = 303;        // 게임서버 -> 클라: 캐릭터 생성 결과
-    GAME_PACKET_ID_CHARACTER_SELECT_REQ = 304;        // 클라 -> 게임서버: 캐릭터 선택 요청 (성공 시 GameEnterNtf, 실패 시 CharacterSelectFailNtf)
-    GAME_PACKET_ID_CHARACTER_SELECT_FAIL_NTF = 305;   // 게임서버 -> 클라: 캐릭터 선택 실패 알림
+    GAME_PACKET_ID_CHARACTER_SELECT_REQ = 304;        // 클라 -> 게임서버: 캐릭터 선택 요청
+    GAME_PACKET_ID_CHARACTER_SELECT_RES = 305;        // 게임서버 -> 클라: 캐릭터 선택 결과 (성공/실패 모두 포함)
 
     // 1000~1999: 이동
     GAME_PACKET_ID_MOVE_DEST_REQ = 1001;   // 클라 -> 서버: 목적지로 이동 시작/갱신
