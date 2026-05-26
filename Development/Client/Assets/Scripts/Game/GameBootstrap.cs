@@ -10,10 +10,11 @@ namespace Client.Game
     // (GameDataManager.LoadAllGameData 와 동일한 방식)
     //
     // 책임:
-    //   1) NetworkManager GameObject 생성 (DontDestroyOnLoad 는 NetworkManager.Awake 가 처리)
-    //   2) Network 어셈블리는 Packet 을 모르므로, OnPacketReceived 를 PacketDispatcher 에 연결하는 다리 놓기
+    //   1) Managers (싱글톤 진입점) 생성 — 가장 먼저. InputManager 초기화 포함.
+    //   2) NetworkManager GameObject 생성 (DontDestroyOnLoad 는 NetworkManager.Awake 가 처리)
+    //   3) Network 어셈블리는 Packet 을 모르므로, OnPacketReceived 를 PacketDispatcher 에 연결하는 다리 놓기
     //
-    // 향후 다른 전역 매니저 (예: AudioManager, InputManager) 가 추가되면 여기에 넣는다.
+    // 향후 다른 전역 매니저 (예: AudioManager) 가 추가되면 여기에 넣는다.
     public static class GameBootstrap
     {
         // AfterSceneLoad 사용 이유:
@@ -23,15 +24,18 @@ namespace Client.Game
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
         {
-            // NetworkManager 생성 (싱글톤 패턴: Awake 에서 Instance 세팅 + DontDestroyOnLoad)
+            // 1) Managers 먼저 생성. InputManager 가 초기화되어 다른 컴포넌트가 안전하게 구독할 수 있게 됨.
+            Managers.Managers.CreateInstance();
+
+            // 2) NetworkManager 생성 (싱글톤 패턴: Awake 에서 Instance 세팅 + DontDestroyOnLoad)
             GameObject go = new GameObject("[NetworkManager]");
             NetworkManager net = go.AddComponent<NetworkManager>();
 
-            // Network 어셈블리가 Packet 을 모르므로, 수신 이벤트를 PacketDispatcher 에 연결.
+            // 3) Network 어셈블리가 Packet 을 모르므로, 수신 이벤트를 PacketDispatcher 에 연결.
             // 의존 방향: Game → Packet → Network 유지.
             net.OnPacketReceived += PacketDispatcher.Instance.Dispatch;
 
-            Debug.Log("[GameBootstrap] Initialized: NetworkManager + PacketDispatcher bound.");
+            Debug.Log("[GameBootstrap] Initialized: Managers + NetworkManager + PacketDispatcher bound.");
         }
     }
 }

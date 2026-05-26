@@ -1,3 +1,4 @@
+using Client.Managers;
 using Client.Network;
 using Common;
 using GamePacket;
@@ -6,13 +7,20 @@ using UnityEngine.InputSystem;
 
 namespace Client.Game
 {
-    // 마우스 좌클릭으로 LocalPlayer를 이동시키고, 서버에도 알린다.
+    // 마우스 입력을 "월드 좌표 + 이동 의도" 로 해석하는 컴포넌트.
     //
-    // 클라이언트.md 규칙:
-    //   - 누르고 있는 동안: 매 프레임 클라 측 캐릭터 이동 + 500ms마다 서버에 MoveReq(목적지)
-    //   - 뗀 순간: 서버에 MoveReq(현재 위치) 1회
+    // 단일 책임: 화면 좌표 → 월드 좌표 변환.
+    //   - InputManager 로부터 마우스 상태(눌림 여부, 화면 좌표)를 받음
+    //   - raycast + 평면 폴백으로 월드 좌표 계산
+    //   - LocalPlayer 의 PlayerMoveController 에게 "이 좌표로 가고 싶다" 라고 전달
     //
-    // 서버 측은 현재 MoveReq를 받기만 하고 처리는 안 함 (Stage::OnUserPacket이 로그만 찍음).
+    // 책임이 아닌 것:
+    //   - 저수준 입력 읽기 (InputManager 가 함)
+    //   - 캐릭터 이동 시뮬레이션 (PlayerCharacter 가 함)
+    //   - 서버 송신 (PlayerMoveController 가 함)
+    //   - 송신 타이밍 (PlayerMoveController 가 함)
+    //
+    // 씬에 하나만 존재. GameInputBridge 같은 빈 GameObject 에 붙여 사용.
     public class MouseInputHandler : MonoBehaviour
     {
         [SerializeField] private Camera m_camera;
@@ -20,21 +28,8 @@ namespace Client.Game
         // raycast 최대 거리
         [SerializeField] private float m_rayMaxDistance = 100f;
 
-        // 누르고 있는 동안 서버에 MoveReq 보내는 주기 (초)
-        [SerializeField] private float m_sendIntervalSec = 0.5f;
-
         // 디버그 로그
         [SerializeField] private bool m_debugLog = false;
-
-        private bool m_wasPressed = false;
-
-        // 마지막으로 서버에 MoveReq 전송한 후 경과 시간 (sec)
-        // 누르고 있는 첫 프레임에 즉시 보내기 위해 큰 값으로 초기화.
-        private float m_timeSinceLastSend = float.MaxValue;
-
-        // 마지막으로 보낸 목적지 (중복 송신 방지 — 같은 목적지면 안 보냄)
-        private Vector3 m_lastSentDest;
-        private bool m_hasLastSent = false;
 
         private void Awake()
         {
@@ -43,121 +38,51 @@ namespace Client.Game
                 m_camera = Camera.main;
             }
 
-            // Unity 6.x에서 기본 Plane mesh의 normal이 -Y로 잡히는 케이스 대응.
+            // Unity 6.x 에서 기본 Plane mesh 의 normal 이 -Y 로 잡히는 케이스 대응.
             Physics.queriesHitBackfaces = true;
         }
 
         private void Update()
         {
             if (m_camera == null) return;
-            if (Mouse.current == null) return;
 
+            InputManager input = Managers.Managers.Input;
+            if (input == null) return;
+
+            // 마우스 좌클릭이 눌려있지 않으면 할 일 없음.
+            // (송신이나 정지 처리는 PlayerMoveController 가 자기 상태로 알아서 함.)
+            if (!input.IsMouseClickHeld) return;
+
+            PlayerMoveController mover = findLocalMoveController();
+            if (mover == null) return;
+
+            Vector2 screenPos = input.MouseScreenPosition;
+            if (!tryGetGroundPoint(screenPos, mover.Character, out Vector3 worldPoint))
+                return;
+
+            mover.RequestMoveTo(worldPoint);
+
+            if (m_debugLog) Debug.Log($"[MouseInput] requested move to {worldPoint}");
+        }
+
+        // LocalPlayer 의 PlayerMoveController 를 찾는다.
+        // 정적 접근을 매 프레임 하지만, GetComponent 1회 호출이라 비용은 미미.
+        // LocalPlayer 가 바뀌어도 (스테이지 이동 등) 자동으로 새 mover 를 따라감.
+        private PlayerMoveController findLocalMoveController()
+        {
             PlayerCharacter local = StageManager.Instance?.LocalPlayer;
-            if (local == null) return;
-
-            bool isPressed = Mouse.current.leftButton.isPressed;
-            m_timeSinceLastSend += Time.deltaTime;
-
-            if (isPressed)
-            {
-                Vector2 screenPos = Mouse.current.position.ReadValue();
-                if (tryGetGroundPoint(screenPos, local, out Vector3 worldPoint))
-                {
-                    local.SetMoveDestination(worldPoint);
-
-                    if (m_debugLog && !m_wasPressed)
-                    {
-                        Debug.Log($"[MouseInput] Move to {worldPoint}");
-                    }
-
-                    // 첫 클릭 프레임이거나 주기가 지났으면 서버에 전송
-                    // 단, 목적지가 거의 동일하면 굳이 안 보냄 (대역폭 절약)
-                    if (m_timeSinceLastSend >= m_sendIntervalSec || !m_wasPressed)
-                    {
-                        if (!m_hasLastSent || (worldPoint - m_lastSentDest).sqrMagnitude > 0.01f)
-                        {
-                            sendMoveDestReq(worldPoint, local.transform.position, local.transform.eulerAngles.y);
-                            m_lastSentDest = worldPoint;
-                            m_hasLastSent = true;
-                            m_timeSinceLastSend = 0f;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // 누르고 있다가 뗀 순간 (이번 프레임에 막 떼어짐)
-                if (m_wasPressed)
-                {
-                    if (local.IsMoving)
-                    {
-                        local.StopMove();
-                        if (m_debugLog) Debug.Log("[MouseInput] Stop");
-                    }
-                    // 떼는 순간 현재 캐릭터 위치를 서버에 알림
-                    Vector3 curPos = local.transform.position;
-                    sendMoveStopReq(curPos, local.transform.eulerAngles.y);
-                    m_hasLastSent = false;
-                    m_timeSinceLastSend = 0f;
-                }
-            }
-
-            m_wasPressed = isPressed;
+            if (local == null) return null;
+            return local.GetComponent<PlayerMoveController>();
         }
 
-        private void sendMoveDestReq(Vector3 dest, Vector3 curPos, float dirY)
-        {
-            NetworkManager net = NetworkManager.Instance;
-            if (net == null || !net.IsConnected) return;
-
-            // 좌표계: Unity 와 동일 (X, Y, Z). 서버와 그대로 매핑.
-            // dest = 도착할 목적지, curPos = 클라 현재 위치 (서버가 검증에 사용).
-            MoveDestReq req = new MoveDestReq
-            {
-                DestX = dest.x,
-                DestY = dest.y,
-                DestZ = dest.z,
-                PosX  = curPos.x,
-                PosY  = curPos.y,
-                PosZ  = curPos.z,
-            };
-            net.Send(GamePacketId.MoveDestReq, req);
-
-            if (m_debugLog)
-            {
-                Debug.Log($"[MouseInput] Sent MoveDestReq dest=({dest.x:F2},{dest.y:F2},{dest.z:F2}) pos=({curPos.x:F2},{curPos.y:F2},{curPos.z:F2}) dirY={dirY:F1}");
-            }
-        }
-
-        private void sendMoveStopReq(Vector3 pos, float dirY)
-        {
-            NetworkManager net = NetworkManager.Instance;
-            if (net == null || !net.IsConnected) return;
-
-            MoveStopReq req = new MoveStopReq
-            {
-                PosX = pos.x,
-                PosY = pos.y,
-                PosZ = pos.z,
-                Yaw = dirY,
-            };
-            // 이전 코드 버그: MoveStopReq인데 GamePacketId.MoveDestReq로 보냄. 수정.
-            net.Send(GamePacketId.MoveStopReq, req);
-
-            if (m_debugLog)
-            {
-                Debug.Log($"[MouseInput] Sent MoveStopReq pos=({pos.x:F2},{pos.y:F2},{pos.z:F2}) dirY={dirY:F1}");
-            }
-        }
-
-
-        // 마우스 화면좌표에서 ray를 쏴서 LocalPlayer 자신을 제외한 첫 충돌점을 구한다.
+        // 마우스 화면좌표에서 ray 를 쏴서 LocalPlayer 자신을 제외한 첫 충돌점을 구한다.
         //
-        // 1단계: Physics.RaycastAll 로 콜라이더 충돌 찾기 (기존 동작).
+        // 1단계: Physics.RaycastAll 로 콜라이더 충돌 찾기.
         //        평면 메시 안쪽에 마우스가 있으면 정확한 ground 점 반환.
         // 2단계 (fallback): 콜라이더에 안 닿으면 (마우스가 평면 너머 허공),
         //        캐릭터 y 평면과 ray 의 수학적 교차점 계산.
-        //        NavMesh 바깥점이 ClampToNavMesh 로 전달되어 가장자리까지 이동하게 함.
+        //        NavMesh 바깥점은 PlayerCharacter.SetMoveDestination 안의
+        //        ClampToNavMesh 가 가장자리까지 보정해 줌.
         //
         // 이 fallback 이 없으면 마우스가 콜라이더 바깥일 때 SetMoveDestination 자체가 호출 안 되어
         // 캐릭터가 입력에 반응하지 않게 된다 (클릭 무브 게임에서 매우 부자연스러움).

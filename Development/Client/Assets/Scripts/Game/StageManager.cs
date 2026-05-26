@@ -244,9 +244,15 @@ namespace Client.Game
             // 캡슐 프리미티브로 생성 (Collider, MeshRenderer 자동 포함)
             GameObject go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
 
-            // 캡슐의 디폴트 콜라이더는 그대로 두되, 충돌 처리는 아직 안다룸
             PlayerCharacter pc = go.AddComponent<PlayerCharacter>();
             pc.Initialize(userId, name, isLocalPlayer, pos, dirY);
+
+            // ★ 추가: 내 캐릭터에만 PlayerMoveController 를 붙인다.
+            //   RequireComponent(typeof(PlayerCharacter)) 가 보장하므로 위 AddComponent<PlayerCharacter> 이후에 호출해야 함.
+            if (isLocalPlayer)
+            {
+                go.AddComponent<PlayerMoveController>();
+            }
 
             m_characters.Add(userId, pc);
             Debug.Log($"[StageManager] Spawned character {go.name} at {pos}");

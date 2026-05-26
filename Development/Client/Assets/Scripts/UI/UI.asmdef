@@ -1,14 +1,7 @@
 {
-    "name": "Game",
-    "rootNamespace": "Client.Game",
+    "name": "UI",
+    "rootNamespace": "Client.UI",
     "references": [
-        "Network",
-        "Packet",
-        "Generated",
-        "NavMesh",
-        "GameData",
-        "Managers",
-        "Unity.InputSystem",
         "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
