@@ -62,6 +62,24 @@ namespace Client.Managers
             }
         }
 
+        // 마우스 휠 스크롤 델타.
+        // y: 지난 프레임 동안의 수직 스크롤 양 (앞으로 굴리면 양수, 뒤로 굴리면 음수).
+        // x: 가로 스크롤. 일반 마우스에는 없으나 값은 0.
+        // .inputactions 에 등록하지 않고 직접 Mouse.current 에서 읽는 이유:
+        //   - 휠은 채팅창 같은 UI 상태에서도 대체로 동작해도 무방 (도메인 특성)
+        //   - 구독 이벤트보다 폴링이 더 자연스러운 입력
+        //   - .inputactions 수정 없이 가벼게 추가 가능
+        // 채팅창 같은 UI 상태에서 휠을 막아야 하면 나중에 .inputactions 으로 승격.
+        public Vector2 MouseScrollDelta
+        {
+            get
+            {
+                Mouse mouse = Mouse.current;
+                if (mouse == null) return Vector2.zero;
+                return mouse.scroll.ReadValue();
+            }
+        }
+
         // ─── 초기화 / 정리 ─────────────────────────────────────────────
 
         public void Init()
