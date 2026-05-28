@@ -3,6 +3,8 @@
 #include "Stage.h"               // SetDestination 에서 Stage::FindPath 호출
 #include "GameServerDefine.h"   // k_characterMoveSpeed
 
+#include "Generated/GameData_JobBase.h"   // 생성 시 JobBase 기본스탯 적용
+
 #include <cmath>
 
 namespace
@@ -35,6 +37,34 @@ Character::Character(const DataStructures::Character& protoData)
     m_destX    = protoData.pos_x();
     m_destY    = protoData.pos_y();
     m_destZ    = protoData.pos_z();
+
+    // JobBase 게임데이터의 기본스탯을 스탯 컴포넌트에 적용.
+    // (향후 레벨/아이템/마스터리/버프는 이어서 각각의 소스가 ApplyStat 한다.)
+    applyJobBaseStats();
+}
+
+void Character::applyJobBaseStats()
+{
+    const EJob job = static_cast<EJob>(m_protoData.job_id());
+    const GameData_JobBase* pJobBase = GameDataTable_JobBase::FindDataByJob(job);
+    if (pJobBase == nullptr)
+    {
+        // 게임데이터가 없으면 기본스탯을 적용하지 못한 채 진행 (빈 스탯 캐릭터).
+        // 운영 전 단계에서 잡혀야 할 데이터 누락이므로 에러 로그만 남긴다.
+        LOG_WRITE(LogLevel::Error, std::format("Character::applyJobBaseStats - JobBase not found. objectId={} jobId={}",
+            GetObjectId(), m_protoData.job_id()));
+        return;
+    }
+
+    // (EStat, value) 쌍 목록을 순회하며 적용. Stat 이 None 인 슬롯은 건너뛴다.
+    const int32 statCount = pJobBase->GetStatCount();
+    for (int32 i = 0; i < statCount; ++i)
+    {
+        const EStat stat = pJobBase->GetStat(i);
+        if (stat == EStat::None)
+            continue;
+        m_statComponent.ApplyStat(stat, pJobBase->GetStatValue(i));
+    }
 }
 
 void Character::SyncRuntimeToProto()

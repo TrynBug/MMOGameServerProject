@@ -45,6 +45,9 @@
     <ClCompile Include="Character.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="CharacterStatComponent.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="StageManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -93,6 +96,9 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="Character.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CharacterStatComponent.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="StageManager.h">

@@ -105,6 +105,7 @@
     <ClInclude Include="Town.h" />
     <ClInclude Include="User.h" />
     <ClInclude Include="Character.h" />
+    <ClInclude Include="CharacterStatComponent.h" />
     <ClInclude Include="StageManager.h" />
     <ClInclude Include="GameServer.h" />
   </ItemGroup>
@@ -123,6 +124,7 @@
     <ClCompile Include="Town.cpp" />
     <ClCompile Include="User.cpp" />
     <ClCompile Include="Character.cpp" />
+    <ClCompile Include="CharacterStatComponent.cpp" />
     <ClCompile Include="StageManager.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="main.cpp" />

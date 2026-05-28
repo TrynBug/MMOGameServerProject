@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include "ActorObject.h"
+#include "CharacterStatComponent.h"
 
 #include <vector>
 
@@ -60,6 +61,12 @@ public:
     // 좌표/yaw는 직접 변경하지 말 것. SetPos/SetYaw 사용.
     DataStructures::Character& GetProtoMutable() { return m_protoData; }
 
+    // ── 스탯 ──────────────────────────────────────────────────
+    // 캐릭터의 모든 스탯을 관리하는 컴포넌트.
+    // 생성 시 JobBase 기본스탯이 적용되며, 이후 아이템/버프 등이 ApplyStat/RemoveStat 한다.
+    CharacterStatComponent&       GetStat()       { return m_statComponent; }
+    const CharacterStatComponent& GetStat() const { return m_statComponent; }
+
     // ── DB 저장 직전 동기화 ─────────────────────────────────────
     // 런타임 좌표/yaw를 m_protoData에 복사한다. DB 직렬화 직전에 호출.
     void SyncRuntimeToProto();
@@ -90,12 +97,18 @@ public:
     bool Update(int64 deltaMs);
 
 private:
+    // 생성자에서 호출. JobBase 게임데이터의 기본스탯을 m_statComponent 에 적용한다.
+    void applyJobBaseStats();
+
     // 현재 waypoint 를 향해 이동 시작 시점에 yaw 를 갱신.
     // (X-Z 평면 상의 방향. Unity 호환 degree.)
     void faceCurrentWaypoint();
 
     DataStructures::Character m_protoData;
     UserWPtr                  m_wpUser;
+
+    // 캐릭터 스탯 컴포넌트. 생성자에서 JobBase 기본스탯을 적용한다.
+    CharacterStatComponent    m_statComponent;
 
     // ── 이동 상태 ────────────────────────────────────────────
     // m_isMoving = false 면 다른 멤버는 의미 없음 (단, m_destX/Y/Z 는 마지막 정지 위치를 보관).
