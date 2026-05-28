@@ -25,16 +25,15 @@ namespace DataStructures {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Ch5EYXRhU3RydWN0dXJlcy9jaGFyYWN0ZXIucHJvdG8SDkRhdGFTdHJ1Y3R1",
-            "cmVzIvsBCglDaGFyYWN0ZXISFAoMY2hhcmFjdGVyX2lkGAEgASgDEhUKDW93",
+            "cmVzIsMBCglDaGFyYWN0ZXISFAoMY2hhcmFjdGVyX2lkGAEgASgDEhUKDW93",
             "bmVyX3VzZXJfaWQYAiABKAMSDAoEbmFtZRgDIAEoCRIOCgZqb2JfaWQYBCAB",
-            "KAUSDQoFbGV2ZWwYBSABKAUSCwoDZXhwGAYgASgDEgoKAmhwGAcgASgFEg4K",
-            "Bm1heF9ocBgIIAEoBRIKCgJtcBgJIAEoBRIOCgZtYXhfbXAYCiABKAUSFQoN",
-            "bGFzdF9zdGFnZV9pZBgLIAEoAxINCgVwb3NfeBgMIAEoAhINCgVwb3NfeRgN",
-            "IAEoAhILCgN5YXcYDiABKAISDQoFcG9zX3oYDyABKAJiBnByb3RvMw=="));
+            "KAUSDQoFbGV2ZWwYBSABKAUSCwoDZXhwGAYgASgDEhUKDWxhc3Rfc3RhZ2Vf",
+            "aWQYCyABKAMSDQoFcG9zX3gYDCABKAISDQoFcG9zX3kYDSABKAISCwoDeWF3",
+            "GA4gASgCEg0KBXBvc196GA8gASgCYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::DataStructures.Character), global::DataStructures.Character.Parser, new[]{ "CharacterId", "OwnerUserId", "Name", "JobId", "Level", "Exp", "Hp", "MaxHp", "Mp", "MaxMp", "LastStageId", "PosX", "PosY", "Yaw", "PosZ" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::DataStructures.Character), global::DataStructures.Character.Parser, new[]{ "CharacterId", "OwnerUserId", "Name", "JobId", "Level", "Exp", "LastStageId", "PosX", "PosY", "Yaw", "PosZ" }, null, null, null, null)
           }));
     }
     #endregion
@@ -89,10 +88,6 @@ namespace DataStructures {
       jobId_ = other.jobId_;
       level_ = other.level_;
       exp_ = other.exp_;
-      hp_ = other.hp_;
-      maxHp_ = other.maxHp_;
-      mp_ = other.mp_;
-      maxMp_ = other.maxMp_;
       lastStageId_ = other.lastStageId_;
       posX_ = other.posX_;
       posY_ = other.posY_;
@@ -191,54 +186,6 @@ namespace DataStructures {
       }
     }
 
-    /// <summary>Field number for the "hp" field.</summary>
-    public const int HpFieldNumber = 7;
-    private int hp_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Hp {
-      get { return hp_; }
-      set {
-        hp_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "max_hp" field.</summary>
-    public const int MaxHpFieldNumber = 8;
-    private int maxHp_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int MaxHp {
-      get { return maxHp_; }
-      set {
-        maxHp_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "mp" field.</summary>
-    public const int MpFieldNumber = 9;
-    private int mp_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Mp {
-      get { return mp_; }
-      set {
-        mp_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "max_mp" field.</summary>
-    public const int MaxMpFieldNumber = 10;
-    private int maxMp_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int MaxMp {
-      get { return maxMp_; }
-      set {
-        maxMp_ = value;
-      }
-    }
-
     /// <summary>Field number for the "last_stage_id" field.</summary>
     public const int LastStageIdFieldNumber = 11;
     private long lastStageId_;
@@ -333,10 +280,6 @@ namespace DataStructures {
       if (JobId != other.JobId) return false;
       if (Level != other.Level) return false;
       if (Exp != other.Exp) return false;
-      if (Hp != other.Hp) return false;
-      if (MaxHp != other.MaxHp) return false;
-      if (Mp != other.Mp) return false;
-      if (MaxMp != other.MaxMp) return false;
       if (LastStageId != other.LastStageId) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosX, other.PosX)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
@@ -355,10 +298,6 @@ namespace DataStructures {
       if (JobId != 0) hash ^= JobId.GetHashCode();
       if (Level != 0) hash ^= Level.GetHashCode();
       if (Exp != 0L) hash ^= Exp.GetHashCode();
-      if (Hp != 0) hash ^= Hp.GetHashCode();
-      if (MaxHp != 0) hash ^= MaxHp.GetHashCode();
-      if (Mp != 0) hash ^= Mp.GetHashCode();
-      if (MaxMp != 0) hash ^= MaxMp.GetHashCode();
       if (LastStageId != 0L) hash ^= LastStageId.GetHashCode();
       if (PosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosX);
       if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
@@ -405,22 +344,6 @@ namespace DataStructures {
       if (Exp != 0L) {
         output.WriteRawTag(48);
         output.WriteInt64(Exp);
-      }
-      if (Hp != 0) {
-        output.WriteRawTag(56);
-        output.WriteInt32(Hp);
-      }
-      if (MaxHp != 0) {
-        output.WriteRawTag(64);
-        output.WriteInt32(MaxHp);
-      }
-      if (Mp != 0) {
-        output.WriteRawTag(72);
-        output.WriteInt32(Mp);
-      }
-      if (MaxMp != 0) {
-        output.WriteRawTag(80);
-        output.WriteInt32(MaxMp);
       }
       if (LastStageId != 0L) {
         output.WriteRawTag(88);
@@ -476,22 +399,6 @@ namespace DataStructures {
         output.WriteRawTag(48);
         output.WriteInt64(Exp);
       }
-      if (Hp != 0) {
-        output.WriteRawTag(56);
-        output.WriteInt32(Hp);
-      }
-      if (MaxHp != 0) {
-        output.WriteRawTag(64);
-        output.WriteInt32(MaxHp);
-      }
-      if (Mp != 0) {
-        output.WriteRawTag(72);
-        output.WriteInt32(Mp);
-      }
-      if (MaxMp != 0) {
-        output.WriteRawTag(80);
-        output.WriteInt32(MaxMp);
-      }
       if (LastStageId != 0L) {
         output.WriteRawTag(88);
         output.WriteInt64(LastStageId);
@@ -540,18 +447,6 @@ namespace DataStructures {
       if (Exp != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(Exp);
       }
-      if (Hp != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Hp);
-      }
-      if (MaxHp != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MaxHp);
-      }
-      if (Mp != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Mp);
-      }
-      if (MaxMp != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MaxMp);
-      }
       if (LastStageId != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(LastStageId);
       }
@@ -596,18 +491,6 @@ namespace DataStructures {
       }
       if (other.Exp != 0L) {
         Exp = other.Exp;
-      }
-      if (other.Hp != 0) {
-        Hp = other.Hp;
-      }
-      if (other.MaxHp != 0) {
-        MaxHp = other.MaxHp;
-      }
-      if (other.Mp != 0) {
-        Mp = other.Mp;
-      }
-      if (other.MaxMp != 0) {
-        MaxMp = other.MaxMp;
       }
       if (other.LastStageId != 0L) {
         LastStageId = other.LastStageId;
@@ -665,22 +548,6 @@ namespace DataStructures {
           }
           case 48: {
             Exp = input.ReadInt64();
-            break;
-          }
-          case 56: {
-            Hp = input.ReadInt32();
-            break;
-          }
-          case 64: {
-            MaxHp = input.ReadInt32();
-            break;
-          }
-          case 72: {
-            Mp = input.ReadInt32();
-            break;
-          }
-          case 80: {
-            MaxMp = input.ReadInt32();
             break;
           }
           case 88: {
@@ -744,22 +611,6 @@ namespace DataStructures {
           }
           case 48: {
             Exp = input.ReadInt64();
-            break;
-          }
-          case 56: {
-            Hp = input.ReadInt32();
-            break;
-          }
-          case 64: {
-            MaxHp = input.ReadInt32();
-            break;
-          }
-          case 72: {
-            Mp = input.ReadInt32();
-            break;
-          }
-          case 80: {
-            MaxMp = input.ReadInt32();
             break;
           }
           case 88: {
