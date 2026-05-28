@@ -12,10 +12,6 @@ constexpr int64 k_townStageId   = 100;   // 마을
 // 현재는 모든 캐릭터가 동일 값을 사용한다.
 constexpr int32 k_aoiRange = 1;
 
-// ── 캐릭터 이동 ──────────────────────────────────────────────
-// 캐릭터 이동 속도 (유닛/초). 향후 GameData_Job으로 이관 예정.
-constexpr float k_characterMoveSpeed = 5.0f;
-
 // MoveStopReq 수신 시 클라 위치와 서버 위치의 허용 오차 (X-Z 평면 거리, 유닛).
 // MoveDestReq/MoveStopReq 둘 다 이 값을 사용.
 // 이 범위 내면 클라 위치 인정, 초과면 MovePosCorrectNtf 송신.

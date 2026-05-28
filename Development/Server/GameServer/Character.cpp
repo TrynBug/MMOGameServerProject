@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "Character.h"
 #include "Stage.h"               // SetDestination 에서 Stage::FindPath 호출
-#include "GameServerDefine.h"   // k_characterMoveSpeed
 
 #include "Generated/GameData_JobBase.h"   // 생성 시 JobBase 기본스탯 적용
 
@@ -194,7 +193,8 @@ bool Character::Update(int64 deltaMs)
     }
 
     // 이번 tick 에 이동할 총 거리.
-    float remainMoveDist = k_characterMoveSpeed * (static_cast<float>(deltaMs) / 1000.0f);
+    const float moveSpeed = static_cast<float>(m_statComponent.Get(EStat::MoveSpdTotal));
+    float remainMoveDist = moveSpeed * (static_cast<float>(deltaMs) / 1000.0f);
 
     // waypoint 들을 따라가면서 remainMoveDist 를 소모. 도달할 때마다 다음 waypoint.
     // 한 tick 안에 여러 waypoint 를 통과할 수 있어서 while 루프.
