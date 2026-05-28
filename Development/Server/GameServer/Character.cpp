@@ -22,7 +22,7 @@ namespace
 }
 
 Character::Character(const DataStructures::Character& protoData)
-    : StageObject(protoData.character_id(), EObjectType::User)
+    : ActorObject(protoData.character_id(), EObjectType::User)
     , m_protoData(protoData)
 {
     // proto의 좌표/yaw를 부모 StageObject 멤버에 복사.

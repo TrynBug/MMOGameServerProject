@@ -27,6 +27,9 @@
     <ClCompile Include="StageObject.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="ActorObject.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="Sector.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -72,6 +75,9 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="StageObject.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ActorObject.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="Sector.h">

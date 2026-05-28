@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pch.h"
-#include "StageObject.h"
+#include "ActorObject.h"
 
 #include <vector>
 
@@ -36,7 +36,7 @@ using UserWPtr = std::weak_ptr<User>;
 // 길찾기 실패 시 [목적지] 한 점으로만 채워 직선 이동 fallback.
 // MoveNtf 의 dest 는 "최종 목적지" 의미 (waypoint 중간점이 아님).
 // 클라는 받은 dest 로 자기 NavMesh 길찾기를 따로 수행하여 같은 경로를 재현한다.
-class Character : public StageObject
+class Character : public ActorObject
 {
 public:
     // protobuf 데이터로부터 생성. character_id를 m_objectId로 사용한다.
