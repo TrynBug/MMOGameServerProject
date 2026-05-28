@@ -4,12 +4,14 @@
 
 #include "../GameDataManagerBase.h"
 
+#include "../GameData_JobBase.h"
 #include "../GameData_Monster.h"
 #include "../GameData_Stage.h"
 #include "../GameData_Stat.h"
 
 bool GameDataManagerBase::createAllGameDataTables()
 {
+	if (!createGameDataTable<GameDataTable_JobBase>()) return false;
 	if (!createGameDataTable<GameDataTable_Monster>()) return false;
 	if (!createGameDataTable<GameDataTable_Stage>()) return false;
 	if (!createGameDataTable<GameDataTable_Stat>()) return false;

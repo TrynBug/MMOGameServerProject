@@ -24,6 +24,25 @@ std::string TeamToString(ETeam v)
     }
 }
 
+EJob StringToJob(const std::string& v)
+{
+    if (v == "None") return EJob::None;
+    if (v == "Wizard") return EJob::Wizard;
+    if (v == "Warrior") return EJob::Warrior;
+    return EJob::None;
+}
+
+std::string JobToString(EJob v)
+{
+    switch (v)
+    {
+    case EJob::None: return "None";
+    case EJob::Wizard: return "Wizard";
+    case EJob::Warrior: return "Warrior";
+    default: return "None";
+    }
+}
+
 EObjectType StringToObjectType(const std::string& v)
 {
     if (v == "None") return EObjectType::None;

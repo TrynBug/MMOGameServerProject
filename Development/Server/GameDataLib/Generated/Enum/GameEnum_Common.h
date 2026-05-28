@@ -17,6 +17,17 @@ enum class ETeam : int
 ETeam StringToTeam(const std::string& v);
 std::string TeamToString(ETeam v);
 
+enum class EJob : int
+{
+    None                 = 0,
+    Wizard               = 1,  // 마법사
+    Warrior              = 2,  // 전사
+    Max                 
+};
+
+EJob StringToJob(const std::string& v);
+std::string JobToString(EJob v);
+
 enum class EObjectType : int
 {
     None                 = 0,
