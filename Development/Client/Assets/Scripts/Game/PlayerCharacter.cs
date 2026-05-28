@@ -6,7 +6,8 @@ namespace Client.Game
 {
     // 1명의 캐릭터(내 캐릭터 또는 다른 유저)를 표현하는 컴포넌트.
     // StageManager가 GameEnterNtf/StageEnterNtf/CharacterEnterNtf 수신 시 동적으로 생성한다.
-    public class PlayerCharacter : MonoBehaviour
+    // ActorObject 를 상속하여 스탯(StatHolder)과 현재 HP/MP 를 갖는다.
+    public class PlayerCharacter : ActorObject
     {
         // 캐릭터 식별자
         public long UserId { get; private set; }

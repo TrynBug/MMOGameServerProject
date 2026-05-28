@@ -47,6 +47,8 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<ObjectVisibilityNtf>(GamePacketId.ObjectVisibilityNtf, onObjectVisibilityNtf);
             PacketDispatcher.Instance.Register<MoveNtf>(GamePacketId.MoveNtf, onMoveNtf);
             PacketDispatcher.Instance.Register<MovePosCorrectNtf>(GamePacketId.MovePosCorrectNtf, onMovePosCorrectNtf);
+            PacketDispatcher.Instance.Register<StatUpdateNtf>(GamePacketId.StatUpdateNtf, onStatUpdateNtf);
+            PacketDispatcher.Instance.Register<HpMpNtf>(GamePacketId.HpMpNtf, onHpMpNtf);
 
             Debug.Log("[StageManager] Ready.");
         }
@@ -177,6 +179,43 @@ namespace Client.Game
             {
                 LocalPlayer.SetPosition(new Vector3(ntf.PosX, ntf.PosY, ntf.PosZ), ntf.Yaw);
             }
+        }
+
+        // 서버가 계산한 합성 스탯 스냅샷(최대HP/MP, 이동속도, 공격속도, 힘 등)을 받아
+        // 대상 캐릭터의 StatHolder 를 통째로 교체한다. (서버는 0 아닌 스탯만 보낸다)
+        // 클라는 계산하지 않고 받은 값을 보관만 한다(정보창/HP바가 읽음).
+        private void onStatUpdateNtf(StatUpdateNtf ntf)
+        {
+            if (!m_characters.TryGetValue(ntf.ObjectId, out PlayerCharacter character) || character == null)
+            {
+                Debug.LogWarning($"[StageManager] StatUpdateNtf: character not found. ObjectId={ntf.ObjectId}");
+                return;
+            }
+
+            character.Stats.Clear();
+            foreach (StatEntry entry in ntf.Entries)
+            {
+                character.Stats.Set((EStat)entry.Stat, entry.Value);
+            }
+
+            Debug.Log($"[StageManager] StatUpdateNtf: ObjectId={ntf.ObjectId}, count={ntf.Entries.Count}");
+        }
+
+        // 현재 HP/MP 갱신. 대미지/회복으로 자주 온다.
+        // SetCurHp/SetCurMp 는 최대치(StatHolder 의 HpTotal/MpTotal)로 clamp 하므로,
+        // 입장 시에는 StatUpdateNtf 가 먼저 도착해 최대치가 셋팅되어 있어야 한다(서버 송신 순서 규약).
+        private void onHpMpNtf(HpMpNtf ntf)
+        {
+            if (!m_characters.TryGetValue(ntf.ObjectId, out PlayerCharacter character) || character == null)
+            {
+                Debug.LogWarning($"[StageManager] HpMpNtf: character not found. ObjectId={ntf.ObjectId}");
+                return;
+            }
+
+            character.SetCurHp(ntf.CurHp);
+            character.SetCurMp(ntf.CurMp);
+
+            Debug.Log($"[StageManager] HpMpNtf: ObjectId={ntf.ObjectId}, hp={ntf.CurHp:F1}, mp={ntf.CurMp:F1}");
         }
 
         // ─── 내부 ──────────────────────────────────────────────────────
