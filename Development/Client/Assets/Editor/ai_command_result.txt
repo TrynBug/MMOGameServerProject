@@ -1,6 +1,0 @@
-ERROR
-컴파일 완료. 에러: 2, 경고: 0
-[ERROR] Assets\Scripts\Game\CharacterSelector.cs(100): Assets\Scripts\Game\CharacterSelector.cs(100,18): error CS0246: The type or namespace name 'EResultCode' could not be found (are you missing a using directive or an assembly reference?)
-
-[ERROR] Assets\Scripts\Game\CharacterSelector.cs(100): Assets\Scripts\Game\CharacterSelector.cs(100,48): error CS0103: The name 'EResultCode' does not exist in the current context
-

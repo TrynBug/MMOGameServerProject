@@ -200,13 +200,18 @@ DB.Browser.for.SQLite-v3.13.1-win64/
 **/Server/OUTPUT/Debug/*.idb
 **/Server/OUTPUT/Debug/*.exe
 **/Server/OUTPUT/Debug/*.pdb
+**/Server/OUTPUT/Debug/*.db-shm
+**/Server/OUTPUT/Debug/*.db-wal
 
 **/Server/OUTPUT/Release/*.lib
 **/Server/OUTPUT/Release/*.idb
 **/Server/OUTPUT/Release/*.exe
 **/Server/OUTPUT/Release/*.pdb
+**/Server/OUTPUT/Release/*.db-shm
+**/Server/OUTPUT/Release/*.db-wal
 
 **/Server/OUTPUT/Tools/
+**/Server/OUTPUT/Map
 
 # visual studio user file
 *.slnLaunch.user
@@ -216,7 +221,9 @@ DB.Browser.for.SQLite-v3.13.1-win64/
 # ==========================================
 **/Client/OUTPUT
 **/Client/Assets/TextMesh Pro
-
+**/Client/Assets/Resources/Art
+**/Client/Assets/StreamingAssets/NavMesh
+**/Client/Assets/Editor/ai_command_result.txt
 # ==========================================
 # 6. 기타
 # ==========================================
