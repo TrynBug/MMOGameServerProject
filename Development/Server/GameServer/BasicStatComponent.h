@@ -4,7 +4,9 @@
 
 #include "StatComponentBase.h"
 #include "Enum/GameEnum_Stat.h"          // EStat, EStatGroup
+#include "Generated/GameData_Stat.h"     // GameDataTable_Stat (그룹→Total 스탯 변환)
 
+#include <functional>
 #include <unordered_map>
 
 // ─────────────────────────────────────────────────────────────
@@ -64,6 +66,24 @@ protected:
         if (idx >= static_cast<size_t>(EStatGroup::Max))
             return;
         m_totals[idx] = value;
+    }
+
+    // raw 맵과 총합 배열을 둘 다 순회한다(분리 저장이므로).
+    // 총합 배열은 그룹 인덱스라, 그룹→Total 스탯(EStat)으로 변환해 콜백한다. 0 필터는 베이스가 적용.
+    void forEachStoredStat(const std::function<void(EStat, double)>& callback) const override
+    {
+        // raw 스탯 (희소 맵)
+        for (const auto& pair : m_rawStats)
+            callback(pair.first, pair.second);
+
+        // 총합 스탯 (그룹 배열 → Total 스탯로 변환)
+        for (size_t i = 1; i < static_cast<size_t>(EStatGroup::Max); ++i)
+        {
+            const StatGroupInfo* pInfo = GameDataTable_Stat::GetGroupInfo(static_cast<EStatGroup>(i));
+            if (pInfo == nullptr || pInfo->total == EStat::None)
+                continue;
+            callback(pInfo->total, m_totals[i]);
+        }
     }
 
 private:

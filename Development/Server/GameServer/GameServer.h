@@ -44,6 +44,14 @@ public:
     // 너무 크다고 판단했을 때 해당 유저에게 unicast.
     void SendMovePosCorrectNtf(int64 userId, float posX, float posY, float posZ, float yaw);
 
+    // 스탯 스냅샷 전송 (StatUpdateNtf). character 의 0 아닌 스탯만 담아 본인에게 unicast.
+    // 입장 시 SendStageEnterNtf 안에서 StageEnterNtf 직전에 호출된다(최대치가 먼저 가야 하므로).
+    void SendStatUpdateNtf(int64 userId, const Character& character);
+
+    // 현재 HP/MP 전송 (HpMpNtf). 본인에게 unicast. 대미지/회복 시점에도 사용.
+    // SetCurHp 가 최대치로 clamp 하므로 클라에서 StatUpdateNtf 보다 나중에 처리되어야 한다.
+    void SendHpMpNtf(int64 userId, double curHp, double curMp);
+
     // NavMesh 데이터에 접근. Stage 가 자신의 NavMesh 를 설정할 때 사용.
     NavMeshManager&       GetNavMeshManager()       { return m_navMeshManager; }
     const NavMeshManager& GetNavMeshManager() const { return m_navMeshManager; }

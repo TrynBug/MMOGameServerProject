@@ -32,6 +32,7 @@
     <ClCompile Include="Generated\GamePacket\object_visibility_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\session_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\stage_packet.pb.cc" />
+    <ClCompile Include="Generated\GamePacket\stat_packet.pb.cc" />
     <ClCompile Include="Generated\ServerPacket\chat_server_packet.pb.cc" />
     <ClCompile Include="Generated\ServerPacket\gateway_game_packet.pb.cc" />
     <ClCompile Include="Generated\ServerPacket\gateway_user_packet.pb.cc" />
@@ -59,6 +60,7 @@
     <ClInclude Include="Generated\GamePacket\object_visibility_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\session_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\stage_packet.pb.h" />
+    <ClInclude Include="Generated\GamePacket\stat_packet.pb.h" />
     <ClInclude Include="Generated\ServerPacket\chat_server_packet.pb.h" />
     <ClInclude Include="Generated\ServerPacket\gateway_game_packet.pb.h" />
     <ClInclude Include="Generated\ServerPacket\gateway_user_packet.pb.h" />
@@ -84,6 +86,7 @@
     <None Include="Proto\GamePacket\object_visibility_packet.proto" />
     <None Include="Proto\GamePacket\session_packet.proto" />
     <None Include="Proto\GamePacket\stage_packet.proto" />
+    <None Include="Proto\GamePacket\stat_packet.proto" />
     <None Include="Proto\ServerPacket\chat_server_packet.proto" />
     <None Include="Proto\ServerPacket\gateway_game_packet.proto" />
     <None Include="Proto\ServerPacket\gateway_user_packet.proto" />

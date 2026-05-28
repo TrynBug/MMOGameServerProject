@@ -33,6 +33,7 @@
 #include "Generated/GamePacket/stage_packet.pb.h"
 #include "Generated/GamePacket/object_visibility_packet.pb.h"
 #include "Generated/GamePacket/move_packet.pb.h"
+#include "Generated/GamePacket/stat_packet.pb.h"
 #include "Generated/ServerPacket/gateway_user_packet.pb.h"
 #include "Generated/ServerPacket/gateway_game_packet.pb.h"
 

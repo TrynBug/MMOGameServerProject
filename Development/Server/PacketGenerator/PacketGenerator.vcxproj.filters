@@ -117,6 +117,9 @@
     <ClInclude Include="Generated\DataStructures\user.pb.h">
       <Filter>소스 파일\Generated\DataStructures</Filter>
     </ClInclude>
+    <ClInclude Include="Generated\GamePacket\stat_packet.pb.h">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ProtoSerializer.cpp">
@@ -191,6 +194,9 @@
     <ClCompile Include="Generated\DataStructures\user.pb.cc">
       <Filter>소스 파일\Generated\DataStructures</Filter>
     </ClCompile>
+    <ClCompile Include="Generated\GamePacket\stat_packet.pb.cc">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="generate_proto.bat">
@@ -252,6 +258,9 @@
     </None>
     <None Include="Proto\DataStructures\user.proto">
       <Filter>소스 파일\Proto\DataStructures</Filter>
+    </None>
+    <None Include="Proto\GamePacket\stat_packet.proto">
+      <Filter>소스 파일\Proto\GamePacket</Filter>
     </None>
   </ItemGroup>
 </Project>

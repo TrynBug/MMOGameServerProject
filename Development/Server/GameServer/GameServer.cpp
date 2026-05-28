@@ -416,10 +416,6 @@ db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 userId, GamePac
     character.set_job_id(req.job_id());
     character.set_level(1);
     character.set_exp(0);
-    character.set_hp(100);
-    character.set_max_hp(100);
-    character.set_mp(50);
-    character.set_max_mp(50);
     character.set_last_stage_id(k_townStageId);
     character.set_pos_x(0.0f);
     character.set_pos_y(0.0f);
@@ -469,6 +465,20 @@ void GameServer::sendCharacterCreateRes(int64 userId, EResultCode resultCode, co
 
 void GameServer::SendStageEnterNtf(int64 userId, int64 stageId, float myPosX, float myPosY, float myPosZ, float myYaw)
 {
+    // StageEnterNtf 먼저 스탯/HP를 보낸다.
+    // 클라는 StageEnterNtf 를 받을 때면 이미 Game 씬 + LocalPlayer 스폰이 끝난 상태라
+    // 스탯 핸들러가 대상 캐릭터를 찾을 수 있다. 또 최대치(StatUpdateNtf)가 현재HP(HpMpNtf)보다
+    // 먼저 가야 클라에서 clamp 가 올바르므로 이 순서로 보낸다.
+    UserPtr spUser;
+    if (m_safeUsers.Find(userId, spUser) && spUser)
+    {
+        if (CharacterPtr spCharacter = spUser->GetCurrentCharacter())
+        {
+            SendStatUpdateNtf(userId, *spCharacter);
+            SendHpMpNtf(userId, spCharacter->GetCurHp(), spCharacter->GetCurMp());
+        }
+    }
+
     GamePacket::StageEnterNtf ntf;
     ntf.set_stage_id(stageId);
     ntf.set_my_pos_x(myPosX);
@@ -480,6 +490,45 @@ void GameServer::SendStageEnterNtf(int64 userId, int64 stageId, float myPosX, fl
 
     LOG_WRITE(LogLevel::Info, std::format("GameServer: StageEnterNtf sent. userId={} stageId={} pos=({},{},{}) yaw={}",
         userId, stageId, myPosX, myPosY, myPosZ, myYaw));
+}
+
+void GameServer::SendStatUpdateNtf(int64 userId, const Character& character)
+{
+    GamePacket::StatUpdateNtf ntf;
+    ntf.set_object_id(character.GetObjectId());
+
+    // 0 이 아닌 스탯만 담는다.
+    character.GetStat().ForEachNonZeroStat([&ntf](EStat stat, double value)
+    {
+        GamePacket::StatEntry* pEntry = ntf.add_entries();
+        pEntry->set_stat(static_cast<int32>(stat));
+        pEntry->set_value(value);
+    });
+
+    sendPacketToUser(userId, Common::GAME_PACKET_ID_STAT_UPDATE_NTF, ntf);
+
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: StatUpdateNtf sent. userId={} objectId={} count={}",
+        userId, character.GetObjectId(), ntf.entries_size()));
+}
+
+void GameServer::SendHpMpNtf(int64 userId, double curHp, double curMp)
+{
+    GamePacket::HpMpNtf ntf;
+    // objectId 는 현재 본인에게만 보내므로 userId 와 동일한 캐릭터 objectId 를 쓴다.
+    // (현재 character_id == objectId == userId 체계. 향후 구분되면 명시 전달로 변경.)
+    UserPtr spUser;
+    int64 objectId = userId;
+    if (m_safeUsers.Find(userId, spUser) && spUser)
+    {
+        if (CharacterPtr spCharacter = spUser->GetCurrentCharacter())
+            objectId = spCharacter->GetObjectId();
+    }
+
+    ntf.set_object_id(objectId);
+    ntf.set_cur_hp(curHp);
+    ntf.set_cur_mp(curMp);
+
+    sendPacketToUser(userId, Common::GAME_PACKET_ID_HP_MP_NTF, ntf);
 }
 
 void GameServer::SendObjectVisibilityNtf(int64 userId,

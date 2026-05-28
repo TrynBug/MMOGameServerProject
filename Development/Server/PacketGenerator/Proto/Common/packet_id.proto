@@ -54,6 +54,10 @@ enum GamePacketId {
     GAME_PACKET_ID_USER_DUNGEON_CREATE_RES  = 5006;   // 서버 -> 클라: 유저던전 생성 결과
     GAME_PACKET_ID_USER_DUNGEON_CLOSE_REQ = 5007;     // 클라 -> 서버: 유저던전 닫기 요청
     GAME_PACKET_ID_DUNGEON_CLOSED_NTF = 5008;   // 서버 -> 클라: 던전 종료 알림 (브로드캐스트)
+
+    // 6000~6999: 스탯
+    GAME_PACKET_ID_STAT_UPDATE_NTF = 6001;   // 서버 -> 클라: 합성 스탯 스냅샷 (최대HP/MP, 이동속도, 공격속도 등. 0 아닌 항목만)
+    GAME_PACKET_ID_HP_MP_NTF       = 6002;   // 서버 -> 클라: 현재 HP/MP (대미지/회복으로 자주 갱신되는 런타임 값)
 }
 
 // 서버 <-> 서버 패킷 ID

@@ -101,6 +101,8 @@ enum GamePacketId : int {
   GAME_PACKET_ID_USER_DUNGEON_CREATE_RES = 5006,
   GAME_PACKET_ID_USER_DUNGEON_CLOSE_REQ = 5007,
   GAME_PACKET_ID_DUNGEON_CLOSED_NTF = 5008,
+  GAME_PACKET_ID_STAT_UPDATE_NTF = 6001,
+  GAME_PACKET_ID_HP_MP_NTF = 6002,
   GamePacketId_INT_MIN_SENTINEL_DO_NOT_USE_ =
       ::std::numeric_limits<::int32_t>::min(),
   GamePacketId_INT_MAX_SENTINEL_DO_NOT_USE_ =
@@ -111,11 +113,11 @@ extern const uint32_t GamePacketId_internal_data_[];
 inline constexpr GamePacketId GamePacketId_MIN =
     static_cast<GamePacketId>(0);
 inline constexpr GamePacketId GamePacketId_MAX =
-    static_cast<GamePacketId>(5008);
+    static_cast<GamePacketId>(6002);
 inline bool GamePacketId_IsValid(int value) {
   return ::google::protobuf::internal::ValidateEnum(value, GamePacketId_internal_data_);
 }
-inline constexpr int GamePacketId_ARRAYSIZE = 5008 + 1;
+inline constexpr int GamePacketId_ARRAYSIZE = 6002 + 1;
 const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL GamePacketId_descriptor();
 template <typename T>
 const ::std::string& GamePacketId_Name(T value) {

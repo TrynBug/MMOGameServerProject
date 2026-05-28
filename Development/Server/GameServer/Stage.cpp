@@ -21,10 +21,6 @@ namespace
         info.set_name(proto.name());
         info.set_job_id(proto.job_id());
         info.set_level(proto.level());
-        info.set_hp(proto.hp());
-        info.set_max_hp(proto.max_hp());
-        info.set_mp(proto.mp());
-        info.set_max_mp(proto.max_mp());
         // 좌표는 런타임이 진실의 원천. StageObject에서 가져온다.
         info.set_pos_x(character.GetPosX());
         info.set_pos_y(character.GetPosY());

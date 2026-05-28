@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package GamePacket;
+
+import "Common/packet_id.proto";
+
+// ──────────────────────────────────────────────
+// 스탯 패킷
+// ──────────────────────────────────────────────
+//
+// 흐름 (게임서버.md / 클라이언트.md 참조):
+// - 대미지/최대치 등 모든 스탯 계산은 서버가 권위적으로 수행한다.
+// - 클라는 계산하지 않고, 서버가 내려준 값을 받아 UI 표시(정보창, HP/MP바)에만 쓴다.
+// - 그래서 클라에는 스탯 "계산기"가 없고 "수신/보관/조회"만 있다.
+//
+// 두 가지로 나누는 이유:
+// - 현재 HP/MP 는 매 타격마다 자주 바뀌는 런타임 상태 → 경량 HpMpNtf 로 잦게 전송.
+// - 그 외 합성 스탯(최대HP/MP, 이동속도, 공격속도, 힘 등)은 장비/버프 시점에만 바뀜
+//   → StatUpdateNtf 로 드물게 전송. EStat 은 값이 0이 아닌 항목만 담는다(희소).
+
+// 스탯 1개 항목. stat 은 GameData 의 EStat enum 값.
+message StatEntry {
+    int32  stat  = 1;   // EStat enum 값 (GameEnum_Stat)
+    double value = 2;
+}
+
+// 합성 스탯 스냅샷 알림 (서버 -> 클라)
+// 대상 액터의 스탯 중 0이 아닌 항목만 담는다.
+// 입장 시 전체 1회, 이후 장비/버프 등으로 스탯이 바뀔 때 전송.
+// (현재는 변경 시 전체 재전송. 델타 전송은 향후 최적화 대상.)
+// 클라는 받은 스냅샷으로 자기 스탯 보관소를 통째로 교체한다.
+message StatUpdateNtf {
+    int64 object_id = 1;             // 대상 액터 (= character_id 등)
+    repeated StatEntry entries = 2;  // 0이 아닌 스탯만 포함
+}
+
+// 현재 HP/MP 알림 (서버 -> 클라)
+// 대미지/회복으로 자주 바뀌는 런타임 값. EStat 에 없는 별도 값이라 명시 필드로 보낸다.
+// 최대치(HpTotal/MpTotal)는 StatUpdateNtf 로 별도 전달된다.
+message HpMpNtf {
+    int64  object_id = 1;
+    double cur_hp    = 2;
+    double cur_mp    = 3;
+}

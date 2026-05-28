@@ -14,10 +14,6 @@ message Character {
     int32 job_id = 4;             // 직업 (GameData로 관리, 마법사/전사 등)
     int32 level = 5;
     int64 exp = 6;
-    int32 hp = 7;
-    int32 max_hp = 8;
-    int32 mp = 9;
-    int32 max_mp = 10;
 
     // 마지막 위치 (게임서버 입장 시 이 위치로 복귀)
     // 좌표계: Unity 와 동일 (X, Y, Z). Y 가 높이, X-Z 가 평면.

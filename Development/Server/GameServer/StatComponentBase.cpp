@@ -2,11 +2,15 @@
 #include "StatComponentBase.h"
 
 #include <algorithm>   // std::clamp
+#include <cmath>       // std::abs
 
 namespace
 {
     // 퍼센트 -> 배수 변환 계수.
     constexpr double k_pctToRatio = 0.01;
+
+    // 0 으로 간주할 임계값. 스탯은 double 누적이라 미세 오차가 남을 수 있어 정확히 0 비교 대신 사용.
+    constexpr double k_zeroEpsilon = 1e-9;
 }
 
 double StatComponentBase::applyOp(EStatOp op, double cur, double value, bool bAdd)
@@ -50,6 +54,16 @@ void StatComponentBase::ApplyStat(EStat stat, double value)
 void StatComponentBase::RemoveStat(EStat stat, double value)
 {
     changeStat(stat, value, false);
+}
+
+void StatComponentBase::ForEachNonZeroStat(const std::function<void(EStat, double)>& callback) const
+{
+    // 파생의 저장소를 순회하되, 0(오차 포함) 항목은 거른다.
+    forEachStoredStat([&callback](EStat stat, double value)
+    {
+        if (std::abs(value) > k_zeroEpsilon)
+            callback(stat, value);
+    });
 }
 
 void StatComponentBase::changeStat(EStat stat, double value, bool bAdd)

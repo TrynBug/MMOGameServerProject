@@ -5,6 +5,8 @@
 #include "Enum/GameEnum_Stat.h"          // EStat, EStatGroup, EStatOp
 #include "Generated/GameData_Stat.h"     // GameDataTable_Stat (역인덱스 조회)
 
+#include <functional>
+
 // ─────────────────────────────────────────────────────────────
 // StatComponentBase
 // ─────────────────────────────────────────────────────────────
@@ -43,17 +45,26 @@ public:
     StatComponentBase& operator=(const StatComponentBase&) = delete;
 
 public:
-    // ── 스탯 적용 / 해제 ──
-    // 소스가 자기 기여분을 들고 호출한다. raw 를 Op 공식으로 갱신한 뒤, 소속 그룹 총합을 즉시 재계산.
-    // stat 은 raw 스탯이어야 한다. (Total 스탯을 직접 Apply/Remove 하지 말 것)
     void ApplyStat(EStat stat, double value);
     void RemoveStat(EStat stat, double value);
+
+    // ── 0 이 아닌 스탯 순회 ──
+    // 저장된 스탯 중 값이 0(부동소수점 오차 포함)이 아닌 항목만 콜백한다.
+    // 클라로 보낼 StatUpdateNtf 스냅샷을 만들 때 사용한다(0인 스탯은 보내지 않는 규약).
+    // 핫패스가 아니다(장비/버프/입장 시점에만 호출). 패킷 타입은 모르고 (EStat, double) 만 넘긴다.
+    void ForEachNonZeroStat(const std::function<void(EStat, double)>& callback) const;
 
 protected:
     // ── 파생이 제공하는 저장 접근 (핫패스 아님: 갱신/합성 흐름에서만 호출) ──
     virtual double getRaw(EStat stat) const = 0;             // 없으면 0 리턴
     virtual void   setRaw(EStat stat, double value) = 0;
     virtual void   setTotal(EStatGroup group, double value) = 0;
+
+    // 저장된 모든 스탯(raw + 총합)을 순회하며 콜백한다. 0 필터는 베이스가 ForEachNonZeroStat 에서 적용하므로
+    // 파생은 자신의 저장소에 들어있는 값을 그대로 넘기면 된다(0 포함 가능).
+    //   - Character : double[EStat::Max] 배열 전체 (raw+총합이 한 배열)
+    //   - Basic     : raw 맵 + 총합 배열 (둘이 분리 저장)
+    virtual void   forEachStoredStat(const std::function<void(EStat, double)>& callback) const = 0;
 
     // ── 공통 공식 / 흐름 (베이스 구현) ──
     // Op 별 raw 누적 공식. bAdd=true 면 더하기, false 면 빼기(역연산).

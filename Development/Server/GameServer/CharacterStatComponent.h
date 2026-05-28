@@ -6,6 +6,8 @@
 #include "Enum/GameEnum_Stat.h"          // EStat, EStatGroup, EStatOp
 #include "Generated/GameData_Stat.h"     // GameDataTable_Stat (역인덱스 조회)
 
+#include <functional>
+
 // ─────────────────────────────────────────────────────────────
 // CharacterStatComponent
 // ─────────────────────────────────────────────────────────────
@@ -56,6 +58,14 @@ protected:
         if (pInfo == nullptr || pInfo->total == EStat::None)
             return;
         m_stats[static_cast<size_t>(pInfo->total)] = value;
+    }
+
+    // 조밀 배열 전체를 순회. raw 와 총합이 같은 배열에 있으므로 한 번 순회로 둘 다 나온다.
+    // None(0) 은 건너뛰고 EStat 1..Max-1 만 돌다. 0 필터는 베이스가 적용.
+    void forEachStoredStat(const std::function<void(EStat, double)>& callback) const override
+    {
+        for (size_t i = 1; i < static_cast<size_t>(EStat::Max); ++i)
+            callback(static_cast<EStat>(i), m_stats[i]);
     }
 
 private:
