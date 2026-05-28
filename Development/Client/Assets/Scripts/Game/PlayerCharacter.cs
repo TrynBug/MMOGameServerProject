@@ -17,7 +17,8 @@ namespace Client.Game
         public bool IsLocalPlayer { get; private set; }
 
         // 이동 관련
-        [SerializeField] private float m_moveSpeed = 5f;             // m/s
+        [SerializeField] private bool m_useMoveSpeedOverride = false;   // (에디터 전용)이동속도를 오버라이드 할건지 여부
+        [SerializeField] private float m_moveSpeedOverride = 5f;        // (에디터 전용)이동속도를 오버라이드할 값
         [SerializeField] private float m_rotateSpeedDeg = 720f;      // 초당 회전 각도 (deg/sec). 720 = 0.5초에 한바퀴.
         private const float k_arriveThreshold = 0.05f;               // 최종 목적지 도착 판정 거리
         private const float k_waypointThreshold = 0.25f;             // 중간 waypoint 도달 판정 거리
@@ -89,6 +90,19 @@ namespace Client.Game
         }
 
         // ─── 이동 ───────────────────────────────────────────────────────
+
+        // 플레이어캐릭터 이동속도 얻기 함수
+        public float GetMoveSpeed()
+        {
+            if (m_useMoveSpeedOverride)
+            {
+                return m_moveSpeedOverride;
+            }
+            else
+            {
+                return (float)Stats.Get(GameData.EStat.MoveSpdTotal);
+            }
+        }
 
         // 목적지 설정. 마우스 누르고 있는 동안 매 프레임 갱신됨.
         // - 입력된 dest 는 NavMesh 위로 보정한다 (마우스가 절벽 아래 등을 가리킬 수도 있어서).
@@ -245,7 +259,8 @@ namespace Client.Game
             }
 
             Vector3 dir = diff / dist;
-            float step = m_moveSpeed * Time.deltaTime;
+            float moveSpeed = GetMoveSpeed();
+            float step = moveSpeed * Time.deltaTime;
 
             if (step >= dist)
             {
@@ -306,7 +321,8 @@ namespace Client.Game
             }
 
             Vector3 dir = diff / dist;
-            float step = m_moveSpeed * Time.deltaTime;
+            float moveSpeed = GetMoveSpeed();
+            float step = moveSpeed * Time.deltaTime;
 
             if (step >= dist)
             {
