@@ -26,7 +26,6 @@ bool GameDataTableBase_Monster::makeGameData(const std::string& line)
 
     // 컬럼 순서대로 파싱
     std::getline(ss, field, ','); pData->Key = std::stoll(field);
-    std::getline(ss, field, ','); pData->HP = std::stoll(field);
     std::getline(ss, field, ','); pData->ItemDropGroup = std::stoll(field);
     std::getline(ss, field, ','); pData->IsItemDrop = StringToBool(field);
     std::getline(ss, field, ','); pData->Exp = std::stod(field);
@@ -38,6 +37,16 @@ bool GameDataTableBase_Monster::makeGameData(const std::string& line)
     std::getline(ss, field, ','); pData->StatValue2 = std::stod(field);
     std::getline(ss, field, ','); pData->Stat3 = static_cast<EStat>(std::stoi(field));
     std::getline(ss, field, ','); pData->StatValue3 = std::stod(field);
+    std::getline(ss, field, ','); pData->Stat4 = static_cast<EStat>(std::stoi(field));
+    std::getline(ss, field, ','); pData->StatValue4 = std::stod(field);
+    std::getline(ss, field, ','); pData->Stat5 = static_cast<EStat>(std::stoi(field));
+    std::getline(ss, field, ','); pData->StatValue5 = std::stod(field);
+    std::getline(ss, field, ','); pData->Stat6 = static_cast<EStat>(std::stoi(field));
+    std::getline(ss, field, ','); pData->StatValue6 = std::stod(field);
+    std::getline(ss, field, ','); pData->Stat7 = static_cast<EStat>(std::stoi(field));
+    std::getline(ss, field, ','); pData->StatValue7 = std::stod(field);
+    std::getline(ss, field, ','); pData->Stat8 = static_cast<EStat>(std::stoi(field));
+    std::getline(ss, field, ','); pData->StatValue8 = std::stod(field);
 
     if (pData->Key <= 0)
     {

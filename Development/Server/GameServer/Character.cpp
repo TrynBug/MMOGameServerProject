@@ -41,6 +41,11 @@ Character::Character(const DataStructures::Character& protoData)
     // JobBase 게임데이터의 기본스탯을 스탯 컴포넌트에 적용.
     // (향후 레벨/아이템/마스터리/버프는 이어서 각각의 소스가 ApplyStat 한다.)
     applyJobBaseStats();
+
+    // 현재 HP/MP 를 최대치로 초기화 (생성 시 풀피).
+    // applyJobBaseStats() 이후여야 HpTotal/MpTotal 이 계산되어 있어 최대치가 정해진다.
+    FillHp();
+    FillMp();
 }
 
 void Character::applyJobBaseStats()

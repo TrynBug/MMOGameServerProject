@@ -45,7 +45,16 @@
     <ClCompile Include="Character.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Monster.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="CharacterStatComponent.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="StatComponentBase.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicStatComponent.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="StageManager.cpp">
@@ -98,7 +107,16 @@
     <ClInclude Include="Character.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Monster.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
     <ClInclude Include="CharacterStatComponent.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="StatComponentBase.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicStatComponent.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="StageManager.h">

@@ -20,7 +20,6 @@ struct GameData_Monster;
 struct GameDataBase_Monster : public GameData
 {
     int64_t              Key                  = 0;
-    int64_t              HP                   = 100;
     int64_t              ItemDropGroup        = 0;
     bool                 IsItemDrop           = true;
     double               Exp                  = 0;
@@ -32,8 +31,18 @@ struct GameDataBase_Monster : public GameData
     double               StatValue2           = 0;
     EStat                Stat3                = EStat::None;
     double               StatValue3           = 0;
+    EStat                Stat4                = EStat::None;
+    double               StatValue4           = 0;
+    EStat                Stat5                = EStat::None;
+    double               StatValue5           = 0;
+    EStat                Stat6                = EStat::None;
+    double               StatValue6           = 0;
+    EStat                Stat7                = EStat::None;
+    double               StatValue7           = 0;
+    EStat                Stat8                = EStat::None;
+    double               StatValue8           = 0;
 
-    int32_t GetStatCount() const { return 3; }
+    int32_t GetStatCount() const { return 8; }
     EStat GetStat(int32_t index) const
     {
         switch (index)
@@ -41,11 +50,16 @@ struct GameDataBase_Monster : public GameData
         case 0: return Stat1;
         case 1: return Stat2;
         case 2: return Stat3;
+        case 3: return Stat4;
+        case 4: return Stat5;
+        case 5: return Stat6;
+        case 6: return Stat7;
+        case 7: return Stat8;
         default: return EStat::None;
         }
     }
 
-    int32_t GetStatValueCount() const { return 3; }
+    int32_t GetStatValueCount() const { return 8; }
     double GetStatValue(int32_t index) const
     {
         switch (index)
@@ -53,6 +67,11 @@ struct GameDataBase_Monster : public GameData
         case 0: return StatValue1;
         case 1: return StatValue2;
         case 2: return StatValue3;
+        case 3: return StatValue4;
+        case 4: return StatValue5;
+        case 5: return StatValue6;
+        case 6: return StatValue7;
+        case 7: return StatValue8;
         default: return 0;
         }
     }

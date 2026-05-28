@@ -67,6 +67,17 @@ public:
     CharacterStatComponent&       GetStat()       { return m_statComponent; }
     const CharacterStatComponent& GetStat() const { return m_statComponent; }
 
+    // ── 최대 HP / MP (ActorObject 오버라이드) ──────────────
+    // 그룹의 Total 스탯을 스탯 컴포넌트에서 읽어 리턴 (ActorObject 오버라이드).
+    // GetMaxHp/GetMaxMp 는 ActorObject 가 이 함수 위에서 공통 구현한다.
+    double GetStatTotal(EStatGroup group) const override
+    {
+        const StatGroupInfo* pInfo = GameDataTable_Stat::GetGroupInfo(group);
+        if (pInfo == nullptr || pInfo->total == EStat::None)
+            return 0.0;
+        return m_statComponent.Get(pInfo->total);
+    }
+
     // ── DB 저장 직전 동기화 ─────────────────────────────────────
     // 런타임 좌표/yaw를 m_protoData에 복사한다. DB 직렬화 직전에 호출.
     void SyncRuntimeToProto();
