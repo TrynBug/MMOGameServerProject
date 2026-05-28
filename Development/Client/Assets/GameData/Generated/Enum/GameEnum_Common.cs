@@ -13,6 +13,14 @@ namespace GameData
         Max                 
     }
 
+    public enum EJob
+    {
+        None                 = 0,
+        Wizard               = 1,  // 마법사
+        Warrior              = 2,  // 전사
+        Max                 
+    }
+
     public enum EObjectType
     {
         None                 = 0,
