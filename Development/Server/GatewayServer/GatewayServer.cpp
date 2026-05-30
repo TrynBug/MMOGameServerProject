@@ -465,13 +465,15 @@ void GatewayServer::handleGameToGatewayPacket(const netlib::ISessionPtr& /*spGam
     if (!m_safeUsers.Find(userId, spUser) || !spUser->spClientSession)
         return;
 
-    auto spPacket = AllocPacket();
+    const std::string& payload = msg.payload();
+    const int32 totalSize = static_cast<int32>(sizeof(netlib::PacketHeader) + payload.size());
+
+    auto spPacket = GetIoContext().GetPacketPool().Alloc(totalSize);
     if (!spPacket)
         return;
 
-    const std::string& payload = msg.payload();
     spPacket->SetHeader(
-        static_cast<uint16>(sizeof(netlib::PacketHeader) + payload.size()),
+        static_cast<uint16>(totalSize),
         static_cast<uint16>(msg.packet_type()),
         netlib::PacketFlags::None
     );
@@ -483,12 +485,14 @@ void GatewayServer::handleGameToGatewayPacket(const netlib::ISessionPtr& /*spGam
 void GatewayServer::handleGameToGatewayBroadcast(const netlib::ISessionPtr& /*spGameSession*/, const ServerPacket::GameToGatewayBroadcastNtf& msg)
 {
     const std::string& payload = msg.payload();
-    auto spPacket = AllocPacket();
+    const int32 totalSize = static_cast<int32>(sizeof(netlib::PacketHeader) + payload.size());
+
+    auto spPacket = GetIoContext().GetPacketPool().Alloc(totalSize);
     if (!spPacket)
         return;
 
     spPacket->SetHeader(
-        static_cast<uint16>(sizeof(netlib::PacketHeader) + payload.size()),
+        static_cast<uint16>(totalSize),
         static_cast<uint16>(msg.packet_type()),
         netlib::PacketFlags::None
     );
