@@ -29,11 +29,12 @@ message NearbyCharacterInfo {
 // - 맵 경계 등 정적 정보는 클라이 GameData_Stage에서 조회한다.
 // - 주변 오브젝트 정보는 별도의 ObjectVisibilityNtf로 전달된다.
 message StageEnterNtf {
-    int64 stage_id = 1;
-    float my_pos_x = 2;     // 서버가 결정한 내 spawn 위치
-    float my_pos_y = 3;     // 높이
-    float my_yaw   = 4;     // degree
-    float my_pos_z = 5;     // 평면 깊이축
+    int64 stage_id = 1;        // Stage Id
+    int64 stage_data_key = 2;  // Stage 데이터 Key
+    float my_pos_x = 3;     // 서버가 결정한 내 spawn 위치
+    float my_pos_y = 4;     // 높이
+    float my_yaw   = 5;     // degree
+    float my_pos_z = 6;     // 평면 깊이축
 }
 
 // 동일 게임서버 내 Stage 이동 요청 (클라 -> 서버)

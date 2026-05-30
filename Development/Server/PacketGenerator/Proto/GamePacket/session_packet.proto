@@ -1,4 +1,4 @@
-﻿syntax = "proto3";
+syntax = "proto3";
 
 package GamePacket;
 
@@ -23,6 +23,7 @@ message GatewayAuthReq {
 // 실제 게임 플레이용 Stage (Town 등) 입장 완료 알림은 StageEnterNtf로 별도 전송.
 message GameEnterNtf {
     int64 stage_id = 1;   // 입장한 Stage ID (현재는 SystemStage)
+    int64 stage_key = 2;  // 입장한 Stage 데이터 Key
 }
 
 // 게임 로그아웃 요청 (클라 -> 게이트웨이)

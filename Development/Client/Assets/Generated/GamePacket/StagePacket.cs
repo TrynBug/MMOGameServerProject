@@ -29,20 +29,20 @@ namespace GamePacket {
             "dGVyLnByb3RvIpsBChNOZWFyYnlDaGFyYWN0ZXJJbmZvEg8KB3VzZXJfaWQY",
             "ASABKAMSDAoEbmFtZRgCIAEoCRINCgVsZXZlbBgDIAEoBRIKCgJocBgEIAEo",
             "BRIOCgZtYXhfaHAYBSABKAUSDQoFcG9zX3gYBiABKAISDQoFcG9zX3kYByAB",
-            "KAISDQoFcG9zX3oYCCABKAISDQoFZGlyX3kYCSABKAIiZwoNU3RhZ2VFbnRl",
-            "ck50ZhIQCghzdGFnZV9pZBgBIAEoAxIQCghteV9wb3NfeBgCIAEoAhIQCght",
-            "eV9wb3NfeRgDIAEoAhIOCgZteV95YXcYBCABKAISEAoIbXlfcG9zX3oYBSAB",
-            "KAIiJwoMU3RhZ2VNb3ZlUmVxEhcKD3RhcmdldF9zdGFnZV9pZBgBIAEoBSJR",
-            "ChdDcm9zc1NlcnZlclN0YWdlTW92ZVJlcRIdChV0YXJnZXRfZ2FtZV9zZXJ2",
-            "ZXJfaWQYASABKAUSFwoPdGFyZ2V0X3N0YWdlX2lkGAIgASgFIkcKEUNoYXJh",
-            "Y3RlckVudGVyTnRmEjIKCWNoYXJhY3RlchgBIAEoCzIfLkdhbWVQYWNrZXQu",
-            "TmVhcmJ5Q2hhcmFjdGVySW5mbyIkChFDaGFyYWN0ZXJMZWF2ZU50ZhIPCgd1",
-            "c2VyX2lkGAEgASgDYgZwcm90bzM="));
+            "KAISDQoFcG9zX3oYCCABKAISDQoFZGlyX3kYCSABKAIifwoNU3RhZ2VFbnRl",
+            "ck50ZhIQCghzdGFnZV9pZBgBIAEoAxIWCg5zdGFnZV9kYXRhX2tleRgCIAEo",
+            "AxIQCghteV9wb3NfeBgDIAEoAhIQCghteV9wb3NfeRgEIAEoAhIOCgZteV95",
+            "YXcYBSABKAISEAoIbXlfcG9zX3oYBiABKAIiJwoMU3RhZ2VNb3ZlUmVxEhcK",
+            "D3RhcmdldF9zdGFnZV9pZBgBIAEoBSJRChdDcm9zc1NlcnZlclN0YWdlTW92",
+            "ZVJlcRIdChV0YXJnZXRfZ2FtZV9zZXJ2ZXJfaWQYASABKAUSFwoPdGFyZ2V0",
+            "X3N0YWdlX2lkGAIgASgFIkcKEUNoYXJhY3RlckVudGVyTnRmEjIKCWNoYXJh",
+            "Y3RlchgBIAEoCzIfLkdhbWVQYWNrZXQuTmVhcmJ5Q2hhcmFjdGVySW5mbyIk",
+            "ChFDaGFyYWN0ZXJMZWF2ZU50ZhIPCgd1c2VyX2lkGAEgASgDYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, global::DataStructures.CharacterReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.NearbyCharacterInfo), global::GamePacket.NearbyCharacterInfo.Parser, new[]{ "UserId", "Name", "Level", "Hp", "MaxHp", "PosX", "PosY", "PosZ", "DirY" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageEnterNtf), global::GamePacket.StageEnterNtf.Parser, new[]{ "StageId", "MyPosX", "MyPosY", "MyYaw", "MyPosZ" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageEnterNtf), global::GamePacket.StageEnterNtf.Parser, new[]{ "StageId", "StageDataKey", "MyPosX", "MyPosY", "MyYaw", "MyPosZ" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageMoveReq), global::GamePacket.StageMoveReq.Parser, new[]{ "TargetStageId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CrossServerStageMoveReq), global::GamePacket.CrossServerStageMoveReq.Parser, new[]{ "TargetGameServerId", "TargetStageId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterEnterNtf), global::GamePacket.CharacterEnterNtf.Parser, new[]{ "Character" }, null, null, null, null),
@@ -603,6 +603,7 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public StageEnterNtf(StageEnterNtf other) : this() {
       stageId_ = other.stageId_;
+      stageDataKey_ = other.stageDataKey_;
       myPosX_ = other.myPosX_;
       myPosY_ = other.myPosY_;
       myYaw_ = other.myYaw_;
@@ -619,6 +620,9 @@ namespace GamePacket {
     /// <summary>Field number for the "stage_id" field.</summary>
     public const int StageIdFieldNumber = 1;
     private long stageId_;
+    /// <summary>
+    /// Stage Id
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public long StageId {
@@ -628,8 +632,23 @@ namespace GamePacket {
       }
     }
 
+    /// <summary>Field number for the "stage_data_key" field.</summary>
+    public const int StageDataKeyFieldNumber = 2;
+    private long stageDataKey_;
+    /// <summary>
+    /// Stage 데이터 Key
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long StageDataKey {
+      get { return stageDataKey_; }
+      set {
+        stageDataKey_ = value;
+      }
+    }
+
     /// <summary>Field number for the "my_pos_x" field.</summary>
-    public const int MyPosXFieldNumber = 2;
+    public const int MyPosXFieldNumber = 3;
     private float myPosX_;
     /// <summary>
     /// 서버가 결정한 내 spawn 위치
@@ -644,7 +663,7 @@ namespace GamePacket {
     }
 
     /// <summary>Field number for the "my_pos_y" field.</summary>
-    public const int MyPosYFieldNumber = 3;
+    public const int MyPosYFieldNumber = 4;
     private float myPosY_;
     /// <summary>
     /// 높이
@@ -659,7 +678,7 @@ namespace GamePacket {
     }
 
     /// <summary>Field number for the "my_yaw" field.</summary>
-    public const int MyYawFieldNumber = 4;
+    public const int MyYawFieldNumber = 5;
     private float myYaw_;
     /// <summary>
     /// degree
@@ -674,7 +693,7 @@ namespace GamePacket {
     }
 
     /// <summary>Field number for the "my_pos_z" field.</summary>
-    public const int MyPosZFieldNumber = 5;
+    public const int MyPosZFieldNumber = 6;
     private float myPosZ_;
     /// <summary>
     /// 평면 깊이축
@@ -704,6 +723,7 @@ namespace GamePacket {
         return true;
       }
       if (StageId != other.StageId) return false;
+      if (StageDataKey != other.StageDataKey) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosX, other.MyPosX)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosY, other.MyPosY)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyYaw, other.MyYaw)) return false;
@@ -716,6 +736,7 @@ namespace GamePacket {
     public override int GetHashCode() {
       int hash = 1;
       if (StageId != 0L) hash ^= StageId.GetHashCode();
+      if (StageDataKey != 0L) hash ^= StageDataKey.GetHashCode();
       if (MyPosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosX);
       if (MyPosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosY);
       if (MyYaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyYaw);
@@ -742,20 +763,24 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(StageId);
       }
+      if (StageDataKey != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(StageDataKey);
+      }
       if (MyPosX != 0F) {
-        output.WriteRawTag(21);
+        output.WriteRawTag(29);
         output.WriteFloat(MyPosX);
       }
       if (MyPosY != 0F) {
-        output.WriteRawTag(29);
+        output.WriteRawTag(37);
         output.WriteFloat(MyPosY);
       }
       if (MyYaw != 0F) {
-        output.WriteRawTag(37);
+        output.WriteRawTag(45);
         output.WriteFloat(MyYaw);
       }
       if (MyPosZ != 0F) {
-        output.WriteRawTag(45);
+        output.WriteRawTag(53);
         output.WriteFloat(MyPosZ);
       }
       if (_unknownFields != null) {
@@ -772,20 +797,24 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(StageId);
       }
+      if (StageDataKey != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(StageDataKey);
+      }
       if (MyPosX != 0F) {
-        output.WriteRawTag(21);
+        output.WriteRawTag(29);
         output.WriteFloat(MyPosX);
       }
       if (MyPosY != 0F) {
-        output.WriteRawTag(29);
+        output.WriteRawTag(37);
         output.WriteFloat(MyPosY);
       }
       if (MyYaw != 0F) {
-        output.WriteRawTag(37);
+        output.WriteRawTag(45);
         output.WriteFloat(MyYaw);
       }
       if (MyPosZ != 0F) {
-        output.WriteRawTag(45);
+        output.WriteRawTag(53);
         output.WriteFloat(MyPosZ);
       }
       if (_unknownFields != null) {
@@ -800,6 +829,9 @@ namespace GamePacket {
       int size = 0;
       if (StageId != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageId);
+      }
+      if (StageDataKey != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageDataKey);
       }
       if (MyPosX != 0F) {
         size += 1 + 4;
@@ -827,6 +859,9 @@ namespace GamePacket {
       }
       if (other.StageId != 0L) {
         StageId = other.StageId;
+      }
+      if (other.StageDataKey != 0L) {
+        StageDataKey = other.StageDataKey;
       }
       if (other.MyPosX != 0F) {
         MyPosX = other.MyPosX;
@@ -863,19 +898,23 @@ namespace GamePacket {
             StageId = input.ReadInt64();
             break;
           }
-          case 21: {
-            MyPosX = input.ReadFloat();
+          case 16: {
+            StageDataKey = input.ReadInt64();
             break;
           }
           case 29: {
-            MyPosY = input.ReadFloat();
+            MyPosX = input.ReadFloat();
             break;
           }
           case 37: {
-            MyYaw = input.ReadFloat();
+            MyPosY = input.ReadFloat();
             break;
           }
           case 45: {
+            MyYaw = input.ReadFloat();
+            break;
+          }
+          case 53: {
             MyPosZ = input.ReadFloat();
             break;
           }
@@ -902,19 +941,23 @@ namespace GamePacket {
             StageId = input.ReadInt64();
             break;
           }
-          case 21: {
-            MyPosX = input.ReadFloat();
+          case 16: {
+            StageDataKey = input.ReadInt64();
             break;
           }
           case 29: {
-            MyPosY = input.ReadFloat();
+            MyPosX = input.ReadFloat();
             break;
           }
           case 37: {
-            MyYaw = input.ReadFloat();
+            MyPosY = input.ReadFloat();
             break;
           }
           case 45: {
+            MyYaw = input.ReadFloat();
+            break;
+          }
+          case 53: {
             MyPosZ = input.ReadFloat();
             break;
           }

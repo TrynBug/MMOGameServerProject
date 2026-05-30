@@ -27,20 +27,20 @@ namespace GamePacket {
             "Ch9HYW1lUGFja2V0L3Nlc3Npb25fcGFja2V0LnByb3RvEgpHYW1lUGFja2V0",
             "GhZDb21tb24vcGFja2V0X2lkLnByb3RvGh5EYXRhU3RydWN0dXJlcy9jaGFy",
             "YWN0ZXIucHJvdG8iNQoOR2F0ZXdheUF1dGhSZXESDwoHdXNlcl9pZBgBIAEo",
-            "AxISCgphdXRoX3Rva2VuGAIgASgEIiAKDEdhbWVFbnRlck50ZhIQCghzdGFn",
-            "ZV9pZBgBIAEoAyIPCg1HYW1lTG9nb3V0UmVxIjoKEkZvcmNlRGlzY29ubmVj",
-            "dE50ZhITCgtyZWFzb25fY29kZRgBIAEoBRIPCgdtZXNzYWdlGAIgASgJKuAB",
-            "ChVGb3JjZURpc2Nvbm5lY3RSZWFzb24SIAocRk9SQ0VfRElTQ09OTkVDVF9S",
-            "RUFTT05fTk9ORRAAEisKJ0ZPUkNFX0RJU0NPTk5FQ1RfUkVBU09OX0RVUExJ",
-            "Q0FURV9MT0dJThABEisKJ0ZPUkNFX0RJU0NPTk5FQ1RfUkVBU09OX1NFUlZF",
-            "Ul9TSFVURE9XThACEicKI0ZPUkNFX0RJU0NPTk5FQ1RfUkVBU09OX0FVVEhf",
-            "RkFJTEVEEAMSIgoeRk9SQ0VfRElTQ09OTkVDVF9SRUFTT05fS0lDS0VEEARi",
-            "BnByb3RvMw=="));
+            "AxISCgphdXRoX3Rva2VuGAIgASgEIjMKDEdhbWVFbnRlck50ZhIQCghzdGFn",
+            "ZV9pZBgBIAEoAxIRCglzdGFnZV9rZXkYAiABKAMiDwoNR2FtZUxvZ291dFJl",
+            "cSI6ChJGb3JjZURpc2Nvbm5lY3ROdGYSEwoLcmVhc29uX2NvZGUYASABKAUS",
+            "DwoHbWVzc2FnZRgCIAEoCSrgAQoVRm9yY2VEaXNjb25uZWN0UmVhc29uEiAK",
+            "HEZPUkNFX0RJU0NPTk5FQ1RfUkVBU09OX05PTkUQABIrCidGT1JDRV9ESVND",
+            "T05ORUNUX1JFQVNPTl9EVVBMSUNBVEVfTE9HSU4QARIrCidGT1JDRV9ESVND",
+            "T05ORUNUX1JFQVNPTl9TRVJWRVJfU0hVVERPV04QAhInCiNGT1JDRV9ESVND",
+            "T05ORUNUX1JFQVNPTl9BVVRIX0ZBSUxFRBADEiIKHkZPUkNFX0RJU0NPTk5F",
+            "Q1RfUkVBU09OX0tJQ0tFRBAEYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, global::DataStructures.CharacterReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::GamePacket.ForceDisconnectReason), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.GatewayAuthReq), global::GamePacket.GatewayAuthReq.Parser, new[]{ "UserId", "AuthToken" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.GameEnterNtf), global::GamePacket.GameEnterNtf.Parser, new[]{ "StageId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.GameEnterNtf), global::GamePacket.GameEnterNtf.Parser, new[]{ "StageId", "StageKey" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.GameLogoutReq), global::GamePacket.GameLogoutReq.Parser, null, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ForceDisconnectNtf), global::GamePacket.ForceDisconnectNtf.Parser, new[]{ "ReasonCode", "Message" }, null, null, null, null)
           }));
@@ -357,6 +357,7 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public GameEnterNtf(GameEnterNtf other) : this() {
       stageId_ = other.stageId_;
+      stageKey_ = other.stageKey_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -381,6 +382,21 @@ namespace GamePacket {
       }
     }
 
+    /// <summary>Field number for the "stage_key" field.</summary>
+    public const int StageKeyFieldNumber = 2;
+    private long stageKey_;
+    /// <summary>
+    /// 입장한 Stage 데이터 Key
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long StageKey {
+      get { return stageKey_; }
+      set {
+        stageKey_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -397,6 +413,7 @@ namespace GamePacket {
         return true;
       }
       if (StageId != other.StageId) return false;
+      if (StageKey != other.StageKey) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -405,6 +422,7 @@ namespace GamePacket {
     public override int GetHashCode() {
       int hash = 1;
       if (StageId != 0L) hash ^= StageId.GetHashCode();
+      if (StageKey != 0L) hash ^= StageKey.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -427,6 +445,10 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(StageId);
       }
+      if (StageKey != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(StageKey);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -441,6 +463,10 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(StageId);
       }
+      if (StageKey != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(StageKey);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -453,6 +479,9 @@ namespace GamePacket {
       int size = 0;
       if (StageId != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageId);
+      }
+      if (StageKey != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageKey);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -468,6 +497,9 @@ namespace GamePacket {
       }
       if (other.StageId != 0L) {
         StageId = other.StageId;
+      }
+      if (other.StageKey != 0L) {
+        StageKey = other.StageKey;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -492,6 +524,10 @@ namespace GamePacket {
             StageId = input.ReadInt64();
             break;
           }
+          case 16: {
+            StageKey = input.ReadInt64();
+            break;
+          }
         }
       }
     #endif
@@ -513,6 +549,10 @@ namespace GamePacket {
             break;
           case 8: {
             StageId = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            StageKey = input.ReadInt64();
             break;
           }
         }

@@ -425,10 +425,11 @@ class StageEnterNtf final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kStageIdFieldNumber = 1,
-    kMyPosXFieldNumber = 2,
-    kMyPosYFieldNumber = 3,
-    kMyYawFieldNumber = 4,
-    kMyPosZFieldNumber = 5,
+    kStageDataKeyFieldNumber = 2,
+    kMyPosXFieldNumber = 3,
+    kMyPosYFieldNumber = 4,
+    kMyYawFieldNumber = 5,
+    kMyPosZFieldNumber = 6,
   };
   // int64 stage_id = 1;
   void clear_stage_id() ;
@@ -440,7 +441,17 @@ class StageEnterNtf final : public ::google::protobuf::Message
   void _internal_set_stage_id(::int64_t value);
 
   public:
-  // float my_pos_x = 2;
+  // int64 stage_data_key = 2;
+  void clear_stage_data_key() ;
+  ::int64_t stage_data_key() const;
+  void set_stage_data_key(::int64_t value);
+
+  private:
+  ::int64_t _internal_stage_data_key() const;
+  void _internal_set_stage_data_key(::int64_t value);
+
+  public:
+  // float my_pos_x = 3;
   void clear_my_pos_x() ;
   float my_pos_x() const;
   void set_my_pos_x(float value);
@@ -450,7 +461,7 @@ class StageEnterNtf final : public ::google::protobuf::Message
   void _internal_set_my_pos_x(float value);
 
   public:
-  // float my_pos_y = 3;
+  // float my_pos_y = 4;
   void clear_my_pos_y() ;
   float my_pos_y() const;
   void set_my_pos_y(float value);
@@ -460,7 +471,7 @@ class StageEnterNtf final : public ::google::protobuf::Message
   void _internal_set_my_pos_y(float value);
 
   public:
-  // float my_yaw = 4;
+  // float my_yaw = 5;
   void clear_my_yaw() ;
   float my_yaw() const;
   void set_my_yaw(float value);
@@ -470,7 +481,7 @@ class StageEnterNtf final : public ::google::protobuf::Message
   void _internal_set_my_yaw(float value);
 
   public:
-  // float my_pos_z = 5;
+  // float my_pos_z = 6;
   void clear_my_pos_z() ;
   float my_pos_z() const;
   void set_my_pos_z(float value);
@@ -484,7 +495,7 @@ class StageEnterNtf final : public ::google::protobuf::Message
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 5,
+  static const ::google::protobuf::internal::TcParseTable<3, 6,
                                    0, 0,
                                    2>
       _table_;
@@ -507,6 +518,7 @@ class StageEnterNtf final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::int64_t stage_id_;
+    ::int64_t stage_data_key_;
     float my_pos_x_;
     float my_pos_y_;
     float my_yaw_;
@@ -1707,12 +1719,37 @@ inline void StageEnterNtf::_internal_set_stage_id(::int64_t value) {
   _impl_.stage_id_ = value;
 }
 
-// float my_pos_x = 2;
+// int64 stage_data_key = 2;
+inline void StageEnterNtf::clear_stage_data_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.stage_data_key_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline ::int64_t StageEnterNtf::stage_data_key() const {
+  // @@protoc_insertion_point(field_get:GamePacket.StageEnterNtf.stage_data_key)
+  return _internal_stage_data_key();
+}
+inline void StageEnterNtf::set_stage_data_key(::int64_t value) {
+  _internal_set_stage_data_key(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:GamePacket.StageEnterNtf.stage_data_key)
+}
+inline ::int64_t StageEnterNtf::_internal_stage_data_key() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.stage_data_key_;
+}
+inline void StageEnterNtf::_internal_set_stage_data_key(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.stage_data_key_ = value;
+}
+
+// float my_pos_x = 3;
 inline void StageEnterNtf::clear_my_pos_x() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.my_pos_x_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000002U);
+                  0x00000004U);
 }
 inline float StageEnterNtf::my_pos_x() const {
   // @@protoc_insertion_point(field_get:GamePacket.StageEnterNtf.my_pos_x)
@@ -1720,7 +1757,7 @@ inline float StageEnterNtf::my_pos_x() const {
 }
 inline void StageEnterNtf::set_my_pos_x(float value) {
   _internal_set_my_pos_x(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   // @@protoc_insertion_point(field_set:GamePacket.StageEnterNtf.my_pos_x)
 }
 inline float StageEnterNtf::_internal_my_pos_x() const {
@@ -1732,12 +1769,12 @@ inline void StageEnterNtf::_internal_set_my_pos_x(float value) {
   _impl_.my_pos_x_ = value;
 }
 
-// float my_pos_y = 3;
+// float my_pos_y = 4;
 inline void StageEnterNtf::clear_my_pos_y() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.my_pos_y_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000008U);
 }
 inline float StageEnterNtf::my_pos_y() const {
   // @@protoc_insertion_point(field_get:GamePacket.StageEnterNtf.my_pos_y)
@@ -1745,7 +1782,7 @@ inline float StageEnterNtf::my_pos_y() const {
 }
 inline void StageEnterNtf::set_my_pos_y(float value) {
   _internal_set_my_pos_y(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   // @@protoc_insertion_point(field_set:GamePacket.StageEnterNtf.my_pos_y)
 }
 inline float StageEnterNtf::_internal_my_pos_y() const {
@@ -1757,12 +1794,12 @@ inline void StageEnterNtf::_internal_set_my_pos_y(float value) {
   _impl_.my_pos_y_ = value;
 }
 
-// float my_yaw = 4;
+// float my_yaw = 5;
 inline void StageEnterNtf::clear_my_yaw() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.my_yaw_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000008U);
+                  0x00000010U);
 }
 inline float StageEnterNtf::my_yaw() const {
   // @@protoc_insertion_point(field_get:GamePacket.StageEnterNtf.my_yaw)
@@ -1770,7 +1807,7 @@ inline float StageEnterNtf::my_yaw() const {
 }
 inline void StageEnterNtf::set_my_yaw(float value) {
   _internal_set_my_yaw(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
   // @@protoc_insertion_point(field_set:GamePacket.StageEnterNtf.my_yaw)
 }
 inline float StageEnterNtf::_internal_my_yaw() const {
@@ -1782,12 +1819,12 @@ inline void StageEnterNtf::_internal_set_my_yaw(float value) {
   _impl_.my_yaw_ = value;
 }
 
-// float my_pos_z = 5;
+// float my_pos_z = 6;
 inline void StageEnterNtf::clear_my_pos_z() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.my_pos_z_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000010U);
+                  0x00000020U);
 }
 inline float StageEnterNtf::my_pos_z() const {
   // @@protoc_insertion_point(field_get:GamePacket.StageEnterNtf.my_pos_z)
@@ -1795,7 +1832,7 @@ inline float StageEnterNtf::my_pos_z() const {
 }
 inline void StageEnterNtf::set_my_pos_z(float value) {
   _internal_set_my_pos_z(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
   // @@protoc_insertion_point(field_set:GamePacket.StageEnterNtf.my_pos_z)
 }
 inline float StageEnterNtf::_internal_my_pos_z() const {
