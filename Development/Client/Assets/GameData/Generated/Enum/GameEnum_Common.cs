@@ -16,7 +16,7 @@ namespace GameData
     public enum EJob
     {
         None                 = 0,
-        Wizard               = 1,  // 마법사
+        Mage                 = 1,  // 마법사
         Warrior              = 2,  // 전사
         Max                 
     }

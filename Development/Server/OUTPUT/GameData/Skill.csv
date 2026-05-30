@@ -1,0 +1,13 @@
+﻿Key,Name,IsUserCastable,NextSkillKey,TriggerDelay,Job,Category,CoolTime,ManaCost,CastTime,NeedsTargeting,EffectType,Damage,OriginType,RangeShape,RangeX,RangeY,IntervalSec,FirstHitDelay,DurationSec,ProjectileCount,ProjectileSpreadAngle,ProjectileSpeed,ProjectileRange,ProjectileMaxHitPerTarget,MoveDistance,MoveTime,MoveFastPhaseRatio,MoveFastTimeRatio,MaxTargetCount,KnockbackDistance,BuffKey,SlowOnHitKey
+1001,Fireball,true,1002,0,1,1,0,10,0.6,true,2,50,1,0,0,0,0,0,0,3,90,20,30,1,0,0,0,0,0,0,0,0
+1002,Fireball_Explosion,false,0,0,0,0,0,0,0,true,3,30,1,1,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1003,IceField,true,0,0,1,1,8,30,0.8,true,4,15,2,2,20,10,2,0.5,10,0,0,0,0,0,0,0,0,0,0,0,0,5002
+1004,Glide,true,1005,0,1,3,6,15,0.8,true,1,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0.5,0.8,0.5,0,0,0,0
+1005,Glide_Shockwave,false,0,0,0,0,0,0,0,true,3,20,1,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0
+1006,Blaze,true,1007,0.5,1,1,30,80,2,true,4,40,3,2,5,50,0.3,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0
+1007,Blaze_FireField,false,0,3,0,0,0,0,0,true,4,15,3,2,5,50,1,1,5,0,0,0,0,0,0,0,0,0,0,0,0,0
+2001,HeavyStrike,true,0,0.2,2,1,0,5,0.4,true,3,40,1,3,3,60,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0
+2002,Whirlwind,true,0,0.3,2,1,3,15,0.6,false,3,25,1,1,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2003,Charge,true,2004,0,2,3,8,20,0.8,true,1,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0.5,0.8,0.5,0,0,0,0
+2004,Charge_Impact,false,0,0,0,0,0,0,0,true,3,30,1,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0
+2005,WarCry,true,0,0.3,2,1,20,25,0.5,false,5,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,5001,0
