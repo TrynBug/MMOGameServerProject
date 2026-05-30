@@ -32,8 +32,12 @@ void Town::OnStart()
     //  - 서버 내부(m_objects/m_monsterObjects + sector)에만 등록된다. 클라 가시성 전파는 아직 없음.
     //  - 좌표는 맵 중앙(항상 world bounds 내부 → sector 등록 보장). monsterKey 50 은 Monster.csv 첫 데이터.
     //  - 추후 스폰 데이터 테이블/스포너 시스템으로 대체 예정.
-    for(int i=0; i<10; ++i)
-        SpawnMonster(51, 0, 0.0f, 0, 0.0f);
+    for (int i = 0; i < 10; ++i)
+    {
+        SpawnMonster(51, 0, i*0.1f, 0, 0.0f);
+        SpawnMonster(52, 0, i*0.1f + 2, 0, 0.0f);
+        SpawnMonster(53, 0, i*0.1f + 4, 0, 0.0f);
+    }
 
     for(int i=0; i<10; ++i)
         SpawnMonster(60, 0, 0.0f, 30, 0.0f);

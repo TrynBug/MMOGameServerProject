@@ -325,17 +325,32 @@ bool Monster::updateMovement(int64 deltaMs)
         const float dz = wz - GetPosZ();
         const float dist = std::sqrt(dx * dx + dz * dz);
 
+        // 현재 waypoint 가 경로의 마지막(= 최종 목적지)인지 확인한다.
+        const bool isLastWaypoint = (m_curWaypointIdx * 3 + 5 >= static_cast<int32>(m_waypoints.size()));
+
         if (dist <= remainMoveDist)
         {
-            // waypoint 도달. 정확히 스냅 후 다음 waypoint.
+            if (isLastWaypoint)
+            {
+                // 최종 목적지에 이번 tick 안에 닿을 수 있다.
+                // 슬롯에 칼같이 스냅(SetPos)하면 마지막 자투리만큼 순간이동처럼 보인다.
+                // 대신 이번 tick 에 갈 수 있는 만큼만 직선 이동하고, 나머지는 다음 tick 에 마저 간다.
+                // (도착이 최대 1 tick 늦어질 뿐, 점프가 사라진다. 슬롯은 hint 라 정밀 도달 불필요.)
+                const float nx = dx / dist;
+                const float nz = dz / dist;
+                const float ratio = remainMoveDist / dist;
+                const float dy = wy - GetPosY();
+                SetPos(GetPosX() + nx * remainMoveDist,
+                    GetPosY() + dy * ratio,
+                    GetPosZ() + nz * remainMoveDist);
+                remainMoveDist = 0.0f;
+                continue;
+            }
+
+            // 중간 waypoint: 스냅 후 자투리 거리로 다음 구간을 이어서 이동(연속적, 점프 없음).
             SetPos(wx, wy, wz);
             remainMoveDist -= dist;
             ++m_curWaypointIdx;
-            if (m_curWaypointIdx * 3 + 2 >= static_cast<int32>(m_waypoints.size()))
-            {
-                StopMoving();
-                return true;   // 최종 목적지 도달.
-            }
             faceWaypoint();
             continue;
         }

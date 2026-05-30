@@ -6,8 +6,25 @@
 
 namespace
 {
-    constexpr float k_rangedBandRatio    = 0.8f;    // 원거리 유지거리 허용 하한 비율 (떨림 방지)
+    constexpr float k_rangedBandRatio = 0.8f;    // 원거리 유지거리 허용 하한 비율 (떨림 방지)
     constexpr float k_returnArriveDistSq = 0.25f;   // 스폰지점 0.5유닛 이내면 복귀 완료
+
+    // 근접 추격 시 타겟 한 점으로 몰리는(겹침) 것을 막기 위한 어택 슬롯.
+    // 타겟 둘레에 슬롯을 2중 링(안/바깥)으로 배치하고, 몬스터마다 objectId % (총슬롯수) 로
+    // 슬롯을 정해 그 좌표를 이동 목적지로 삼는다. 슬롯은 서버 내부 dest 분산용 hint 일 뿐이며
+    // (클라는 평소처럼 dest 1개를 받을 뿐 슬롯 개념을 모름), 정확히 도달할 필요는 없다.
+    //   - 안쪽 링: 공격사거리 안쪽 반지름 → 도착 시 inAttackBand 판정을 통과해 바로 공격.
+    //   - 바깥 링: 공격사거리 밖 반지름 → 대기/접근용 자리. 안쪽이 비면 inAttackBand 로 자연히 진입.
+    // 추가로 같은 슬롯에 배정된 몬스터들이 정확히 겹치지 않도록 objectId 기반 지터를 더한다.
+    // 지터는 objectId 로만 결정되어 매 tick 동일 → dest 가 떨리지 않아 repath throttle 과 안전.
+    constexpr int32 k_attackSlotInnerCount = 8;     // 안쪽 링 슬롯 개수
+    constexpr int32 k_attackSlotOuterCount = 12;    // 바깥 링 슬롯 개수
+    constexpr int32 k_attackSlotTotalCount = k_attackSlotInnerCount + k_attackSlotOuterCount;
+    constexpr float k_attackSlotInnerRatio = 0.8f;  // 안쪽 링 반지름 = 공격사거리 * 이 비율
+    constexpr float k_attackSlotOuterRatio = 1.5f;  // 바깥 링 반지름 = 공격사거리 * 이 비율
+    constexpr float k_attackSlotAngleJitter = 0.15f; // 각도 지터 최대치 (rad)
+    constexpr float k_attackSlotRadiusJitter = 0.25f; // 반지름 지터 최대치 (유닛)
+    constexpr float k_twoPi = 6.2831853f;
 }
 
 void MonsterFsmAI::Update(Monster& monster, int64 deltaMs)
@@ -76,8 +93,39 @@ void MonsterFsmAI::updateChase(Monster& monster, int64 deltaMs)
     }
 
     // 이동 목표 계산.
-    float destX = pTarget->GetPosX();
-    float destZ = pTarget->GetPosZ();
+    // 근접: 타겟 정중앙이 아니라 타겟 둘레의 어택 슬롯으로 향한다 (겹침 방지).
+    //       slot = objectId % 총슬롯수. 안쪽 링부터 채우고, 넘치면 바깥 링.
+    //       같은 슬롯끼리도 objectId 지터로 흩어 정확한 포개짐을 방지한다.
+    const int64 objectId = monster.GetObjectId();
+    const int32 slot = static_cast<int32>(objectId % k_attackSlotTotalCount);
+
+    int32 ringSlotIndex;   // 링 내에서의 슬롯 순번
+    int32 ringSlotCount;   // 그 링의 총 슬롯 수
+    float ringRatio;       // 그 링의 반지름 비율
+    if (slot < k_attackSlotInnerCount)
+    {
+        ringSlotIndex = slot;
+        ringSlotCount = k_attackSlotInnerCount;
+        ringRatio = k_attackSlotInnerRatio;
+    }
+    else
+    {
+        ringSlotIndex = slot - k_attackSlotInnerCount;
+        ringSlotCount = k_attackSlotOuterCount;
+        ringRatio = k_attackSlotOuterRatio;
+    }
+
+    // objectId 기반 지터 (deterministic). 서로 다른 해시로 각도/반지름에 분산.
+    const float angleJitter = ((objectId * 2654435761LL) % 1000) / 1000.0f;   // 0.0 ~ 1.0
+    const float radiusJitter = ((objectId * 40503LL) % 1000) / 1000.0f;        // 0.0 ~ 1.0
+
+    const float slotAngle = (k_twoPi / ringSlotCount) * ringSlotIndex
+        + (angleJitter - 0.5f) * 2.0f * k_attackSlotAngleJitter;
+    const float slotRadius = monster.GetAttackRange() * ringRatio
+        + (radiusJitter - 0.5f) * 2.0f * k_attackSlotRadiusJitter;
+
+    float destX = pTarget->GetPosX() + std::cos(slotAngle) * slotRadius;
+    float destZ = pTarget->GetPosZ() + std::sin(slotAngle) * slotRadius;
     if (monster.IsRanged())
     {
         // 타겟으로부터 desiredRange 만큼 떨어진 "몬스터 쪽 방향"의 점 (카이팅).
