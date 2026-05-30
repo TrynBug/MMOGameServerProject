@@ -1,6 +1,4 @@
 using Client.Managers;
-using GameData;
-using MMO.Client.Navigation;
 using UnityEngine;
 
 namespace Client.Game
@@ -11,10 +9,10 @@ namespace Client.Game
     // Start 시점에 Init() 이 호출된다.
     //
     // 책임:
-    //   - 씬 진입 시 SelectedSpawn 의 StageId 로 NavMesh 로드
     //   - CharacterDataCache 의 SelectedSpawn 정보로 LocalPlayer 스폰을 StageManager 에 요청
     //
     // 책임이 아닌 것:
+    //   - NavMesh 로드 (StageManager 가 StageEnterNtf 수신 시 stage_data_key 로 처리)
     //   - 게임 로직 (StageManager 가 함)
     //   - 캐릭터 GameObject 생성 (CharacterFactory 가 함)
     //   - 패킷 핸들링 (StageManager 가 함)
@@ -32,11 +30,8 @@ namespace Client.Game
                 return;
             }
 
-            // NavMesh 로드. 캐릭터 스폰 전에 먼저 해야 PlayerCharacter 의 길찾기가 즉시 동작함.
-            // stageId → NavMeshFileName 매핑은 게임데이터에서.
-            loadNavMeshForStage(spawn.StageId);
-
             // 같은 씬의 StageManager 에 LocalPlayer 스폰 요청.
+            // NavMesh 는 StageManager 가 StageEnterNtf 를 받을 때 로드한다 (입장 직후 도착).
             if (StageManager.Instance == null)
             {
                 Debug.LogError("[GameScene] StageManager.Instance is null. Game 씬에 StageManager 를 배치했는지 확인하세요.");
@@ -56,31 +51,6 @@ namespace Client.Game
         {
             Debug.Log("[GameScene] Clear");
             // 추후: BGM 정지, HUD 닫기, 캐릭터 정리 등
-        }
-
-        // stageId 로 게임데이터를 조회해서 NavMesh 파일을 로드.
-        // 게임데이터가 없거나 NavMeshFileName 이 비어있으면 경고만 남기고 진행
-        // (PlayerCharacter 는 NavMesh 없으면 직선 이동으로 폴백함).
-        private static void loadNavMeshForStage(long stageId)
-        {
-            GameData_Stage stageData = GameDataTable_Stage.FindData(stageId);
-            if (stageData == null)
-            {
-                Debug.LogError($"[GameScene] Stage 게임데이터를 찾을 수 없습니다. stageId={stageId}");
-                return;
-            }
-
-            string navMeshName = stageData.NavMeshFileName;
-            if (string.IsNullOrEmpty(navMeshName))
-            {
-                Debug.LogWarning($"[GameScene] Stage 의 NavMeshFileName 이 비어있습니다. stageId={stageId} name={stageData.Name}");
-                return;
-            }
-
-            if (!NavMeshService.Load(navMeshName))
-            {
-                Debug.LogError($"[GameScene] NavMesh 로드 실패. stageId={stageId} navMeshName={navMeshName}");
-            }
         }
     }
 }

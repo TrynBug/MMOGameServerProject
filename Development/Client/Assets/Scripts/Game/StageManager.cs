@@ -90,7 +90,7 @@ namespace Client.Game
             // 새 Stage 의 NavMesh 로 갈아끼움.
             // 같은 stage 면 NavMeshService 가 no-op 처리. Game 씬 진입 시에는 GameScene.Init 에서
             // 먼저 로드되고, 이후 같은 게임서버 내 Stage 이동 시에는 이 파트가 갱신을 담당한다.
-            loadNavMeshForStage(ntf.StageId);
+            loadNavMeshForStage(ntf.StageDataKey);
 
             // 서버가 알려준 spawn 위치/회전으로 내 캐릭터 동기화
             if (LocalPlayer != null)
@@ -99,6 +99,10 @@ namespace Client.Game
             }
 
             CurrentStageId = ntf.StageId;
+
+            // 디버그용 sector 격자 표시. sectorSize 는 stage_data_key 로 GameData_Stage 를
+            // 조회해 얻고, 격자 원점/범위는 NavMesh 메타 bounds(서버 worldMin/Max 와 동일 소스)를 쓴다.
+            showSectorGridDebug(ntf);
         }
 
         // 스테이지내의 오브젝트 스폰/제거 패킷
@@ -162,22 +166,26 @@ namespace Client.Game
                 return;
             }
 
-            if (!m_characters.TryGetValue(ntf.ObjectId, out PlayerCharacter character) || character == null)
+            // 캐릭터 우선 조회. 없으면 몬스터로 라우팅. (둘 다 object_id 기반, 동일 처리)
+            if (m_characters.TryGetValue(ntf.ObjectId, out PlayerCharacter character) && character != null)
             {
-                Debug.LogWarning($"[StageManager] MoveNtf: character not found. ObjectId={ntf.ObjectId}");
+                if (ntf.IsMoving)
+                    character.SetMoveDestination(new Vector3(ntf.DestX, ntf.DestY, ntf.DestZ));
+                else
+                    character.SetPosition(new Vector3(ntf.PosX, ntf.PosY, ntf.PosZ), ntf.Yaw);
                 return;
             }
 
-            if (ntf.IsMoving)
+            if (m_monsters.TryGetValue(ntf.ObjectId, out MonsterObject monster) && monster != null)
             {
-                character.SetMoveDestination(new Vector3(ntf.DestX, ntf.DestY, ntf.DestZ));
-            }
-            else
-            {
-                character.SetPosition(new Vector3(ntf.PosX, ntf.PosY, ntf.PosZ), ntf.Yaw);
+                if (ntf.IsMoving)
+                    monster.SetMoveDestination(new Vector3(ntf.DestX, ntf.DestY, ntf.DestZ));
+                else
+                    monster.SetPosition(new Vector3(ntf.PosX, ntf.PosY, ntf.PosZ), ntf.Yaw);
+                return;
             }
 
-            Debug.Log($"[StageManager] MoveNtf: ObjectId={ntf.ObjectId}, IsMoving={ntf.IsMoving}");
+            Debug.LogWarning($"[StageManager] MoveNtf: object not found. ObjectId={ntf.ObjectId}");
         }
 
         // 서버가 내 위치와 서버 위치의 오차가 허용 이상이라고 판단했을 때 보내는 패킷.
@@ -230,6 +238,19 @@ namespace Client.Game
         }
 
         // ─── 내부 ──────────────────────────────────────────────────────
+
+        // 디버그: 서버 Stage 의 sector 격자를 화면에 그린다.
+        // sectorSize 는 stage_data_key 로 GameData_Stage 를 조회해서 얻는다.
+        private static void showSectorGridDebug(StageEnterNtf ntf)
+        {
+            GameData_Stage stageData = GameDataTable_Stage.FindData(ntf.StageDataKey);
+            if (stageData == null)
+            {
+                Debug.LogWarning($"[StageManager] sector grid: Stage 게임데이터를 찾을 수 없습니다. stageDataKey={ntf.StageDataKey}");
+                return;
+            }
+            SectorGridDebug.ShowForStage(stageData.NavMeshFileName, stageData.sectorSize, ntf.MyPosY);
+        }
 
         private PlayerCharacter spawnRemoteCharacter(long userId, string name, Vector3 pos, float dirY)
         {
@@ -285,25 +306,25 @@ namespace Client.Game
         // 게임데이터가 없거나 NavMeshFileName 이 비어있으면 경고만 남기고 진행
         // (PlayerCharacter 는 NavMesh 없으면 직선 이동으로 폴백함).
         // 같은 stage 가 이미 로드되어 있으면 NavMeshService.Load 가 no-op 처리.
-        private static void loadNavMeshForStage(long stageId)
+        private static void loadNavMeshForStage(long stageDataKey)
         {
-            GameData_Stage stageData = GameDataTable_Stage.FindData(stageId);
+            GameData_Stage stageData = GameDataTable_Stage.FindData(stageDataKey);
             if (stageData == null)
             {
-                Debug.LogError($"[StageManager] Stage 게임데이터를 찾을 수 없습니다. stageId={stageId}");
+                Debug.LogError($"[StageManager] Stage 게임데이터를 찾을 수 없습니다. stageDataKey={stageDataKey}");
                 return;
             }
 
             string navMeshName = stageData.NavMeshFileName;
             if (string.IsNullOrEmpty(navMeshName))
             {
-                Debug.LogWarning($"[StageManager] Stage 의 NavMeshFileName 이 비어있습니다. stageId={stageId} name={stageData.Name}");
+                Debug.LogWarning($"[StageManager] Stage 의 NavMeshFileName 이 비어있습니다. stageDataKey={stageDataKey} name={stageData.Name}");
                 return;
             }
 
             if (!NavMeshService.Load(navMeshName))
             {
-                Debug.LogError($"[StageManager] NavMesh 로드 실패. stageId={stageId} navMeshName={navMeshName}");
+                Debug.LogError($"[StageManager] NavMesh 로드 실패. stageDataKey={stageDataKey} navMeshName={navMeshName}");
             }
         }
     }
