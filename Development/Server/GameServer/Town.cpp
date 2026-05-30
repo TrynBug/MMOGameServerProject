@@ -3,13 +3,13 @@
 #include "Character.h"     // GetCurrentCharacter가 CharacterPtr을 리턴하여 완전타입 필요
 #include "GameServer.h"   // StageEnterNtf 전송을 위해 완전 타입 필요
 
-Town::Town(int64 stageId)
-    : Town(stageId, LoadStageGridParams(stageId))   // 위임. LoadStageGridParams는 1회만 호출.
+Town::Town(int64 stageId, int64 stageDataKey)
+    : Town(stageId, stageDataKey, LoadStageGridParams(stageDataKey))   // 위임. LoadStageGridParams는 1회만 호출.
 {
 }
 
-Town::Town(int64 stageId, const StageGridParams& params)
-    : Stage(stageId,
+Town::Town(int64 stageId, int64 stageDataKey, const StageGridParams& params)
+    : Stage(stageId, stageDataKey,
             params.stageType,
             params.worldMinX, params.worldMinZ,
             params.worldMaxX, params.worldMaxZ,
@@ -60,6 +60,6 @@ void Town::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
         return;
     }
 
-    pGameServer->SendStageEnterNtf(spUser->GetUserId(), GetStageId(),
+	pGameServer->SendStageEnterNtf(spUser->GetUserId(), GetStageId(), GetStageDataKey(),
         spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), spCharacter->GetYaw());
 }

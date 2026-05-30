@@ -43,8 +43,8 @@ public:
 
     // ── Stage 생성 + 등록 + 컨텐츠 스레드 배정 + GameServer 주입 ──
     // 실패 시 nullptr 리턴 (중복 stageId 등).
-    SystemStagePtr CreateSystemStage(int64 stageId);
-    TownPtr        CreateTown(int64 stageId);
+    SystemStagePtr CreateSystemStage(int64 stageId, int64 stageDataKey);
+    TownPtr        CreateTown(int64 stageId, int64 stageDataKey);
     // 향후: CreateUserDungeon, CreatePublicDungeon, CreateField 등
 
     // ── 조회 ──

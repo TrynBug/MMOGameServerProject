@@ -2,10 +2,9 @@
 #include "Stage.h"
 #include "Character.h"   // OnUserEnter에서 Character를 m_objects에 등록하기 위해 완전타입 필요
 #include "Monster.h"     // SpawnMonster 에서 Monster 생성 + GameDataTable_Monster 조회를 위해 완전타입 필요
+#include "MonsterFsmAI.h"  // SpawnMonster 에서 기본 두뇌(FSM) 주입
 #include "GameServer.h"   // OnUserEnter/OnUserLeave에서 visibility 패킷 전송 위해 필요
 #include "StageNavMesh.h"  // SetNavMesh 구현에서 StageNavMesh 완전타입 필요
-
-#include "Generated/GameData_Stage.h"
 
 #include <cmath>
 
@@ -66,7 +65,7 @@ namespace
     constexpr double k_fallbackSectorSize =   50.0;
 }
 
-StageGridParams LoadStageGridParams(int64 stageId)
+StageGridParams LoadStageGridParams(int64 stageDataKey)
 {
     StageGridParams params;
     // worldMin/Max 는 fallback 으로 기본 세팅. NavMesh 가 있는 Stage 는 호출자가 NavMeshMeta 로 덮어쓴다.
@@ -75,10 +74,10 @@ StageGridParams LoadStageGridParams(int64 stageId)
     params.worldMaxX = k_fallbackWorldMaxX;
     params.worldMaxZ = k_fallbackWorldMaxZ;
 
-    const GameData_Stage* pData = GameDataTable_Stage::FindData(stageId);
+    const GameData_Stage* pData = GameDataTable_Stage::FindData(stageDataKey);
     if (!pData)
     {
-        LOG_WRITE(LogLevel::Error, std::format("LoadStageGridParams: GameData_Stage not found. stageId={}. using fallback values.", stageId));
+        LOG_WRITE(LogLevel::Error, std::format("LoadStageGridParams: GameData_Stage not found. stageDataKey={}. using fallback values.", stageDataKey));
         params.stageType  = EStageType::None;
         params.navMeshFileName.clear();
         params.sectorSize = k_fallbackSectorSize;
@@ -92,7 +91,7 @@ StageGridParams LoadStageGridParams(int64 stageId)
     return params;
 }
 
-Stage::Stage(int64 stageId, EStageType stageType,
+Stage::Stage(int64 stageId, int64 stageDataKey, EStageType stageType,
              double worldMinX, double worldMinZ,
              double worldMaxX, double worldMaxZ,
              double sectorSize)
@@ -105,6 +104,8 @@ Stage::Stage(int64 stageId, EStageType stageType,
     , m_sectorSize(sectorSize)
 {
     initializeSectorGrid();
+
+	m_pStageData = GameDataTable_Stage::FindData(stageDataKey);
 }
 
 Stage::~Stage()
@@ -148,6 +149,44 @@ bool Stage::SampleNavMeshPosition(float x, float y, float z,
     if (!m_pStageNavMesh)
         return false;
     return m_pStageNavMesh->SamplePosition(x, y, z, halfExtentX, halfExtentY, halfExtentZ, outX, outY, outZ);
+}
+
+StageObject* Stage::FindObject(int64 objectId)
+{
+    auto it = m_objects.find(objectId);
+    if (it == m_objects.end())
+        return nullptr;
+    return it->second.get();
+}
+
+void Stage::updateMonsters(int64 deltaMs)
+{
+    // m_monsterObjects 에는 Monster 만 등록된다 (SpawnMonster). FSM 1 tick 진행.
+    // Monster::Update 는 이동 시 내부에서 UpdateObjectSector(sector 맵)를 호출하지만
+    // m_monsterObjects 자체는 변경하지 않으므로 순회 중 안전하다.
+    // (사망 시 디스폰은 여기서 하지 않는다 — 순회 중 컨테이너 변경 금지.)
+    for (auto& pair : m_monsterObjects)
+    {
+        Monster* pMonster = static_cast<Monster*>(pair.second.get());
+
+        // Update 전 sector 좌표 캐치 (sector 변경 감지용). Monster::Update 내부에서
+        // UpdateObjectSector 가 호출되어 갱신되므로, Update 후 좌표와 비교한다.
+        const int32 oldSectorX = pMonster->GetCurSectorX();
+        const int32 oldSectorZ = pMonster->GetCurSectorZ();
+
+        pMonster->Update(deltaMs);
+
+        // sector 가 바뀌면 visibility 갱신: 새로 보게 된 유저에게 spawn, 못 보게 된 유저에게 despawn.
+        const int32 newSectorX = pMonster->GetCurSectorX();
+        const int32 newSectorZ = pMonster->GetCurSectorZ();
+        if (oldSectorX != newSectorX || oldSectorZ != newSectorZ)
+            updateMonsterVisibilityOnSectorChange(*pMonster, oldSectorX, oldSectorZ, newSectorX, newSectorZ);
+
+        // 이동 상태가 바뀜으면(추격 시작/목적지 변경/정지) 주변 유저에게 MoveNtf 브로드캐스트.
+        // 매 tick 이 아니라 상태 변화 시점에만 (Monster 내부 throttled repath + 정지 시 dirty).
+        if (pMonster->ConsumeMoveStateDirty())
+            broadcastMoveNtf(*pMonster);
+    }
 }
 
 void Stage::initializeSectorGrid()
@@ -264,10 +303,13 @@ void Stage::OnUpdate(int64 deltaMs)
     // 3. 캐릭터 이동 시뮬레이션 + sector 갱신
     updateCharacters(deltaMs);
 
-    // 4. 파생 클래스 로직
+    // 4. 몬스터 AI(FSM) 시뮬레이션 + sector 갱신
+    updateMonsters(deltaMs);
+
+    // 5. 파생 클래스 로직
     OnStageUpdate(deltaMs);
 
-    // 5. heartbeat 로그 (5초마다 1번)
+    // 6. heartbeat 로그 (5초마다 1번)
     m_heartbeatAccumMs += deltaMs;
     if (m_heartbeatAccumMs >= k_heartbeatIntervalMs)
     {
@@ -349,6 +391,7 @@ Monster* Stage::SpawnMonster(int64 monsterKey, float posX, float posY, float pos
     // ObjectId 발급 후 Monster 생성. Monster 생성자가 종류데이터 기본스탯 적용 + 현재HP/MP 풀피까지 처리한다.
     const int64 objectId = pServer->GenerateObjectId();
     MonsterPtr spMonster = std::make_shared<Monster>(objectId, pMonsterData);
+    spMonster->SetAI(std::make_unique<MonsterFsmAI>());   // 기본 두뇌: FSM (보스 등은 향후 BT 로 교체)
     spMonster->SetPos(spawnX, spawnY, spawnZ);
     spMonster->SetYaw(yaw);
     spMonster->SetStage(this);
@@ -821,28 +864,36 @@ void Stage::updateCharacters(int64 deltaMs)
 
 void Stage::broadcastMoveNtf(const Character& character)
 {
+    sendMoveNtfToAoi(character.GetObjectId(),
+                     character.GetCurSectorX(), character.GetCurSectorZ(),
+                     character.GetPosX(), character.GetPosY(), character.GetPosZ(), character.GetYaw(),
+                     character.GetDestX(), character.GetDestY(), character.GetDestZ(),
+                     character.IsMoving());
+}
+
+void Stage::broadcastMoveNtf(const Monster& monster)
+{
+    sendMoveNtfToAoi(monster.GetObjectId(),
+                     monster.GetCurSectorX(), monster.GetCurSectorZ(),
+                     monster.GetPosX(), monster.GetPosY(), monster.GetPosZ(), monster.GetYaw(),
+                     monster.GetDestX(), monster.GetDestY(), monster.GetDestZ(),
+                     monster.IsMoving());
+}
+
+void Stage::sendMoveNtfToAoi(int64 objectId, int32 sectorX, int32 sectorZ,
+                             float posX, float posY, float posZ, float yaw,
+                             float destX, float destY, float destZ, bool isMoving)
+{
     GameServer* pServer = GetGameServer();
     if (!pServer)
         return;
 
-    const int64 objectId = character.GetObjectId();
-    const float posX     = character.GetPosX();
-    const float posY     = character.GetPosY();
-    const float posZ     = character.GetPosZ();
-    const float yaw      = character.GetYaw();
-    const float destX    = character.GetDestX();
-    const float destY    = character.GetDestY();
-    const float destZ    = character.GetDestZ();
-    const bool  isMoving = character.IsMoving();
-
-    // 주변 sector의 모든 캐릭터(자기 자신 포함)에게 unicast.
-    // 캐릭터의 현재 sector가 -1이면(맵 밖) broadcast 안 함.
-    const int32 sx = character.GetCurSectorX();
-    const int32 sz = character.GetCurSectorZ();
-    if (sx < 0 || sz < 0)
+    // sector 가 -1 이면(맵 밖) broadcast 안 함.
+    if (sectorX < 0 || sectorZ < 0)
         return;
 
-    ForEachAdjacentSector(sx, sz, k_aoiRange,
+    // 주변 sector AOI 의 모든 유저에게 unicast.
+    ForEachAdjacentSector(sectorX, sectorZ, k_aoiRange,
         [&](Sector* pSector)
         {
             for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
@@ -955,4 +1006,68 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
     {
         pServer->SendObjectVisibilityNtf(myUserId, {}, despawnIdsForMe);
     }
+}
+
+void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
+                                                  int32 oldSectorX, int32 oldSectorZ,
+                                                  int32 newSectorX, int32 newSectorZ)
+{
+    GameServer* pServer = GetGameServer();
+    if (!pServer)
+        return;
+
+    const int64 monsterObjectId = monster.GetObjectId();
+
+    // sector (x, z)가 (centerX, centerZ) 기준 k_aoiRange 범위 안에 있는지 검사.
+    // centerX/Z 가 -1(맵 밖)이면 어떤 범위에도 속하지 않음.
+    auto inAOI = [](int32 x, int32 z, int32 centerX, int32 centerZ) -> bool
+    {
+        if (centerX < 0 || centerZ < 0)
+            return false;
+        return std::abs(x - centerX) <= k_aoiRange && std::abs(z - centerZ) <= k_aoiRange;
+    };
+
+    // ── newAOI − oldAOI: 새로 이 몬스터를 보게 된 유저들에게 spawn ──
+    // 이동 중이면 spawn 직후 MoveNtf 도 보내 클라가 바로 따라가게 한다. spawn 정보엔
+    // 이동 상태가 없어 그냥 두면 다음 상태변화 broadcast 전까지 정지한 것처럼 보임.
+    const std::vector<GamePacket::MonsterSpawnInfo> singleMonster = { makeMonsterSpawnInfo(monster) };
+    const bool monsterMoving = monster.IsMoving();
+
+    ForEachAdjacentSector(newSectorX, newSectorZ, k_aoiRange,
+        [&](Sector* pSector)
+        {
+            // oldAOI 에도 있던 sector 면 이미 보고 있으므로 skip.
+            if (inAOI(pSector->GetSectorX(), pSector->GetSectorZ(), oldSectorX, oldSectorZ))
+                return;
+
+            for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
+            {
+                Character* pOtherChar = static_cast<Character*>(pOtherObj);
+                const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
+                pServer->SendObjectVisibilityNtf(otherUserId, {}, {}, singleMonster);
+                if (monsterMoving)
+                {
+                    pServer->SendMoveNtf(otherUserId, monsterObjectId,
+                        monster.GetPosX(), monster.GetPosY(), monster.GetPosZ(), monster.GetYaw(),
+                        monster.GetDestX(), monster.GetDestY(), monster.GetDestZ(), true);
+                }
+            }
+        });
+
+    // ── oldAOI − newAOI: 더 이상 이 몬스터를 못 보는 유저들에게 despawn ──
+    const std::vector<int64> despawnId = { monsterObjectId };
+    ForEachAdjacentSector(oldSectorX, oldSectorZ, k_aoiRange,
+        [&](Sector* pSector)
+        {
+            // newAOI 에도 있는 sector 면 계속 보이므로 skip.
+            if (inAOI(pSector->GetSectorX(), pSector->GetSectorZ(), newSectorX, newSectorZ))
+                return;
+
+            for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
+            {
+                Character* pOtherChar = static_cast<Character*>(pOtherObj);
+                const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
+                pServer->SendObjectVisibilityNtf(otherUserId, {}, despawnId);
+            }
+        });
 }

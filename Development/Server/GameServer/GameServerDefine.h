@@ -2,10 +2,10 @@
 
 // GameServer 전용 상수, enum, 세션 메타정보 구조체 등 정의
 
-// ── Stage ID (GameData_Stage의 Key와 일치) ───────────────────────
-// 게임서버 시작 시 항상 생성되는 고정 Stage들의 ID.
-constexpr int64 k_systemStageId = 1;     // 캐릭터 선택창
-constexpr int64 k_townStageId   = 100;   // 마을
+// ── Stage 데이터 Key (GameData_Stage의 Key와 일치) ───────────────────────
+// 게임서버 시작 시 항상 생성되는 고정 Stage들의 Key
+constexpr int64 k_systemStageDataKey = 1;     // 캐릭터 선택창
+constexpr int64 k_townStageDataKey   = 100;   // 마을
 
 // ── AOI (Area of Interest) ───────────────────────────────────────
 // 캐릭터의 시야 범위. range=1이면 자기 sector 포함 3x3, range=2면 5x5.

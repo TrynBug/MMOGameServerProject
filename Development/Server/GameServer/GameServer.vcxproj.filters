@@ -72,6 +72,9 @@
     <ClCompile Include="StageNavMesh.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="MonsterFsmAI.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameServer.h">
@@ -126,6 +129,12 @@
       <Filter>소스 파일\Map</Filter>
     </ClInclude>
     <ClInclude Include="StageNavMesh.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="IMonsterAI.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MonsterFsmAI.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

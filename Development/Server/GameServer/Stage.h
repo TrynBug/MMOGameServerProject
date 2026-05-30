@@ -6,6 +6,7 @@
 #include "StageObject.h"
 
 #include "Enum/GameEnum_Stage.h"   // EStageType
+#include "Generated/GameData_Stage.h"
 
 #include <variant>
 
@@ -44,10 +45,10 @@ struct StageGridParams
     double      sectorSize = 0.0;
 };
 
-// stageId로 GameData_Stage를 조회하여 StageGridParams의 stageType / navMeshFileName / sectorSize 를 채운다.
+// stageDataKey로 GameData_Stage를 조회하여 StageGridParams의 stageType / navMeshFileName / sectorSize 를 채운다.
 // worldMin/Max 는 여기서 채우지 않는다 (NavMesh 메타에서 가져와야 하므로 호출자가 채운다).
 // 데이터가 없으면 에러 로그를 남기고 기본값(fallback)을 리턴.
-StageGridParams LoadStageGridParams(int64 stageId);
+StageGridParams LoadStageGridParams(int64 stageDataKey);
 
 // ─────────────────────────────────────────────────────────────
 // Stage 시스템 메시지
@@ -115,7 +116,7 @@ class Stage : public serverbase::Contents
 {
 public:
     // 명시적 grid 값으로 생성.
-    Stage(int64 stageId, EStageType stageType,
+    Stage(int64 stageId, int64 stageDataKey, EStageType stageType,
           double worldMinX, double worldMinZ,
           double worldMaxX, double worldMaxZ,
           double sectorSize);
@@ -129,6 +130,8 @@ public:
 public:
     int64      GetStageId()   const { return m_stageId; }
     EStageType GetStageType() const { return m_stageType; }
+	int64 	   GetStageDataKey() const { return m_pStageData->Key; }
+	const GameData_Stage* pGetStageData() const { return m_pStageData; }
 
     // ── 맵/섹터 정보 조회 (X-Z 평면) ──
     double GetWorldMinX()    const { return m_worldMinX; }
@@ -190,6 +193,10 @@ public:
     // Character::Update 등 이동 처리 이후 호출. sector 변경 없으면 no-op.
     // visibility 갱신은 D-3에서 추가 예정.
     void      UpdateObjectSector(StageObject* pObject);
+
+    // objectId 로 StageObject 를 조회한다 (통합 컨테이너 m_objects 기준). 없으면 nullptr.
+    // 비소유 raw 포인터 — 컨텐츠 스레드에서 해당 tick 내 사용 (몬스터 AI 의 타겟 해소 등).
+    StageObject* FindObject(int64 objectId);
 
     // (centerX, centerZ) sector를 중심으로 range 거리 내의 sector를 순회.
     // range=1이면 3x3, range=2면 5x5. 맵 범위 밖 sector는 자동 스킵.
@@ -258,9 +265,23 @@ private:
     // m_userObjects 순회하면서 Character::Update 호출 + sector 갱신.
     void updateCharacters(int64 deltaMs);
 
+    // m_monsterObjects 순회하면서 Monster::Update(FSM) 호출.
+    // (이동 시 sector 갱신은 Monster 내부에서 한다. 컨텐츠 스레드 전용.)
+    void updateMonsters(int64 deltaMs);
+
     // Character의 현재 이동 상태를 그 주변 sector의 모든 캐릭터(자기 포함)에게 MoveNtf로 알린다.
     // 이동 시작/정지/도착 등 *상태 변화 시점*에서 호출.
     void broadcastMoveNtf(const Character& character);
+
+    // Monster 버전. 몬스터는 클라 요청 없이 FSM 이 서버에서 이동을 구동하므로,
+    // updateMonsters 에서 이동 상태 변화(ConsumeMoveStateDirty)가 감지될 때 호출한다.
+    void broadcastMoveNtf(const Monster& monster);
+
+    // 위 두 broadcastMoveNtf 의 공용 구현. 주어진 이동 상태를 (sectorX, sectorZ) 주변 AOI 의
+    // 모든 유저에게 MoveNtf 로 전송한다. objectId 로 클라가 대상 오브젝트(캐릭터/몬스터)를 식별한다.
+    void sendMoveNtfToAoi(int64 objectId, int32 sectorX, int32 sectorZ,
+                          float posX, float posY, float posZ, float yaw,
+                          float destX, float destY, float destZ, bool isMoving);
 
     // Character가 sector를 바꿔을 때 visibility 갱신.
     // oldAOI − newAOI 안의 캐릭터들에게는 despawn (나, 상대 서로),
@@ -268,6 +289,14 @@ private:
     void updateVisibilityOnSectorChange(Character& character,
                                         int32 oldSectorX, int32 oldSectorZ,
                                         int32 newSectorX, int32 newSectorZ);
+
+    // Monster가 sector를 바꿨을 때 visibility 갱신 (단방향: 유저에게만 통보).
+    // newAOI − oldAOI 안의 유저들에게는 이 몬스터 spawn (이동 중이면 직후 MoveNtf 도),
+    // oldAOI − newAOI 안의 유저들에게는 이 몬스터 despawn 전송.
+    // 몬스터는 관찰자가 아니므로 캐릭터판과 달리 서로 교환하지 않는다.
+    void updateMonsterVisibilityOnSectorChange(Monster& monster,
+                                               int32 oldSectorX, int32 oldSectorZ,
+                                               int32 newSectorX, int32 newSectorZ);
 
     // 섹터 그리드 초기화 (생성자에서 1회 호출)
     void initializeSectorGrid();
@@ -285,6 +314,7 @@ private:
 private:
     int64      m_stageId   = 0;
     EStageType m_stageType = EStageType::None;
+	const GameData_Stage* m_pStageData = nullptr;   // 현재 Stage의 데이터. 반드시 null이 아님.
 
     // GameServer 포인터 (소유권 없음, 주입자가 lifetime 보장).
     // SetGameServer로 주입되며, Stage 파생이 패킷 전송 등을 하기 위해 사용.

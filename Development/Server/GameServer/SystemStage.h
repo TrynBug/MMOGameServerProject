@@ -10,7 +10,7 @@ class SystemStage : public Stage
 {
 public:
     // GameData_Stage 키로 생성. 해당 데이터의 stageType/world bounds/sectorSize를 사용.
-    explicit SystemStage(int64 stageId);
+    explicit SystemStage(int64 stageId, int64 stageDataKey);
     ~SystemStage() override = default;
 
     SystemStage(const SystemStage&) = delete;
@@ -21,7 +21,7 @@ protected:
 
 private:
     // 위임 생성자용 private 생성자. StageGridParams를 1회만 평가하기 위해 사용.
-    SystemStage(int64 stageId, const StageGridParams& params);
+    SystemStage(int64 stageId, int64 stageDataKey, const StageGridParams& params);
 };
 
 using SystemStagePtr = std::shared_ptr<SystemStage>;

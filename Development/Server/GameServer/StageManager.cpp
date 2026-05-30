@@ -3,6 +3,7 @@
 #include "GameServer.h"   // AssignContents/RemoveContents/GetContentsThreadCount 호출
 #include "Stage.h"        // LoadStageGridParams
 #include "Map/NavMeshManager.h"  // NavMeshMeta
+#include "Generated/GameData_Stage.h"
 
 void StageManager::Initialize(GameServer* pGameServer, int32 contentsThreadCount)
 {
@@ -35,11 +36,18 @@ void StageManager::Clear()
     m_spTown.reset();
 }
 
-SystemStagePtr StageManager::CreateSystemStage(int64 stageId)
+SystemStagePtr StageManager::CreateSystemStage(int64 stageId, int64 stageDataKey)
 {
     if (!m_pGameServer)
     {
         LOG_WRITE(LogLevel::Error, std::format("StageManager::CreateSystemStage - not initialized. stageId={}", stageId));
+        return nullptr;
+    }
+
+	const GameData_Stage* pStageData = GameDataTable_Stage::FindData(stageDataKey); 
+    if (!pStageData)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("StageManager::CreateSystemStage - GameData_Stage not found. stageId={}, stageDataKey={}", stageId, stageDataKey));
         return nullptr;
     }
 
@@ -50,7 +58,7 @@ SystemStagePtr StageManager::CreateSystemStage(int64 stageId)
         return nullptr;
     }
 
-    SystemStagePtr spStage = std::make_shared<SystemStage>(stageId);
+    SystemStagePtr spStage = std::make_shared<SystemStage>(stageId, stageDataKey);
     spStage->SetGameServer(m_pGameServer);
 
     const int32 threadIdx = computeStageThreadIndex(stageId);
@@ -65,11 +73,18 @@ SystemStagePtr StageManager::CreateSystemStage(int64 stageId)
     return spStage;
 }
 
-TownPtr StageManager::CreateTown(int64 stageId)
+TownPtr StageManager::CreateTown(int64 stageId, int64 stageDataKey)
 {
     if (!m_pGameServer)
     {
         LOG_WRITE(LogLevel::Error, std::format("StageManager::CreateTown - not initialized. stageId={}", stageId));
+        return nullptr;
+    }
+
+    const GameData_Stage* pStageData = GameDataTable_Stage::FindData(stageDataKey);
+    if (!pStageData)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("StageManager::CreateTown - GameData_Stage not found. stageId={}, stageDataKey={}", stageId, stageDataKey));
         return nullptr;
     }
 
@@ -81,7 +96,7 @@ TownPtr StageManager::CreateTown(int64 stageId)
     }
 
     // 1) GameData_Stage 에서 stageType/navMeshFileName/sectorSize 읽는다. worldMin/Max 는 fallback.
-    StageGridParams params = LoadStageGridParams(stageId);
+    StageGridParams params = LoadStageGridParams(stageDataKey);
 
     // 2) NavMesh 메타가 있으면 worldMin/Max 를 해당 메타의 bounds 로 덮어쓴다.
     //    메타가 없으면(파일 누락 등) fallback 그대로 사용.
@@ -112,7 +127,7 @@ TownPtr StageManager::CreateTown(int64 stageId)
     }
 
     // 3) Town 생성. 명시적 params 를 전달하는 생성자 사용.
-    TownPtr spStage = std::make_shared<Town>(stageId, params);
+    TownPtr spStage = std::make_shared<Town>(stageId, stageDataKey, params);
     spStage->SetGameServer(m_pGameServer);
 
     // 4) NavMesh 객체 부착. nullptr 이면 길찾기 비활성화.

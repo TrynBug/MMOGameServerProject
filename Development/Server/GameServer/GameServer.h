@@ -27,7 +27,7 @@ public:
     // ── Stage 파생 클래스가 호출하는 public 서비스 ────────────────
     // Stage 입장 완료 알림 전송 (StageEnterNtf).
     // 서버가 결정한 spawn 위치/회전만 포함. 다른 주변 오브젝트 정보는 ObjectVisibilityNtf로 별도 전송.
-    void SendStageEnterNtf(int64 userId, int64 stageId, float myPosX, float myPosY, float myPosZ, float myYaw);
+    void SendStageEnterNtf(int64 userId, int64 stageId, int64 stageDataKey, float myPosX, float myPosY, float myPosZ, float myYaw);
 
     // 오브젝트 가시성 알림 전송 (ObjectVisibilityNtf).
     // userId에게 spawns/despawnIds 전송.

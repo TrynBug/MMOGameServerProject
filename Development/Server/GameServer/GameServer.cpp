@@ -80,15 +80,17 @@ bool GameServer::OnInitialize()
 
     m_stageManager.Initialize(this, GetContentsThreadCount());
 
-    if (!m_stageManager.CreateSystemStage(k_systemStageId))
+    const int64 systemStageId = GenerateObjectId();
+    if (!m_stageManager.CreateSystemStage(systemStageId, k_systemStageDataKey))
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to create SystemStage. stageId={}", k_systemStageId));
+        LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to create SystemStage. stageId={}, stageKey={}", systemStageId, k_systemStageDataKey));
         return false;
     }
 
-    if (!m_stageManager.CreateTown(k_townStageId))
+    const int64 townStageId = GenerateObjectId();
+    if (!m_stageManager.CreateTown(townStageId, k_townStageDataKey))
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to create Town. stageId={}", k_townStageId));
+        LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to create Town. stageId={}, stageKey={}", townStageId, k_townStageDataKey));
         return false;
     }
 
@@ -373,7 +375,17 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
 void GameServer::sendGameEnterNtf(int64 userId)
 {
     GamePacket::GameEnterNtf ntf;
-    ntf.set_stage_id(k_systemStageId);
+    ntf.set_stage_key(k_systemStageDataKey);
+
+    SystemStagePtr spSystemStage = m_stageManager.GetSystemStage();
+    if (spSystemStage)
+    {
+        ntf.set_stage_id(spSystemStage->GetStageId());
+    }
+    else
+    {
+        ntf.set_stage_id(0);
+    }
 
     sendPacketToUser(userId, Common::GAME_PACKET_ID_GAME_ENTER_NTF, ntf);
 }
@@ -416,7 +428,7 @@ db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 userId, GamePac
     character.set_job_id(req.job_id());
     character.set_level(1);
     character.set_exp(0);
-    character.set_last_stage_id(k_townStageId);
+    character.set_last_stage_id(0); // TBD
     character.set_pos_x(0.0f);
     character.set_pos_y(0.0f);
     character.set_pos_z(0.0f);
@@ -463,7 +475,7 @@ void GameServer::sendCharacterCreateRes(int64 userId, EResultCode resultCode, co
     sendPacketToUser(userId, Common::GAME_PACKET_ID_CHARACTER_CREATE_RES, res);
 }
 
-void GameServer::SendStageEnterNtf(int64 userId, int64 stageId, float myPosX, float myPosY, float myPosZ, float myYaw)
+void GameServer::SendStageEnterNtf(int64 userId, int64 stageId, int64 stageDataKey, float myPosX, float myPosY, float myPosZ, float myYaw)
 {
     // StageEnterNtf 먼저 스탯/HP를 보낸다.
     // 클라는 StageEnterNtf 를 받을 때면 이미 Game 씬 + LocalPlayer 스폰이 끝난 상태라
@@ -481,6 +493,7 @@ void GameServer::SendStageEnterNtf(int64 userId, int64 stageId, float myPosX, fl
 
     GamePacket::StageEnterNtf ntf;
     ntf.set_stage_id(stageId);
+    ntf.set_stage_data_key(stageDataKey);
     ntf.set_my_pos_x(myPosX);
     ntf.set_my_pos_y(myPosY);
     ntf.set_my_pos_z(myPosZ);
@@ -488,8 +501,8 @@ void GameServer::SendStageEnterNtf(int64 userId, int64 stageId, float myPosX, fl
 
     sendPacketToUser(userId, Common::GAME_PACKET_ID_STAGE_ENTER_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: StageEnterNtf sent. userId={} stageId={} pos=({},{},{}) yaw={}",
-        userId, stageId, myPosX, myPosY, myPosZ, myYaw));
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: StageEnterNtf sent. userId={} stageId={} stageKey={} pos=({},{},{}) yaw={}",
+        userId, stageId, stageDataKey, myPosX, myPosY, myPosZ, myYaw));
 }
 
 void GameServer::SendStatUpdateNtf(int64 userId, const Character& character)

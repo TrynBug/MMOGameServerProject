@@ -11,10 +11,10 @@ class Town : public Stage
 public:
     // GameData_Stage 키로 생성. 해당 데이터의 stageType/sectorSize 는 사용하고,
     // worldMin/Max 는 LoadStageGridParams 의 fallback 값이 사용된다 (NavMesh 메타가 없을 때용).
-    explicit Town(int64 stageId);
+    explicit Town(int64 stageId, int64 stageDataKey);
 
     // 명시적 params 로 생성. StageManager 에서 NavMesh 메타로 worldMin/Max 를 덮어쓴 params 를 보낸다.
-    Town(int64 stageId, const StageGridParams& params);
+    Town(int64 stageId, int64 stageDataKey, const StageGridParams& params);
 
     ~Town() override = default;
 
