@@ -28,6 +28,9 @@ namespace Client.Game
         // user_id -> PlayerCharacter
         private readonly Dictionary<long, PlayerCharacter> m_characters = new Dictionary<long, PlayerCharacter>();
 
+        // object_id -> MonsterObject (몬스터 전용 레지스트리. 디스폰은 despawnObject 로 공용 처리)
+        private readonly Dictionary<long, MonsterObject> m_monsters = new Dictionary<long, MonsterObject>();
+
         // 내 캐릭터 (편의 접근)
         public PlayerCharacter LocalPlayer { get; private set; }
         public long CurrentStageId { get; private set; }
@@ -123,14 +126,22 @@ namespace Client.Game
                 Debug.Log($"[StageManager] ObjectVisibilityNtf: CharacterSpawn characterId={characterSpawnInfo.ObjectId}");
             }
 
-            // 오브젝트 디스폰 정보 처리
+            // 몬스터 스폰정보 처리
+            foreach (MonsterSpawnInfo monsterSpawnInfo in ntf.MonsterSpawns)
+            {
+                spawnMonster(
+                    objectId: monsterSpawnInfo.ObjectId,
+                    monsterKey: monsterSpawnInfo.MonsterKey,
+                    pos: new Vector3(monsterSpawnInfo.PosX, monsterSpawnInfo.PosY, monsterSpawnInfo.PosZ),
+                    dirY: monsterSpawnInfo.Yaw);
+
+                Debug.Log($"[StageManager] ObjectVisibilityNtf: MonsterSpawn objectId={monsterSpawnInfo.ObjectId} key={monsterSpawnInfo.MonsterKey}");
+            }
+
+            // 오브젝트 디스폰 정보 처리 (캐릭터/몬스터 공용)
             foreach (long despawnObjectId in ntf.DespawnIds)
             {
-                if (m_characters.TryGetValue(despawnObjectId, out PlayerCharacter character) && character != null)
-                {
-                    m_characters.Remove(despawnObjectId);
-                    Destroy(character.gameObject);
-                }
+                despawnObject(despawnObjectId);
 
                 Debug.Log($"[StageManager] ObjectVisibilityNtf: Despawn objectId={despawnObjectId}");
             }
@@ -232,6 +243,42 @@ namespace Client.Game
             PlayerCharacter pc = CharacterFactory.Create(userId, name, isLocalPlayer: false, pos, dirY);
             m_characters.Add(userId, pc);
             return pc;
+        }
+
+        // 몬스터 스폰. 게임데이터 Key 로 MonsterFactory 가 prefab 을 찾아 생성한다.
+        // 이미 같은 objectId 가 있으면 위치만 갱신 (idempotent).
+        private MonsterObject spawnMonster(long objectId, long monsterKey, Vector3 pos, float dirY)
+        {
+            if (m_monsters.TryGetValue(objectId, out MonsterObject existing) && existing != null)
+            {
+                existing.transform.position = pos;
+                existing.transform.rotation = Quaternion.Euler(0f, dirY, 0f);
+                return existing;
+            }
+
+            MonsterObject mo = MonsterFactory.Create(objectId, monsterKey, pos, dirY);
+            if (mo != null)
+                m_monsters.Add(objectId, mo);
+            return mo;
+        }
+
+        // 오브젝트 공용 디스폰. objectId 로 캐릭터/몬스터 어느 쪽이든 찾아 제거한다.
+        // 양쪽 어디에도 없으면 (이미 제거됨/모르는 객체) 조용히 무시 (idempotent).
+        private void despawnObject(long objectId)
+        {
+            if (m_characters.TryGetValue(objectId, out PlayerCharacter character) && character != null)
+            {
+                m_characters.Remove(objectId);
+                Destroy(character.gameObject);
+                return;
+            }
+
+            if (m_monsters.TryGetValue(objectId, out MonsterObject monster) && monster != null)
+            {
+                m_monsters.Remove(objectId);
+                Destroy(monster.gameObject);
+                return;
+            }
         }
 
         // stageId 로 게임데이터를 조회해서 NavMesh 파일을 로드.
