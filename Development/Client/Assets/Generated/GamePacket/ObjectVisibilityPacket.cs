@@ -30,15 +30,20 @@ namespace GamePacket {
             "X2lkGAIgASgDEgwKBG5hbWUYAyABKAkSDgoGam9iX2lkGAQgASgFEg0KBWxl",
             "dmVsGAUgASgFEgoKAmhwGAYgASgFEg4KBm1heF9ocBgHIAEoBRIKCgJtcBgI",
             "IAEoBRIOCgZtYXhfbXAYCSABKAUSDQoFcG9zX3gYCiABKAISDQoFcG9zX3kY",
-            "CyABKAISCwoDeWF3GAwgASgCEg0KBXBvc196GA0gASgCImQKE09iamVjdFZp",
-            "c2liaWxpdHlOdGYSOAoQY2hhcmFjdGVyX3NwYXducxgBIAMoCzIeLkdhbWVQ",
-            "YWNrZXQuQ2hhcmFjdGVyU3Bhd25JbmZvEhMKC2Rlc3Bhd25faWRzGAogAygD",
-            "YgZwcm90bzM="));
+            "CyABKAISCwoDeWF3GAwgASgCEg0KBXBvc196GA0gASgCInQKEE1vbnN0ZXJT",
+            "cGF3bkluZm8SEQoJb2JqZWN0X2lkGAEgASgDEhMKC21vbnN0ZXJfa2V5GAIg",
+            "ASgDEg0KBXBvc194GAMgASgCEg0KBXBvc195GAQgASgCEgsKA3lhdxgFIAEo",
+            "AhINCgVwb3NfehgGIAEoAiKaAQoTT2JqZWN0VmlzaWJpbGl0eU50ZhI4ChBj",
+            "aGFyYWN0ZXJfc3Bhd25zGAEgAygLMh4uR2FtZVBhY2tldC5DaGFyYWN0ZXJT",
+            "cGF3bkluZm8SNAoObW9uc3Rlcl9zcGF3bnMYAiADKAsyHC5HYW1lUGFja2V0",
+            "Lk1vbnN0ZXJTcGF3bkluZm8SEwoLZGVzcGF3bl9pZHMYCiADKANiBnByb3Rv",
+            "Mw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSpawnInfo), global::GamePacket.CharacterSpawnInfo.Parser, new[]{ "ObjectId", "OwnerUserId", "Name", "JobId", "Level", "Hp", "MaxHp", "Mp", "MaxMp", "PosX", "PosY", "Yaw", "PosZ" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ObjectVisibilityNtf), global::GamePacket.ObjectVisibilityNtf.Parser, new[]{ "CharacterSpawns", "DespawnIds" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.MonsterSpawnInfo), global::GamePacket.MonsterSpawnInfo.Parser, new[]{ "ObjectId", "MonsterKey", "PosX", "PosY", "Yaw", "PosZ" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ObjectVisibilityNtf), global::GamePacket.ObjectVisibilityNtf.Parser, new[]{ "CharacterSpawns", "MonsterSpawns", "DespawnIds" }, null, null, null, null)
           }));
     }
     #endregion
@@ -704,6 +709,406 @@ namespace GamePacket {
   }
 
   /// <summary>
+  /// 몬스터 spawn 정보. 클라이언트는 monster_key 로 몬스터 게임데이터를 조회해
+  /// 프리팹 경로 등 나머지 정보를 얻는다.
+  /// 좌표계: Unity 와 동일. Y가 높이, X-Z 가 평면.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class MonsterSpawnInfo : pb::IMessage<MonsterSpawnInfo>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MonsterSpawnInfo> _parser = new pb::MessageParser<MonsterSpawnInfo>(() => new MonsterSpawnInfo());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<MonsterSpawnInfo> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::GamePacket.ObjectVisibilityPacketReflection.Descriptor.MessageTypes[1]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MonsterSpawnInfo() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MonsterSpawnInfo(MonsterSpawnInfo other) : this() {
+      objectId_ = other.objectId_;
+      monsterKey_ = other.monsterKey_;
+      posX_ = other.posX_;
+      posY_ = other.posY_;
+      yaw_ = other.yaw_;
+      posZ_ = other.posZ_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MonsterSpawnInfo Clone() {
+      return new MonsterSpawnInfo(this);
+    }
+
+    /// <summary>Field number for the "object_id" field.</summary>
+    public const int ObjectIdFieldNumber = 1;
+    private long objectId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long ObjectId {
+      get { return objectId_; }
+      set {
+        objectId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "monster_key" field.</summary>
+    public const int MonsterKeyFieldNumber = 2;
+    private long monsterKey_;
+    /// <summary>
+    /// GameData_Monster 의 Key
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MonsterKey {
+      get { return monsterKey_; }
+      set {
+        monsterKey_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pos_x" field.</summary>
+    public const int PosXFieldNumber = 3;
+    private float posX_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float PosX {
+      get { return posX_; }
+      set {
+        posX_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pos_y" field.</summary>
+    public const int PosYFieldNumber = 4;
+    private float posY_;
+    /// <summary>
+    /// 높이
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float PosY {
+      get { return posY_; }
+      set {
+        posY_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "yaw" field.</summary>
+    public const int YawFieldNumber = 5;
+    private float yaw_;
+    /// <summary>
+    /// Y축 회전, degree 단위
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float Yaw {
+      get { return yaw_; }
+      set {
+        yaw_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pos_z" field.</summary>
+    public const int PosZFieldNumber = 6;
+    private float posZ_;
+    /// <summary>
+    /// 평면 깊이축
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float PosZ {
+      get { return posZ_; }
+      set {
+        posZ_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as MonsterSpawnInfo);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(MonsterSpawnInfo other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (ObjectId != other.ObjectId) return false;
+      if (MonsterKey != other.MonsterKey) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosX, other.PosX)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Yaw, other.Yaw)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (ObjectId != 0L) hash ^= ObjectId.GetHashCode();
+      if (MonsterKey != 0L) hash ^= MonsterKey.GetHashCode();
+      if (PosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosX);
+      if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
+      if (Yaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Yaw);
+      if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (ObjectId != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(ObjectId);
+      }
+      if (MonsterKey != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MonsterKey);
+      }
+      if (PosX != 0F) {
+        output.WriteRawTag(29);
+        output.WriteFloat(PosX);
+      }
+      if (PosY != 0F) {
+        output.WriteRawTag(37);
+        output.WriteFloat(PosY);
+      }
+      if (Yaw != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(Yaw);
+      }
+      if (PosZ != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(PosZ);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (ObjectId != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(ObjectId);
+      }
+      if (MonsterKey != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MonsterKey);
+      }
+      if (PosX != 0F) {
+        output.WriteRawTag(29);
+        output.WriteFloat(PosX);
+      }
+      if (PosY != 0F) {
+        output.WriteRawTag(37);
+        output.WriteFloat(PosY);
+      }
+      if (Yaw != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(Yaw);
+      }
+      if (PosZ != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(PosZ);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (ObjectId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ObjectId);
+      }
+      if (MonsterKey != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MonsterKey);
+      }
+      if (PosX != 0F) {
+        size += 1 + 4;
+      }
+      if (PosY != 0F) {
+        size += 1 + 4;
+      }
+      if (Yaw != 0F) {
+        size += 1 + 4;
+      }
+      if (PosZ != 0F) {
+        size += 1 + 4;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(MonsterSpawnInfo other) {
+      if (other == null) {
+        return;
+      }
+      if (other.ObjectId != 0L) {
+        ObjectId = other.ObjectId;
+      }
+      if (other.MonsterKey != 0L) {
+        MonsterKey = other.MonsterKey;
+      }
+      if (other.PosX != 0F) {
+        PosX = other.PosX;
+      }
+      if (other.PosY != 0F) {
+        PosY = other.PosY;
+      }
+      if (other.Yaw != 0F) {
+        Yaw = other.Yaw;
+      }
+      if (other.PosZ != 0F) {
+        PosZ = other.PosZ;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            ObjectId = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            MonsterKey = input.ReadInt64();
+            break;
+          }
+          case 29: {
+            PosX = input.ReadFloat();
+            break;
+          }
+          case 37: {
+            PosY = input.ReadFloat();
+            break;
+          }
+          case 45: {
+            Yaw = input.ReadFloat();
+            break;
+          }
+          case 53: {
+            PosZ = input.ReadFloat();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            ObjectId = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            MonsterKey = input.ReadInt64();
+            break;
+          }
+          case 29: {
+            PosX = input.ReadFloat();
+            break;
+          }
+          case 37: {
+            PosY = input.ReadFloat();
+            break;
+          }
+          case 45: {
+            Yaw = input.ReadFloat();
+            break;
+          }
+          case 53: {
+            PosZ = input.ReadFloat();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
   /// 오브젝트 가시성 변경 알림 (서버 -> 클라)
   /// spawns: 보이게 된 오브젝트들 (타입별 리스트로 분리)
   /// despawn_ids: 안 보이게 된 오브젝트 ID 목록 (타입 무관, ID만)
@@ -723,7 +1128,7 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GamePacket.ObjectVisibilityPacketReflection.Descriptor.MessageTypes[1]; }
+      get { return global::GamePacket.ObjectVisibilityPacketReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -744,6 +1149,7 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public ObjectVisibilityNtf(ObjectVisibilityNtf other) : this() {
       characterSpawns_ = other.characterSpawns_.Clone();
+      monsterSpawns_ = other.monsterSpawns_.Clone();
       despawnIds_ = other.despawnIds_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -759,16 +1165,26 @@ namespace GamePacket {
     private static readonly pb::FieldCodec<global::GamePacket.CharacterSpawnInfo> _repeated_characterSpawns_codec
         = pb::FieldCodec.ForMessage(10, global::GamePacket.CharacterSpawnInfo.Parser);
     private readonly pbc::RepeatedField<global::GamePacket.CharacterSpawnInfo> characterSpawns_ = new pbc::RepeatedField<global::GamePacket.CharacterSpawnInfo>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::GamePacket.CharacterSpawnInfo> CharacterSpawns {
+      get { return characterSpawns_; }
+    }
+
+    /// <summary>Field number for the "monster_spawns" field.</summary>
+    public const int MonsterSpawnsFieldNumber = 2;
+    private static readonly pb::FieldCodec<global::GamePacket.MonsterSpawnInfo> _repeated_monsterSpawns_codec
+        = pb::FieldCodec.ForMessage(18, global::GamePacket.MonsterSpawnInfo.Parser);
+    private readonly pbc::RepeatedField<global::GamePacket.MonsterSpawnInfo> monsterSpawns_ = new pbc::RepeatedField<global::GamePacket.MonsterSpawnInfo>();
     /// <summary>
     /// 향후 추가 예정:
-    /// repeated MonsterSpawnInfo  monster_spawns  = 2;
     /// repeated PropSpawnInfo     prop_spawns     = 3;
     /// repeated DropSpawnInfo     drop_spawns     = 4;
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pbc::RepeatedField<global::GamePacket.CharacterSpawnInfo> CharacterSpawns {
-      get { return characterSpawns_; }
+    public pbc::RepeatedField<global::GamePacket.MonsterSpawnInfo> MonsterSpawns {
+      get { return monsterSpawns_; }
     }
 
     /// <summary>Field number for the "despawn_ids" field.</summary>
@@ -798,6 +1214,7 @@ namespace GamePacket {
         return true;
       }
       if(!characterSpawns_.Equals(other.characterSpawns_)) return false;
+      if(!monsterSpawns_.Equals(other.monsterSpawns_)) return false;
       if(!despawnIds_.Equals(other.despawnIds_)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -807,6 +1224,7 @@ namespace GamePacket {
     public override int GetHashCode() {
       int hash = 1;
       hash ^= characterSpawns_.GetHashCode();
+      hash ^= monsterSpawns_.GetHashCode();
       hash ^= despawnIds_.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -827,6 +1245,7 @@ namespace GamePacket {
       output.WriteRawMessage(this);
     #else
       characterSpawns_.WriteTo(output, _repeated_characterSpawns_codec);
+      monsterSpawns_.WriteTo(output, _repeated_monsterSpawns_codec);
       despawnIds_.WriteTo(output, _repeated_despawnIds_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -839,6 +1258,7 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
       characterSpawns_.WriteTo(ref output, _repeated_characterSpawns_codec);
+      monsterSpawns_.WriteTo(ref output, _repeated_monsterSpawns_codec);
       despawnIds_.WriteTo(ref output, _repeated_despawnIds_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -851,6 +1271,7 @@ namespace GamePacket {
     public int CalculateSize() {
       int size = 0;
       size += characterSpawns_.CalculateSize(_repeated_characterSpawns_codec);
+      size += monsterSpawns_.CalculateSize(_repeated_monsterSpawns_codec);
       size += despawnIds_.CalculateSize(_repeated_despawnIds_codec);
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -865,6 +1286,7 @@ namespace GamePacket {
         return;
       }
       characterSpawns_.Add(other.characterSpawns_);
+      monsterSpawns_.Add(other.monsterSpawns_);
       despawnIds_.Add(other.despawnIds_);
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -887,6 +1309,10 @@ namespace GamePacket {
             break;
           case 10: {
             characterSpawns_.AddEntriesFrom(input, _repeated_characterSpawns_codec);
+            break;
+          }
+          case 18: {
+            monsterSpawns_.AddEntriesFrom(input, _repeated_monsterSpawns_codec);
             break;
           }
           case 82:
@@ -915,6 +1341,10 @@ namespace GamePacket {
             break;
           case 10: {
             characterSpawns_.AddEntriesFrom(ref input, _repeated_characterSpawns_codec);
+            break;
+          }
+          case 18: {
+            monsterSpawns_.AddEntriesFrom(ref input, _repeated_monsterSpawns_codec);
             break;
           }
           case 82:
