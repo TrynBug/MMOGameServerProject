@@ -24,6 +24,10 @@ public:
 protected:
     void OnStageUpdate(int64 deltaMs) override;
 
+    // 마을 시작 시 1회 호출. [임시] 테스트용 몬스터를 하드코딩으로 스폰한다.
+    // (추후 스폰 데이터 테이블/스포너 시스템으로 대체 예정.)
+    void OnStart() override;
+
     // 유저 입장 처리 override.
     // Stage::OnUserEnter 호출하여 User/Character를 등록한 후, StageEnterNtf를 클라에게 전송.
     void OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter) override;

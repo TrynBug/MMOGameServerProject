@@ -26,6 +26,9 @@ class GameServer;
 class Character;
 using CharacterPtr = std::shared_ptr<Character>;
 
+// Monster forward declaration (SpawnMonster 리턴 타입). 완전타입은 Stage.cpp 에서 include.
+class Monster;
+
 
 // StageGridParams: Stage 공간 정보 + NavMesh 매핑.
 // Stage 파생 클래스가 생성자에서 LoadStageGridParams 로 일부 필드를 채우고,
@@ -164,6 +167,16 @@ public:
                   float endX,   float endY,   float endZ,
                   std::vector<float>& outWaypoints) const;
 
+    // NavMesh 가 설정/준비되어 길찾기·스냅이 가능한 상태인지.
+    bool HasNavMesh() const;
+
+    // 점을 NavMesh 표면으로 스냅한다 (Y 보정 + walkable 검증). StageNavMesh 에 위임.
+    // 검색 박스(halfExtent, 각 축 반경) 안에서 가장 가까운 NavMesh 폴리곤 위의 점을 out* 에 채운다.
+    // NavMesh 미설정/미준비거나 박스 안에 폴리곤이 없으면 false (out* 미변경).
+    bool SampleNavMeshPosition(float x, float y, float z,
+                               float halfExtentX, float halfExtentY, float halfExtentZ,
+                               float& outX, float& outY, float& outZ) const;
+
     // GameServer 주입. 생성 직후 소유자가 설정한다.
     // Stage 파생 클래스가 패킷 전송 등을 위해 사용.
     void          SetGameServer(GameServer* pGameServer) { m_pGameServer = pGameServer; }
@@ -208,6 +221,19 @@ protected:
     // Stage 파생 클래스의 매 tick 로직.
     // OnUpdate 안에서 시스템 메시지 처리 이후에 호출된다.
     virtual void OnStageUpdate(int64 deltaMs) {}
+
+    // ── 몬스터 스폰/디스폰 ─────────────────────────────────────
+    // SpawnMonster: monsterKey 의 GameData_Monster 로 Monster 를 생성하여 Stage 객체 컨테이너
+    // (m_objects, m_monsterObjects) 와 해당 좌표의 sector 에 등록한다.
+    // 그리고 주변 AOI 의 유저들에게 ObjectVisibilityNtf(monster_spawns)로 spawn 을 통보한다.
+    // ObjectId 는 ObjectIdGenerator(GameServer 경유)로 발급한다.
+    // 성공 시 생성된 Monster*, 실패 시 nullptr (소유권은 Stage 가 가짐).
+    Monster* SpawnMonster(int64 monsterKey, float posX, float posY, float posZ, float yaw);
+
+    // DespawnMonster: objectId 의 몬스터를 컨테이너/sector 에서 제거하고,
+    // 주변 AOI 의 유저들에게 ObjectVisibilityNtf(despawn_ids)로 despawn 을 통보한다.
+    // 성공 시 true, 해당 몬스터가 없으면 false.
+    bool DespawnMonster(int64 objectId);
 
     // ── 시스템 메시지 처리 hooks (파생 클래스가 override 가능) ──
     // 기본 동작: 유저 추가/제거 및 로그 출력.

@@ -130,3 +130,26 @@ bool StageNavMesh::FindPath(float startX, float startY, float startZ,
     }
     return true;
 }
+
+bool StageNavMesh::SamplePosition(float x, float y, float z,
+                                  float halfExtentX, float halfExtentY, float halfExtentZ,
+                                  float& outX, float& outY, float& outZ) const
+{
+    if (!IsReady())
+        return false;
+
+    const float center[3]      = { x, y, z };
+    const float halfExtents[3] = { halfExtentX, halfExtentY, halfExtentZ };
+
+    dtPolyRef nearestRef   = 0;
+    float     nearestPt[3] = { 0, 0, 0 };
+
+    const dtStatus status = m_pNavQuery->findNearestPoly(center, halfExtents, m_pNavFilter, &nearestRef, nearestPt);
+    if (dtStatusFailed(status) || nearestRef == 0)
+        return false;
+
+    outX = nearestPt[0];
+    outY = nearestPt[1];
+    outZ = nearestPt[2];
+    return true;
+}

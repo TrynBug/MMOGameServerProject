@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Stage.h"
 #include "Character.h"   // OnUserEnter에서 Character를 m_objects에 등록하기 위해 완전타입 필요
+#include "Monster.h"     // SpawnMonster 에서 Monster 생성 + GameDataTable_Monster 조회를 위해 완전타입 필요
 #include "GameServer.h"   // OnUserEnter/OnUserLeave에서 visibility 패킷 전송 위해 필요
 #include "StageNavMesh.h"  // SetNavMesh 구현에서 StageNavMesh 완전타입 필요
 
@@ -28,6 +29,26 @@ namespace
         info.set_yaw(character.GetYaw());
         return info;
     }
+
+    // Monster 정보를 MonsterSpawnInfo (패킷) 형식으로 채웁니다.
+    // 클라는 monster_key 로 게임데이터를 조회해 프리팹 경로 등 나머지 정보를 얻는다.
+    // 좌표계: Unity 와 동일 (X, Y, Z). Y가 높이, X-Z 가 평면.
+    GamePacket::MonsterSpawnInfo makeMonsterSpawnInfo(const Monster& monster)
+    {
+        GamePacket::MonsterSpawnInfo info;
+        info.set_object_id(monster.GetObjectId());
+        info.set_monster_key(monster.GetMonsterData()->Key);
+        info.set_pos_x(monster.GetPosX());
+        info.set_pos_y(monster.GetPosY());
+        info.set_pos_z(monster.GetPosZ());
+        info.set_yaw(monster.GetYaw());
+        return info;
+    }
+
+    // 몬스터 스폰 시 NavMesh 표면 검색 반경(각 축 half-extent).
+    // 입력 Y 를 신뢰할 수 없어(예: 데이터에 Y 미입력) Y 검색은 넉넉히 잡아 바닥으로 스냅한다.
+    constexpr float k_spawnSampleHalfExtentXZ = 5.0f;
+    constexpr float k_spawnSampleHalfExtentY  = 1000.0f;
 
     constexpr int64 k_heartbeatIntervalMs = 5000;   // 5초마다 1번 heartbeat 로그
 
@@ -113,6 +134,20 @@ bool Stage::FindPath(float startX, float startY, float startZ,
         return false;
     }
     return m_pStageNavMesh->FindPath(startX, startY, startZ, endX, endY, endZ, outWaypoints);
+}
+
+bool Stage::HasNavMesh() const
+{
+    return m_pStageNavMesh && m_pStageNavMesh->IsReady();
+}
+
+bool Stage::SampleNavMeshPosition(float x, float y, float z,
+                                  float halfExtentX, float halfExtentY, float halfExtentZ,
+                                  float& outX, float& outY, float& outZ) const
+{
+    if (!m_pStageNavMesh)
+        return false;
+    return m_pStageNavMesh->SamplePosition(x, y, z, halfExtentX, halfExtentY, halfExtentZ, outX, outY, outZ);
 }
 
 void Stage::initializeSectorGrid()
@@ -255,6 +290,145 @@ void Stage::EnqueueMessage(StageMessage msg)
 {
     std::lock_guard<std::mutex> lock(m_pendingMessagesMutex);
     m_pendingMessages.push_back(std::move(msg));
+}
+
+Monster* Stage::SpawnMonster(int64 monsterKey, float posX, float posY, float posZ, float yaw)
+{
+    const GameData_Monster* pMonsterData = GameDataTable_Monster::FindData(monsterKey);
+    if (!pMonsterData)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("Stage::SpawnMonster - GameData_Monster not found. stageId={} monsterKey={}",
+            m_stageId, monsterKey));
+        return nullptr;
+    }
+
+    GameServer* pServer = GetGameServer();
+    if (!pServer)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("Stage::SpawnMonster - GameServer not injected. stageId={} monsterKey={}",
+            m_stageId, monsterKey));
+        return nullptr;
+    }
+
+    // ── 스폰 위치 검증 + NavMesh Y 스냅 ──────────────────────
+    // NavMesh 가 있으면 표면으로 스냅(Y 보정 + walkable 검증). 검색 박스 안에 walkable 폴리곤이
+    // 없으면(=걸을 수 없는 위치) 스폰을 거부한다. 입력 Y 를 신뢰할 수 없어 Y 검색 반경은 넉넉히.
+    // NavMesh 가 없는 Stage(예: SystemStage)는 스냅 없이 월드 경계만 검증한다.
+    float spawnX = posX;
+    float spawnY = posY;
+    float spawnZ = posZ;
+
+    if (HasNavMesh())
+    {
+        float snappedX = 0.0f;
+        float snappedY = 0.0f;
+        float snappedZ = 0.0f;
+        if (!SampleNavMeshPosition(posX, posY, posZ,
+                k_spawnSampleHalfExtentXZ, k_spawnSampleHalfExtentY, k_spawnSampleHalfExtentXZ,
+                snappedX, snappedY, snappedZ))
+        {
+            LOG_WRITE(LogLevel::Error, std::format("Stage::SpawnMonster - spawn pos not on NavMesh, rejected. stageId={} monsterKey={} pos=({},{},{})",
+                m_stageId, monsterKey, posX, posY, posZ));
+            return nullptr;
+        }
+        spawnX = snappedX;
+        spawnY = snappedY;
+        spawnZ = snappedZ;
+    }
+
+    // 월드 경계 밖이면 sector 에 등록되지 못해 유령 객체가 되므로 스폰을 거부한다.
+    int32 spawnSectorX = 0;
+    int32 spawnSectorZ = 0;
+    if (!GetSectorIndex(spawnX, spawnZ, spawnSectorX, spawnSectorZ))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("Stage::SpawnMonster - spawn pos out of world bounds, rejected. stageId={} monsterKey={} pos=({},{},{})",
+            m_stageId, monsterKey, spawnX, spawnY, spawnZ));
+        return nullptr;
+    }
+
+    // ObjectId 발급 후 Monster 생성. Monster 생성자가 종류데이터 기본스탯 적용 + 현재HP/MP 풀피까지 처리한다.
+    const int64 objectId = pServer->GenerateObjectId();
+    MonsterPtr spMonster = std::make_shared<Monster>(objectId, pMonsterData);
+    spMonster->SetPos(spawnX, spawnY, spawnZ);
+    spMonster->SetYaw(yaw);
+    spMonster->SetStage(this);
+
+    // Stage 객체 컨테이너 등록 (통합 + 타입별).
+    m_objects[objectId] = spMonster;
+    m_monsterObjects[objectId] = spMonster;
+
+    // 좌표 기준 sector 등록. 맵 범위 밖이면 (-1,-1) 로 남고 addObjectToSector 가 경고 로그를 남긴다.
+    addObjectToSector(spMonster.get());
+
+    LOG_WRITE(LogLevel::Info, std::format("Stage::SpawnMonster - stageId={} monsterKey={} objectId={} pos=({},{},{}) yaw={} sector=({},{}) totalObjects={}",
+        m_stageId, monsterKey, objectId, spawnX, spawnY, spawnZ, yaw,
+        spMonster->GetCurSectorX(), spMonster->GetCurSectorZ(), m_objects.size()));
+
+    // 주변 sector AOI 안의 유저들에게 spawn 통보. (몬스터는 관찰자가 아니므로 단방향.)
+    const int32 sx = spMonster->GetCurSectorX();
+    const int32 sz = spMonster->GetCurSectorZ();
+    if (sx >= 0 && sz >= 0)
+    {
+        std::vector<GamePacket::MonsterSpawnInfo> singleMonster = { makeMonsterSpawnInfo(*spMonster) };
+        ForEachAdjacentSector(sx, sz, k_aoiRange,
+            [&](Sector* pSector)
+            {
+                for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
+                {
+                    Character* pOtherChar = static_cast<Character*>(pOtherObj);
+                    const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
+                    pServer->SendObjectVisibilityNtf(otherUserId, {}, {}, singleMonster);
+                }
+            });
+    }
+
+    return spMonster.get();
+}
+
+bool Stage::DespawnMonster(int64 objectId)
+{
+    auto iter = m_monsterObjects.find(objectId);
+    if (iter == m_monsterObjects.end())
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("Stage::DespawnMonster - monster not found. stageId={} objectId={}",
+            m_stageId, objectId));
+        return false;
+    }
+
+    StageObjectPtr spMonster = iter->second;
+
+    // 제거 전에 sector 좌표를 캐시 (despawn broadcast 범위 결정용).
+    const int32 sx = spMonster->GetCurSectorX();
+    const int32 sz = spMonster->GetCurSectorZ();
+
+    // sector 및 컨테이너에서 제거.
+    removeObjectFromSector(spMonster.get());
+    m_monsterObjects.erase(iter);
+    m_objects.erase(objectId);
+
+    LOG_WRITE(LogLevel::Info, std::format("Stage::DespawnMonster - stageId={} objectId={} totalObjects={}",
+        m_stageId, objectId, m_objects.size()));
+
+    // 주변 sector AOI 안의 유저들에게 despawn 통보.
+    if (GameServer* pServer = GetGameServer())
+    {
+        if (sx >= 0 && sz >= 0)
+        {
+            std::vector<int64> despawnIds = { objectId };
+            ForEachAdjacentSector(sx, sz, k_aoiRange,
+                [&](Sector* pSector)
+                {
+                    for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
+                    {
+                        Character* pOtherChar = static_cast<Character*>(pOtherObj);
+                        const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
+                        pServer->SendObjectVisibilityNtf(otherUserId, {}, despawnIds);
+                    }
+                });
+        }
+    }
+
+    return true;
 }
 
 // ── sector 등록/제거/이동 헬퍼 ─────────────────────────────
@@ -410,9 +584,11 @@ void Stage::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
         {
             const GamePacket::CharacterSpawnInfo myInfo = makeCharacterSpawnInfo(*spCharacter);
 
-            // 나에게 전송할 spawn 목록 (주변 sector의 모든 캐릭터, 자기 포함).
+            // 나에게 전송할 spawn 목록 (주변 sector의 모든 캐릭터(자기 포함) + 모든 몬스터).
             std::vector<GamePacket::CharacterSpawnInfo> spawnsForMe;
             spawnsForMe.reserve(16);
+            std::vector<GamePacket::MonsterSpawnInfo> monsterSpawnsForMe;
+            monsterSpawnsForMe.reserve(16);
 
             // 다른 캐릭터에게 전송할 용도의 "내 spawn 1개".
             std::vector<GamePacket::CharacterSpawnInfo> singleSpawn = { myInfo };
@@ -432,9 +608,15 @@ void Stage::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
                             pServer->SendObjectVisibilityNtf(otherUserId, singleSpawn, {});
                         }
                     }
+
+                    // 주변 몬스터도 나에게 spawn 통보. (몬스터는 관찰자가 아니므로 받기만 한다.)
+                    for (const auto& [monsterObjId, pMonsterObj] : pSector->GetMonsters())
+                    {
+                        monsterSpawnsForMe.push_back(makeMonsterSpawnInfo(*static_cast<Monster*>(pMonsterObj)));
+                    }
                 });
 
-            pServer->SendObjectVisibilityNtf(userId, spawnsForMe, {});
+            pServer->SendObjectVisibilityNtf(userId, spawnsForMe, {}, monsterSpawnsForMe);
         }
     }
     else
@@ -698,6 +880,8 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
     // 자기 자신은 제외 (이미 m_userObjects/newSector에 있고, 본인은 spawn 알 필요 없음).
     std::vector<GamePacket::CharacterSpawnInfo> newlyVisibleSpawnsForMe;
     newlyVisibleSpawnsForMe.reserve(8);
+    std::vector<GamePacket::MonsterSpawnInfo> newlyVisibleMonstersForMe;
+    newlyVisibleMonstersForMe.reserve(8);
     std::vector<GamePacket::CharacterSpawnInfo> singleSpawnOfMe = { myInfo };
 
     ForEachAdjacentSector(newSectorX, newSectorZ, k_aoiRange,
@@ -720,11 +904,17 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
                 const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
                 pServer->SendObjectVisibilityNtf(otherUserId, singleSpawnOfMe, {});
             }
+
+            // 새로 보이는 sector의 몬스터들도 나에게 spawn. (몬스터는 받기만 한다.)
+            for (const auto& [monsterObjId, pMonsterObj] : pSector->GetMonsters())
+            {
+                newlyVisibleMonstersForMe.push_back(makeMonsterSpawnInfo(*static_cast<Monster*>(pMonsterObj)));
+            }
         });
 
-    if (!newlyVisibleSpawnsForMe.empty())
+    if (!newlyVisibleSpawnsForMe.empty() || !newlyVisibleMonstersForMe.empty())
     {
-        pServer->SendObjectVisibilityNtf(myUserId, newlyVisibleSpawnsForMe, {});
+        pServer->SendObjectVisibilityNtf(myUserId, newlyVisibleSpawnsForMe, {}, newlyVisibleMonstersForMe);
     }
 
     // ── oldAOI 순회 ──
@@ -752,6 +942,12 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
 
                 const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
                 pServer->SendObjectVisibilityNtf(otherUserId, {}, myDespawnId);
+            }
+
+            // 더 이상 안 보이는 sector의 몬스터들은 나에게 despawn (despawn_ids 는 타입 무관).
+            for (const auto& [monsterObjId, pMonsterObj] : pSector->GetMonsters())
+            {
+                despawnIdsForMe.push_back(monsterObjId);
             }
         });
 

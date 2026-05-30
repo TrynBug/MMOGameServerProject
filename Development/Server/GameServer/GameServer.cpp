@@ -533,12 +533,17 @@ void GameServer::SendHpMpNtf(int64 userId, double curHp, double curMp)
 
 void GameServer::SendObjectVisibilityNtf(int64 userId,
                                          const std::vector<GamePacket::CharacterSpawnInfo>& characterSpawns,
-                                         const std::vector<int64>& despawnIds)
+                                         const std::vector<int64>& despawnIds,
+                                         const std::vector<GamePacket::MonsterSpawnInfo>& monsterSpawns)
 {
     GamePacket::ObjectVisibilityNtf ntf;
     for (const auto& spawn : characterSpawns)
     {
         *ntf.add_character_spawns() = spawn;
+    }
+    for (const auto& spawn : monsterSpawns)
+    {
+        *ntf.add_monster_spawns() = spawn;
     }
     for (int64 id : despawnIds)
     {
@@ -547,8 +552,8 @@ void GameServer::SendObjectVisibilityNtf(int64 userId,
 
     sendPacketToUser(userId, Common::GAME_PACKET_ID_OBJECT_VISIBILITY_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: ObjectVisibilityNtf sent. userId={} characterSpawns={} despawns={}",
-        userId, characterSpawns.size(), despawnIds.size()));
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: ObjectVisibilityNtf sent. userId={} characterSpawns={} monsterSpawns={} despawns={}",
+        userId, characterSpawns.size(), monsterSpawns.size(), despawnIds.size()));
 }
 
 void GameServer::SendMoveNtf(int64 userId, int64 objectId,

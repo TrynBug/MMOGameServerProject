@@ -27,7 +27,7 @@ class dtQueryFilter;
 //   1. Stage 가 NavMeshManager 로부터 const dtNavMesh* 얻음
 //   2. std::make_unique<StageNavMesh>(pNavMesh) 로 생성
 //   3. pNavMesh 가 nullptr 이거나 init 실패 시 IsReady()==false
-//   4. FindPath / (향후) ClampToNavMesh / SamplePosition 호출
+//   4. FindPath / SamplePosition / (향후) ClampToNavMesh 호출
 class StageNavMesh
 {
 public:
@@ -54,6 +54,14 @@ public:
     bool FindPath(float startX, float startY, float startZ,
                   float endX,   float endY,   float endZ,
                   std::vector<float>& outWaypoints) const;
+
+    // 주어진 (x,y,z) 근처의 NavMesh 표면 점을 찾는다 (Y 스냅 + walkable 검증용).
+    // 검색 박스(halfExtent, 각 축 반경) 안에서 가장 가까운 NavMesh 폴리곤 위의 점을 out* 에 채운다.
+    // 입력 Y 를 신뢰할 수 없는 경우(예: 스폰) halfExtentY 를 넉넉히 잡으면 바닥 높이로 스냅된다.
+    // 리턴: NavMesh 준비됨 + 박스 안에 폴리곤 있으면 true(out* 채움), 아니면 false(out* 미변경).
+    bool SamplePosition(float x, float y, float z,
+                        float halfExtentX, float halfExtentY, float halfExtentZ,
+                        float& outX, float& outY, float& outZ) const;
 
 private:
     const dtNavMesh* m_pNavMesh  = nullptr;   // 참조만 (소유 안 함)

@@ -23,6 +23,22 @@ void Town::OnStageUpdate(int64 /*deltaMs*/)
     // 향후 NPC 업데이트, 마을 이벤트 등이 들어갈 예정.
 }
 
+void Town::OnStart()
+{
+    // 부모 처리 (로그 등).
+    Stage::OnStart();
+
+    // [임시 테스트] 마을 시작 시 몬스터 1마리 하드코딩 스폰.
+    //  - 서버 내부(m_objects/m_monsterObjects + sector)에만 등록된다. 클라 가시성 전파는 아직 없음.
+    //  - 좌표는 맵 중앙(항상 world bounds 내부 → sector 등록 보장). monsterKey 50 은 Monster.csv 첫 데이터.
+    //  - 추후 스폰 데이터 테이블/스포너 시스템으로 대체 예정.
+    for(int i=0; i<10; ++i)
+        SpawnMonster(51, 0, 0.0f, 0, 0.0f);
+
+    for(int i=0; i<10; ++i)
+        SpawnMonster(60, 0, 0.0f, 30, 0.0f);
+}
+
 void Town::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
 {
     // 부모 처리 (User를 m_users에, Character를 m_objects/m_userObjects에 등록).
