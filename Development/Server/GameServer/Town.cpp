@@ -34,9 +34,7 @@ void Town::OnStart()
     //  - 추후 스폰 데이터 테이블/스포너 시스템으로 대체 예정.
     for (int i = 0; i < 10; ++i)
     {
-        SpawnMonster(51, i*1.f, 0, 0, 0.0f);
-        SpawnMonster(52, i*1.f + 2, 0, 0, 0.0f);
-        SpawnMonster(53, i*1.f + 4, 0, 0, 0.0f);
+        SpawnMonster(50, i*1.f, 0, 0, 0.0f);
     }
 
     for(int i=0; i<10; ++i)

@@ -26,6 +26,17 @@ namespace
         info.set_pos_y(character.GetPosY());
         info.set_pos_z(character.GetPosZ());
         info.set_yaw(character.GetYaw());
+
+        // Fill current buffs into the spawn snapshot (UI badges) so viewers see them on sight.
+        character.GetBuffComponent().ForEachBuff(
+            [&info](int64 buffKey, int32 stackCount, int32 remainMs)
+            {
+                GamePacket::BuffSnapshotInfo* pBuff = info.add_buffs();
+                pBuff->set_buff_key(buffKey);
+                pBuff->set_stack_count(stackCount);
+                pBuff->set_remain_time_ms(remainMs);
+            });
+
         return info;
     }
 
@@ -41,6 +52,17 @@ namespace
         info.set_pos_y(monster.GetPosY());
         info.set_pos_z(monster.GetPosZ());
         info.set_yaw(monster.GetYaw());
+
+        // Fill current buffs into the spawn snapshot (UI badges) so viewers see them on sight.
+        monster.GetBuffComponent().ForEachBuff(
+            [&info](int64 buffKey, int32 stackCount, int32 remainMs)
+            {
+                GamePacket::BuffSnapshotInfo* pBuff = info.add_buffs();
+                pBuff->set_buff_key(buffKey);
+                pBuff->set_stack_count(stackCount);
+                pBuff->set_remain_time_ms(remainMs);
+            });
+
         return info;
     }
 
@@ -192,6 +214,9 @@ void Stage::updateMonsters(int64 deltaMs)
         // 매 tick 이 아니라 상태 변화 시점에만 (Monster 내부 throttled repath + 정지 시 dirty).
         if (pMonster->ConsumeMoveStateDirty())
             broadcastMoveNtf(*pMonster);
+
+        // Buff tick (expire + DoT/HoT). Monster::Update already settled its sector.
+        pMonster->GetBuffComponent().Update(elapsedMs);
     }
 }
 
@@ -872,6 +897,9 @@ void Stage::updateCharacters(int64 deltaMs)
         // 좌표가 바뀌었을 수 있으면 sector 갱신 (도착했거나 이동 중 모두).
         UpdateObjectSector(pCharacter);
 
+        // Buff tick (expire + DoT/HoT). After sector settle so badge broadcast uses current sector.
+        pCharacter->GetBuffComponent().Update(elapsedMs);
+
         // sector가 바뀐 경우 visibility 갱신.
         const int32 newSectorX = pCharacter->GetCurSectorX();
         const int32 newSectorZ = pCharacter->GetCurSectorZ();
@@ -1094,6 +1122,57 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
                 Character* pOtherChar = static_cast<Character*>(pOtherObj);
                 const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
                 pServer->SendObjectVisibilityNtf(otherUserId, {}, despawnId);
+            }
+        });
+}
+
+// Buff badge AOI broadcast (mirrors sendMoveNtfToAoi).
+// Called by BuffComponent on add/refresh/stack (BuffNtf) and remove/expire (BuffRemoveNtf).
+// Sends to every user in the actor's AOI; the owner is included if they are a user in their own sector.
+void Stage::BroadcastBuffNtf(const ActorObject& actor, int64 buffKey, int32 stackCount, int32 remainMs)
+{
+    GameServer* pServer = GetGameServer();
+    if (!pServer)
+        return;
+
+    const int32 sectorX = actor.GetCurSectorX();
+    const int32 sectorZ = actor.GetCurSectorZ();
+    if (sectorX < 0 || sectorZ < 0)
+        return;
+
+    const int64 objectId = actor.GetObjectId();
+    ForEachAdjacentSector(sectorX, sectorZ, k_aoiRange,
+        [&](Sector* pSector)
+        {
+            for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
+            {
+                Character* pOtherChar = static_cast<Character*>(pOtherObj);
+                const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
+                pServer->SendBuffNtf(otherUserId, objectId, buffKey, stackCount, remainMs);
+            }
+        });
+}
+
+void Stage::BroadcastBuffRemoveNtf(const ActorObject& actor, int64 buffKey)
+{
+    GameServer* pServer = GetGameServer();
+    if (!pServer)
+        return;
+
+    const int32 sectorX = actor.GetCurSectorX();
+    const int32 sectorZ = actor.GetCurSectorZ();
+    if (sectorX < 0 || sectorZ < 0)
+        return;
+
+    const int64 objectId = actor.GetObjectId();
+    ForEachAdjacentSector(sectorX, sectorZ, k_aoiRange,
+        [&](Sector* pSector)
+        {
+            for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
+            {
+                Character* pOtherChar = static_cast<Character*>(pOtherObj);
+                const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
+                pServer->SendBuffRemoveNtf(otherUserId, objectId, buffKey);
             }
         });
 }

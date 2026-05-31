@@ -67,6 +67,14 @@ public:
     CharacterStatComponent&       GetStat()       { return m_statComponent; }
     const CharacterStatComponent& GetStat() const { return m_statComponent; }
 
+    // ActorObject hook: expose stat component base so BuffComponent can ApplyStat/RemoveStat.
+    StatComponentBase* GetStatComponent() override { return &m_statComponent; }
+
+    // ActorObject hooks: notify owner client of buff-driven changes.
+    // (stat change -> StatUpdateNtf, DoT/HoT HP change -> HpMpNtf)
+    void OnStatsChangedByBuff() override;
+    void OnHpChangedByBuff() override;
+
     // ── 최대 HP / MP (ActorObject 오버라이드) ──────────────
     // 그룹의 Total 스탯을 스탯 컴포넌트에서 읽어 리턴 (ActorObject 오버라이드).
     // GetMaxHp/GetMaxMp 는 ActorObject 가 이 함수 위에서 공통 구현한다.

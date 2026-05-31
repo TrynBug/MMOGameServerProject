@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Character.h"
+#include "GameServer.h"           // buff hooks call SendStatUpdateNtf / SendHpMpNtf
 #include "Stage.h"               // SetDestination 에서 Stage::FindPath 호출
 
 #include "Generated/GameData_JobBase.h"   // 생성 시 JobBase 기본스탯 적용
@@ -242,4 +243,28 @@ void Character::Update(int64 deltaMs)
                GetPosZ() + nz * remainMoveDist);
         remainMoveDist = 0.0f;
     }
+}
+
+void Character::OnStatsChangedByBuff()
+{
+    // Buff added/removed/stacked changed stats -> resend full stat snapshot to the owner client.
+    Stage* pStage = GetStage();
+    if (pStage == nullptr)
+        return;
+    GameServer* pServer = pStage->GetGameServer();
+    if (pServer == nullptr)
+        return;
+    pServer->SendStatUpdateNtf(GetProto().owner_user_id(), *this);
+}
+
+void Character::OnHpChangedByBuff()
+{
+    // DoT/HoT tick changed current HP -> send current HP/MP to the owner client.
+    Stage* pStage = GetStage();
+    if (pStage == nullptr)
+        return;
+    GameServer* pServer = pStage->GetGameServer();
+    if (pServer == nullptr)
+        return;
+    pServer->SendHpMpNtf(GetProto().owner_user_id(), GetCurHp(), GetCurMp());
 }

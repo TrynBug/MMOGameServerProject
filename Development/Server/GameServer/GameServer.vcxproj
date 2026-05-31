@@ -102,6 +102,8 @@
     <ClInclude Include="StageNavMesh.h" />
     <ClInclude Include="StageObject.h" />
     <ClInclude Include="ActorObject.h" />
+    <ClInclude Include="BuffInstance.h" />
+    <ClInclude Include="BuffComponent.h" />
     <ClInclude Include="Sector.h" />
     <ClInclude Include="SystemStage.h" />
     <ClInclude Include="Town.h" />
@@ -125,6 +127,7 @@
     <ClCompile Include="StageNavMesh.cpp" />
     <ClCompile Include="StageObject.cpp" />
     <ClCompile Include="ActorObject.cpp" />
+    <ClCompile Include="BuffComponent.cpp" />
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="SystemStage.cpp" />
     <ClCompile Include="Town.cpp" />
@@ -136,6 +139,7 @@
     <ClCompile Include="BasicStatComponent.cpp" />
     <ClCompile Include="StageManager.cpp" />
     <ClCompile Include="GameServer.cpp" />
+    <ClCompile Include="GameServerBuff.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <!-- 설정 파일 -->

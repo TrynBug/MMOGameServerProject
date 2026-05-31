@@ -71,6 +71,9 @@ public:
 
     double GetStatTotal(EStatGroup group) const override { return m_statComponent.GetTotal(group); }
 
+    // ActorObject hook: expose stat component base so BuffComponent can ApplyStat/RemoveStat.
+    StatComponentBase* GetStatComponent() override { return &m_statComponent; }
+
     // ── 두뇌(AI) ──────────────────────────────────────────────
     // 두뇌 주입(교체). nullptr 도 허용(=AI 없음, Update 시 행동 안 함).
     void SetAI(std::unique_ptr<IMonsterAI> ai) { m_ai = std::move(ai); }

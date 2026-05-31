@@ -2,8 +2,12 @@
 
 #include "pch.h"
 #include "StageObject.h"
+#include "BuffComponent.h"        // 액터가 버프 컴포넌트를 멤버로 소유
 
 #include "Enum/GameEnum_Stat.h"   // EStatGroup
+
+// 전방선언: 스탯 컴포넌트 베이스 (파생이 GetStatComponent 로 노출)
+class StatComponentBase;
 
 // ─────────────────────────────────────────────────────────────
 // ActorObject 베이스 클래스
@@ -46,6 +50,21 @@ public:
     // (Character 는 스탯 컴포넌트의 HpTotal/MpTotal, Monster 는 경량 스탯 등.)
     virtual double GetStatTotal(EStatGroup group) const = 0;
 
+    // ── 스탯 컴포넌트 접근 ──────────────────────────────────────
+    // 버프 등 스탯 소스가 ApplyStat/RemoveStat 하기 위해 사용한다.
+    // 파생이 자신의 컴포넌트를 노출한다 (Character=CharacterStatComponent, Monster=BasicStatComponent).
+    virtual StatComponentBase* GetStatComponent() = 0;
+
+    // ── 버프 컴포넌트 ──────────────────────────────────────────
+    BuffComponent&       GetBuffComponent()       { return m_buffComponent; }
+    const BuffComponent& GetBuffComponent() const { return m_buffComponent; }
+
+    // ── 버프에 의한 변화의 클라 통지 훅 ─────────────────────────
+    // 버프가 스탯을 바꾸면 OnStatsChangedByBuff(), DoT/HoT 로 HP 가 바뀌면 OnHpChangedByBuff() 가 호출된다.
+    // 파생이 자신의 방식으로 통지한다 (Character=StatUpdateNtf/HpMpNtf, Monster=무시).
+    virtual void OnStatsChangedByBuff() {}
+    virtual void OnHpChangedByBuff() {}
+
     // 그룹의 총합 스탯값(예: EStatGroup::Hp → HpTotal)을 리턴한다. 파생이 제공.
     //   - Character : CharacterStatComponent 의 해당 Total 스탯
     //   - Monster   : BasicStatComponent::GetTotal(group)
@@ -82,6 +101,9 @@ private:
     // 현재 HP / MP. 최대치는 GetMaxHp()/GetMaxMp() 로 얻는다.
     double m_curHp = 0.0;
     double m_curMp = 0.0;
+
+    // 버프 컴포넌트. 생성자에서 owner(this)로 초기화된다.
+    BuffComponent m_buffComponent;
 };
 
 using ActorObjectPtr  = std::shared_ptr<ActorObject>;

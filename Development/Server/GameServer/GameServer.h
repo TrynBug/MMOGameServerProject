@@ -53,6 +53,13 @@ public:
     // SetCurHp 가 최대치로 clamp 하므로 클라에서 StatUpdateNtf 보다 나중에 처리되어야 한다.
     void SendHpMpNtf(int64 userId, double curHp, double curMp);
 
+    // 버프 뱃지 알림 전송 (BuffNtf / BuffRemoveNtf). UI 뱃지 데이터(키/스택/남은시간)만 담는다.
+    // 스탯/HP 효과 자체는 StatUpdateNtf / HpMpNtf 로 별도 전송된다.
+    // Stage 가 버프 추가/갱신/스택/제거 시점에 AOI 유저들에게 broadcast 하면서 호출한다.
+    // remainTimeMs: -1 이면 영구(클라에서 카운트다운 표시 안 함).
+    void SendBuffNtf(int64 userId, int64 objectId, int64 buffKey, int32 stackCount, int32 remainTimeMs);
+    void SendBuffRemoveNtf(int64 userId, int64 objectId, int64 buffKey);
+
     // NavMesh 데이터에 접근. Stage 가 자신의 NavMesh 를 설정할 때 사용.
     NavMeshManager&       GetNavMeshManager()       { return m_navMeshManager; }
     const NavMeshManager& GetNavMeshManager() const { return m_navMeshManager; }

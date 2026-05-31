@@ -30,6 +30,9 @@ using CharacterPtr = std::shared_ptr<Character>;
 // Monster forward declaration (SpawnMonster 리턴 타입). 완전타입은 Stage.cpp 에서 include.
 class Monster;
 
+// ActorObject forward declaration (BroadcastBuff* takes const ActorObject&). Full type in Stage.cpp.
+class ActorObject;
+
 
 // StageGridParams: Stage 공간 정보 + NavMesh 매핑.
 // Stage 파생 클래스가 생성자에서 LoadStageGridParams 로 일부 필드를 채우고,
@@ -193,6 +196,11 @@ public:
     // Character::Update 등 이동 처리 이후 호출. sector 변경 없으면 no-op.
     // visibility 갱신은 D-3에서 추가 예정.
     void      UpdateObjectSector(StageObject* pObject);
+
+    // Buff badge broadcast to AOI users (mirrors MoveNtf broadcast). Called by BuffComponent.
+    // remainMs: -1 means permanent (client shows no countdown).
+    void      BroadcastBuffNtf(const ActorObject& actor, int64 buffKey, int32 stackCount, int32 remainMs);
+    void      BroadcastBuffRemoveNtf(const ActorObject& actor, int64 buffKey);
 
     // objectId 로 StageObject 를 조회한다 (통합 컨테이너 m_objects 기준). 없으면 nullptr.
     // 비소유 raw 포인터 — 컨텐츠 스레드에서 해당 tick 내 사용 (몬스터 AI 의 타겟 해소 등).
