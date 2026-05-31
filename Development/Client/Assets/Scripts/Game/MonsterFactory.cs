@@ -42,11 +42,18 @@ namespace Client.Game
                 return null;
             }
 
-            // 4) MonsterObject 컴포넌트 확보 (없으면 부착) + 초기화.
+            // 4) MonsterObject 컴포넌트 확보 (없으면 부착).
             MonsterObject mo = go.GetComponent<MonsterObject>();
             if (mo == null)
                 mo = go.AddComponent<MonsterObject>();
 
+            // 5) 공통 애니메이터 확보 (없으면 부착).
+            //    Animator 자체는 아트 prefab 의 자식에 있고, AnimatorActorAnimator 가 그걸 찾아 쓴다.
+            //    MonsterObject.Initialize 가 이 컴포넌트를 IActorAnimator 로 해석하므로 Initialize 앞에 붙인다.
+            if (go.GetComponent<IActorAnimator>() == null)
+                go.AddComponent<AnimatorActorAnimator>();
+
+            // 6) 초기화.
             mo.Initialize(objectId, monsterKey, pos, dirY);
 
             go.name = $"Monster_{objectId}_key{monsterKey}";

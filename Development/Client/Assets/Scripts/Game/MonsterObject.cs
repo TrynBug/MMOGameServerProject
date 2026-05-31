@@ -13,7 +13,8 @@ namespace Client.Game
     //   - is_moving=false : SetPosition(pos, yaw)    → 서버 위치로 즉시 스냅.
     // 추종 로직은 PlayerCharacter 의 원격 캐릭터 처리와 동일하다. (향후 공통 추종 컴포넌트로 묶을 수 있음)
     //
-    // 스탯/HP/애니메이션은 아직 없다. 필요해지면 ActorObject 상속 등으로 확장한다.
+    // 애니메이션은 IActorAnimator(AnimatorActorAnimator)를 통해 idle/move 를 재생한다(서버 MoveNtf 기반).
+    // 스탯/HP 는 아직 없다. 필요해지면 ActorObject 상속 등으로 확장한다.
     // prefab 은 임의의 아트 에셋이라 이 컴포넌트가 미리 붙어있지 않을 수 있어 MonsterFactory 가 런타임에 AddComponent 한다.
     public class MonsterObject : MonoBehaviour
     {
@@ -47,6 +48,10 @@ namespace Client.Game
 
         public bool IsMoving => m_hasMoveDest;
 
+        // 공통 애니메이터. idle/move 등 의미론적 상태를 Animator 파라미터로 변환한다.
+        // 없을 수 있음(아트 미적용 prefab) → 그 경우 애니메이션 없이 동작.
+        private IActorAnimator m_actorAnimator;
+
         // MonsterFactory 가 생성 직후 1회 호출.
         public void Initialize(long objectId, long monsterKey, Vector3 pos, float dirY)
         {
@@ -55,6 +60,10 @@ namespace Client.Game
 
             transform.position = pos;
             transform.rotation = Quaternion.Euler(0f, dirY, 0f);
+
+            // 공통 애니메이터 해석. AddComponent 타이밍 의존을 피하려고 Awake 가 아니라
+            // (모든 컴포넌트가 부착된 뒤 호출되는) Initialize 에서 찾는다. 없으면 애니메이션 없이 동작.
+            m_actorAnimator = GetComponentInChildren<IActorAnimator>();
         }
 
         // ─── 서버 MoveNtf 처리 ───────────────────────────────────────────
@@ -128,6 +137,16 @@ namespace Client.Game
         private void Update()
         {
             updateMovement();
+            updateAnimator();
+        }
+
+        // 이동 상태(IsMoving)를 애니메이터에 반영. 값 변화 감지는 애니메이터 구현이 처리하므로 매 프레임 그대로 밀어넣는다.
+        private void updateAnimator()
+        {
+            if (m_actorAnimator == null)
+                return;
+
+            m_actorAnimator.SetMoving(m_hasMoveDest);
         }
 
         private void updateMovement()
