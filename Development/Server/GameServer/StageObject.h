@@ -62,6 +62,32 @@ public:
         m_curSectorZ = sectorZ;
     }
 
+    // ── 매 tick 업데이트 ────────────────────────────────────
+    // 소속 Stage 가 이 오브젝트의 업데이트 주기에 도달했을 때 호출한다 (컨테츠 스레드 전용).
+    // deltaMs 는 "마지막 Update 이후" 누적 경과시간(주기가 길면 서버 tick 보다 크다).
+    // 기본 구현은 아무것도 안 함 — 매 tick 로직이 필요한 파생만 override 한다
+    // (예: Character/Monster 의 이동·AI). 안 움직이는 Prop 등은 override 불필요.
+    virtual void Update(int64 deltaMs) {}
+
+    // ── 업데이트 주기 ──────────────────────────────────────────
+    // Stage 는 매 서버 tick(50ms)마다 모든 StageObject 를 순회하지만, 실제 Update 는
+    // 이 오브젝트의 주기(k_updateTickUnitMs 의 배수)마다 1번만 호출된다.
+    // 중요 오브젝트(유저/캐릭터/보스)는 50ms, 덜 중요한 오브젝트(잡몹/프랍)는 더 긴 주기를
+    // 가질 수 있다. 주기는 오브젝트 생성 직후 또는 Stage 등록 직전에 결정한다.
+    // (게임서버.md '서버 tick' 참조.)
+    int64 GetUpdateIntervalMs() const { return m_updateIntervalMs; }
+
+    // 업데이트 주기 설정. k_updateTickUnitMs(50ms)의 배수로 내림 정렬하며 최소 1단위.
+    void  SetUpdateIntervalMs(int64 intervalMs);
+
+    // Stage 등록 시점에 누적시간을 0 으로 초기화한다 (업데이트 스케줄 시작점 리셋).
+    void  ResetUpdateClock() { m_updateAccumMs = 0; }
+
+    // Stage 의 매 tick 에서 호출한다. deltaMs 를 누적하고, 주기에 도달했으면 true 와 함께
+    // 마지막 Update 이후의 누적 경과시간(outElapsedMs)을 돌려주고 누적을 0 으로 리셋한다.
+    // 아직 주기에 도달하지 않았으면 false (이번 tick 의 Update 는 건너뛴다).
+    bool  AdvanceUpdateClock(int64 deltaMs, int64& outElapsedMs);
+
 private:
     int64       m_objectId   = 0;
     EObjectType m_objectType = EObjectType::None;
@@ -79,6 +105,17 @@ private:
     // 아직 어떤 섹터에도 속하지 않은 상태를 표현하기 위해 -1 로 초기화.
     int32       m_curSectorX = -1;
     int32       m_curSectorZ = -1;
+
+    // ── 업데이트 주기 ──
+    // 서버 tick 단위(ms). 업데이트 주기는 이 값의 배수여야 한다.
+    // (ContentsThread 의 기본 update 주기와 일치. 게임서버.md '서버 tick' 참조.)
+    static constexpr int64 k_updateTickUnitMs = 50;
+
+    // m_updateIntervalMs : 이 오브젝트의 Update 호출 주기(ms). 기본값 없음 — Stage 등록 시
+    //                      반드시 SetUpdateIntervalMs 로 설정된다. 0 은 "미설정" 을 뜻한다.
+    // m_updateAccumMs    : 마지막 Update 이후 누적된 경과시간(ms). 주기 도달 시 0 으로 리셋.
+    int64       m_updateIntervalMs = 0;
+    int64       m_updateAccumMs    = 0;
 };
 
 using StageObjectPtr  = std::shared_ptr<StageObject>;

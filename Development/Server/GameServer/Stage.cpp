@@ -169,12 +169,18 @@ void Stage::updateMonsters(int64 deltaMs)
     {
         Monster* pMonster = static_cast<Monster*>(pair.second.get());
 
+        // 이 몬스터의 업데이트 주기에 도달했는지 확인. 아직이면 이번 tick 은 건너뛴다.
+        // elapsedMs = 마지막 Update 이후 누적 경과시간(주기가 길면 deltaMs 보다 크다).
+        int64 elapsedMs = 0;
+        if (!pMonster->AdvanceUpdateClock(deltaMs, elapsedMs))
+            continue;
+
         // Update 전 sector 좌표 캐치 (sector 변경 감지용). Monster::Update 내부에서
         // UpdateObjectSector 가 호출되어 갱신되므로, Update 후 좌표와 비교한다.
         const int32 oldSectorX = pMonster->GetCurSectorX();
         const int32 oldSectorZ = pMonster->GetCurSectorZ();
 
-        pMonster->Update(deltaMs);
+        pMonster->Update(elapsedMs);
 
         // sector 가 바뀌면 visibility 갱신: 새로 보게 된 유저에게 spawn, 못 보게 된 유저에게 despawn.
         const int32 newSectorX = pMonster->GetCurSectorX();
@@ -394,14 +400,10 @@ Monster* Stage::SpawnMonster(int64 monsterKey, float posX, float posY, float pos
     spMonster->SetAI(std::make_unique<MonsterFsmAI>());   // 기본 두뇌: FSM (보스 등은 향후 BT 로 교체)
     spMonster->SetPos(spawnX, spawnY, spawnZ);
     spMonster->SetYaw(yaw);
-    spMonster->SetStage(this);
 
-    // Stage 객체 컨테이너 등록 (통합 + 타입별).
-    m_objects[objectId] = spMonster;
-    m_monsterObjects[objectId] = spMonster;
-
-    // 좌표 기준 sector 등록. 맵 범위 밖이면 (-1,-1) 로 남고 addObjectToSector 가 경고 로그를 남긴다.
-    addObjectToSector(spMonster.get());
+    // Stage 등록 (통합/타입별 컨테이너 + Stage/업데이트주기/sector).
+    // 몬스터 업데이트 주기는 등록 진입점에 명시 전달 (현재 매 tick; 향후 잡몹은 더 긴 주기로).
+    registerObject(spMonster, k_monsterUpdateIntervalMs, m_monsterObjects);
 
     LOG_WRITE(LogLevel::Info, std::format("Stage::SpawnMonster - stageId={} monsterKey={} objectId={} pos=({},{},{}) yaw={} sector=({},{}) totalObjects={}",
         m_stageId, monsterKey, objectId, spawnX, spawnY, spawnZ, yaw,
@@ -476,6 +478,23 @@ bool Stage::DespawnMonster(int64 objectId)
 
 // ── sector 등록/제거/이동 헬퍼 ─────────────────────────────
 // 섹터는 X-Z 평면으로만 분할됨. Y(높이)는 섹터 분할에 사용 안 함.
+
+void Stage::registerObject(const StageObjectPtr& spObject, int64 updateIntervalMs,
+                           std::unordered_map<int64, StageObjectPtr>& typeMap)
+{
+    const int64 objectId = spObject->GetObjectId();
+
+    // 통합 컨테이너 + 타입별 맵에 등록 (둘 다 같은 shared_ptr 보관).
+    m_objects[objectId] = spObject;
+    typeMap[objectId]   = spObject;
+
+    spObject->SetStage(this);
+    spObject->SetUpdateIntervalMs(updateIntervalMs);   // 필수: 호출자가 지정한 업데이트 주기
+    spObject->ResetUpdateClock();                      // 등록 시점부터 주기 카운트 시작
+
+    // 좌표 기준 sector 등록. 맵 범위 밖이면 (-1,-1) 로 남고 addObjectToSector 가 경고 로그를 남긴다.
+    addObjectToSector(spObject.get());
+}
 
 void Stage::addObjectToSector(StageObject* pObject)
 {
@@ -609,12 +628,9 @@ void Stage::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
     if (spCharacter)
     {
         const int64 objectId = spCharacter->GetObjectId();
-        m_objects[objectId] = spCharacter;
-        m_userObjects[objectId] = spCharacter;
-        spCharacter->SetStage(this);
 
-        // sector에도 등록 (좌표 기준). 맵 범위 밖이면 (-1, -1).
-        addObjectToSector(spCharacter.get());
+        // 캐릭터는 중요 오브젝트 → 매 tick(50ms) 업데이트. 등록 진입점에 주기를 명시 전달.
+        registerObject(spCharacter, k_characterUpdateIntervalMs, m_userObjects);
 
         LOG_WRITE(LogLevel::Info, std::format("Stage::OnUserEnter - stageId={} userId={} characterId={} sector=({},{}) totalUsers={} totalObjects={}",
             m_stageId, userId, objectId,
@@ -837,11 +853,21 @@ void Stage::updateCharacters(int64 deltaMs)
     {
         Character* pCharacter = static_cast<Character*>(spObject.get());
 
+        // 이 캐릭터의 업데이트 주기에 도달했는지 확인. 아직이면 이번 tick 은 건너뛴다.
+        // (캐릭터는 기본 50ms = 매 tick 이라 사실상 건너뛰지 않는다.)
+        int64 elapsedMs = 0;
+        if (!pCharacter->AdvanceUpdateClock(deltaMs, elapsedMs))
+            continue;
+
         // Update 전 sector 좌표 캐치 (sector 변경 감지용).
         const int32 oldSectorX = pCharacter->GetCurSectorX();
         const int32 oldSectorZ = pCharacter->GetCurSectorZ();
 
-        const bool arrived = pCharacter->Update(deltaMs);
+        // Update 가 void 가 되어 도착 여부를 직접 리턴하지 않으므로,
+        // 이동→정지 전환을 IsMoving() 변화로 감지한다 (도착·안전망 정지 모두 포함).
+        const bool wasMoving = pCharacter->IsMoving();
+        pCharacter->Update(elapsedMs);
+        const bool arrived = wasMoving && !pCharacter->IsMoving();
 
         // 좌표가 바뀌었을 수 있으면 sector 갱신 (도착했거나 이동 중 모두).
         UpdateObjectSector(pCharacter);

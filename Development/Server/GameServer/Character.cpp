@@ -178,10 +178,10 @@ void Character::faceCurrentWaypoint()
     SetYaw(std::atan2(dx, dz) * k_radToDeg);
 }
 
-bool Character::Update(int64 deltaMs)
+void Character::Update(int64 deltaMs)
 {
     if (!m_isMoving)
-        return false;
+        return;
 
     // 안전망: waypoint 가 비었거나 인덱스가 유효 범위 밖이면 정지.
     if (m_waypoints.empty() || m_curWaypointIdx * 3 + 2 >= static_cast<int32>(m_waypoints.size()))
@@ -189,7 +189,7 @@ bool Character::Update(int64 deltaMs)
         m_isMoving = false;
         m_waypoints.clear();
         m_curWaypointIdx = 0;
-        return true;
+        return;
     }
 
     // 이번 tick 에 이동할 총 거리.
@@ -223,7 +223,7 @@ bool Character::Update(int64 deltaMs)
                 m_isMoving = false;
                 m_waypoints.clear();
                 m_curWaypointIdx = 0;
-                return true;
+                return;
             }
             // 다음 waypoint 방향으로 yaw 갱신.
             faceCurrentWaypoint();
@@ -242,6 +242,4 @@ bool Character::Update(int64 deltaMs)
                GetPosZ() + nz * remainMoveDist);
         remainMoveDist = 0.0f;
     }
-
-    return false;
 }

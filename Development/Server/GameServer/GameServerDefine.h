@@ -12,6 +12,12 @@ constexpr int64 k_townStageDataKey   = 100;   // 마을
 // 현재는 모든 캐릭터가 동일 값을 사용한다.
 constexpr int32 k_aoiRange = 1;
 
+// ── 오브젝트 업데이트 주기 (ms) ────────────────────────────────
+// Stage 등록 시 각 오브젝트에 명시적으로 전달하는 업데이트 주기. 서버 tick(50ms)의 배수.
+// 중요 오브젝트(캐릭터)는 매 tick, 그 외는 종류에 맞게 조정한다.
+constexpr int64 k_characterUpdateIntervalMs = 50;    // 캐릭터: 매 tick (중요)
+constexpr int64 k_monsterUpdateIntervalMs   = 500;    // 몬스터 tick (향후 잡몹 보스몹 구분 예정)
+
 // MoveStopReq 수신 시 클라 위치와 서버 위치의 허용 오차 (X-Z 평면 거리, 유닛).
 // MoveDestReq/MoveStopReq 둘 다 이 값을 사용.
 // 이 범위 내면 클라 위치 인정, 초과면 MovePosCorrectNtf 송신.

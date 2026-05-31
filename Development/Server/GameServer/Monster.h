@@ -77,7 +77,7 @@ public:
 
     // 매 tick(컨텐츠 스레드 전용) 호출. 공통 housekeeping 후 두뇌에 위임한다.
     // Stage::updateMonsters 가 m_monsterObjects 를 순회하며 호출한다.
-    void Update(int64 deltaMs);
+    void Update(int64 deltaMs) override;
 
     // ─────────────────────────────────────────────────────────
     // 공유 행동 레이어 (두뇌가 호출)

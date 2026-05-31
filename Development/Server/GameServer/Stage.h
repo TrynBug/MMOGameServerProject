@@ -304,6 +304,13 @@ private:
     // 2D 섹터 좌표 → 1D 배열 인덱스 변환
     int32 sectorIndexToFlat(int32 sectorX, int32 sectorZ) const { return sectorZ * m_sectorCountX + sectorX; }
 
+    // StageObject 를 Stage 에 등록하는 공용 진입점. 모든 등록 경로(유저 입장/몬스터 스폰 등)가
+    // 반드시 이 함수를 거친다. updateIntervalMs 는 필수 인자 — 오브젝트 종류에 맞는 업데이트
+    // 주기를 호출자가 명시적으로 지정해야 한다 (자동 기본값 없음).
+    // 통합 컨테이너(m_objects)와 전달된 타입별 맵에 등록하고, Stage/업데이트주기/sector 를 설정한다.
+    void registerObject(const StageObjectPtr& spObject, int64 updateIntervalMs,
+                        std::unordered_map<int64, StageObjectPtr>& typeMap);
+
     // 객체를 자신의 현재 좌표 기준으로 sector에 등록.
     // pObject->m_curSectorX/Y를 갱신. 맵 범위 밖이면 등록 안 함.
     void addObjectToSector(StageObject* pObject);

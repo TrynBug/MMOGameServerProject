@@ -104,8 +104,8 @@ public:
     // 매 tick 호출. 현재 waypoint 향해 이동, 도달하면 다음 waypoint, 마지막 도달 시 정지.
     // (X-Z 평면 거리로 도달 판정. Y는 waypoint Y로 직접 보간.)
     // waypoint 도달 시점마다 yaw 재계산.
-    // 리턴값: 최종 목적지에 도달했는지 여부 (true면 정지 상태로 전환됨).
-    bool Update(int64 deltaMs);
+    // 최종 목적지 도달 시 정지 상태로 전환된다. (이동→정지 전환은 호출자가 IsMoving() 변화로 감지.)
+    void Update(int64 deltaMs) override;
 
 private:
     // 생성자에서 호출. JobBase 게임데이터의 기본스탯을 m_statComponent 에 적용한다.
