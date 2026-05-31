@@ -27,7 +27,7 @@ namespace Client.Managers
         // 현재 활성 씬의 BaseScene 컴포넌트.
         // 씬 안에 BaseScene 상속 컴포넌트가 부착된 GameObject 가 있어야 함.
         // 없으면 null (씬 전환 시 정리할 게 없는 것으로 간주).
-        public BaseScene CurrentScene => Object.FindFirstObjectByType<BaseScene>();
+        public BaseScene CurrentScene => Object.FindAnyObjectByType<BaseScene>();
 
         // 씬 전환.
         //   1) Managers 의 일괄 정리 (UI close, Input 구독자 정리)

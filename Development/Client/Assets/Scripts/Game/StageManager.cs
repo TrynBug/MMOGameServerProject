@@ -52,6 +52,8 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<MovePosCorrectNtf>(GamePacketId.MovePosCorrectNtf, onMovePosCorrectNtf);
             PacketDispatcher.Instance.Register<StatUpdateNtf>(GamePacketId.StatUpdateNtf, onStatUpdateNtf);
             PacketDispatcher.Instance.Register<HpMpNtf>(GamePacketId.HpMpNtf, onHpMpNtf);
+            PacketDispatcher.Instance.Register<BuffNtf>(GamePacketId.BuffNtf, onBuffNtf);
+            PacketDispatcher.Instance.Register<BuffRemoveNtf>(GamePacketId.BuffRemoveNtf, onBuffRemoveNtf);
 
             Debug.Log("[StageManager] Ready.");
         }
@@ -115,17 +117,22 @@ namespace Client.Game
             // 캐릭터 스폰정보 처리
             foreach (CharacterSpawnInfo characterSpawnInfo in ntf.CharacterSpawns)
             {
-                // 내 캐릭터는 무시
+                // 내 캐릭터는 다시 스폰하지 않지만, 보유 버프 스냅샷은 반영한다.
                 if (characterSpawnInfo.ObjectId == myCharacterId)
                 {
+                    if (LocalPlayer != null)
+                        applyBuffSnapshot(LocalPlayer.Buffs, characterSpawnInfo.Buffs);
                     continue;
                 }
 
-                spawnRemoteCharacter(
+                PlayerCharacter remoteCharacter = spawnRemoteCharacter(
                     userId: characterSpawnInfo.ObjectId,
                     name: characterSpawnInfo.Name,
                     pos: new Vector3(characterSpawnInfo.PosX, characterSpawnInfo.PosY, characterSpawnInfo.PosZ),
                     dirY: characterSpawnInfo.Yaw);
+
+                if (remoteCharacter != null)
+                    applyBuffSnapshot(remoteCharacter.Buffs, characterSpawnInfo.Buffs);
 
                 Debug.Log($"[StageManager] ObjectVisibilityNtf: CharacterSpawn characterId={characterSpawnInfo.ObjectId}");
             }
@@ -133,11 +140,14 @@ namespace Client.Game
             // 몬스터 스폰정보 처리
             foreach (MonsterSpawnInfo monsterSpawnInfo in ntf.MonsterSpawns)
             {
-                spawnMonster(
+                MonsterObject monster = spawnMonster(
                     objectId: monsterSpawnInfo.ObjectId,
                     monsterKey: monsterSpawnInfo.MonsterKey,
                     pos: new Vector3(monsterSpawnInfo.PosX, monsterSpawnInfo.PosY, monsterSpawnInfo.PosZ),
                     dirY: monsterSpawnInfo.Yaw);
+
+                if (monster != null)
+                    applyBuffSnapshot(monster.Buffs, monsterSpawnInfo.Buffs);
 
                 Debug.Log($"[StageManager] ObjectVisibilityNtf: MonsterSpawn objectId={monsterSpawnInfo.ObjectId} key={monsterSpawnInfo.MonsterKey}");
             }
@@ -237,7 +247,50 @@ namespace Client.Game
             Debug.Log($"[StageManager] HpMpNtf: ObjectId={ntf.ObjectId}, hp={ntf.CurHp:F1}, mp={ntf.CurMp:F1}");
         }
 
+        // 버프 추가/갱신 (upsert). object_id 로 캐릭터/몬스터를 찾아 BuffHolder 를 갱신.
+        // 스탯/HP 효과는 StatUpdateNtf/HpMpNtf 로 따로 오므로 여기서는 뱃지 정보만 보관한다.
+        private void onBuffNtf(BuffNtf ntf)
+        {
+            BuffHolder holder = findBuffHolder(ntf.ObjectId);
+            if (holder == null)
+            {
+                Debug.LogWarning($"[StageManager] BuffNtf: object not found. ObjectId={ntf.ObjectId} buffKey={ntf.BuffKey}");
+                return;
+            }
+
+            holder.Upsert(ntf.BuffKey, ntf.StackCount, ntf.RemainTimeMs);
+        }
+
+        // 버프 제거 (만료/디스펠/정리). 이미 디스폰된 객체면 조용히 무시.
+        private void onBuffRemoveNtf(BuffRemoveNtf ntf)
+        {
+            BuffHolder holder = findBuffHolder(ntf.ObjectId);
+            if (holder == null)
+                return;
+
+            holder.Remove(ntf.BuffKey);
+        }
+
         // ─── 내부 ──────────────────────────────────────────────────────
+
+        // object_id 로 캐릭터/몬스터의 BuffHolder 를 찾는다. 없으면 null.
+        // (현재 character_id == object_id == userId 체계라 캐릭터는 m_characters 에서 바로 찾힌다.)
+        private BuffHolder findBuffHolder(long objectId)
+        {
+            if (m_characters.TryGetValue(objectId, out PlayerCharacter character) && character != null)
+                return character.Buffs;
+            if (m_monsters.TryGetValue(objectId, out MonsterObject monster) && monster != null)
+                return monster.Buffs;
+            return null;
+        }
+
+        // spawn 스냅샷의 버프 목록을 holder 에 통째로 반영(전체 교체).
+        private static void applyBuffSnapshot(BuffHolder holder, IEnumerable<BuffSnapshotInfo> buffs)
+        {
+            holder.Clear();
+            foreach (BuffSnapshotInfo b in buffs)
+                holder.Upsert(b.BuffKey, b.StackCount, b.RemainTimeMs);
+        }
 
         // 디버그: 서버 Stage 의 sector 격자를 화면에 그린다.
         // sectorSize 는 stage_data_key 로 GameData_Stage 를 조회해서 얻는다.

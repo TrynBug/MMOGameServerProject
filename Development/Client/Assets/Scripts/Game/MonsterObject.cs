@@ -24,6 +24,9 @@ namespace Client.Game
         // 몬스터 게임데이터 Key (종류 식별).
         public long MonsterKey { get; private set; }
 
+        // Server-provided buff state (key/stack/remain). Filled by BuffNtf and spawn snapshot.
+        public BuffHolder Buffs { get; } = new BuffHolder();
+
         // 이동 속도(유닛/초). 서버 Monster 의 이동속도와 맞춰야 시각적으로 자연스럽다.
         // TODO(데이터): 서버/클라가 GameData_Monster 의 이동속도를 공유하거나 MoveNtf 에 실어 보내도록.
         [SerializeField] private float m_moveSpeed = 4f;

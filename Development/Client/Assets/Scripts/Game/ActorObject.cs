@@ -13,6 +13,8 @@ namespace Client.Game
     //                                EStat 이 아니라 별도 멤버. HpMpNtf 로 갱신.
     //   - StatHolder               : 그 외 모든 합성 스탯(최대HP/MP, 이동속도, 공격속도, 힘 등).
     //                                StatUpdateNtf 로 갱신. 최대치는 여기서 Get 으로 읽는다.
+    //   - BuffHolder               : 현재 보유 버프(키/스택/남은시간). BuffNtf/BuffRemoveNtf,
+    //                                spawn 스냅샷으로 갱신. 버프 UI(바/뱃지)가 읽는다.
     //
     // 클라는 스탯을 계산하지 않으므로 서버의 StatComponent 누적 공식은 갖지 않는다.
     // 받은 값을 보관/조회할 뿐이다.
@@ -28,6 +30,9 @@ namespace Client.Game
     {
         // 서버가 내려준 합성 스탯 보관소. 최대HP/MP, 이동속도, 공격속도 등을 여기서 읽는다.
         public StatHolder Stats { get; } = new StatHolder();
+
+        // 서버가 내려준 현재 보유 버프 보관소. 버프 UI 가 읽는다.
+        public BuffHolder Buffs { get; } = new BuffHolder();
 
         // ── 현재 HP / MP ───────────────────────────────────────
         public double CurHp { get; private set; }

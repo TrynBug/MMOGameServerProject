@@ -45,6 +45,9 @@ namespace Client.Game
                 dirY: spawn.Yaw);
 
             Debug.Log($"[GameScene] LocalPlayer spawned. characterId={spawn.CharacterId} stageId={spawn.StageId} pos={spawn.Position} yaw={spawn.Yaw}");
+
+            // Create the local player's buff bar HUD (code-built, no prefab/art needed).
+            Managers.Managers.UI.ShowSceneUI<UI_BuffBar>();
         }
 
         public override void Clear()
