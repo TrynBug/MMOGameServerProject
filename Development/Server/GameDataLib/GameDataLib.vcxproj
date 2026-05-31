@@ -150,11 +150,13 @@
     <ClCompile Include="Generated\Enum\GameEnum_Skill.cpp" />
     <ClCompile Include="Generated\Enum\GameEnum_Stage.cpp" />
     <ClCompile Include="Generated\Enum\GameEnum_Stat.cpp" />
+    <ClCompile Include="Generated\GameDataBase_Buff.cpp" />
     <ClCompile Include="Generated\GameDataBase_JobBase.cpp" />
     <ClCompile Include="Generated\GameDataBase_Monster.cpp" />
     <ClCompile Include="Generated\GameDataBase_Skill.cpp" />
     <ClCompile Include="Generated\GameDataBase_Stage.cpp" />
     <ClCompile Include="Generated\GameDataBase_Stat.cpp" />
+    <ClCompile Include="Generated\GameData_Buff.cpp" />
     <ClCompile Include="Generated\GameData_JobBase.cpp" />
     <ClCompile Include="Generated\GameData_Monster.cpp" />
     <ClCompile Include="Generated\GameData_Skill.cpp" />
@@ -172,11 +174,13 @@
     <ClInclude Include="Generated\Enum\GameEnum_Skill.h" />
     <ClInclude Include="Generated\Enum\GameEnum_Stage.h" />
     <ClInclude Include="Generated\Enum\GameEnum_Stat.h" />
+    <ClInclude Include="Generated\GameDataBase_Buff.h" />
     <ClInclude Include="Generated\GameDataBase_JobBase.h" />
     <ClInclude Include="Generated\GameDataBase_Monster.h" />
     <ClInclude Include="Generated\GameDataBase_Skill.h" />
     <ClInclude Include="Generated\GameDataBase_Stage.h" />
     <ClInclude Include="Generated\GameDataBase_Stat.h" />
+    <ClInclude Include="Generated\GameData_Buff.h" />
     <ClInclude Include="Generated\GameData_JobBase.h" />
     <ClInclude Include="Generated\GameData_Monster.h" />
     <ClInclude Include="Generated\GameData_Skill.h" />

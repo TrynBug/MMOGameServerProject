@@ -8,6 +8,10 @@ namespace GameData
     {
         public static bool LoadAllGameData(string csvPath)
         {
+            var table_Buff = new GameDataTable_Buff();
+            if (!table_Buff.LoadData(csvPath))
+                return false;
+
             var table_JobBase = new GameDataTable_JobBase();
             if (!table_JobBase.LoadData(csvPath))
                 return false;
