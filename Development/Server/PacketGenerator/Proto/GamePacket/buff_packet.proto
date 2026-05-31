@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package GamePacket;
+
+import "Common/packet_id.proto";
+
+// ──────────────────────────────────────────────
+// 버프 패킷
+// ──────────────────────────────────────────────
+//
+// 흐름 (게임서버.md / 클라이언트.md 참조):
+// - 버프의 적용/해제/만료/스택은 전적으로 서버가 권위적으로 처리한다.
+// - 클라는 버프를 계산하지 않고, 서버가 내려준 상태(아이콘/남은시간/스택)를 UI 표시에만 쓴다.
+//   그래서 클라 -> 서버 버프 패킷은 존재하지 않는다.
+//
+// 중요: 이 패킷들은 스탯 값이나 HP 변화를 나르지 않는다.
+// - 버프로 합성 스탯이 바뀌면 서버가 StatUpdateNtf 로 별도 전송한다.
+// - DoT/HoT 로 HP 가 바뀌면 서버가 HpMpNtf 로 별도 전송한다.
+// 이 패킷은 오직 UI 뱃지(어떤 버프가 몇 스택, 얼마나 남았는지) 표시용이다.
+
+// 버프 추가/갱신 알림 (서버 -> 클라, upsert)
+// ObjectVisibilityNtf 와 동일한 idempotent 정책:
+// 같은 (object_id, buff_key) 가 이미 있으면 갱신(스택/남은시간 변경), 없으면 신규 추가.
+message BuffNtf {
+    int64 object_id      = 1;   // 대상 액터 (= character_id, 몬스터 object_id 등)
+    int64 buff_key       = 2;   // GameData_Buff 의 Key
+    int32 stack_count    = 3;
+    int32 remain_time_ms = 4;   // 남은 시간(ms). -1 = 영구(카운트다운 표시 안 함)
+}
+
+// 버프 제거 알림 (서버 -> 클라)
+// 만료 / 디스펠 / 사망·이동에 의한 정리 등 모든 제거에 공통 사용.
+message BuffRemoveNtf {
+    int64 object_id = 1;
+    int64 buff_key  = 2;
+}

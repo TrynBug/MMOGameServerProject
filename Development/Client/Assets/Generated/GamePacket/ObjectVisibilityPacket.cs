@@ -25,24 +25,28 @@ namespace GamePacket {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "CilHYW1lUGFja2V0L29iamVjdF92aXNpYmlsaXR5X3BhY2tldC5wcm90bxIK",
-            "R2FtZVBhY2tldBoWQ29tbW9uL3BhY2tldF9pZC5wcm90byLdAQoSQ2hhcmFj",
-            "dGVyU3Bhd25JbmZvEhEKCW9iamVjdF9pZBgBIAEoAxIVCg1vd25lcl91c2Vy",
-            "X2lkGAIgASgDEgwKBG5hbWUYAyABKAkSDgoGam9iX2lkGAQgASgFEg0KBWxl",
-            "dmVsGAUgASgFEgoKAmhwGAYgASgFEg4KBm1heF9ocBgHIAEoBRIKCgJtcBgI",
-            "IAEoBRIOCgZtYXhfbXAYCSABKAUSDQoFcG9zX3gYCiABKAISDQoFcG9zX3kY",
-            "CyABKAISCwoDeWF3GAwgASgCEg0KBXBvc196GA0gASgCInQKEE1vbnN0ZXJT",
-            "cGF3bkluZm8SEQoJb2JqZWN0X2lkGAEgASgDEhMKC21vbnN0ZXJfa2V5GAIg",
-            "ASgDEg0KBXBvc194GAMgASgCEg0KBXBvc195GAQgASgCEgsKA3lhdxgFIAEo",
-            "AhINCgVwb3NfehgGIAEoAiKaAQoTT2JqZWN0VmlzaWJpbGl0eU50ZhI4ChBj",
-            "aGFyYWN0ZXJfc3Bhd25zGAEgAygLMh4uR2FtZVBhY2tldC5DaGFyYWN0ZXJT",
-            "cGF3bkluZm8SNAoObW9uc3Rlcl9zcGF3bnMYAiADKAsyHC5HYW1lUGFja2V0",
-            "Lk1vbnN0ZXJTcGF3bkluZm8SEwoLZGVzcGF3bl9pZHMYCiADKANiBnByb3Rv",
-            "Mw=="));
+            "R2FtZVBhY2tldBoWQ29tbW9uL3BhY2tldF9pZC5wcm90byJRChBCdWZmU25h",
+            "cHNob3RJbmZvEhAKCGJ1ZmZfa2V5GAEgASgDEhMKC3N0YWNrX2NvdW50GAIg",
+            "ASgFEhYKDnJlbWFpbl90aW1lX21zGAMgASgFIooCChJDaGFyYWN0ZXJTcGF3",
+            "bkluZm8SEQoJb2JqZWN0X2lkGAEgASgDEhUKDW93bmVyX3VzZXJfaWQYAiAB",
+            "KAMSDAoEbmFtZRgDIAEoCRIOCgZqb2JfaWQYBCABKAUSDQoFbGV2ZWwYBSAB",
+            "KAUSCgoCaHAYBiABKAUSDgoGbWF4X2hwGAcgASgFEgoKAm1wGAggASgFEg4K",
+            "Bm1heF9tcBgJIAEoBRINCgVwb3NfeBgKIAEoAhINCgVwb3NfeRgLIAEoAhIL",
+            "CgN5YXcYDCABKAISDQoFcG9zX3oYDSABKAISKwoFYnVmZnMYDiADKAsyHC5H",
+            "YW1lUGFja2V0LkJ1ZmZTbmFwc2hvdEluZm8ioQEKEE1vbnN0ZXJTcGF3bklu",
+            "Zm8SEQoJb2JqZWN0X2lkGAEgASgDEhMKC21vbnN0ZXJfa2V5GAIgASgDEg0K",
+            "BXBvc194GAMgASgCEg0KBXBvc195GAQgASgCEgsKA3lhdxgFIAEoAhINCgVw",
+            "b3NfehgGIAEoAhIrCgVidWZmcxgHIAMoCzIcLkdhbWVQYWNrZXQuQnVmZlNu",
+            "YXBzaG90SW5mbyKaAQoTT2JqZWN0VmlzaWJpbGl0eU50ZhI4ChBjaGFyYWN0",
+            "ZXJfc3Bhd25zGAEgAygLMh4uR2FtZVBhY2tldC5DaGFyYWN0ZXJTcGF3bklu",
+            "Zm8SNAoObW9uc3Rlcl9zcGF3bnMYAiADKAsyHC5HYW1lUGFja2V0Lk1vbnN0",
+            "ZXJTcGF3bkluZm8SEwoLZGVzcGF3bl9pZHMYCiADKANiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSpawnInfo), global::GamePacket.CharacterSpawnInfo.Parser, new[]{ "ObjectId", "OwnerUserId", "Name", "JobId", "Level", "Hp", "MaxHp", "Mp", "MaxMp", "PosX", "PosY", "Yaw", "PosZ" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.MonsterSpawnInfo), global::GamePacket.MonsterSpawnInfo.Parser, new[]{ "ObjectId", "MonsterKey", "PosX", "PosY", "Yaw", "PosZ" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.BuffSnapshotInfo), global::GamePacket.BuffSnapshotInfo.Parser, new[]{ "BuffKey", "StackCount", "RemainTimeMs" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSpawnInfo), global::GamePacket.CharacterSpawnInfo.Parser, new[]{ "ObjectId", "OwnerUserId", "Name", "JobId", "Level", "Hp", "MaxHp", "Mp", "MaxMp", "PosX", "PosY", "Yaw", "PosZ", "Buffs" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.MonsterSpawnInfo), global::GamePacket.MonsterSpawnInfo.Parser, new[]{ "ObjectId", "MonsterKey", "PosX", "PosY", "Yaw", "PosZ", "Buffs" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ObjectVisibilityNtf), global::GamePacket.ObjectVisibilityNtf.Parser, new[]{ "CharacterSpawns", "MonsterSpawns", "DespawnIds" }, null, null, null, null)
           }));
     }
@@ -50,6 +54,288 @@ namespace GamePacket {
 
   }
   #region Messages
+  /// <summary>
+  /// 가시 범위 진입 시 해당 오브젝트가 보유한 버프 1개 (UI 뱃지용).
+  /// 스탯/HP 효과는 별도(StatUpdateNtf/HpMpNtf)로 전달되며, 여기는 표시 정보만 담는다.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class BuffSnapshotInfo : pb::IMessage<BuffSnapshotInfo>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<BuffSnapshotInfo> _parser = new pb::MessageParser<BuffSnapshotInfo>(() => new BuffSnapshotInfo());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<BuffSnapshotInfo> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::GamePacket.ObjectVisibilityPacketReflection.Descriptor.MessageTypes[0]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public BuffSnapshotInfo() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public BuffSnapshotInfo(BuffSnapshotInfo other) : this() {
+      buffKey_ = other.buffKey_;
+      stackCount_ = other.stackCount_;
+      remainTimeMs_ = other.remainTimeMs_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public BuffSnapshotInfo Clone() {
+      return new BuffSnapshotInfo(this);
+    }
+
+    /// <summary>Field number for the "buff_key" field.</summary>
+    public const int BuffKeyFieldNumber = 1;
+    private long buffKey_;
+    /// <summary>
+    /// GameData_Buff 의 Key
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long BuffKey {
+      get { return buffKey_; }
+      set {
+        buffKey_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "stack_count" field.</summary>
+    public const int StackCountFieldNumber = 2;
+    private int stackCount_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int StackCount {
+      get { return stackCount_; }
+      set {
+        stackCount_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "remain_time_ms" field.</summary>
+    public const int RemainTimeMsFieldNumber = 3;
+    private int remainTimeMs_;
+    /// <summary>
+    /// 남은 시간(ms). -1 = 영구(카운트다운 표시 안 함)
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int RemainTimeMs {
+      get { return remainTimeMs_; }
+      set {
+        remainTimeMs_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as BuffSnapshotInfo);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(BuffSnapshotInfo other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (BuffKey != other.BuffKey) return false;
+      if (StackCount != other.StackCount) return false;
+      if (RemainTimeMs != other.RemainTimeMs) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (BuffKey != 0L) hash ^= BuffKey.GetHashCode();
+      if (StackCount != 0) hash ^= StackCount.GetHashCode();
+      if (RemainTimeMs != 0) hash ^= RemainTimeMs.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (BuffKey != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(BuffKey);
+      }
+      if (StackCount != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(StackCount);
+      }
+      if (RemainTimeMs != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(RemainTimeMs);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (BuffKey != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(BuffKey);
+      }
+      if (StackCount != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(StackCount);
+      }
+      if (RemainTimeMs != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(RemainTimeMs);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (BuffKey != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(BuffKey);
+      }
+      if (StackCount != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(StackCount);
+      }
+      if (RemainTimeMs != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(RemainTimeMs);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(BuffSnapshotInfo other) {
+      if (other == null) {
+        return;
+      }
+      if (other.BuffKey != 0L) {
+        BuffKey = other.BuffKey;
+      }
+      if (other.StackCount != 0) {
+        StackCount = other.StackCount;
+      }
+      if (other.RemainTimeMs != 0) {
+        RemainTimeMs = other.RemainTimeMs;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            BuffKey = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            StackCount = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            RemainTimeMs = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            BuffKey = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            StackCount = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            RemainTimeMs = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
   /// <summary>
   /// 캐릭터 spawn 정보. 클라이언트가 화면에 캐릭터를 표시하는데 필요한 최소 정보.
   /// 좌표계: Unity 와 동일. Y가 높이, X-Z 가 평면.
@@ -69,7 +355,7 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GamePacket.ObjectVisibilityPacketReflection.Descriptor.MessageTypes[0]; }
+      get { return global::GamePacket.ObjectVisibilityPacketReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -102,6 +388,7 @@ namespace GamePacket {
       posY_ = other.posY_;
       yaw_ = other.yaw_;
       posZ_ = other.posZ_;
+      buffs_ = other.buffs_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -279,6 +566,20 @@ namespace GamePacket {
       }
     }
 
+    /// <summary>Field number for the "buffs" field.</summary>
+    public const int BuffsFieldNumber = 14;
+    private static readonly pb::FieldCodec<global::GamePacket.BuffSnapshotInfo> _repeated_buffs_codec
+        = pb::FieldCodec.ForMessage(114, global::GamePacket.BuffSnapshotInfo.Parser);
+    private readonly pbc::RepeatedField<global::GamePacket.BuffSnapshotInfo> buffs_ = new pbc::RepeatedField<global::GamePacket.BuffSnapshotInfo>();
+    /// <summary>
+    /// 현재 보유 버프 (UI 뱃지용)
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::GamePacket.BuffSnapshotInfo> Buffs {
+      get { return buffs_; }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -307,6 +608,7 @@ namespace GamePacket {
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Yaw, other.Yaw)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
+      if(!buffs_.Equals(other.buffs_)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -327,6 +629,7 @@ namespace GamePacket {
       if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
       if (Yaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Yaw);
       if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
+      hash ^= buffs_.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -397,6 +700,7 @@ namespace GamePacket {
         output.WriteRawTag(109);
         output.WriteFloat(PosZ);
       }
+      buffs_.WriteTo(output, _repeated_buffs_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -459,6 +763,7 @@ namespace GamePacket {
         output.WriteRawTag(109);
         output.WriteFloat(PosZ);
       }
+      buffs_.WriteTo(ref output, _repeated_buffs_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -508,6 +813,7 @@ namespace GamePacket {
       if (PosZ != 0F) {
         size += 1 + 4;
       }
+      size += buffs_.CalculateSize(_repeated_buffs_codec);
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -559,6 +865,7 @@ namespace GamePacket {
       if (other.PosZ != 0F) {
         PosZ = other.PosZ;
       }
+      buffs_.Add(other.buffs_);
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -628,6 +935,10 @@ namespace GamePacket {
           }
           case 109: {
             PosZ = input.ReadFloat();
+            break;
+          }
+          case 114: {
+            buffs_.AddEntriesFrom(input, _repeated_buffs_codec);
             break;
           }
         }
@@ -701,6 +1012,10 @@ namespace GamePacket {
             PosZ = input.ReadFloat();
             break;
           }
+          case 114: {
+            buffs_.AddEntriesFrom(ref input, _repeated_buffs_codec);
+            break;
+          }
         }
       }
     }
@@ -728,7 +1043,7 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GamePacket.ObjectVisibilityPacketReflection.Descriptor.MessageTypes[1]; }
+      get { return global::GamePacket.ObjectVisibilityPacketReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -754,6 +1069,7 @@ namespace GamePacket {
       posY_ = other.posY_;
       yaw_ = other.yaw_;
       posZ_ = other.posZ_;
+      buffs_ = other.buffs_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -847,6 +1163,20 @@ namespace GamePacket {
       }
     }
 
+    /// <summary>Field number for the "buffs" field.</summary>
+    public const int BuffsFieldNumber = 7;
+    private static readonly pb::FieldCodec<global::GamePacket.BuffSnapshotInfo> _repeated_buffs_codec
+        = pb::FieldCodec.ForMessage(58, global::GamePacket.BuffSnapshotInfo.Parser);
+    private readonly pbc::RepeatedField<global::GamePacket.BuffSnapshotInfo> buffs_ = new pbc::RepeatedField<global::GamePacket.BuffSnapshotInfo>();
+    /// <summary>
+    /// 현재 보유 버프 (UI 뱃지용)
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::GamePacket.BuffSnapshotInfo> Buffs {
+      get { return buffs_; }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -868,6 +1198,7 @@ namespace GamePacket {
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Yaw, other.Yaw)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
+      if(!buffs_.Equals(other.buffs_)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -881,6 +1212,7 @@ namespace GamePacket {
       if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
       if (Yaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Yaw);
       if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
+      hash ^= buffs_.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -923,6 +1255,7 @@ namespace GamePacket {
         output.WriteRawTag(53);
         output.WriteFloat(PosZ);
       }
+      buffs_.WriteTo(output, _repeated_buffs_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -957,6 +1290,7 @@ namespace GamePacket {
         output.WriteRawTag(53);
         output.WriteFloat(PosZ);
       }
+      buffs_.WriteTo(ref output, _repeated_buffs_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -985,6 +1319,7 @@ namespace GamePacket {
       if (PosZ != 0F) {
         size += 1 + 4;
       }
+      size += buffs_.CalculateSize(_repeated_buffs_codec);
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -1015,6 +1350,7 @@ namespace GamePacket {
       if (other.PosZ != 0F) {
         PosZ = other.PosZ;
       }
+      buffs_.Add(other.buffs_);
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -1056,6 +1392,10 @@ namespace GamePacket {
           }
           case 53: {
             PosZ = input.ReadFloat();
+            break;
+          }
+          case 58: {
+            buffs_.AddEntriesFrom(input, _repeated_buffs_codec);
             break;
           }
         }
@@ -1101,6 +1441,10 @@ namespace GamePacket {
             PosZ = input.ReadFloat();
             break;
           }
+          case 58: {
+            buffs_.AddEntriesFrom(ref input, _repeated_buffs_codec);
+            break;
+          }
         }
       }
     }
@@ -1128,7 +1472,7 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GamePacket.ObjectVisibilityPacketReflection.Descriptor.MessageTypes[2]; }
+      get { return global::GamePacket.ObjectVisibilityPacketReflection.Descriptor.MessageTypes[3]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

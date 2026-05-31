@@ -58,6 +58,10 @@ enum GamePacketId {
     // 6000~6999: 스탯
     GAME_PACKET_ID_STAT_UPDATE_NTF = 6001;   // 서버 -> 클라: 합성 스탯 스냅샷 (최대HP/MP, 이동속도, 공격속도 등. 0 아닌 항목만)
     GAME_PACKET_ID_HP_MP_NTF       = 6002;   // 서버 -> 클라: 현재 HP/MP (대미지/회복으로 자주 갱신되는 런타임 값)
+
+    // 7000~7999: 버프
+    GAME_PACKET_ID_BUFF_NTF        = 7001;   // 서버 -> 클라: 버프 추가/갱신 (upsert. UI 뱃지용. 스탯 효과는 StatUpdateNtf/HpMpNtf로 별도 전송)
+    GAME_PACKET_ID_BUFF_REMOVE_NTF = 7002;   // 서버 -> 클라: 버프 제거
 }
 
 // 서버 <-> 서버 패킷 ID

@@ -17,6 +17,14 @@ import "Common/packet_id.proto";
 // idempotent 처리: 같은 object_id가 이미 사전에 있으면 정보를 갱신, 없으면 신규 생성.
 // 자기 자신의 캐릭터도 spawns에 포함될 수 있다 (owner_user_id로 자기/남 구분).
 
+// 가시 범위 진입 시 해당 오브젝트가 보유한 버프 1개 (UI 뱃지용).
+// 스탯/HP 효과는 별도(StatUpdateNtf/HpMpNtf)로 전달되며, 여기는 표시 정보만 담는다.
+message BuffSnapshotInfo {
+    int64 buff_key       = 1;   // GameData_Buff 의 Key
+    int32 stack_count    = 2;
+    int32 remain_time_ms = 3;   // 남은 시간(ms). -1 = 영구(카운트다운 표시 안 함)
+}
+
 // 캐릭터 spawn 정보. 클라이언트가 화면에 캐릭터를 표시하는데 필요한 최소 정보.
 // 좌표계: Unity 와 동일. Y가 높이, X-Z 가 평면.
 message CharacterSpawnInfo {
@@ -33,6 +41,7 @@ message CharacterSpawnInfo {
     float  pos_y          = 11;  // 높이
     float  yaw            = 12;  // Y축 회전, degree 단위
     float  pos_z          = 13;  // 평면 깊이축
+    repeated BuffSnapshotInfo buffs = 14;  // 현재 보유 버프 (UI 뱃지용)
 }
 
 // 몬스터 spawn 정보. 클라이언트는 monster_key 로 몬스터 게임데이터를 조회해
@@ -45,6 +54,7 @@ message MonsterSpawnInfo {
     float pos_y       = 4;   // 높이
     float yaw         = 5;   // Y축 회전, degree 단위
     float pos_z       = 6;   // 평면 깊이축
+    repeated BuffSnapshotInfo buffs = 7;   // 현재 보유 버프 (UI 뱃지용)
 }
 
 // 오브젝트 가시성 변경 알림 (서버 -> 클라)

@@ -54,6 +54,10 @@ extern "C" {
 extern const ::google::protobuf::internal::DescriptorTable descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto;
 }  // extern "C"
 namespace GamePacket {
+class BuffSnapshotInfo;
+struct BuffSnapshotInfoDefaultTypeInternal;
+extern BuffSnapshotInfoDefaultTypeInternal _BuffSnapshotInfo_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull BuffSnapshotInfo_class_data_;
 class CharacterSpawnInfo;
 struct CharacterSpawnInfoDefaultTypeInternal;
 extern CharacterSpawnInfoDefaultTypeInternal _CharacterSpawnInfo_default_instance_;
@@ -77,6 +81,220 @@ namespace GamePacket {
 // ===================================================================
 
 
+// -------------------------------------------------------------------
+
+class BuffSnapshotInfo final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.BuffSnapshotInfo) */ {
+ public:
+  inline BuffSnapshotInfo() : BuffSnapshotInfo(nullptr) {}
+  ~BuffSnapshotInfo() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(BuffSnapshotInfo* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(BuffSnapshotInfo));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR BuffSnapshotInfo(::google::protobuf::internal::ConstantInitialized);
+
+  inline BuffSnapshotInfo(const BuffSnapshotInfo& from) : BuffSnapshotInfo(nullptr, from) {}
+  inline BuffSnapshotInfo(BuffSnapshotInfo&& from) noexcept
+      : BuffSnapshotInfo(nullptr, ::std::move(from)) {}
+  inline BuffSnapshotInfo& operator=(const BuffSnapshotInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline BuffSnapshotInfo& operator=(BuffSnapshotInfo&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const BuffSnapshotInfo& default_instance() {
+    return *reinterpret_cast<const BuffSnapshotInfo*>(
+        &_BuffSnapshotInfo_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 0;
+  friend void swap(BuffSnapshotInfo& a, BuffSnapshotInfo& b) { a.Swap(&b); }
+  inline void Swap(BuffSnapshotInfo* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(BuffSnapshotInfo* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  BuffSnapshotInfo* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<BuffSnapshotInfo>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const BuffSnapshotInfo& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const BuffSnapshotInfo& from) { BuffSnapshotInfo::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(BuffSnapshotInfo* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.BuffSnapshotInfo"; }
+
+  explicit BuffSnapshotInfo(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  BuffSnapshotInfo(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const BuffSnapshotInfo& from);
+  BuffSnapshotInfo(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, BuffSnapshotInfo&& from) noexcept
+      : BuffSnapshotInfo(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kBuffKeyFieldNumber = 1,
+    kStackCountFieldNumber = 2,
+    kRemainTimeMsFieldNumber = 3,
+  };
+  // int64 buff_key = 1;
+  void clear_buff_key() ;
+  ::int64_t buff_key() const;
+  void set_buff_key(::int64_t value);
+
+  private:
+  ::int64_t _internal_buff_key() const;
+  void _internal_set_buff_key(::int64_t value);
+
+  public:
+  // int32 stack_count = 2;
+  void clear_stack_count() ;
+  ::int32_t stack_count() const;
+  void set_stack_count(::int32_t value);
+
+  private:
+  ::int32_t _internal_stack_count() const;
+  void _internal_set_stack_count(::int32_t value);
+
+  public:
+  // int32 remain_time_ms = 3;
+  void clear_remain_time_ms() ;
+  ::int32_t remain_time_ms() const;
+  void set_remain_time_ms(::int32_t value);
+
+  private:
+  ::int32_t _internal_remain_time_ms() const;
+  void _internal_set_remain_time_ms(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.BuffSnapshotInfo)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 3,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const BuffSnapshotInfo& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int64_t buff_key_;
+    ::int32_t stack_count_;
+    ::int32_t remain_time_ms_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fobject_5fvisibility_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull BuffSnapshotInfo_class_data_;
 // -------------------------------------------------------------------
 
 class MonsterSpawnInfo final : public ::google::protobuf::Message
@@ -134,7 +352,7 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
     return *reinterpret_cast<const MonsterSpawnInfo*>(
         &_MonsterSpawnInfo_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 2;
   friend void swap(MonsterSpawnInfo& a, MonsterSpawnInfo& b) { a.Swap(&b); }
   inline void Swap(MonsterSpawnInfo* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -221,6 +439,7 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
+    kBuffsFieldNumber = 7,
     kObjectIdFieldNumber = 1,
     kMonsterKeyFieldNumber = 2,
     kPosXFieldNumber = 3,
@@ -228,6 +447,23 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
     kYawFieldNumber = 5,
     kPosZFieldNumber = 6,
   };
+  // repeated .GamePacket.BuffSnapshotInfo buffs = 7;
+  int buffs_size() const;
+  private:
+  int _internal_buffs_size() const;
+
+  public:
+  void clear_buffs() ;
+  ::GamePacket::BuffSnapshotInfo* PROTOBUF_NONNULL mutable_buffs(int index);
+  ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>* PROTOBUF_NONNULL mutable_buffs();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>& _internal_buffs() const;
+  ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>* PROTOBUF_NONNULL _internal_mutable_buffs();
+  public:
+  const ::GamePacket::BuffSnapshotInfo& buffs(int index) const;
+  ::GamePacket::BuffSnapshotInfo* PROTOBUF_NONNULL add_buffs();
+  const ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>& buffs() const;
   // int64 object_id = 1;
   void clear_object_id() ;
   ::int64_t object_id() const;
@@ -292,8 +528,8 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 6,
-                                   0, 0,
+  static const ::google::protobuf::internal::TcParseTable<3, 7,
+                                   1, 0,
                                    2>
       _table_;
 
@@ -314,6 +550,7 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
         const MonsterSpawnInfo& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::RepeatedPtrField< ::GamePacket::BuffSnapshotInfo > buffs_;
     ::int64_t object_id_;
     ::int64_t monster_key_;
     float pos_x_;
@@ -384,7 +621,7 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
     return *reinterpret_cast<const CharacterSpawnInfo*>(
         &_CharacterSpawnInfo_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 0;
+  static constexpr int kIndexInFileMessages = 1;
   friend void swap(CharacterSpawnInfo& a, CharacterSpawnInfo& b) { a.Swap(&b); }
   inline void Swap(CharacterSpawnInfo* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -471,6 +708,7 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
+    kBuffsFieldNumber = 14,
     kNameFieldNumber = 3,
     kObjectIdFieldNumber = 1,
     kOwnerUserIdFieldNumber = 2,
@@ -485,6 +723,23 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
     kYawFieldNumber = 12,
     kPosZFieldNumber = 13,
   };
+  // repeated .GamePacket.BuffSnapshotInfo buffs = 14;
+  int buffs_size() const;
+  private:
+  int _internal_buffs_size() const;
+
+  public:
+  void clear_buffs() ;
+  ::GamePacket::BuffSnapshotInfo* PROTOBUF_NONNULL mutable_buffs(int index);
+  ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>* PROTOBUF_NONNULL mutable_buffs();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>& _internal_buffs() const;
+  ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>* PROTOBUF_NONNULL _internal_mutable_buffs();
+  public:
+  const ::GamePacket::BuffSnapshotInfo& buffs(int index) const;
+  ::GamePacket::BuffSnapshotInfo* PROTOBUF_NONNULL add_buffs();
+  const ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>& buffs() const;
   // string name = 3;
   void clear_name() ;
   const ::std::string& name() const;
@@ -624,8 +879,8 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<4, 13,
-                                   0, 50,
+  static const ::google::protobuf::internal::TcParseTable<4, 14,
+                                   1, 50,
                                    2>
       _table_;
 
@@ -646,6 +901,7 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
         const CharacterSpawnInfo& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::RepeatedPtrField< ::GamePacket::BuffSnapshotInfo > buffs_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::int64_t object_id_;
     ::int64_t owner_user_id_;
@@ -723,7 +979,7 @@ class ObjectVisibilityNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const ObjectVisibilityNtf*>(
         &_ObjectVisibilityNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 2;
+  static constexpr int kIndexInFileMessages = 3;
   friend void swap(ObjectVisibilityNtf& a, ObjectVisibilityNtf& b) { a.Swap(&b); }
   inline void Swap(ObjectVisibilityNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -918,6 +1174,85 @@ extern const ::google::protobuf::internal::ClassDataFull ObjectVisibilityNtf_cla
 #endif  // __GNUC__
 // -------------------------------------------------------------------
 
+// BuffSnapshotInfo
+
+// int64 buff_key = 1;
+inline void BuffSnapshotInfo::clear_buff_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.buff_key_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::int64_t BuffSnapshotInfo::buff_key() const {
+  // @@protoc_insertion_point(field_get:GamePacket.BuffSnapshotInfo.buff_key)
+  return _internal_buff_key();
+}
+inline void BuffSnapshotInfo::set_buff_key(::int64_t value) {
+  _internal_set_buff_key(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_set:GamePacket.BuffSnapshotInfo.buff_key)
+}
+inline ::int64_t BuffSnapshotInfo::_internal_buff_key() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.buff_key_;
+}
+inline void BuffSnapshotInfo::_internal_set_buff_key(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.buff_key_ = value;
+}
+
+// int32 stack_count = 2;
+inline void BuffSnapshotInfo::clear_stack_count() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.stack_count_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline ::int32_t BuffSnapshotInfo::stack_count() const {
+  // @@protoc_insertion_point(field_get:GamePacket.BuffSnapshotInfo.stack_count)
+  return _internal_stack_count();
+}
+inline void BuffSnapshotInfo::set_stack_count(::int32_t value) {
+  _internal_set_stack_count(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:GamePacket.BuffSnapshotInfo.stack_count)
+}
+inline ::int32_t BuffSnapshotInfo::_internal_stack_count() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.stack_count_;
+}
+inline void BuffSnapshotInfo::_internal_set_stack_count(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.stack_count_ = value;
+}
+
+// int32 remain_time_ms = 3;
+inline void BuffSnapshotInfo::clear_remain_time_ms() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.remain_time_ms_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline ::int32_t BuffSnapshotInfo::remain_time_ms() const {
+  // @@protoc_insertion_point(field_get:GamePacket.BuffSnapshotInfo.remain_time_ms)
+  return _internal_remain_time_ms();
+}
+inline void BuffSnapshotInfo::set_remain_time_ms(::int32_t value) {
+  _internal_set_remain_time_ms(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:GamePacket.BuffSnapshotInfo.remain_time_ms)
+}
+inline ::int32_t BuffSnapshotInfo::_internal_remain_time_ms() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.remain_time_ms_;
+}
+inline void BuffSnapshotInfo::_internal_set_remain_time_ms(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.remain_time_ms_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // CharacterSpawnInfo
 
 // int64 object_id = 1;
@@ -925,7 +1260,7 @@ inline void CharacterSpawnInfo::clear_object_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.object_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000002U);
+                  0x00000004U);
 }
 inline ::int64_t CharacterSpawnInfo::object_id() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.object_id)
@@ -933,7 +1268,7 @@ inline ::int64_t CharacterSpawnInfo::object_id() const {
 }
 inline void CharacterSpawnInfo::set_object_id(::int64_t value) {
   _internal_set_object_id(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.object_id)
 }
 inline ::int64_t CharacterSpawnInfo::_internal_object_id() const {
@@ -950,7 +1285,7 @@ inline void CharacterSpawnInfo::clear_owner_user_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.owner_user_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000008U);
 }
 inline ::int64_t CharacterSpawnInfo::owner_user_id() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.owner_user_id)
@@ -958,7 +1293,7 @@ inline ::int64_t CharacterSpawnInfo::owner_user_id() const {
 }
 inline void CharacterSpawnInfo::set_owner_user_id(::int64_t value) {
   _internal_set_owner_user_id(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.owner_user_id)
 }
 inline ::int64_t CharacterSpawnInfo::_internal_owner_user_id() const {
@@ -975,7 +1310,7 @@ inline void CharacterSpawnInfo::clear_name() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.name_.ClearToEmpty();
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000001U);
+                  0x00000002U);
 }
 inline const ::std::string& CharacterSpawnInfo::name() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
@@ -985,13 +1320,13 @@ inline const ::std::string& CharacterSpawnInfo::name() const
 template <typename Arg_, typename... Args_>
 PROTOBUF_ALWAYS_INLINE void CharacterSpawnInfo::set_name(Arg_&& arg, Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
   _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.name)
 }
 inline ::std::string* PROTOBUF_NONNULL CharacterSpawnInfo::mutable_name()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
   ::std::string* _s = _internal_mutable_name();
   // @@protoc_insertion_point(field_mutable:GamePacket.CharacterSpawnInfo.name)
   return _s;
@@ -1011,10 +1346,10 @@ inline ::std::string* PROTOBUF_NONNULL CharacterSpawnInfo::_internal_mutable_nam
 inline ::std::string* PROTOBUF_NULLABLE CharacterSpawnInfo::release_name() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   // @@protoc_insertion_point(field_release:GamePacket.CharacterSpawnInfo.name)
-  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000001U)) {
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000002U)) {
     return nullptr;
   }
-  ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
   auto* released = _impl_.name_.Release();
   if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
     _impl_.name_.Set("", GetArena());
@@ -1024,9 +1359,9 @@ inline ::std::string* PROTOBUF_NULLABLE CharacterSpawnInfo::release_name() {
 inline void CharacterSpawnInfo::set_allocated_name(::std::string* PROTOBUF_NULLABLE value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (value != nullptr) {
-    SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+    SetHasBit(_impl_._has_bits_[0], 0x00000002U);
   } else {
-    ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+    ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
   }
   _impl_.name_.SetAllocated(value, GetArena());
   if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
@@ -1040,7 +1375,7 @@ inline void CharacterSpawnInfo::clear_job_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.job_id_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000008U);
+                  0x00000010U);
 }
 inline ::int32_t CharacterSpawnInfo::job_id() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.job_id)
@@ -1048,7 +1383,7 @@ inline ::int32_t CharacterSpawnInfo::job_id() const {
 }
 inline void CharacterSpawnInfo::set_job_id(::int32_t value) {
   _internal_set_job_id(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.job_id)
 }
 inline ::int32_t CharacterSpawnInfo::_internal_job_id() const {
@@ -1065,7 +1400,7 @@ inline void CharacterSpawnInfo::clear_level() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.level_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000010U);
+                  0x00000020U);
 }
 inline ::int32_t CharacterSpawnInfo::level() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.level)
@@ -1073,7 +1408,7 @@ inline ::int32_t CharacterSpawnInfo::level() const {
 }
 inline void CharacterSpawnInfo::set_level(::int32_t value) {
   _internal_set_level(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.level)
 }
 inline ::int32_t CharacterSpawnInfo::_internal_level() const {
@@ -1090,7 +1425,7 @@ inline void CharacterSpawnInfo::clear_hp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.hp_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000020U);
+                  0x00000040U);
 }
 inline ::int32_t CharacterSpawnInfo::hp() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.hp)
@@ -1098,7 +1433,7 @@ inline ::int32_t CharacterSpawnInfo::hp() const {
 }
 inline void CharacterSpawnInfo::set_hp(::int32_t value) {
   _internal_set_hp(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.hp)
 }
 inline ::int32_t CharacterSpawnInfo::_internal_hp() const {
@@ -1115,7 +1450,7 @@ inline void CharacterSpawnInfo::clear_max_hp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.max_hp_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000040U);
+                  0x00000080U);
 }
 inline ::int32_t CharacterSpawnInfo::max_hp() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.max_hp)
@@ -1123,7 +1458,7 @@ inline ::int32_t CharacterSpawnInfo::max_hp() const {
 }
 inline void CharacterSpawnInfo::set_max_hp(::int32_t value) {
   _internal_set_max_hp(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000080U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.max_hp)
 }
 inline ::int32_t CharacterSpawnInfo::_internal_max_hp() const {
@@ -1140,7 +1475,7 @@ inline void CharacterSpawnInfo::clear_mp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.mp_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000080U);
+                  0x00000100U);
 }
 inline ::int32_t CharacterSpawnInfo::mp() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.mp)
@@ -1148,7 +1483,7 @@ inline ::int32_t CharacterSpawnInfo::mp() const {
 }
 inline void CharacterSpawnInfo::set_mp(::int32_t value) {
   _internal_set_mp(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000080U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000100U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.mp)
 }
 inline ::int32_t CharacterSpawnInfo::_internal_mp() const {
@@ -1165,7 +1500,7 @@ inline void CharacterSpawnInfo::clear_max_mp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.max_mp_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000100U);
+                  0x00000200U);
 }
 inline ::int32_t CharacterSpawnInfo::max_mp() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.max_mp)
@@ -1173,7 +1508,7 @@ inline ::int32_t CharacterSpawnInfo::max_mp() const {
 }
 inline void CharacterSpawnInfo::set_max_mp(::int32_t value) {
   _internal_set_max_mp(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000100U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000200U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.max_mp)
 }
 inline ::int32_t CharacterSpawnInfo::_internal_max_mp() const {
@@ -1190,7 +1525,7 @@ inline void CharacterSpawnInfo::clear_pos_x() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_x_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000200U);
+                  0x00000400U);
 }
 inline float CharacterSpawnInfo::pos_x() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.pos_x)
@@ -1198,7 +1533,7 @@ inline float CharacterSpawnInfo::pos_x() const {
 }
 inline void CharacterSpawnInfo::set_pos_x(float value) {
   _internal_set_pos_x(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000200U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000400U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.pos_x)
 }
 inline float CharacterSpawnInfo::_internal_pos_x() const {
@@ -1215,7 +1550,7 @@ inline void CharacterSpawnInfo::clear_pos_y() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_y_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000400U);
+                  0x00000800U);
 }
 inline float CharacterSpawnInfo::pos_y() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.pos_y)
@@ -1223,7 +1558,7 @@ inline float CharacterSpawnInfo::pos_y() const {
 }
 inline void CharacterSpawnInfo::set_pos_y(float value) {
   _internal_set_pos_y(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000400U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000800U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.pos_y)
 }
 inline float CharacterSpawnInfo::_internal_pos_y() const {
@@ -1240,7 +1575,7 @@ inline void CharacterSpawnInfo::clear_yaw() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.yaw_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000800U);
+                  0x00001000U);
 }
 inline float CharacterSpawnInfo::yaw() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.yaw)
@@ -1248,7 +1583,7 @@ inline float CharacterSpawnInfo::yaw() const {
 }
 inline void CharacterSpawnInfo::set_yaw(float value) {
   _internal_set_yaw(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000800U);
+  SetHasBit(_impl_._has_bits_[0], 0x00001000U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.yaw)
 }
 inline float CharacterSpawnInfo::_internal_yaw() const {
@@ -1265,7 +1600,7 @@ inline void CharacterSpawnInfo::clear_pos_z() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_z_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00001000U);
+                  0x00002000U);
 }
 inline float CharacterSpawnInfo::pos_z() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.pos_z)
@@ -1273,7 +1608,7 @@ inline float CharacterSpawnInfo::pos_z() const {
 }
 inline void CharacterSpawnInfo::set_pos_z(float value) {
   _internal_set_pos_z(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00001000U);
+  SetHasBit(_impl_._has_bits_[0], 0x00002000U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.pos_z)
 }
 inline float CharacterSpawnInfo::_internal_pos_z() const {
@@ -1285,6 +1620,62 @@ inline void CharacterSpawnInfo::_internal_set_pos_z(float value) {
   _impl_.pos_z_ = value;
 }
 
+// repeated .GamePacket.BuffSnapshotInfo buffs = 14;
+inline int CharacterSpawnInfo::_internal_buffs_size() const {
+  return _internal_buffs().size();
+}
+inline int CharacterSpawnInfo::buffs_size() const {
+  return _internal_buffs_size();
+}
+inline void CharacterSpawnInfo::clear_buffs() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.buffs_.Clear();
+  ClearHasBitForRepeated(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::GamePacket::BuffSnapshotInfo* PROTOBUF_NONNULL CharacterSpawnInfo::mutable_buffs(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:GamePacket.CharacterSpawnInfo.buffs)
+  return _internal_mutable_buffs()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>* PROTOBUF_NONNULL CharacterSpawnInfo::mutable_buffs()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_mutable_list:GamePacket.CharacterSpawnInfo.buffs)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_buffs();
+}
+inline const ::GamePacket::BuffSnapshotInfo& CharacterSpawnInfo::buffs(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.buffs)
+  return _internal_buffs().Get(index);
+}
+inline ::GamePacket::BuffSnapshotInfo* PROTOBUF_NONNULL CharacterSpawnInfo::add_buffs()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::GamePacket::BuffSnapshotInfo* _add =
+      _internal_mutable_buffs()->InternalAddWithArena(
+          ::google::protobuf::MessageLite::internal_visibility(), GetArena());
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_add:GamePacket.CharacterSpawnInfo.buffs)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>& CharacterSpawnInfo::buffs() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:GamePacket.CharacterSpawnInfo.buffs)
+  return _internal_buffs();
+}
+inline const ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>&
+CharacterSpawnInfo::_internal_buffs() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.buffs_;
+}
+inline ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>* PROTOBUF_NONNULL
+CharacterSpawnInfo::_internal_mutable_buffs() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.buffs_;
+}
+
 // -------------------------------------------------------------------
 
 // MonsterSpawnInfo
@@ -1294,7 +1685,7 @@ inline void MonsterSpawnInfo::clear_object_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.object_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000001U);
+                  0x00000002U);
 }
 inline ::int64_t MonsterSpawnInfo::object_id() const {
   // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.object_id)
@@ -1302,7 +1693,7 @@ inline ::int64_t MonsterSpawnInfo::object_id() const {
 }
 inline void MonsterSpawnInfo::set_object_id(::int64_t value) {
   _internal_set_object_id(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
   // @@protoc_insertion_point(field_set:GamePacket.MonsterSpawnInfo.object_id)
 }
 inline ::int64_t MonsterSpawnInfo::_internal_object_id() const {
@@ -1319,7 +1710,7 @@ inline void MonsterSpawnInfo::clear_monster_key() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.monster_key_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000002U);
+                  0x00000004U);
 }
 inline ::int64_t MonsterSpawnInfo::monster_key() const {
   // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.monster_key)
@@ -1327,7 +1718,7 @@ inline ::int64_t MonsterSpawnInfo::monster_key() const {
 }
 inline void MonsterSpawnInfo::set_monster_key(::int64_t value) {
   _internal_set_monster_key(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   // @@protoc_insertion_point(field_set:GamePacket.MonsterSpawnInfo.monster_key)
 }
 inline ::int64_t MonsterSpawnInfo::_internal_monster_key() const {
@@ -1344,7 +1735,7 @@ inline void MonsterSpawnInfo::clear_pos_x() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_x_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000008U);
 }
 inline float MonsterSpawnInfo::pos_x() const {
   // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.pos_x)
@@ -1352,7 +1743,7 @@ inline float MonsterSpawnInfo::pos_x() const {
 }
 inline void MonsterSpawnInfo::set_pos_x(float value) {
   _internal_set_pos_x(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   // @@protoc_insertion_point(field_set:GamePacket.MonsterSpawnInfo.pos_x)
 }
 inline float MonsterSpawnInfo::_internal_pos_x() const {
@@ -1369,7 +1760,7 @@ inline void MonsterSpawnInfo::clear_pos_y() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_y_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000008U);
+                  0x00000010U);
 }
 inline float MonsterSpawnInfo::pos_y() const {
   // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.pos_y)
@@ -1377,7 +1768,7 @@ inline float MonsterSpawnInfo::pos_y() const {
 }
 inline void MonsterSpawnInfo::set_pos_y(float value) {
   _internal_set_pos_y(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
   // @@protoc_insertion_point(field_set:GamePacket.MonsterSpawnInfo.pos_y)
 }
 inline float MonsterSpawnInfo::_internal_pos_y() const {
@@ -1394,7 +1785,7 @@ inline void MonsterSpawnInfo::clear_yaw() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.yaw_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000010U);
+                  0x00000020U);
 }
 inline float MonsterSpawnInfo::yaw() const {
   // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.yaw)
@@ -1402,7 +1793,7 @@ inline float MonsterSpawnInfo::yaw() const {
 }
 inline void MonsterSpawnInfo::set_yaw(float value) {
   _internal_set_yaw(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
   // @@protoc_insertion_point(field_set:GamePacket.MonsterSpawnInfo.yaw)
 }
 inline float MonsterSpawnInfo::_internal_yaw() const {
@@ -1419,7 +1810,7 @@ inline void MonsterSpawnInfo::clear_pos_z() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_z_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000020U);
+                  0x00000040U);
 }
 inline float MonsterSpawnInfo::pos_z() const {
   // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.pos_z)
@@ -1427,7 +1818,7 @@ inline float MonsterSpawnInfo::pos_z() const {
 }
 inline void MonsterSpawnInfo::set_pos_z(float value) {
   _internal_set_pos_z(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
   // @@protoc_insertion_point(field_set:GamePacket.MonsterSpawnInfo.pos_z)
 }
 inline float MonsterSpawnInfo::_internal_pos_z() const {
@@ -1437,6 +1828,62 @@ inline float MonsterSpawnInfo::_internal_pos_z() const {
 inline void MonsterSpawnInfo::_internal_set_pos_z(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_z_ = value;
+}
+
+// repeated .GamePacket.BuffSnapshotInfo buffs = 7;
+inline int MonsterSpawnInfo::_internal_buffs_size() const {
+  return _internal_buffs().size();
+}
+inline int MonsterSpawnInfo::buffs_size() const {
+  return _internal_buffs_size();
+}
+inline void MonsterSpawnInfo::clear_buffs() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.buffs_.Clear();
+  ClearHasBitForRepeated(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::GamePacket::BuffSnapshotInfo* PROTOBUF_NONNULL MonsterSpawnInfo::mutable_buffs(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:GamePacket.MonsterSpawnInfo.buffs)
+  return _internal_mutable_buffs()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>* PROTOBUF_NONNULL MonsterSpawnInfo::mutable_buffs()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_mutable_list:GamePacket.MonsterSpawnInfo.buffs)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_buffs();
+}
+inline const ::GamePacket::BuffSnapshotInfo& MonsterSpawnInfo::buffs(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.buffs)
+  return _internal_buffs().Get(index);
+}
+inline ::GamePacket::BuffSnapshotInfo* PROTOBUF_NONNULL MonsterSpawnInfo::add_buffs()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::GamePacket::BuffSnapshotInfo* _add =
+      _internal_mutable_buffs()->InternalAddWithArena(
+          ::google::protobuf::MessageLite::internal_visibility(), GetArena());
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_add:GamePacket.MonsterSpawnInfo.buffs)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>& MonsterSpawnInfo::buffs() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:GamePacket.MonsterSpawnInfo.buffs)
+  return _internal_buffs();
+}
+inline const ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>&
+MonsterSpawnInfo::_internal_buffs() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.buffs_;
+}
+inline ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>* PROTOBUF_NONNULL
+MonsterSpawnInfo::_internal_mutable_buffs() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.buffs_;
 }
 
 // -------------------------------------------------------------------
