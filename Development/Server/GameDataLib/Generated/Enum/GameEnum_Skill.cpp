@@ -5,92 +5,124 @@
 
 #include "GameEnum_Skill.h"
 
-ESkillCategory StringToSkillCategory(const std::string& v)
+ESkillCastClass StringToSkillCastClass(const std::string& v)
 {
-    if (v == "None") return ESkillCategory::None;
-    if (v == "StationaryCast") return ESkillCategory::StationaryCast;
-    if (v == "MobileCast") return ESkillCategory::MobileCast;
-    if (v == "Movement") return ESkillCategory::Movement;
-    return ESkillCategory::None;
+    if (v == "None") return ESkillCastClass::None;
+    if (v == "Stationary") return ESkillCastClass::Stationary;
+    if (v == "Mobile") return ESkillCastClass::Mobile;
+    if (v == "Mobility") return ESkillCastClass::Mobility;
+    return ESkillCastClass::None;
 }
 
-std::string SkillCategoryToString(ESkillCategory v)
+std::string SkillCastClassToString(ESkillCastClass v)
 {
     switch (v)
     {
-    case ESkillCategory::None: return "None";
-    case ESkillCategory::StationaryCast: return "StationaryCast";
-    case ESkillCategory::MobileCast: return "MobileCast";
-    case ESkillCategory::Movement: return "Movement";
+    case ESkillCastClass::None: return "None";
+    case ESkillCastClass::Stationary: return "Stationary";
+    case ESkillCastClass::Mobile: return "Mobile";
+    case ESkillCastClass::Mobility: return "Mobility";
     default: return "None";
     }
 }
 
-EEffectType StringToEffectType(const std::string& v)
+ENextSkillOrigin StringToNextSkillOrigin(const std::string& v)
 {
-    if (v == "None") return EEffectType::None;
-    if (v == "Movement") return EEffectType::Movement;
-    if (v == "Projectile") return EEffectType::Projectile;
-    if (v == "InstantDamage") return EEffectType::InstantDamage;
-    if (v == "TickDamageArea") return EEffectType::TickDamageArea;
-    if (v == "Buff") return EEffectType::Buff;
-    if (v == "VFX") return EEffectType::VFX;
-    return EEffectType::None;
+    if (v == "None") return ENextSkillOrigin::None;
+    if (v == "CasterPos") return ENextSkillOrigin::CasterPos;
+    if (v == "CasterFront") return ENextSkillOrigin::CasterFront;
+    if (v == "PrevCenter") return ENextSkillOrigin::PrevCenter;
+    if (v == "PrevEnd") return ENextSkillOrigin::PrevEnd;
+    return ENextSkillOrigin::None;
 }
 
-std::string EffectTypeToString(EEffectType v)
+std::string NextSkillOriginToString(ENextSkillOrigin v)
 {
     switch (v)
     {
-    case EEffectType::None: return "None";
-    case EEffectType::Movement: return "Movement";
-    case EEffectType::Projectile: return "Projectile";
-    case EEffectType::InstantDamage: return "InstantDamage";
-    case EEffectType::TickDamageArea: return "TickDamageArea";
-    case EEffectType::Buff: return "Buff";
-    case EEffectType::VFX: return "VFX";
+    case ENextSkillOrigin::None: return "None";
+    case ENextSkillOrigin::CasterPos: return "CasterPos";
+    case ENextSkillOrigin::CasterFront: return "CasterFront";
+    case ENextSkillOrigin::PrevCenter: return "PrevCenter";
+    case ENextSkillOrigin::PrevEnd: return "PrevEnd";
     default: return "None";
     }
 }
 
-ERangeShape StringToRangeShape(const std::string& v)
+ENextSkillTiming StringToNextSkillTiming(const std::string& v)
 {
-    if (v == "None") return ERangeShape::None;
-    if (v == "Circle") return ERangeShape::Circle;
-    if (v == "Rectangle") return ERangeShape::Rectangle;
-    if (v == "Sector") return ERangeShape::Sector;
-    return ERangeShape::None;
+    if (v == "None") return ENextSkillTiming::None;
+    if (v == "OnStart") return ENextSkillTiming::OnStart;
+    if (v == "AfterEnd") return ENextSkillTiming::AfterEnd;
+    if (v == "AfterDelay") return ENextSkillTiming::AfterDelay;
+    return ENextSkillTiming::None;
 }
 
-std::string RangeShapeToString(ERangeShape v)
+std::string NextSkillTimingToString(ENextSkillTiming v)
 {
     switch (v)
     {
-    case ERangeShape::None: return "None";
-    case ERangeShape::Circle: return "Circle";
-    case ERangeShape::Rectangle: return "Rectangle";
-    case ERangeShape::Sector: return "Sector";
+    case ENextSkillTiming::None: return "None";
+    case ENextSkillTiming::OnStart: return "OnStart";
+    case ENextSkillTiming::AfterEnd: return "AfterEnd";
+    case ENextSkillTiming::AfterDelay: return "AfterDelay";
     default: return "None";
     }
 }
 
-EOriginType StringToOriginType(const std::string& v)
+ESkillEffectMotion StringToSkillEffectMotion(const std::string& v)
 {
-    if (v == "None") return EOriginType::None;
-    if (v == "CasterCenter") return EOriginType::CasterCenter;
-    if (v == "TargetCenter") return EOriginType::TargetCenter;
-    if (v == "CasterForward") return EOriginType::CasterForward;
-    return EOriginType::None;
+    if (v == "None") return ESkillEffectMotion::None;
+    if (v == "Static") return ESkillEffectMotion::Static;
+    if (v == "Linear") return ESkillEffectMotion::Linear;
+    return ESkillEffectMotion::None;
 }
 
-std::string OriginTypeToString(EOriginType v)
+std::string SkillEffectMotionToString(ESkillEffectMotion v)
 {
     switch (v)
     {
-    case EOriginType::None: return "None";
-    case EOriginType::CasterCenter: return "CasterCenter";
-    case EOriginType::TargetCenter: return "TargetCenter";
-    case EOriginType::CasterForward: return "CasterForward";
+    case ESkillEffectMotion::None: return "None";
+    case ESkillEffectMotion::Static: return "Static";
+    case ESkillEffectMotion::Linear: return "Linear";
+    default: return "None";
+    }
+}
+
+ESkillEffectDamage StringToSkillEffectDamage(const std::string& v)
+{
+    if (v == "None") return ESkillEffectDamage::None;
+    if (v == "ContactHit") return ESkillEffectDamage::ContactHit;
+    if (v == "Area") return ESkillEffectDamage::Area;
+    return ESkillEffectDamage::None;
+}
+
+std::string SkillEffectDamageToString(ESkillEffectDamage v)
+{
+    switch (v)
+    {
+    case ESkillEffectDamage::None: return "None";
+    case ESkillEffectDamage::ContactHit: return "ContactHit";
+    case ESkillEffectDamage::Area: return "Area";
+    default: return "None";
+    }
+}
+
+ESkillEffectShape StringToSkillEffectShape(const std::string& v)
+{
+    if (v == "None") return ESkillEffectShape::None;
+    if (v == "Circle") return ESkillEffectShape::Circle;
+    if (v == "Obb") return ESkillEffectShape::Obb;
+    return ESkillEffectShape::None;
+}
+
+std::string SkillEffectShapeToString(ESkillEffectShape v)
+{
+    switch (v)
+    {
+    case ESkillEffectShape::None: return "None";
+    case ESkillEffectShape::Circle: return "Circle";
+    case ESkillEffectShape::Obb: return "Obb";
     default: return "None";
     }
 }

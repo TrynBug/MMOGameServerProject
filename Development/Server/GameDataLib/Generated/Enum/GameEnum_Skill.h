@@ -6,54 +6,73 @@
 
 #include <string>
 
-enum class ESkillCategory : int
+enum class ESkillCastClass : int
 {
     None                 = 0,
-    StationaryCast       = 1,  // 제자리시전
-    MobileCast           = 2,  // 이동시전
-    Movement             = 3,  // 이동기
+    Stationary           = 1,  // 제자리시전
+    Mobile               = 2,  // 이동시전
+    Mobility             = 3,  // 이동기
     Max                 
 };
 
-ESkillCategory StringToSkillCategory(const std::string& v);
-std::string SkillCategoryToString(ESkillCategory v);
+ESkillCastClass StringToSkillCastClass(const std::string& v);
+std::string SkillCastClassToString(ESkillCastClass v);
 
-enum class EEffectType : int
+enum class ENextSkillOrigin : int
 {
     None                 = 0,
-    Movement             = 1,  // 강제이동
-    Projectile           = 2,  // 투사체
-    InstantDamage        = 3,  // 즉시타격
-    TickDamageArea       = 4,  // 지속타격영역
-    Buff                 = 5,  // 버프
-    VFX                  = 6,  // 시각효과
+    CasterPos            = 1,  // 캐스터 현재 위치
+    CasterFront          = 2,  // 캐스터 정면 + CasterFrontDistance
+    PrevCenter           = 3,  // 이전 페이즈 중심
+    PrevEnd              = 4,  // 이전 페이즈 종료 위치
     Max                 
 };
 
-EEffectType StringToEffectType(const std::string& v);
-std::string EffectTypeToString(EEffectType v);
+ENextSkillOrigin StringToNextSkillOrigin(const std::string& v);
+std::string NextSkillOriginToString(ENextSkillOrigin v);
 
-enum class ERangeShape : int
+enum class ENextSkillTiming : int
 {
     None                 = 0,
-    Circle               = 1,  // 원형
-    Rectangle            = 2,  // 사각형
-    Sector               = 3,  // 부채꼴
+    OnStart              = 1,  // 이전 스킬 발동과 동시
+    AfterEnd             = 2,  // 이전 스킬 lifetime 종료 직후
+    AfterDelay           = 3,  // 이전 스킬 litetime 종료 + NextTriggerDelayMs
     Max                 
 };
 
-ERangeShape StringToRangeShape(const std::string& v);
-std::string RangeShapeToString(ERangeShape v);
+ENextSkillTiming StringToNextSkillTiming(const std::string& v);
+std::string NextSkillTimingToString(ENextSkillTiming v);
 
-enum class EOriginType : int
+enum class ESkillEffectMotion : int
 {
     None                 = 0,
-    CasterCenter         = 1,  // 캐릭터 위치 중심
-    TargetCenter         = 2,  // 타겟 위치 중심
-    CasterForward        = 3,  // 캐릭터 위치에서 전방으로 뻗음
+    Static               = 1,  // 고정 (얼음지대, 화염지대, 전격방출, 메테오 착탄 등)
+    Linear               = 2,  // 직선 등속 (이동하는 장판 = 하이브리드)
     Max                 
 };
 
-EOriginType StringToOriginType(const std::string& v);
-std::string OriginTypeToString(EOriginType v);
+ESkillEffectMotion StringToSkillEffectMotion(const std::string& v);
+std::string SkillEffectMotionToString(ESkillEffectMotion v);
+
+enum class ESkillEffectDamage : int
+{
+    None                 = 0,
+    ContactHit           = 1,  // 투사체 접촉 시 1회. 클라 hit 보고 기반 → ProjectileGroup
+    Area                 = 2,  // 서버 주도 범위 틱 → AreaEffect. 틱 횟수/간격이 instant(1회)/periodic(N회) 을 결정.
+    Max                 
+};
+
+ESkillEffectDamage StringToSkillEffectDamage(const std::string& v);
+std::string SkillEffectDamageToString(ESkillEffectDamage v);
+
+enum class ESkillEffectShape : int
+{
+    None                 = 0,
+    Circle               = 1,  // 원 (전격방출, 메테오 착탄, 파이어볼 폭발 등)
+    Obb                  = 2,  // 방향이 있는 직사각형, Oriented Bounding Box (얼음지대, 블레이즈)
+    Max                 
+};
+
+ESkillEffectShape StringToSkillEffectShape(const std::string& v);
+std::string SkillEffectShapeToString(ESkillEffectShape v);
 

@@ -11,7 +11,8 @@ namespace GameData
         Normal               = 1,  // 일반
         Magic                = 2,  // 매직
         Rare                 = 3,  // 레어
-        Boss                 = 4,  // 보스
+        Unique               = 4,  // 유니크
+        Boss                 = 5,  // 보스
         Max                 
     }
 }

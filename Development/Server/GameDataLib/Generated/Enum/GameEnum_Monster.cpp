@@ -11,6 +11,7 @@ EMonsterGrade StringToMonsterGrade(const std::string& v)
     if (v == "Normal") return EMonsterGrade::Normal;
     if (v == "Magic") return EMonsterGrade::Magic;
     if (v == "Rare") return EMonsterGrade::Rare;
+    if (v == "Unique") return EMonsterGrade::Unique;
     if (v == "Boss") return EMonsterGrade::Boss;
     return EMonsterGrade::None;
 }
@@ -23,6 +24,7 @@ std::string MonsterGradeToString(EMonsterGrade v)
     case EMonsterGrade::Normal: return "Normal";
     case EMonsterGrade::Magic: return "Magic";
     case EMonsterGrade::Rare: return "Rare";
+    case EMonsterGrade::Unique: return "Unique";
     case EMonsterGrade::Boss: return "Boss";
     default: return "None";
     }
