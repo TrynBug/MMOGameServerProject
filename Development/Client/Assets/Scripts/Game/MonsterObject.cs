@@ -58,13 +58,17 @@ namespace Client.Game
         private IActorAnimator m_actorAnimator;
 
         // MonsterFactory 가 생성 직후 1회 호출.
-        public void Initialize(long objectId, long monsterKey, Vector3 pos, float dirY)
+        public void Initialize(long objectId, long monsterKey, Vector3 pos, float dirY, bool isDead, double curHp, double maxHp)
         {
             ObjectId = objectId;
             MonsterKey = monsterKey;
 
-            // 등급 + 최대 HP 를 게임데이터에서 채운다.
+            // 등급(Grade)은 게임데이터에서 채운다 (서버가 등급은 안 보냄).
             seedFromGameData(monsterKey);
+
+            // HP 는 서버 권위값으로 설정한다. 최대치(HpTotal)를 먼저 넣어야 SetCurHp 의 clamp 가 올바르다.
+            Stats.Set(EStat.HpTotal, maxHp);
+            SetCurHp(curHp);
 
             transform.position = pos;
             transform.rotation = Quaternion.Euler(0f, dirY, 0f);
@@ -72,11 +76,13 @@ namespace Client.Game
             // 공통 애니메이터 해석. AddComponent 타이밍 의존을 피하려고 Awake 가 아니라
             // (모든 컴포넌트가 부착된 뒤 호출되는) Initialize 에서 찾는다. 없으면 애니메이션 없이 동작.
             m_actorAnimator = GetComponentInChildren<IActorAnimator>();
+
+            // corpse 유지 중 늦게 진입한 경우(is_dead): 이동 정지 + 사망 끝 포즈로 고정(애니메이션 재생 없음).
+            if (isDead)
+                SpawnAsCorpse();
         }
 
-        // 게임데이터에서 등급과 최대 HP 를 읽어 채운다.
-        // 서버는 (현재) 몬스터 스탯 패킷을 안 보내므로 클라가 MaxHp 를 시드한다.
-        // v1 몬스터는 Add 연산만 있어 HpTotal == HpAdd. 서버가 몬스터 스탯을 보내게 되면 그게 대체한다.
+        // 게임데이터에서 등급(Grade)을 읽어 채운다. HP(현재/최대)는 서버 권위값을 Initialize 에서 설정한다.
         private void seedFromGameData(long monsterKey)
         {
             GameData_Monster data = GameDataTable_Monster.FindData(monsterKey);
@@ -84,18 +90,7 @@ namespace Client.Game
                 return;
 
             Grade = data.Grade;
-
-            // 8개 스탯 슬롯에서 HpAdd 를 찾아 HpTotal(=MaxHp)로 시드.
-            for (int i = 0; i < data.GetStatCount(); ++i)
-            {
-                if (data.GetStat(i) == EStat.HpAdd)
-                {
-                    Stats.Set(EStat.HpTotal, data.GetStatValue(i));
-                    break;
-                }
-            }
-
-            FillHp();   // 스폰 시 풀피.
+            // HP(현재/최대)는 서버 권위값을 Initialize 에서 설정하므로 여기서는 다루지 않는다.
         }
 
         // ─── 서버 MoveNtf 처리 ───────────────────────────────────────────
@@ -114,6 +109,9 @@ namespace Client.Game
         // dest 를 NavMesh 위로 보정 후 경로 계산. NavMesh 미로드 시 직선 폴백. (PlayerCharacter 와 동일)
         public void SetMoveDestination(Vector3 dest)
         {
+            if (IsDead)
+                return;   // 시체는 이동하지 않는다.
+
             if (!NavMeshService.IsLoaded)
             {
                 if (!m_hasMoveDest)
@@ -147,6 +145,31 @@ namespace Client.Game
             m_hasMoveDest = false;
             m_path.Clear();
             m_pathIndex = 0;
+        }
+
+        // 사망 처리: 이동 정지 + 사망 애니메이션. 이미 사망 상태면 멱등.
+        public override void OnDeath()
+        {
+            enterDeadState(playAnimation: true);   // 막 죽음: 사망 애니메이션을 처음부터 재생.
+        }
+
+        // corpse 상태로 늦게 진입한 경우: 사망 상태로 들어가되 애니메이션 재생 없이 끝 포즈로 고정.
+        public void SpawnAsCorpse()
+        {
+            enterDeadState(playAnimation: false);
+        }
+
+        // 사망 상태 진입 공통 처리. 이미 사망이면 멱등. playAnimation=true 면 처음부터 재생, false 면 끝 포즈 고정.
+        private void enterDeadState(bool playAnimation)
+        {
+            if (IsDead)
+                return;
+            base.OnDeath();   // IsDead = true (ActorObject)
+            StopMove();
+            if (playAnimation)
+                m_actorAnimator?.PlayDead();
+            else
+                m_actorAnimator?.SetDeadPose();
         }
 
         private void recalculatePath(Vector3 destOnNav)

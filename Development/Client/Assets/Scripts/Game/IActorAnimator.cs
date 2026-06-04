@@ -16,6 +16,14 @@ namespace Client.Game
         // 이동/정지 전환. true 면 이동(walk/run), false 면 정지(idle).
         void SetMoving(bool isMoving);
 
+        // 사망 연출 1회 재생. 사망 시점(ObjectDeathNtf)에 호출한다 — 사망 애니메이션을 처음부터 재생.
+        // 구현체가 Animator 에 사망 트리거가 없으면 조용히 무시한다.
+        void PlayDead();
+
+        // 사망 끝 포즈로 즉시 고정. corpse 상태로 늦게 spawn 될 때 호출한다 — 애니메이션 재생 없이 마지막 프레임(쓰러진 포즈)부터 표시.
+        // 구현체가 사망 상태가 없으면 조용히 무시한다.
+        void SetDeadPose();
+
         // (추후) 스킬 시전/피격/사망 등 one-shot 은 해당 기능이 실제로 들어올 때 추가한다.
         //   void PlaySkill(int skillId);
         //   void PlayHit();

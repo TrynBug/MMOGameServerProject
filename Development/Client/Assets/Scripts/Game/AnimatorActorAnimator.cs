@@ -14,6 +14,7 @@ namespace Client.Game
     {
         // Animator 파라미터 hash. 문자열 lookup 을 피한다.
         private static readonly int s_paramIsMoving = Animator.StringToHash("IsMoving");
+        private static readonly int s_paramDead     = Animator.StringToHash("Dead");
 
         private Animator m_animator;
 
@@ -39,6 +40,40 @@ namespace Client.Game
 
             m_animator.SetBool(s_paramIsMoving, isMoving);
             m_lastSentIsMoving = isMoving;
+        }
+
+        // 사망 연출 재생. Animator 에 "Dead" 트리거 파라미터가 있을 때만 발동한다.
+        // 아트가 아직 사망 클립/트리거를 안 붙인 prefab 이면 조용히 무시한다(애니 없이 동작).
+        public void PlayDead()
+        {
+            if (m_animator == null)
+                return;
+            if (!hasParameter(s_paramDead))
+                return;
+
+            m_animator.SetTrigger(s_paramDead);
+        }
+
+        // 사망 끝 포즈로 즉시 고정. "Dead" 상태(Base 레이어)를 normalizedTime=1 로 재생해 마지막 프레임을 보인다.
+        // SetTrigger 와 달리 전이를 거치지 않고 즉시 해당 지점으로 점프한다(애니메이션 재생 없음).
+        // "Dead" 상태가 없는 컨트롤러면 Animator 가 경고를 내지만 동작에는 지장이 없다(애니 없이 동작).
+        public void SetDeadPose()
+        {
+            if (m_animator == null)
+                return;
+
+            m_animator.Play(s_paramDead, 0, 1.0f);
+        }
+
+        // Animator 에 해당 hash 의 파라미터가 존재하는지. 없는 파라미터에 SetTrigger 하면 에러 로그가 나므로 선체크한다.
+        private bool hasParameter(int paramHash)
+        {
+            foreach (AnimatorControllerParameter p in m_animator.parameters)
+            {
+                if (p.nameHash == paramHash)
+                    return true;
+            }
+            return false;
         }
     }
 }

@@ -54,6 +54,7 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<HpMpNtf>(GamePacketId.HpMpNtf, onHpMpNtf);
             PacketDispatcher.Instance.Register<BuffNtf>(GamePacketId.BuffNtf, onBuffNtf);
             PacketDispatcher.Instance.Register<BuffRemoveNtf>(GamePacketId.BuffRemoveNtf, onBuffRemoveNtf);
+            PacketDispatcher.Instance.Register<ObjectDeathNtf>(GamePacketId.ObjectDeathNtf, onObjectDeathNtf);
 
             Debug.Log("[StageManager] Ready.");
         }
@@ -145,7 +146,16 @@ namespace Client.Game
                     dirY: characterSpawnInfo.Yaw);
 
                 if (remoteCharacter != null)
+                {
+                    // 원격 캐릭터의 HP/MP 는 spawn 정보로 설정한다. (관전자는 그 캐릭터의 StatUpdateNtf/HpMpNtf 를 받지 못한다.)
+                    // 최대치(HpTotal/MpTotal)를 먼저 넣어야 SetCurHp/SetCurMp 의 clamp 가 올바르다.
+                    remoteCharacter.Stats.Set(EStat.HpTotal, characterSpawnInfo.MaxHp);
+                    remoteCharacter.SetCurHp(characterSpawnInfo.Hp);
+                    remoteCharacter.Stats.Set(EStat.MpTotal, characterSpawnInfo.MaxMp);
+                    remoteCharacter.SetCurMp(characterSpawnInfo.Mp);
+
                     applyBuffSnapshot(remoteCharacter.Buffs, characterSpawnInfo.Buffs);
+                }
 
                 Debug.Log($"[StageManager] ObjectVisibilityNtf: CharacterSpawn characterId={characterSpawnInfo.ObjectId}");
             }
@@ -157,7 +167,10 @@ namespace Client.Game
                     objectId: monsterSpawnInfo.ObjectId,
                     monsterKey: monsterSpawnInfo.MonsterKey,
                     pos: new Vector3(monsterSpawnInfo.PosX, monsterSpawnInfo.PosY, monsterSpawnInfo.PosZ),
-                    dirY: monsterSpawnInfo.Yaw);
+                    dirY: monsterSpawnInfo.Yaw,
+                    isDead: monsterSpawnInfo.IsDead,
+                    curHp: monsterSpawnInfo.CurHp,
+                    maxHp: monsterSpawnInfo.MaxHp);
 
                 if (monster != null)
                     applyBuffSnapshot(monster.Buffs, monsterSpawnInfo.Buffs);
@@ -172,6 +185,21 @@ namespace Client.Game
 
                 Debug.Log($"[StageManager] ObjectVisibilityNtf: Despawn objectId={despawnObjectId}");
             }
+        }
+
+        // 오브젝트 사망 알림. 해당 액터를 사망 상태로 전환한다(이동 정지 + 사망 애니메이션).
+        // 디스폰(시체 제거)은 corpse 시간 후 ObjectVisibilityNtf 의 Despawn 이 별도로 처리한다.
+        private void onObjectDeathNtf(ObjectDeathNtf ntf)
+        {
+            ActorObject actor = FindActor(ntf.ObjectId);
+            if (actor == null)
+            {
+                Debug.LogWarning($"[StageManager] ObjectDeathNtf: actor not found. ObjectId={ntf.ObjectId}");
+                return;
+            }
+
+            actor.OnDeath();
+            Debug.Log($"[StageManager] ObjectDeathNtf: ObjectId={ntf.ObjectId} killer={ntf.KillerObjectId}");
         }
 
         // 스테이지내의 오브젝트가 이동했을때 서버가 보내는 패킷.
@@ -334,7 +362,7 @@ namespace Client.Game
 
         // 몬스터 스폰. 게임데이터 Key 로 MonsterFactory 가 prefab 을 찾아 생성한다.
         // 이미 같은 objectId 가 있으면 위치만 갱신 (idempotent).
-        private MonsterObject spawnMonster(long objectId, long monsterKey, Vector3 pos, float dirY)
+        private MonsterObject spawnMonster(long objectId, long monsterKey, Vector3 pos, float dirY, bool isDead, double curHp, double maxHp)
         {
             if (m_monsters.TryGetValue(objectId, out MonsterObject existing) && existing != null)
             {
@@ -343,7 +371,7 @@ namespace Client.Game
                 return existing;
             }
 
-            MonsterObject mo = MonsterFactory.Create(objectId, monsterKey, pos, dirY);
+            MonsterObject mo = MonsterFactory.Create(objectId, monsterKey, pos, dirY, isDead, curHp, maxHp);
             if (mo != null)
                 m_monsters.Add(objectId, mo);
             return mo;

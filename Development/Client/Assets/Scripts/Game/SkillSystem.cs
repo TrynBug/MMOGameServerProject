@@ -376,7 +376,7 @@ namespace Client.Game
             Vector3 head = target.transform.position + Vector3.up * 1.5f;
             DamageText.Spawn(head, ntf.Damage, ntf.IsDuplicate);
 
-            // is_dead: 1차엔 표시만. 디스폰/보상은 서버 후속(ObjectVisibilityNtf 의 Despawn 이 처리).
+            // 사망 연출/디스폰은 이 패킷이 아니라 ObjectDeathNtf(사망) + ObjectVisibilityNtf의 Despawn(제거)이 처리한다.
         }
     }
 }

@@ -52,8 +52,15 @@ namespace Client.Game
         public void FillHp() { CurHp = MaxHp; }
         public void FillMp() { CurMp = MaxMp; }
 
-        // 사망 여부. 현재HP 가 0 이하이면 사망으로 본다.
-        public bool IsDead => CurHp <= 0.0;
+        // 사망 여부. 서버와 동일하게 명시적 상태이다(HP 0 파생 아님). OnDeath() 로 1회 전환된다.
+        // ObjectDeathNtf 수신 시, 또는 corpse 상태로 spawn 될 때 설정된다.
+        public bool IsDead { get; private set; }
+
+        // 사망으로 전환. 이미 사망 상태면 no-op (멱등). 파생(MonsterObject)은 이동 정지/사망 애니메이션을 덧붙인다.
+        public virtual void OnDeath()
+        {
+            IsDead = true;
+        }
 
         // value 를 [0, maxValue] 로 clamp. maxValue 가 음수면 0 으로 본다.
         private static double clampToRange(double value, double maxValue)
