@@ -105,6 +105,11 @@ enum GamePacketId : int {
   GAME_PACKET_ID_HP_MP_NTF = 6002,
   GAME_PACKET_ID_BUFF_NTF = 7001,
   GAME_PACKET_ID_BUFF_REMOVE_NTF = 7002,
+  GAME_PACKET_ID_SKILL_CAST_REQ = 8001,
+  GAME_PACKET_ID_SKILL_PROJECTILE_HIT_REQ = 8002,
+  GAME_PACKET_ID_SKILL_CAST_NTF = 8003,
+  GAME_PACKET_ID_SKILL_DAMAGE_NTF = 8004,
+  GAME_PACKET_ID_SKILL_CAST_REJECT_NTF = 8005,
   GamePacketId_INT_MIN_SENTINEL_DO_NOT_USE_ =
       ::std::numeric_limits<::int32_t>::min(),
   GamePacketId_INT_MAX_SENTINEL_DO_NOT_USE_ =
@@ -115,11 +120,11 @@ extern const uint32_t GamePacketId_internal_data_[];
 inline constexpr GamePacketId GamePacketId_MIN =
     static_cast<GamePacketId>(0);
 inline constexpr GamePacketId GamePacketId_MAX =
-    static_cast<GamePacketId>(7002);
+    static_cast<GamePacketId>(8005);
 inline bool GamePacketId_IsValid(int value) {
   return ::google::protobuf::internal::ValidateEnum(value, GamePacketId_internal_data_);
 }
-inline constexpr int GamePacketId_ARRAYSIZE = 7002 + 1;
+inline constexpr int GamePacketId_ARRAYSIZE = 8005 + 1;
 const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL GamePacketId_descriptor();
 template <typename T>
 const ::std::string& GamePacketId_Name(T value) {

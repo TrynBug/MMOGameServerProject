@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package GamePacket;
+
+import "Common/packet_id.proto";
+
+// ──────────────────────────────────────────────
+// 스킬 패킷
+// ──────────────────────────────────────────────
+//
+// 흐름 (스킬.md / 클라이언트.md 참조):
+// - 클라가 스킬 입력 + 오토타겟으로 방향 결정 + seed 생성 → SkillCastReq 전송.
+// - 서버: SkillComponent.TryCast → bake → 투사체/장판 spawn(effectId 발급) → AOI 에 SkillCastNtf.
+// - 클라들: 시전 애니 + 투사체/효과 비주얼을 origin/dir/seed 로 재현 (scatter 도 seed 로 동일 위치 재현).
+// - 시전한 클라만 자기 투사체 hit 를 검사하여 한 프레임 분량을 모아 SkillProjectileHitReq(배치) 로 보고.
+// - 서버: 각 hit 를 검증 → 직격 대미지 + OnHitSkillKey 폭발 → AOI 에 SkillDamageNtf.
+//
+// 좌표/방향: Unity 와 동일. Y는 높이, X-Z 가 평면. dir 은 정규화된 X-Z (dir_y 는 0 이라 생략).
+
+// 스킬 시전 요청 (클라 -> 서버)
+// origin 은 entry 효과의 중심/시작 위치 (투사체=캐스터 위치, 타겟형 장판=클릭 위치 등 클라가 결정).
+// target_* 은 오토타겟 결과(서버 검증용). 서버는 일단 신뢰하고 사용한다 (핵 검사는 후속).
+message SkillCastReq {
+    int64  skill_key        = 1;
+    float  origin_x         = 2;
+    float  origin_y         = 3;   // 높이
+    float  origin_z         = 4;   // 평면 깊이축
+    float  dir_x            = 5;   // 시전 방향 (정규화 X-Z)
+    float  dir_z            = 6;
+    uint32 seed             = 7;   // 난수 재현용 (scatter 등). 클라/서버 공유.
+    int64  target_object_id = 8;   // 오토타겟이 잡은 대상 (없으면 0). 검증용.
+    float  target_pos_x     = 9;   // 타겟 위치 (X-Z 평면). 검증용.
+    float  target_pos_z     = 10;
+}
+
+// 투사체 "종료 사건" 1건. 투사체가 적에 직격했거나, 최대사거리/지형에 도달해 끝난 사건을 보고한다.
+// 한 프레임에 여러 투사체가 끝날 수 있으므로 SkillProjectileHitReq 에 배열로 모아 보낸다.
+//
+// 중요: 폭발의 적중(범위 내 누가 맞는지)은 전적으로 서버가 판정한다 (B-2: 폭발 = 서버 AreaEffect).
+// 클라는 "투사체가 여기서 끝났다"는 사건과 위치만 보고하며, 폭발이 아무도 안 맞추어도 무조건 보고한다.
+message SkillHitItem {
+    int64 effect_id        = 1;   // 어느 투사체 그룹인지 (SkillCastNtf 로 받은 값)
+    int32 projectile_index = 2;   // 그룹 내 몇 번째 투사체인지
+    int64 target_object_id = 3;   // 직격 대상. 0 = 직격 없음(최대사거리/지형 폭발) 또는 클라가 대상을 못 찾은 오류.
+
+    // 타겟 없이 폭발한 경우의 플래그 (직격 대미지 없이 폭발만 발생. 폭발 적중은 서버가 판정).
+    bool exploded_at_max_range = 4;   // 최대사거리 도달로 폭발 (서버가 origin+dir*maxRange 로 위치 계산)
+    bool exploded_on_terrain   = 5;   // 지형/벽 충돌로 폭발 (서버가 위치를 모르므로 아래 hit_x/z 사용)
+
+    // 폭발/타격 위치 (X-Z). 직격 시에도 서버가 자신이 역산한 투사체 위치와 비교해 검증하는 데 사용.
+    // 지형 폭발처럼 서버가 위치를 모를 때는 이 값을 폭발 위치로 사용한다.
+    float hit_x = 6;
+    float hit_z = 7;
+}
+
+// 투사체 hit 보고 (클라 -> 서버, 배치)
+// 시전한 클라가 한 프레임 분량의 hit 를 모아 한 번에 보고한다.
+message SkillProjectileHitReq {
+    repeated SkillHitItem hits = 1;
+}
+
+// 시전 통보 (서버 -> 클라 브로드캐스트, 시전자 포함)
+// 다른 클라는 origin/dir/seed 로 투사체·효과 비주얼을 재현한다.
+// 시전한 클라는 effect_id 로 자기 투사체의 hit 를 SkillProjectileHitReq 에 담아 보고한다.
+message SkillCastNtf {
+    int64  caster_object_id = 1;
+    int64  skill_key        = 2;
+    int64  effect_id        = 3;   // 서버가 발급한 투사체 그룹 ID (투사체 스킬이 아니면 0)
+    float  origin_x         = 4;
+    float  origin_y         = 5;   // 높이
+    float  origin_z         = 6;   // 평면 깊이축
+    float  dir_x            = 7;   // 정규화 X-Z
+    float  dir_z            = 8;
+    uint32 seed             = 9;
+}
+
+// 대미지 통보 (서버 -> 클라 브로드캐스트)
+// 클라는 대미지 숫자를 표시하고 대상의 HP 를 갱신한다.
+message SkillDamageNtf {
+    int64 target_object_id = 1;
+    float damage           = 2;   // 적용된 대미지 (배율 적용 후 최종값)
+    bool  is_duplicate     = 3;   // 중복타격으로 감소된 대미지인지 (표시용 flag)
+    float remaining_hp     = 4;   // 대미지 적용 후 대상의 남은 HP
+    bool  is_dead          = 5;   // 이 대미지로 사망했는지
+}

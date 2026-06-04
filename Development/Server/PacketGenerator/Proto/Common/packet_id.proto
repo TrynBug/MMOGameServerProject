@@ -62,6 +62,13 @@ enum GamePacketId {
     // 7000~7999: 버프
     GAME_PACKET_ID_BUFF_NTF        = 7001;   // 서버 -> 클라: 버프 추가/갱신 (upsert. UI 뱃지용. 스탯 효과는 StatUpdateNtf/HpMpNtf로 별도 전송)
     GAME_PACKET_ID_BUFF_REMOVE_NTF = 7002;   // 서버 -> 클라: 버프 제거
+
+    // 8000~8999: 스킬
+    GAME_PACKET_ID_SKILL_CAST_REQ           = 8001;   // 클라 -> 서버: 스킬 시전 요청
+    GAME_PACKET_ID_SKILL_PROJECTILE_HIT_REQ = 8002;   // 클라 -> 서버: 투사체 hit 보고 (한 프레임 분량을 배치로 보냄)
+    GAME_PACKET_ID_SKILL_CAST_NTF           = 8003;   // 서버 -> 클라: 시전 통보 (비주얼 재현 + 시전 클라에 effectId 전달)
+    GAME_PACKET_ID_SKILL_DAMAGE_NTF         = 8004;   // 서버 -> 클라: 대미지 통보 (숫자 표시 / HP / 사망)
+    GAME_PACKET_ID_SKILL_CAST_REJECT_NTF    = 8005;   // 서버 -> 클라: 시전 거부 (쿳타임/마나 부족 등. 5c 에서 사용)
 }
 
 // 서버 <-> 서버 패킷 ID
