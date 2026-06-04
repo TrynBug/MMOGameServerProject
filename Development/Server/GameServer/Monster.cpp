@@ -16,7 +16,7 @@ namespace
     constexpr float k_repathDistSq = 1.0f;
 
     // 사망 후 시체 유지 시간(ms). 이 시간이 지나면 디스폰한다.
-    constexpr int64 k_corpseDurationMs = 5000;
+    constexpr int64 k_corpseDurationMs = 30000;
 }
 
 bool Monster::Initialize(int64 objectId, const GameData_Monster* pMonsterData)
