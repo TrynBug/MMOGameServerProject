@@ -3,6 +3,7 @@
 #include "pch.h"
 #include "StageObject.h"
 #include "BuffComponent.h"        // 액터가 버프 컴포넌트를 멤버로 소유
+#include "SkillComponent.h"       // 액터가 스킬 컴포넌트를 멤버로 소유
 
 #include "Enum/GameEnum_Stat.h"   // EStatGroup
 
@@ -59,11 +60,19 @@ public:
     BuffComponent&       GetBuffComponent()       { return m_buffComponent; }
     const BuffComponent& GetBuffComponent() const { return m_buffComponent; }
 
+    // 스킬 컴포넌트 접근.
+    SkillComponent&       GetSkillComponent()       { return m_skillComponent; }
+    const SkillComponent& GetSkillComponent() const { return m_skillComponent; }
+
     // ── 버프에 의한 변화의 클라 통지 훅 ─────────────────────────
     // 버프가 스탯을 바꾸면 OnStatsChangedByBuff(), DoT/HoT 로 HP 가 바뀌면 OnHpChangedByBuff() 가 호출된다.
     // 파생이 자신의 방식으로 통지한다 (Character=StatUpdateNtf/HpMpNtf, Monster=무시).
     virtual void OnStatsChangedByBuff() {}
     virtual void OnHpChangedByBuff() {}
+
+    // 이동기(Mobility)/이동 페이즈가 발동될 때 SkillComponent 가 호출한다.
+    // 파생이 자신의 이동 방식으로 구현한다 (Character=대시/순간이동, Monster=무시). 기본은 no-op. (5d 예정.)
+    virtual void ApplySkillMovement(const Vector3& dir, float distance, int32 durationMs) {}
 
     // 그룹의 총합 스탯값(예: EStatGroup::Hp → HpTotal)을 리턴한다. 파생이 제공.
     //   - Character : CharacterStatComponent 의 해당 Total 스탯
@@ -104,6 +113,9 @@ private:
 
     // 버프 컴포넌트. 생성자에서 owner(this)로 초기화된다.
     BuffComponent m_buffComponent;
+
+    // 스킬 컴포넌트. 생성자에서 owner(this)로 초기화된다.
+    SkillComponent m_skillComponent;
 };
 
 using ActorObjectPtr  = std::shared_ptr<ActorObject>;

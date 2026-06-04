@@ -4,6 +4,7 @@
 #include "User.h"
 #include "Sector.h"
 #include "StageObject.h"
+#include "GameServerDefine.h"   // Vector3 (SpawnSkillProjectileGroup 의 std::vector<Vector3> 파라미터에 완전타입 필요)
 
 #include "Enum/GameEnum_Stage.h"   // EStageType
 #include "Generated/GameData_Stage.h"
@@ -32,6 +33,13 @@ class Monster;
 
 // ActorObject forward declaration (BroadcastBuff* takes const ActorObject&). Full type in Stage.cpp.
 class ActorObject;
+
+// 스킬/효과 시스템 타입 전방선언. 완전 정의는 Stage.cpp 에서 include.
+// (EffectShape/EffectParams/AreaEffect/ProjectileGroup = Skill/. Vector3 는 위에서 include 함.)
+struct EffectShape;
+struct EffectParams;
+class AreaEffect;
+class ProjectileGroup;
 
 
 // StageGridParams: Stage 공간 정보 + NavMesh 매핑.
@@ -202,9 +210,42 @@ public:
     void      BroadcastBuffNtf(const ActorObject& actor, int64 buffKey, int32 stackCount, int32 remainMs);
     void      BroadcastBuffRemoveNtf(const ActorObject& actor, int64 buffKey);
 
+    // 스킬 시전 통보(SkillCastNtf)를 시전자 주변 AOI 에 broadcast 한다. SkillComponent 가 entry 페이즈 발동 시 호출.
+    // effectId: entry 가 투사체면 그 그룹 ID, 아니면 0. 클라는 origin/dir/seed 로 비주얼을 재현한다.
+    void      BroadcastSkillCastNtf(const ActorObject& caster, int64 skillKey, int64 effectId,
+                                    const Vector3& origin, const Vector3& dir, uint32 seed);
+
     // objectId 로 StageObject 를 조회한다 (통합 컨테이너 m_objects 기준). 없으면 nullptr.
     // 비소유 raw 포인터 — 컨텐츠 스레드에서 해당 tick 내 사용 (몬스터 AI 의 타겟 해소 등).
     StageObject* FindObject(int64 objectId);
+
+    // (centerPos 를 중심으로) shape 범위 안에 있는 "적" StageObject 들을 outEnemies 에 채운다 (X-Z 평면).
+    // 진영 규칙(v1): casterType 이 Monster 면 User(캐릭터)들을, 그 외(User 등)면 Monster 들을 대상으로 한다.
+    // casterType 을 값으로 받는 이유: 효과가 지속되는 동안 시전자 객체가 사라져도 안전하게 하기 위함.
+    // shape 의 bounding 반경으로 후보 섹터를 추린 뒤 정밀 판정한다. outEnemies 는 먼저 clear 된다.
+    // 비소유 raw 포인터 — 해당 tick 내 사용 (컨텐츠 스레드 전용).
+    void QueryEnemiesInShape(EObjectType casterType, const Vector3& centerPos,
+                             const EffectShape& shape, std::vector<StageObject*>& outEnemies);
+
+    // 스킬 효과(범위 대미지) 하나를 월드에 시작시킨다. SkillComponent 가 bake 한 EffectParams 를 넘긴다.
+    // (투사체=ProjectileGroup 은 별도 경로. 이 함수는 Area 효과 전용.)
+    void SpawnSkillAreaEffect(const EffectParams& params);
+
+    // 효과(스킬)에 의한 대미지를 target 에 적용하고, 주변 AOI 에 SkillDamageNtf 를 broadcast 한다. AreaEffect 등이 호출.
+    // isDuplicate: 중복타격으로 감소된 대미지인지 (표시용 flag). 사망 처리(디스폰)는 후속.
+    void ApplyEffectDamage(ActorObject& target, double damage, bool isDuplicate = false);
+
+    // 스킬 투사체 묶음(1회 시전 분)을 월드에 등록한다. 발급된 effectId 를 리턴한다 (시전 Ntf 에 실을 용도).
+    // dirs: 부채꼴 전개된 투사체별 방향. SkillComponent 가 계산해 넘긴다.
+    int64 SpawnSkillProjectileGroup(const EffectParams& params, const std::vector<Vector3>& dirs);
+
+    // 클라가 보고한 투사체 종료 사건을 처리한다 (직격 대미지 + 폭발). 폭발 적중은 서버가 판정.
+    //   - 직격: targetId 유효 + flag 없음 → projPos 에서 직격 대미지 + 폭발.
+    //   - 최대사거리(explodedAtMaxRange): origin+dir*maxRange 에 폭발만.
+    //   - 지형(explodedOnTerrain): (hitX, hitZ) 에 폭발만.
+    void OnSkillProjectileHit(int64 effectId, int32 projectileIndex, int64 targetId,
+                              bool explodedAtMaxRange, bool explodedOnTerrain,
+                              float hitX, float hitZ);
 
     // (centerX, centerZ) sector를 중심으로 range 거리 내의 sector를 순회.
     // range=1이면 3x3, range=2면 5x5. 맵 범위 밖 sector는 자동 스킵.
@@ -277,6 +318,12 @@ private:
     // (이동 시 sector 갱신은 Monster 내부에서 한다. 컨텐츠 스레드 전용.)
     void updateMonsters(int64 deltaMs);
 
+    // 진행 중인 스킬 효과(AreaEffect)들을 tick 하고 만료된 것을 제거한다. OnUpdate 에서 매 tick 호출.
+    void updateSkillEffects(int64 deltaMs);
+
+    // effectId 로 진행 중인 투사체 그룹을 찾는다. 없으면 nullptr.
+    ProjectileGroup* findSkillProjectileGroup(int64 effectId);
+
     // Character의 현재 이동 상태를 그 주변 sector의 모든 캐릭터(자기 포함)에게 MoveNtf로 알린다.
     // 이동 시작/정지/도착 등 *상태 변화 시점*에서 호출.
     void broadcastMoveNtf(const Character& character);
@@ -338,6 +385,9 @@ private:
     // 5초 주기 heartbeat 로그용 누적 시간
     int64      m_heartbeatAccumMs = 0;
 
+    // Stage 단조 증가 시계 (ms). OnUpdate 마다 deltaMs 누적. 스킬 효과/투사체 타이밍 기준.
+    int64      m_stageClockMs = 0;
+
     // ── 맵/섹터 정보 ─────────────────────────────────────────────
     // GameData_Stage에서 double로 제공되므로 멤버도 double.
     // (런타임 객체 좌표는 float이지만, 맵 영역/섹터 제원은
@@ -379,6 +429,15 @@ private:
     // 길찾기 로직 + dtNavMeshQuery/dtQueryFilter lifetime 은 StageNavMesh 가 담당.
     // Stage 가 nullptr 이면 NavMesh 미설정 상태 (길찾기 비활성화).
     std::unique_ptr<StageNavMesh> m_pStageNavMesh;
+
+    // ── 스킬 효과 ──────────────────────────────
+    // 진행 중인 범위 효과(AreaEffect)들. updateSkillEffects 에서 tick + 만료 sweep.
+    // unique_ptr 보관: Stage.h 가 AreaEffect 완전타입에 의존하지 않도록 (재빌드 영향 최소화).
+    std::vector<std::unique_ptr<AreaEffect>> m_skillAreaEffects;
+
+    // 진행 중인 투사체 그룹들 (effectId → 그룹). 클라 hit 보고가 effectId 로 그룹을 지목한다.
+    // updateSkillEffects 에서 만료된 그룹을 제거한다.
+    std::unordered_map<int64, std::unique_ptr<ProjectileGroup>> m_skillProjectileGroups;
 };
 
 using StagePtr  = std::shared_ptr<Stage>;

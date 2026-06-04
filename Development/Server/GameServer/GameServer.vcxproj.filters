@@ -16,6 +16,9 @@
     <Filter Include="소스 파일\Map">
       <UniqueIdentifier>{0bfea7d2-f2ea-4b32-8576-6fb50cf152ab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Skill">
+      <UniqueIdentifier>{a3e1c2d4-5b6f-4a7c-9d8e-1f2a3b4c5d6e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -73,6 +76,18 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="MonsterFsmAI.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Skill\AreaEffect.cpp">
+      <Filter>소스 파일\Skill</Filter>
+    </ClCompile>
+    <ClCompile Include="Skill\ProjectileGroup.cpp">
+      <Filter>소스 파일\Skill</Filter>
+    </ClCompile>
+    <ClCompile Include="Skill\SkillBake.cpp">
+      <Filter>소스 파일\Skill</Filter>
+    </ClCompile>
+    <ClCompile Include="SkillComponent.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -135,6 +150,24 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="MonsterFsmAI.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Skill\EffectShape.h">
+      <Filter>소스 파일\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="Skill\EffectParams.h">
+      <Filter>소스 파일\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="Skill\AreaEffect.h">
+      <Filter>소스 파일\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="Skill\ProjectileGroup.h">
+      <Filter>소스 파일\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="Skill\SkillBake.h">
+      <Filter>소스 파일\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="SkillComponent.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

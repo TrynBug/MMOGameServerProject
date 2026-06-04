@@ -44,13 +44,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Generated;$(SolutionDir)Recast\Include;$(SolutionDir)Detour\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Generated;$(SolutionDir)Recast\Include;$(SolutionDir)Detour\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Generated;$(SolutionDir)Recast\Include;$(SolutionDir)Detour\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Generated;$(SolutionDir)Recast\Include;$(SolutionDir)Detour\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
@@ -115,6 +115,12 @@
     <ClInclude Include="BasicStatComponent.h" />
     <ClInclude Include="StageManager.h" />
     <ClInclude Include="GameServer.h" />
+    <ClInclude Include="SkillComponent.h" />
+    <ClInclude Include="Skill\EffectShape.h" />
+    <ClInclude Include="Skill\EffectParams.h" />
+    <ClInclude Include="Skill\AreaEffect.h" />
+    <ClInclude Include="Skill\ProjectileGroup.h" />
+    <ClInclude Include="Skill\SkillBake.h" />
   </ItemGroup>
   <!-- 소스 파일 -->
   <ItemGroup>
@@ -140,6 +146,10 @@
     <ClCompile Include="StageManager.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="GameServerBuff.cpp" />
+    <ClCompile Include="SkillComponent.cpp" />
+    <ClCompile Include="Skill\AreaEffect.cpp" />
+    <ClCompile Include="Skill\ProjectileGroup.cpp" />
+    <ClCompile Include="Skill\SkillBake.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <!-- 설정 파일 -->

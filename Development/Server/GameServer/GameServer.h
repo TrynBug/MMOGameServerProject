@@ -60,6 +60,13 @@ public:
     void SendBuffNtf(int64 userId, int64 objectId, int64 buffKey, int32 stackCount, int32 remainTimeMs);
     void SendBuffRemoveNtf(int64 userId, int64 objectId, int64 buffKey);
 
+    // 스킬 대미지 알림 전송 (SkillDamageNtf). Stage 가 대미지 적용 시점에 대상 주변 AOI 유저들에게 broadcast.
+    void SendSkillDamageNtf(int64 userId, int64 targetObjectId, double damage, bool isDuplicate, double remainingHp, bool isDead);
+
+    // 스킬 시전 알림 전송 (SkillCastNtf). Stage 가 시전자 주변 AOI 유저들에게 broadcast. 클라 비주얼 재현용.
+    void SendSkillCastNtf(int64 userId, int64 casterObjectId, int64 skillKey, int64 effectId,
+                          float originX, float originY, float originZ, float dirX, float dirZ, uint32 seed);
+
     // NavMesh 데이터에 접근. Stage 가 자신의 NavMesh 를 설정할 때 사용.
     NavMeshManager&       GetNavMeshManager()       { return m_navMeshManager; }
     const NavMeshManager& GetNavMeshManager() const { return m_navMeshManager; }

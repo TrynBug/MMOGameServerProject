@@ -601,6 +601,35 @@ void GameServer::SendMovePosCorrectNtf(int64 userId, float posX, float posY, flo
         userId, posX, posY, posZ, yaw));
 }
 
+void GameServer::SendSkillDamageNtf(int64 userId, int64 targetObjectId, double damage, bool isDuplicate, double remainingHp, bool isDead)
+{
+    GamePacket::SkillDamageNtf ntf;
+    ntf.set_target_object_id(targetObjectId);
+    ntf.set_damage(static_cast<float>(damage));
+    ntf.set_is_duplicate(isDuplicate);
+    ntf.set_remaining_hp(static_cast<float>(remainingHp));
+    ntf.set_is_dead(isDead);
+
+    sendPacketToUser(userId, Common::GAME_PACKET_ID_SKILL_DAMAGE_NTF, ntf);
+}
+
+void GameServer::SendSkillCastNtf(int64 userId, int64 casterObjectId, int64 skillKey, int64 effectId,
+                                  float originX, float originY, float originZ, float dirX, float dirZ, uint32 seed)
+{
+    GamePacket::SkillCastNtf ntf;
+    ntf.set_caster_object_id(casterObjectId);
+    ntf.set_skill_key(skillKey);
+    ntf.set_effect_id(effectId);
+    ntf.set_origin_x(originX);
+    ntf.set_origin_y(originY);
+    ntf.set_origin_z(originZ);
+    ntf.set_dir_x(dirX);
+    ntf.set_dir_z(dirZ);
+    ntf.set_seed(seed);
+
+    sendPacketToUser(userId, Common::GAME_PACKET_ID_SKILL_CAST_NTF, ntf);
+}
+
 // 클라이언트 캐릭터 선택 요청 처리 → 코루틴
 // 1) DB에서 (user_id, character_id) 로 캐릭터 조회
 // 2) 없는 캐릭터면 CharacterSelectRes(Fail) 전송 후 종료

@@ -2,6 +2,46 @@
 
 // GameServer 전용 상수, enum, 세션 메타정보 구조체 등 정의
 
+// ── 수학 타입 ────────────────────────────────────────────────
+// 3D 벡터. 좌표계는 Unity 와 동일: Y 가 높이, X-Z 가 평면.
+// 현재는 스킬/효과 시스템에서만 사용한다. 향후 좌표 표현을 점진적으로 이 타입으로 통일할 예정.
+// (struct 이므로 멤버에 m_ 접두를 붙이지 않는다. CodeConvention 참조.)
+struct Vector3
+{
+    float x = 0.0f;
+    float y = 0.0f;   // 높이
+    float z = 0.0f;   // 평면 깊이축
+
+    Vector3() = default;
+    Vector3(float inX, float inY, float inZ) : x(inX), y(inY), z(inZ) {}
+
+    Vector3 operator+(const Vector3& rhs) const { return Vector3(x + rhs.x, y + rhs.y, z + rhs.z); }
+    Vector3 operator-(const Vector3& rhs) const { return Vector3(x - rhs.x, y - rhs.y, z - rhs.z); }
+    Vector3 operator*(float scalar) const { return Vector3(x * scalar, y * scalar, z * scalar); }
+
+    Vector3& operator+=(const Vector3& rhs) { x += rhs.x; y += rhs.y; z += rhs.z; return *this; }
+    Vector3& operator-=(const Vector3& rhs) { x -= rhs.x; y -= rhs.y; z -= rhs.z; return *this; }
+
+    // 3D 내적 / 길이
+    float Dot(const Vector3& rhs) const { return x * rhs.x + y * rhs.y + z * rhs.z; }
+    float LengthSq() const { return x * x + y * y + z * z; }
+    float Length() const { return std::sqrt(LengthSq()); }
+
+    // X-Z 평면 길이 (높이 무시). 게임 로직 대부분이 평면 거리로 판정하므로 자주 쓰인다.
+    float LengthSqXZ() const { return x * x + z * z; }
+    float LengthXZ() const { return std::sqrt(LengthSqXZ()); }
+
+    // 정규화된 벡터. 길이가 0 에 가까우면 영벡터를 리턴한다.
+    Vector3 Normalized() const
+    {
+        const float len = Length();
+        if (len < 1e-6f)
+            return Vector3();
+        const float inv = 1.0f / len;
+        return Vector3(x * inv, y * inv, z * inv);
+    }
+};
+
 // ── Stage 데이터 Key (GameData_Stage의 Key와 일치) ───────────────────────
 // 게임서버 시작 시 항상 생성되는 고정 Stage들의 Key
 constexpr int64 k_systemStageDataKey = 1;     // 캐릭터 선택창
