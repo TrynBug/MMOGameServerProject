@@ -1,3 +1,4 @@
+using GameData;
 using MMO.Client.Navigation;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,9 +15,10 @@ namespace Client.Game
     // 추종 로직은 PlayerCharacter 의 원격 캐릭터 처리와 동일하다. (향후 공통 추종 컴포넌트로 묶을 수 있음)
     //
     // 애니메이션은 IActorAnimator(AnimatorActorAnimator)를 통해 idle/move 를 재생한다(서버 MoveNtf 기반).
-    // 스탯/HP 는 아직 없다. 필요해지면 ActorObject 상속 등으로 확장한다.
+    // HP/스탯/버프는 ActorObject 에서 상속한다. 현재 HP 는 SkillDamageNtf 의 remaining_hp 로 갱신되고,
+    // 최대 HP 는 스폰 시 게임데이터로 시드한다(서버가 몬스터 스탯 패킷을 보내기 전까지의 v1 처리).
     // prefab 은 임의의 아트 에셋이라 이 컴포넌트가 미리 붙어있지 않을 수 있어 MonsterFactory 가 런타임에 AddComponent 한다.
-    public class MonsterObject : MonoBehaviour
+    public class MonsterObject : ActorObject
     {
         // 서버가 발급한 오브젝트 식별자 (디스폰 시 이 값으로 찾는다).
         public long ObjectId { get; private set; }
@@ -24,8 +26,8 @@ namespace Client.Game
         // 몬스터 게임데이터 Key (종류 식별).
         public long MonsterKey { get; private set; }
 
-        // Server-provided buff state (key/stack/remain). Filled by BuffNtf and spawn snapshot.
-        public BuffHolder Buffs { get; } = new BuffHolder();
+        // 몬스터 등급 (노말~보스). 오토타게팅의 "최고 등급" 모드가 읽는다. 스폰 시 게임데이터에서 채운다.
+        public EMonsterGrade Grade { get; private set; } = EMonsterGrade.Normal;
 
         // 이동 속도(유닛/초). 서버 Monster 의 이동속도와 맞춰야 시각적으로 자연스럽다.
         // TODO(데이터): 서버/클라가 GameData_Monster 의 이동속도를 공유하거나 MoveNtf 에 실어 보내도록.
@@ -61,12 +63,39 @@ namespace Client.Game
             ObjectId = objectId;
             MonsterKey = monsterKey;
 
+            // 등급 + 최대 HP 를 게임데이터에서 채운다.
+            seedFromGameData(monsterKey);
+
             transform.position = pos;
             transform.rotation = Quaternion.Euler(0f, dirY, 0f);
 
             // 공통 애니메이터 해석. AddComponent 타이밍 의존을 피하려고 Awake 가 아니라
             // (모든 컴포넌트가 부착된 뒤 호출되는) Initialize 에서 찾는다. 없으면 애니메이션 없이 동작.
             m_actorAnimator = GetComponentInChildren<IActorAnimator>();
+        }
+
+        // 게임데이터에서 등급과 최대 HP 를 읽어 채운다.
+        // 서버는 (현재) 몬스터 스탯 패킷을 안 보내므로 클라가 MaxHp 를 시드한다.
+        // v1 몬스터는 Add 연산만 있어 HpTotal == HpAdd. 서버가 몬스터 스탯을 보내게 되면 그게 대체한다.
+        private void seedFromGameData(long monsterKey)
+        {
+            GameData_Monster data = GameDataTable_Monster.FindData(monsterKey);
+            if (data == null)
+                return;
+
+            Grade = data.Grade;
+
+            // 8개 스탯 슬롯에서 HpAdd 를 찾아 HpTotal(=MaxHp)로 시드.
+            for (int i = 0; i < data.GetStatCount(); ++i)
+            {
+                if (data.GetStat(i) == EStat.HpAdd)
+                {
+                    Stats.Set(EStat.HpTotal, data.GetStatValue(i));
+                    break;
+                }
+            }
+
+            FillHp();   // 스폰 시 풀피.
         }
 
         // ─── 서버 MoveNtf 처리 ───────────────────────────────────────────

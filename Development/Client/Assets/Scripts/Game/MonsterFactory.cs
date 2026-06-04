@@ -53,7 +53,18 @@ namespace Client.Game
             if (go.GetComponent<IActorAnimator>() == null)
                 go.AddComponent<AnimatorActorAnimator>();
 
-            // 6) 초기화.
+            // 6) 충돌체 확보 (투사체 hit 판정용). 아트 prefab 에 콜라이더가 없을 수 있으므로
+            //    없을 때만 기본 SphereCollider 를 붙인다. (정확한 히트박스는 아트 확정 후 교체)
+            //    투사체(트리거 콜라이더 + kinematic Rigidbody) 쪽이 OnTriggerEnter 를 받으므로
+            //    몬스터 콜라이더는 trigger 여부와 무관하게 히트 감지에 쓰일 수 있다.
+            if (go.GetComponentInChildren<Collider>() == null)
+            {
+                SphereCollider col = go.AddComponent<SphereCollider>();
+                col.radius = 0.5f;
+                col.center = new Vector3(0f, 0.5f, 0f);
+            }
+
+            // 7) 초기화.
             mo.Initialize(objectId, monsterKey, pos, dirY);
 
             go.name = $"Monster_{objectId}_key{monsterKey}";

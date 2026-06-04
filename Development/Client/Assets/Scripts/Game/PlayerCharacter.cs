@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using MMO.Client.Navigation;
 using UnityEngine;
@@ -46,10 +47,19 @@ namespace Client.Game
         // Visual 하위에 부착된 Animator. Awake 에서 찾아둠.
         // prefab 에 모델이 없거나 Animator 가 없으면 null 일 수 있음 (이 경우 애니메이션 없이 동작).
         private Animator m_animator;
-        // Animator 에 마지막으로 보낸 IsMoving 값. 매 프레임 SetBool 호출을 피하기 위한 캐시.
-        private bool m_lastSentIsMoving;
         // Animator 파라미터 hash. 문자열 lookup 을 피해 성능 약간 좋음.
-        private static readonly int s_paramIsMoving = Animator.StringToHash("IsMoving");
+        private static readonly int s_paramSpeed = Animator.StringToHash("Speed");
+        // Speed 파라미터 보간 시간(초). 이 시간 동안 idle↔walk↔run 블렌드를 거친다.
+        private const float k_speedDampTime = 0.12f;
+        // 시전 애니 재생속도 멀티플라이어. cast 스테이트의 Speed 가 이 파라미터를 Multiplier 로 써야 적용됨.
+        private static readonly int s_paramCastSpeed = Animator.StringToHash("CastSpeed");
+        // 이동시전(Mobile)용 상반신 오버라이드 레이어 이름/트리거. (베이스 Cast 트리거와 분리)
+        private const string k_upperBodyLayerName = "UpperBody";
+        private const string k_castUpperTrigger = "CastUpper";
+        private int m_upperBodyLayer = -2;   // -2 = 미해결, -1 = 레이어 없음
+        private Coroutine m_upperFade;
+        // 이동 잠금 만료 시각(Time.time). Stationary 시전 동안 이동 입력을 막는다.
+        private float m_moveLockedUntil;
 
         private void Awake()
         {
@@ -59,6 +69,74 @@ namespace Client.Game
             {
                 Debug.LogWarning($"[PlayerCharacter] Animator 를 찾지 못했습니다. 애니메이션 없이 동작합니다.");
             }
+        }
+
+        // 스킬 시전 애니메이션 1회 재생. triggerName = Animator 의 Trigger 파라미터 이름(Skill 데이터 CastAnim).
+        // 빈 문자열이거나 Animator 가 없으면 무시한다.
+        // castSpeed(= 시전클립 기본길이 / ActionLock초)를 받아 CastSpeed 파라미터에 넣어
+        // 시전 애니가 ActionLock 길이에 맞게 재생되도록 한다.
+        public void PlayCastAnimation(string triggerName, float castSpeed)
+        {
+            if (m_animator == null || string.IsNullOrEmpty(triggerName))
+                return;
+
+            // CastSpeed 를 먼저 세팅한 뒤 트리거 → cast 스테이트가 첫 프레임부터 맞는 속도로 재생.
+            m_animator.SetFloat(s_paramCastSpeed, Mathf.Max(0.01f, castSpeed));
+            m_animator.SetTrigger(triggerName);
+        }
+
+        // 이동시전(Mobile): 상반신 레이어 가중치를 올리고 상반신 시전 트리거를 쏘다.
+        // 베이스 레이어는 locomotion 을 유지하므로 다리는 계속 달린다. durationSec 뒤 가중치를 0 으로 페이드.
+        public void PlayCastUpperBody(float castSpeed, float durationSec)
+        {
+            if (m_animator == null)
+                return;
+
+            m_animator.SetFloat(s_paramCastSpeed, Mathf.Max(0.01f, castSpeed));
+
+            int layer = resolveUpperBodyLayer();
+            if (layer < 0)
+                return;   // 상반신 레이어 없음 → 미구성. (이동시전 스킬엔 UpperBody 레이어가 필요)
+
+            m_animator.SetLayerWeight(layer, 1f);
+            m_animator.SetTrigger(k_castUpperTrigger);
+
+            if (m_upperFade != null)
+                StopCoroutine(m_upperFade);
+            m_upperFade = StartCoroutine(fadeUpperBodyOut(layer, durationSec));
+        }
+
+        private int resolveUpperBodyLayer()
+        {
+            if (m_upperBodyLayer == -2 && m_animator != null)
+                m_upperBodyLayer = m_animator.GetLayerIndex(k_upperBodyLayerName);
+            return m_upperBodyLayer;
+        }
+
+        // durationSec 동안 유지 후 상반신 레이어 가중치를 0 으로 부드럽게 내린다.
+        private IEnumerator fadeUpperBodyOut(int layer, float holdSec)
+        {
+            if (holdSec > 0f)
+                yield return new WaitForSeconds(holdSec);
+
+            const float fadeSec = 0.15f;
+            float start = m_animator.GetLayerWeight(layer);
+            float t = 0f;
+            while (t < fadeSec)
+            {
+                t += Time.deltaTime;
+                m_animator.SetLayerWeight(layer, Mathf.Lerp(start, 0f, t / fadeSec));
+                yield return null;
+            }
+            m_animator.SetLayerWeight(layer, 0f);
+            m_upperFade = null;
+        }
+
+        // 이동을 seconds 동안 잠그고(Stationary 시전), 현재 이동도 즉시 멈춘다.
+        public void LockMovement(float seconds)
+        {
+            m_moveLockedUntil = Time.time + seconds;
+            StopMove();
         }
 
         // StageManager가 캐릭터 생성 직후 1회 호출
@@ -110,6 +188,8 @@ namespace Client.Game
         // - 경로 재계산은 200ms 마다 (또는 목적지가 의미 있게 바뀌었을 때).
         public void SetMoveDestination(Vector3 dest)
         {
+            if (Time.time < m_moveLockedUntil)
+                return;   // 시전 중 이동 잠금 (Stationary 캐스트).
             // dest 의 y 는 그대로 둡다. NavMesh 검색 시 자동으로 표면 Y 로 보정됨.
             // (이전에는 transform.position.y 로 덮어써서 지형 높낮이가 반영되지 않았음)
 
@@ -189,17 +269,16 @@ namespace Client.Game
             updateAnimator();
         }
 
-        // Animator 의 IsMoving 파라미터를 m_hasMoveDest 와 동기화.
-        // 값이 바뀐 시점에만 SetBool 호출 (불필요한 Animator 갱신 방지).
+        // Animator 의 Speed(float) 파라미터를 이동 상태와 동기화.
+        // 이동 여부를 0/1 목표값으로 두고 damping 으로 보간 → 가/감속 구간에서 walk 블렌드를
+        // 거쳐 run 으로 자연스럽게 전환된다. (블렌드 트리: idle=0, walk=0.5, run=1)
+        // SetFloat damping 은 매 프레임 호출해야 보간되므로 캐시 가드 없이 호출한다.
         private void updateAnimator()
         {
             if (m_animator == null) return;
 
-            if (m_lastSentIsMoving != m_hasMoveDest)
-            {
-                m_animator.SetBool(s_paramIsMoving, m_hasMoveDest);
-                m_lastSentIsMoving = m_hasMoveDest;
-            }
+            float target = m_hasMoveDest ? 1f : 0f;
+            m_animator.SetFloat(s_paramSpeed, target, k_speedDampTime, Time.deltaTime);
         }
 
         private void updateMovement()

@@ -18,12 +18,12 @@ namespace Client.Game
     // 그 시점에 MonoBehaviour 매니저로 승격할 수 있음.
     //
     // prefab 경로:
-    //   현재는 "Characters/PlayerCharacter" 한 종류만 사용.
+    //   임시로 "Prefabs/Characters/Mage" 한 종류만 사용.
     //   직업별 prefab 도입 시 enum/string 으로 분기.
     public static class CharacterFactory
     {
         // Resources/ 하위 경로 (확장자 없음).
-        private const string k_playerPrefabPath = "Characters/PlayerCharacter";
+        private const string k_playerPrefabPath = "Prefabs/Characters/Mage";
 
         public static PlayerCharacter Create(long userId, string name, bool isLocalPlayer, Vector3 pos, float dirY)
         {

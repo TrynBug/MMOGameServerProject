@@ -102,6 +102,11 @@ namespace Client.Game
                 if (selfToIgnore != null && h.collider.transform.IsChildOf(selfToIgnore.transform))
                     continue;
 
+                // 몬스터 콜라이더는 지면 클릭 대상에서 제외. (투사체 hit 판정용으로 추가된
+                // 몬스터 콜라이더가 이동 클릭 좌표를 가로채지 않도록. 몬스터를 클릭해도 지면/그 너머로 이동 좌표가 잡힌다.)
+                if (h.collider.GetComponentInParent<MonsterObject>() != null)
+                    continue;
+
                 if (h.distance < bestDist)
                 {
                     bestDist = h.distance;

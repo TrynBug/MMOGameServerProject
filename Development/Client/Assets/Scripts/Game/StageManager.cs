@@ -82,6 +82,19 @@ namespace Client.Game
             return pc;
         }
 
+        // object_id 로 액터(캐릭터/몬스터)를 찾는다. 없으면 null. (SkillSystem 의 데미지 라우팅용)
+        public ActorObject FindActor(long objectId)
+        {
+            if (m_characters.TryGetValue(objectId, out PlayerCharacter c) && c != null)
+                return c;
+            if (m_monsters.TryGetValue(objectId, out MonsterObject m) && m != null)
+                return m;
+            return null;
+        }
+
+        // 현재 스폰된 몬스터 목록 (오토타게팅용 읽기 전용 뷰).
+        public IReadOnlyDictionary<long, MonsterObject> Monsters => m_monsters;
+
         // ─── 패킷 핸들러 ────────────────────────────────────────────────
 
         // 유저가 스테이지에 입장 성공
