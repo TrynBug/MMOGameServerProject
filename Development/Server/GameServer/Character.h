@@ -42,11 +42,15 @@ class Character : public ActorObject
 public:
     // protobuf 데이터로부터 생성. character_id를 m_objectId로 사용한다.
     // 좌표/yaw는 m_protoData의 값을 부모 StageObject 멤버로 복사한다.
-    explicit Character(const DataStructures::Character& protoData);
+    // 생성자는 파라미터 없음. 빈 객체로 생성한 뒤 Initialize 를 호출해야 한다.
+    Character() = default;
     ~Character() override = default;
 
     Character(const Character&) = delete;
     Character& operator=(const Character&) = delete;
+
+    // protoData 로 캐릭터를 초기화한다. character_id 가 유효하지 않으면 false 를 리턴한다.
+    [[nodiscard]] bool Initialize(const DataStructures::Character& protoData);
 
 public:
     // ── User 참조 (weak_ptr) ────────────────────────────────────
@@ -56,6 +60,9 @@ public:
     // ── proto 데이터 접근 ───────────────────────────────────────
     // const 접근은 자유롭게.
     const DataStructures::Character& GetProto() const { return m_protoData; }
+
+    // StageObject hook: 이 캐릭터를 소유한 유저 ID. AOI 브로드캐스트(Stage::ForEachUserInAoi)가 사용.
+    int64 GetOwnerUserId() const override { return m_protoData.owner_user_id(); }
 
     // 변경 가능 접근 (hp/level/exp 등을 직접 set 하기 위해).
     // 좌표/yaw는 직접 변경하지 말 것. SetPos/SetYaw 사용.
@@ -116,8 +123,8 @@ public:
     void Update(int64 deltaMs) override;
 
 private:
-    // 생성자에서 호출. JobBase 게임데이터의 기본스탯을 m_statComponent 에 적용한다.
-    void applyJobBaseStats();
+    // Initialize 에서 호출. JobBase 게임데이터의 기본스탯을 m_statComponent 에 적용한다.
+    bool applyJobBaseStats();
 
     // 현재 waypoint 를 향해 이동 시작 시점에 yaw 를 갱신.
     // (X-Z 평면 상의 방향. Unity 호환 degree.)

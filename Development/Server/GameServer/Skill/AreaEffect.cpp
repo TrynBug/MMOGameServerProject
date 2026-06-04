@@ -57,6 +57,6 @@ void AreaEffect::fireTick(Stage* pStage)
     // QueryEnemiesInShape 는 User/Monster 버킷에서만 후보를 모으므로 모두 ActorObject 파생이다.
     for (StageObject* pEnemy : enemies)
     {
-        pStage->ApplyEffectDamage(*static_cast<ActorObject*>(pEnemy), m_params.damageAmount);
+        pStage->ApplyEffectDamage(*static_cast<ActorObject*>(pEnemy), m_params.damageAmount, m_params.casterObjectId);
     }
 }

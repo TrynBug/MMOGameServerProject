@@ -1,10 +1,18 @@
 #include "pch.h"
 #include "StageObject.h"
 
-StageObject::StageObject(int64 objectId, EObjectType objectType)
-    : m_objectId(objectId)
-    , m_objectType(objectType)
+bool StageObject::Initialize(int64 objectId, EObjectType objectType)
 {
+    if (objectId == 0 || objectType == EObjectType::None)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("StageObject::Initialize - invalid args. objectId={} objectType={}",
+            objectId, static_cast<int>(objectType)));
+        return false;
+    }
+
+    m_objectId   = objectId;
+    m_objectType = objectType;
+    return true;
 }
 
 void StageObject::SetUpdateIntervalMs(int64 intervalMs)

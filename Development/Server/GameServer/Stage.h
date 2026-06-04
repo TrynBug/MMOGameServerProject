@@ -233,7 +233,11 @@ public:
 
     // 효과(스킬)에 의한 대미지를 target 에 적용하고, 주변 AOI 에 SkillDamageNtf 를 broadcast 한다. AreaEffect 등이 호출.
     // isDuplicate: 중복타격으로 감소된 대미지인지 (표시용 flag). 사망 처리(디스폰)는 후속.
-    void ApplyEffectDamage(ActorObject& target, double damage, bool isDuplicate = false);
+    void ApplyEffectDamage(ActorObject& target, double damage, int64 killerObjectId, bool isDuplicate = false);
+
+    // 오브젝트 사망을 주변 AOI 유저들에게 통보(ObjectDeathNtf). 클라 사망 연출용.
+    // 디스폰(시체 제거)은 corpse 시간 경과 후 DespawnMonster(ObjectVisibilityNtf despawn)로 별도 처리된다.
+    void BroadcastObjectDeathNtf(const ActorObject& actor, int64 killerObjectId);
 
     // 스킬 투사체 묶음(1회 시전 분)을 월드에 등록한다. 발급된 effectId 를 리턴한다 (시전 Ntf 에 실을 용도).
     // dirs: 부채꼴 전개된 투사체별 방향. SkillComponent 가 계산해 넘긴다.
@@ -268,6 +272,23 @@ public:
         }
     }
 
+    // (centerSectorX, centerSectorZ) 주변 AOI(k_aoiRange) 안의 모든 유저에 대해 콜백을 호출한다.
+    // 콜백 시그니처: void(int64 userId). center 가 -1(맵 밖)이면 아무것도 하지 않는다.
+    // "내 주변 유저 전체에게 패킷 전송" 브로드캐스트의 공통 골격. (ForEachAdjacentSector 와 동일 성능, std::function 없음)
+    template <typename Func>
+    void ForEachUserInAoi(int32 centerSectorX, int32 centerSectorZ, Func&& callback)
+    {
+        if (centerSectorX < 0 || centerSectorZ < 0)
+            return;
+
+        ForEachAdjacentSector(centerSectorX, centerSectorZ, k_aoiRange,
+            [&](Sector* pSector)
+            {
+                for (const auto& [objId, pObj] : pSector->GetUsers())
+                    callback(pObj->GetOwnerUserId());
+            });
+    }
+
 protected:
     // serverbase::Contents 훅
     void OnStart()              override;
@@ -297,9 +318,31 @@ protected:
     virtual void OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter);
     virtual void OnUserLeave(int64 userId);
 
-    // 유저가 클라이언트로부터 보낸 패킷 처리 hook (파생 클래스가 override 가능).
-    // 기본 동작: 로그만 출력. 향후 단계에서 실제 디스패쳐 호출 등을 추가한다.
+    // 유저가 클라이언트로부터 보낸 패킷 처리 진입점.
+    // 패킷ID로 핸들러 테이블(getUserPacketHandlerMap)을 조회하여 해당 멤버 핸들러를 호출한다.
+    // 미등록 패킷은 Debug 로그만 남긴다.
     virtual void OnUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+
+    // ── 유저 패킷 핸들러 디스패치 ──────────────────────────────
+    // 패킷ID → 멤버 핸들러 포인터. 모든 핸들러는 (UserPtr, PacketPtr) 시그니처로 통일한다.
+    using UserPacketHandler    = void (Stage::*)(const UserPtr&, const netlib::PacketPtr&);
+    using UserPacketHandlerMap = std::unordered_map<uint16, UserPacketHandler>;
+
+    // 이 Stage 종류가 처리할 [패킷ID, 핸들러] 테이블을 돌려준다.
+    // static const 테이블이라 클래스당 한 번만 생성된다 (Stage 인스턴스마다 드는 비용 없음).
+    // 파생 클래스가 자기만의 패킷셋을 가지려면 이 함수를 override 하여 자기 테이블을 돌려준다.
+    virtual const UserPacketHandlerMap& getUserPacketHandlerMap() const;
+
+    // 패킷 payload 를 TMsg 로 역직렬화한다. 실패 시 Warn 로그 후 false (호출자는 return).
+    // 각 핸들러에 중복되던 역직렬화 + 실패 로그 보일러플레이트를 흡수한다.
+    template <typename TMsg>
+    bool deserializeUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacket, TMsg& outMsg);
+
+    // 개별 패킷 핸들러. getUserPacketHandlerMap 테이블에 등록되어 OnUserPacket 이 호출한다.
+    void handleMoveDestReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+    void handleMoveStopReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+    void handleSkillCastReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+    void handleSkillProjectileHitReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
 
     // ── 유저 컨테이너 접근 ──
     const std::unordered_map<int64, UserPtr>& GetUsers() const { return m_users; }

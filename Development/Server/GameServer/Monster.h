@@ -53,14 +53,17 @@ struct MonsterSkill
 class Monster : public ActorObject
 {
 public:
-    // objectId 는 외부(스폰 로직)에서 ObjectIdGenerator 로 발급해 전달한다.
-    // pMonsterData 는 몬스터 종류 데이터(스탯/등급/경험치 등). 호출자가 유효성을 보장한다.
-    // 위치는 생성 후 SetPos/SetYaw 로 설정한다. 두뇌는 SetAI 로 주입한다.
-    Monster(int64 objectId, const GameData_Monster* pMonsterData);
+    // 생성자는 파라미터 없음. 빈 객체로 생성한 뒤 Initialize 를 호출해야 한다.
+    Monster() = default;
     ~Monster() override = default;
 
     Monster(const Monster&) = delete;
     Monster& operator=(const Monster&) = delete;
+
+    // objectId 는 외부(스폰 로직)에서 ObjectIdGenerator 로 발급해 전달한다.
+    // pMonsterData 는 몬스터 종류 데이터. nullptr 이거나 잘못된 인자면 false 를 리턴한다.
+    // 위치는 초기화 후 SetPos/SetYaw 로 설정하고, 두뇌는 SetAI 로 주입한다.
+    [[nodiscard]] bool Initialize(int64 objectId, const GameData_Monster* pMonsterData);
 
 public:
     // ── 종류 데이터 / 스탯 ─────────────────────────────────────
@@ -105,6 +108,10 @@ public:
         return dirty;
     }
 
+    // 사망 후 시체(corpse) 경과시간을 deltaMs 만큼 누적하고, 유지시간(k_corpseDurationMs)을
+    // 넘으면 true 를 리턴한다(=디스폰 타이밍). Stage::updateMonsters 가 사망한 몬스터에게만 매 tick 호출한다.
+    bool AdvanceCorpseTimer(int64 deltaMs);
+
     // ── 타겟 ──
     // 주변 sector 에서 어그로 범위 내 가장 가까운 유저를 찾아 현재 타겟으로 설정 (없으면 해제).
     void         AcquireTarget();
@@ -147,8 +154,9 @@ public:
     void  ExecuteSkill(int32 index, StageObject* pTarget);
 
 private:
-    // 생성자에서 호출. 종류 데이터의 기본스탯을 m_statComponent 에 적용한다.
-    void applyBaseStats();
+    // Initialize 에서 호출. 종류 데이터의 기본스탯을 m_statComponent 에 적용한다.
+    // 종류 데이터가 없으면 false (초기화 실패로 이어짐).
+    bool applyBaseStats();
 
     // 매 tick housekeeping: 스킬 쿨다운 진행.
     void tickSkillCooldowns(int64 deltaMs);
@@ -176,6 +184,9 @@ private:
     float m_spawnX = 0.0f;
     float m_spawnY = 0.0f;
     float m_spawnZ = 0.0f;
+
+    // 사망 후 시체 유지 경과시간(ms). MarkDead 이후 Stage::updateMonsters 가 매 tick 누적한다.
+    int64 m_corpseElapsedMs = 0;
 
     // ── AI 설정값 ─────────────────────────────────────────────
     // TODO(데이터): GameData_Monster 컬럼으로 이동. 지금은 근접 몹 기준 기본값 하드코딩.

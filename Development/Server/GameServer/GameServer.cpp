@@ -387,7 +387,7 @@ void GameServer::sendGameEnterNtf(int64 userId)
         ntf.set_stage_id(0);
     }
 
-    sendPacketToUser(userId, Common::GAME_PACKET_ID_GAME_ENTER_NTF, ntf);
+    m_packetSender.SendToUser(userId, Common::GAME_PACKET_ID_GAME_ENTER_NTF, ntf);
 }
 
 void GameServer::sendCharacterListNtf(int64 userId, const std::vector<DataStructures::Character>& characters)
@@ -397,7 +397,7 @@ void GameServer::sendCharacterListNtf(int64 userId, const std::vector<DataStruct
     {
         *ntf.add_characters() = character;
     }
-    sendPacketToUser(userId, Common::GAME_PACKET_ID_CHARACTER_LIST_NTF, ntf);
+    m_packetSender.SendToUser(userId, Common::GAME_PACKET_ID_CHARACTER_LIST_NTF, ntf);
 
     LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterListNtf sent. userId={} count={}",
         userId, characters.size()));
@@ -472,162 +472,7 @@ void GameServer::sendCharacterCreateRes(int64 userId, EResultCode resultCode, co
     {
         *res.mutable_new_character() = *pNewCharacter;
     }
-    sendPacketToUser(userId, Common::GAME_PACKET_ID_CHARACTER_CREATE_RES, res);
-}
-
-void GameServer::SendStageEnterNtf(int64 userId, int64 stageId, int64 stageDataKey, float myPosX, float myPosY, float myPosZ, float myYaw)
-{
-    // StageEnterNtf 먼저 스탯/HP를 보낸다.
-    // 클라는 StageEnterNtf 를 받을 때면 이미 Game 씬 + LocalPlayer 스폰이 끝난 상태라
-    // 스탯 핸들러가 대상 캐릭터를 찾을 수 있다. 또 최대치(StatUpdateNtf)가 현재HP(HpMpNtf)보다
-    // 먼저 가야 클라에서 clamp 가 올바르므로 이 순서로 보낸다.
-    UserPtr spUser;
-    if (m_safeUsers.Find(userId, spUser) && spUser)
-    {
-        if (CharacterPtr spCharacter = spUser->GetCurrentCharacter())
-        {
-            SendStatUpdateNtf(userId, *spCharacter);
-            SendHpMpNtf(userId, spCharacter->GetCurHp(), spCharacter->GetCurMp());
-        }
-    }
-
-    GamePacket::StageEnterNtf ntf;
-    ntf.set_stage_id(stageId);
-    ntf.set_stage_data_key(stageDataKey);
-    ntf.set_my_pos_x(myPosX);
-    ntf.set_my_pos_y(myPosY);
-    ntf.set_my_pos_z(myPosZ);
-    ntf.set_my_yaw(myYaw);
-
-    sendPacketToUser(userId, Common::GAME_PACKET_ID_STAGE_ENTER_NTF, ntf);
-
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: StageEnterNtf sent. userId={} stageId={} stageKey={} pos=({},{},{}) yaw={}",
-        userId, stageId, stageDataKey, myPosX, myPosY, myPosZ, myYaw));
-}
-
-void GameServer::SendStatUpdateNtf(int64 userId, const Character& character)
-{
-    GamePacket::StatUpdateNtf ntf;
-    ntf.set_object_id(character.GetObjectId());
-
-    // 0 이 아닌 스탯만 담는다.
-    character.GetStat().ForEachNonZeroStat([&ntf](EStat stat, double value)
-    {
-        GamePacket::StatEntry* pEntry = ntf.add_entries();
-        pEntry->set_stat(static_cast<int32>(stat));
-        pEntry->set_value(value);
-    });
-
-    sendPacketToUser(userId, Common::GAME_PACKET_ID_STAT_UPDATE_NTF, ntf);
-
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: StatUpdateNtf sent. userId={} objectId={} count={}",
-        userId, character.GetObjectId(), ntf.entries_size()));
-}
-
-void GameServer::SendHpMpNtf(int64 userId, double curHp, double curMp)
-{
-    GamePacket::HpMpNtf ntf;
-    // objectId 는 현재 본인에게만 보내므로 userId 와 동일한 캐릭터 objectId 를 쓴다.
-    // (현재 character_id == objectId == userId 체계. 향후 구분되면 명시 전달로 변경.)
-    UserPtr spUser;
-    int64 objectId = userId;
-    if (m_safeUsers.Find(userId, spUser) && spUser)
-    {
-        if (CharacterPtr spCharacter = spUser->GetCurrentCharacter())
-            objectId = spCharacter->GetObjectId();
-    }
-
-    ntf.set_object_id(objectId);
-    ntf.set_cur_hp(curHp);
-    ntf.set_cur_mp(curMp);
-
-    sendPacketToUser(userId, Common::GAME_PACKET_ID_HP_MP_NTF, ntf);
-}
-
-void GameServer::SendObjectVisibilityNtf(int64 userId,
-                                         const std::vector<GamePacket::CharacterSpawnInfo>& characterSpawns,
-                                         const std::vector<int64>& despawnIds,
-                                         const std::vector<GamePacket::MonsterSpawnInfo>& monsterSpawns)
-{
-    GamePacket::ObjectVisibilityNtf ntf;
-    for (const auto& spawn : characterSpawns)
-    {
-        *ntf.add_character_spawns() = spawn;
-    }
-    for (const auto& spawn : monsterSpawns)
-    {
-        *ntf.add_monster_spawns() = spawn;
-    }
-    for (int64 id : despawnIds)
-    {
-        ntf.add_despawn_ids(id);
-    }
-
-    sendPacketToUser(userId, Common::GAME_PACKET_ID_OBJECT_VISIBILITY_NTF, ntf);
-
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: ObjectVisibilityNtf sent. userId={} characterSpawns={} monsterSpawns={} despawns={}",
-        userId, characterSpawns.size(), monsterSpawns.size(), despawnIds.size()));
-}
-
-void GameServer::SendMoveNtf(int64 userId, int64 objectId,
-                             float posX, float posY, float posZ, float yaw,
-                             float destX, float destY, float destZ, bool isMoving)
-{
-    GamePacket::MoveNtf ntf;
-    ntf.set_object_id(objectId);
-    ntf.set_pos_x(posX);
-    ntf.set_pos_y(posY);
-    ntf.set_pos_z(posZ);
-    ntf.set_yaw(yaw);
-    ntf.set_dest_x(destX);
-    ntf.set_dest_y(destY);
-    ntf.set_dest_z(destZ);
-    ntf.set_is_moving(isMoving);
-
-    sendPacketToUser(userId, Common::GAME_PACKET_ID_MOVE_NTF, ntf);
-}
-
-void GameServer::SendMovePosCorrectNtf(int64 userId, float posX, float posY, float posZ, float yaw)
-{
-    GamePacket::MovePosCorrectNtf ntf;
-    ntf.set_pos_x(posX);
-    ntf.set_pos_y(posY);
-    ntf.set_pos_z(posZ);
-    ntf.set_yaw(yaw);
-
-    sendPacketToUser(userId, Common::GAME_PACKET_ID_MOVE_POS_CORRECT_NTF, ntf);
-
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: MovePosCorrectNtf sent. userId={} pos=({},{},{}) yaw={}",
-        userId, posX, posY, posZ, yaw));
-}
-
-void GameServer::SendSkillDamageNtf(int64 userId, int64 targetObjectId, double damage, bool isDuplicate, double remainingHp, bool isDead)
-{
-    GamePacket::SkillDamageNtf ntf;
-    ntf.set_target_object_id(targetObjectId);
-    ntf.set_damage(static_cast<float>(damage));
-    ntf.set_is_duplicate(isDuplicate);
-    ntf.set_remaining_hp(static_cast<float>(remainingHp));
-    ntf.set_is_dead(isDead);
-
-    sendPacketToUser(userId, Common::GAME_PACKET_ID_SKILL_DAMAGE_NTF, ntf);
-}
-
-void GameServer::SendSkillCastNtf(int64 userId, int64 casterObjectId, int64 skillKey, int64 effectId,
-                                  float originX, float originY, float originZ, float dirX, float dirZ, uint32 seed)
-{
-    GamePacket::SkillCastNtf ntf;
-    ntf.set_caster_object_id(casterObjectId);
-    ntf.set_skill_key(skillKey);
-    ntf.set_effect_id(effectId);
-    ntf.set_origin_x(originX);
-    ntf.set_origin_y(originY);
-    ntf.set_origin_z(originZ);
-    ntf.set_dir_x(dirX);
-    ntf.set_dir_z(dirZ);
-    ntf.set_seed(seed);
-
-    sendPacketToUser(userId, Common::GAME_PACKET_ID_SKILL_CAST_NTF, ntf);
+    m_packetSender.SendToUser(userId, Common::GAME_PACKET_ID_CHARACTER_CREATE_RES, res);
 }
 
 // 클라이언트 캐릭터 선택 요청 처리 → 코루틴
@@ -695,7 +540,13 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
 
     // Character 객체 생성. 라이프타임은 Town이 최종소유 (StageMsg_UserEnter로 전달 후).
     // 여기서는 임시로 shared_ptr을 들고 Town으로 넘겨주면 Town이 m_objects에 등록.
-    CharacterPtr spCharacter = std::make_shared<Character>(character);
+    CharacterPtr spCharacter = std::make_shared<Character>();
+    if (!spCharacter->Initialize(character))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - Character Initialize failed. userId={} characterId={}", userId, characterId));
+        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: character init", characterId, 0, 0.f, 0.f, 0.f, 0.f);
+        co_return;
+    }
     spCharacter->SetUser(spUser);   // Character -> User weak_ptr
     spUser->SetCurrentCharacter(spCharacter);   // User -> Character weak_ptr
 
@@ -741,7 +592,7 @@ void GameServer::sendCharacterSelectRes(int64 userId, EResultCode resultCode, co
     res.set_pos_y(posY);
     res.set_pos_z(posZ);
     res.set_yaw(yaw);
-    sendPacketToUser(userId, Common::GAME_PACKET_ID_CHARACTER_SELECT_RES, res);
+    m_packetSender.SendToUser(userId, Common::GAME_PACKET_ID_CHARACTER_SELECT_RES, res);
 
     LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterSelectRes sent. userId={} resultCode={} characterId={} stageId={}",
         userId, static_cast<int32>(resultCode), characterId, stageId));

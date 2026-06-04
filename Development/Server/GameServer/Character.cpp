@@ -23,10 +23,13 @@ namespace
     constexpr float k_waypointReachDistSq = 0.0025f;
 }
 
-Character::Character(const DataStructures::Character& protoData)
-    : ActorObject(protoData.character_id(), EObjectType::User)
-    , m_protoData(protoData)
+bool Character::Initialize(const DataStructures::Character& protoData)
 {
+    if (!ActorObject::Initialize(protoData.character_id(), EObjectType::User))
+        return false;
+
+    m_protoData = protoData;
+
     // proto의 좌표/yaw를 부모 StageObject 멤버에 복사.
     // (런타임은 StageObject 멤버를 진실의 원천으로 사용한다.)
     SetPos(protoData.pos_x(), protoData.pos_y(), protoData.pos_z());
@@ -40,25 +43,28 @@ Character::Character(const DataStructures::Character& protoData)
 
     // JobBase 게임데이터의 기본스탯을 스탯 컴포넌트에 적용.
     // (향후 레벨/아이템/마스터리/버프는 이어서 각각의 소스가 ApplyStat 한다.)
-    applyJobBaseStats();
+    if (!applyJobBaseStats())
+        return false;
 
     // 현재 HP/MP 를 최대치로 초기화 (생성 시 풀피).
     // applyJobBaseStats() 이후여야 HpTotal/MpTotal 이 계산되어 있어 최대치가 정해진다.
     FillHp();
     FillMp();
+
+    return true;
 }
 
-void Character::applyJobBaseStats()
+bool Character::applyJobBaseStats()
 {
     const EJob job = static_cast<EJob>(m_protoData.job_id());
     const GameData_JobBase* pJobBase = GameDataTable_JobBase::FindDataByJob(job);
     if (pJobBase == nullptr)
     {
-        // 게임데이터가 없으면 기본스탯을 적용하지 못한 채 진행 (빈 스탯 캐릭터).
-        // 운영 전 단계에서 잡혀야 할 데이터 누락이므로 에러 로그만 남긴다.
+        // JobBase 데이터가 없으면 기본스탯을 적용할 수 없으므로 초기화 실패로 처리한다(false 리턴).
+        // 호출자 Character::Initialize 가 false 를 받아 캐릭터 생성을 중단한다.
         LOG_WRITE(LogLevel::Error, std::format("Character::applyJobBaseStats - JobBase not found. objectId={} jobId={}",
             GetObjectId(), m_protoData.job_id()));
-        return;
+        return false;
     }
 
     // (EStat, value) 쌍 목록을 순회하며 적용. Stat 이 None 인 슬롯은 건너뛴다.
@@ -70,6 +76,8 @@ void Character::applyJobBaseStats()
             continue;
         m_statComponent.ApplyStat(stat, pJobBase->GetStatValue(i));
     }
+
+    return true;
 }
 
 void Character::SyncRuntimeToProto()
@@ -254,7 +262,7 @@ void Character::OnStatsChangedByBuff()
     GameServer* pServer = pStage->GetGameServer();
     if (pServer == nullptr)
         return;
-    pServer->SendStatUpdateNtf(GetProto().owner_user_id(), *this);
+    pServer->GetPacketSender().SendStatUpdateNtf(GetProto().owner_user_id(), *this);
 }
 
 void Character::OnHpChangedByBuff()
@@ -266,5 +274,5 @@ void Character::OnHpChangedByBuff()
     GameServer* pServer = pStage->GetGameServer();
     if (pServer == nullptr)
         return;
-    pServer->SendHpMpNtf(GetProto().owner_user_id(), GetCurHp(), GetCurMp());
+    pServer->GetPacketSender().SendHpMpNtf(GetProto().owner_user_id(), GetCurHp(), GetCurMp());
 }

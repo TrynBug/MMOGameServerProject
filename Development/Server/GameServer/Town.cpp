@@ -62,6 +62,6 @@ void Town::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
         return;
     }
 
-	pGameServer->SendStageEnterNtf(spUser->GetUserId(), GetStageId(), GetStageDataKey(),
+	pGameServer->GetPacketSender().SendStageEnterNtf(spUser->GetUserId(), GetStageId(), GetStageDataKey(),
         spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), spCharacter->GetYaw());
 }

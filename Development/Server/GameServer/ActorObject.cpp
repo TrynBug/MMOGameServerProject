@@ -1,9 +1,13 @@
 #include "pch.h"
 #include "ActorObject.h"
 
-ActorObject::ActorObject(int64 objectId, EObjectType objectType)
-    : StageObject(objectId, objectType)
-    , m_buffComponent(this)
+ActorObject::ActorObject()
+    : m_buffComponent(this)
     , m_skillComponent(this)
 {
+}
+
+bool ActorObject::Initialize(int64 objectId, EObjectType objectType)
+{
+    return StageObject::Initialize(objectId, objectType);
 }

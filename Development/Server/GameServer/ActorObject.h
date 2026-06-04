@@ -39,11 +39,16 @@ class StatComponentBase;
 class ActorObject : public StageObject
 {
 public:
-    ActorObject(int64 objectId, EObjectType objectType);
+    // 생성자는 파라미터 없음. 단, 멤버 컴포넌트(Buff/Skill)는 owner(this)를 필요로 하므로
+    // 생성자 초기화 리스트에서 this 로 연결한다(정의는 .cpp). 이는 멤버 구성이라 검증 대상이 아니다.
+    ActorObject();
     ~ActorObject() override = default;
 
     ActorObject(const ActorObject&) = delete;
     ActorObject& operator=(const ActorObject&) = delete;
+
+    // 파생 클래스의 Initialize 가 호출하는 부모 초기화 체인. StageObject::Initialize 로 위임.
+    [[nodiscard]] bool Initialize(int64 objectId, EObjectType objectType);
 
 public:
     // ── 최대 HP / MP ──────────────────────────────────────────
@@ -93,8 +98,22 @@ public:
     void FillHp() { m_curHp = GetMaxHp(); }
     void FillMp() { m_curMp = GetMaxMp(); }
 
-    // 사망 여부. 현재HP 가 0 이하이면 사망으로 본다.
-    bool IsDead() const { return m_curHp <= 0.0; }
+    // ── 사망 상태 ────────────────────────────────
+    // 사망은 명시적 상태다(HP 0 파생이 아님). 대미지가 아닌 사인(스크립트/지형 등)도 있을 수 있어,
+    // HP 와 무관하게 MarkDead 로 1회 전환한다. 디스폰은 이 상태를 기준으로 별도 스케줄링된다.
+    bool  IsDead() const { return m_isDead; }
+    int64 GetKillerObjectId() const { return m_killerObjectId; }
+
+    // 사망으로 전환한다. 이미 사망 상태면 아무것도 하지 않고 false (중복 사망 방지).
+    // 이번 호출에서 처음 사망 전환했으면 true (호출자가 사망 통보를 1회만 보내도록).
+    bool MarkDead(int64 killerObjectId)
+    {
+        if (m_isDead)
+            return false;
+        m_isDead         = true;
+        m_killerObjectId = killerObjectId;
+        return true;
+    }
 
 private:
     // value 를 [0, maxValue] 로 clamp. maxValue 가 음수면 0 으로 본다.
@@ -110,6 +129,10 @@ private:
     // 현재 HP / MP. 최대치는 GetMaxHp()/GetMaxMp() 로 얻는다.
     double m_curHp = 0.0;
     double m_curMp = 0.0;
+
+    // 사망 상태 (MarkDead 로 전환). m_killerObjectId 0 = 처치자 없음.
+    bool  m_isDead = false;
+    int64 m_killerObjectId = 0;
 
     // 버프 컴포넌트. 생성자에서 owner(this)로 초기화된다.
     BuffComponent m_buffComponent;

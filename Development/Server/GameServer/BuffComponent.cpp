@@ -205,9 +205,10 @@ void BuffComponent::fireTick(const BuffInstance& buff)
     switch (buff.pData->PeriodicType)
     {
     case EPeriodicEffect::DamageHp:
-        m_pOwner->SetCurHp(m_pOwner->GetCurHp() - amount);   // SetCurHp 가 [0,최대] 로 clamp
-        m_pOwner->OnHpChangedByBuff();
-        // TODO(전투): HP <= 0 사망 처리는 death 시스템 연동 시 추가. 지금은 0 으로 clamp 만.
+        // 대미지는 Stage::ApplyEffectDamage 로 통일한다 (HP 감소 + SkillDamageNtf + 사망 판정/통보).
+        // casterObjectId 가 처치자(killer)로 사망 패킷에 실린다. DoT 가 죽이면 여기서 ObjectDeathNtf 까지 나간다.
+        if (Stage* pStage = m_pOwner->GetStage())
+            pStage->ApplyEffectDamage(*m_pOwner, amount, buff.casterObjectId);
         break;
 
     case EPeriodicEffect::HealHp:

@@ -28,15 +28,23 @@ class Stage;
 class StageObject
 {
 public:
-    StageObject(int64 objectId, EObjectType objectType);
+    StageObject() = default;
     virtual ~StageObject() = default;
 
     StageObject(const StageObject&) = delete;
     StageObject& operator=(const StageObject&) = delete;
 
+    // 빈 객체로 생성한 뒤 반드시 호출하여 초기화한다. 생성자는 리턴값이 없어 실패를 알릴 수 없으므로,
+    // 초기화 성공 여부는 이 함수의 반환값(false=실패)으로 확인한다. 잘못된 인자(objectId==0 / objectType==None)면 false.
+    [[nodiscard]] bool Initialize(int64 objectId, EObjectType objectType);
+
 public:
     int64       GetObjectId()   const { return m_objectId; }
     EObjectType GetObjectType() const { return m_objectType; }
+
+    // 이 오브젝트를 소유한 유저의 ID. 유저 객체(Character)만 의미있는 값을 돌려주고, 그 외(Monster/Prop 등)는 0.
+    // AOI 브로드캐스트(Stage::ForEachUserInAoi)에서 user 컨테이너 순회 시 사용.
+    virtual int64 GetOwnerUserId() const { return 0; }
 
     float       GetPosX()       const { return m_posX; }
     float       GetPosY()       const { return m_posY; }   // 높이

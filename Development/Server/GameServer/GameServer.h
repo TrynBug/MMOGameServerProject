@@ -8,6 +8,7 @@
 #include "StageManager.h"
 #include "Map/NavMeshManager.h"
 #include "ThreadSafeUnorderedMap.h"
+#include "PacketSender.h"
 
 // GameServer는 게임로직(Stage, 유저, 전투, 스킬 등)을 처리하는 서버이다.
 // - 클라이언트와 직접 연결되지 않는다. 게이트웨이서버를 통해 클라이언트와 통신한다.
@@ -18,54 +19,20 @@
 class GameServer : public serverbase::ServerBase
 {
 public:
-    GameServer() = default;
+    GameServer()
+        : m_packetSender(*this, m_safeUsers, m_safeGatewaySessions)
+    {
+    }
     ~GameServer() override = default;
 
     GameServer(const GameServer&) = delete;
     GameServer& operator=(const GameServer&) = delete;
 
-    // ── Stage 파생 클래스가 호출하는 public 서비스 ────────────────
-    // Stage 입장 완료 알림 전송 (StageEnterNtf).
-    // 서버가 결정한 spawn 위치/회전만 포함. 다른 주변 오브젝트 정보는 ObjectVisibilityNtf로 별도 전송.
-    void SendStageEnterNtf(int64 userId, int64 stageId, int64 stageDataKey, float myPosX, float myPosY, float myPosZ, float myYaw);
-
-    // 오브젝트 가시성 알림 전송 (ObjectVisibilityNtf).
-    // userId에게 spawns/despawnIds 전송.
-    void SendObjectVisibilityNtf(int64 userId,
-                                 const std::vector<GamePacket::CharacterSpawnInfo>& characterSpawns,
-                                 const std::vector<int64>& despawnIds,
-                                 const std::vector<GamePacket::MonsterSpawnInfo>& monsterSpawns = {});
-
-    // 이동 알림 전송 (MoveNtf). 상태 변화 시점에 Stage가 sector AOI 순회하면서 unicast.
-    void SendMoveNtf(int64 userId, int64 objectId,
-                     float posX, float posY, float posZ, float yaw,
-                     float destX, float destY, float destZ, bool isMoving);
-
-    // 위치 보정 알림 전송 (MovePosCorrectNtf). 서버가 클라 위치와 서버 위치의 오차가
-    // 너무 크다고 판단했을 때 해당 유저에게 unicast.
-    void SendMovePosCorrectNtf(int64 userId, float posX, float posY, float posZ, float yaw);
-
-    // 스탯 스냅샷 전송 (StatUpdateNtf). character 의 0 아닌 스탯만 담아 본인에게 unicast.
-    // 입장 시 SendStageEnterNtf 안에서 StageEnterNtf 직전에 호출된다(최대치가 먼저 가야 하므로).
-    void SendStatUpdateNtf(int64 userId, const Character& character);
-
-    // 현재 HP/MP 전송 (HpMpNtf). 본인에게 unicast. 대미지/회복 시점에도 사용.
-    // SetCurHp 가 최대치로 clamp 하므로 클라에서 StatUpdateNtf 보다 나중에 처리되어야 한다.
-    void SendHpMpNtf(int64 userId, double curHp, double curMp);
-
-    // 버프 뱃지 알림 전송 (BuffNtf / BuffRemoveNtf). UI 뱃지 데이터(키/스택/남은시간)만 담는다.
-    // 스탯/HP 효과 자체는 StatUpdateNtf / HpMpNtf 로 별도 전송된다.
-    // Stage 가 버프 추가/갱신/스택/제거 시점에 AOI 유저들에게 broadcast 하면서 호출한다.
-    // remainTimeMs: -1 이면 영구(클라에서 카운트다운 표시 안 함).
-    void SendBuffNtf(int64 userId, int64 objectId, int64 buffKey, int32 stackCount, int32 remainTimeMs);
-    void SendBuffRemoveNtf(int64 userId, int64 objectId, int64 buffKey);
-
-    // 스킬 대미지 알림 전송 (SkillDamageNtf). Stage 가 대미지 적용 시점에 대상 주변 AOI 유저들에게 broadcast.
-    void SendSkillDamageNtf(int64 userId, int64 targetObjectId, double damage, bool isDuplicate, double remainingHp, bool isDead);
-
-    // 스킬 시전 알림 전송 (SkillCastNtf). Stage 가 시전자 주변 AOI 유저들에게 broadcast. 클라 비주얼 재현용.
-    void SendSkillCastNtf(int64 userId, int64 casterObjectId, int64 skillKey, int64 effectId,
-                          float originX, float originY, float originZ, float dirX, float dirZ, uint32 seed);
+    // ── 패킷 송신 ──────────────────────────────────────────────
+    // 클라이언트로 나가는 모든 Send***Ntf 는 PacketSender 가 담당한다. Stage/컴포넌트는
+    // GetPacketSender() 로 얻어서 호출한다 (예: GetPacketSender().SendMoveNtf(...)).
+    PacketSender&       GetPacketSender()       { return m_packetSender; }
+    const PacketSender& GetPacketSender() const { return m_packetSender; }
 
     // NavMesh 데이터에 접근. Stage 가 자신의 NavMesh 를 설정할 때 사용.
     NavMeshManager&       GetNavMeshManager()       { return m_navMeshManager; }
@@ -110,11 +77,6 @@ private:
     // 게이트웨이로부터 받은 클라 패킷 (사이드카 있음) 처리.
     // 사이드카에서 userId 추출 후 해당 유저의 패킷 큐에 push.
     void handleRelayedClientPacket(const netlib::PacketPtr& spPacket);
-
-    // ── 게임서버 → 클라이언트 패킷 전송 helper ─────────────────────
-    // 게이트웨이를 통해 GameToGatewayPacketNtf로 래핑하여 단일 유저에게 전송.
-    template <typename TMessage>
-    void sendPacketToUser(int64 userId, int32 packetType, const TMessage& message);
 
     // 유저 입장 완료 알림 (GameEnterNtf) 전송. 현재 SystemStage 입장 단계 완료 시 전송.
     void sendGameEnterNtf(int64 userId);
@@ -165,56 +127,12 @@ private:
     // 또 다른 소유자가 된다. Stage에서 제거되어도 여기서 제거되어야 객체가 사라진다.
     SharedThreadSafeUnorderedMap<int64, UserPtr> m_safeUsers;
 
+    // ── 패킷 송신 (PacketSender) ─────────────────────────────────
+    // 클라이언트로 나가는 Ntf 송신 전담. m_server(=*this) + 위 두 맵(유저/게이트웨이세션)을 참조로 받는다.
+    // 위 두 맵보다 뒤에 선언하여 초기화 순서상 안전하게 참조를 바인딩한다.
+    PacketSender m_packetSender;
+
     // ── GameDB ────────────────────────────────────────────────────
     // 코루틴으로 co_await ExecuteAsync() 사용.
     db::AsyncDBQueue m_dbQueue;
 };
-
-
-// ─────────────────────────────────────────────────────────────
-// template 구현
-// ─────────────────────────────────────────────────────────────
-template <typename TMessage>
-void GameServer::sendPacketToUser(int64 userId, int32 packetType, const TMessage& message)
-{
-    UserPtr spUser;
-    if (!m_safeUsers.Find(userId, spUser) || !spUser)
-    {
-        LOG_WRITE(LogLevel::Warn, std::format("sendPacketToUser - user not found. userId={} packetType={}",
-            userId, packetType));
-        return;
-    }
-
-    netlib::ISessionPtr spGatewaySession;
-    if (!m_safeGatewaySessions.Find(spUser->GetGatewayId(), spGatewaySession) || !spGatewaySession)
-    {
-        LOG_WRITE(LogLevel::Warn, std::format("sendPacketToUser - gateway session not found. userId={} gatewayId={} packetType={}",
-            userId, spUser->GetGatewayId(), packetType));
-        return;
-    }
-
-    // 내부 패킷 바디(클라용)를 먼저 직렬화한다.
-    std::string payload;
-    if (!message.SerializeToString(&payload))
-    {
-        LOG_WRITE(LogLevel::Error, std::format("sendPacketToUser - failed to serialize payload. userId={} packetType={}",
-            userId, packetType));
-        return;
-    }
-
-    // GameToGatewayPacketNtf로 감싸서 게이트웨이로 전송.
-    ServerPacket::GameToGatewayPacketNtf ntf;
-    ntf.set_user_id(userId);
-    ntf.set_packet_type(packetType);
-    ntf.set_payload(std::move(payload));
-
-    auto spPacket = SerializePacket(Common::SERVER_PACKET_ID_GAME_TO_GATEWAY_PACKET_NTF, ntf);
-    if (!spPacket)
-    {
-        LOG_WRITE(LogLevel::Error, std::format("sendPacketToUser - failed to serialize GameToGatewayPacketNtf. userId={} packetType={}",
-            userId, packetType));
-        return;
-    }
-
-    spGatewaySession->Send(spPacket);
-}

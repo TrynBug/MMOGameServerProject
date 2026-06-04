@@ -27,6 +27,10 @@ namespace
         info.set_name(proto.name());
         info.set_job_id(proto.job_id());
         info.set_level(proto.level());
+        info.set_hp(character.GetCurHp());
+        info.set_max_hp(character.GetMaxHp());
+        info.set_mp(character.GetCurMp());
+        info.set_max_mp(character.GetMaxMp());
         // 좌표는 런타임이 진실의 원천. StageObject에서 가져온다.
         info.set_pos_x(character.GetPosX());
         info.set_pos_y(character.GetPosY());
@@ -58,6 +62,9 @@ namespace
         info.set_pos_y(monster.GetPosY());
         info.set_pos_z(monster.GetPosZ());
         info.set_yaw(monster.GetYaw());
+        info.set_is_dead(monster.IsDead());
+        info.set_cur_hp(monster.GetCurHp());
+        info.set_max_hp(monster.GetMaxHp());
 
         // Fill current buffs into the spawn snapshot (UI badges) so viewers see them on sight.
         monster.GetBuffComponent().ForEachBuff(
@@ -78,9 +85,6 @@ namespace
     constexpr float k_spawnSampleHalfExtentY  = 1000.0f;
 
     constexpr int64 k_heartbeatIntervalMs = 5000;   // 5초마다 1번 heartbeat 로그
-
-    // 투사체 hit 보고 사거리 sanity 검증 여유 (units, X-Z). 정밀 핵검사는 후속.
-    constexpr float k_projectileRangeToleranceXZ = 3.0f;
 
     // GameData_Stage 에는 worldMin/Max 이 없습니다 (NavMesh 메타에서 가져옵). 그래서 LoadStageGridParams 의
     // 기본값으로 아래 fallback 을 쓴다. 조건:
@@ -196,9 +200,20 @@ void Stage::updateMonsters(int64 deltaMs)
     // Monster::Update 는 이동 시 내부에서 UpdateObjectSector(sector 맵)를 호출하지만
     // m_monsterObjects 자체는 변경하지 않으므로 순회 중 안전하다.
     // (사망 시 디스폰은 여기서 하지 않는다 — 순회 중 컨테이너 변경 금지.)
+    // 사망 만료된 몬스터는 순회 중 erase 하면 안 되므로(컨테이너 변경 금지) 모았다가 루프 후 디스폰한다.
+    std::vector<int64> deadToDespawn;
+
     for (auto& pair : m_monsterObjects)
     {
         Monster* pMonster = static_cast<Monster*>(pair.second.get());
+
+        // 사망한 몬스터: AI/이동/타게팅 정지. corpse 카운트다운만 매 tick 진행하고, 만료되면 디스폰 예약.
+        if (pMonster->IsDead())
+        {
+            if (pMonster->AdvanceCorpseTimer(deltaMs))
+                deadToDespawn.push_back(pMonster->GetObjectId());
+            continue;
+        }
 
         // 이 몬스터의 업데이트 주기에 도달했는지 확인. 아직이면 이번 tick 은 건너뛴다.
         // elapsedMs = 마지막 Update 이후 누적 경과시간(주기가 길면 deltaMs 보다 크다).
@@ -230,6 +245,10 @@ void Stage::updateMonsters(int64 deltaMs)
         // 스킬 체인 진행 (몬스터 시전은 v1 미사용이라 보통 no-op). 일관성을 위해 호출.
         pMonster->GetSkillComponent().Update(elapsedMs);
     }
+
+    // 순회 종료 후 사망 만료 몬스터 디스폰 (기존 ObjectVisibilityNtf despawn 통보 재사용).
+    for (int64 objectId : deadToDespawn)
+        DespawnMonster(objectId);
 }
 
 void Stage::initializeSectorGrid()
@@ -437,9 +456,15 @@ Monster* Stage::SpawnMonster(int64 monsterKey, float posX, float posY, float pos
         return nullptr;
     }
 
-    // ObjectId 발급 후 Monster 생성. Monster 생성자가 종류데이터 기본스탯 적용 + 현재HP/MP 풀피까지 처리한다.
+    // ObjectId 발급 후 Monster 생성/초기화. Monster::Initialize 가 종류데이터 기본스탯 적용 + 현재HP/MP 풀피까지 처리한다.
     const int64 objectId = pServer->GenerateObjectId();
-    MonsterPtr spMonster = std::make_shared<Monster>(objectId, pMonsterData);
+    MonsterPtr spMonster = std::make_shared<Monster>();
+    if (!spMonster->Initialize(objectId, pMonsterData))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("Stage::SpawnMonster - Monster Initialize failed. stageId={} monsterKey={} objectId={}",
+            m_stageId, monsterKey, objectId));
+        return nullptr;
+    }
     spMonster->SetAI(std::make_unique<MonsterFsmAI>());   // 기본 두뇌: FSM (보스 등은 향후 BT 로 교체)
     spMonster->SetPos(spawnX, spawnY, spawnZ);
     spMonster->SetYaw(yaw);
@@ -453,22 +478,12 @@ Monster* Stage::SpawnMonster(int64 monsterKey, float posX, float posY, float pos
         spMonster->GetCurSectorX(), spMonster->GetCurSectorZ(), m_objects.size()));
 
     // 주변 sector AOI 안의 유저들에게 spawn 통보. (몬스터는 관찰자가 아니므로 단방향.)
-    const int32 sx = spMonster->GetCurSectorX();
-    const int32 sz = spMonster->GetCurSectorZ();
-    if (sx >= 0 && sz >= 0)
-    {
-        std::vector<GamePacket::MonsterSpawnInfo> singleMonster = { makeMonsterSpawnInfo(*spMonster) };
-        ForEachAdjacentSector(sx, sz, k_aoiRange,
-            [&](Sector* pSector)
-            {
-                for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
-                {
-                    Character* pOtherChar = static_cast<Character*>(pOtherObj);
-                    const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                    pServer->SendObjectVisibilityNtf(otherUserId, {}, {}, singleMonster);
-                }
-            });
-    }
+    const std::vector<GamePacket::MonsterSpawnInfo> singleMonster = { makeMonsterSpawnInfo(*spMonster) };
+    ForEachUserInAoi(spMonster->GetCurSectorX(), spMonster->GetCurSectorZ(),
+        [&](int64 userId)
+        {
+            pServer->GetPacketSender().SendObjectVisibilityNtf(userId, {}, {}, singleMonster);
+        });
 
     return spMonster.get();
 }
@@ -500,20 +515,12 @@ bool Stage::DespawnMonster(int64 objectId)
     // 주변 sector AOI 안의 유저들에게 despawn 통보.
     if (GameServer* pServer = GetGameServer())
     {
-        if (sx >= 0 && sz >= 0)
-        {
-            std::vector<int64> despawnIds = { objectId };
-            ForEachAdjacentSector(sx, sz, k_aoiRange,
-                [&](Sector* pSector)
-                {
-                    for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
-                    {
-                        Character* pOtherChar = static_cast<Character*>(pOtherObj);
-                        const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                        pServer->SendObjectVisibilityNtf(otherUserId, {}, despawnIds);
-                    }
-                });
-        }
+        const std::vector<int64> despawnIds = { objectId };
+        ForEachUserInAoi(sx, sz,
+            [&](int64 userId)
+            {
+                pServer->GetPacketSender().SendObjectVisibilityNtf(userId, {}, despawnIds);
+            });
     }
 
     return true;
@@ -707,7 +714,7 @@ void Stage::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
                         if (otherObjId != objectId)
                         {
                             const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                            pServer->SendObjectVisibilityNtf(otherUserId, singleSpawn, {});
+                            pServer->GetPacketSender().SendObjectVisibilityNtf(otherUserId, singleSpawn, {});
                         }
                     }
 
@@ -718,7 +725,7 @@ void Stage::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
                     }
                 });
 
-            pServer->SendObjectVisibilityNtf(userId, spawnsForMe, {}, monsterSpawnsForMe);
+            pServer->GetPacketSender().SendObjectVisibilityNtf(userId, spawnsForMe, {}, monsterSpawnsForMe);
         }
     }
     else
@@ -782,7 +789,7 @@ void Stage::OnUserLeave(int64 userId)
                     {
                         Character* pOtherChar = static_cast<Character*>(pOtherObj);
                         const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                        pServer->SendObjectVisibilityNtf(otherUserId, {}, despawnIds);
+                        pServer->GetPacketSender().SendObjectVisibilityNtf(otherUserId, {}, despawnIds);
                     }
                 });
         }
@@ -795,118 +802,135 @@ void Stage::OnUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacke
         return;
 
     const uint16 packetType = spPacket->GetHeader()->type;
+    const UserPacketHandlerMap& handlerMap = getUserPacketHandlerMap();
 
-    // User의 현재 캐릭터 lock. Character 단계 패킷 (이동 등)은 캐릭터가 있어야 처리 가능.
+    auto iter = handlerMap.find(packetType);
+    if (iter == handlerMap.end())
+    {
+        // 등록되지 않은 패킷은 디버그 로그.
+        LOG_WRITE(LogLevel::Debug, std::format("Stage::OnUserPacket - unhandled. stageId={} userId={} packetType={} payloadSize={}",
+            m_stageId, spUser->GetUserId(),
+            packetType, spPacket->GetPayloadSize()));
+        return;
+    }
+
+    (this->*(iter->second))(spUser, spPacket);
+}
+
+// 이 Stage(베이스) 가 처리하는 [패킷ID, 핸들러] 테이블. static const 라 클래스당 1회만 생성된다.
+const Stage::UserPacketHandlerMap& Stage::getUserPacketHandlerMap() const
+{
+    static const UserPacketHandlerMap sm_handlers = {
+        { Common::GAME_PACKET_ID_MOVE_DEST_REQ,            &Stage::handleMoveDestReq },
+        { Common::GAME_PACKET_ID_MOVE_STOP_REQ,            &Stage::handleMoveStopReq },
+        { Common::GAME_PACKET_ID_SKILL_CAST_REQ,           &Stage::handleSkillCastReq },
+        { Common::GAME_PACKET_ID_SKILL_PROJECTILE_HIT_REQ, &Stage::handleSkillProjectileHitReq },
+    };
+    return sm_handlers;
+}
+
+// payload 를 TMsg 로 역직렬화. 실패 시 Warn 로그 + false.
+template <typename TMsg>
+bool Stage::deserializeUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacket, TMsg& outMsg)
+{
+    if (!GetGameServer() || !GetGameServer()->DeserializePacket(*spPacket, outMsg))
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - failed to deserialize. stageId={} userId={} packetType={}",
+            m_stageId, spUser->GetUserId(), spPacket->GetHeader()->type));
+        return false;
+    }
+    return true;
+}
+
+void Stage::handleMoveDestReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+{
     CharacterPtr spCharacter = spUser->GetCurrentCharacter();
-
-    switch (packetType)
+    if (!spCharacter || spCharacter->GetStage() != this)
     {
-    case Common::GAME_PACKET_ID_MOVE_DEST_REQ:
-    {
-        if (!spCharacter || spCharacter->GetStage() != this)
-        {
-            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveDestReq but no character or wrong stage. stageId={} userId={}",
-                m_stageId, spUser->GetUserId()));
-            return;
-        }
-        GamePacket::MoveDestReq req;
-        if (!GetGameServer() || !GetGameServer()->DeserializePacket(*spPacket, req))
-        {
-            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - failed to deserialize MoveDestReq. stageId={} userId={}",
-                m_stageId, spUser->GetUserId()));
-            return;
-        }
-        spCharacter->SetDestination(req.dest_x(), req.dest_y(), req.dest_z());
-        broadcastMoveNtf(*spCharacter);
+        LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveDestReq but no character or wrong stage. stageId={} userId={}",
+            m_stageId, spUser->GetUserId()));
         return;
     }
-    case Common::GAME_PACKET_ID_MOVE_STOP_REQ:
+
+    GamePacket::MoveDestReq req;
+    if (!deserializeUserPacket(spUser, spPacket, req))
+        return;
+
+    spCharacter->SetDestination(req.dest_x(), req.dest_y(), req.dest_z());
+    broadcastMoveNtf(*spCharacter);
+}
+
+void Stage::handleMoveStopReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+{
+    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+    if (!spCharacter || spCharacter->GetStage() != this)
     {
-        if (!spCharacter || spCharacter->GetStage() != this)
-        {
-            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveStopReq but no character or wrong stage. stageId={} userId={}",
-                m_stageId, spUser->GetUserId()));
-            return;
-        }
-        GamePacket::MoveStopReq req;
-        if (!GetGameServer() || !GetGameServer()->DeserializePacket(*spPacket, req))
-        {
-            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - failed to deserialize MoveStopReq. stageId={} userId={}",
-                m_stageId, spUser->GetUserId()));
-            return;
-        }
-
-        // 클라/서버 위치 오차 검증. X-Z 평면 거리로 계산 (Y는 NavMesh가 결정하므로 비교 제외).
-        // 오차 범위 내면 클라 위치 인정, 초과면 서버 위치로 고정.
-        const float dx = req.pos_x() - spCharacter->GetPosX();
-        const float dz = req.pos_z() - spCharacter->GetPosZ();
-        const float distSq = dx * dx + dz * dz;
-        const float tolSq  = k_movePositionTolerance * k_movePositionTolerance;
-
-        if (distSq <= tolSq)
-        {
-            spCharacter->StopAt(req.pos_x(), req.pos_y(), req.pos_z(), req.yaw());
-        }
-        else
-        {
-            // 서버 위치로 고정. 향후 위치 보정 패킷 추가 예정.
-            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveStopReq position out of tolerance. stageId={} userId={} clientPos=({},{},{}) serverPos=({},{},{})",
-                m_stageId, spUser->GetUserId(),
-                req.pos_x(), req.pos_y(), req.pos_z(),
-                spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ()));
-            spCharacter->StopAt(spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), req.yaw());
-        }
-        broadcastMoveNtf(*spCharacter);
+        LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveStopReq but no character or wrong stage. stageId={} userId={}",
+            m_stageId, spUser->GetUserId()));
         return;
     }
-    case Common::GAME_PACKET_ID_SKILL_CAST_REQ:
-    {
-        if (!spCharacter || spCharacter->GetStage() != this)
-        {
-            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - SkillCastReq but no character or wrong stage. stageId={} userId={}",
-                m_stageId, spUser->GetUserId()));
-            return;
-        }
-        GamePacket::SkillCastReq req;
-        if (!GetGameServer() || !GetGameServer()->DeserializePacket(*spPacket, req))
-        {
-            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - failed to deserialize SkillCastReq. stageId={} userId={}",
-                m_stageId, spUser->GetUserId()));
-            return;
-        }
-        const Vector3 origin(req.origin_x(), req.origin_y(), req.origin_z());
-        const Vector3 dir(req.dir_x(), 0.0f, req.dir_z());
-        // target_object_id / target_pos 는 검증용 — v1 시전 로직엔 미사용 (핵검사 후속).
-        spCharacter->GetSkillComponent().TryCast(req.skill_key(), origin, dir, req.seed());
+
+    GamePacket::MoveStopReq req;
+    if (!deserializeUserPacket(spUser, spPacket, req))
         return;
-    }
-    case Common::GAME_PACKET_ID_SKILL_PROJECTILE_HIT_REQ:
+
+    // 클라/서버 위치 오차 검증. X-Z 평면 거리로 계산 (Y는 NavMesh가 결정하므로 비교 제외).
+    // 오차 범위 내면 클라 위치 인정, 초과면 서버 위치로 고정.
+    const float dx = req.pos_x() - spCharacter->GetPosX();
+    const float dz = req.pos_z() - spCharacter->GetPosZ();
+    const float distSq = dx * dx + dz * dz;
+    const float tolSq  = k_movePositionTolerance * k_movePositionTolerance;
+
+    if (distSq <= tolSq)
     {
-        GamePacket::SkillProjectileHitReq req;
-        if (!GetGameServer() || !GetGameServer()->DeserializePacket(*spPacket, req))
-        {
-            LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - failed to deserialize SkillProjectileHitReq. stageId={} userId={}",
-                m_stageId, spUser->GetUserId()));
-            return;
-        }
-        // 한 프레임 분량의 hit 을 한 번에 처리 (배치).
-        for (int i = 0; i < req.hits_size(); ++i)
-        {
-            const GamePacket::SkillHitItem& item = req.hits(i);
-            OnSkillProjectileHit(item.effect_id(), item.projectile_index(), item.target_object_id(),
-                                 item.exploded_at_max_range(), item.exploded_on_terrain(),
-                                 item.hit_x(), item.hit_z());
-        }
-        return;
+        spCharacter->StopAt(req.pos_x(), req.pos_y(), req.pos_z(), req.yaw());
     }
-    default:
-        break;
+    else
+    {
+        // 서버 위치로 고정. 향후 위치 보정 패킷 추가 예정.
+        LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveStopReq position out of tolerance. stageId={} userId={} clientPos=({},{},{}) serverPos=({},{},{})",
+            m_stageId, spUser->GetUserId(),
+            req.pos_x(), req.pos_y(), req.pos_z(),
+            spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ()));
+        spCharacter->StopAt(spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), req.yaw());
+    }
+    broadcastMoveNtf(*spCharacter);
+}
+
+void Stage::handleSkillCastReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+{
+    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+    if (!spCharacter || spCharacter->GetStage() != this)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - SkillCastReq but no character or wrong stage. stageId={} userId={}",
+            m_stageId, spUser->GetUserId()));
+        return;
     }
 
-    // 처리되지 않은 패킷은 디버그 로그.
-    LOG_WRITE(LogLevel::Debug, std::format("Stage::OnUserPacket - unhandled. stageId={} userId={} packetType={} payloadSize={}",
-        m_stageId, spUser->GetUserId(),
-        packetType, spPacket->GetPayloadSize()));
+    GamePacket::SkillCastReq req;
+    if (!deserializeUserPacket(spUser, spPacket, req))
+        return;
+
+    const Vector3 origin(req.origin_x(), req.origin_y(), req.origin_z());
+    const Vector3 dir(req.dir_x(), 0.0f, req.dir_z());
+    // target_object_id / target_pos 는 검증용 — v1 시전 로직엔 미사용 (핵검사 후속).
+    spCharacter->GetSkillComponent().TryCast(req.skill_key(), origin, dir, req.seed());
+}
+
+void Stage::handleSkillProjectileHitReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+{
+    GamePacket::SkillProjectileHitReq req;
+    if (!deserializeUserPacket(spUser, spPacket, req))
+        return;
+
+    // 한 프레임 분량의 hit 을 한 번에 처리 (배치).
+    for (int i = 0; i < req.hits_size(); ++i)
+    {
+        const GamePacket::SkillHitItem& item = req.hits(i);
+        OnSkillProjectileHit(item.effect_id(), item.projectile_index(), item.target_object_id(),
+                             item.exploded_at_max_range(), item.exploded_on_terrain(),
+                             item.hit_x(), item.hit_z());
+    }
 }
 
 void Stage::processUserPackets()
@@ -1003,20 +1027,11 @@ void Stage::sendMoveNtfToAoi(int64 objectId, int32 sectorX, int32 sectorZ,
     if (!pServer)
         return;
 
-    // sector 가 -1 이면(맵 밖) broadcast 안 함.
-    if (sectorX < 0 || sectorZ < 0)
-        return;
-
-    // 주변 sector AOI 의 모든 유저에게 unicast.
-    ForEachAdjacentSector(sectorX, sectorZ, k_aoiRange,
-        [&](Sector* pSector)
+    // 주변 sector AOI 의 모든 유저에게 unicast. (sector 가 -1 이면 ForEachUserInAoi 가 no-op.)
+    ForEachUserInAoi(sectorX, sectorZ,
+        [&](int64 userId)
         {
-            for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
-            {
-                Character* pOtherChar = static_cast<Character*>(pOtherObj);
-                const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                pServer->SendMoveNtf(otherUserId, objectId, posX, posY, posZ, yaw, destX, destY, destZ, isMoving);
-            }
+            pServer->GetPacketSender().SendMoveNtf(userId, objectId, posX, posY, posZ, yaw, destX, destY, destZ, isMoving);
         });
 }
 
@@ -1068,7 +1083,7 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
                 newlyVisibleSpawnsForMe.push_back(makeCharacterSpawnInfo(*pOtherChar));
 
                 const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                pServer->SendObjectVisibilityNtf(otherUserId, singleSpawnOfMe, {});
+                pServer->GetPacketSender().SendObjectVisibilityNtf(otherUserId, singleSpawnOfMe, {});
             }
 
             // 새로 보이는 sector의 몬스터들도 나에게 spawn. (몬스터는 받기만 한다.)
@@ -1080,7 +1095,7 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
 
     if (!newlyVisibleSpawnsForMe.empty() || !newlyVisibleMonstersForMe.empty())
     {
-        pServer->SendObjectVisibilityNtf(myUserId, newlyVisibleSpawnsForMe, {}, newlyVisibleMonstersForMe);
+        pServer->GetPacketSender().SendObjectVisibilityNtf(myUserId, newlyVisibleSpawnsForMe, {}, newlyVisibleMonstersForMe);
     }
 
     // ── oldAOI 순회 ──
@@ -1107,7 +1122,7 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
                 despawnIdsForMe.push_back(otherObjId);
 
                 const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                pServer->SendObjectVisibilityNtf(otherUserId, {}, myDespawnId);
+                pServer->GetPacketSender().SendObjectVisibilityNtf(otherUserId, {}, myDespawnId);
             }
 
             // 더 이상 안 보이는 sector의 몬스터들은 나에게 despawn (despawn_ids 는 타입 무관).
@@ -1119,7 +1134,7 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
 
     if (!despawnIdsForMe.empty())
     {
-        pServer->SendObjectVisibilityNtf(myUserId, {}, despawnIdsForMe);
+        pServer->GetPacketSender().SendObjectVisibilityNtf(myUserId, {}, despawnIdsForMe);
     }
 }
 
@@ -1159,10 +1174,10 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
             {
                 Character* pOtherChar = static_cast<Character*>(pOtherObj);
                 const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                pServer->SendObjectVisibilityNtf(otherUserId, {}, {}, singleMonster);
+                pServer->GetPacketSender().SendObjectVisibilityNtf(otherUserId, {}, {}, singleMonster);
                 if (monsterMoving)
                 {
-                    pServer->SendMoveNtf(otherUserId, monsterObjectId,
+                    pServer->GetPacketSender().SendMoveNtf(otherUserId, monsterObjectId,
                         monster.GetPosX(), monster.GetPosY(), monster.GetPosZ(), monster.GetYaw(),
                         monster.GetDestX(), monster.GetDestY(), monster.GetDestZ(), true);
                 }
@@ -1182,7 +1197,7 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
             {
                 Character* pOtherChar = static_cast<Character*>(pOtherObj);
                 const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                pServer->SendObjectVisibilityNtf(otherUserId, {}, despawnId);
+                pServer->GetPacketSender().SendObjectVisibilityNtf(otherUserId, {}, despawnId);
             }
         });
 }
@@ -1196,21 +1211,11 @@ void Stage::BroadcastBuffNtf(const ActorObject& actor, int64 buffKey, int32 stac
     if (!pServer)
         return;
 
-    const int32 sectorX = actor.GetCurSectorX();
-    const int32 sectorZ = actor.GetCurSectorZ();
-    if (sectorX < 0 || sectorZ < 0)
-        return;
-
     const int64 objectId = actor.GetObjectId();
-    ForEachAdjacentSector(sectorX, sectorZ, k_aoiRange,
-        [&](Sector* pSector)
+    ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
+        [&](int64 userId)
         {
-            for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
-            {
-                Character* pOtherChar = static_cast<Character*>(pOtherObj);
-                const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                pServer->SendBuffNtf(otherUserId, objectId, buffKey, stackCount, remainMs);
-            }
+            pServer->GetPacketSender().SendBuffNtf(userId, objectId, buffKey, stackCount, remainMs);
         });
 }
 
@@ -1220,265 +1225,12 @@ void Stage::BroadcastBuffRemoveNtf(const ActorObject& actor, int64 buffKey)
     if (!pServer)
         return;
 
-    const int32 sectorX = actor.GetCurSectorX();
-    const int32 sectorZ = actor.GetCurSectorZ();
-    if (sectorX < 0 || sectorZ < 0)
-        return;
-
     const int64 objectId = actor.GetObjectId();
-    ForEachAdjacentSector(sectorX, sectorZ, k_aoiRange,
-        [&](Sector* pSector)
+    ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
+        [&](int64 userId)
         {
-            for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
-            {
-                Character* pOtherChar = static_cast<Character*>(pOtherObj);
-                const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                pServer->SendBuffRemoveNtf(otherUserId, objectId, buffKey);
-            }
+            pServer->GetPacketSender().SendBuffRemoveNtf(userId, objectId, buffKey);
         });
 }
 
-// (centerPos 를 중심으로) shape 범위 안의 "적" StageObject 들을 outEnemies 에 채운다. (X-Z 평면)
-// 진영 규칙(v1): Monster 시전자는 User(캐릭터)를, 그 외(User 등) 시전자는 Monster 를 대상으로 한다.
-void Stage::QueryEnemiesInShape(EObjectType casterType, const Vector3& centerPos,
-                                const EffectShape& shape, std::vector<StageObject*>& outEnemies)
-{
-    outEnemies.clear();
 
-    if (shape.type == ESkillEffectShape::None)
-        return;
-
-    // 적 타입 결정 (v1 진영 규칙).
-    const EObjectType enemyType = (casterType == EObjectType::Monster) ? EObjectType::User : EObjectType::Monster;
-
-    // center 가 속한 섹터 + 모양의 bounding 반경으로 검사할 섹터 range 를 정한다.
-    int32 centerSectorX = 0;
-    int32 centerSectorZ = 0;
-    if (!GetSectorIndex(centerPos.x, centerPos.z, centerSectorX, centerSectorZ))
-        return;   // center 가 맵 영역 밖이면 대상 없음
-
-    const float boundingRadius = shape.GetBoundingRadiusXZ();
-    const int32 sectorRange = static_cast<int32>(std::ceil(boundingRadius / static_cast<float>(GetSectorSize())));
-
-    ForEachAdjacentSector(centerSectorX, centerSectorZ, sectorRange,
-        [&](Sector* pSector)
-        {
-            const std::unordered_map<int64, StageObject*>& candidates =
-                (enemyType == EObjectType::Monster) ? pSector->GetMonsters() : pSector->GetUsers();
-
-            for (const auto& [objectId, pObject] : candidates)
-            {
-                const Vector3 objPos(pObject->GetPosX(), pObject->GetPosY(), pObject->GetPosZ());
-                if (shape.Contains(centerPos, objPos))
-                    outEnemies.push_back(pObject);
-            }
-        });
-}
-
-// SkillComponent(또는 폭발 경로)가 bake 한 EffectParams 로 AreaEffect 를 생성해 월드에 등록한다.
-// scatterCount > 1 이면 origin 기준 링 영역에 시드 랜덤으로 N개를 분산 배치한다 (메테오 파편).
-void Stage::SpawnSkillAreaEffect(const EffectParams& params)
-{
-    if (params.scatterCount <= 1)
-    {
-        m_skillAreaEffects.push_back(std::make_unique<AreaEffect>(params));
-        return;
-    }
-
-    // [inner, outer] 링 영역에 면적 균등 분포로 scatterCount 개 배치. seed 로 결정론적 재현.
-    std::mt19937 rng(params.seed);
-    std::uniform_real_distribution<float> angleDist(0.0f, 6.2831853f);
-    std::uniform_real_distribution<float> rSqDist(
-        params.scatterInnerRadius * params.scatterInnerRadius,
-        params.scatterOuterRadius * params.scatterOuterRadius);
-
-    for (int32 i = 0; i < params.scatterCount; ++i)
-    {
-        const float angle = angleDist(rng);
-        const float r = std::sqrt(rSqDist(rng));
-
-        EffectParams sub = params;
-        sub.scatterCount = 0;   // 분산된 각 조각은 다시 분산하지 않는다
-        sub.origin = Vector3(params.origin.x + std::cos(angle) * r,
-                             params.origin.y,
-                             params.origin.z + std::sin(angle) * r);
-        m_skillAreaEffects.push_back(std::make_unique<AreaEffect>(sub));
-    }
-}
-
-// 진행 중인 AreaEffect 들을 tick 하고, 만료된 것을 swap-and-pop 으로 제거한다. 만료된 투사체 그룹도 제거한다.
-void Stage::updateSkillEffects(int64 deltaMs)
-{
-    for (size_t i = 0; i < m_skillAreaEffects.size(); )
-    {
-        const bool expired = m_skillAreaEffects[i]->Update(this, deltaMs);
-        if (expired)
-        {
-            m_skillAreaEffects[i] = std::move(m_skillAreaEffects.back());
-            m_skillAreaEffects.pop_back();
-        }
-        else
-        {
-            ++i;
-        }
-    }
-
-    // 만료된 투사체 그룹 제거 (Stage 시계 기준). 투사체는 tick 하지 않고 만료만 sweep 한다.
-    for (auto iter = m_skillProjectileGroups.begin(); iter != m_skillProjectileGroups.end(); )
-    {
-        if (iter->second->IsExpired(m_stageClockMs))
-            iter = m_skillProjectileGroups.erase(iter);
-        else
-            ++iter;
-    }
-}
-
-// 효과(스킬)에 의한 대미지를 target 의 현재 HP 에서 감소시키고, 주변 AOI 유저들에게 SkillDamageNtf 를 broadcast 한다.
-void Stage::ApplyEffectDamage(ActorObject& target, double damage, bool isDuplicate)
-{
-    target.SetCurHp(target.GetCurHp() - damage);
-
-    const double remainingHp = target.GetCurHp();
-    const bool   isDead      = target.IsDead();
-
-    GameServer* pServer = GetGameServer();
-    if (pServer == nullptr)
-        return;
-
-    const int32 sectorX = target.GetCurSectorX();
-    const int32 sectorZ = target.GetCurSectorZ();
-    if (sectorX < 0 || sectorZ < 0)
-        return;
-
-    const int64 targetObjectId = target.GetObjectId();
-    ForEachAdjacentSector(sectorX, sectorZ, k_aoiRange,
-        [&](Sector* pSector)
-        {
-            for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
-            {
-                Character* pOtherChar = static_cast<Character*>(pOtherObj);
-                const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                pServer->SendSkillDamageNtf(otherUserId, targetObjectId, damage, isDuplicate, remainingHp, isDead);
-            }
-        });
-
-    // TODO(skill): 사망 시 디스폰/보상은 후속. 현재는 is_dead 만 통보하고 객체는 0 HP 로 유지한다.
-}
-
-// SkillComponent 가 bake 한 EffectParams + 부채꼴 방향으로 투사체 그룹을 생성/등록하고, 발급된 effectId 를 리턴한다.
-int64 Stage::SpawnSkillProjectileGroup(const EffectParams& params, const std::vector<Vector3>& dirs)
-{
-    EffectParams p = params;
-
-    // effectId 발급 (클라가 hit 보고 시 이 id 로 그룹을 지목한다).
-    if (GameServer* pServer = GetGameServer())
-        p.effectId = pServer->GenerateObjectId();
-
-    const int64 effectId = p.effectId;
-    auto spGroup = std::make_unique<ProjectileGroup>();
-    spGroup->Init(p, dirs, m_stageClockMs);
-    m_skillProjectileGroups[effectId] = std::move(spGroup);
-    return effectId;
-}
-
-ProjectileGroup* Stage::findSkillProjectileGroup(int64 effectId)
-{
-    auto iter = m_skillProjectileGroups.find(effectId);
-    if (iter == m_skillProjectileGroups.end())
-        return nullptr;
-    return iter->second.get();
-}
-
-// 클라가 보고한 투사체 종료 사건을 처리한다 (직격 대미지 + 폭발). 폭발 적중은 서버(AreaEffect)가 판정한다.
-void Stage::OnSkillProjectileHit(int64 effectId, int32 projectileIndex, int64 targetId,
-                                 bool explodedAtMaxRange, bool explodedOnTerrain,
-                                 float hitX, float hitZ)
-{
-    ProjectileGroup* pGroup = findSkillProjectileGroup(effectId);
-    if (pGroup == nullptr || pGroup->IsExpired(m_stageClockMs))
-        return;   // 이미 만료/폐기된 투사체 → 무시
-
-    const EffectParams& params = pGroup->GetParams();
-
-    Vector3 explosionPos;
-    double  multiplier = 1.0;
-
-    if (explodedOnTerrain)
-    {
-        if (!pGroup->TryConsume(projectileIndex))
-            return;
-        explosionPos = Vector3(hitX, 0.0f, hitZ);   // 서버가 위치를 모르므로 클라 보고 위치 사용
-    }
-    else if (explodedAtMaxRange)
-    {
-        if (!pGroup->TryConsume(projectileIndex))
-            return;
-        explosionPos = params.origin + pGroup->GetDir(projectileIndex) * params.maxRange;
-    }
-    else
-    {
-        // 직격.
-        if (targetId == 0)
-            return;   // 대상을 못 찾은 오류 보고 무시
-
-        const ProjectileHitResult hit = pGroup->TryHit(projectileIndex, targetId);
-        if (!hit.accepted)
-            return;   // 이미 소비된 투사체거나 잘못된 index
-        multiplier = hit.damageMultiplier;
-
-        const Vector3 projPos = pGroup->GetProjectilePosition(projectileIndex, m_stageClockMs);
-
-        // 사거리 sanity 검증 (관대; 정밀 핵검사는 후속).
-        if ((projPos - params.origin).LengthXZ() > params.maxRange + k_projectileRangeToleranceXZ)
-            return;
-        explosionPos = projPos;
-
-        // 직격 대미지: 보고된 타겟이 적 타입일 때만 (진영 검증 + 안전한 캐스팅).
-        const EObjectType enemyType =
-            (params.casterObjectType == EObjectType::Monster) ? EObjectType::User : EObjectType::Monster;
-        if (StageObject* pTargetObj = FindObject(targetId))
-        {
-            if (pTargetObj->GetObjectType() == enemyType)
-                ApplyEffectDamage(*static_cast<ActorObject*>(pTargetObj), params.damageAmount * multiplier, hit.isDuplicate);
-        }
-    }
-
-    // 폭발: OnHitSkillKey 가 있으면 explosionPos 에 폭발 스킬을 발동한다 (배율 물림, 적중은 서버 판정).
-    if (params.onHitSkillKey != 0)
-    {
-        if (const GameData_Skill* pExplosion = GameDataTable_Skill::FindData(params.onHitSkillKey))
-        {
-            EffectParams explosionParams = BakeSkillEffectParams(
-                *pExplosion, params.casterObjectType, params.casterObjectId, explosionPos, params.dir, params.seed);
-            explosionParams.damageAmount *= multiplier;
-            SpawnSkillAreaEffect(explosionParams);
-        }
-    }
-}
-
-// 시전 통보를 시전자 주변 AOI 유저들에게 broadcast.
-void Stage::BroadcastSkillCastNtf(const ActorObject& caster, int64 skillKey, int64 effectId,
-                                  const Vector3& origin, const Vector3& dir, uint32 seed)
-{
-    GameServer* pServer = GetGameServer();
-    if (pServer == nullptr)
-        return;
-
-    const int32 sectorX = caster.GetCurSectorX();
-    const int32 sectorZ = caster.GetCurSectorZ();
-    if (sectorX < 0 || sectorZ < 0)
-        return;
-
-    const int64 casterObjectId = caster.GetObjectId();
-    ForEachAdjacentSector(sectorX, sectorZ, k_aoiRange,
-        [&](Sector* pSector)
-        {
-            for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
-            {
-                Character* pOtherChar = static_cast<Character*>(pOtherObj);
-                const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                pServer->SendSkillCastNtf(otherUserId, casterObjectId, skillKey, effectId,
-                                          origin.x, origin.y, origin.z, dir.x, dir.z, seed);
-            }
-        });
-}

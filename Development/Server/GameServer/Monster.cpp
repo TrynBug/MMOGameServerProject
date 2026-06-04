@@ -14,14 +14,26 @@ namespace
 
     // throttled repath: 목표점이 1유닛 이상 움직이면 재길찾기.
     constexpr float k_repathDistSq = 1.0f;
+
+    // 사망 후 시체 유지 시간(ms). 이 시간이 지나면 디스폰한다.
+    constexpr int64 k_corpseDurationMs = 5000;
 }
 
-Monster::Monster(int64 objectId, const GameData_Monster* pMonsterData)
-    : ActorObject(objectId, EObjectType::Monster)
-    , m_pMonsterData(pMonsterData)
+bool Monster::Initialize(int64 objectId, const GameData_Monster* pMonsterData)
 {
+    if (pMonsterData == nullptr)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("Monster::Initialize - monster data is null. objectId={}", objectId));
+        return false;
+    }
+    if (!ActorObject::Initialize(objectId, EObjectType::Monster))
+        return false;
+
+    m_pMonsterData = pMonsterData;
+
     // 종류 데이터의 기본스탯을 스탯 컴포넌트에 적용.
-    applyBaseStats();
+    if (!applyBaseStats())
+        return false;
 
     // 현재 HP/MP 를 최대치로 초기화 (스폰 시 풀피).
     FillHp();
@@ -42,14 +54,16 @@ Monster::Monster(int64 objectId, const GameData_Monster* pMonsterData)
     castSkill.cooldownMs = 5000;
     castSkill.castTimeMs = 800;
     m_skills.push_back(castSkill);
+
+    return true;
 }
 
-void Monster::applyBaseStats()
+bool Monster::applyBaseStats()
 {
     if (m_pMonsterData == nullptr)
     {
         LOG_WRITE(LogLevel::Error, std::format("Monster::applyBaseStats - monster data is null. objectId={}", GetObjectId()));
-        return;
+        return false;
     }
 
     // (EStat, value) 쌍 목록을 순회하며 적용. Stat 이 None 인 슬롯은 건너뛴다.
@@ -62,6 +76,14 @@ void Monster::applyBaseStats()
             continue;
         m_statComponent.ApplyStat(stat, m_pMonsterData->GetStatValue(i));
     }
+
+    return true;
+}
+
+bool Monster::AdvanceCorpseTimer(int64 deltaMs)
+{
+    m_corpseElapsedMs += deltaMs;
+    return m_corpseElapsedMs >= k_corpseDurationMs;
 }
 
 // ─────────────────────────────────────────────────────────────

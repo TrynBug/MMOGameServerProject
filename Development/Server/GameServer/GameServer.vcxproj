@@ -115,6 +115,7 @@
     <ClInclude Include="BasicStatComponent.h" />
     <ClInclude Include="StageManager.h" />
     <ClInclude Include="GameServer.h" />
+    <ClInclude Include="PacketSender.h" />
     <ClInclude Include="SkillComponent.h" />
     <ClInclude Include="Skill\EffectShape.h" />
     <ClInclude Include="Skill\EffectParams.h" />
@@ -130,6 +131,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="StageSkill.cpp" />
     <ClCompile Include="StageNavMesh.cpp" />
     <ClCompile Include="StageObject.cpp" />
     <ClCompile Include="ActorObject.cpp" />
@@ -145,7 +147,7 @@
     <ClCompile Include="BasicStatComponent.cpp" />
     <ClCompile Include="StageManager.cpp" />
     <ClCompile Include="GameServer.cpp" />
-    <ClCompile Include="GameServerBuff.cpp" />
+    <ClCompile Include="PacketSender.cpp" />
     <ClCompile Include="SkillComponent.cpp" />
     <ClCompile Include="Skill\AreaEffect.cpp" />
     <ClCompile Include="Skill\ProjectileGroup.cpp" />
