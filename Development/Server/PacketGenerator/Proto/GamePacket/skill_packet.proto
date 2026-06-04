@@ -81,5 +81,4 @@ message SkillDamageNtf {
     float damage           = 2;   // 적용된 대미지 (배율 적용 후 최종값)
     bool  is_duplicate     = 3;   // 중복타격으로 감소된 대미지인지 (표시용 flag)
     float remaining_hp     = 4;   // 대미지 적용 후 대상의 남은 HP
-    bool  is_dead          = 5;   // 이 대미지로 사망했는지
 }

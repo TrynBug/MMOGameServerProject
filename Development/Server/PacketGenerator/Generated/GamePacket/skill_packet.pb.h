@@ -493,9 +493,8 @@ class SkillDamageNtf final : public ::google::protobuf::Message
   enum : int {
     kTargetObjectIdFieldNumber = 1,
     kDamageFieldNumber = 2,
-    kRemainingHpFieldNumber = 4,
     kIsDuplicateFieldNumber = 3,
-    kIsDeadFieldNumber = 5,
+    kRemainingHpFieldNumber = 4,
   };
   // int64 target_object_id = 1;
   void clear_target_object_id() ;
@@ -517,16 +516,6 @@ class SkillDamageNtf final : public ::google::protobuf::Message
   void _internal_set_damage(float value);
 
   public:
-  // float remaining_hp = 4;
-  void clear_remaining_hp() ;
-  float remaining_hp() const;
-  void set_remaining_hp(float value);
-
-  private:
-  float _internal_remaining_hp() const;
-  void _internal_set_remaining_hp(float value);
-
-  public:
   // bool is_duplicate = 3;
   void clear_is_duplicate() ;
   bool is_duplicate() const;
@@ -537,21 +526,21 @@ class SkillDamageNtf final : public ::google::protobuf::Message
   void _internal_set_is_duplicate(bool value);
 
   public:
-  // bool is_dead = 5;
-  void clear_is_dead() ;
-  bool is_dead() const;
-  void set_is_dead(bool value);
+  // float remaining_hp = 4;
+  void clear_remaining_hp() ;
+  float remaining_hp() const;
+  void set_remaining_hp(float value);
 
   private:
-  bool _internal_is_dead() const;
-  void _internal_set_is_dead(bool value);
+  float _internal_remaining_hp() const;
+  void _internal_set_remaining_hp(float value);
 
   public:
   // @@protoc_insertion_point(class_scope:GamePacket.SkillDamageNtf)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 5,
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
                                    0, 0,
                                    2>
       _table_;
@@ -575,9 +564,8 @@ class SkillDamageNtf final : public ::google::protobuf::Message
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::int64_t target_object_id_;
     float damage_;
-    float remaining_hp_;
     bool is_duplicate_;
-    bool is_dead_;
+    float remaining_hp_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -2160,7 +2148,7 @@ inline void SkillDamageNtf::clear_is_duplicate() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.is_duplicate_ = false;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000008U);
+                  0x00000004U);
 }
 inline bool SkillDamageNtf::is_duplicate() const {
   // @@protoc_insertion_point(field_get:GamePacket.SkillDamageNtf.is_duplicate)
@@ -2168,7 +2156,7 @@ inline bool SkillDamageNtf::is_duplicate() const {
 }
 inline void SkillDamageNtf::set_is_duplicate(bool value) {
   _internal_set_is_duplicate(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   // @@protoc_insertion_point(field_set:GamePacket.SkillDamageNtf.is_duplicate)
 }
 inline bool SkillDamageNtf::_internal_is_duplicate() const {
@@ -2185,7 +2173,7 @@ inline void SkillDamageNtf::clear_remaining_hp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.remaining_hp_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000008U);
 }
 inline float SkillDamageNtf::remaining_hp() const {
   // @@protoc_insertion_point(field_get:GamePacket.SkillDamageNtf.remaining_hp)
@@ -2193,7 +2181,7 @@ inline float SkillDamageNtf::remaining_hp() const {
 }
 inline void SkillDamageNtf::set_remaining_hp(float value) {
   _internal_set_remaining_hp(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   // @@protoc_insertion_point(field_set:GamePacket.SkillDamageNtf.remaining_hp)
 }
 inline float SkillDamageNtf::_internal_remaining_hp() const {
@@ -2203,31 +2191,6 @@ inline float SkillDamageNtf::_internal_remaining_hp() const {
 inline void SkillDamageNtf::_internal_set_remaining_hp(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.remaining_hp_ = value;
-}
-
-// bool is_dead = 5;
-inline void SkillDamageNtf::clear_is_dead() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.is_dead_ = false;
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00000010U);
-}
-inline bool SkillDamageNtf::is_dead() const {
-  // @@protoc_insertion_point(field_get:GamePacket.SkillDamageNtf.is_dead)
-  return _internal_is_dead();
-}
-inline void SkillDamageNtf::set_is_dead(bool value) {
-  _internal_set_is_dead(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
-  // @@protoc_insertion_point(field_set:GamePacket.SkillDamageNtf.is_dead)
-}
-inline bool SkillDamageNtf::_internal_is_dead() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.is_dead_;
-}
-inline void SkillDamageNtf::_internal_set_is_dead(bool value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.is_dead_ = value;
 }
 
 #ifdef __GNUC__

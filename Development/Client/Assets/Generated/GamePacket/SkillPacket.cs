@@ -39,10 +39,9 @@ namespace GamePacket {
             "cl9vYmplY3RfaWQYASABKAMSEQoJc2tpbGxfa2V5GAIgASgDEhEKCWVmZmVj",
             "dF9pZBgDIAEoAxIQCghvcmlnaW5feBgEIAEoAhIQCghvcmlnaW5feRgFIAEo",
             "AhIQCghvcmlnaW5fehgGIAEoAhINCgVkaXJfeBgHIAEoAhINCgVkaXJfehgI",
-            "IAEoAhIMCgRzZWVkGAkgASgNIncKDlNraWxsRGFtYWdlTnRmEhgKEHRhcmdl",
+            "IAEoAhIMCgRzZWVkGAkgASgNImYKDlNraWxsRGFtYWdlTnRmEhgKEHRhcmdl",
             "dF9vYmplY3RfaWQYASABKAMSDgoGZGFtYWdlGAIgASgCEhQKDGlzX2R1cGxp",
-            "Y2F0ZRgDIAEoCBIUCgxyZW1haW5pbmdfaHAYBCABKAISDwoHaXNfZGVhZBgF",
-            "IAEoCGIGcHJvdG8z"));
+            "Y2F0ZRgDIAEoCBIUCgxyZW1haW5pbmdfaHAYBCABKAJiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -50,7 +49,7 @@ namespace GamePacket {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillHitItem), global::GamePacket.SkillHitItem.Parser, new[]{ "EffectId", "ProjectileIndex", "TargetObjectId", "ExplodedAtMaxRange", "ExplodedOnTerrain", "HitX", "HitZ" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillProjectileHitReq), global::GamePacket.SkillProjectileHitReq.Parser, new[]{ "Hits" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillCastNtf), global::GamePacket.SkillCastNtf.Parser, new[]{ "CasterObjectId", "SkillKey", "EffectId", "OriginX", "OriginY", "OriginZ", "DirX", "DirZ", "Seed" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillDamageNtf), global::GamePacket.SkillDamageNtf.Parser, new[]{ "TargetObjectId", "Damage", "IsDuplicate", "RemainingHp", "IsDead" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillDamageNtf), global::GamePacket.SkillDamageNtf.Parser, new[]{ "TargetObjectId", "Damage", "IsDuplicate", "RemainingHp" }, null, null, null, null)
           }));
     }
     #endregion
@@ -1802,7 +1801,6 @@ namespace GamePacket {
       damage_ = other.damage_;
       isDuplicate_ = other.isDuplicate_;
       remainingHp_ = other.remainingHp_;
-      isDead_ = other.isDead_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1869,21 +1867,6 @@ namespace GamePacket {
       }
     }
 
-    /// <summary>Field number for the "is_dead" field.</summary>
-    public const int IsDeadFieldNumber = 5;
-    private bool isDead_;
-    /// <summary>
-    /// 이 대미지로 사망했는지
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool IsDead {
-      get { return isDead_; }
-      set {
-        isDead_ = value;
-      }
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -1903,7 +1886,6 @@ namespace GamePacket {
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Damage, other.Damage)) return false;
       if (IsDuplicate != other.IsDuplicate) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(RemainingHp, other.RemainingHp)) return false;
-      if (IsDead != other.IsDead) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1915,7 +1897,6 @@ namespace GamePacket {
       if (Damage != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Damage);
       if (IsDuplicate != false) hash ^= IsDuplicate.GetHashCode();
       if (RemainingHp != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(RemainingHp);
-      if (IsDead != false) hash ^= IsDead.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1950,10 +1931,6 @@ namespace GamePacket {
         output.WriteRawTag(37);
         output.WriteFloat(RemainingHp);
       }
-      if (IsDead != false) {
-        output.WriteRawTag(40);
-        output.WriteBool(IsDead);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1980,10 +1957,6 @@ namespace GamePacket {
         output.WriteRawTag(37);
         output.WriteFloat(RemainingHp);
       }
-      if (IsDead != false) {
-        output.WriteRawTag(40);
-        output.WriteBool(IsDead);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -2005,9 +1978,6 @@ namespace GamePacket {
       }
       if (RemainingHp != 0F) {
         size += 1 + 4;
-      }
-      if (IsDead != false) {
-        size += 1 + 1;
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -2032,9 +2002,6 @@ namespace GamePacket {
       }
       if (other.RemainingHp != 0F) {
         RemainingHp = other.RemainingHp;
-      }
-      if (other.IsDead != false) {
-        IsDead = other.IsDead;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -2071,10 +2038,6 @@ namespace GamePacket {
             RemainingHp = input.ReadFloat();
             break;
           }
-          case 40: {
-            IsDead = input.ReadBool();
-            break;
-          }
         }
       }
     #endif
@@ -2108,10 +2071,6 @@ namespace GamePacket {
           }
           case 37: {
             RemainingHp = input.ReadFloat();
-            break;
-          }
-          case 40: {
-            IsDead = input.ReadBool();
             break;
           }
         }

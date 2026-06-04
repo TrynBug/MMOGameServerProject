@@ -33,10 +33,10 @@ message CharacterSpawnInfo {
     string name           = 3;
     int32  job_id         = 4;
     int32  level          = 5;
-    int32  hp             = 6;
-    int32  max_hp         = 7;
-    int32  mp             = 8;
-    int32  max_mp         = 9;
+    double hp             = 6;   // 현재 HP
+    double max_hp         = 7;   // 최대 HP(=HpTotal)
+    double mp             = 8;   // 현재 MP
+    double max_mp         = 9;   // 최대 MP(=MpTotal)
     float  pos_x          = 10;
     float  pos_y          = 11;  // 높이
     float  yaw            = 12;  // Y축 회전, degree 단위
@@ -55,6 +55,9 @@ message MonsterSpawnInfo {
     float yaw         = 5;   // Y축 회전, degree 단위
     float pos_z       = 6;   // 평면 깊이축
     repeated BuffSnapshotInfo buffs = 7;   // 현재 보유 버프 (UI 뱃지용)
+    bool is_dead = 8;                       // 사망(시체) 상태. corpse 유지 중 진입한 관전자가 사망 포즈로 표시한다.
+    double cur_hp = 9;                      // 현재 HP. 살아있으면 max 와 같고, AOI 중간 진입/corpse 면 max 보다 작다(corpse=0).
+    double max_hp = 10;                     // 최대 HP(=HpTotal). 클라가 HP바 계산의 분모로 쓴다.
 }
 
 // 오브젝트 가시성 변경 알림 (서버 -> 클라)
@@ -68,4 +71,13 @@ message ObjectVisibilityNtf {
     // repeated DropSpawnInfo     drop_spawns     = 4;
 
     repeated int64 despawn_ids = 10;
+}
+
+// 오브젝트 사망 알림 (서버 -> 클라)
+// HP 0 등으로 오브젝트가 사망한 시점에 주변 AOI 유저들에게 통보한다. 클라는 사망 애니메이션을 재생한다.
+// 디스폰(시체 제거)은 일정 시간(corpse) 후 ObjectVisibilityNtf 의 despawn_ids 로 별도 통보된다.
+// 대미지가 아닌 사인도 있을 수 있어 SkillDamageNtf 와 분리한다.
+message ObjectDeathNtf {
+    int64 object_id        = 1;   // 사망한 오브젝트
+    int64 killer_object_id = 2;   // 처치자 (없으면 0)
 }

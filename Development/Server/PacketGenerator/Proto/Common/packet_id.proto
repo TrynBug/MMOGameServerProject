@@ -44,6 +44,7 @@ enum GamePacketId {
     GAME_PACKET_ID_CROSS_SERVER_STAGE_MOVE_REQ = 4003;   // 클라 -> 서버: 다른 게임서버 Stage 이동 요청
     // 4004, 4005: 과거 CHARACTER_ENTER_NTF / CHARACTER_LEAVE_NTF 자리. ObjectVisibilityNtf로 통합되어 제거됨.
     GAME_PACKET_ID_OBJECT_VISIBILITY_NTF = 4006;   // 서버 -> 클라: 오브젝트 가시성 변경 (생성/제거 리스트)
+    GAME_PACKET_ID_OBJECT_DEATH_NTF      = 4007;   // 서버 -> 클라: 오브젝트 사망 알림 (사망 연출용). 디스폰은 ObjectVisibilityNtf 의 despawn_ids 로 별도 통보.
 
     // 5000~5999: 던전
     GAME_PACKET_ID_PUBLIC_DUNGEON_LIST_REQ  = 5001;   // 클라 -> 서버: 공용던전 목록 요청
