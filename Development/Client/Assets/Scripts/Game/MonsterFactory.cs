@@ -67,6 +67,9 @@ namespace Client.Game
             // 7) 초기화.
             mo.Initialize(objectId, monsterKey, pos, dirY, isDead, curHp, maxHp);
 
+            // 8) 머리 위 체력바 부착 (코드 생성 placeholder).
+            HealthBar.Attach(mo);
+
             go.name = $"Monster_{objectId}_key{monsterKey}";
 
             Debug.Log($"[MonsterFactory] Created {go.name} at {pos}");

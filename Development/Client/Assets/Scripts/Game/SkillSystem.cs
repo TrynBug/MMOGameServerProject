@@ -30,6 +30,16 @@ namespace Client.Game
         // 마일스톤 1: OnSkill1 = 파이어볼. (스킬 슬롯 매핑은 추후 스킬창/장비에서.)
         [SerializeField] private long m_skill1Key = 1001;
 
+        // M1(범위 스킬): OnSkill2 = 얼음지대(1003), OnSkill3 = 전격방출(1008).
+        [SerializeField] private long m_skill2Key = 1003;
+        [SerializeField] private long m_skill3Key = 1008;
+
+        // M2(이동 스킬): OnSkill4 = 글라이드(1004). 순간이동(1009) 테스트는 슬롯 키를 인스펙터에서 교체.
+        [SerializeField] private long m_skill4Key = 1004;
+
+        // 단발(instant) 범위 비주얼의 표시 시간(초). 지속 데이터(LifetimeMs)가 없는 단일 틱 스킬에 사용.
+        [SerializeField] private float m_areaInstantDisplaySec = 0.5f;
+
         // 투사체 비주얼의 Y 오프셋 (지면에 반쯤 묻히지 않도록). XZ 판정에는 영향 없음.
         [SerializeField] private float m_projectileHeight = 0.5f;
 
@@ -39,6 +49,11 @@ namespace Client.Game
         [SerializeField] private float m_castClipBaseLength = 0.8f;
 
         private readonly ISkillTargetingMode m_targeting = new NearestTargeting();
+        private readonly ISkillTargetingMode m_highestGradeTargeting = new HighestGradeNearestTargeting();
+
+        // 타겟형 범위 스킬의 오토타겟 검색 반경 (MaxRange=0 일 때) + 타겟 없을 때 정면 고정 시전 거리.
+        [SerializeField] private float m_areaTargetRange = 30f;
+        [SerializeField] private float m_areaCastFallbackDistance = 10f;
 
         // 시전 클라가 발사한 투사체 그룹들 (effect_id 바인딩 + hit 보고 대상).
         private readonly List<SkillProjectileGroup> m_groups = new List<SkillProjectileGroup>();
@@ -65,14 +80,24 @@ namespace Client.Game
         {
             InputManager input = Managers.Managers.Input;
             if (input != null)
+            {
                 input.OnSkill1 += castSkill1;
+                input.OnSkill2 += castSkill2;
+                input.OnSkill3 += castSkill3;
+                input.OnSkill4 += castSkill4;
+            }
         }
 
         private void OnDisable()
         {
             InputManager input = Managers.Managers.Input;
             if (input != null)
+            {
                 input.OnSkill1 -= castSkill1;
+                input.OnSkill2 -= castSkill2;
+                input.OnSkill3 -= castSkill3;
+                input.OnSkill4 -= castSkill4;
+            }
         }
 
         private void OnDestroy()
@@ -83,6 +108,9 @@ namespace Client.Game
 
         // ─── 시전 ────────────────────────────────────────────────────
         private void castSkill1() => tryCast(m_skill1Key);
+        private void castSkill2() => tryCast(m_skill2Key);
+        private void castSkill3() => tryCast(m_skill3Key);
+        private void castSkill4() => tryCast(m_skill4Key);
 
         private void tryCast(long skillKey)
         {
@@ -104,24 +132,68 @@ namespace Client.Game
             if (caster.CurMp < skill.ManaCost)
                 return;
 
-            // 방향/타겟 결정 (오토타게팅: 가장 가까운 적, 없으면 캐릭터 정면).
+            // 방향/타겟 결정.
             Vector3 origin = caster.transform.position;
             Vector3 dir;
             long targetId = 0;
             Vector3 targetPos = origin;
 
-            MonsterObject target = m_targeting.SelectTarget(origin, (float)skill.MaxRange);
-            if (target != null)
+            bool isMoveSkill = skill.EffectDamage == ESkillEffectDamage.None && skill.MoveDistance > 0.0;
+            if (isMoveSkill)
             {
-                Vector3 to = target.transform.position - origin;
+                // 이동 스킬(글라이드/순간이동)은 오토타겟이 아니라 마우스 지면점을 향한다.
+                Vector3 aim = origin + flatForward(caster);
+                if (MouseInputHandler.Instance != null
+                    && MouseInputHandler.Instance.TryGetMouseGroundPoint(caster, out Vector3 gp))
+                    aim = gp;
+
+                Vector3 to = aim - origin;
                 to.y = 0f;
                 dir = (to.sqrMagnitude > 0.0001f) ? to.normalized : flatForward(caster);
-                targetId = target.ObjectId;
-                targetPos = target.transform.position;
+                targetPos = aim;   // 서버 클램프(min(MoveDistance, |targetPos-origin|))와 동일 입력.
             }
             else
             {
-                dir = flatForward(caster);
+                // 1) 타게팅: Targeting 모드로 대상 선택 (None 이면 타게팅 안 함 — 전격방출 등).
+                MonsterObject target = null;
+                if (skill.Targeting != ETargetingMode.None)
+                {
+                    ISkillTargetingMode targeting = (skill.Targeting == ETargetingMode.HighestGradeNearest)
+                        ? m_highestGradeTargeting : m_targeting;
+                    float searchRange = (skill.MaxRange > 0.0) ? (float)skill.MaxRange : m_areaTargetRange;
+                    target = targeting.SelectTarget(origin, searchRange);
+                }
+
+                // 2) 방향: 타겟 있으면 캐스터→타겟, 없으면 캐스터 정면.
+                if (target != null)
+                {
+                    Vector3 to = target.transform.position - origin;
+                    to.y = 0f;
+                    dir = (to.sqrMagnitude > 0.0001f) ? to.normalized : flatForward(caster);
+                    targetId = target.ObjectId;
+                    targetPos = target.transform.position;
+                }
+                else
+                {
+                    dir = flatForward(caster);
+                }
+
+                // 3) 배치(Placement): 효과 중심 origin 결정. (서버는 이 origin 을 그대로 효과 중심으로 사용)
+                switch (skill.Placement)
+                {
+                    case ESkillPlacement.Target:
+                        // 타겟 위치. 타겟 없으면 정면 고정거리에 시전(설계).
+                        origin = (target != null)
+                            ? target.transform.position
+                            : caster.transform.position + dir * m_areaCastFallbackDistance;
+                        targetPos = origin;
+                        break;
+                    case ESkillPlacement.Forward:
+                        // 캐스터 전방에서 타겟 방향으로 OBB: 중심을 정면으로 ObbLength/2 만큼 밀어 빔이 앞으로 뻗게.
+                        origin = caster.transform.position + dir * (float)(skill.ObbLength * 0.5);
+                        break;
+                    // None / Caster: origin = 캐스터 위치 (투사체 발사점 / 캐스터 중심). 그대로 둔다.
+                }
             }
 
             // 캐릭터 즉시 회전 (Rotation=true 인 스킬).
@@ -160,6 +232,16 @@ namespace Client.Game
                 m_groups.Add(group);
                 StartCoroutine(spawnProjectilesAfterDelay(group, skill, origin, dir));
             }
+            // 범위 스킬이면 CastDelay 후 비주얼만 예측 표시. 대미지는 서버 SkillDamageNtf 가 구동한다.
+            else if (skill.EffectDamage == ESkillEffectDamage.Area)
+            {
+                StartCoroutine(spawnAreaVisualAfterDelay(skill, origin, dir));
+            }
+            // 이동 스킬이면 강제이동을 로컬 예측한다 (서버와 동일 공식). 글라이드는 충격파 페이즈도 재생.
+            else if (isMoveSkill)
+            {
+                predictSkillMovement(caster, skill, origin, dir, targetPos);
+            }
         }
 
         // 캐릭터 정면(수평). 정면이 거의 수직이면 월드 forward 폴백.
@@ -176,6 +258,196 @@ namespace Client.Game
                 yield return new WaitForSeconds(skill.CastDelayMs / 1000f);
 
             spawnFan(group, skill, origin, dir);
+        }
+
+        // 범위 스킬 비주얼을 CastDelay 후에 표시한다 (로컬 예측). 대미지는 서버가 구동.
+        private IEnumerator spawnAreaVisualAfterDelay(GameData_Skill skill, Vector3 origin, Vector3 dir)
+        {
+            if (skill.CastDelayMs > 0)
+                yield return new WaitForSeconds(skill.CastDelayMs / 1000f);
+
+            spawnAreaChainPhase(skill, origin, dir);
+        }
+
+        // 범위(Area) 스킬을 origin 에 표시한다 (로컬 예측/원격 재현 공용).
+        // ScatterCount>1 이면 [inner,outer] 링에 N개를 흩뿌린다 (메테오 파편).
+        // 흩뿌리는 위치는 클라 로컬 랜덤(장식) — 대미지는 서버가 enemy 위치로 판정하므로 DamageNtf 가 정확도를 보장.
+        private void spawnAreaVisual(GameData_Skill skill, Vector3 origin, Vector3 dir)
+        {
+            if (skill.ScatterCount > 1)
+            {
+                int n = (int)skill.ScatterCount;
+                float inner = (float)skill.ScatterInnerRadius;
+                float outer = (float)skill.ScatterOuterRadius;
+                for (int i = 0; i < n; ++i)
+                {
+                    float ang = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+                    // 면적 균등: r = sqrt(U[inner^2, outer^2]). 서버와 같은 분포 형태(시드 미공유라 위치 자체는 다름).
+                    float r = Mathf.Sqrt(UnityEngine.Random.Range(inner * inner, outer * outer));
+                    Vector3 p = origin + new Vector3(Mathf.Cos(ang) * r, 0f, Mathf.Sin(ang) * r);
+                    spawnOneAreaVisual(skill, p, dir);
+                }
+                return;
+            }
+
+            spawnOneAreaVisual(skill, origin, dir);
+        }
+
+        // 범위 비주얼 prefab 1개를 pos 에 생성. shape 회전(Obb)·스케일 후 표시시간 뒤 파괴. 대미지는 서버 DamageNtf 담당.
+        private void spawnOneAreaVisual(GameData_Skill skill, Vector3 pos, Vector3 dir)
+        {
+            // 비주얼 prefab 은 스킬 데이터의 EffectPrefabPath 에서 로드 (파이어볼의 ProjectilePrefabPath 와 동일 방식).
+            GameObject prefab = Managers.Managers.Resource.Load<GameObject>(skill.EffectPrefabPath);
+            if (prefab == null)
+                return;   // prefab 없으면 ResourceManager 가 경고 1회. 폴백 없음(데이터/에셋이 맞아야 동작).
+
+            GameObject go = Instantiate(prefab);
+            go.name = "AreaVfx_" + skill.Name;
+            go.transform.position = pos;
+
+            // prefab 의 기본 크기 메타데이터 (없으면 base=1 = 1유닛 footprint 전제).
+            AreaVfx vfx = go.GetComponent<AreaVfx>();
+
+            // 모양에 맞춰 배치. 데이터 크기 / prefab 기본크기 비율로 스케일. 판정은 XZ 평면이라 Y 스케일은 prefab 값 유지.
+            if (skill.EffectShape == ESkillEffectShape.Obb)
+            {
+                // 시전 방향으로 회전 (forward = dir). OBB 가로=ObbWidth(X), 세로=ObbLength(Z).
+                if (dir.sqrMagnitude > 0.0001f)
+                    go.transform.rotation = Quaternion.LookRotation(new Vector3(dir.x, 0f, dir.z));
+
+                float baseW = (vfx != null && vfx.baseSize.x > 0f) ? vfx.baseSize.x : 1f;
+                float baseL = (vfx != null && vfx.baseSize.y > 0f) ? vfx.baseSize.y : 1f;
+                Vector3 s = go.transform.localScale;
+                go.transform.localScale = new Vector3((float)skill.ObbWidth / baseW, s.y, (float)skill.ObbLength / baseL);
+            }
+            else if (skill.EffectShape == ESkillEffectShape.Circle)
+            {
+                // 지름 = 반지름 × 2. prefab 기본 지름(baseDiameter) 대비 비율로 스케일.
+                float baseD = (vfx != null && vfx.baseDiameter > 0f) ? vfx.baseDiameter : 1f;
+                float scale = ((float)skill.Radius * 2f) / baseD;
+                Vector3 s = go.transform.localScale;
+                go.transform.localScale = new Vector3(scale, s.y, scale);
+            }
+
+            // 표시 시간: 지속형(periodic)은 LifetimeMs, 단발(instant)은 FirstTickDelay(낙하 등 리드업) + 고정 표시.
+            float displaySec = (skill.LifetimeMs > 0)
+                ? skill.LifetimeMs / 1000f
+                : skill.FirstTickDelayMs / 1000f + m_areaInstantDisplaySec;
+            Destroy(go, displaySec);
+        }
+
+        // ─── 다중 Area 체인 재생 (블레이즈 빔→화염지대, 메테오 운석→파편) ───
+        // 현재 Area 페이즈를 표시하고, 체인(NextSkillKey)이 있으면 다음 Area 페이즈를 예약한다.
+        private void spawnAreaChainPhase(GameData_Skill skill, Vector3 center, Vector3 dir)
+        {
+            spawnAreaVisual(skill, center, dir);
+
+            if (skill.NextSkillKey == 0 || skill.NextTriggerTiming == ENextSkillTiming.None)
+                return;
+
+            GameData_Skill next = GameDataTable_Skill.FindData(skill.NextSkillKey);
+            if (next == null)
+                return;
+
+            float wait = areaPhaseDurationSec(skill);   // AfterEnd: 이 페이즈 지속 종료 직후
+            if (skill.NextTriggerTiming == ENextSkillTiming.AfterDelay)
+                wait += skill.NextTriggerDelayMs / 1000f;
+
+            Vector3 nextCenter = resolveAreaChainOrigin(skill, center, dir);
+            StartCoroutine(spawnAreaChainAfter(next, nextCenter, dir, wait));
+        }
+
+        private IEnumerator spawnAreaChainAfter(GameData_Skill skill, Vector3 center, Vector3 dir, float wait)
+        {
+            if (wait > 0f)
+                yield return new WaitForSeconds(wait);
+            spawnAreaChainPhase(skill, center, dir);   // 재귀 (다음 페이즈도 체인 가능)
+        }
+
+        // Area 페이즈의 체인 지속시간(초). 서버 chainDurationMs(Area) = max(FirstTickDelay, Lifetime) 와 동일.
+        private static float areaPhaseDurationSec(GameData_Skill skill)
+        {
+            long ms = Mathf.Max((int)skill.FirstTickDelayMs, (int)skill.LifetimeMs);
+            return ms / 1000f;
+        }
+
+        // 직전 Area 페이즈의 NextOrigin 규칙으로 다음 페이즈 중심을 구한다.
+        // Area(Static)는 중심=끝=시작이라 PrevCenter/PrevEnd 모두 현재 center.
+        private Vector3 resolveAreaChainOrigin(GameData_Skill skill, Vector3 center, Vector3 dir)
+        {
+            switch (skill.NextOrigin)
+            {
+                case ENextSkillOrigin.CasterPos:
+                {
+                    PlayerCharacter local = StageManager.Instance?.LocalPlayer;
+                    return local != null ? local.transform.position : center;
+                }
+                case ENextSkillOrigin.CasterFront: return center + dir * (float)skill.CasterFrontDistance;
+                default:                           return center;   // PrevCenter / PrevEnd / None
+            }
+        }
+
+        // ─── 이동 스킬 예측 + 체인 재생 ──────────────────────────────
+        // 이동 스킬(글라이드/순간이동) 로컬 예측. 서버 Character::ApplySkillMovement 와 동일 규칙.
+        //   - 강제 대시(MoveDurationMs>0): 고정 거리 ease-out.
+        //   - 즉시 블링크(MoveDurationMs<=0): min(MoveDistance, |aim-origin|) 만큼 즉시 이동.
+        // NextSkillKey 가 있으면(글라이드) 이동 종료 후 다음(충격파) 페이즈 비주얼을 재생한다.
+        private void predictSkillMovement(PlayerCharacter caster, GameData_Skill skill, Vector3 origin, Vector3 dir, Vector3 aim)
+        {
+            float distance;
+            if (skill.MoveDurationMs > 0)
+            {
+                distance = (float)skill.MoveDistance;   // 글라이드: 고정 거리
+            }
+            else
+            {
+                Vector3 to = aim - origin;
+                to.y = 0f;
+                distance = Mathf.Min((float)skill.MoveDistance, to.magnitude);   // 순간이동: 클램프
+            }
+
+            float durationSec = skill.MoveDurationMs / 1000f;
+            caster.StartSkillMove(dir, distance, durationSec);
+
+            // 이동 페이즈 뒤에 이어지는 체인(글라이드 충격파 등) 비주얼 재생.
+            if (skill.NextSkillKey != 0 && skill.NextTriggerTiming != ENextSkillTiming.None)
+                StartCoroutine(spawnChainAfterMove(skill, origin, dir, distance, durationSec));
+        }
+
+        // 이동 종료 시각에 맞춰 다음 페이즈(Area) 비주얼을 그 origin 에 표시한다.
+        private IEnumerator spawnChainAfterMove(GameData_Skill skill, Vector3 origin, Vector3 dir, float distance, float durationSec)
+        {
+            float wait = durationSec;   // AfterEnd: 이동(지속) 종료 직후
+            if (skill.NextTriggerTiming == ENextSkillTiming.AfterDelay)
+                wait += skill.NextTriggerDelayMs / 1000f;
+            if (wait > 0f)
+                yield return new WaitForSeconds(wait);
+
+            GameData_Skill next = GameDataTable_Skill.FindData(skill.NextSkillKey);
+            if (next == null)
+                yield break;
+
+            Vector3 nextOrigin = resolveChainOrigin(skill, origin, dir, distance);
+            if (next.EffectDamage == ESkillEffectDamage.Area)
+                spawnAreaChainPhase(next, nextOrigin, dir);
+            // (다음 페이즈가 또 체인이면 재귀 확장 — v1 글라이드는 1단계라 생략.)
+        }
+
+        // 직전 페이즈(이동)의 NextOrigin 규칙으로 다음 페이즈 기준 위치를 구한다.
+        private Vector3 resolveChainOrigin(GameData_Skill skill, Vector3 origin, Vector3 dir, float distance)
+        {
+            switch (skill.NextOrigin)
+            {
+                case ENextSkillOrigin.CasterPos:
+                {
+                    PlayerCharacter local = StageManager.Instance?.LocalPlayer;
+                    return local != null ? local.transform.position : origin;
+                }
+                case ENextSkillOrigin.CasterFront: return origin + dir * (float)skill.CasterFrontDistance;
+                case ENextSkillOrigin.PrevEnd:     return origin + dir * distance;   // 이동 끝점
+                case ENextSkillOrigin.PrevCenter:  return origin;                     // 이동 중심=시작(v1)
+                default:                           return origin;
+            }
         }
 
         private void sendCastReq(GameData_Skill skill, Vector3 origin, Vector3 dir, long targetId, Vector3 targetPos)
@@ -237,14 +509,37 @@ namespace Client.Game
         private void spawnRemoteVisual(SkillCastNtf ntf)
         {
             GameData_Skill skill = GameDataTable_Skill.FindData(ntf.SkillKey);
-            if (skill == null || skill.EffectDamage != ESkillEffectDamage.ContactHit)
+            if (skill == null)
                 return;
 
             Vector3 origin = new Vector3(ntf.OriginX, ntf.OriginY, ntf.OriginZ);
             Vector3 dir = new Vector3(ntf.DirX, 0f, ntf.DirZ);
             dir = (dir.sqrMagnitude > 0.0001f) ? dir.normalized : Vector3.forward;
 
-            spawnFan(group: null, skill, origin, dir);   // group=null → 비주얼 전용.
+            // 서버는 entry 발동(=CastDelay 경과) 시점에 CastNtf 를 보내므로 원격은 즉시 재현한다.
+            if (skill.EffectDamage == ESkillEffectDamage.ContactHit)
+            {
+                spawnFan(group: null, skill, origin, dir);   // group=null → 비주얼 전용.
+            }
+            else if (skill.EffectDamage == ESkillEffectDamage.Area)
+            {
+                spawnAreaChainPhase(skill, origin, dir);
+            }
+            // 이동 스킬: 원격 캐스터를 서버가 실제 사용한 거리(move_distance)로 동일하게 이동시킨다.
+            else if (skill.EffectDamage == ESkillEffectDamage.None && skill.MoveDistance > 0.0)
+            {
+                PlayerCharacter caster = StageManager.Instance?.FindActor(ntf.CasterObjectId) as PlayerCharacter;
+                if (caster != null)
+                {
+                    float distance = ntf.MoveDistance;
+                    float durationSec = skill.MoveDurationMs / 1000f;
+                    caster.StartSkillMove(dir, distance, durationSec);
+
+                    // 글라이드 등: 이동 종료 후 충격파(Area) 페이즈 비주얼 재생.
+                    if (skill.NextSkillKey != 0 && skill.NextTriggerTiming != ENextSkillTiming.None)
+                        StartCoroutine(spawnChainAfterMove(skill, origin, dir, distance, durationSec));
+                }
+            }
         }
 
         // ─── 투사체 발사 (로컬/원격 공용) ────────────────────────────
@@ -263,12 +558,12 @@ namespace Client.Game
 
             Vector3 startPos = origin + Vector3.up * m_projectileHeight;   // 비주얼 높이 (XZ 판정엔 영향 없음).
             for (int i = 0; i < dirs.Count; ++i)
-                spawnOneProjectile(prefab, group, i, startPos, dirs[i], (float)skill.ProjectileSpeed, (float)skill.MaxRange);
+                spawnOneProjectile(prefab, group, i, startPos, dirs[i], (float)skill.ProjectileSpeed, (float)skill.MaxRange, skill.OnHitSkillKey);
 
             group?.MarkLaunched(dirs.Count);
         }
 
-        private void spawnOneProjectile(GameObject prefab, SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange)
+        private void spawnOneProjectile(GameObject prefab, SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, long onHitSkillKey)
         {
             GameObject go = Instantiate(prefab);
             go.name = "Projectile";
@@ -294,7 +589,19 @@ namespace Client.Game
             }
 
             Projectile proj = go.AddComponent<Projectile>();
-            proj.Launch(group, index, startPos, dir, speed, maxRange);
+            proj.Launch(group, index, startPos, dir, speed, maxRange, onHitSkillKey);
+        }
+
+        // 투사체가 끝난 위치에 OnHit 폭발(예: 파이어볼 폭발 1002)의 비주얼을 띄운다. Projectile 이 종료 시 호출.
+        // 폭발 적중/대미지는 서버가 판정해 SkillDamageNtf 로 통보 — 여기서는 비주얼만 (시전 클라/원격 공용).
+        public void SpawnHitExplosionVisual(long explosionSkillKey, Vector3 pos, Vector3 dir)
+        {
+            if (explosionSkillKey == 0)
+                return;
+            GameData_Skill explosion = GameDataTable_Skill.FindData(explosionSkillKey);
+            if (explosion == null)
+                return;
+            spawnAreaVisual(explosion, pos, dir);
         }
 
         // 서버 SkillComponent::computeFanDirs 와 동일한 공식/순서 (projectile_index 정합).

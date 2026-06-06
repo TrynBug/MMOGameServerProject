@@ -37,4 +37,40 @@ namespace Client.Game
             return best;
         }
     }
+
+    // 가장 등급이 높은 적 중 가장 가까운 적. (보스>유니크>레어>매직>노말, EMonsterGrade 값이 클수록 높음.)
+    public class HighestGradeNearestTargeting : ISkillTargetingMode
+    {
+        public MonsterObject SelectTarget(Vector3 from, float range)
+        {
+            StageManager stage = StageManager.Instance;
+            if (stage == null)
+                return null;
+
+            float rangeSqr = range * range;
+            MonsterObject best = null;
+            int bestGrade = -1;
+            float bestSqr = float.MaxValue;
+
+            foreach (MonsterObject m in stage.Monsters.Values)
+            {
+                if (m == null || m.IsDead)
+                    continue;
+
+                float sqr = (m.transform.position - from).sqrMagnitude;
+                if (sqr > rangeSqr)
+                    continue;   // range 밖 제외.
+
+                int grade = (int)m.Grade;
+                // 더 높은 등급 우선, 같은 등급이면 더 가까운 적.
+                if (grade > bestGrade || (grade == bestGrade && sqr < bestSqr))
+                {
+                    bestGrade = grade;
+                    bestSqr = sqr;
+                    best = m;
+                }
+            }
+            return best;
+        }
+    }
 }

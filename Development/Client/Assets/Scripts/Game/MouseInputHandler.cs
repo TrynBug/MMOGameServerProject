@@ -31,8 +31,13 @@ namespace Client.Game
         // 디버그 로그
         [SerializeField] private bool m_debugLog = false;
 
+        // 씬에 하나만 존재. 스킬 시스템 등이 마우스 지면점을 조회할 때 사용.
+        public static MouseInputHandler Instance { get; private set; }
+
         private void Awake()
         {
+            Instance = this;
+
             if (m_camera == null)
             {
                 m_camera = Camera.main;
@@ -40,6 +45,27 @@ namespace Client.Game
 
             // Unity 6.x 에서 기본 Plane mesh 의 normal 이 -Y 로 잡히는 케이스 대응.
             Physics.queriesHitBackfaces = true;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+                Instance = null;
+        }
+
+        // 현재 마우스 화면좌표 아래의 월드 지면점을 구한다 (스킬 조준용). 클릭 상태와 무관.
+        // selfToIgnore: 레이캐스트에서 제외할 캐릭터(보통 LocalPlayer). 실패 시 false.
+        public bool TryGetMouseGroundPoint(PlayerCharacter selfToIgnore, out Vector3 worldPoint)
+        {
+            worldPoint = Vector3.zero;
+            if (m_camera == null)
+                return false;
+
+            InputManager input = Managers.Managers.Input;
+            if (input == null)
+                return false;
+
+            return tryGetGroundPoint(input.MouseScreenPosition, selfToIgnore, out worldPoint);
         }
 
         private void Update()

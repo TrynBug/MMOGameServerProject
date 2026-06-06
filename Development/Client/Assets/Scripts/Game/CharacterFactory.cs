@@ -48,6 +48,9 @@ namespace Client.Game
 
             pc.Initialize(userId, name, isLocalPlayer, pos, dirY);
 
+            // 머리 위 체력바 부착 (코드 생성 placeholder). 로컬 플레이어를 빼려면 if (!isLocalPlayer) 가드.
+            HealthBar.Attach(pc);
+
             // LocalPlayer 에만 입력→이동 컨트롤러 부착.
             // 타 유저 prefab 에는 PlayerMoveController 가 없어야 함 (구조적 보장).
             if (isLocalPlayer)

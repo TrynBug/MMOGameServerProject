@@ -43,6 +43,18 @@ namespace Client.Game
         // 캐릭터가 현재 이동 중인지
         public bool IsMoving => m_hasMoveDest;
 
+        // ── 스킬 강제이동 (대시/블링크) ──
+        // 일반 이동(m_hasMoveDest)과 별개. m_skillMoving 동안 updateMovement 가 ease-out 으로 전진.
+        // 서버 Character::ApplySkillMovement 와 동일한 공식(f=1-(1-t)^2)을 사용한다.
+        private bool m_skillMoving;
+        private Vector3 m_skillMoveStart;
+        private Vector3 m_skillMoveDir;        // 정규화 평면 방향
+        private float m_skillMoveDistance;
+        private float m_skillMoveDuration;
+        private float m_skillMoveElapsed;
+
+        public bool IsSkillMoving => m_skillMoving;
+
         // ─── Animator ────────────────────────────────────────────────
         // Visual 하위에 부착된 Animator. Awake 에서 찾아둠.
         // prefab 에 모델이 없거나 Animator 가 없으면 null 일 수 있음 (이 경우 애니메이션 없이 동작).
@@ -163,6 +175,7 @@ namespace Client.Game
             transform.position = pos;
             transform.rotation = Quaternion.Euler(0f, dirY, 0f);
             m_hasMoveDest = false; // 위치 강제 동기화는 이동 취소
+            m_skillMoving = false; // 스킬 강제이동도 취소
             m_path.Clear();
             m_pathIndex = 0;
         }
@@ -188,6 +201,8 @@ namespace Client.Game
         // - 경로 재계산은 200ms 마다 (또는 목적지가 의미 있게 바뀌었을 때).
         public void SetMoveDestination(Vector3 dest)
         {
+            if (m_skillMoving)
+                return;   // 스킬 강제이동(대시/블링크) 중에는 일반 이동 입력 무시.
             if (Time.time < m_moveLockedUntil)
                 return;   // 시전 중 이동 잠금 (Stationary 캐스트).
             // dest 의 y 는 그대로 둡다. NavMesh 검색 시 자동으로 표면 Y 로 보정됨.
@@ -241,6 +256,61 @@ namespace Client.Game
             m_pathIndex = 0;
         }
 
+        // 스킬 강제이동 시작 (이동기/순간이동).
+        //   durationSec <= 0 : 즉시 블링크(끝점 스냅) — 순간이동.
+        //   durationSec >  0 : duration 동안 ease-out 감속 대시 — 글라이드.
+        // 서버 Character::ApplySkillMovement 와 동일한 공식이어야 위치가 동기화된다.
+        // 지형 충돌은 v1 무시 (완전 결정론).
+        public void StartSkillMove(Vector3 dirFlat, float distance, float durationSec)
+        {
+            Vector3 d = new Vector3(dirFlat.x, 0f, dirFlat.z);
+            if (d.sqrMagnitude < 1e-6f || distance <= 0f)
+                return;
+            d.Normalize();
+
+            // 일반 이동 중단 + 시전 방향으로 즉시 회전.
+            StopMove();
+            transform.rotation = Quaternion.LookRotation(d);
+
+            if (durationSec <= 0f)
+            {
+                // 즉시 블링크: 끝점 스냅 (Y 유지).
+                Vector3 end = transform.position + d * distance;
+                end.y = transform.position.y;
+                transform.position = end;
+                m_skillMoving = false;
+                return;
+            }
+
+            m_skillMoveStart = transform.position;
+            m_skillMoveDir = d;
+            m_skillMoveDistance = distance;
+            m_skillMoveDuration = durationSec;
+            m_skillMoveElapsed = 0f;
+            m_skillMoving = true;
+        }
+
+        // 강제이동 1 프레임 전진. ease-out(f=1-(1-t)^2), 종료 시 끝점 스냅. (updateMovement 에서 호출)
+        private void advanceSkillMove()
+        {
+            m_skillMoveElapsed += Time.deltaTime;
+            float t = (m_skillMoveDuration > 0f) ? m_skillMoveElapsed / m_skillMoveDuration : 1f;
+
+            if (t >= 1f)
+            {
+                Vector3 end = m_skillMoveStart + m_skillMoveDir * m_skillMoveDistance;
+                end.y = m_skillMoveStart.y;
+                transform.position = end;
+                m_skillMoving = false;
+                return;
+            }
+
+            float f = 1f - (1f - t) * (1f - t);
+            Vector3 p = m_skillMoveStart + m_skillMoveDir * (m_skillMoveDistance * f);
+            p.y = m_skillMoveStart.y;
+            transform.position = p;
+        }
+
         // NavMesh 경로 재계산. 시작점은 현재 캐릭터 위치 (NavMesh 위로 보정해서).
         private void recalculatePath(Vector3 destOnNav)
         {
@@ -283,6 +353,13 @@ namespace Client.Game
 
         private void updateMovement()
         {
+            // 스킬 강제이동이 우선 (일반 이동과 배타적).
+            if (m_skillMoving)
+            {
+                advanceSkillMove();
+                return;
+            }
+
             if (!m_hasMoveDest)
                 return;
 
