@@ -213,7 +213,8 @@ public:
     // 스킬 시전 통보(SkillCastNtf)를 시전자 주변 AOI 에 broadcast 한다. SkillComponent 가 entry 페이즈 발동 시 호출.
     // effectId: entry 가 투사체면 그 그룹 ID, 아니면 0. 클라는 origin/dir/seed 로 비주얼을 재현한다.
     void      BroadcastSkillCastNtf(const ActorObject& caster, int64 skillKey, int64 effectId,
-                                    const Vector3& origin, const Vector3& dir, uint32 seed);
+                                    const Vector3& origin, const Vector3& dir, uint32 seed,
+                                    float moveDistance);
 
     // objectId 로 StageObject 를 조회한다 (통합 컨테이너 m_objects 기준). 없으면 nullptr.
     // 비소유 raw 포인터 — 컨텐츠 스레드에서 해당 tick 내 사용 (몬스터 AI 의 타겟 해소 등).

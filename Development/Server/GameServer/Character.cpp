@@ -91,6 +91,10 @@ void Character::SyncRuntimeToProto()
 
 void Character::SetDestination(float destX, float destY, float destZ)
 {
+    // 스킬 강제이동(대시/블링크) 중에는 일반 이동 입력을 무시한다.
+    if (m_skillMoving)
+        return;
+
     // X-Z 평면 거리로 이동 여부 판정. Y(높이) 변화는 이동 트리거에 사용하지 않음.
     const float dx = destX - GetPosX();
     const float dz = destZ - GetPosZ();
@@ -189,6 +193,13 @@ void Character::faceCurrentWaypoint()
 
 void Character::Update(int64 deltaMs)
 {
+    // 스킬 강제이동이 우선한다 (일반 이동과 배타적).
+    if (m_skillMoving)
+    {
+        advanceSkillMove(deltaMs);
+        return;
+    }
+
     if (!m_isMoving)
         return;
 
@@ -251,6 +262,72 @@ void Character::Update(int64 deltaMs)
                GetPosZ() + nz * remainMoveDist);
         remainMoveDist = 0.0f;
     }
+}
+
+void Character::ApplySkillMovement(const Vector3& dir, float distance, int32 durationMs)
+{
+    // XZ 방향 정규화. 거리/방향이 무의미하면 무시.
+    float dx = dir.x;
+    float dz = dir.z;
+    const float len = std::sqrt(dx * dx + dz * dz);
+    if (len < 1e-4f || distance <= 0.0f)
+        return;
+    dx /= len;
+    dz /= len;
+
+    // 강제이동은 일반(waypoint) 이동을 중단시킨다.
+    m_isMoving = false;
+    m_waypoints.clear();
+    m_curWaypointIdx = 0;
+
+    // 시전 방향으로 즉시 회전 (Unity 호환 yaw).
+    SetYaw(std::atan2(dx, dz) * k_radToDeg);
+
+    if (durationMs <= 0)
+    {
+        // 즉시 블링크: 끝점으로 스냅 + 섹터 즉시 갱신 (이번 tick AOI/visibility 정합).
+        SetPos(GetPosX() + dx * distance, GetPosY(), GetPosZ() + dz * distance);
+        m_skillMoving = false;
+        if (Stage* pStage = GetStage())
+            pStage->UpdateObjectSector(this);
+        return;
+    }
+
+    // 감속 대시: 상태만 설정하고 매 tick Update(advanceSkillMove)에서 전진.
+    m_skillMoveStartX     = GetPosX();
+    m_skillMoveStartY     = GetPosY();
+    m_skillMoveStartZ     = GetPosZ();
+    m_skillMoveDirX       = dx;
+    m_skillMoveDirZ       = dz;
+    m_skillMoveDistance   = distance;
+    m_skillMoveDurationMs = durationMs;
+    m_skillMoveElapsedMs  = 0;
+    m_skillMoving         = true;
+}
+
+void Character::advanceSkillMove(int64 deltaMs)
+{
+    m_skillMoveElapsedMs += deltaMs;
+
+    const float t = (m_skillMoveDurationMs > 0)
+        ? static_cast<float>(m_skillMoveElapsedMs) / static_cast<float>(m_skillMoveDurationMs)
+        : 1.0f;
+
+    if (t >= 1.0f)
+    {
+        // 종료: 끝점으로 정확히 스냅 (클라/서버 끝위치 일치).
+        SetPos(m_skillMoveStartX + m_skillMoveDirX * m_skillMoveDistance,
+               m_skillMoveStartY,
+               m_skillMoveStartZ + m_skillMoveDirZ * m_skillMoveDistance);
+        m_skillMoving = false;
+        return;
+    }
+
+    // ease-out quad: f = 1 - (1-t)^2. 클라이언트와 반드시 동일한 공식이어야 한다.
+    const float f = 1.0f - (1.0f - t) * (1.0f - t);
+    SetPos(m_skillMoveStartX + m_skillMoveDirX * m_skillMoveDistance * f,
+           m_skillMoveStartY,
+           m_skillMoveStartZ + m_skillMoveDirZ * m_skillMoveDistance * f);
 }
 
 void Character::OnStatsChangedByBuff()

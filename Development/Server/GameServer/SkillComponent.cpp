@@ -8,7 +8,7 @@
 
 #include <cmath>
 
-void SkillComponent::TryCast(int64 skillKey, const Vector3& origin, const Vector3& dir, uint32 seed)
+void SkillComponent::TryCast(int64 skillKey, const Vector3& origin, const Vector3& dir, const Vector3& targetPos, uint32 seed)
 {
     const GameData_Skill* pSkill = GameDataTable_Skill::FindData(skillKey);
     if (pSkill == nullptr)
@@ -18,6 +18,7 @@ void SkillComponent::TryCast(int64 skillKey, const Vector3& origin, const Vector
     m_active    = true;
     m_elapsedMs = 0;
     m_castDir   = dir;
+    m_castTargetPos = targetPos;
     m_castSeed  = seed;
 
     // entry 페이즈는 선딜레이(CastDelayMs) 후 발동. origin 은 호출자 지정값.
@@ -54,7 +55,7 @@ void SkillComponent::Update(int64 deltaMs)
         if (isEntry)
         {
             if (Stage* pStage = m_pOwner->GetStage())
-                pStage->BroadcastSkillCastNtf(*m_pOwner, pSkill->Key, effectId, origin, m_castDir, m_castSeed);
+                pStage->BroadcastSkillCastNtf(*m_pOwner, pSkill->Key, effectId, origin, m_castDir, m_castSeed, m_lastMoveDistance);
         }
 
         // 다음 NextOrigin 결정을 위해 이 페이즈의 중심/종료 위치를 기록.
@@ -95,6 +96,8 @@ int64 SkillComponent::firePhase(const GameData_Skill& skill, const Vector3& orig
     if (pStage == nullptr)
         return 0;
 
+    m_lastMoveDistance = 0.0f;   // 이동 페이즈에서만 갱신.
+
     EffectParams params = BakeSkillEffectParams(
         skill, m_pOwner->GetObjectType(), m_pOwner->GetObjectId(), origin, m_castDir, m_castSeed);
 
@@ -112,11 +115,24 @@ int64 SkillComponent::firePhase(const GameData_Skill& skill, const Vector3& orig
 
     case ESkillEffectDamage::None:
     default:
-        // 대미지 없는 페이즈 (이동기 등). 이동 처리는 5d 의 ApplySkillMovement 훅으로 위임.
-        if (skill.MoveDurationMs > 0)
+        // 대미지 없는 페이즈 (이동기 등). 이동은 ApplySkillMovement(5d)로 위임.
+        //   - 강제 대시(MoveDurationMs>0): 고정 거리(MoveDistance)를 duration 동안 감속 이동(글라이드).
+        //   - 즉시 블링크(MoveDurationMs<=0): 타겟까지 거리로 클램프한 거리만큼 즉시 이동(순간이동).
+        if (skill.MoveDistance > 0.0)
         {
-            m_pOwner->ApplySkillMovement(
-                m_castDir, static_cast<float>(skill.MoveDistance), static_cast<int32>(skill.MoveDurationMs));
+            float dist;
+            if (skill.MoveDurationMs > 0)
+            {
+                dist = static_cast<float>(skill.MoveDistance);
+            }
+            else
+            {
+                const float toTarget = (m_castTargetPos - origin).LengthXZ();
+                const float maxDist  = static_cast<float>(skill.MoveDistance);
+                dist = (maxDist < toTarget) ? maxDist : toTarget;
+            }
+            m_lastMoveDistance = dist;
+            m_pOwner->ApplySkillMovement(m_castDir, dist, static_cast<int32>(skill.MoveDurationMs));
         }
         return 0;
     }

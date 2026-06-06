@@ -79,7 +79,8 @@ public:
 
     // 스킬 시전 알림 전송 (SkillCastNtf). Stage 가 시전자 주변 AOI 유저들에게 broadcast. 클라 비주얼 재현용.
     void SendSkillCastNtf(int64 userId, int64 casterObjectId, int64 skillKey, int64 effectId,
-                          float originX, float originY, float originZ, float dirX, float dirZ, uint32 seed);
+                          float originX, float originY, float originZ, float dirX, float dirZ, uint32 seed,
+                          float moveDistance);
 
     // 오브젝트 사망 알림 전송 (ObjectDeathNtf). Stage 가 사망한 대상 주변 AOI 유저들에게 broadcast. 클라 사망 연출용.
     void SendObjectDeathNtf(int64 userId, int64 objectId, int64 killerObjectId);

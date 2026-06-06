@@ -913,8 +913,9 @@ void Stage::handleSkillCastReq(const UserPtr& spUser, const netlib::PacketPtr& s
 
     const Vector3 origin(req.origin_x(), req.origin_y(), req.origin_z());
     const Vector3 dir(req.dir_x(), 0.0f, req.dir_z());
-    // target_object_id / target_pos 는 검증용 — v1 시전 로직엔 미사용 (핵검사 후속).
-    spCharacter->GetSkillComponent().TryCast(req.skill_key(), origin, dir, req.seed());
+    // target_pos: 즉시이동(블링크) 거리 클램프에 사용. target_object_id 는 아직 검증용(미사용).
+    const Vector3 targetPos(req.target_pos_x(), 0.0f, req.target_pos_z());
+    spCharacter->GetSkillComponent().TryCast(req.skill_key(), origin, dir, targetPos, req.seed());
 }
 
 void Stage::handleSkillProjectileHitReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)

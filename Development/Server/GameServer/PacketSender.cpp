@@ -166,7 +166,8 @@ void PacketSender::SendSkillDamageNtf(int64 userId, int64 targetObjectId, double
 }
 
 void PacketSender::SendSkillCastNtf(int64 userId, int64 casterObjectId, int64 skillKey, int64 effectId,
-                                    float originX, float originY, float originZ, float dirX, float dirZ, uint32 seed)
+                                    float originX, float originY, float originZ, float dirX, float dirZ, uint32 seed,
+                                    float moveDistance)
 {
     GamePacket::SkillCastNtf ntf;
     ntf.set_caster_object_id(casterObjectId);
@@ -178,6 +179,7 @@ void PacketSender::SendSkillCastNtf(int64 userId, int64 casterObjectId, int64 sk
     ntf.set_dir_x(dirX);
     ntf.set_dir_z(dirZ);
     ntf.set_seed(seed);
+    ntf.set_move_distance(moveDistance);
 
     SendToUser(userId, Common::GAME_PACKET_ID_SKILL_CAST_NTF, ntf);
 }

@@ -122,9 +122,21 @@ public:
     // 최종 목적지 도달 시 정지 상태로 전환된다. (이동→정지 전환은 호출자가 IsMoving() 변화로 감지.)
     void Update(int64 deltaMs) override;
 
+    // 스킬 강제이동(5d). ActorObject 훅 override.
+    //   durationMs<=0 : 즉시 블링크(끝점 스냅) — 순간이동.
+    //   durationMs>0  : duration 동안 ease-out 감속 대시 — 글라이드. (지형 충돌은 v1 무시.)
+    // 강제이동 중에는 일반(waypoint) 이동이 중단된다.
+    void ApplySkillMovement(const Vector3& dir, float distance, int32 durationMs) override;
+
+    // 스킬 강제이동 진행 중인지. (일반 이동과 별개 상태.)
+    bool IsSkillMoving() const { return m_skillMoving; }
+
 private:
     // Initialize 에서 호출. JobBase 게임데이터의 기본스탯을 m_statComponent 에 적용한다.
     bool applyJobBaseStats();
+
+    // 스킬 강제이동 1 tick 전진. ease-out 위치 갱신, duration 종료 시 끝점 스냅.
+    void advanceSkillMove(int64 deltaMs);
 
     // 현재 waypoint 를 향해 이동 시작 시점에 yaw 를 갱신.
     // (X-Z 평면 상의 방향. Unity 호환 degree.)
@@ -154,6 +166,18 @@ private:
     // m_waypoints 에서 현재 향해가는 waypoint 인덱스 (트리플 단위, 0-based).
     // 0 이면 m_waypoints[0..2] 를 향함. 도달 시 ++.
     int32 m_curWaypointIdx = 0;
+
+    // ── 스킬 강제이동 상태 (5d) ─────────────────────────────────
+    // 일반 이동(m_isMoving/waypoint)과 별개. m_skillMoving=true 동안 Update 가 ease-out 으로 전진.
+    bool   m_skillMoving         = false;
+    float  m_skillMoveStartX     = 0.0f;
+    float  m_skillMoveStartY     = 0.0f;
+    float  m_skillMoveStartZ     = 0.0f;
+    float  m_skillMoveDirX       = 0.0f;   // 정규화 X-Z 방향
+    float  m_skillMoveDirZ       = 0.0f;
+    float  m_skillMoveDistance   = 0.0f;
+    int64  m_skillMoveDurationMs = 0;
+    int64  m_skillMoveElapsedMs  = 0;
 };
 
 using CharacterPtr  = std::shared_ptr<Character>;
