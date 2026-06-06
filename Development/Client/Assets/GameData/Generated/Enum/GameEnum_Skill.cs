@@ -56,4 +56,21 @@ namespace GameData
         Obb                  = 2,  // 방향이 있는 직사각형, Oriented Bounding Box (얼음지대, 블레이즈)
         Max                 
     }
+
+    public enum ETargetingMode
+    {
+        None                 = 0,
+        Nearest              = 1,  // 가장 가까운 타겟
+        HighestGradeNearest  = 2,  // 가장 등급이 높으면서 가장 가까운 타겟
+        Max                 
+    }
+
+    public enum ESkillPlacement
+    {
+        None                 = 0,
+        Caster               = 1,  // 캐스터 위치 (투사체 발사점 / 캐스터 중심 범위)
+        Target               = 2,  // 타겟 위치에 OBB/Circle 생성
+        Forward              = 3,  // 캐스터 전방에서 시작해 타겟 방향으로 OBB
+        Max                 
+    }
 }

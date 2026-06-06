@@ -127,3 +127,43 @@ std::string SkillEffectShapeToString(ESkillEffectShape v)
     }
 }
 
+ETargetingMode StringToTargetingMode(const std::string& v)
+{
+    if (v == "None") return ETargetingMode::None;
+    if (v == "Nearest") return ETargetingMode::Nearest;
+    if (v == "HighestGradeNearest") return ETargetingMode::HighestGradeNearest;
+    return ETargetingMode::None;
+}
+
+std::string TargetingModeToString(ETargetingMode v)
+{
+    switch (v)
+    {
+    case ETargetingMode::None: return "None";
+    case ETargetingMode::Nearest: return "Nearest";
+    case ETargetingMode::HighestGradeNearest: return "HighestGradeNearest";
+    default: return "None";
+    }
+}
+
+ESkillPlacement StringToSkillPlacement(const std::string& v)
+{
+    if (v == "None") return ESkillPlacement::None;
+    if (v == "Caster") return ESkillPlacement::Caster;
+    if (v == "Target") return ESkillPlacement::Target;
+    if (v == "Forward") return ESkillPlacement::Forward;
+    return ESkillPlacement::None;
+}
+
+std::string SkillPlacementToString(ESkillPlacement v)
+{
+    switch (v)
+    {
+    case ESkillPlacement::None: return "None";
+    case ESkillPlacement::Caster: return "Caster";
+    case ESkillPlacement::Target: return "Target";
+    case ESkillPlacement::Forward: return "Forward";
+    default: return "None";
+    }
+}
+

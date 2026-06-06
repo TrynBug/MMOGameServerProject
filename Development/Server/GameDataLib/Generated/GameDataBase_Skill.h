@@ -35,6 +35,8 @@ struct GameDataBase_Skill : public GameData
     int64_t              CastDelayMs          = 0;
     int64_t              ActionLockMs         = 0;
     bool                 Rotation             = true;
+    ETargetingMode       Targeting            = ETargetingMode::None;
+    ESkillPlacement      Placement            = ESkillPlacement::None;
     ESkillEffectMotion   EffectMotion         = ESkillEffectMotion::None;
     ESkillEffectDamage   EffectDamage         = ESkillEffectDamage::None;
     ESkillEffectShape    EffectShape          = ESkillEffectShape::None;

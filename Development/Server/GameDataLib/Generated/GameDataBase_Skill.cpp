@@ -41,6 +41,8 @@ bool GameDataTableBase_Skill::makeGameData(const std::string& line)
     std::getline(ss, field, ','); pData->CastDelayMs = std::stoll(field);
     std::getline(ss, field, ','); pData->ActionLockMs = std::stoll(field);
     std::getline(ss, field, ','); pData->Rotation = StringToBool(field);
+    std::getline(ss, field, ','); pData->Targeting = static_cast<ETargetingMode>(std::stoi(field));
+    std::getline(ss, field, ','); pData->Placement = static_cast<ESkillPlacement>(std::stoi(field));
     std::getline(ss, field, ','); pData->EffectMotion = static_cast<ESkillEffectMotion>(std::stoi(field));
     std::getline(ss, field, ','); pData->EffectDamage = static_cast<ESkillEffectDamage>(std::stoi(field));
     std::getline(ss, field, ','); pData->EffectShape = static_cast<ESkillEffectShape>(std::stoi(field));

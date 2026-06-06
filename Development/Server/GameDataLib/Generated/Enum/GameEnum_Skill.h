@@ -76,3 +76,26 @@ enum class ESkillEffectShape : int
 ESkillEffectShape StringToSkillEffectShape(const std::string& v);
 std::string SkillEffectShapeToString(ESkillEffectShape v);
 
+enum class ETargetingMode : int
+{
+    None                 = 0,
+    Nearest              = 1,  // 가장 가까운 타겟
+    HighestGradeNearest  = 2,  // 가장 등급이 높으면서 가장 가까운 타겟
+    Max                 
+};
+
+ETargetingMode StringToTargetingMode(const std::string& v);
+std::string TargetingModeToString(ETargetingMode v);
+
+enum class ESkillPlacement : int
+{
+    None                 = 0,
+    Caster               = 1,  // 캐스터 위치 (투사체 발사점 / 캐스터 중심 범위)
+    Target               = 2,  // 타겟 위치에 OBB/Circle 생성
+    Forward              = 3,  // 캐스터 전방에서 시작해 타겟 방향으로 OBB
+    Max                 
+};
+
+ESkillPlacement StringToSkillPlacement(const std::string& v);
+std::string SkillPlacementToString(ESkillPlacement v);
+
