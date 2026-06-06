@@ -130,7 +130,8 @@ inline constexpr SkillCastNtf::Impl_::Impl_(
         origin_z_{0},
         dir_x_{0},
         dir_z_{0},
-        seed_{0u} {}
+        seed_{0u},
+        move_distance_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR SkillCastNtf::SkillCastNtf(::_pbi::ConstantInitialized)
@@ -231,7 +232,7 @@ const ::uint32_t
         0,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillCastNtf, _impl_._has_bits_),
-        12, // hasbit index offset
+        13, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillCastNtf, _impl_.caster_object_id_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillCastNtf, _impl_.skill_key_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillCastNtf, _impl_.effect_id_),
@@ -241,6 +242,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillCastNtf, _impl_.dir_x_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillCastNtf, _impl_.dir_z_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillCastNtf, _impl_.seed_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::SkillCastNtf, _impl_.move_distance_),
         0,
         1,
         2,
@@ -250,6 +252,7 @@ const ::uint32_t
         6,
         7,
         8,
+        9,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillDamageNtf, _impl_._has_bits_),
         7, // hasbit index offset
@@ -269,7 +272,7 @@ static const ::_pbi::MigrationSchema
         {23, sizeof(::GamePacket::SkillHitItem)},
         {40, sizeof(::GamePacket::SkillProjectileHitReq)},
         {45, sizeof(::GamePacket::SkillCastNtf)},
-        {66, sizeof(::GamePacket::SkillDamageNtf)},
+        {68, sizeof(::GamePacket::SkillDamageNtf)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::GamePacket::_SkillCastReq_default_instance_._instance,
@@ -292,15 +295,15 @@ const char descriptor_table_protodef_GamePacket_2fskill_5fpacket_2eproto[] ABSL_
     "\035\n\025exploded_at_max_range\030\004 \001(\010\022\033\n\023explod"
     "ed_on_terrain\030\005 \001(\010\022\r\n\005hit_x\030\006 \001(\002\022\r\n\005hi"
     "t_z\030\007 \001(\002\"\?\n\025SkillProjectileHitReq\022&\n\004hi"
-    "ts\030\001 \003(\0132\030.GamePacket.SkillHitItem\"\260\001\n\014S"
+    "ts\030\001 \003(\0132\030.GamePacket.SkillHitItem\"\307\001\n\014S"
     "killCastNtf\022\030\n\020caster_object_id\030\001 \001(\003\022\021\n"
     "\tskill_key\030\002 \001(\003\022\021\n\teffect_id\030\003 \001(\003\022\020\n\010o"
     "rigin_x\030\004 \001(\002\022\020\n\010origin_y\030\005 \001(\002\022\020\n\010origi"
     "n_z\030\006 \001(\002\022\r\n\005dir_x\030\007 \001(\002\022\r\n\005dir_z\030\010 \001(\002\022"
-    "\014\n\004seed\030\t \001(\r\"f\n\016SkillDamageNtf\022\030\n\020targe"
-    "t_object_id\030\001 \001(\003\022\016\n\006damage\030\002 \001(\002\022\024\n\014is_"
-    "duplicate\030\003 \001(\010\022\024\n\014remaining_hp\030\004 \001(\002b\006p"
-    "roto3"
+    "\014\n\004seed\030\t \001(\r\022\025\n\rmove_distance\030\n \001(\002\"f\n\016"
+    "SkillDamageNtf\022\030\n\020target_object_id\030\001 \001(\003"
+    "\022\016\n\006damage\030\002 \001(\002\022\024\n\014is_duplicate\030\003 \001(\010\022\024"
+    "\n\014remaining_hp\030\004 \001(\002b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_GamePacket_2fskill_5fpacket_2eproto_deps[1] = {
@@ -310,7 +313,7 @@ static ::absl::once_flag descriptor_table_GamePacket_2fskill_5fpacket_2eproto_on
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fskill_5fpacket_2eproto = {
     false,
     false,
-    805,
+    828,
     descriptor_table_protodef_GamePacket_2fskill_5fpacket_2eproto,
     "GamePacket/skill_packet.proto",
     &descriptor_table_GamePacket_2fskill_5fpacket_2eproto_once,
@@ -1590,9 +1593,9 @@ inline void SkillCastNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   ::memset(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, caster_object_id_),
            0,
-           offsetof(Impl_, seed_) -
+           offsetof(Impl_, move_distance_) -
                offsetof(Impl_, caster_object_id_) +
-               sizeof(Impl_::seed_));
+               sizeof(Impl_::move_distance_));
 }
 SkillCastNtf::~SkillCastNtf() {
   // @@protoc_insertion_point(destructor:GamePacket.SkillCastNtf)
@@ -1651,16 +1654,16 @@ SkillCastNtf::GetClassData() const {
   return SkillCastNtf_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<4, 9, 0, 0, 2>
+const ::_pbi::TcParseTable<4, 10, 0, 0, 2>
 SkillCastNtf::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_._has_bits_),
     0, // no _extensions_
-    9, 120,  // max_field_number, fast_idx_mask
+    10, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294966784,  // skipmap
+    4294966272,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    9,  // num_field_entries
+    10,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     SkillCastNtf_class_data_.base(),
@@ -1707,7 +1710,10 @@ SkillCastNtf::_table_ = {
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(SkillCastNtf, _impl_.seed_), 8>(),
      {72, 8, 0,
       PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.seed_)}},
-    {::_pbi::TcParser::MiniParse, {}},
+    // float move_distance = 10;
+    {::_pbi::TcParser::FastF32S1,
+     {85, 9, 0,
+      PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.move_distance_)}},
     {::_pbi::TcParser::MiniParse, {}},
     {::_pbi::TcParser::MiniParse, {}},
     {::_pbi::TcParser::MiniParse, {}},
@@ -1734,6 +1740,8 @@ SkillCastNtf::_table_ = {
     {PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.dir_z_), _Internal::kHasBitsOffset + 7, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
     // uint32 seed = 9;
     {PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.seed_), _Internal::kHasBitsOffset + 8, 0, (0 | ::_fl::kFcOptional | ::_fl::kUInt32)},
+    // float move_distance = 10;
+    {PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.move_distance_), _Internal::kHasBitsOffset + 9, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
   }},
   // no aux_entries
   {{
@@ -1752,7 +1760,11 @@ PROTOBUF_NOINLINE void SkillCastNtf::Clear() {
         reinterpret_cast<char*>(&_impl_.dir_z_) -
         reinterpret_cast<char*>(&_impl_.caster_object_id_)) + sizeof(_impl_.dir_z_));
   }
-  _impl_.seed_ = 0u;
+  if (BatchCheckHasBit(cached_has_bits, 0x00000300U)) {
+    ::memset(&_impl_.seed_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.move_distance_) -
+        reinterpret_cast<char*>(&_impl_.seed_)) + sizeof(_impl_.move_distance_));
+  }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -1857,6 +1869,15 @@ PROTOBUF_NOINLINE void SkillCastNtf::Clear() {
     }
   }
 
+  // float move_distance = 10;
+  if (CheckHasBit(cached_has_bits, 0x00000200U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_move_distance()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          10, this_._internal_move_distance(), target);
+    }
+  }
+
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -1935,12 +1956,18 @@ PROTOBUF_NOINLINE void SkillCastNtf::Clear() {
       }
     }
   }
-   {
+  if (BatchCheckHasBit(cached_has_bits, 0x00000300U)) {
     // uint32 seed = 9;
     if (CheckHasBit(cached_has_bits, 0x00000100U)) {
       if (this_._internal_seed() != 0) {
         total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
             this_._internal_seed());
+      }
+    }
+    // float move_distance = 10;
+    if (CheckHasBit(cached_has_bits, 0x00000200U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_move_distance()) != 0) {
+        total_size += 5;
       }
     }
   }
@@ -2004,9 +2031,16 @@ void SkillCastNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
   }
-  if (CheckHasBit(cached_has_bits, 0x00000100U)) {
-    if (from._internal_seed() != 0) {
-      _this->_impl_.seed_ = from._impl_.seed_;
+  if (BatchCheckHasBit(cached_has_bits, 0x00000300U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000100U)) {
+      if (from._internal_seed() != 0) {
+        _this->_impl_.seed_ = from._impl_.seed_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000200U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_move_distance()) != 0) {
+        _this->_impl_.move_distance_ = from._impl_.move_distance_;
+      }
     }
   }
   _this->_impl_._has_bits_[0] |= cached_has_bits;
@@ -2027,8 +2061,8 @@ void SkillCastNtf::InternalSwap(SkillCastNtf* PROTOBUF_RESTRICT PROTOBUF_NONNULL
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.seed_)
-      + sizeof(SkillCastNtf::_impl_.seed_)
+      PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.move_distance_)
+      + sizeof(SkillCastNtf::_impl_.move_distance_)
       - PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.caster_object_id_)>(
           reinterpret_cast<char*>(&_impl_.caster_object_id_),
           reinterpret_cast<char*>(&other->_impl_.caster_object_id_));

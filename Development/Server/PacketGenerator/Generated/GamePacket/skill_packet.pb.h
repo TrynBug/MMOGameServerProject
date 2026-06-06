@@ -1024,6 +1024,7 @@ class SkillCastNtf final : public ::google::protobuf::Message
     kDirXFieldNumber = 7,
     kDirZFieldNumber = 8,
     kSeedFieldNumber = 9,
+    kMoveDistanceFieldNumber = 10,
   };
   // int64 caster_object_id = 1;
   void clear_caster_object_id() ;
@@ -1115,11 +1116,21 @@ class SkillCastNtf final : public ::google::protobuf::Message
   void _internal_set_seed(::uint32_t value);
 
   public:
+  // float move_distance = 10;
+  void clear_move_distance() ;
+  float move_distance() const;
+  void set_move_distance(float value);
+
+  private:
+  float _internal_move_distance() const;
+  void _internal_set_move_distance(float value);
+
+  public:
   // @@protoc_insertion_point(class_scope:GamePacket.SkillCastNtf)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<4, 9,
+  static const ::google::protobuf::internal::TcParseTable<4, 10,
                                    0, 0,
                                    2>
       _table_;
@@ -1150,6 +1161,7 @@ class SkillCastNtf final : public ::google::protobuf::Message
     float dir_x_;
     float dir_z_;
     ::uint32_t seed_;
+    float move_distance_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -2087,6 +2099,31 @@ inline ::uint32_t SkillCastNtf::_internal_seed() const {
 inline void SkillCastNtf::_internal_set_seed(::uint32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.seed_ = value;
+}
+
+// float move_distance = 10;
+inline void SkillCastNtf::clear_move_distance() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.move_distance_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000200U);
+}
+inline float SkillCastNtf::move_distance() const {
+  // @@protoc_insertion_point(field_get:GamePacket.SkillCastNtf.move_distance)
+  return _internal_move_distance();
+}
+inline void SkillCastNtf::set_move_distance(float value) {
+  _internal_set_move_distance(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000200U);
+  // @@protoc_insertion_point(field_set:GamePacket.SkillCastNtf.move_distance)
+}
+inline float SkillCastNtf::_internal_move_distance() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.move_distance_;
+}
+inline void SkillCastNtf::_internal_set_move_distance(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.move_distance_ = value;
 }
 
 // -------------------------------------------------------------------

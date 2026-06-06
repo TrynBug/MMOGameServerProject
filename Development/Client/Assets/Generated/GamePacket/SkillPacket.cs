@@ -35,20 +35,21 @@ namespace GamePacket {
             "HQoVZXhwbG9kZWRfYXRfbWF4X3JhbmdlGAQgASgIEhsKE2V4cGxvZGVkX29u",
             "X3RlcnJhaW4YBSABKAgSDQoFaGl0X3gYBiABKAISDQoFaGl0X3oYByABKAIi",
             "PwoVU2tpbGxQcm9qZWN0aWxlSGl0UmVxEiYKBGhpdHMYASADKAsyGC5HYW1l",
-            "UGFja2V0LlNraWxsSGl0SXRlbSKwAQoMU2tpbGxDYXN0TnRmEhgKEGNhc3Rl",
+            "UGFja2V0LlNraWxsSGl0SXRlbSLHAQoMU2tpbGxDYXN0TnRmEhgKEGNhc3Rl",
             "cl9vYmplY3RfaWQYASABKAMSEQoJc2tpbGxfa2V5GAIgASgDEhEKCWVmZmVj",
             "dF9pZBgDIAEoAxIQCghvcmlnaW5feBgEIAEoAhIQCghvcmlnaW5feRgFIAEo",
             "AhIQCghvcmlnaW5fehgGIAEoAhINCgVkaXJfeBgHIAEoAhINCgVkaXJfehgI",
-            "IAEoAhIMCgRzZWVkGAkgASgNImYKDlNraWxsRGFtYWdlTnRmEhgKEHRhcmdl",
-            "dF9vYmplY3RfaWQYASABKAMSDgoGZGFtYWdlGAIgASgCEhQKDGlzX2R1cGxp",
-            "Y2F0ZRgDIAEoCBIUCgxyZW1haW5pbmdfaHAYBCABKAJiBnByb3RvMw=="));
+            "IAEoAhIMCgRzZWVkGAkgASgNEhUKDW1vdmVfZGlzdGFuY2UYCiABKAIiZgoO",
+            "U2tpbGxEYW1hZ2VOdGYSGAoQdGFyZ2V0X29iamVjdF9pZBgBIAEoAxIOCgZk",
+            "YW1hZ2UYAiABKAISFAoMaXNfZHVwbGljYXRlGAMgASgIEhQKDHJlbWFpbmlu",
+            "Z19ocBgEIAEoAmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillCastReq), global::GamePacket.SkillCastReq.Parser, new[]{ "SkillKey", "OriginX", "OriginY", "OriginZ", "DirX", "DirZ", "Seed", "TargetObjectId", "TargetPosX", "TargetPosZ" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillHitItem), global::GamePacket.SkillHitItem.Parser, new[]{ "EffectId", "ProjectileIndex", "TargetObjectId", "ExplodedAtMaxRange", "ExplodedOnTerrain", "HitX", "HitZ" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillProjectileHitReq), global::GamePacket.SkillProjectileHitReq.Parser, new[]{ "Hits" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillCastNtf), global::GamePacket.SkillCastNtf.Parser, new[]{ "CasterObjectId", "SkillKey", "EffectId", "OriginX", "OriginY", "OriginZ", "DirX", "DirZ", "Seed" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillCastNtf), global::GamePacket.SkillCastNtf.Parser, new[]{ "CasterObjectId", "SkillKey", "EffectId", "OriginX", "OriginY", "OriginZ", "DirX", "DirZ", "Seed", "MoveDistance" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillDamageNtf), global::GamePacket.SkillDamageNtf.Parser, new[]{ "TargetObjectId", "Damage", "IsDuplicate", "RemainingHp" }, null, null, null, null)
           }));
     }
@@ -1296,6 +1297,7 @@ namespace GamePacket {
       dirX_ = other.dirX_;
       dirZ_ = other.dirZ_;
       seed_ = other.seed_;
+      moveDistance_ = other.moveDistance_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1425,6 +1427,21 @@ namespace GamePacket {
       }
     }
 
+    /// <summary>Field number for the "move_distance" field.</summary>
+    public const int MoveDistanceFieldNumber = 10;
+    private float moveDistance_;
+    /// <summary>
+    /// 이동 스킬(글라이드/순간이동)이 실제 사용한 거리. 원격 클라가 이동 재현에 사용. 그 외 0.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float MoveDistance {
+      get { return moveDistance_; }
+      set {
+        moveDistance_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -1449,6 +1466,7 @@ namespace GamePacket {
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(DirX, other.DirX)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(DirZ, other.DirZ)) return false;
       if (Seed != other.Seed) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MoveDistance, other.MoveDistance)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1465,6 +1483,7 @@ namespace GamePacket {
       if (DirX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(DirX);
       if (DirZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(DirZ);
       if (Seed != 0) hash ^= Seed.GetHashCode();
+      if (MoveDistance != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MoveDistance);
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1519,6 +1538,10 @@ namespace GamePacket {
         output.WriteRawTag(72);
         output.WriteUInt32(Seed);
       }
+      if (MoveDistance != 0F) {
+        output.WriteRawTag(85);
+        output.WriteFloat(MoveDistance);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1565,6 +1588,10 @@ namespace GamePacket {
         output.WriteRawTag(72);
         output.WriteUInt32(Seed);
       }
+      if (MoveDistance != 0F) {
+        output.WriteRawTag(85);
+        output.WriteFloat(MoveDistance);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1601,6 +1628,9 @@ namespace GamePacket {
       }
       if (Seed != 0) {
         size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Seed);
+      }
+      if (MoveDistance != 0F) {
+        size += 1 + 4;
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1640,6 +1670,9 @@ namespace GamePacket {
       }
       if (other.Seed != 0) {
         Seed = other.Seed;
+      }
+      if (other.MoveDistance != 0F) {
+        MoveDistance = other.MoveDistance;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1696,6 +1729,10 @@ namespace GamePacket {
             Seed = input.ReadUInt32();
             break;
           }
+          case 85: {
+            MoveDistance = input.ReadFloat();
+            break;
+          }
         }
       }
     #endif
@@ -1749,6 +1786,10 @@ namespace GamePacket {
           }
           case 72: {
             Seed = input.ReadUInt32();
+            break;
+          }
+          case 85: {
+            MoveDistance = input.ReadFloat();
             break;
           }
         }

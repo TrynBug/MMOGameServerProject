@@ -72,6 +72,7 @@ message SkillCastNtf {
     float  dir_x            = 7;   // 정규화 X-Z
     float  dir_z            = 8;
     uint32 seed             = 9;
+    float  move_distance    = 10;  // 이동 스킬(글라이드/순간이동)이 실제 사용한 거리. 원격 클라가 이동 재현에 사용. 그 외 0.
 }
 
 // 대미지 통보 (서버 -> 클라 브로드캐스트)
