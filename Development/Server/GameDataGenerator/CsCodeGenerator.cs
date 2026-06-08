@@ -24,7 +24,7 @@ namespace GameDataGenerator
             foreach (var (fileGroup, enums) in groups)
             {
                 string path = Path.Combine(enumOutputDir, $"GameEnum_{fileGroup}.cs");
-                File.WriteAllText(path, BuildEnumFile(enums), Encoding.UTF8);
+                FileUtil.WriteIfChanged(path, BuildEnumFile(enums), Encoding.UTF8);
             }
         }
 
@@ -72,7 +72,7 @@ namespace GameDataGenerator
         public static void GenerateBaseFile(string tableName, List<ColumnInfo> allColumns, string baseOutputDir)
         {
             string path = Path.Combine(baseOutputDir, $"GameDataBase_{tableName}.cs");
-            File.WriteAllText(path, BuildBaseFile(tableName, allColumns), Encoding.UTF8);
+            FileUtil.WriteIfChanged(path, BuildBaseFile(tableName, allColumns), Encoding.UTF8);
         }
 
         private static string BuildBaseFile(string tableName, List<ColumnInfo> columns)
@@ -231,7 +231,7 @@ namespace GameDataGenerator
         // ----------------------------------------------------------------
         public static void GenerateManagerFile(List<string> tableNames, string managerOutputDir)
         {
-            File.WriteAllText(Path.Combine(managerOutputDir, "GameDataManagerBase.cs"), BuildManagerCs(tableNames), Encoding.UTF8);
+            FileUtil.WriteIfChanged(Path.Combine(managerOutputDir, "GameDataManagerBase.cs"), BuildManagerCs(tableNames), Encoding.UTF8);
         }
 
         private static string BuildManagerCs(List<string> tableNames)

@@ -254,4 +254,17 @@ namespace GameDataGenerator
             Console.WriteLine("      --client-code-manager <C# Manager 폴더>");
         }
     }
+
+    public static class FileUtil
+    {
+        // 생성한 내용이 기존 파일과 다를 때만 덮어쓴다.
+        // 내용이 같으면 파일을 건드리지 않으므로 타임스탬프가 유지되어
+        // 불필요한 재컴파일과 git diff 를 막는다.
+        public static void WriteIfChanged(string path, string content, System.Text.Encoding encoding)
+        {
+            if (File.Exists(path) && File.ReadAllText(path) == content)
+                return;
+            File.WriteAllText(path, content, encoding);
+        }
+    }
 }

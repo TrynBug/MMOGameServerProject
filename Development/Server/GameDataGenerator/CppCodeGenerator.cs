@@ -25,8 +25,8 @@ namespace GameDataGenerator
                 string headerPath = Path.Combine(outputDir, $"GameEnum_{fileGroup}.h");
                 string cppPath = Path.Combine(outputDir, $"GameEnum_{fileGroup}.cpp");
 
-                File.WriteAllText(headerPath, BuildEnumHeader(fileGroup, enums), Encoding.UTF8);
-                File.WriteAllText(cppPath, BuildEnumCpp(fileGroup, enums), Encoding.UTF8);
+                FileUtil.WriteIfChanged(headerPath, BuildEnumHeader(fileGroup, enums), Encoding.UTF8);
+                FileUtil.WriteIfChanged(cppPath, BuildEnumCpp(fileGroup, enums), Encoding.UTF8);
             }
         }
 
@@ -109,8 +109,8 @@ namespace GameDataGenerator
         // ----------------------------------------------------------------
         public static void GenerateBaseFiles(string tableName, List<ColumnInfo> allColumns, List<EnumInfo> allEnums, string outputDir)
         {
-            File.WriteAllText(Path.Combine(outputDir, $"GameDataBase_{tableName}.h"),   BuildBaseHeader(tableName, allColumns, allEnums), Encoding.UTF8);
-            File.WriteAllText(Path.Combine(outputDir, $"GameDataBase_{tableName}.cpp"), BuildBaseCpp(tableName, allColumns),              Encoding.UTF8);
+            FileUtil.WriteIfChanged(Path.Combine(outputDir, $"GameDataBase_{tableName}.h"),   BuildBaseHeader(tableName, allColumns, allEnums), Encoding.UTF8);
+            FileUtil.WriteIfChanged(Path.Combine(outputDir, $"GameDataBase_{tableName}.cpp"), BuildBaseCpp(tableName, allColumns),              Encoding.UTF8);
         }
 
         private static string BuildBaseHeader(string tableName, List<ColumnInfo> columns, List<EnumInfo> allEnums)
@@ -419,7 +419,7 @@ namespace GameDataGenerator
         // ----------------------------------------------------------------
         public static void GenerateManagerFiles(List<string> tableNames, string generatedDir, string managerDir)
         {
-            File.WriteAllText(Path.Combine(managerDir, "GameDataManagerBase.cpp"), BuildManagerCpp(tableNames, generatedDir), Encoding.UTF8);
+            FileUtil.WriteIfChanged(Path.Combine(managerDir, "GameDataManagerBase.cpp"), BuildManagerCpp(tableNames, generatedDir), Encoding.UTF8);
         }
 
         private static string BuildManagerCpp(List<string> tableNames, string generatedDir)

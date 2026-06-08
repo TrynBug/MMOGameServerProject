@@ -103,7 +103,7 @@ namespace GameDataGenerator
             }
 
             string outputPath = Path.Combine(outputDir, $"{tableName}.csv");
-            File.WriteAllText(outputPath, sb.ToString(), Encoding.UTF8);
+            FileUtil.WriteIfChanged(outputPath, sb.ToString(), Encoding.UTF8);
         }
     }
 }
