@@ -10,7 +10,7 @@ namespace GameData
     // Monster 데이터 1개 행을 표현합니다.
     public class GameDataBase_Monster : GameDataBase
     {
-        public long                 Key                  = 0;
+        public int                  Key                  = 0;
         public string               Name                 = "";
         public string               PrefabPath           = "";
         public EMonsterGrade        Grade                = EMonsterGrade.Normal;
@@ -86,7 +86,7 @@ namespace GameData
             string[] fields = line.Split(',');
             GameData_Monster data = new GameData_Monster();
 
-            data.Key = long.Parse(fields[0]);
+            data.Key = int.Parse(fields[0]);
             data.Name = fields[1];
             data.PrefabPath = fields[2];
             data.Grade = (EMonsterGrade)int.Parse(fields[3]);

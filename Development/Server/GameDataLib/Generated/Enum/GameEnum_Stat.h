@@ -8,7 +8,7 @@
 
 enum class EStatOp : int
 {
-    None                 = 0,  // 필수
+    None                 = 0,
     Add                  = 1,  // 합연산 (힘+)
     AddPct               = 2,  // 합연산% (힘+%)
     Amp                  = 3,  // 곱연산 (힘증폭)

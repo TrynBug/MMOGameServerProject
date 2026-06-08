@@ -25,8 +25,8 @@ bool GameDataTableBase_Monster::makeGameData(const std::string& line)
     GameData_Monster* pData = new GameData_Monster;
 
     // 컬럼 순서대로 파싱
-    std::getline(ss, field, ','); pData->Key = std::stoll(field);
-    std::getline(ss, field, ','); pData->ItemDropGroup = std::stoll(field);
+    std::getline(ss, field, ','); pData->Key = std::stoi(field);
+    std::getline(ss, field, ','); pData->ItemDropGroup = std::stoi(field);
     std::getline(ss, field, ','); pData->IsItemDrop = StringToBool(field);
     std::getline(ss, field, ','); pData->Exp = std::stod(field);
     std::getline(ss, field, ','); pData->IsExp = StringToBool(field);

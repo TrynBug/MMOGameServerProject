@@ -7,26 +7,27 @@ namespace GameData
 {
     public enum EBuffCategory
     {
-        None                 = 0,  // 이로운효과
-        Buff                 = 1,  // 해로운효과
-        Debuff               = 2,
+        None                 = 0,
+        Buff                 = 1,  // 이로운효과
+        Debuff               = 2,  // 해로운효과    // 디스펠 대상
         Max                 
     }
 
     public enum EBuffStackPolicy
     {
         None                 = 0,
-        Refresh              = 1,  // 시간갱신
-        Stack                = 2,  // 스택증가
-        Ignore               = 3,  // 무시
+        Refresh              = 1,  // 시간갱신    // 재적용 시 지속시간만 리셋
+        Stack                = 2,  // 스택증가    // 재적용 시 스택+1 (MaxStack까지)
+        Ignore               = 3,  // 무시    // 이미 있으면 무시
         Max                 
     }
 
+    /* 버프의 주기적 효과 */
     public enum EPeriodicEffect
     {
-        None                 = 0,  // 주기효과 없음
-        DamageHp             = 1,  // HP감소
-        HealHp               = 2,  // HP회복
+        None                 = 0,
+        DamageHp             = 1,  // HP감소    // DoT
+        HealHp               = 2,  // HP회복    // HoT
         Max                 
     }
 }

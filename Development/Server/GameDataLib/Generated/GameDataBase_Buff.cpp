@@ -25,17 +25,17 @@ bool GameDataTableBase_Buff::makeGameData(const std::string& line)
     GameData_Buff* pData = new GameData_Buff;
 
     // 컬럼 순서대로 파싱
-    std::getline(ss, field, ','); pData->Key = std::stoll(field);
+    std::getline(ss, field, ','); pData->Key = std::stoi(field);
     std::getline(ss, field, ','); pData->Name = field;
     std::getline(ss, field, ','); pData->Desc = field;
     std::getline(ss, field, ','); pData->Category = static_cast<EBuffCategory>(std::stoi(field));
-    std::getline(ss, field, ','); pData->DurationMs = std::stoll(field);
-    std::getline(ss, field, ','); pData->MaxStack = std::stoll(field);
+    std::getline(ss, field, ','); pData->DurationMs = std::stoi(field);
+    std::getline(ss, field, ','); pData->MaxStack = std::stoi(field);
     std::getline(ss, field, ','); pData->StackPolicy = static_cast<EBuffStackPolicy>(std::stoi(field));
     std::getline(ss, field, ','); pData->Dispellable = StringToBool(field);
     std::getline(ss, field, ','); pData->RemoveOnDeath = StringToBool(field);
     std::getline(ss, field, ','); pData->RemoveOnStageChange = StringToBool(field);
-    std::getline(ss, field, ','); pData->TickIntervalMs = std::stoll(field);
+    std::getline(ss, field, ','); pData->TickIntervalMs = std::stoi(field);
     std::getline(ss, field, ','); pData->PeriodicType = static_cast<EPeriodicEffect>(std::stoi(field));
     std::getline(ss, field, ','); pData->PeriodicValue = std::stod(field);
     std::getline(ss, field, ','); pData->Stat1 = static_cast<EStat>(std::stoi(field));

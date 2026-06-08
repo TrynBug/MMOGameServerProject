@@ -25,7 +25,7 @@ bool GameDataTableBase_JobBase::makeGameData(const std::string& line)
     GameData_JobBase* pData = new GameData_JobBase;
 
     // 컬럼 순서대로 파싱
-    std::getline(ss, field, ','); pData->Key = std::stoll(field);
+    std::getline(ss, field, ','); pData->Key = std::stoi(field);
     std::getline(ss, field, ','); pData->Job = static_cast<EJob>(std::stoi(field));
     std::getline(ss, field, ','); pData->Stat1 = static_cast<EStat>(std::stoi(field));
     std::getline(ss, field, ','); pData->StatValue1 = std::stod(field);

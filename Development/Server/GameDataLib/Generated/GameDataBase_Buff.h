@@ -19,17 +19,17 @@ struct GameData_Buff;
 // Buff 데이터 1개 행을 표현합니다.
 struct GameDataBase_Buff : public GameData
 {
-    int64_t              Key                  = 0;
+    int32_t              Key                  = 0;
     std::string          Name                 = "";
     std::string          Desc                 = "";
     EBuffCategory        Category             = EBuffCategory::None;
-    int64_t              DurationMs           = 0;
-    int64_t              MaxStack             = 1;
+    int32_t              DurationMs           = 0;
+    int32_t              MaxStack             = 1;
     EBuffStackPolicy     StackPolicy          = EBuffStackPolicy::Refresh;
     bool                 Dispellable          = false;
     bool                 RemoveOnDeath        = true;
     bool                 RemoveOnStageChange  = true;
-    int64_t              TickIntervalMs       = 0;
+    int32_t              TickIntervalMs       = 0;
     EPeriodicEffect      PeriodicType         = EPeriodicEffect::None;
     double               PeriodicValue        = 0;
     EStat                Stat1                = EStat::None;

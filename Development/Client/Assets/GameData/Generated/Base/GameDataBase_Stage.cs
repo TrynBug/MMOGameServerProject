@@ -10,12 +10,12 @@ namespace GameData
     // Stage 데이터 1개 행을 표현합니다.
     public class GameDataBase_Stage : GameDataBase
     {
-        public long                 Key                  = 0;
+        public int                  Key                  = 0;
         public string               Name                 = "";
         public EStageType           StageType            = EStageType.None;
         public string               StagePrefabPath      = "";
         public string               NavMeshFileName      = "";
-        public double               sectorSize           = 0;
+        public float                sectorSize           = 0f;
     }
 
     // Stage 데이터 파일 전체를 표현합니다.
@@ -38,12 +38,12 @@ namespace GameData
             string[] fields = line.Split(',');
             GameData_Stage data = new GameData_Stage();
 
-            data.Key = long.Parse(fields[0]);
+            data.Key = int.Parse(fields[0]);
             data.Name = fields[1];
             data.StageType = (EStageType)int.Parse(fields[2]);
             data.StagePrefabPath = fields[3];
             data.NavMeshFileName = fields[4];
-            data.sectorSize = double.Parse(fields[5]);
+            data.sectorSize = float.Parse(fields[5]);
 
             if (data.Key <= 0)
                 return false;

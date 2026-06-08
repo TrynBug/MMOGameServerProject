@@ -10,13 +10,13 @@ namespace GameData
     // Buff 데이터 1개 행을 표현합니다.
     public class GameDataBase_Buff : GameDataBase
     {
-        public long                 Key                  = 0;
+        public int                  Key                  = 0;
         public string               Name                 = "";
         public string               Desc                 = "";
         public EBuffCategory        Category             = EBuffCategory.None;
-        public long                 DurationMs           = 0;
-        public long                 MaxStack             = 1;
-        public long                 IconId               = 0;
+        public int                  DurationMs           = 0;
+        public int                  MaxStack             = 1;
+        public int                  IconId               = 0;
     }
 
     // Buff 데이터 파일 전체를 표현합니다.
@@ -39,13 +39,13 @@ namespace GameData
             string[] fields = line.Split(',');
             GameData_Buff data = new GameData_Buff();
 
-            data.Key = long.Parse(fields[0]);
+            data.Key = int.Parse(fields[0]);
             data.Name = fields[1];
             data.Desc = fields[2];
             data.Category = (EBuffCategory)int.Parse(fields[3]);
-            data.DurationMs = long.Parse(fields[4]);
-            data.MaxStack = long.Parse(fields[5]);
-            data.IconId = long.Parse(fields[6]);
+            data.DurationMs = int.Parse(fields[4]);
+            data.MaxStack = int.Parse(fields[5]);
+            data.IconId = int.Parse(fields[6]);
 
             if (data.Key <= 0)
                 return false;

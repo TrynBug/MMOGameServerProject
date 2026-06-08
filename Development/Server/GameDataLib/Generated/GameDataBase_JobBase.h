@@ -19,7 +19,7 @@ struct GameData_JobBase;
 // JobBase 데이터 1개 행을 표현합니다.
 struct GameDataBase_JobBase : public GameData
 {
-    int64_t              Key                  = 0;
+    int32_t              Key                  = 0;
     EJob                 Job                  = EJob::None;
     EStat                Stat1                = EStat::None;
     double               StatValue1           = 0;

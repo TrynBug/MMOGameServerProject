@@ -10,13 +10,13 @@ namespace GameData
     // StageStartPosition 데이터 1개 행을 표현합니다.
     public class GameDataBase_StageStartPosition : GameDataBase
     {
-        public long                 Key                  = 0;
-        public long                 StageKey             = 0;
+        public int                  Key                  = 0;
+        public int                  StageKey             = 0;
         public EStagePositionType   StagePositionType    = EStagePositionType.None;
-        public double               PosX                 = 0;
-        public double               PosY                 = 0;
-        public double               PosZ                 = 0;
-        public double               Yaw                  = 0;
+        public float                PosX                 = 0f;
+        public float                PosY                 = 0f;
+        public float                PosZ                 = 0f;
+        public float                Yaw                  = 0f;
     }
 
     // StageStartPosition 데이터 파일 전체를 표현합니다.
@@ -39,13 +39,13 @@ namespace GameData
             string[] fields = line.Split(',');
             GameData_StageStartPosition data = new GameData_StageStartPosition();
 
-            data.Key = long.Parse(fields[0]);
-            data.StageKey = long.Parse(fields[1]);
+            data.Key = int.Parse(fields[0]);
+            data.StageKey = int.Parse(fields[1]);
             data.StagePositionType = (EStagePositionType)int.Parse(fields[2]);
-            data.PosX = double.Parse(fields[3]);
-            data.PosY = double.Parse(fields[4]);
-            data.PosZ = double.Parse(fields[5]);
-            data.Yaw = double.Parse(fields[6]);
+            data.PosX = float.Parse(fields[3]);
+            data.PosY = float.Parse(fields[4]);
+            data.PosZ = float.Parse(fields[5]);
+            data.Yaw = float.Parse(fields[6]);
 
             if (data.Key <= 0)
                 return false;

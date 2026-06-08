@@ -25,13 +25,13 @@ bool GameDataTableBase_StageStartPosition::makeGameData(const std::string& line)
     GameData_StageStartPosition* pData = new GameData_StageStartPosition;
 
     // 컬럼 순서대로 파싱
-    std::getline(ss, field, ','); pData->Key = std::stoll(field);
-    std::getline(ss, field, ','); pData->StageKey = std::stoll(field);
+    std::getline(ss, field, ','); pData->Key = std::stoi(field);
+    std::getline(ss, field, ','); pData->StageKey = std::stoi(field);
     std::getline(ss, field, ','); pData->StagePositionType = static_cast<EStagePositionType>(std::stoi(field));
-    std::getline(ss, field, ','); pData->PosX = std::stod(field);
-    std::getline(ss, field, ','); pData->PosY = std::stod(field);
-    std::getline(ss, field, ','); pData->PosZ = std::stod(field);
-    std::getline(ss, field, ','); pData->Yaw = std::stod(field);
+    std::getline(ss, field, ','); pData->PosX = std::stof(field);
+    std::getline(ss, field, ','); pData->PosY = std::stof(field);
+    std::getline(ss, field, ','); pData->PosZ = std::stof(field);
+    std::getline(ss, field, ','); pData->Yaw = std::stof(field);
 
     if (pData->Key <= 0)
     {

@@ -18,13 +18,13 @@ struct GameData_StageStartPosition;
 // StageStartPosition 데이터 1개 행을 표현합니다.
 struct GameDataBase_StageStartPosition : public GameData
 {
-    int64_t              Key                  = 0;
-    int64_t              StageKey             = 0;
+    int32_t              Key                  = 0;
+    int32_t              StageKey             = 0;
     EStagePositionType   StagePositionType    = EStagePositionType::None;
-    double               PosX                 = 0;
-    double               PosY                 = 0;
-    double               PosZ                 = 0;
-    double               Yaw                  = 0;
+    float                PosX                 = 0.0f;
+    float                PosY                 = 0.0f;
+    float                PosZ                 = 0.0f;
+    float                Yaw                  = 0.0f;
 };
 
 

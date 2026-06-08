@@ -18,7 +18,7 @@ struct GameData_Stat;
 // Stat 데이터 1개 행을 표현합니다.
 struct GameDataBase_Stat : public GameData
 {
-    int64_t              Key                  = 0;
+    int32_t              Key                  = 0;
     EStat                Stat                 = EStat::None;
     EStatGroup           StatGroup            = EStatGroup::None;
     EStatOp              StatOp               = EStatOp::None;

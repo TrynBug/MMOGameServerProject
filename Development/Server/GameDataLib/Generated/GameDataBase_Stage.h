@@ -18,10 +18,10 @@ struct GameData_Stage;
 // Stage 데이터 1개 행을 표현합니다.
 struct GameDataBase_Stage : public GameData
 {
-    int64_t              Key                  = 0;
+    int32_t              Key                  = 0;
     EStageType           StageType            = EStageType::None;
     std::string          NavMeshFileName      = "";
-    double               sectorSize           = 0;
+    float                sectorSize           = 0.0f;
 };
 
 

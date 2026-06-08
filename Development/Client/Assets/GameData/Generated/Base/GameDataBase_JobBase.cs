@@ -10,7 +10,7 @@ namespace GameData
     // JobBase 데이터 1개 행을 표현합니다.
     public class GameDataBase_JobBase : GameDataBase
     {
-        public long                 Key                  = 0;
+        public int                  Key                  = 0;
         public EJob                 Job                  = EJob.None;
         public EStat                Stat1                = EStat.None;
         public double               StatValue1           = 0;
@@ -84,7 +84,7 @@ namespace GameData
             string[] fields = line.Split(',');
             GameData_JobBase data = new GameData_JobBase();
 
-            data.Key = long.Parse(fields[0]);
+            data.Key = int.Parse(fields[0]);
             data.Job = (EJob)int.Parse(fields[1]);
             data.Stat1 = (EStat)int.Parse(fields[2]);
             data.StatValue1 = double.Parse(fields[3]);

@@ -10,7 +10,7 @@ namespace GameData
     // Stat 데이터 1개 행을 표현합니다.
     public class GameDataBase_Stat : GameDataBase
     {
-        public long                 Key                  = 0;
+        public int                  Key                  = 0;
         public EStat                Stat                 = EStat.None;
         public EStatGroup           StatGroup            = EStatGroup.None;
         public EStatOp              StatOp               = EStatOp.None;
@@ -38,7 +38,7 @@ namespace GameData
             string[] fields = line.Split(',');
             GameData_Stat data = new GameData_Stat();
 
-            data.Key = long.Parse(fields[0]);
+            data.Key = int.Parse(fields[0]);
             data.Stat = (EStat)int.Parse(fields[1]);
             data.StatGroup = (EStatGroup)int.Parse(fields[2]);
             data.StatOp = (EStatOp)int.Parse(fields[3]);

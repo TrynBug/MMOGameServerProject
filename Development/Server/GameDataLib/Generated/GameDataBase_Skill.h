@@ -19,21 +19,21 @@ struct GameData_Skill;
 // Skill 데이터 1개 행을 표현합니다.
 struct GameDataBase_Skill : public GameData
 {
-    int64_t              Key                  = 0;
+    int32_t              Key                  = 0;
     std::string          Name                 = "";
     EJob                 Job                  = EJob::None;
     ESkillCastClass      CastClass            = ESkillCastClass::None;
     bool                 IsPrimaryEligible    = false;
-    int64_t              OnHitSkillKey        = 0;
-    int64_t              NextSkillKey         = 0;
+    int32_t              OnHitSkillKey        = 0;
+    int32_t              NextSkillKey         = 0;
     ENextSkillTiming     NextTriggerTiming    = ENextSkillTiming::None;
-    int64_t              NextTriggerDelayMs   = 0;
+    int32_t              NextTriggerDelayMs   = 0;
     ENextSkillOrigin     NextOrigin           = ENextSkillOrigin::None;
-    double               CasterFrontDistance  = 0;
-    int64_t              CooldownMs           = 0;
-    double               ManaCost             = 0;
-    int64_t              CastDelayMs          = 0;
-    int64_t              ActionLockMs         = 0;
+    float                CasterFrontDistance  = 0.0f;
+    int32_t              CooldownMs           = 0;
+    float                ManaCost             = 0.0f;
+    int32_t              CastDelayMs          = 0;
+    int32_t              ActionLockMs         = 0;
     bool                 Rotation             = true;
     ETargetingMode       Targeting            = ETargetingMode::None;
     ESkillPlacement      Placement            = ESkillPlacement::None;
@@ -41,21 +41,21 @@ struct GameDataBase_Skill : public GameData
     ESkillEffectDamage   EffectDamage         = ESkillEffectDamage::None;
     ESkillEffectShape    EffectShape          = ESkillEffectShape::None;
     double               DamageCoeff          = 0;
-    double               Radius               = 0;
-    double               ObbWidth             = 0;
-    double               ObbLength            = 0;
-    double               ProjectileSpeed      = 0;
-    double               MaxRange             = 0;
-    int64_t              ProjectileCount      = 0;
-    double               FanAngleDeg          = 0;
-    int64_t              FirstTickDelayMs     = 0;
-    int64_t              TickIntervalMs       = 0;
-    int64_t              LifetimeMs           = 0;
-    double               MoveDistance         = 0;
-    int64_t              MoveDurationMs       = 0;
-    int64_t              ScatterCount         = 0;
-    double               ScatterInnerRadius   = 0;
-    double               ScatterOuterRadius   = 0;
+    float                Radius               = 0.0f;
+    float                ObbWidth             = 0.0f;
+    float                ObbLength            = 0.0f;
+    float                ProjectileSpeed      = 0.0f;
+    float                MaxRange             = 0.0f;
+    int32_t              ProjectileCount      = 0;
+    float                FanAngleDeg          = 0.0f;
+    int32_t              FirstTickDelayMs     = 0;
+    int32_t              TickIntervalMs       = 0;
+    int32_t              LifetimeMs           = 0;
+    float                MoveDistance         = 0.0f;
+    int32_t              MoveDurationMs       = 0;
+    int32_t              ScatterCount         = 0;
+    float                ScatterInnerRadius   = 0.0f;
+    float                ScatterOuterRadius   = 0.0f;
 };
 
 

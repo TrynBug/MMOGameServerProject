@@ -25,21 +25,21 @@ bool GameDataTableBase_Skill::makeGameData(const std::string& line)
     GameData_Skill* pData = new GameData_Skill;
 
     // 컬럼 순서대로 파싱
-    std::getline(ss, field, ','); pData->Key = std::stoll(field);
+    std::getline(ss, field, ','); pData->Key = std::stoi(field);
     std::getline(ss, field, ','); pData->Name = field;
     std::getline(ss, field, ','); pData->Job = static_cast<EJob>(std::stoi(field));
     std::getline(ss, field, ','); pData->CastClass = static_cast<ESkillCastClass>(std::stoi(field));
     std::getline(ss, field, ','); pData->IsPrimaryEligible = StringToBool(field);
-    std::getline(ss, field, ','); pData->OnHitSkillKey = std::stoll(field);
-    std::getline(ss, field, ','); pData->NextSkillKey = std::stoll(field);
+    std::getline(ss, field, ','); pData->OnHitSkillKey = std::stoi(field);
+    std::getline(ss, field, ','); pData->NextSkillKey = std::stoi(field);
     std::getline(ss, field, ','); pData->NextTriggerTiming = static_cast<ENextSkillTiming>(std::stoi(field));
-    std::getline(ss, field, ','); pData->NextTriggerDelayMs = std::stoll(field);
+    std::getline(ss, field, ','); pData->NextTriggerDelayMs = std::stoi(field);
     std::getline(ss, field, ','); pData->NextOrigin = static_cast<ENextSkillOrigin>(std::stoi(field));
-    std::getline(ss, field, ','); pData->CasterFrontDistance = std::stod(field);
-    std::getline(ss, field, ','); pData->CooldownMs = std::stoll(field);
-    std::getline(ss, field, ','); pData->ManaCost = std::stod(field);
-    std::getline(ss, field, ','); pData->CastDelayMs = std::stoll(field);
-    std::getline(ss, field, ','); pData->ActionLockMs = std::stoll(field);
+    std::getline(ss, field, ','); pData->CasterFrontDistance = std::stof(field);
+    std::getline(ss, field, ','); pData->CooldownMs = std::stoi(field);
+    std::getline(ss, field, ','); pData->ManaCost = std::stof(field);
+    std::getline(ss, field, ','); pData->CastDelayMs = std::stoi(field);
+    std::getline(ss, field, ','); pData->ActionLockMs = std::stoi(field);
     std::getline(ss, field, ','); pData->Rotation = StringToBool(field);
     std::getline(ss, field, ','); pData->Targeting = static_cast<ETargetingMode>(std::stoi(field));
     std::getline(ss, field, ','); pData->Placement = static_cast<ESkillPlacement>(std::stoi(field));
@@ -47,21 +47,21 @@ bool GameDataTableBase_Skill::makeGameData(const std::string& line)
     std::getline(ss, field, ','); pData->EffectDamage = static_cast<ESkillEffectDamage>(std::stoi(field));
     std::getline(ss, field, ','); pData->EffectShape = static_cast<ESkillEffectShape>(std::stoi(field));
     std::getline(ss, field, ','); pData->DamageCoeff = std::stod(field);
-    std::getline(ss, field, ','); pData->Radius = std::stod(field);
-    std::getline(ss, field, ','); pData->ObbWidth = std::stod(field);
-    std::getline(ss, field, ','); pData->ObbLength = std::stod(field);
-    std::getline(ss, field, ','); pData->ProjectileSpeed = std::stod(field);
-    std::getline(ss, field, ','); pData->MaxRange = std::stod(field);
-    std::getline(ss, field, ','); pData->ProjectileCount = std::stoll(field);
-    std::getline(ss, field, ','); pData->FanAngleDeg = std::stod(field);
-    std::getline(ss, field, ','); pData->FirstTickDelayMs = std::stoll(field);
-    std::getline(ss, field, ','); pData->TickIntervalMs = std::stoll(field);
-    std::getline(ss, field, ','); pData->LifetimeMs = std::stoll(field);
-    std::getline(ss, field, ','); pData->MoveDistance = std::stod(field);
-    std::getline(ss, field, ','); pData->MoveDurationMs = std::stoll(field);
-    std::getline(ss, field, ','); pData->ScatterCount = std::stoll(field);
-    std::getline(ss, field, ','); pData->ScatterInnerRadius = std::stod(field);
-    std::getline(ss, field, ','); pData->ScatterOuterRadius = std::stod(field);
+    std::getline(ss, field, ','); pData->Radius = std::stof(field);
+    std::getline(ss, field, ','); pData->ObbWidth = std::stof(field);
+    std::getline(ss, field, ','); pData->ObbLength = std::stof(field);
+    std::getline(ss, field, ','); pData->ProjectileSpeed = std::stof(field);
+    std::getline(ss, field, ','); pData->MaxRange = std::stof(field);
+    std::getline(ss, field, ','); pData->ProjectileCount = std::stoi(field);
+    std::getline(ss, field, ','); pData->FanAngleDeg = std::stof(field);
+    std::getline(ss, field, ','); pData->FirstTickDelayMs = std::stoi(field);
+    std::getline(ss, field, ','); pData->TickIntervalMs = std::stoi(field);
+    std::getline(ss, field, ','); pData->LifetimeMs = std::stoi(field);
+    std::getline(ss, field, ','); pData->MoveDistance = std::stof(field);
+    std::getline(ss, field, ','); pData->MoveDurationMs = std::stoi(field);
+    std::getline(ss, field, ','); pData->ScatterCount = std::stoi(field);
+    std::getline(ss, field, ','); pData->ScatterInnerRadius = std::stof(field);
+    std::getline(ss, field, ','); pData->ScatterOuterRadius = std::stof(field);
 
     if (pData->Key <= 0)
     {

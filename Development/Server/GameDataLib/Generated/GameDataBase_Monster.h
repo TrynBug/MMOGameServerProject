@@ -19,8 +19,8 @@ struct GameData_Monster;
 // Monster 데이터 1개 행을 표현합니다.
 struct GameDataBase_Monster : public GameData
 {
-    int64_t              Key                  = 0;
-    int64_t              ItemDropGroup        = 0;
+    int32_t              Key                  = 0;
+    int32_t              ItemDropGroup        = 0;
     bool                 IsItemDrop           = true;
     double               Exp                  = 0;
     bool                 IsExp                = true;

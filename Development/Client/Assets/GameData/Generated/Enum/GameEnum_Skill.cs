@@ -8,12 +8,13 @@ namespace GameData
     public enum ESkillCastClass
     {
         None                 = 0,
-        Stationary           = 1,  // 제자리시전
-        Mobile               = 2,  // 이동시전
-        Mobility             = 3,  // 이동기
+        Stationary           = 1,  // 제자리시전    // 스킬 사용중 움직일 수 없음
+        Mobile               = 2,  // 이동시전    // 스킬 사용중 움직일 수 있음
+        Mobility             = 3,  // 이동기    // 이동전용 스킬
         Max                 
     }
 
+    /* 다음페이즈 스킬이 트리거되는 기준 위치 */
     public enum ENextSkillOrigin
     {
         None                 = 0,
@@ -24,6 +25,7 @@ namespace GameData
         Max                 
     }
 
+    /* 다음페이즈 스킬이 트리거되는 타이밍 */
     public enum ENextSkillTiming
     {
         None                 = 0,
@@ -33,30 +35,36 @@ namespace GameData
         Max                 
     }
 
+    /* 스킬 효과의 위치가 시간에 따라 어떻게 변하는지 결정 */
     public enum ESkillEffectMotion
     {
         None                 = 0,
-        Static               = 1,  // 고정 (얼음지대, 화염지대, 전격방출, 메테오 착탄 등)
-        Linear               = 2,  // 직선 등속 (이동하는 장판 = 하이브리드)
+        Static               = 1,  // 고정    // 얼음지대, 화염지대, 전격방출, 메테오 착탄 등
+        Linear               = 2,  // 직선 등속    // 이동하는 장판 등의 하이브리드
         Max                 
     }
 
+    /* 스킬 대미지를 어떻게 주는지 결정 */
     public enum ESkillEffectDamage
     {
         None                 = 0,
-        ContactHit           = 1,  // 투사체 접촉 시 1회. 클라 hit 보고 기반 → ProjectileGroup
-        Area                 = 2,  // 서버 주도 범위 틱 → AreaEffect. 틱 횟수/간격이 instant(1회)/periodic(N회) 을 결정.
+        ContactHit           = 1,  // 투사체 접촉 시 1회    // 투사체 접촉 시 클라이언트가 hit을 보고한다.
+        Area                 = 2,  // 서버 주도 범위 틱    // 서버에서 영역내의 적에게 대미지를 입힌다.
         Max                 
     }
 
+    /* EffectShape — 스킬/효과의 범위 모양 (X-Z 평면)
+범위 판정은 모두 X-Z 평면에서 한다 (높이 Y 는 무시). 게임이 쿼터뷰 평면 기반이라 대미지 범위는 평면 모양으로 충분하다.
+중심 좌표(center)는 모양에 넣지 않는다. 이동하는 효과는 매 tick center 가 달라지므로 center 는 판정 시점에 인자로 받고, 모양 자체(반지름/크기/방향)만 보관한다. */
     public enum ESkillEffectShape
     {
         None                 = 0,
-        Circle               = 1,  // 원 (전격방출, 메테오 착탄, 파이어볼 폭발 등)
-        Obb                  = 2,  // 방향이 있는 직사각형, Oriented Bounding Box (얼음지대, 블레이즈)
+        Circle               = 1,  // 원형    // 전격방출, 메테오 착탄, 파이어볼 폭발 등
+        Obb                  = 2,  // 방향이 있는 직사각형, OBB(Oriented Bounding Box)    // 얼음지대, 블레이즈
         Max                 
     }
 
+    /* 스킬의 타게팅 방식 */
     public enum ETargetingMode
     {
         None                 = 0,
@@ -65,10 +73,11 @@ namespace GameData
         Max                 
     }
 
+    /* 스킬 효과의 위치를 어디에 둘지 정한다. */
     public enum ESkillPlacement
     {
         None                 = 0,
-        Caster               = 1,  // 캐스터 위치 (투사체 발사점 / 캐스터 중심 범위)
+        Caster               = 1,  // 캐스터 위치    // 투사체 발사점 / 캐스터 중심 범위
         Target               = 2,  // 타겟 위치에 OBB/Circle 생성
         Forward              = 3,  // 캐스터 전방에서 시작해 타겟 방향으로 OBB
         Max                 
