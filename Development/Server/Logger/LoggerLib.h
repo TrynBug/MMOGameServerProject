@@ -5,6 +5,8 @@
 #pragma comment(lib, "Logger.lib")
 
 // spdlog를 컴파일된 라이브러리로 사용한다 (헤더 전용 모드 비활성화)
-#define SPDLOG_COMPILED_LIB
+#ifndef SPDLOG_COMPILED_LIB
+    #define SPDLOG_COMPILED_LIB
+#endif
 
 #include "Logger.h"
