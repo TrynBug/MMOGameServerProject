@@ -260,7 +260,7 @@ void Stage::OnSkillProjectileHit(int64 effectId, int32 projectileIndex, int64 ta
 }
 
 // 시전 통보를 시전자 주변 AOI 유저들에게 broadcast.
-void Stage::BroadcastSkillCastNtf(const ActorObject& caster, int64 skillKey, int64 effectId,
+void Stage::BroadcastSkillCastNtf(const ActorObject& caster, int32 skillKey, int64 effectId,
                                   const Vector3& origin, const Vector3& dir, uint32 seed,
                                   float moveDistance)
 {

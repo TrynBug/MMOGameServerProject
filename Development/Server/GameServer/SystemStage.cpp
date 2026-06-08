@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "SystemStage.h"
 
-SystemStage::SystemStage(int64 stageId, int64 stageDataKey)
+SystemStage::SystemStage(int64 stageId, int32 stageDataKey)
     : SystemStage(stageId, stageDataKey, LoadStageGridParams(stageDataKey))   // 위임. LoadStageGridParams는 1회만 호출.
 {
 }
 
-SystemStage::SystemStage(int64 stageId, int64 stageDataKey, const StageGridParams& params)
+SystemStage::SystemStage(int64 stageId, int32 stageDataKey, const StageGridParams& params)
     : Stage(stageId, stageDataKey,
             params.stageType,
             params.worldMinX, params.worldMinZ,

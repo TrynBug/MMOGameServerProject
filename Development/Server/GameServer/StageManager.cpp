@@ -42,7 +42,7 @@ void StageManager::Clear()
     m_spTown.reset();
 }
 
-SystemStagePtr StageManager::CreateSystemStage(int64 stageId, int64 stageDataKey)
+SystemStagePtr StageManager::CreateSystemStage(int64 stageId, int32 stageDataKey)
 {
     if (!m_pGameServer)
     {
@@ -73,7 +73,7 @@ SystemStagePtr StageManager::CreateSystemStage(int64 stageId, int64 stageDataKey
     return spStage;
 }
 
-TownPtr StageManager::CreateTown(int64 stageId, int64 stageDataKey)
+TownPtr StageManager::CreateTown(int64 stageId, int32 stageDataKey)
 {
     StageGridParams params;
     const dtNavMesh* pNavMesh = nullptr;
@@ -90,7 +90,7 @@ TownPtr StageManager::CreateTown(int64 stageId, int64 stageDataKey)
     return spStage;
 }
 
-FieldPtr StageManager::CreateField(int64 stageId, int64 stageDataKey)
+FieldPtr StageManager::CreateField(int64 stageId, int32 stageDataKey)
 {
     StageGridParams params;
     const dtNavMesh* pNavMesh = nullptr;
@@ -106,7 +106,7 @@ FieldPtr StageManager::CreateField(int64 stageId, int64 stageDataKey)
     return spStage;
 }
 
-bool StageManager::prepareNavStage(int64 stageId, int64 stageDataKey, const char* logTag,
+bool StageManager::prepareNavStage(int64 stageId, int32 stageDataKey, const char* logTag,
                                    StageGridParams& outParams, const dtNavMesh*& outNavMesh)
 {
     if (!m_pGameServer)
@@ -170,7 +170,7 @@ bool StageManager::prepareNavStage(int64 stageId, int64 stageDataKey, const char
     return true;
 }
 
-void StageManager::registerStage(int64 stageId, int64 stageDataKey, const StagePtr& spStage)
+void StageManager::registerStage(int64 stageId, int32 stageDataKey, const StagePtr& spStage)
 {
     spStage->SetGameServer(m_pGameServer);
 
@@ -193,7 +193,7 @@ StagePtr StageManager::Find(int64 stageId) const
     return nullptr;
 }
 
-std::vector<StagePtr> StageManager::FindStagesByDataKey(int64 stageDataKey) const
+std::vector<StagePtr> StageManager::FindStagesByDataKey(int32 stageDataKey) const
 {
     std::vector<int64> stageIds;
     {

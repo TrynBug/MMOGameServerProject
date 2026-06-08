@@ -44,9 +44,9 @@ public:
 
     // ── Stage 생성 + 등록 + 컨텐츠 스레드 배정 + GameServer 주입 ──
     // 실패 시 nullptr 리턴 (중복 stageId 등).
-    SystemStagePtr CreateSystemStage(int64 stageId, int64 stageDataKey);
-    TownPtr        CreateTown(int64 stageId, int64 stageDataKey);
-    FieldPtr       CreateField(int64 stageId, int64 stageDataKey);
+    SystemStagePtr CreateSystemStage(int64 stageId, int32 stageDataKey);
+    TownPtr        CreateTown(int64 stageId, int32 stageDataKey);
+    FieldPtr       CreateField(int64 stageId, int32 stageDataKey);
     // 향후: CreateUserDungeon, CreatePublicDungeon 등
 
     // ── 조회 ──
@@ -56,7 +56,7 @@ public:
     // dataKey로 Stage 인스턴스 목록 조회.
     // 동일 dataKey의 Stage가 여러 개 존재할 수 있다는 전제 (채널, 인스턴스 던전).
     // 호출부가 복수 전제를 잊지 않도록 단수 반환 API는 의도적으로 두지 않는다.
-    std::vector<StagePtr> FindStagesByDataKey(int64 stageDataKey) const;
+    std::vector<StagePtr> FindStagesByDataKey(int32 stageDataKey) const;
 
     // 자주 쓰는 고정 Stage의 빠른 접근. Initialize 후 readonly.
     SystemStagePtr GetSystemStage() const { return m_spSystemStage; }
@@ -68,12 +68,12 @@ private:
 
     // 공용 등록 경로: 컨텐츠 스레드 배정 + m_safeStages + dataKey 인덱스.
     // 모든 Create* 가 이 함수를 거친다 (인덱스 누락 방지).
-    void registerStage(int64 stageId, int64 stageDataKey, const StagePtr& spStage);
+    void registerStage(int64 stageId, int32 stageDataKey, const StagePtr& spStage);
 
     // NavMesh 기반 Stage(Town/Field)의 공통 준비:
     // GameData 조회 → 중복 stageId 검사 → params 구성 + NavMesh 메타로 bounds 덮어쓰기.
     // 실패 시 false (에러 로그는 내부에서 남김). outNavMesh는 nullptr일 수 있음 (길찾기 비활성화).
-    bool prepareNavStage(int64 stageId, int64 stageDataKey, const char* logTag,
+    bool prepareNavStage(int64 stageId, int32 stageDataKey, const char* logTag,
                          StageGridParams& outParams, const dtNavMesh*& outNavMesh);
 
     GameServer* m_pGameServer = nullptr;
@@ -87,7 +87,7 @@ private:
     // m_safeStages와 별도 락이므로 "인덱스에는 있는데 m_safeStages에 없는" 순간이 없도록
     // 등록 시 m_safeStages 먼저, 제거 시 인덱스 먼저 갱신한다 (조회 측은 miss만 발생).
     mutable std::mutex m_dataKeyIndexMutex;
-    std::unordered_map<int64, std::vector<int64>> m_stageIdsByDataKey;
+    std::unordered_map<int32, std::vector<int64>> m_stageIdsByDataKey;
 
     // 자주 쓰는 고정 Stage의 캐시. m_safeStages에도 들어가 있음.
     // Initialize 시점에 set되고 그 후엔 변경되지 않으므로 mutex 없이 접근 가능.

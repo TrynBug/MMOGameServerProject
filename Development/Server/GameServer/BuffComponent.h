@@ -38,10 +38,10 @@ public:
 
     // 버프 적용. 이미 있으면 StackPolicy(Refresh/Stack/Ignore)에 따라 처리한다.
     // casterObjectId 0 = 시전자 없음(환경 효과 등).
-    void ApplyBuff(int64 buffKey, int64 casterObjectId = 0);
+    void ApplyBuff(int32 buffKey, int64 casterObjectId = 0);
 
     // 버프 제거 (만료/디스펠/정리 공통). 없으면 no-op.
-    void RemoveBuff(int64 buffKey);
+    void RemoveBuff(int32 buffKey);
 
     // 매 tick(액터 Update 안에서) 호출. 주기효과 틱 + 만료 처리.
     // deltaMs 는 마지막 Update 이후 누적 경과시간.
@@ -54,7 +54,7 @@ public:
     void OnOwnerStageChange();
 
     // spawn 스냅샷 채우기용. (buffKey, stackCount, remainMs[-1=영구]) 콜백.
-    void ForEachBuff(const std::function<void(int64 buffKey, int32 stackCount, int32 remainMs)>& callback) const;
+    void ForEachBuff(const std::function<void(int32 buffKey, int32 stackCount, int32 remainMs)>& callback) const;
 
     bool Empty() const { return m_buffs.empty(); }
 
@@ -69,9 +69,9 @@ private:
 
     // 버프 뱃지 추가/갱신, 제거 브로드캐스트 (Stage AOI 경유).
     void broadcastBuffNtf(const BuffInstance& buff);
-    void broadcastBuffRemove(int64 buffKey);
+    void broadcastBuffRemove(int32 buffKey);
 
 private:
     ActorObject* m_pOwner = nullptr;
-    std::unordered_map<int64, BuffInstance> m_buffs;   // key = buffKey
+    std::unordered_map<int32, BuffInstance> m_buffs;   // key = buffKey
 };

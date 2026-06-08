@@ -8,7 +8,7 @@
 // 원래 GameServer.cpp / GameServerBuff.cpp 에 흩어져 있던 Send*** 들을 한 곳으로 모았다.
 // ─────────────────────────────────────────────────────────────
 
-void PacketSender::SendStageLoadCompleteRes(int64 userId, EResultCode resultCode, int64 stageId, int64 stageDataKey,
+void PacketSender::SendStageLoadCompleteRes(int64 userId, EResultCode resultCode, int64 stageId, int32 stageDataKey,
                                             float myPosX, float myPosY, float myPosZ, float myYaw)
 {
     GamePacket::StageLoadCompleteRes res;
@@ -41,7 +41,7 @@ void PacketSender::SendStageLoadCompleteRes(int64 userId, EResultCode resultCode
         userId, stageId, stageDataKey, myPosX, myPosY, myPosZ, myYaw));
 }
 
-void PacketSender::SendStageMoveRes(int64 userId, EResultCode resultCode, const std::string& errorMsg, int64 targetStageDataKey)
+void PacketSender::SendStageMoveRes(int64 userId, EResultCode resultCode, const std::string& errorMsg, int32 targetStageDataKey)
 {
     GamePacket::StageMoveRes res;
     res.set_result_code(static_cast<int32>(resultCode));
@@ -147,7 +147,7 @@ void PacketSender::SendHpMpNtf(int64 userId, double curHp, double curMp)
     SendToUser(userId, Common::GAME_PACKET_ID_HP_MP_NTF, ntf);
 }
 
-void PacketSender::SendBuffNtf(int64 userId, int64 objectId, int64 buffKey, int32 stackCount, int32 remainTimeMs)
+void PacketSender::SendBuffNtf(int64 userId, int64 objectId, int32 buffKey, int32 stackCount, int32 remainTimeMs)
 {
     GamePacket::BuffNtf ntf;
     ntf.set_object_id(objectId);
@@ -158,7 +158,7 @@ void PacketSender::SendBuffNtf(int64 userId, int64 objectId, int64 buffKey, int3
     SendToUser(userId, Common::GAME_PACKET_ID_BUFF_NTF, ntf);
 }
 
-void PacketSender::SendBuffRemoveNtf(int64 userId, int64 objectId, int64 buffKey)
+void PacketSender::SendBuffRemoveNtf(int64 userId, int64 objectId, int32 buffKey)
 {
     GamePacket::BuffRemoveNtf ntf;
     ntf.set_object_id(objectId);
@@ -178,7 +178,7 @@ void PacketSender::SendSkillDamageNtf(int64 userId, int64 targetObjectId, double
     SendToUser(userId, Common::GAME_PACKET_ID_SKILL_DAMAGE_NTF, ntf);
 }
 
-void PacketSender::SendSkillCastNtf(int64 userId, int64 casterObjectId, int64 skillKey, int64 effectId,
+void PacketSender::SendSkillCastNtf(int64 userId, int64 casterObjectId, int32 skillKey, int64 effectId,
                                     float originX, float originY, float originZ, float dirX, float dirZ, uint32 seed,
                                     float moveDistance)
 {

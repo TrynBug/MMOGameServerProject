@@ -59,7 +59,7 @@ struct StageGridParams
 // stageDataKey로 GameData_Stage를 조회하여 StageGridParams의 stageType / navMeshFileName / sectorSize 를 채운다.
 // worldMin/Max 는 여기서 채우지 않는다 (NavMesh 메타에서 가져와야 하므로 호출자가 채운다).
 // 데이터가 없으면 에러 로그를 남기고 기본값(fallback)을 리턴.
-StageGridParams LoadStageGridParams(int64 stageDataKey);
+StageGridParams LoadStageGridParams(int32 stageDataKey);
 
 // ─────────────────────────────────────────────────────────────
 // Stage 시스템 메시지
@@ -127,7 +127,7 @@ class Stage : public serverbase::Contents
 {
 public:
     // 명시적 grid 값으로 생성.
-    Stage(int64 stageId, int64 stageDataKey, EStageType stageType,
+    Stage(int64 stageId, int32 stageDataKey, EStageType stageType,
           double worldMinX, double worldMinZ,
           double worldMaxX, double worldMaxZ,
           double sectorSize);
@@ -141,7 +141,7 @@ public:
 public:
     int64      GetStageId()   const { return m_stageId; }
     EStageType GetStageType() const { return m_stageType; }
-	int64 	   GetStageDataKey() const { return m_pStageData->Key; }
+    int32 	   GetStageDataKey() const { return m_pStageData->Key; }
 	const GameData_Stage* pGetStageData() const { return m_pStageData; }
 
     // ── 맵/섹터 정보 조회 (X-Z 평면) ──
@@ -207,12 +207,12 @@ public:
 
     // Buff badge broadcast to AOI users (mirrors MoveNtf broadcast). Called by BuffComponent.
     // remainMs: -1 means permanent (client shows no countdown).
-    void      BroadcastBuffNtf(const ActorObject& actor, int64 buffKey, int32 stackCount, int32 remainMs);
-    void      BroadcastBuffRemoveNtf(const ActorObject& actor, int64 buffKey);
+    void      BroadcastBuffNtf(const ActorObject& actor, int32 buffKey, int32 stackCount, int32 remainMs);
+    void      BroadcastBuffRemoveNtf(const ActorObject& actor, int32 buffKey);
 
     // 스킬 시전 통보(SkillCastNtf)를 시전자 주변 AOI 에 broadcast 한다. SkillComponent 가 entry 페이즈 발동 시 호출.
     // effectId: entry 가 투사체면 그 그룹 ID, 아니면 0. 클라는 origin/dir/seed 로 비주얼을 재현한다.
-    void      BroadcastSkillCastNtf(const ActorObject& caster, int64 skillKey, int64 effectId,
+    void      BroadcastSkillCastNtf(const ActorObject& caster, int32 skillKey, int64 effectId,
                                     const Vector3& origin, const Vector3& dir, uint32 seed,
                                     float moveDistance);
 
@@ -306,7 +306,7 @@ protected:
     // 그리고 주변 AOI 의 유저들에게 ObjectVisibilityNtf(monster_spawns)로 spawn 을 통보한다.
     // ObjectId 는 ObjectIdGenerator(GameServer 경유)로 발급한다.
     // 성공 시 생성된 Monster*, 실패 시 nullptr (소유권은 Stage 가 가짐).
-    Monster* SpawnMonster(int64 monsterKey, float posX, float posY, float posZ, float yaw);
+    Monster* SpawnMonster(int32 monsterKey, float posX, float posY, float posZ, float yaw);
 
     // DespawnMonster: objectId 의 몬스터를 컨테이너/sector 에서 제거하고,
     // 주변 AOI 의 유저들에게 ObjectVisibilityNtf(despawn_ids)로 despawn 을 통보한다.

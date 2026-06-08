@@ -10,7 +10,7 @@
 
 #include <vector>
 
-void BuffComponent::ApplyBuff(int64 buffKey, int64 casterObjectId)
+void BuffComponent::ApplyBuff(int32 buffKey, int64 casterObjectId)
 {
     const GameData_Buff* pData = GameDataTable_Buff::FindData(buffKey);
     if (pData == nullptr)
@@ -73,7 +73,7 @@ void BuffComponent::ApplyBuff(int64 buffKey, int64 casterObjectId)
     broadcastBuffNtf(buff);
 }
 
-void BuffComponent::RemoveBuff(int64 buffKey)
+void BuffComponent::RemoveBuff(int32 buffKey)
 {
     auto iter = m_buffs.find(buffKey);
     if (iter == m_buffs.end())
@@ -96,7 +96,7 @@ void BuffComponent::Update(int64 deltaMs)
         return;
 
     // 만료된 버프 key 수집 (순회 중 컨테이너 변경 금지 → 순회 후 RemoveBuff).
-    std::vector<int64> expiredKeys;
+    std::vector<int32> expiredKeys;
 
     for (auto& [buffKey, buff] : m_buffs)
     {
@@ -122,7 +122,7 @@ void BuffComponent::Update(int64 deltaMs)
         }
     }
 
-    for (int64 key : expiredKeys)
+    for (int32 key : expiredKeys)
         RemoveBuff(key);
 }
 
@@ -131,13 +131,13 @@ void BuffComponent::OnOwnerDead()
     if (m_buffs.empty())
         return;
 
-    std::vector<int64> toRemove;
+    std::vector<int32> toRemove;
     for (const auto& [buffKey, buff] : m_buffs)
     {
         if (buff.pData->RemoveOnDeath)
             toRemove.push_back(buffKey);
     }
-    for (int64 key : toRemove)
+    for (int32 key : toRemove)
         RemoveBuff(key);
 }
 
@@ -146,17 +146,17 @@ void BuffComponent::OnOwnerStageChange()
     if (m_buffs.empty())
         return;
 
-    std::vector<int64> toRemove;
+    std::vector<int32> toRemove;
     for (const auto& [buffKey, buff] : m_buffs)
     {
         if (buff.pData->RemoveOnStageChange)
             toRemove.push_back(buffKey);
     }
-    for (int64 key : toRemove)
+    for (int32 key : toRemove)
         RemoveBuff(key);
 }
 
-void BuffComponent::ForEachBuff(const std::function<void(int64, int32, int32)>& callback) const
+void BuffComponent::ForEachBuff(const std::function<void(int32, int32, int32)>& callback) const
 {
     for (const auto& [buffKey, buff] : m_buffs)
     {
@@ -231,7 +231,7 @@ void BuffComponent::broadcastBuffNtf(const BuffInstance& buff)
     pStage->BroadcastBuffNtf(*m_pOwner, buff.pData->Key, buff.stackCount, remainMs);
 }
 
-void BuffComponent::broadcastBuffRemove(int64 buffKey)
+void BuffComponent::broadcastBuffRemove(int32 buffKey)
 {
     Stage* pStage = m_pOwner->GetStage();
     if (pStage == nullptr)

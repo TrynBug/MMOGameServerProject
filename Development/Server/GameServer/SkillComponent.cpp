@@ -8,7 +8,7 @@
 
 #include <cmath>
 
-void SkillComponent::TryCast(int64 skillKey, const Vector3& origin, const Vector3& dir, const Vector3& targetPos, uint32 seed)
+void SkillComponent::TryCast(int32 skillKey, const Vector3& origin, const Vector3& dir, const Vector3& targetPos, uint32 seed)
 {
     const GameData_Skill* pSkill = GameDataTable_Skill::FindData(skillKey);
     if (pSkill == nullptr)

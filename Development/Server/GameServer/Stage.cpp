@@ -41,7 +41,7 @@ namespace
 
         // Fill current buffs into the spawn snapshot (UI badges) so viewers see them on sight.
         character.GetBuffComponent().ForEachBuff(
-            [&info](int64 buffKey, int32 stackCount, int32 remainMs)
+            [&info](int32 buffKey, int32 stackCount, int32 remainMs)
             {
                 GamePacket::BuffSnapshotInfo* pBuff = info.add_buffs();
                 pBuff->set_buff_key(buffKey);
@@ -70,7 +70,7 @@ namespace
 
         // Fill current buffs into the spawn snapshot (UI badges) so viewers see them on sight.
         monster.GetBuffComponent().ForEachBuff(
-            [&info](int64 buffKey, int32 stackCount, int32 remainMs)
+            [&info](int32 buffKey, int32 stackCount, int32 remainMs)
             {
                 GamePacket::BuffSnapshotInfo* pBuff = info.add_buffs();
                 pBuff->set_buff_key(buffKey);
@@ -102,7 +102,7 @@ namespace
     constexpr double k_fallbackSectorSize =   50.0;
 }
 
-StageGridParams LoadStageGridParams(int64 stageDataKey)
+StageGridParams LoadStageGridParams(int32 stageDataKey)
 {
     StageGridParams params;
     // worldMin/Max 는 fallback 으로 기본 세팅. NavMesh 가 있는 Stage 는 호출자가 NavMeshMeta 로 덮어쓴다.
@@ -128,7 +128,7 @@ StageGridParams LoadStageGridParams(int64 stageDataKey)
     return params;
 }
 
-Stage::Stage(int64 stageId, int64 stageDataKey, EStageType stageType,
+Stage::Stage(int64 stageId, int32 stageDataKey, EStageType stageType,
              double worldMinX, double worldMinZ,
              double worldMaxX, double worldMaxZ,
              double sectorSize)
@@ -404,7 +404,7 @@ void Stage::EnqueueMessage(StageMessage msg)
     m_pendingMessages.push_back(std::move(msg));
 }
 
-Monster* Stage::SpawnMonster(int64 monsterKey, float posX, float posY, float posZ, float yaw)
+Monster* Stage::SpawnMonster(int32 monsterKey, float posX, float posY, float posZ, float yaw)
 {
     const GameData_Monster* pMonsterData = GameDataTable_Monster::FindData(monsterKey);
     if (!pMonsterData)
@@ -1405,7 +1405,7 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
 // Buff badge AOI broadcast (mirrors sendMoveNtfToAoi).
 // Called by BuffComponent on add/refresh/stack (BuffNtf) and remove/expire (BuffRemoveNtf).
 // Sends to every user in the actor's AOI; the owner is included if they are a user in their own sector.
-void Stage::BroadcastBuffNtf(const ActorObject& actor, int64 buffKey, int32 stackCount, int32 remainMs)
+void Stage::BroadcastBuffNtf(const ActorObject& actor, int32 buffKey, int32 stackCount, int32 remainMs)
 {
     GameServer* pServer = GetGameServer();
     if (!pServer)
@@ -1419,7 +1419,7 @@ void Stage::BroadcastBuffNtf(const ActorObject& actor, int64 buffKey, int32 stac
         });
 }
 
-void Stage::BroadcastBuffRemoveNtf(const ActorObject& actor, int64 buffKey)
+void Stage::BroadcastBuffRemoveNtf(const ActorObject& actor, int32 buffKey)
 {
     GameServer* pServer = GetGameServer();
     if (!pServer)

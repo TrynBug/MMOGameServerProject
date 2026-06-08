@@ -26,9 +26,9 @@ struct EffectParams
     int64       casterObjectId  = 0;                  // 시전자 오브젝트 ID
     EObjectType casterObjectType = EObjectType::None; // 진영 판정용 (시전자 타입). 시전자가 사라져도 안전하도록 bake.
 
-    int64                 skillKey   = 0;             // 스킬 게임데이터 Key
+    int32                 skillKey   = 0;             // 스킬 게임데이터 Key
     const GameData_Skill* pSkillData = nullptr;       // 스킬 게임데이터 (불변, 빠른 참조).
-    int64                 onHitSkillKey = 0;          // 투사체 hit/최대사거리 도달 시 발동할 폭발 스킬 Key. 없으면 0.
+    int32                 onHitSkillKey = 0;          // 투사체 hit/최대사거리 도달 시 발동할 폭발 스킬 Key. 없으면 0.
 
     // ── 위치 ──
     ESkillEffectMotion motion = ESkillEffectMotion::Static;

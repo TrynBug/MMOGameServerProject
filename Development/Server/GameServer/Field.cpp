@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "Field.h"
 
-Field::Field(int64 stageId, int64 stageDataKey)
+Field::Field(int64 stageId, int32 stageDataKey)
     : Field(stageId, stageDataKey, LoadStageGridParams(stageDataKey))   // 위임. LoadStageGridParams는 1회만 호출.
 {
 }
 
-Field::Field(int64 stageId, int64 stageDataKey, const StageGridParams& params)
+Field::Field(int64 stageId, int32 stageDataKey, const StageGridParams& params)
     : Stage(stageId, stageDataKey,
             params.stageType,
             params.worldMinX, params.worldMinZ,

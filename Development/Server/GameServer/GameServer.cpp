@@ -605,7 +605,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
 }
 
 void GameServer::sendCharacterSelectRes(int64 userId, EResultCode resultCode, const std::string& errorMsg,
-                                        const DataStructures::Character* pCharacter, int64 stageDataKey)
+                                        const DataStructures::Character* pCharacter, int32 stageDataKey)
 {
     GamePacket::CharacterSelectRes res;
     res.set_result_code(static_cast<int32>(resultCode));

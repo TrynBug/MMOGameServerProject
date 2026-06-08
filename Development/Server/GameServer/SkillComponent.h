@@ -36,7 +36,7 @@ public:
     //   dir    : 시전 방향 (정규화된 X-Z). 체인 전체가 공유한다.
     //   seed   : 난수 재현용 (scatter 등). 클라와 공유된 값.
     //   targetPos : 타겟/마우스 위치 (X-Z). 즉시이동(블링크) 거리 클램프에 사용.
-    void TryCast(int64 skillKey, const Vector3& origin, const Vector3& dir, const Vector3& targetPos, uint32 seed);
+    void TryCast(int32 skillKey, const Vector3& origin, const Vector3& dir, const Vector3& targetPos, uint32 seed);
 
     // 매 tick(액터 Update 안에서) 호출. 진행 중인 체인의 도래한 페이즈를 발동한다.
     void Update(int64 deltaMs);
@@ -66,7 +66,7 @@ private:
     // firePhase 가 이동 페이즈에서 실제 사용한 이동거리. CastNtf(move_distance)로 실어 원격 재현에 쓴다. 이동 아니면 0.
     float   m_lastMoveDistance = 0.0f;
 
-    int64 m_pendingSkillKey = 0;   // 다음에 발동할 페이즈 스킬 Key (0 = 더 없음)
+    int32 m_pendingSkillKey = 0;   // 다음에 발동할 페이즈 스킬 Key (0 = 더 없음)
     int64 m_pendingFireAtMs = 0;   // 그 페이즈 발동 시각 (m_elapsedMs 기준)
 
     bool    m_pendingIsEntry = false;   // 다음 발동이 entry 페이즈인가 (origin = 호출자 지정값)

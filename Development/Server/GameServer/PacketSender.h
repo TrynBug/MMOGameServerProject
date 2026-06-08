@@ -49,11 +49,11 @@ public:
     // Stage 로딩 완료 결과 + 캐릭터 스폰 확정 전송 (StageLoadCompleteRes).
     // 클라의 StageLoadCompleteReq에 대한 응답. 서버가 결정한 spawn 위치/회전을 포함한다.
     // 다른 주변 오브젝트 정보는 ObjectVisibilityNtf로 별도 전송.
-    void SendStageLoadCompleteRes(int64 userId, EResultCode resultCode, int64 stageId, int64 stageDataKey,
+    void SendStageLoadCompleteRes(int64 userId, EResultCode resultCode, int64 stageId, int32 stageDataKey,
                                   float myPosX, float myPosY, float myPosZ, float myYaw);
 
     // Stage 이동 요청 결과 전송 (StageMoveRes). 성공 = 클라는 로딩 시작.
-    void SendStageMoveRes(int64 userId, EResultCode resultCode, const std::string& errorMsg, int64 targetStageDataKey);
+    void SendStageMoveRes(int64 userId, EResultCode resultCode, const std::string& errorMsg, int32 targetStageDataKey);
 
     // 오브젝트 가시성 알림 전송 (ObjectVisibilityNtf). userId에게 spawns/despawnIds 전송.
     void SendObjectVisibilityNtf(int64 userId,
@@ -77,14 +77,14 @@ public:
 
     // 버프 뱃지 알림 전송 (BuffNtf / BuffRemoveNtf). UI 뱃지 데이터(키/스택/남은시간)만 담는다.
     // remainTimeMs: -1 이면 영구(클라에서 카운트다운 표시 안 함).
-    void SendBuffNtf(int64 userId, int64 objectId, int64 buffKey, int32 stackCount, int32 remainTimeMs);
-    void SendBuffRemoveNtf(int64 userId, int64 objectId, int64 buffKey);
+    void SendBuffNtf(int64 userId, int64 objectId, int32 buffKey, int32 stackCount, int32 remainTimeMs);
+    void SendBuffRemoveNtf(int64 userId, int64 objectId, int32 buffKey);
 
     // 스킬 대미지 알림 전송 (SkillDamageNtf). Stage 가 대미지 적용 시점에 대상 주변 AOI 유저들에게 broadcast.
     void SendSkillDamageNtf(int64 userId, int64 targetObjectId, double damage, bool isDuplicate, double remainingHp);
 
     // 스킬 시전 알림 전송 (SkillCastNtf). Stage 가 시전자 주변 AOI 유저들에게 broadcast. 클라 비주얼 재현용.
-    void SendSkillCastNtf(int64 userId, int64 casterObjectId, int64 skillKey, int64 effectId,
+    void SendSkillCastNtf(int64 userId, int64 casterObjectId, int32 skillKey, int64 effectId,
                           float originX, float originY, float originZ, float dirX, float dirZ, uint32 seed,
                           float moveDistance);
 

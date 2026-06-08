@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "Town.h"
 
-Town::Town(int64 stageId, int64 stageDataKey)
+Town::Town(int64 stageId, int32 stageDataKey)
     : Town(stageId, stageDataKey, LoadStageGridParams(stageDataKey))   // 위임. LoadStageGridParams는 1회만 호출.
 {
 }
 
-Town::Town(int64 stageId, int64 stageDataKey, const StageGridParams& params)
+Town::Town(int64 stageId, int32 stageDataKey, const StageGridParams& params)
     : Stage(stageId, stageDataKey,
             params.stageType,
             params.worldMinX, params.worldMinZ,

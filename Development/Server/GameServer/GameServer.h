@@ -103,7 +103,7 @@ private:
     //   - 실패: resultCode=Fail,    errorMsg=사유, pCharacter=nullptr
     // 스폰 좌표는 이 패킷에 싣지 않는다. 로딩 완료 후 StageLoadCompleteRes가 좌표의 단일 출처.
     void sendCharacterSelectRes(int64 userId, EResultCode resultCode, const std::string& errorMsg,
-                                const DataStructures::Character* pCharacter, int64 stageDataKey);
+                                const DataStructures::Character* pCharacter, int32 stageDataKey);
 
 private:
     // NavMesh 데이터 관리, 길찾기 기능 제공
