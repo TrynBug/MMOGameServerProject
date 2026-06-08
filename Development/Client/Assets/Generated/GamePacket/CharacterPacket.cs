@@ -31,11 +31,10 @@ namespace GamePacket {
             "KAkSDgoGam9iX2lkGAIgASgFIm4KEkNoYXJhY3RlckNyZWF0ZVJlcxITCgty",
             "ZXN1bHRfY29kZRgBIAEoBRIRCgllcnJvcl9tc2cYAiABKAkSMAoNbmV3X2No",
             "YXJhY3RlchgDIAEoCzIZLkRhdGFTdHJ1Y3R1cmVzLkNoYXJhY3RlciIqChJD",
-            "aGFyYWN0ZXJTZWxlY3RSZXESFAoMY2hhcmFjdGVyX2lkGAEgASgDIp4BChJD",
-            "aGFyYWN0ZXJTZWxlY3RSZXMSEwoLcmVzdWx0X2NvZGUYASABKAUSEQoJZXJy",
-            "b3JfbXNnGAIgASgJEhQKDGNoYXJhY3Rlcl9pZBgDIAEoAxIQCghzdGFnZV9p",
-            "ZBgEIAEoAxINCgVwb3NfeBgFIAEoAhINCgVwb3NfeRgGIAEoAhINCgVwb3Nf",
-            "ehgHIAEoAhILCgN5YXcYCCABKAJiBnByb3RvMw=="));
+            "aGFyYWN0ZXJTZWxlY3RSZXESFAoMY2hhcmFjdGVyX2lkGAEgASgDInAKEkNo",
+            "YXJhY3RlclNlbGVjdFJlcxITCgtyZXN1bHRfY29kZRgBIAEoBRIRCgllcnJv",
+            "cl9tc2cYAiABKAkSFAoMY2hhcmFjdGVyX2lkGAMgASgDEhYKDnN0YWdlX2Rh",
+            "dGFfa2V5GAkgASgDSgQIBBAJYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::DataStructures.CharacterReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -43,7 +42,7 @@ namespace GamePacket {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterCreateReq), global::GamePacket.CharacterCreateReq.Parser, new[]{ "Name", "JobId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterCreateRes), global::GamePacket.CharacterCreateRes.Parser, new[]{ "ResultCode", "ErrorMsg", "NewCharacter" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSelectReq), global::GamePacket.CharacterSelectReq.Parser, new[]{ "CharacterId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSelectRes), global::GamePacket.CharacterSelectRes.Parser, new[]{ "ResultCode", "ErrorMsg", "CharacterId", "StageId", "PosX", "PosY", "PosZ", "Yaw" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSelectRes), global::GamePacket.CharacterSelectRes.Parser, new[]{ "ResultCode", "ErrorMsg", "CharacterId", "StageDataKey" }, null, null, null, null)
           }));
     }
     #endregion
@@ -986,8 +985,9 @@ namespace GamePacket {
   /// 캐릭터 선택 결과 (게임서버 -> 클라)
   /// result_code 는 EResultCode (1=Success, 2=Fail). 0은 사용하지 않음.
   ///
-  /// 성공 시: 클라는 이 패킷의 spawn 정보로 LocalPlayer 스폰과 Game 씬 전환을 진행한다.
-  /// 실패 시: error_msg 만 의미 있고 spawn 관련 필드는 기본값.
+  /// 성공 시: 클라는 Game 씬 전환 + 맵 로딩을 시작하고, 완료 후 StageLoadCompleteReq를 보낸다.
+  ///          스폰 위치/방향은 이후 StageEnterNtf로 전달된다 (좌표 정보의 단일 출처).
+  /// 실패 시: error_msg 만 의미 있음.
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class CharacterSelectRes : pb::IMessage<CharacterSelectRes>
@@ -1027,11 +1027,7 @@ namespace GamePacket {
       resultCode_ = other.resultCode_;
       errorMsg_ = other.errorMsg_;
       characterId_ = other.characterId_;
-      stageId_ = other.stageId_;
-      posX_ = other.posX_;
-      posY_ = other.posY_;
-      posZ_ = other.posZ_;
-      yaw_ = other.yaw_;
+      stageDataKey_ = other.stageDataKey_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1086,78 +1082,18 @@ namespace GamePacket {
       }
     }
 
-    /// <summary>Field number for the "stage_id" field.</summary>
-    public const int StageIdFieldNumber = 4;
-    private long stageId_;
+    /// <summary>Field number for the "stage_data_key" field.</summary>
+    public const int StageDataKeyFieldNumber = 9;
+    private long stageDataKey_;
     /// <summary>
-    /// 입장할 Stage ID
+    /// 입장할 Stage 데이터 Key (클라가 로딩할 맵 리소스 식별)
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long StageId {
-      get { return stageId_; }
+    public long StageDataKey {
+      get { return stageDataKey_; }
       set {
-        stageId_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "pos_x" field.</summary>
-    public const int PosXFieldNumber = 5;
-    private float posX_;
-    /// <summary>
-    /// 스폰 위치 X
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float PosX {
-      get { return posX_; }
-      set {
-        posX_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "pos_y" field.</summary>
-    public const int PosYFieldNumber = 6;
-    private float posY_;
-    /// <summary>
-    /// 스폰 위치 Y
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float PosY {
-      get { return posY_; }
-      set {
-        posY_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "pos_z" field.</summary>
-    public const int PosZFieldNumber = 7;
-    private float posZ_;
-    /// <summary>
-    /// 스폰 위치 Z
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float PosZ {
-      get { return posZ_; }
-      set {
-        posZ_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "yaw" field.</summary>
-    public const int YawFieldNumber = 8;
-    private float yaw_;
-    /// <summary>
-    /// 스폰 회전 (Y축, degree)
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float Yaw {
-      get { return yaw_; }
-      set {
-        yaw_ = value;
+        stageDataKey_ = value;
       }
     }
 
@@ -1179,11 +1115,7 @@ namespace GamePacket {
       if (ResultCode != other.ResultCode) return false;
       if (ErrorMsg != other.ErrorMsg) return false;
       if (CharacterId != other.CharacterId) return false;
-      if (StageId != other.StageId) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosX, other.PosX)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Yaw, other.Yaw)) return false;
+      if (StageDataKey != other.StageDataKey) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1194,11 +1126,7 @@ namespace GamePacket {
       if (ResultCode != 0) hash ^= ResultCode.GetHashCode();
       if (ErrorMsg.Length != 0) hash ^= ErrorMsg.GetHashCode();
       if (CharacterId != 0L) hash ^= CharacterId.GetHashCode();
-      if (StageId != 0L) hash ^= StageId.GetHashCode();
-      if (PosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosX);
-      if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
-      if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
-      if (Yaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Yaw);
+      if (StageDataKey != 0L) hash ^= StageDataKey.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1229,25 +1157,9 @@ namespace GamePacket {
         output.WriteRawTag(24);
         output.WriteInt64(CharacterId);
       }
-      if (StageId != 0L) {
-        output.WriteRawTag(32);
-        output.WriteInt64(StageId);
-      }
-      if (PosX != 0F) {
-        output.WriteRawTag(45);
-        output.WriteFloat(PosX);
-      }
-      if (PosY != 0F) {
-        output.WriteRawTag(53);
-        output.WriteFloat(PosY);
-      }
-      if (PosZ != 0F) {
-        output.WriteRawTag(61);
-        output.WriteFloat(PosZ);
-      }
-      if (Yaw != 0F) {
-        output.WriteRawTag(69);
-        output.WriteFloat(Yaw);
+      if (StageDataKey != 0L) {
+        output.WriteRawTag(72);
+        output.WriteInt64(StageDataKey);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -1271,25 +1183,9 @@ namespace GamePacket {
         output.WriteRawTag(24);
         output.WriteInt64(CharacterId);
       }
-      if (StageId != 0L) {
-        output.WriteRawTag(32);
-        output.WriteInt64(StageId);
-      }
-      if (PosX != 0F) {
-        output.WriteRawTag(45);
-        output.WriteFloat(PosX);
-      }
-      if (PosY != 0F) {
-        output.WriteRawTag(53);
-        output.WriteFloat(PosY);
-      }
-      if (PosZ != 0F) {
-        output.WriteRawTag(61);
-        output.WriteFloat(PosZ);
-      }
-      if (Yaw != 0F) {
-        output.WriteRawTag(69);
-        output.WriteFloat(Yaw);
+      if (StageDataKey != 0L) {
+        output.WriteRawTag(72);
+        output.WriteInt64(StageDataKey);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -1310,20 +1206,8 @@ namespace GamePacket {
       if (CharacterId != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(CharacterId);
       }
-      if (StageId != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageId);
-      }
-      if (PosX != 0F) {
-        size += 1 + 4;
-      }
-      if (PosY != 0F) {
-        size += 1 + 4;
-      }
-      if (PosZ != 0F) {
-        size += 1 + 4;
-      }
-      if (Yaw != 0F) {
-        size += 1 + 4;
+      if (StageDataKey != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageDataKey);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1346,20 +1230,8 @@ namespace GamePacket {
       if (other.CharacterId != 0L) {
         CharacterId = other.CharacterId;
       }
-      if (other.StageId != 0L) {
-        StageId = other.StageId;
-      }
-      if (other.PosX != 0F) {
-        PosX = other.PosX;
-      }
-      if (other.PosY != 0F) {
-        PosY = other.PosY;
-      }
-      if (other.PosZ != 0F) {
-        PosZ = other.PosZ;
-      }
-      if (other.Yaw != 0F) {
-        Yaw = other.Yaw;
+      if (other.StageDataKey != 0L) {
+        StageDataKey = other.StageDataKey;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1392,24 +1264,8 @@ namespace GamePacket {
             CharacterId = input.ReadInt64();
             break;
           }
-          case 32: {
-            StageId = input.ReadInt64();
-            break;
-          }
-          case 45: {
-            PosX = input.ReadFloat();
-            break;
-          }
-          case 53: {
-            PosY = input.ReadFloat();
-            break;
-          }
-          case 61: {
-            PosZ = input.ReadFloat();
-            break;
-          }
-          case 69: {
-            Yaw = input.ReadFloat();
+          case 72: {
+            StageDataKey = input.ReadInt64();
             break;
           }
         }
@@ -1443,24 +1299,8 @@ namespace GamePacket {
             CharacterId = input.ReadInt64();
             break;
           }
-          case 32: {
-            StageId = input.ReadInt64();
-            break;
-          }
-          case 45: {
-            PosX = input.ReadFloat();
-            break;
-          }
-          case 53: {
-            PosY = input.ReadFloat();
-            break;
-          }
-          case 61: {
-            PosZ = input.ReadFloat();
-            break;
-          }
-          case 69: {
-            Yaw = input.ReadFloat();
+          case 72: {
+            StageDataKey = input.ReadInt64();
             break;
           }
         }

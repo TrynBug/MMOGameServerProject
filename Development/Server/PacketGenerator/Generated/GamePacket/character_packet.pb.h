@@ -231,12 +231,8 @@ class CharacterSelectRes final : public ::google::protobuf::Message
   enum : int {
     kErrorMsgFieldNumber = 2,
     kCharacterIdFieldNumber = 3,
+    kStageDataKeyFieldNumber = 9,
     kResultCodeFieldNumber = 1,
-    kPosXFieldNumber = 5,
-    kStageIdFieldNumber = 4,
-    kPosYFieldNumber = 6,
-    kPosZFieldNumber = 7,
-    kYawFieldNumber = 8,
   };
   // string error_msg = 2;
   void clear_error_msg() ;
@@ -263,6 +259,16 @@ class CharacterSelectRes final : public ::google::protobuf::Message
   void _internal_set_character_id(::int64_t value);
 
   public:
+  // int64 stage_data_key = 9;
+  void clear_stage_data_key() ;
+  ::int64_t stage_data_key() const;
+  void set_stage_data_key(::int64_t value);
+
+  private:
+  ::int64_t _internal_stage_data_key() const;
+  void _internal_set_stage_data_key(::int64_t value);
+
+  public:
   // int32 result_code = 1;
   void clear_result_code() ;
   ::int32_t result_code() const;
@@ -273,62 +279,12 @@ class CharacterSelectRes final : public ::google::protobuf::Message
   void _internal_set_result_code(::int32_t value);
 
   public:
-  // float pos_x = 5;
-  void clear_pos_x() ;
-  float pos_x() const;
-  void set_pos_x(float value);
-
-  private:
-  float _internal_pos_x() const;
-  void _internal_set_pos_x(float value);
-
-  public:
-  // int64 stage_id = 4;
-  void clear_stage_id() ;
-  ::int64_t stage_id() const;
-  void set_stage_id(::int64_t value);
-
-  private:
-  ::int64_t _internal_stage_id() const;
-  void _internal_set_stage_id(::int64_t value);
-
-  public:
-  // float pos_y = 6;
-  void clear_pos_y() ;
-  float pos_y() const;
-  void set_pos_y(float value);
-
-  private:
-  float _internal_pos_y() const;
-  void _internal_set_pos_y(float value);
-
-  public:
-  // float pos_z = 7;
-  void clear_pos_z() ;
-  float pos_z() const;
-  void set_pos_z(float value);
-
-  private:
-  float _internal_pos_z() const;
-  void _internal_set_pos_z(float value);
-
-  public:
-  // float yaw = 8;
-  void clear_yaw() ;
-  float yaw() const;
-  void set_yaw(float value);
-
-  private:
-  float _internal_yaw() const;
-  void _internal_set_yaw(float value);
-
-  public:
   // @@protoc_insertion_point(class_scope:GamePacket.CharacterSelectRes)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 8,
-                                   0, 55,
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
+                                   0, 47,
                                    2>
       _table_;
 
@@ -351,12 +307,8 @@ class CharacterSelectRes final : public ::google::protobuf::Message
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr error_msg_;
     ::int64_t character_id_;
+    ::int64_t stage_data_key_;
     ::int32_t result_code_;
-    float pos_x_;
-    ::int64_t stage_id_;
-    float pos_y_;
-    float pos_z_;
-    float yaw_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -1568,7 +1520,7 @@ inline void CharacterSelectRes::clear_result_code() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.result_code_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000008U);
 }
 inline ::int32_t CharacterSelectRes::result_code() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSelectRes.result_code)
@@ -1576,7 +1528,7 @@ inline ::int32_t CharacterSelectRes::result_code() const {
 }
 inline void CharacterSelectRes::set_result_code(::int32_t value) {
   _internal_set_result_code(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSelectRes.result_code)
 }
 inline ::int32_t CharacterSelectRes::_internal_result_code() const {
@@ -1678,129 +1630,29 @@ inline void CharacterSelectRes::_internal_set_character_id(::int64_t value) {
   _impl_.character_id_ = value;
 }
 
-// int64 stage_id = 4;
-inline void CharacterSelectRes::clear_stage_id() {
+// int64 stage_data_key = 9;
+inline void CharacterSelectRes::clear_stage_data_key() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.stage_id_ = ::int64_t{0};
+  _impl_.stage_data_key_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000010U);
+                  0x00000004U);
 }
-inline ::int64_t CharacterSelectRes::stage_id() const {
-  // @@protoc_insertion_point(field_get:GamePacket.CharacterSelectRes.stage_id)
-  return _internal_stage_id();
+inline ::int64_t CharacterSelectRes::stage_data_key() const {
+  // @@protoc_insertion_point(field_get:GamePacket.CharacterSelectRes.stage_data_key)
+  return _internal_stage_data_key();
 }
-inline void CharacterSelectRes::set_stage_id(::int64_t value) {
-  _internal_set_stage_id(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
-  // @@protoc_insertion_point(field_set:GamePacket.CharacterSelectRes.stage_id)
+inline void CharacterSelectRes::set_stage_data_key(::int64_t value) {
+  _internal_set_stage_data_key(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:GamePacket.CharacterSelectRes.stage_data_key)
 }
-inline ::int64_t CharacterSelectRes::_internal_stage_id() const {
+inline ::int64_t CharacterSelectRes::_internal_stage_data_key() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.stage_id_;
+  return _impl_.stage_data_key_;
 }
-inline void CharacterSelectRes::_internal_set_stage_id(::int64_t value) {
+inline void CharacterSelectRes::_internal_set_stage_data_key(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.stage_id_ = value;
-}
-
-// float pos_x = 5;
-inline void CharacterSelectRes::clear_pos_x() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_x_ = 0;
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00000008U);
-}
-inline float CharacterSelectRes::pos_x() const {
-  // @@protoc_insertion_point(field_get:GamePacket.CharacterSelectRes.pos_x)
-  return _internal_pos_x();
-}
-inline void CharacterSelectRes::set_pos_x(float value) {
-  _internal_set_pos_x(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
-  // @@protoc_insertion_point(field_set:GamePacket.CharacterSelectRes.pos_x)
-}
-inline float CharacterSelectRes::_internal_pos_x() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.pos_x_;
-}
-inline void CharacterSelectRes::_internal_set_pos_x(float value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_x_ = value;
-}
-
-// float pos_y = 6;
-inline void CharacterSelectRes::clear_pos_y() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_y_ = 0;
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00000020U);
-}
-inline float CharacterSelectRes::pos_y() const {
-  // @@protoc_insertion_point(field_get:GamePacket.CharacterSelectRes.pos_y)
-  return _internal_pos_y();
-}
-inline void CharacterSelectRes::set_pos_y(float value) {
-  _internal_set_pos_y(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
-  // @@protoc_insertion_point(field_set:GamePacket.CharacterSelectRes.pos_y)
-}
-inline float CharacterSelectRes::_internal_pos_y() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.pos_y_;
-}
-inline void CharacterSelectRes::_internal_set_pos_y(float value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_y_ = value;
-}
-
-// float pos_z = 7;
-inline void CharacterSelectRes::clear_pos_z() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_z_ = 0;
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00000040U);
-}
-inline float CharacterSelectRes::pos_z() const {
-  // @@protoc_insertion_point(field_get:GamePacket.CharacterSelectRes.pos_z)
-  return _internal_pos_z();
-}
-inline void CharacterSelectRes::set_pos_z(float value) {
-  _internal_set_pos_z(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
-  // @@protoc_insertion_point(field_set:GamePacket.CharacterSelectRes.pos_z)
-}
-inline float CharacterSelectRes::_internal_pos_z() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.pos_z_;
-}
-inline void CharacterSelectRes::_internal_set_pos_z(float value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_z_ = value;
-}
-
-// float yaw = 8;
-inline void CharacterSelectRes::clear_yaw() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.yaw_ = 0;
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00000080U);
-}
-inline float CharacterSelectRes::yaw() const {
-  // @@protoc_insertion_point(field_get:GamePacket.CharacterSelectRes.yaw)
-  return _internal_yaw();
-}
-inline void CharacterSelectRes::set_yaw(float value) {
-  _internal_set_yaw(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000080U);
-  // @@protoc_insertion_point(field_set:GamePacket.CharacterSelectRes.yaw)
-}
-inline float CharacterSelectRes::_internal_yaw() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.yaw_;
-}
-inline void CharacterSelectRes::_internal_set_yaw(float value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.yaw_ = value;
+  _impl_.stage_data_key_ = value;
 }
 
 #ifdef __GNUC__

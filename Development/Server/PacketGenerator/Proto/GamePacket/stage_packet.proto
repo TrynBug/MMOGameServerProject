@@ -3,33 +3,25 @@ syntax = "proto3";
 package GamePacket;
 
 import "Common/packet_id.proto";
-import "DataStructures/character.proto";
 
 // ──────────────────────────────────────────────
-// Stage 이동 / 주변 캐릭터 브로드캐스트
+// Stage 이동
 // ──────────────────────────────────────────────
-
-// 주변 캐릭터 간략 정보 (브로드캐스트용)
-// 좌표계: Unity 와 동일. Y가 높이, X-Z 가 평면.
-message NearbyCharacterInfo {
-    int64 user_id = 1;
-    string name = 2;
-    int32 level = 3;
-    int32 hp = 4;
-    int32 max_hp = 5;
-    float pos_x = 6;
-    float pos_y = 7;             // 높이
-    float pos_z = 8;             // 평면 깊이축
-    float dir_y = 9;             // Y축 회전, degree 단위
-}
+//
+// 이동 흐름 (2단계 입장):
+//   1) 클라 -> 서버: StageMoveReq (대상 stageDataKey + 시작위치 타입)
+//   2) 서버 -> 클라: StageMoveRes (성공 = 클라는 로딩 시작, 실패 = 사유 표시)
+//   3) 클라 -> 서버: StageLoadCompleteReq (맵/NavMesh 로딩 완료 보고)
+//   4) 서버 -> 클라: StageEnterNtf (캐릭터 스폰 확정. 위치/방향 포함)
+// 최초 입장(캐릭터 선택 -> Town)도 2)~4) 와 동일한 시퀀스를 사용한다
+// (2의 역할을 CharacterSelectRes가 대신함).
 
 // Stage 입장 완료 알림 (서버 -> 클라)
-// Stage 이동(동일 게임서버 내 / 다른 게임서버) 완료 후 전송.
-// 조괄됨: Stage 자체 정보(맵/엔티티)는 이 패킷에 넣지 않는다.
-// - 맵 경계 등 정적 정보는 클라이 GameData_Stage에서 조회한다.
+// 주의: Stage 자체 정보(맵/엔티티)는 이 패킷에 넣지 않는다.
+// - 맵 경계 등 정적 정보는 클라가 GameData_Stage에서 조회한다.
 // - 주변 오브젝트 정보는 별도의 ObjectVisibilityNtf로 전달된다.
 message StageEnterNtf {
-    int64 stage_id = 1;        // Stage Id
+    int64 stage_id = 1;        // Stage Id (런타임 발급)
     int64 stage_data_key = 2;  // Stage 데이터 Key
     float my_pos_x = 3;     // 서버가 결정한 내 spawn 위치
     float my_pos_y = 4;     // 높이
@@ -37,23 +29,27 @@ message StageEnterNtf {
     float my_pos_z = 6;     // 평면 깊이축
 }
 
-// 동일 게임서버 내 Stage 이동 요청 (클라 -> 서버)
+// Stage 이동 요청 (클라 -> 서버)
+// 동일 게임서버 / 다른 게임서버 이동을 모두 이 패킷으로 요청한다 (서버가 분기).
 message StageMoveReq {
-    int32 target_stage_id = 1;
+    int64 target_stage_data_key = 1;   // 이동할 Stage 데이터 Key
+    int32 position_type = 2;           // EStagePositionType 값 (도착 위치 선택)
+                                       // [치트 전용 임시] 포탈 도입 시 서버가 통과한 포탈로부터 결정한다.
+    int32 target_game_server_id = 3;   // 0 = 현재 서버. [치트 전용 임시] 타 서버 지정.
+                                       // 장기적으로는 매칭/채널 시스템이 대상 서버를 해석한다.
 }
 
-// 다른 게임서버 Stage로 이동 요청 (클라 -> 서버)
-message CrossServerStageMoveReq {
-    int32 target_game_server_id = 1;
-    int32 target_stage_id = 2;
+// Stage 이동 요청 결과 (서버 -> 클라)
+// result_code 는 EResultCode (1=Success, 2=Fail).
+// 성공 수신 = 클라는 입력을 잠그고 맵 로딩을 시작한다.
+// 크로스서버 이동 시에는 타겟 게임서버가 송신한다 (클라는 구분할 필요 없음).
+message StageMoveRes {
+    int32 result_code = 1;             // EResultCode 값
+    string error_msg = 2;              // 실패 시 사유 (성공 시 빈 문자열)
+    int64 target_stage_data_key = 3;   // 로딩할 Stage 데이터 Key
 }
 
-// 타 캐릭터 입장 알림 (서버 -> 클라 브로드캐스트)
-message CharacterEnterNtf {
-    NearbyCharacterInfo character = 1;
-}
-
-// 타 캐릭터 퇴장 알림 (서버 -> 클라 브로드캐스트)
-message CharacterLeaveNtf {
-    int64 user_id = 1;
+// Stage 로딩 완료 보고 (클라 -> 서버)
+// 맵 프리팹/NavMesh 교체 완료 후 전송. 서버는 이 시점에 캐릭터를 스폰하고 StageEnterNtf를 보낸다.
+message StageLoadCompleteReq {
 }
