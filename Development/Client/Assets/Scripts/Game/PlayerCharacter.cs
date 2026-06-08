@@ -6,7 +6,8 @@ using UnityEngine;
 namespace Client.Game
 {
     // 1명의 캐릭터(내 캐릭터 또는 다른 유저)를 표현하는 컴포넌트.
-    // StageManager가 GameEnterNtf/StageEnterNtf/CharacterEnterNtf 수신 시 동적으로 생성한다.
+    // LocalPlayer 는 StageManager.EnsureLocalPlayer 가 1회 생성해 영속 보관(스테이지 이동 시 숨김/재배치).
+    // 타 유저는 ObjectVisibilityNtf 수신 시 동적으로 생성/제거한다.
     // ActorObject 를 상속하여 스탯(StatHolder)과 현재 HP/MP 를 갖는다.
     public class PlayerCharacter : ActorObject
     {

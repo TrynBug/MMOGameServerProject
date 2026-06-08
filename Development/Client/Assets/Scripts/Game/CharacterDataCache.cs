@@ -6,10 +6,13 @@ namespace Client.Game
 {
     // 씬 간에 공유되어야 하는 유저/캐릭터 데이터를 보관하는 싱글톤 캐시.
     //
-    // Login 씬에서 CharacterListNtf를 받으면 여기에 저장하고,
-    // CharacterSelect 씬에서 꺼내서 UI에 표시한다.
-    // CharacterSelect 씬에서 CharacterSelectRes(성공) 받으면 SelectedSpawn에 저장하고,
-    // Game 씬에서 꺼내서 LocalPlayer 스폰에 사용한다.
+    // Login 씬에서 CharacterListNtf를 받으면 Characters에 저장(선택 UI용 목록).
+    // CharacterSelect 씬에서 CharacterSelectRes(성공)를 받으면 LocalCharacter(전체 데이터)와
+    // SelectedStageDataKey를 저장한다.
+    //
+    // LocalCharacter는 "내 캐릭터 데이터 모델"이다. 스테이지 이동마다 새로 만들지 않고
+    // 로그인~로그아웃 동안 계속 보관한다. 앞으로 인벤/장비/스킬 등이 붙으면 이 모델이 커진다.
+    // (GameObject 표현물은 Game 씬의 StageManager가 이 모델로부터 1회 생성해 들고 다닌다.)
     //
     // 일반 C# 싱글톤. MonoBehaviour가 아니므로 씬 전환과 무관하게 살아있다.
     public class CharacterDataCache
@@ -21,11 +24,15 @@ namespace Client.Game
         // 로그인 응답에서 받은 정보
         public long UserId { get; private set; }
 
-        // 게임서버가 보내준 캐릭터 목록 (0개 이상)
+        // 게임서버가 보내준 캐릭터 목록 (0개 이상). 선택 화면용 요약 목록.
         public IReadOnlyList<Character> Characters { get; private set; } = new List<Character>();
 
-        // 선택된 캐릭터의 spawn 정보 (CharacterSelectRes 성공 시 채워짐)
-        public SelectedSpawnInfo SelectedSpawn { get; private set; }
+        // 선택된 내 캐릭터의 전체 데이터 모델 (CharacterSelectRes 성공 시 채워짐).
+        // 영속: 스테이지 이동에도 유지된다.
+        public Character LocalCharacter { get; private set; }
+
+        // 최초 입장할 Stage 데이터 Key (CharacterSelectRes 의 stage_data_key).
+        public long SelectedStageDataKey { get; private set; }
 
         public void SetUserId(long userId)
         {
@@ -38,30 +45,19 @@ namespace Client.Game
             Characters = new List<Character>(characters);
         }
 
-        public void SetSelectedSpawn(long characterId, string name, long stageDataKey)
+        // CharacterSelectRes(성공) 수신 시 호출. 전체 데이터 모델을 깊은 복사로 보관한다.
+        public void SetLocalCharacter(Character character, long stageDataKey)
         {
-            SelectedSpawn = new SelectedSpawnInfo
-            {
-                CharacterId = characterId,
-                Name = name,
-                StageDataKey = stageDataKey,
-            };
+            LocalCharacter = character.Clone();   // protobuf 깊은 복사 (송신 버퍼와 분리)
+            SelectedStageDataKey = stageDataKey;
         }
 
         public void Clear()
         {
             UserId = 0;
             Characters = new List<Character>();
-            SelectedSpawn = null;
+            LocalCharacter = null;
+            SelectedStageDataKey = 0;
         }
-    }
-
-    // CharacterSelectRes(성공) 결과를 Game 씬으로 넘기기 위한 컨테이너.
-    // 스폰 좌표는 들어있지 않다 — 좌표는 로딩 완료 후 StageEnterNtf 가 단일 출처 (2단계 입장).
-    public class SelectedSpawnInfo
-    {
-        public long CharacterId;
-        public string Name;
-        public long StageDataKey;
     }
 }

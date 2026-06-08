@@ -22,7 +22,7 @@ namespace Client.Game
     //
     // 책임이 아닌 것:
     //   - 캐릭터 GameObject 생성 (Game 씬의 StageManager 가 함)
-    //   - StageEnterNtf 이후의 흐름 (Game 씬의 StageManager 가 함)
+    //   - 입장 이후의 흐름 (Game 씬의 StageManager 가 함)
     public class CharacterSelector : MonoBehaviour
     {
         // 외부 이벤트. UI 가 진행 상태를 표시할 수 있도록.
@@ -114,17 +114,18 @@ namespace Client.Game
                 return;
             }
 
-            Debug.Log($"[CharacterSelector] CharacterSelectRes OK. characterId={res.CharacterId}, stageDataKey={res.StageDataKey}");
+            Character character = res.Character;
+            if (character == null)
+            {
+                Debug.LogError("[CharacterSelector] CharacterSelectRes has null Character");
+                return;
+            }
 
-            // 선택된 캐릭터 이름은 캐시의 Characters 목록에서 찾아옴.
-            string name = findCharacterName(res.CharacterId);
+            Debug.Log($"[CharacterSelector] CharacterSelectRes OK. characterId={character.CharacterId}, name={character.Name}, stageDataKey={res.StageDataKey}");
 
-            // 선택 결과를 캐시에 저장 (Game 씬에서 꺼내 씀).
-            // 스폰 좌표는 없음 — 로딩 완료 보고 후 StageEnterNtf 로 받는다 (2단계 입장).
-            CharacterDataCache.Instance.SetSelectedSpawn(
-                characterId: res.CharacterId,
-                name: name,
-                stageDataKey: res.StageDataKey);
+            // 내 캐릭터 전체 데이터 모델을 캐시에 보관 (영속). Game 씬에서 이 모델로 LocalPlayer 를 만든다.
+            // 스폰 좌표는 없음 — 로딩 완료 보고 후 StageLoadCompleteRes 로 받는다 (2단계 입장).
+            CharacterDataCache.Instance.SetLocalCharacter(character, res.StageDataKey);
 
             // Game 씬으로 전환
             setStatus("게임 입장 중...");
@@ -171,15 +172,6 @@ namespace Client.Game
         }
 
         // ─── 헬퍼 ───────────────────────────────────────────────────────
-
-        private string findCharacterName(long characterId)
-        {
-            foreach (Character ch in CharacterDataCache.Instance.Characters)
-            {
-                if (ch != null && ch.CharacterId == characterId) return ch.Name;
-            }
-            return $"Character_{characterId}";
-        }
 
         private void setStatus(string msg)
         {

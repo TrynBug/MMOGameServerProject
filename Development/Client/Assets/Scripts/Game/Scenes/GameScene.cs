@@ -9,12 +9,13 @@ namespace Client.Game
     // Start 시점에 Init() 이 호출된다.
     //
     // 책임:
-    //   - 최초 입장 시 StageManager 에 스테이지 로딩 시작 요청 (BeginStageLoad)
-    //     → 로딩 완료 보고(StageLoadCompleteReq) → 서버가 스폰 → StageEnterNtf 로 LocalPlayer 생성
+    //   - 캐시의 LocalCharacter 데이터모델로 LocalPlayer GameObject 1회 생성(비활성 상태)
+    //   - StageManager 에 스테이지 로딩 시작 요청 (BeginStageLoad)
+    //     → 로딩 완료 보고(StageLoadCompleteReq) → 서버가 스폰 → StageLoadCompleteRes 로 LocalPlayer 활성화/배치
     //
     // 책임이 아닌 것:
     //   - 게임 로직 (StageManager 가 함)
-    //   - 캐릭터 GameObject 생성 (CharacterFactory 가 함)
+    //   - 캐릭터 GameObject 생성 자체 (CharacterFactory 가 함)
     //   - 패킷 핸들링 (StageManager 가 함)
     public class GameScene : BaseScene
     {
@@ -22,11 +23,11 @@ namespace Client.Game
         {
             Debug.Log("[GameScene] Init");
 
-            // 캐시에서 선택 결과 꺼내기. 정상 흐름이면 CharacterSelector 가 채워놨음.
-            SelectedSpawnInfo spawn = CharacterDataCache.Instance.SelectedSpawn;
-            if (spawn == null)
+            // 캐시에서 내 캐릭터 데이터모델 꺼내기. 정상 흐름이면 CharacterSelector 가 채워놨음.
+            DataStructures.Character localData = CharacterDataCache.Instance.LocalCharacter;
+            if (localData == null)
             {
-                Debug.LogError("[GameScene] SelectedSpawn is null. CharacterSelection 씬을 거치지 않고 진입한 것 같습니다.");
+                Debug.LogError("[GameScene] LocalCharacter is null. CharacterSelection 씬을 거치지 않고 진입한 것 같습니다.");
                 return;
             }
 
@@ -36,9 +37,13 @@ namespace Client.Game
                 return;
             }
 
+            // 데이터모델로 LocalPlayer 를 1회 생성한다 (비활성/조작불가 상태로 보관).
+            // 이후 스테이지를 이동해도 파괴하지 않고 숨김+재배치만 한다.
+            StageManager.Instance.EnsureLocalPlayer(localData);
+
             // 스테이지 로딩 시작 (NavMesh 교체 → StageLoadCompleteReq 송신).
-            // LocalPlayer 는 이후 StageEnterNtf 수신 시 StageManager 가 스폰한다.
-            StageManager.Instance.BeginStageLoad(spawn.StageDataKey);
+            // LocalPlayer 는 이후 StageLoadCompleteRes 수신 시 활성화+배치된다.
+            StageManager.Instance.BeginStageLoad(CharacterDataCache.Instance.SelectedStageDataKey);
 
             // 스테이지 이동 치트 키 (F5~F8). 코드로 부착하여 씬 에셋 수정 불필요.
             gameObject.AddComponent<StageMoveCheat>();
