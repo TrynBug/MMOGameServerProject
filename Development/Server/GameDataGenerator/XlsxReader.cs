@@ -6,6 +6,19 @@ namespace GameDataGenerator
     public class XlsxReader
     {
         // ----------------------------------------------------------------
+        // Excel에서 파일이 열려있어도 읽을 수 있도록 공유 모드로 워크북을 연다.
+        // (경로로 바로 열면 ClosedXML이 배타적 잠금을 시도해 Excel과 충돌함)
+        // ----------------------------------------------------------------
+        public static XLWorkbook OpenShared(string xlsxPath)
+        {
+            using var fs = new FileStream(xlsxPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            var ms = new MemoryStream();
+            fs.CopyTo(ms);
+            ms.Position = 0;
+            return new XLWorkbook(ms);
+        }
+
+        // ----------------------------------------------------------------
         // GameEnum.xlsx 파싱
         // ----------------------------------------------------------------
         public static List<EnumInfo> ReadEnumXlsx(string xlsxPath)
@@ -13,7 +26,7 @@ namespace GameDataGenerator
             var result = new List<EnumInfo>();
             var enumMap = new Dictionary<string, EnumInfo>();
 
-            using var workbook = new XLWorkbook(xlsxPath);
+            using var workbook = OpenShared(xlsxPath);
             var sheet = workbook.Worksheet(1);
 
             // 1행은 컬럼명(헤더) -> 2행부터 읽기
@@ -55,7 +68,7 @@ namespace GameDataGenerator
         // ----------------------------------------------------------------
         public static (string tableName, List<ColumnInfo> columns) ReadDataXlsx(string xlsxPath)
         {
-            using var workbook = new XLWorkbook(xlsxPath);
+            using var workbook = OpenShared(xlsxPath);
             var sheet = workbook.Worksheet(1);
 
             // 1행 B열: 데이터파일 이름

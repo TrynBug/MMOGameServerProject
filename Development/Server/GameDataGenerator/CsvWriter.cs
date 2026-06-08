@@ -21,7 +21,7 @@ namespace GameDataGenerator
                 ? columns.Where(c => c.IsForServer).ToList()
                 : columns.Where(c => c.IsForClient).ToList();
 
-            using var workbook = new XLWorkbook(xlsxPath);
+            using var workbook = XlsxReader.OpenShared(xlsxPath);
             var sheet = workbook.Worksheet(1);
 
             int lastRow = sheet.LastRowUsed()?.RowNumber() ?? 8;
