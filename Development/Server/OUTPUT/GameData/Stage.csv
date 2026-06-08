@@ -1,9 +1,9 @@
 ﻿Key,StageType,NavMeshFileName,sectorSize
 1,1,,100
 100,2,Town,10
-101,3,Field1,10
-102,3,Field2,10
-103,3,Field3,10
-104,4,Dungeon1,10
-105,4,Dungeon2,10
-106,4,Dungeon3,10
+101,3,Town,10
+102,3,Town,10
+103,3,Town,10
+104,4,Town,10
+105,4,Town,10
+106,4,Town,10

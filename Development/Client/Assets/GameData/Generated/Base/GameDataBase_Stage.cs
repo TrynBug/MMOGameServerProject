@@ -13,6 +13,7 @@ namespace GameData
         public long                 Key                  = 0;
         public string               Name                 = "";
         public EStageType           StageType            = EStageType.None;
+        public string               StagePrefabPath      = "";
         public string               NavMeshFileName      = "";
         public double               sectorSize           = 0;
     }
@@ -40,8 +41,9 @@ namespace GameData
             data.Key = long.Parse(fields[0]);
             data.Name = fields[1];
             data.StageType = (EStageType)int.Parse(fields[2]);
-            data.NavMeshFileName = fields[3];
-            data.sectorSize = double.Parse(fields[4]);
+            data.StagePrefabPath = fields[3];
+            data.NavMeshFileName = fields[4];
+            data.sectorSize = double.Parse(fields[5]);
 
             if (data.Key <= 0)
                 return false;

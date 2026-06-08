@@ -39,6 +39,9 @@ namespace Client.Game
 
         public long CurrentStageId { get; private set; }
 
+        // 현재 스테이지 맵 비주얼 인스턴스 (프리팹에서 생성). 스테이지 이동 시 파괴 후 재생성.
+        private GameObject m_currentMapInstance;
+
         // 스테이지 전환 중 여부. BeginStageLoad ~ StageLoadCompleteRes 사이 true.
         // true 동안 LocalPlayer 는 비활성(숨김+조작불가) 상태이고, 클라는 스테이지를 진행하지 않는다.
         public bool IsStageLoading { get; private set; }
@@ -122,8 +125,10 @@ namespace Client.Game
             despawnRemoteObjects();
 
             // NavMesh 교체 (같은 스테이지면 NavMeshService 가 no-op).
-            // 맵 프리팹 교체는 스테이지별 맵 리소스가 생기면 여기에 추가된다.
             loadNavMeshForStage(stageDataKey);
+
+            // 스테이지 맵 비주얼(프리팹) 교체.
+            loadStageMap(stageDataKey);
 
             // 로딩 완료 보고 → 서버가 입장 처리 후 캐릭터 스폰 + StageLoadCompleteRes.
             NetworkManager net = NetworkManager.Instance;
@@ -541,6 +546,34 @@ namespace Client.Game
             {
                 Debug.LogError($"[StageManager] NavMesh 로드 실패. stageDataKey={stageDataKey} navMeshName={navMeshName}");
             }
+        }
+
+        // 스테이지 맵 비주얼(프리팹)을 교체한다.
+        // 프리팹 경로 규약: Resources/Stages/{NavMeshFileName}  (예: Stages/Town, Stages/Field1)
+        // 프리팹이 아직 없으면 경고만 남기고 현재 씬 지오메트리를 그대로 둔다(no-op).
+        //   → 스테이지별 맵 프리팹을 만들어 Resources/Stages/ 에 넣으면 자동으로 적용된다.
+        //   (그 시점엔 Game 씬에 고정 배치된 정적 맵 지오메트리를 제거해야 중복되지 않는다.)
+        private void loadStageMap(long stageDataKey)
+        {
+            GameData_Stage stageData = GameDataTable_Stage.FindData(stageDataKey);
+            if (stageData == null || string.IsNullOrEmpty(stageData.NavMeshFileName))
+                return;
+
+            GameObject prefab = Resources.Load<GameObject>(stageData.StagePrefabPath);
+            if (prefab == null)
+            {
+                Debug.LogWarning($"[StageManager] 스테이지 맵 프리팹 없음: Resources/{stageData.StagePrefabPath} (현재 씬 지오메트리 유지)");
+                return;
+            }
+
+            // 이전 맵 인스턴스 파괴 후 새 맵 생성.
+            if (m_currentMapInstance != null)
+                Destroy(m_currentMapInstance);
+
+            m_currentMapInstance = Instantiate(prefab);
+            m_currentMapInstance.name = prefab.name;
+
+            Debug.Log($"[StageManager] 스테이지 맵 교체: {stageData.StagePrefabPath}");
         }
     }
 }

@@ -1,9 +1,9 @@
-﻿Key,Name,StageType,NavMeshFileName,sectorSize
-1,캐릭터 선택창,1,,100
-100,마을,2,Town,10
-101,필드1,3,Field1,10
-102,필드2,3,Field2,10
-103,필드3,3,Field3,10
-104,던전1,4,Dungeon1,10
-105,던전2,4,Dungeon2,10
-106,던전3,4,Dungeon3,10
+﻿Key,Name,StageType,StagePrefabPath,NavMeshFileName,sectorSize
+1,캐릭터 선택창,1,,,100
+100,마을,2,Prefabs/Stages/Town,Town,10
+101,필드1,3,Prefabs/Stages/Town,Town,10
+102,필드2,3,Prefabs/Stages/Town,Town,10
+103,필드3,3,Prefabs/Stages/Town,Town,10
+104,던전1,4,Prefabs/Stages/Town,Town,10
+105,던전2,4,Prefabs/Stages/Town,Town,10
+106,던전3,4,Prefabs/Stages/Town,Town,10
