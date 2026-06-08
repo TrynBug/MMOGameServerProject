@@ -31,10 +31,11 @@ namespace GamePacket {
             "KAkSDgoGam9iX2lkGAIgASgFIm4KEkNoYXJhY3RlckNyZWF0ZVJlcxITCgty",
             "ZXN1bHRfY29kZRgBIAEoBRIRCgllcnJvcl9tc2cYAiABKAkSMAoNbmV3X2No",
             "YXJhY3RlchgDIAEoCzIZLkRhdGFTdHJ1Y3R1cmVzLkNoYXJhY3RlciIqChJD",
-            "aGFyYWN0ZXJTZWxlY3RSZXESFAoMY2hhcmFjdGVyX2lkGAEgASgDInAKEkNo",
-            "YXJhY3RlclNlbGVjdFJlcxITCgtyZXN1bHRfY29kZRgBIAEoBRIRCgllcnJv",
-            "cl9tc2cYAiABKAkSFAoMY2hhcmFjdGVyX2lkGAMgASgDEhYKDnN0YWdlX2Rh",
-            "dGFfa2V5GAkgASgDSgQIBBAJYgZwcm90bzM="));
+            "aGFyYWN0ZXJTZWxlY3RSZXESFAoMY2hhcmFjdGVyX2lkGAEgASgDIo4BChJD",
+            "aGFyYWN0ZXJTZWxlY3RSZXMSEwoLcmVzdWx0X2NvZGUYASABKAUSEQoJZXJy",
+            "b3JfbXNnGAIgASgJEiwKCWNoYXJhY3RlchgKIAEoCzIZLkRhdGFTdHJ1Y3R1",
+            "cmVzLkNoYXJhY3RlchIWCg5zdGFnZV9kYXRhX2tleRgJIAEoA0oECAMQBEoE",
+            "CAQQCWIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::DataStructures.CharacterReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -42,7 +43,7 @@ namespace GamePacket {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterCreateReq), global::GamePacket.CharacterCreateReq.Parser, new[]{ "Name", "JobId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterCreateRes), global::GamePacket.CharacterCreateRes.Parser, new[]{ "ResultCode", "ErrorMsg", "NewCharacter" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSelectReq), global::GamePacket.CharacterSelectReq.Parser, new[]{ "CharacterId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSelectRes), global::GamePacket.CharacterSelectRes.Parser, new[]{ "ResultCode", "ErrorMsg", "CharacterId", "StageDataKey" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSelectRes), global::GamePacket.CharacterSelectRes.Parser, new[]{ "ResultCode", "ErrorMsg", "Character", "StageDataKey" }, null, null, null, null)
           }));
     }
     #endregion
@@ -985,8 +986,10 @@ namespace GamePacket {
   /// 캐릭터 선택 결과 (게임서버 -> 클라)
   /// result_code 는 EResultCode (1=Success, 2=Fail). 0은 사용하지 않음.
   ///
-  /// 성공 시: 클라는 Game 씬 전환 + 맵 로딩을 시작하고, 완료 후 StageLoadCompleteReq를 보낸다.
-  ///          스폰 위치/방향은 이후 StageEnterNtf로 전달된다 (좌표 정보의 단일 출처).
+  /// 성공 시: 클라는 character(전체 데이터)로 LocalPlayer 데이터모델을 만들어 보관하고,
+  ///          Game 씬 전환 + 맵 로딩을 시작한다. 완료 후 StageLoadCompleteReq를 보낸다.
+  ///          spawn 위치/방향은 이후 StageLoadCompleteRes로 전달된다 (좌표 정보의 단일 출처).
+  ///          클라는 이 캐릭터를 스테이지 이동마다 새로 만들지 않고 계속 보관한다(데이터 영속).
   /// 실패 시: error_msg 만 의미 있음.
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
@@ -1026,7 +1029,7 @@ namespace GamePacket {
     public CharacterSelectRes(CharacterSelectRes other) : this() {
       resultCode_ = other.resultCode_;
       errorMsg_ = other.errorMsg_;
-      characterId_ = other.characterId_;
+      character_ = other.character_ != null ? other.character_.Clone() : null;
       stageDataKey_ = other.stageDataKey_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -1067,18 +1070,18 @@ namespace GamePacket {
       }
     }
 
-    /// <summary>Field number for the "character_id" field.</summary>
-    public const int CharacterIdFieldNumber = 3;
-    private long characterId_;
+    /// <summary>Field number for the "character" field.</summary>
+    public const int CharacterFieldNumber = 10;
+    private global::DataStructures.Character character_;
     /// <summary>
-    /// 선택된 캐릭터 ID (클라 확인용)
+    /// 선택된 캐릭터 전체 데이터 (서버가 진실의 원천)
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long CharacterId {
-      get { return characterId_; }
+    public global::DataStructures.Character Character {
+      get { return character_; }
       set {
-        characterId_ = value;
+        character_ = value;
       }
     }
 
@@ -1114,7 +1117,7 @@ namespace GamePacket {
       }
       if (ResultCode != other.ResultCode) return false;
       if (ErrorMsg != other.ErrorMsg) return false;
-      if (CharacterId != other.CharacterId) return false;
+      if (!object.Equals(Character, other.Character)) return false;
       if (StageDataKey != other.StageDataKey) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -1125,7 +1128,7 @@ namespace GamePacket {
       int hash = 1;
       if (ResultCode != 0) hash ^= ResultCode.GetHashCode();
       if (ErrorMsg.Length != 0) hash ^= ErrorMsg.GetHashCode();
-      if (CharacterId != 0L) hash ^= CharacterId.GetHashCode();
+      if (character_ != null) hash ^= Character.GetHashCode();
       if (StageDataKey != 0L) hash ^= StageDataKey.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -1153,13 +1156,13 @@ namespace GamePacket {
         output.WriteRawTag(18);
         output.WriteString(ErrorMsg);
       }
-      if (CharacterId != 0L) {
-        output.WriteRawTag(24);
-        output.WriteInt64(CharacterId);
-      }
       if (StageDataKey != 0L) {
         output.WriteRawTag(72);
         output.WriteInt64(StageDataKey);
+      }
+      if (character_ != null) {
+        output.WriteRawTag(82);
+        output.WriteMessage(Character);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -1179,13 +1182,13 @@ namespace GamePacket {
         output.WriteRawTag(18);
         output.WriteString(ErrorMsg);
       }
-      if (CharacterId != 0L) {
-        output.WriteRawTag(24);
-        output.WriteInt64(CharacterId);
-      }
       if (StageDataKey != 0L) {
         output.WriteRawTag(72);
         output.WriteInt64(StageDataKey);
+      }
+      if (character_ != null) {
+        output.WriteRawTag(82);
+        output.WriteMessage(Character);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -1203,8 +1206,8 @@ namespace GamePacket {
       if (ErrorMsg.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(ErrorMsg);
       }
-      if (CharacterId != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(CharacterId);
+      if (character_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Character);
       }
       if (StageDataKey != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageDataKey);
@@ -1227,8 +1230,11 @@ namespace GamePacket {
       if (other.ErrorMsg.Length != 0) {
         ErrorMsg = other.ErrorMsg;
       }
-      if (other.CharacterId != 0L) {
-        CharacterId = other.CharacterId;
+      if (other.character_ != null) {
+        if (character_ == null) {
+          Character = new global::DataStructures.Character();
+        }
+        Character.MergeFrom(other.Character);
       }
       if (other.StageDataKey != 0L) {
         StageDataKey = other.StageDataKey;
@@ -1260,12 +1266,15 @@ namespace GamePacket {
             ErrorMsg = input.ReadString();
             break;
           }
-          case 24: {
-            CharacterId = input.ReadInt64();
-            break;
-          }
           case 72: {
             StageDataKey = input.ReadInt64();
+            break;
+          }
+          case 82: {
+            if (character_ == null) {
+              Character = new global::DataStructures.Character();
+            }
+            input.ReadMessage(Character);
             break;
           }
         }
@@ -1295,12 +1304,15 @@ namespace GamePacket {
             ErrorMsg = input.ReadString();
             break;
           }
-          case 24: {
-            CharacterId = input.ReadInt64();
-            break;
-          }
           case 72: {
             StageDataKey = input.ReadInt64();
+            break;
+          }
+          case 82: {
+            if (character_ == null) {
+              Character = new global::DataStructures.Character();
+            }
+            input.ReadMessage(Character);
             break;
           }
         }

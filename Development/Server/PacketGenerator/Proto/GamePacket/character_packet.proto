@@ -44,13 +44,15 @@ message CharacterSelectReq {
 // 캐릭터 선택 결과 (게임서버 -> 클라)
 // result_code 는 EResultCode (1=Success, 2=Fail). 0은 사용하지 않음.
 //
-// 성공 시: 클라는 Game 씬 전환 + 맵 로딩을 시작하고, 완료 후 StageLoadCompleteReq를 보낸다.
-//          스폰 위치/방향은 이후 StageEnterNtf로 전달된다 (좌표 정보의 단일 출처).
+// 성공 시: 클라는 character(전체 데이터)로 LocalPlayer 데이터모델을 만들어 보관하고,
+//          Game 씬 전환 + 맵 로딩을 시작한다. 완료 후 StageLoadCompleteReq를 보낸다.
+//          spawn 위치/방향은 이후 StageLoadCompleteRes로 전달된다 (좌표 정보의 단일 출처).
+//          클라는 이 캐릭터를 스테이지 이동마다 새로 만들지 않고 계속 보관한다(데이터 영속).
 // 실패 시: error_msg 만 의미 있음.
 message CharacterSelectRes {
-    reserved 4 to 8;             // 과거 stage_id / spawn 좌표 필드. StageEnterNtf로 일원화되어 제거됨.
+    reserved 3, 4 to 8;          // 3: 과거 character_id(이제 character에 포함). 4-8: 과거 spawn 좌표.
     int32 result_code = 1;       // EResultCode 값
     string error_msg = 2;        // 실패 시 사유 메시지 (성공 시 빈 문자열)
-    int64 character_id = 3;      // 선택된 캐릭터 ID (클라 확인용)
+    DataStructures.Character character = 10;  // 선택된 캐릭터 전체 데이터 (서버가 진실의 원천)
     int64 stage_data_key = 9;    // 입장할 Stage 데이터 Key (클라가 로딩할 맵 리소스 식별)
 }

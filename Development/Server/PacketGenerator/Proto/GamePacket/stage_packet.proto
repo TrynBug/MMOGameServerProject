@@ -12,22 +12,9 @@ import "Common/packet_id.proto";
 //   1) 클라 -> 서버: StageMoveReq (대상 stageDataKey + 시작위치 타입)
 //   2) 서버 -> 클라: StageMoveRes (성공 = 클라는 로딩 시작, 실패 = 사유 표시)
 //   3) 클라 -> 서버: StageLoadCompleteReq (맵/NavMesh 로딩 완료 보고)
-//   4) 서버 -> 클라: StageEnterNtf (캐릭터 스폰 확정. 위치/방향 포함)
+//   4) 서버 -> 클라: StageLoadCompleteRes (입장 처리 완료 + 캐릭터 스폰 확정. 위치/방향 포함)
 // 최초 입장(캐릭터 선택 -> Town)도 2)~4) 와 동일한 시퀀스를 사용한다
 // (2의 역할을 CharacterSelectRes가 대신함).
-
-// Stage 입장 완료 알림 (서버 -> 클라)
-// 주의: Stage 자체 정보(맵/엔티티)는 이 패킷에 넣지 않는다.
-// - 맵 경계 등 정적 정보는 클라가 GameData_Stage에서 조회한다.
-// - 주변 오브젝트 정보는 별도의 ObjectVisibilityNtf로 전달된다.
-message StageEnterNtf {
-    int64 stage_id = 1;        // Stage Id (런타임 발급)
-    int64 stage_data_key = 2;  // Stage 데이터 Key
-    float my_pos_x = 3;     // 서버가 결정한 내 spawn 위치
-    float my_pos_y = 4;     // 높이
-    float my_yaw   = 5;     // degree
-    float my_pos_z = 6;     // 평면 깊이축
-}
 
 // Stage 이동 요청 (클라 -> 서버)
 // 동일 게임서버 / 다른 게임서버 이동을 모두 이 패킷으로 요청한다 (서버가 분기).
@@ -50,6 +37,24 @@ message StageMoveRes {
 }
 
 // Stage 로딩 완료 보고 (클라 -> 서버)
-// 맵 프리팹/NavMesh 교체 완료 후 전송. 서버는 이 시점에 캐릭터를 스폰하고 StageEnterNtf를 보낸다.
+// 맵 프리팹/NavMesh 교체 완료 후 전송. 서버는 이 시점에 입장 처리(향후 인벤/스킬 로드 등) 후
+// 캐릭터를 스폰하고 StageLoadCompleteRes로 응답한다.
 message StageLoadCompleteReq {
+}
+
+// Stage 로딩 완료 결과 + 캐릭터 스폰 확정 (서버 -> 클라)
+// result_code 는 EResultCode (1=Success, 2=Fail).
+// 성공 시: 클라는 보유 중인 LocalPlayer를 spawn 위치에 배치하고 조작 가능 상태로 전환한다.
+// 이 패킷 수신 전까지 클라는 '로딩 중'으로 캐릭터를 씬에 스폰하지 않는다.
+// 주의: 캐릭터 데이터(스탯/인벤 등)는 이 패킷에 없다. 클라가 CharacterSelectRes로 이미 보유.
+//       여기엔 이번 Stage에서의 spawn 좌표/식별 정보만 담는다.
+message StageLoadCompleteRes {
+    int32 result_code = 1;     // EResultCode 값
+    string error_msg = 2;      // 실패 시 사유 (성공 시 빈 문자열)
+    int64 stage_id = 3;        // Stage Id (런타임 발급)
+    int64 stage_data_key = 4;  // Stage 데이터 Key
+    float my_pos_x = 5;     // 서버가 결정한 내 spawn 위치
+    float my_pos_y = 6;     // 높이
+    float my_yaw   = 7;     // degree
+    float my_pos_z = 8;     // 평면 깊이축
 }

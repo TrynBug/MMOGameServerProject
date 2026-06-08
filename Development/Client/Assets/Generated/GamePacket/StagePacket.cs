@@ -25,435 +25,29 @@ namespace GamePacket {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Ch1HYW1lUGFja2V0L3N0YWdlX3BhY2tldC5wcm90bxIKR2FtZVBhY2tldBoW",
-            "Q29tbW9uL3BhY2tldF9pZC5wcm90byJ/Cg1TdGFnZUVudGVyTnRmEhAKCHN0",
-            "YWdlX2lkGAEgASgDEhYKDnN0YWdlX2RhdGFfa2V5GAIgASgDEhAKCG15X3Bv",
-            "c194GAMgASgCEhAKCG15X3Bvc195GAQgASgCEg4KBm15X3lhdxgFIAEoAhIQ",
-            "CghteV9wb3NfehgGIAEoAiJjCgxTdGFnZU1vdmVSZXESHQoVdGFyZ2V0X3N0",
-            "YWdlX2RhdGFfa2V5GAEgASgDEhUKDXBvc2l0aW9uX3R5cGUYAiABKAUSHQoV",
-            "dGFyZ2V0X2dhbWVfc2VydmVyX2lkGAMgASgFIlUKDFN0YWdlTW92ZVJlcxIT",
-            "CgtyZXN1bHRfY29kZRgBIAEoBRIRCgllcnJvcl9tc2cYAiABKAkSHQoVdGFy",
-            "Z2V0X3N0YWdlX2RhdGFfa2V5GAMgASgDIhYKFFN0YWdlTG9hZENvbXBsZXRl",
-            "UmVxYgZwcm90bzM="));
+            "Q29tbW9uL3BhY2tldF9pZC5wcm90byJjCgxTdGFnZU1vdmVSZXESHQoVdGFy",
+            "Z2V0X3N0YWdlX2RhdGFfa2V5GAEgASgDEhUKDXBvc2l0aW9uX3R5cGUYAiAB",
+            "KAUSHQoVdGFyZ2V0X2dhbWVfc2VydmVyX2lkGAMgASgFIlUKDFN0YWdlTW92",
+            "ZVJlcxITCgtyZXN1bHRfY29kZRgBIAEoBRIRCgllcnJvcl9tc2cYAiABKAkS",
+            "HQoVdGFyZ2V0X3N0YWdlX2RhdGFfa2V5GAMgASgDIhYKFFN0YWdlTG9hZENv",
+            "bXBsZXRlUmVxIq4BChRTdGFnZUxvYWRDb21wbGV0ZVJlcxITCgtyZXN1bHRf",
+            "Y29kZRgBIAEoBRIRCgllcnJvcl9tc2cYAiABKAkSEAoIc3RhZ2VfaWQYAyAB",
+            "KAMSFgoOc3RhZ2VfZGF0YV9rZXkYBCABKAMSEAoIbXlfcG9zX3gYBSABKAIS",
+            "EAoIbXlfcG9zX3kYBiABKAISDgoGbXlfeWF3GAcgASgCEhAKCG15X3Bvc196",
+            "GAggASgCYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageEnterNtf), global::GamePacket.StageEnterNtf.Parser, new[]{ "StageId", "StageDataKey", "MyPosX", "MyPosY", "MyYaw", "MyPosZ" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageMoveReq), global::GamePacket.StageMoveReq.Parser, new[]{ "TargetStageDataKey", "PositionType", "TargetGameServerId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageMoveRes), global::GamePacket.StageMoveRes.Parser, new[]{ "ResultCode", "ErrorMsg", "TargetStageDataKey" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageLoadCompleteReq), global::GamePacket.StageLoadCompleteReq.Parser, null, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageLoadCompleteReq), global::GamePacket.StageLoadCompleteReq.Parser, null, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageLoadCompleteRes), global::GamePacket.StageLoadCompleteRes.Parser, new[]{ "ResultCode", "ErrorMsg", "StageId", "StageDataKey", "MyPosX", "MyPosY", "MyYaw", "MyPosZ" }, null, null, null, null)
           }));
     }
     #endregion
 
   }
   #region Messages
-  /// <summary>
-  /// Stage 입장 완료 알림 (서버 -> 클라)
-  /// 주의: Stage 자체 정보(맵/엔티티)는 이 패킷에 넣지 않는다.
-  /// - 맵 경계 등 정적 정보는 클라가 GameData_Stage에서 조회한다.
-  /// - 주변 오브젝트 정보는 별도의 ObjectVisibilityNtf로 전달된다.
-  /// </summary>
-  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
-  public sealed partial class StageEnterNtf : pb::IMessage<StageEnterNtf>
-  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      , pb::IBufferMessage
-  #endif
-  {
-    private static readonly pb::MessageParser<StageEnterNtf> _parser = new pb::MessageParser<StageEnterNtf>(() => new StageEnterNtf());
-    private pb::UnknownFieldSet _unknownFields;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<StageEnterNtf> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::GamePacket.StagePacketReflection.Descriptor.MessageTypes[0]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public StageEnterNtf() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public StageEnterNtf(StageEnterNtf other) : this() {
-      stageId_ = other.stageId_;
-      stageDataKey_ = other.stageDataKey_;
-      myPosX_ = other.myPosX_;
-      myPosY_ = other.myPosY_;
-      myYaw_ = other.myYaw_;
-      myPosZ_ = other.myPosZ_;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public StageEnterNtf Clone() {
-      return new StageEnterNtf(this);
-    }
-
-    /// <summary>Field number for the "stage_id" field.</summary>
-    public const int StageIdFieldNumber = 1;
-    private long stageId_;
-    /// <summary>
-    /// Stage Id (런타임 발급)
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long StageId {
-      get { return stageId_; }
-      set {
-        stageId_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "stage_data_key" field.</summary>
-    public const int StageDataKeyFieldNumber = 2;
-    private long stageDataKey_;
-    /// <summary>
-    /// Stage 데이터 Key
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long StageDataKey {
-      get { return stageDataKey_; }
-      set {
-        stageDataKey_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "my_pos_x" field.</summary>
-    public const int MyPosXFieldNumber = 3;
-    private float myPosX_;
-    /// <summary>
-    /// 서버가 결정한 내 spawn 위치
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float MyPosX {
-      get { return myPosX_; }
-      set {
-        myPosX_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "my_pos_y" field.</summary>
-    public const int MyPosYFieldNumber = 4;
-    private float myPosY_;
-    /// <summary>
-    /// 높이
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float MyPosY {
-      get { return myPosY_; }
-      set {
-        myPosY_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "my_yaw" field.</summary>
-    public const int MyYawFieldNumber = 5;
-    private float myYaw_;
-    /// <summary>
-    /// degree
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float MyYaw {
-      get { return myYaw_; }
-      set {
-        myYaw_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "my_pos_z" field.</summary>
-    public const int MyPosZFieldNumber = 6;
-    private float myPosZ_;
-    /// <summary>
-    /// 평면 깊이축
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float MyPosZ {
-      get { return myPosZ_; }
-      set {
-        myPosZ_ = value;
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override bool Equals(object other) {
-      return Equals(other as StageEnterNtf);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(StageEnterNtf other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (StageId != other.StageId) return false;
-      if (StageDataKey != other.StageDataKey) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosX, other.MyPosX)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosY, other.MyPosY)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyYaw, other.MyYaw)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosZ, other.MyPosZ)) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (StageId != 0L) hash ^= StageId.GetHashCode();
-      if (StageDataKey != 0L) hash ^= StageDataKey.GetHashCode();
-      if (MyPosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosX);
-      if (MyPosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosY);
-      if (MyYaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyYaw);
-      if (MyPosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosZ);
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void WriteTo(pb::CodedOutputStream output) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      output.WriteRawMessage(this);
-    #else
-      if (StageId != 0L) {
-        output.WriteRawTag(8);
-        output.WriteInt64(StageId);
-      }
-      if (StageDataKey != 0L) {
-        output.WriteRawTag(16);
-        output.WriteInt64(StageDataKey);
-      }
-      if (MyPosX != 0F) {
-        output.WriteRawTag(29);
-        output.WriteFloat(MyPosX);
-      }
-      if (MyPosY != 0F) {
-        output.WriteRawTag(37);
-        output.WriteFloat(MyPosY);
-      }
-      if (MyYaw != 0F) {
-        output.WriteRawTag(45);
-        output.WriteFloat(MyYaw);
-      }
-      if (MyPosZ != 0F) {
-        output.WriteRawTag(53);
-        output.WriteFloat(MyPosZ);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    #endif
-    }
-
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (StageId != 0L) {
-        output.WriteRawTag(8);
-        output.WriteInt64(StageId);
-      }
-      if (StageDataKey != 0L) {
-        output.WriteRawTag(16);
-        output.WriteInt64(StageDataKey);
-      }
-      if (MyPosX != 0F) {
-        output.WriteRawTag(29);
-        output.WriteFloat(MyPosX);
-      }
-      if (MyPosY != 0F) {
-        output.WriteRawTag(37);
-        output.WriteFloat(MyPosY);
-      }
-      if (MyYaw != 0F) {
-        output.WriteRawTag(45);
-        output.WriteFloat(MyYaw);
-      }
-      if (MyPosZ != 0F) {
-        output.WriteRawTag(53);
-        output.WriteFloat(MyPosZ);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(ref output);
-      }
-    }
-    #endif
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int CalculateSize() {
-      int size = 0;
-      if (StageId != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageId);
-      }
-      if (StageDataKey != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageDataKey);
-      }
-      if (MyPosX != 0F) {
-        size += 1 + 4;
-      }
-      if (MyPosY != 0F) {
-        size += 1 + 4;
-      }
-      if (MyYaw != 0F) {
-        size += 1 + 4;
-      }
-      if (MyPosZ != 0F) {
-        size += 1 + 4;
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(StageEnterNtf other) {
-      if (other == null) {
-        return;
-      }
-      if (other.StageId != 0L) {
-        StageId = other.StageId;
-      }
-      if (other.StageDataKey != 0L) {
-        StageDataKey = other.StageDataKey;
-      }
-      if (other.MyPosX != 0F) {
-        MyPosX = other.MyPosX;
-      }
-      if (other.MyPosY != 0F) {
-        MyPosY = other.MyPosY;
-      }
-      if (other.MyYaw != 0F) {
-        MyYaw = other.MyYaw;
-      }
-      if (other.MyPosZ != 0F) {
-        MyPosZ = other.MyPosZ;
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(pb::CodedInputStream input) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      input.ReadRawMessage(this);
-    #else
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 8: {
-            StageId = input.ReadInt64();
-            break;
-          }
-          case 16: {
-            StageDataKey = input.ReadInt64();
-            break;
-          }
-          case 29: {
-            MyPosX = input.ReadFloat();
-            break;
-          }
-          case 37: {
-            MyPosY = input.ReadFloat();
-            break;
-          }
-          case 45: {
-            MyYaw = input.ReadFloat();
-            break;
-          }
-          case 53: {
-            MyPosZ = input.ReadFloat();
-            break;
-          }
-        }
-      }
-    #endif
-    }
-
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
-            break;
-          case 8: {
-            StageId = input.ReadInt64();
-            break;
-          }
-          case 16: {
-            StageDataKey = input.ReadInt64();
-            break;
-          }
-          case 29: {
-            MyPosX = input.ReadFloat();
-            break;
-          }
-          case 37: {
-            MyPosY = input.ReadFloat();
-            break;
-          }
-          case 45: {
-            MyYaw = input.ReadFloat();
-            break;
-          }
-          case 53: {
-            MyPosZ = input.ReadFloat();
-            break;
-          }
-        }
-      }
-    }
-    #endif
-
-  }
-
   /// <summary>
   /// Stage 이동 요청 (클라 -> 서버)
   /// 동일 게임서버 / 다른 게임서버 이동을 모두 이 패킷으로 요청한다 (서버가 분기).
@@ -473,7 +67,7 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GamePacket.StagePacketReflection.Descriptor.MessageTypes[1]; }
+      get { return global::GamePacket.StagePacketReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -760,7 +354,7 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GamePacket.StagePacketReflection.Descriptor.MessageTypes[2]; }
+      get { return global::GamePacket.StagePacketReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1028,7 +622,8 @@ namespace GamePacket {
 
   /// <summary>
   /// Stage 로딩 완료 보고 (클라 -> 서버)
-  /// 맵 프리팹/NavMesh 교체 완료 후 전송. 서버는 이 시점에 캐릭터를 스폰하고 StageEnterNtf를 보낸다.
+  /// 맵 프리팹/NavMesh 교체 완료 후 전송. 서버는 이 시점에 입장 처리(향후 인벤/스킬 로드 등) 후
+  /// 캐릭터를 스폰하고 StageLoadCompleteRes로 응답한다.
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class StageLoadCompleteReq : pb::IMessage<StageLoadCompleteReq>
@@ -1045,7 +640,7 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GamePacket.StagePacketReflection.Descriptor.MessageTypes[3]; }
+      get { return global::GamePacket.StagePacketReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1184,6 +779,495 @@ namespace GamePacket {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// Stage 로딩 완료 결과 + 캐릭터 스폰 확정 (서버 -> 클라)
+  /// result_code 는 EResultCode (1=Success, 2=Fail).
+  /// 성공 시: 클라는 보유 중인 LocalPlayer를 spawn 위치에 배치하고 조작 가능 상태로 전환한다.
+  /// 이 패킷 수신 전까지 클라는 '로딩 중'으로 캐릭터를 씬에 스폰하지 않는다.
+  /// 주의: 캐릭터 데이터(스탯/인벤 등)는 이 패킷에 없다. 클라가 CharacterSelectRes로 이미 보유.
+  ///       여기엔 이번 Stage에서의 spawn 좌표/식별 정보만 담는다.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class StageLoadCompleteRes : pb::IMessage<StageLoadCompleteRes>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<StageLoadCompleteRes> _parser = new pb::MessageParser<StageLoadCompleteRes>(() => new StageLoadCompleteRes());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<StageLoadCompleteRes> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::GamePacket.StagePacketReflection.Descriptor.MessageTypes[3]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public StageLoadCompleteRes() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public StageLoadCompleteRes(StageLoadCompleteRes other) : this() {
+      resultCode_ = other.resultCode_;
+      errorMsg_ = other.errorMsg_;
+      stageId_ = other.stageId_;
+      stageDataKey_ = other.stageDataKey_;
+      myPosX_ = other.myPosX_;
+      myPosY_ = other.myPosY_;
+      myYaw_ = other.myYaw_;
+      myPosZ_ = other.myPosZ_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public StageLoadCompleteRes Clone() {
+      return new StageLoadCompleteRes(this);
+    }
+
+    /// <summary>Field number for the "result_code" field.</summary>
+    public const int ResultCodeFieldNumber = 1;
+    private int resultCode_;
+    /// <summary>
+    /// EResultCode 값
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int ResultCode {
+      get { return resultCode_; }
+      set {
+        resultCode_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "error_msg" field.</summary>
+    public const int ErrorMsgFieldNumber = 2;
+    private string errorMsg_ = "";
+    /// <summary>
+    /// 실패 시 사유 (성공 시 빈 문자열)
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ErrorMsg {
+      get { return errorMsg_; }
+      set {
+        errorMsg_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "stage_id" field.</summary>
+    public const int StageIdFieldNumber = 3;
+    private long stageId_;
+    /// <summary>
+    /// Stage Id (런타임 발급)
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long StageId {
+      get { return stageId_; }
+      set {
+        stageId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "stage_data_key" field.</summary>
+    public const int StageDataKeyFieldNumber = 4;
+    private long stageDataKey_;
+    /// <summary>
+    /// Stage 데이터 Key
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long StageDataKey {
+      get { return stageDataKey_; }
+      set {
+        stageDataKey_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "my_pos_x" field.</summary>
+    public const int MyPosXFieldNumber = 5;
+    private float myPosX_;
+    /// <summary>
+    /// 서버가 결정한 내 spawn 위치
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float MyPosX {
+      get { return myPosX_; }
+      set {
+        myPosX_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "my_pos_y" field.</summary>
+    public const int MyPosYFieldNumber = 6;
+    private float myPosY_;
+    /// <summary>
+    /// 높이
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float MyPosY {
+      get { return myPosY_; }
+      set {
+        myPosY_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "my_yaw" field.</summary>
+    public const int MyYawFieldNumber = 7;
+    private float myYaw_;
+    /// <summary>
+    /// degree
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float MyYaw {
+      get { return myYaw_; }
+      set {
+        myYaw_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "my_pos_z" field.</summary>
+    public const int MyPosZFieldNumber = 8;
+    private float myPosZ_;
+    /// <summary>
+    /// 평면 깊이축
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float MyPosZ {
+      get { return myPosZ_; }
+      set {
+        myPosZ_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as StageLoadCompleteRes);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(StageLoadCompleteRes other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (ResultCode != other.ResultCode) return false;
+      if (ErrorMsg != other.ErrorMsg) return false;
+      if (StageId != other.StageId) return false;
+      if (StageDataKey != other.StageDataKey) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosX, other.MyPosX)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosY, other.MyPosY)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyYaw, other.MyYaw)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosZ, other.MyPosZ)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (ResultCode != 0) hash ^= ResultCode.GetHashCode();
+      if (ErrorMsg.Length != 0) hash ^= ErrorMsg.GetHashCode();
+      if (StageId != 0L) hash ^= StageId.GetHashCode();
+      if (StageDataKey != 0L) hash ^= StageDataKey.GetHashCode();
+      if (MyPosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosX);
+      if (MyPosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosY);
+      if (MyYaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyYaw);
+      if (MyPosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosZ);
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (ResultCode != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(ResultCode);
+      }
+      if (ErrorMsg.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(ErrorMsg);
+      }
+      if (StageId != 0L) {
+        output.WriteRawTag(24);
+        output.WriteInt64(StageId);
+      }
+      if (StageDataKey != 0L) {
+        output.WriteRawTag(32);
+        output.WriteInt64(StageDataKey);
+      }
+      if (MyPosX != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(MyPosX);
+      }
+      if (MyPosY != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(MyPosY);
+      }
+      if (MyYaw != 0F) {
+        output.WriteRawTag(61);
+        output.WriteFloat(MyYaw);
+      }
+      if (MyPosZ != 0F) {
+        output.WriteRawTag(69);
+        output.WriteFloat(MyPosZ);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (ResultCode != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(ResultCode);
+      }
+      if (ErrorMsg.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(ErrorMsg);
+      }
+      if (StageId != 0L) {
+        output.WriteRawTag(24);
+        output.WriteInt64(StageId);
+      }
+      if (StageDataKey != 0L) {
+        output.WriteRawTag(32);
+        output.WriteInt64(StageDataKey);
+      }
+      if (MyPosX != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(MyPosX);
+      }
+      if (MyPosY != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(MyPosY);
+      }
+      if (MyYaw != 0F) {
+        output.WriteRawTag(61);
+        output.WriteFloat(MyYaw);
+      }
+      if (MyPosZ != 0F) {
+        output.WriteRawTag(69);
+        output.WriteFloat(MyPosZ);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (ResultCode != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ResultCode);
+      }
+      if (ErrorMsg.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ErrorMsg);
+      }
+      if (StageId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageId);
+      }
+      if (StageDataKey != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageDataKey);
+      }
+      if (MyPosX != 0F) {
+        size += 1 + 4;
+      }
+      if (MyPosY != 0F) {
+        size += 1 + 4;
+      }
+      if (MyYaw != 0F) {
+        size += 1 + 4;
+      }
+      if (MyPosZ != 0F) {
+        size += 1 + 4;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(StageLoadCompleteRes other) {
+      if (other == null) {
+        return;
+      }
+      if (other.ResultCode != 0) {
+        ResultCode = other.ResultCode;
+      }
+      if (other.ErrorMsg.Length != 0) {
+        ErrorMsg = other.ErrorMsg;
+      }
+      if (other.StageId != 0L) {
+        StageId = other.StageId;
+      }
+      if (other.StageDataKey != 0L) {
+        StageDataKey = other.StageDataKey;
+      }
+      if (other.MyPosX != 0F) {
+        MyPosX = other.MyPosX;
+      }
+      if (other.MyPosY != 0F) {
+        MyPosY = other.MyPosY;
+      }
+      if (other.MyYaw != 0F) {
+        MyYaw = other.MyYaw;
+      }
+      if (other.MyPosZ != 0F) {
+        MyPosZ = other.MyPosZ;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            ResultCode = input.ReadInt32();
+            break;
+          }
+          case 18: {
+            ErrorMsg = input.ReadString();
+            break;
+          }
+          case 24: {
+            StageId = input.ReadInt64();
+            break;
+          }
+          case 32: {
+            StageDataKey = input.ReadInt64();
+            break;
+          }
+          case 45: {
+            MyPosX = input.ReadFloat();
+            break;
+          }
+          case 53: {
+            MyPosY = input.ReadFloat();
+            break;
+          }
+          case 61: {
+            MyYaw = input.ReadFloat();
+            break;
+          }
+          case 69: {
+            MyPosZ = input.ReadFloat();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            ResultCode = input.ReadInt32();
+            break;
+          }
+          case 18: {
+            ErrorMsg = input.ReadString();
+            break;
+          }
+          case 24: {
+            StageId = input.ReadInt64();
+            break;
+          }
+          case 32: {
+            StageDataKey = input.ReadInt64();
+            break;
+          }
+          case 45: {
+            MyPosX = input.ReadFloat();
+            break;
+          }
+          case 53: {
+            MyPosY = input.ReadFloat();
+            break;
+          }
+          case 61: {
+            MyYaw = input.ReadFloat();
+            break;
+          }
+          case 69: {
+            MyPosZ = input.ReadFloat();
+            break;
+          }
         }
       }
     }

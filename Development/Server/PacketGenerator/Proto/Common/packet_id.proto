@@ -39,7 +39,7 @@ enum GamePacketId {
     GAME_PACKET_ID_CHAT_RECV_NTF = 3002;   // 서버 -> 클라: 채팅 수신 알림 (브로드캐스트)
 
     // 4000~4999: Stage / 주변 캐릭터
-    GAME_PACKET_ID_STAGE_ENTER_NTF = 4001;               // 서버 -> 클라: Stage 입장 완료 알림 (캐릭터 스폰 확정)
+    // 4001: 과거 STAGE_ENTER_NTF 자리. STAGE_LOAD_COMPLETE_RES로 통합되어 제거됨.
     GAME_PACKET_ID_STAGE_MOVE_REQ = 4002;                // 클라 -> 서버: Stage 이동 요청 (동일/크로스 서버 통합. 서버가 분기)
     // 4003: 과거 CROSS_SERVER_STAGE_MOVE_REQ 자리. STAGE_MOVE_REQ로 통합되어 제거됨.
     // 4004, 4005: 과거 CHARACTER_ENTER_NTF / CHARACTER_LEAVE_NTF 자리. ObjectVisibilityNtf로 통합되어 제거됨.
@@ -47,6 +47,7 @@ enum GamePacketId {
     GAME_PACKET_ID_OBJECT_DEATH_NTF      = 4007;   // 서버 -> 클라: 오브젝트 사망 알림 (사망 연출용). 디스폰은 ObjectVisibilityNtf 의 despawn_ids 로 별도 통보.
     GAME_PACKET_ID_STAGE_MOVE_RES = 4008;          // 서버 -> 클라: Stage 이동 요청 결과 (성공 = 클라 로딩 시작)
     GAME_PACKET_ID_STAGE_LOAD_COMPLETE_REQ = 4009; // 클라 -> 서버: 맵 로딩 완료 보고 (서버는 이때 스폰)
+    GAME_PACKET_ID_STAGE_LOAD_COMPLETE_RES = 4010; // 서버 -> 클라: 입장 처리 완료 + 캐릭터 스폰 확정 (위치/방향 포함)
 
     // 5000~5999: 던전
     GAME_PACKET_ID_PUBLIC_DUNGEON_LIST_REQ  = 5001;   // 클라 -> 서버: 공용던전 목록 요청

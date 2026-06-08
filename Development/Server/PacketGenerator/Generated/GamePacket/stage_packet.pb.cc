@@ -81,6 +81,40 @@ struct StageMoveReqDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StageMoveReqDefaultTypeInternal _StageMoveReq_default_instance_;
+
+inline constexpr StageLoadCompleteRes::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        error_msg_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        stage_id_{::int64_t{0}},
+        result_code_{0},
+        my_pos_x_{0},
+        stage_data_key_{::int64_t{0}},
+        my_pos_y_{0},
+        my_yaw_{0},
+        my_pos_z_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR StageLoadCompleteRes::StageLoadCompleteRes(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(StageLoadCompleteRes_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct StageLoadCompleteResDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR StageLoadCompleteResDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~StageLoadCompleteResDefaultTypeInternal() {}
+  union {
+    StageLoadCompleteRes _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StageLoadCompleteResDefaultTypeInternal _StageLoadCompleteRes_default_instance_;
 template <typename>
 PROTOBUF_CONSTEXPR StageLoadCompleteReq::StageLoadCompleteReq(::_pbi::ConstantInitialized)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
@@ -99,36 +133,6 @@ struct StageLoadCompleteReqDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StageLoadCompleteReqDefaultTypeInternal _StageLoadCompleteReq_default_instance_;
-
-inline constexpr StageEnterNtf::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : _cached_size_{0},
-        stage_id_{::int64_t{0}},
-        stage_data_key_{::int64_t{0}},
-        my_pos_x_{0},
-        my_pos_y_{0},
-        my_yaw_{0},
-        my_pos_z_{0} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR StageEnterNtf::StageEnterNtf(::_pbi::ConstantInitialized)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(StageEnterNtf_class_data_.base()),
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(),
-#endif  // PROTOBUF_CUSTOM_VTABLE
-      _impl_(::_pbi::ConstantInitialized()) {
-}
-struct StageEnterNtfDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR StageEnterNtfDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~StageEnterNtfDefaultTypeInternal() {}
-  union {
-    StageEnterNtf _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StageEnterNtfDefaultTypeInternal _StageEnterNtf_default_instance_;
 }  // namespace GamePacket
 static constexpr const ::_pb::EnumDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_enum_descriptors_GamePacket_2fstage_5fpacket_2eproto = nullptr;
@@ -137,21 +141,6 @@ static constexpr const ::_pb::ServiceDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULL
 const ::uint32_t
     TableStruct_GamePacket_2fstage_5fpacket_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
-        0x081, // bitmap
-        PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_._has_bits_),
-        9, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_.stage_id_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_.stage_data_key_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_.my_pos_x_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_.my_pos_y_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_.my_yaw_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::StageEnterNtf, _impl_.my_pos_z_),
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::StageMoveReq, _impl_._has_bits_),
         6, // hasbit index offset
@@ -171,34 +160,54 @@ const ::uint32_t
         0,
         1,
         0x000, // bitmap
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_._has_bits_),
+        11, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.result_code_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.error_msg_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.stage_id_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.stage_data_key_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.my_pos_x_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.my_pos_y_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.my_yaw_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.my_pos_z_),
+        2,
+        0,
+        1,
+        4,
+        3,
+        5,
+        6,
+        7,
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, sizeof(::GamePacket::StageEnterNtf)},
-        {15, sizeof(::GamePacket::StageMoveReq)},
-        {24, sizeof(::GamePacket::StageMoveRes)},
-        {33, sizeof(::GamePacket::StageLoadCompleteReq)},
+        {0, sizeof(::GamePacket::StageMoveReq)},
+        {9, sizeof(::GamePacket::StageMoveRes)},
+        {18, sizeof(::GamePacket::StageLoadCompleteReq)},
+        {19, sizeof(::GamePacket::StageLoadCompleteRes)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
-    &::GamePacket::_StageEnterNtf_default_instance_._instance,
     &::GamePacket::_StageMoveReq_default_instance_._instance,
     &::GamePacket::_StageMoveRes_default_instance_._instance,
     &::GamePacket::_StageLoadCompleteReq_default_instance_._instance,
+    &::GamePacket::_StageLoadCompleteRes_default_instance_._instance,
 };
 const char descriptor_table_protodef_GamePacket_2fstage_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\035GamePacket/stage_packet.proto\022\nGamePac"
-    "ket\032\026Common/packet_id.proto\"\177\n\rStageEnte"
-    "rNtf\022\020\n\010stage_id\030\001 \001(\003\022\026\n\016stage_data_key"
-    "\030\002 \001(\003\022\020\n\010my_pos_x\030\003 \001(\002\022\020\n\010my_pos_y\030\004 \001"
-    "(\002\022\016\n\006my_yaw\030\005 \001(\002\022\020\n\010my_pos_z\030\006 \001(\002\"c\n\014"
-    "StageMoveReq\022\035\n\025target_stage_data_key\030\001 "
-    "\001(\003\022\025\n\rposition_type\030\002 \001(\005\022\035\n\025target_gam"
-    "e_server_id\030\003 \001(\005\"U\n\014StageMoveRes\022\023\n\013res"
-    "ult_code\030\001 \001(\005\022\021\n\terror_msg\030\002 \001(\t\022\035\n\025tar"
-    "get_stage_data_key\030\003 \001(\003\"\026\n\024StageLoadCom"
-    "pleteReqb\006proto3"
+    "ket\032\026Common/packet_id.proto\"c\n\014StageMove"
+    "Req\022\035\n\025target_stage_data_key\030\001 \001(\003\022\025\n\rpo"
+    "sition_type\030\002 \001(\005\022\035\n\025target_game_server_"
+    "id\030\003 \001(\005\"U\n\014StageMoveRes\022\023\n\013result_code\030"
+    "\001 \001(\005\022\021\n\terror_msg\030\002 \001(\t\022\035\n\025target_stage"
+    "_data_key\030\003 \001(\003\"\026\n\024StageLoadCompleteReq\""
+    "\256\001\n\024StageLoadCompleteRes\022\023\n\013result_code\030"
+    "\001 \001(\005\022\021\n\terror_msg\030\002 \001(\t\022\020\n\010stage_id\030\003 \001"
+    "(\003\022\026\n\016stage_data_key\030\004 \001(\003\022\020\n\010my_pos_x\030\005"
+    " \001(\002\022\020\n\010my_pos_y\030\006 \001(\002\022\016\n\006my_yaw\030\007 \001(\002\022\020"
+    "\n\010my_pos_z\030\010 \001(\002b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_GamePacket_2fstage_5fpacket_2eproto_deps[1] = {
@@ -208,7 +217,7 @@ static ::absl::once_flag descriptor_table_GamePacket_2fstage_5fpacket_2eproto_on
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fstage_5fpacket_2eproto = {
     false,
     false,
-    416,
+    464,
     descriptor_table_protodef_GamePacket_2fstage_5fpacket_2eproto,
     "GamePacket/stage_packet.proto",
     &descriptor_table_GamePacket_2fstage_5fpacket_2eproto_once,
@@ -222,405 +231,6 @@ PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fs
     file_level_service_descriptors_GamePacket_2fstage_5fpacket_2eproto,
 };
 namespace GamePacket {
-// ===================================================================
-
-class StageEnterNtf::_Internal {
- public:
-  using HasBits =
-      decltype(::std::declval<StageEnterNtf>()._impl_._has_bits_);
-  static constexpr ::int32_t kHasBitsOffset =
-      8 * PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_._has_bits_);
-};
-
-StageEnterNtf::StageEnterNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, StageEnterNtf_class_data_.base()) {
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(arena) {
-#endif  // PROTOBUF_CUSTOM_VTABLE
-  SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:GamePacket.StageEnterNtf)
-}
-StageEnterNtf::StageEnterNtf(
-    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const StageEnterNtf& from)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, StageEnterNtf_class_data_.base()),
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(arena),
-#endif  // PROTOBUF_CUSTOM_VTABLE
-      _impl_(from._impl_) {
-  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
-      from._internal_metadata_);
-}
-PROTOBUF_NDEBUG_INLINE StageEnterNtf::Impl_::Impl_(
-    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
-    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
-      : _cached_size_{0} {}
-
-inline void StageEnterNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
-  ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, stage_id_),
-           0,
-           offsetof(Impl_, my_pos_z_) -
-               offsetof(Impl_, stage_id_) +
-               sizeof(Impl_::my_pos_z_));
-}
-StageEnterNtf::~StageEnterNtf() {
-  // @@protoc_insertion_point(destructor:GamePacket.StageEnterNtf)
-  SharedDtor(*this);
-}
-inline void StageEnterNtf::SharedDtor(MessageLite& self) {
-  StageEnterNtf& this_ = static_cast<StageEnterNtf&>(self);
-  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
-    this_.CheckHasBitConsistency();
-  }
-  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
-  ABSL_DCHECK(this_.GetArena() == nullptr);
-  this_._impl_.~Impl_();
-}
-
-inline void* PROTOBUF_NONNULL StageEnterNtf::PlacementNew_(
-    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
-    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
-  return ::new (mem) StageEnterNtf(arena);
-}
-constexpr auto StageEnterNtf::InternalNewImpl_() {
-  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(StageEnterNtf),
-                                            alignof(StageEnterNtf));
-}
-constexpr auto StageEnterNtf::InternalGenerateClassData_() {
-  return ::google::protobuf::internal::ClassDataFull{
-      ::google::protobuf::internal::ClassData{
-          &_StageEnterNtf_default_instance_._instance,
-          &_table_.header,
-          nullptr,  // OnDemandRegisterArenaDtor
-          nullptr,  // IsInitialized
-          &StageEnterNtf::MergeImpl,
-          ::google::protobuf::Message::GetNewImpl<StageEnterNtf>(),
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-          &StageEnterNtf::SharedDtor,
-          ::google::protobuf::Message::GetClearImpl<StageEnterNtf>(), &StageEnterNtf::ByteSizeLong,
-              &StageEnterNtf::_InternalSerialize,
-#endif  // PROTOBUF_CUSTOM_VTABLE
-          PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_._cached_size_),
-          false,
-      },
-      &StageEnterNtf::kDescriptorMethods,
-      &descriptor_table_GamePacket_2fstage_5fpacket_2eproto,
-      nullptr,  // tracker
-  };
-}
-
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
-    ::google::protobuf::internal::ClassDataFull StageEnterNtf_class_data_ =
-        StageEnterNtf::InternalGenerateClassData_();
-
-PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
-StageEnterNtf::GetClassData() const {
-  ::google::protobuf::internal::PrefetchToLocalCache(&StageEnterNtf_class_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(StageEnterNtf_class_data_.tc_table);
-  return StageEnterNtf_class_data_.base();
-}
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 6, 0, 0, 2>
-StageEnterNtf::_table_ = {
-  {
-    PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_._has_bits_),
-    0, // no _extensions_
-    6, 56,  // max_field_number, fast_idx_mask
-    offsetof(decltype(_table_), field_lookup_table),
-    4294967232,  // skipmap
-    offsetof(decltype(_table_), field_entries),
-    6,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
-    StageEnterNtf_class_data_.base(),
-    nullptr,  // post_loop_handler
-    ::_pbi::TcParser::GenericFallback,  // fallback
-    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::GamePacket::StageEnterNtf>(),  // to_prefetch
-    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
-  }, {{
-    {::_pbi::TcParser::MiniParse, {}},
-    // int64 stage_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(StageEnterNtf, _impl_.stage_id_), 0>(),
-     {8, 0, 0,
-      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.stage_id_)}},
-    // int64 stage_data_key = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(StageEnterNtf, _impl_.stage_data_key_), 1>(),
-     {16, 1, 0,
-      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.stage_data_key_)}},
-    // float my_pos_x = 3;
-    {::_pbi::TcParser::FastF32S1,
-     {29, 2, 0,
-      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_pos_x_)}},
-    // float my_pos_y = 4;
-    {::_pbi::TcParser::FastF32S1,
-     {37, 3, 0,
-      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_pos_y_)}},
-    // float my_yaw = 5;
-    {::_pbi::TcParser::FastF32S1,
-     {45, 4, 0,
-      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_yaw_)}},
-    // float my_pos_z = 6;
-    {::_pbi::TcParser::FastF32S1,
-     {53, 5, 0,
-      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_pos_z_)}},
-    {::_pbi::TcParser::MiniParse, {}},
-  }}, {{
-    65535, 65535
-  }}, {{
-    // int64 stage_id = 1;
-    {PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.stage_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
-    // int64 stage_data_key = 2;
-    {PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.stage_data_key_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
-    // float my_pos_x = 3;
-    {PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_pos_x_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float my_pos_y = 4;
-    {PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_pos_y_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float my_yaw = 5;
-    {PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_yaw_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float my_pos_z = 6;
-    {PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_pos_z_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-  }},
-  // no aux_entries
-  {{
-  }},
-};
-PROTOBUF_NOINLINE void StageEnterNtf::Clear() {
-// @@protoc_insertion_point(message_clear_start:GamePacket.StageEnterNtf)
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  cached_has_bits = _impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
-    ::memset(&_impl_.stage_id_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.my_pos_z_) -
-        reinterpret_cast<char*>(&_impl_.stage_id_)) + sizeof(_impl_.my_pos_z_));
-  }
-  _impl_._has_bits_.Clear();
-  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
-}
-
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL StageEnterNtf::_InternalSerialize(
-    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
-    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
-  const StageEnterNtf& this_ = static_cast<const StageEnterNtf&>(base);
-#else   // PROTOBUF_CUSTOM_VTABLE
-::uint8_t* PROTOBUF_NONNULL StageEnterNtf::_InternalSerialize(
-    ::uint8_t* PROTOBUF_NONNULL target,
-    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
-  const StageEnterNtf& this_ = *this;
-#endif  // PROTOBUF_CUSTOM_VTABLE
-  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
-    this_.CheckHasBitConsistency();
-  }
-  // @@protoc_insertion_point(serialize_to_array_start:GamePacket.StageEnterNtf)
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
-
-  cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 stage_id = 1;
-  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (this_._internal_stage_id() != 0) {
-      target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_stage_id(), target);
-    }
-  }
-
-  // int64 stage_data_key = 2;
-  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-    if (this_._internal_stage_data_key() != 0) {
-      target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<2>(
-              stream, this_._internal_stage_data_key(), target);
-    }
-  }
-
-  // float my_pos_x = 3;
-  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_x()) != 0) {
-      target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          3, this_._internal_my_pos_x(), target);
-    }
-  }
-
-  // float my_pos_y = 4;
-  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_y()) != 0) {
-      target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          4, this_._internal_my_pos_y(), target);
-    }
-  }
-
-  // float my_yaw = 5;
-  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_my_yaw()) != 0) {
-      target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          5, this_._internal_my_yaw(), target);
-    }
-  }
-
-  // float my_pos_z = 6;
-  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_z()) != 0) {
-      target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          6, this_._internal_my_pos_z(), target);
-    }
-  }
-
-  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
-    target =
-        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:GamePacket.StageEnterNtf)
-  return target;
-}
-
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t StageEnterNtf::ByteSizeLong(const MessageLite& base) {
-  const StageEnterNtf& this_ = static_cast<const StageEnterNtf&>(base);
-#else   // PROTOBUF_CUSTOM_VTABLE
-::size_t StageEnterNtf::ByteSizeLong() const {
-  const StageEnterNtf& this_ = *this;
-#endif  // PROTOBUF_CUSTOM_VTABLE
-  // @@protoc_insertion_point(message_byte_size_start:GamePacket.StageEnterNtf)
-  ::size_t total_size = 0;
-
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void)cached_has_bits;
-
-  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
-  cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
-    // int64 stage_id = 1;
-    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (this_._internal_stage_id() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_stage_id());
-      }
-    }
-    // int64 stage_data_key = 2;
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (this_._internal_stage_data_key() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_stage_data_key());
-      }
-    }
-    // float my_pos_x = 3;
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_x()) != 0) {
-        total_size += 5;
-      }
-    }
-    // float my_pos_y = 4;
-    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_y()) != 0) {
-        total_size += 5;
-      }
-    }
-    // float my_yaw = 5;
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_my_yaw()) != 0) {
-        total_size += 5;
-      }
-    }
-    // float my_pos_z = 6;
-    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_z()) != 0) {
-        total_size += 5;
-      }
-    }
-  }
-  return this_.MaybeComputeUnknownFieldsSize(total_size,
-                                             &this_._impl_._cached_size_);
-}
-
-void StageEnterNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
-                            const ::google::protobuf::MessageLite& from_msg) {
-   auto* const _this =
-      static_cast<StageEnterNtf*>(&to_msg);
-  auto& from = static_cast<const StageEnterNtf&>(from_msg);
-  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
-    from.CheckHasBitConsistency();
-  }
-  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.StageEnterNtf)
-  ABSL_DCHECK_NE(&from, _this);
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
-
-  cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
-    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (from._internal_stage_id() != 0) {
-        _this->_impl_.stage_id_ = from._impl_.stage_id_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (from._internal_stage_data_key() != 0) {
-        _this->_impl_.stage_data_key_ = from._impl_.stage_data_key_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_my_pos_x()) != 0) {
-        _this->_impl_.my_pos_x_ = from._impl_.my_pos_x_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_my_pos_y()) != 0) {
-        _this->_impl_.my_pos_y_ = from._impl_.my_pos_y_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_my_yaw()) != 0) {
-        _this->_impl_.my_yaw_ = from._impl_.my_yaw_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_my_pos_z()) != 0) {
-        _this->_impl_.my_pos_z_ = from._impl_.my_pos_z_;
-      }
-    }
-  }
-  _this->_impl_._has_bits_[0] |= cached_has_bits;
-  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
-      from._internal_metadata_);
-}
-
-void StageEnterNtf::CopyFrom(const StageEnterNtf& from) {
-  // @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.StageEnterNtf)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-
-void StageEnterNtf::InternalSwap(StageEnterNtf* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
-  using ::std::swap;
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.my_pos_z_)
-      + sizeof(StageEnterNtf::_impl_.my_pos_z_)
-      - PROTOBUF_FIELD_OFFSET(StageEnterNtf, _impl_.stage_id_)>(
-          reinterpret_cast<char*>(&_impl_.stage_id_),
-          reinterpret_cast<char*>(&other->_impl_.stage_id_));
-}
-
-::google::protobuf::Metadata StageEnterNtf::GetMetadata() const {
-  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
-}
 // ===================================================================
 
 class StageMoveReq::_Internal {
@@ -1407,6 +1017,493 @@ StageLoadCompleteReq::_table_ = {
 
 ::google::protobuf::Metadata StageLoadCompleteReq::GetMetadata() const {
   return ::google::protobuf::internal::ZeroFieldsBase::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class StageLoadCompleteRes::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<StageLoadCompleteRes>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_._has_bits_);
+};
+
+StageLoadCompleteRes::StageLoadCompleteRes(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, StageLoadCompleteRes_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:GamePacket.StageLoadCompleteRes)
+}
+PROTOBUF_NDEBUG_INLINE StageLoadCompleteRes::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::GamePacket::StageLoadCompleteRes& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        error_msg_(arena, from.error_msg_) {}
+
+StageLoadCompleteRes::StageLoadCompleteRes(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const StageLoadCompleteRes& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, StageLoadCompleteRes_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  StageLoadCompleteRes* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, stage_id_),
+           reinterpret_cast<const char*>(&from._impl_) +
+               offsetof(Impl_, stage_id_),
+           offsetof(Impl_, my_pos_z_) -
+               offsetof(Impl_, stage_id_) +
+               sizeof(Impl_::my_pos_z_));
+
+  // @@protoc_insertion_point(copy_constructor:GamePacket.StageLoadCompleteRes)
+}
+PROTOBUF_NDEBUG_INLINE StageLoadCompleteRes::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        error_msg_(arena) {}
+
+inline void StageLoadCompleteRes::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, stage_id_),
+           0,
+           offsetof(Impl_, my_pos_z_) -
+               offsetof(Impl_, stage_id_) +
+               sizeof(Impl_::my_pos_z_));
+}
+StageLoadCompleteRes::~StageLoadCompleteRes() {
+  // @@protoc_insertion_point(destructor:GamePacket.StageLoadCompleteRes)
+  SharedDtor(*this);
+}
+inline void StageLoadCompleteRes::SharedDtor(MessageLite& self) {
+  StageLoadCompleteRes& this_ = static_cast<StageLoadCompleteRes&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.error_msg_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL StageLoadCompleteRes::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) StageLoadCompleteRes(arena);
+}
+constexpr auto StageLoadCompleteRes::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(StageLoadCompleteRes),
+                                            alignof(StageLoadCompleteRes));
+}
+constexpr auto StageLoadCompleteRes::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_StageLoadCompleteRes_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &StageLoadCompleteRes::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<StageLoadCompleteRes>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &StageLoadCompleteRes::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<StageLoadCompleteRes>(), &StageLoadCompleteRes::ByteSizeLong,
+              &StageLoadCompleteRes::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_._cached_size_),
+          false,
+      },
+      &StageLoadCompleteRes::kDescriptorMethods,
+      &descriptor_table_GamePacket_2fstage_5fpacket_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull StageLoadCompleteRes_class_data_ =
+        StageLoadCompleteRes::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+StageLoadCompleteRes::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&StageLoadCompleteRes_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(StageLoadCompleteRes_class_data_.tc_table);
+  return StageLoadCompleteRes_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<3, 8, 0, 57, 2>
+StageLoadCompleteRes::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_._has_bits_),
+    0, // no _extensions_
+    8, 56,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967040,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    8,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    StageLoadCompleteRes_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::GamePacket::StageLoadCompleteRes>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // float my_pos_z = 8;
+    {::_pbi::TcParser::FastF32S1,
+     {69, 7, 0,
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_pos_z_)}},
+    // int32 result_code = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(StageLoadCompleteRes, _impl_.result_code_), 2>(),
+     {8, 2, 0,
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.result_code_)}},
+    // string error_msg = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 0, 0,
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.error_msg_)}},
+    // int64 stage_id = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(StageLoadCompleteRes, _impl_.stage_id_), 1>(),
+     {24, 1, 0,
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.stage_id_)}},
+    // int64 stage_data_key = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(StageLoadCompleteRes, _impl_.stage_data_key_), 4>(),
+     {32, 4, 0,
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.stage_data_key_)}},
+    // float my_pos_x = 5;
+    {::_pbi::TcParser::FastF32S1,
+     {45, 3, 0,
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_pos_x_)}},
+    // float my_pos_y = 6;
+    {::_pbi::TcParser::FastF32S1,
+     {53, 5, 0,
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_pos_y_)}},
+    // float my_yaw = 7;
+    {::_pbi::TcParser::FastF32S1,
+     {61, 6, 0,
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_yaw_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 result_code = 1;
+    {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.result_code_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // string error_msg = 2;
+    {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.error_msg_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int64 stage_id = 3;
+    {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.stage_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 stage_data_key = 4;
+    {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.stage_data_key_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // float my_pos_x = 5;
+    {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_pos_x_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float my_pos_y = 6;
+    {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_pos_y_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float my_yaw = 7;
+    {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_yaw_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float my_pos_z = 8;
+    {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_pos_z_), _Internal::kHasBitsOffset + 7, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+  }},
+  // no aux_entries
+  {{
+    "\37\0\11\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    "GamePacket.StageLoadCompleteRes"
+    "error_msg"
+  }},
+};
+PROTOBUF_NOINLINE void StageLoadCompleteRes::Clear() {
+// @@protoc_insertion_point(message_clear_start:GamePacket.StageLoadCompleteRes)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    _impl_.error_msg_.ClearNonDefaultToEmpty();
+  }
+  if (BatchCheckHasBit(cached_has_bits, 0x000000feU)) {
+    ::memset(&_impl_.stage_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.my_pos_z_) -
+        reinterpret_cast<char*>(&_impl_.stage_id_)) + sizeof(_impl_.my_pos_z_));
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL StageLoadCompleteRes::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const StageLoadCompleteRes& this_ = static_cast<const StageLoadCompleteRes&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL StageLoadCompleteRes::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const StageLoadCompleteRes& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:GamePacket.StageLoadCompleteRes)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // int32 result_code = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (this_._internal_result_code() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<1>(
+              stream, this_._internal_result_code(), target);
+    }
+  }
+
+  // string error_msg = 2;
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (!this_._internal_error_msg().empty()) {
+      const ::std::string& _s = this_._internal_error_msg();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "GamePacket.StageLoadCompleteRes.error_msg");
+      target = stream->WriteStringMaybeAliased(2, _s, target);
+    }
+  }
+
+  // int64 stage_id = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    if (this_._internal_stage_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<3>(
+              stream, this_._internal_stage_id(), target);
+    }
+  }
+
+  // int64 stage_data_key = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (this_._internal_stage_data_key() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<4>(
+              stream, this_._internal_stage_data_key(), target);
+    }
+  }
+
+  // float my_pos_x = 5;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_x()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          5, this_._internal_my_pos_x(), target);
+    }
+  }
+
+  // float my_pos_y = 6;
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_y()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          6, this_._internal_my_pos_y(), target);
+    }
+  }
+
+  // float my_yaw = 7;
+  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_my_yaw()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          7, this_._internal_my_yaw(), target);
+    }
+  }
+
+  // float my_pos_z = 8;
+  if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_z()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          8, this_._internal_my_pos_z(), target);
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:GamePacket.StageLoadCompleteRes)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t StageLoadCompleteRes::ByteSizeLong(const MessageLite& base) {
+  const StageLoadCompleteRes& this_ = static_cast<const StageLoadCompleteRes&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t StageLoadCompleteRes::ByteSizeLong() const {
+  const StageLoadCompleteRes& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:GamePacket.StageLoadCompleteRes)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+  cached_has_bits = this_._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x000000ffU)) {
+    // string error_msg = 2;
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!this_._internal_error_msg().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_error_msg());
+      }
+    }
+    // int64 stage_id = 3;
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (this_._internal_stage_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_stage_id());
+      }
+    }
+    // int32 result_code = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (this_._internal_result_code() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_result_code());
+      }
+    }
+    // float my_pos_x = 5;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_x()) != 0) {
+        total_size += 5;
+      }
+    }
+    // int64 stage_data_key = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (this_._internal_stage_data_key() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_stage_data_key());
+      }
+    }
+    // float my_pos_y = 6;
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_y()) != 0) {
+        total_size += 5;
+      }
+    }
+    // float my_yaw = 7;
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_my_yaw()) != 0) {
+        total_size += 5;
+      }
+    }
+    // float my_pos_z = 8;
+    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_my_pos_z()) != 0) {
+        total_size += 5;
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void StageLoadCompleteRes::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<StageLoadCompleteRes*>(&to_msg);
+  auto& from = static_cast<const StageLoadCompleteRes&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.StageLoadCompleteRes)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x000000ffU)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!from._internal_error_msg().empty()) {
+        _this->_internal_set_error_msg(from._internal_error_msg());
+      } else {
+        if (_this->_impl_.error_msg_.IsDefault()) {
+          _this->_internal_set_error_msg("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (from._internal_stage_id() != 0) {
+        _this->_impl_.stage_id_ = from._impl_.stage_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (from._internal_result_code() != 0) {
+        _this->_impl_.result_code_ = from._impl_.result_code_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_my_pos_x()) != 0) {
+        _this->_impl_.my_pos_x_ = from._impl_.my_pos_x_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (from._internal_stage_data_key() != 0) {
+        _this->_impl_.stage_data_key_ = from._impl_.stage_data_key_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_my_pos_y()) != 0) {
+        _this->_impl_.my_pos_y_ = from._impl_.my_pos_y_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_my_yaw()) != 0) {
+        _this->_impl_.my_yaw_ = from._impl_.my_yaw_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_my_pos_z()) != 0) {
+        _this->_impl_.my_pos_z_ = from._impl_.my_pos_z_;
+      }
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void StageLoadCompleteRes::CopyFrom(const StageLoadCompleteRes& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.StageLoadCompleteRes)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void StageLoadCompleteRes::InternalSwap(StageLoadCompleteRes* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.error_msg_, &other->_impl_.error_msg_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_pos_z_)
+      + sizeof(StageLoadCompleteRes::_impl_.my_pos_z_)
+      - PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.stage_id_)>(
+          reinterpret_cast<char*>(&_impl_.stage_id_),
+          reinterpret_cast<char*>(&other->_impl_.stage_id_));
+}
+
+::google::protobuf::Metadata StageLoadCompleteRes::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace GamePacket
