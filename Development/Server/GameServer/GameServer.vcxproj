@@ -44,16 +44,18 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir);$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Generated;$(SolutionDir)Recast\Include;$(SolutionDir)Detour\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)Common;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Generated;$(SolutionDir)Recast\Include;$(SolutionDir)Detour\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
+    <ExternalIncludePath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir);$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Generated;$(SolutionDir)Recast\Include;$(SolutionDir)Detour\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)Common;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib;$(SolutionDir)GameDataLib\Generated;$(SolutionDir)Recast\Include;$(SolutionDir)Detour\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
+    <ExternalIncludePath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -62,9 +64,10 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;SPDLOG_COMPILED_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /external:templates- %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -81,9 +84,10 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;SPDLOG_COMPILED_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /external:templates- %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
