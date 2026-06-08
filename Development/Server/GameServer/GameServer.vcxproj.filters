@@ -45,6 +45,9 @@
     <ClCompile Include="Town.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Field.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="User.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -126,6 +129,9 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="Town.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Field.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="User.h">

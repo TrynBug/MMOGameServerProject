@@ -94,6 +94,20 @@ bool GameServer::OnInitialize()
         return false;
     }
 
+    // Field 타입 Stage는 GameData_Stage 데이터 기준으로 전부 생성 (데이터 추가만으로 필드 확장).
+    for (const auto& [stageDataKey, pStageData] : GameDataTable_Stage::GetDataMap())
+    {
+        if (pStageData->StageType != EStageType::Field)
+            continue;
+
+        const int64 fieldStageId = GenerateObjectId();
+        if (!m_stageManager.CreateField(fieldStageId, stageDataKey))
+        {
+            LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to create Field. stageId={}, stageKey={}", fieldStageId, stageDataKey));
+            return false;
+        }
+    }
+
     // ── GameDB 열기 ────────────────────────────────────────────
     if (!m_dbQueue.Open(k_gameDBPath, 1))
     {
@@ -359,7 +373,7 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
     SystemStagePtr spSystemStage = m_stageManager.GetSystemStage();
     if (spSystemStage)
     {
-        spSystemStage->EnqueueMessage(StageMsg_UserEnter{spUser, nullptr});
+        spSystemStage->EnqueueMessage(StageMsg_UserEnter{spUser});
     }
     else
     {
@@ -498,7 +512,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     if (!result.success)
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect DB select failed. userId={} err={}", userId, result.errorMsg));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: db select", characterId, 0, 0.f, 0.f, 0.f, 0.f);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: db select", characterId, 0);
         co_return;
     }
 
@@ -507,7 +521,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     {
         LOG_WRITE(LogLevel::Warn, std::format("GameServer: CharacterSelect - character not found. userId={} characterId={}",
             userId, characterId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "character not found", characterId, 0, 0.f, 0.f, 0.f, 0.f);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "character not found", characterId, 0);
         co_return;
     }
 
@@ -517,7 +531,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - failed to parse character JSON. userId={} characterId={}",
             userId, characterId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: parse", characterId, 0, 0.f, 0.f, 0.f, 0.f);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: parse", characterId, 0);
         co_return;
     }
 
@@ -526,11 +540,11 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - owner mismatch. userId={} characterOwner={} characterId={}",
             userId, character.owner_user_id(), characterId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "not character owner", characterId, 0, 0.f, 0.f, 0.f, 0.f);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "not character owner", characterId, 0);
         co_return;
     }
 
-    // ── 4) User에 현재 캐릭터 설정 ──────────────────────────────────────
+    // ── 4) User 조회 + 상태 검증 ─────────────────────────────────────────
     UserPtr spUser;
     if (!m_safeUsers.Find(userId, spUser) || !spUser)
     {
@@ -538,64 +552,68 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
         co_return;
     }
 
-    // Character 객체 생성. 라이프타임은 Town이 최종소유 (StageMsg_UserEnter로 전달 후).
-    // 여기서는 임시로 shared_ptr을 들고 Town으로 넘겨주면 Town이 m_objects에 등록.
+    // 이미 입장 중(Moving)이거나 입장 완료(InStage)면 중복 선택 거부.
+    if (spUser->GetStageState() != EUserStageState::None)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("GameServer: CharacterSelect - invalid stage state. userId={} state={}",
+            userId, static_cast<int32>(spUser->GetStageState())));
+        sendCharacterSelectRes(userId, EResultCode::Fail, "already entering or in stage", characterId, 0);
+        co_return;
+    }
+
+    // Character 객체 생성. 라이프타임은 스폰 후 target Stage가 최종소유
+    // (그 전까지는 User의 pendingCharacter가 임시 소유).
     CharacterPtr spCharacter = std::make_shared<Character>();
     if (!spCharacter->Initialize(character))
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - Character Initialize failed. userId={} characterId={}", userId, characterId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: character init", characterId, 0, 0.f, 0.f, 0.f, 0.f);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: character init", characterId, 0);
         co_return;
     }
     spCharacter->SetUser(spUser);   // Character -> User weak_ptr
-    spUser->SetCurrentCharacter(spCharacter);   // User -> Character weak_ptr
 
     LOG_WRITE(LogLevel::Info, std::format("GameServer: character selected. userId={} characterId={} name='{}'",
         userId, character.character_id(), character.name()));
 
-    // ── 5) SystemStage에서 제거 ──────────────────────────────────────────
-    if (SystemStagePtr spSystemStage = m_stageManager.GetSystemStage())
-    {
-        spSystemStage->EnqueueMessage(StageMsg_UserLeave{userId});
-    }
-
-    // ── 6) 클라에게 CharacterSelectRes(성공) 송신 ─────────────────────────
-    // Town 으로의 입장은 EnqueueMessage 라 비동기지만, 클라는 이 응답을 받자마자
-    // Game 씬 전환을 시작하면 됨. StageEnterNtf 는 Town 의 OnUserEnter 에서 별도 송신.
+    // ── 5) Town 확인 ─────────────────────────────────────────────────────
     TownPtr spTown = m_stageManager.GetTown();
     if (!spTown)
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - Town is null. userId={}", userId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: no town", characterId, 0, 0.f, 0.f, 0.f, 0.f);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: no town", characterId, 0);
         co_return;
     }
 
-    sendCharacterSelectRes(userId, EResultCode::Success, "",
-        character.character_id(), spTown->GetStageId(),
-        character.pos_x(), character.pos_y(), character.pos_z(), character.yaw());
+    // ── 6) 2단계 입장 시작 (Stage 이동과 동일한 골격) ─────────────────────
+    // 캐릭터를 User가 임시 보관(Moving)하고 Town에는 유저만 입장시킨다.
+    // 클라가 Game 씬 + 맵 로딩 후 StageLoadCompleteReq를 보내면 Town이 스폰하고 StageEnterNtf를 보낸다.
+    // positionType=None → 캐릭터의 DB 좌표 사용 (마지막 위치 복귀).
+    spUser->SetPendingCharacter(spCharacter, EStagePositionType::None);
+    spUser->SetStageState(EUserStageState::Moving);
 
-    // ── 7) Town으로 입장 ───────────────────────────────────────────────
-    // Town이 OnUserEnter override로 StageEnterNtf를 전송한다.
-    spTown->EnqueueMessage(StageMsg_UserEnter{spUser, spCharacter});
+    if (SystemStagePtr spSystemStage = m_stageManager.GetSystemStage())
+    {
+        spSystemStage->EnqueueMessage(StageMsg_UserLeave{userId});
+    }
+    spTown->EnqueueMessage(StageMsg_UserEnter{spUser});
+
+    // ── 7) 클라에게 CharacterSelectRes(성공) 송신 → 클라는 로딩 시작 ──────
+    sendCharacterSelectRes(userId, EResultCode::Success, "",
+        character.character_id(), spTown->GetStageDataKey());
 }
 
 void GameServer::sendCharacterSelectRes(int64 userId, EResultCode resultCode, const std::string& errorMsg,
-                                        int64 characterId, int64 stageId,
-                                        float posX, float posY, float posZ, float yaw)
+                                        int64 characterId, int64 stageDataKey)
 {
     GamePacket::CharacterSelectRes res;
     res.set_result_code(static_cast<int32>(resultCode));
     res.set_error_msg(errorMsg);
     res.set_character_id(characterId);
-    res.set_stage_id(stageId);
-    res.set_pos_x(posX);
-    res.set_pos_y(posY);
-    res.set_pos_z(posZ);
-    res.set_yaw(yaw);
+    res.set_stage_data_key(stageDataKey);
     m_packetSender.SendToUser(userId, Common::GAME_PACKET_ID_CHARACTER_SELECT_RES, res);
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterSelectRes sent. userId={} resultCode={} characterId={} stageId={}",
-        userId, static_cast<int32>(resultCode), characterId, stageId));
+    LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterSelectRes sent. userId={} resultCode={} characterId={} stageDataKey={}",
+        userId, static_cast<int32>(resultCode), characterId, stageDataKey));
 }
 
 // 게이트웨이로부터 GatewayUserDisconnectNtf 수신
@@ -707,6 +725,6 @@ void GameServer::handleRelayedClientPacket(const netlib::PacketPtr& spPacket)
         break;
     }
 
-    // 기본: User 패킷 큐에 push (Stage 스레드가 다음 tick에서 drain해서 처리)
+    // 게임 플레이 패킷: User 패킷 큐에 push. 유저가 속한 Stage가 다음 tick에 drain하여 처리.
     spUser->EnqueuePacket(spPacket);
 }

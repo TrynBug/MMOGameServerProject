@@ -4,6 +4,7 @@
 #include "ServerBase.h"            // serverbase::ServerBase (SerializePacket 호출에 필요)
 #include "User.h"                  // UserPtr (맵 value 타입), User::GetGatewayId (SendToUser 템플릿에서 사용)
 #include "ThreadSafeUnorderedMap.h"
+#include "Enum/GameEnum_Common.h"  // EResultCode (SendStageMoveRes)
 
 // 전방선언 (SendStatUpdateNtf 의 const Character& 파라미터. 완전타입은 PacketSender.cpp 에서 include.)
 class Character;
@@ -48,6 +49,9 @@ public:
     // Stage 입장 완료 알림 전송 (StageEnterNtf).
     // 서버가 결정한 spawn 위치/회전만 포함. 다른 주변 오브젝트 정보는 ObjectVisibilityNtf로 별도 전송.
     void SendStageEnterNtf(int64 userId, int64 stageId, int64 stageDataKey, float myPosX, float myPosY, float myPosZ, float myYaw);
+
+    // Stage 이동 요청 결과 전송 (StageMoveRes). 성공 = 클라는 로딩 시작.
+    void SendStageMoveRes(int64 userId, EResultCode resultCode, const std::string& errorMsg, int64 targetStageDataKey);
 
     // 오브젝트 가시성 알림 전송 (ObjectVisibilityNtf). userId에게 spawns/despawnIds 전송.
     void SendObjectVisibilityNtf(int64 userId,

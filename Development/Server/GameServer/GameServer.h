@@ -38,6 +38,10 @@ public:
     NavMeshManager&       GetNavMeshManager()       { return m_navMeshManager; }
     const NavMeshManager& GetNavMeshManager() const { return m_navMeshManager; }
 
+    // StageManager 접근. Stage 가 이동 대상 Stage 를 해석(FindStagesByDataKey)할 때 사용.
+    StageManager&       GetStageManager()       { return m_stageManager; }
+    const StageManager& GetStageManager() const { return m_stageManager; }
+
 protected:
     // ServerBase 훅
     bool OnInitialize()                              override;
@@ -95,11 +99,11 @@ private:
     db::DetachedCoTask handleClientCharacterSelect(int64 userId, GamePacket::CharacterSelectReq req);
 
     // 캐릭터 선택 결과 전송 (CharacterSelectRes). 성공/실패 모두 이 함수로 송신.
-    //   - 성공: resultCode=Success, errorMsg="", spawn 정보(characterId/stageId/pos/yaw) 채움
-    //   - 실패: resultCode=Fail,    errorMsg=사유,   spawn 정보는 모두 기본값
+    //   - 성공: resultCode=Success, errorMsg="", characterId/stageDataKey 채움 (클라는 로딩 시작)
+    //   - 실패: resultCode=Fail,    errorMsg=사유
+    // 스폰 좌표는 이 패킷에 싣지 않는다. 로딩 완료 후 StageEnterNtf가 좌표의 단일 출처.
     void sendCharacterSelectRes(int64 userId, EResultCode resultCode, const std::string& errorMsg,
-                                int64 characterId, int64 stageId,
-                                float posX, float posY, float posZ, float yaw);
+                                int64 characterId, int64 stageDataKey);
 
 private:
     // NavMesh 데이터 관리, 길찾기 기능 제공

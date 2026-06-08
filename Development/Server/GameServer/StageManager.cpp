@@ -22,6 +22,12 @@ void StageManager::Clear()
         snapshot.emplace_back(stageId, spStage);
     });
 
+    // 제거는 인덱스 먼저 (인덱스에만 있고 m_safeStages에 없는 순간을 만들지 않기 위해).
+    {
+        std::lock_guard<std::mutex> lock(m_dataKeyIndexMutex);
+        m_stageIdsByDataKey.clear();
+    }
+
     for (auto& [stageId, spStage] : snapshot)
     {
         if (m_pGameServer)
@@ -44,7 +50,7 @@ SystemStagePtr StageManager::CreateSystemStage(int64 stageId, int64 stageDataKey
         return nullptr;
     }
 
-	const GameData_Stage* pStageData = GameDataTable_Stage::FindData(stageDataKey); 
+	const GameData_Stage* pStageData = GameDataTable_Stage::FindData(stageDataKey);
     if (!pStageData)
     {
         LOG_WRITE(LogLevel::Error, std::format("StageManager::CreateSystemStage - GameData_Stage not found. stageId={}, stageDataKey={}", stageId, stageDataKey));
@@ -59,96 +65,124 @@ SystemStagePtr StageManager::CreateSystemStage(int64 stageId, int64 stageDataKey
     }
 
     SystemStagePtr spStage = std::make_shared<SystemStage>(stageId, stageDataKey);
-    spStage->SetGameServer(m_pGameServer);
-
-    const int32 threadIdx = computeStageThreadIndex(stageId);
-    m_pGameServer->AssignContents(threadIdx, spStage);
-
-    m_safeStages.Insert(stageId, spStage);
+    registerStage(stageId, stageDataKey, spStage);
     m_spSystemStage = spStage;
 
-    LOG_WRITE(LogLevel::Info, std::format("StageManager::CreateSystemStage - stageId={} assignedThreadIndex={}",
-        stageId, threadIdx));
+    LOG_WRITE(LogLevel::Info, std::format("StageManager::CreateSystemStage - stageId={}", stageId));
 
     return spStage;
 }
 
 TownPtr StageManager::CreateTown(int64 stageId, int64 stageDataKey)
 {
+    StageGridParams params;
+    const dtNavMesh* pNavMesh = nullptr;
+    if (!prepareNavStage(stageId, stageDataKey, "CreateTown", params, pNavMesh))
+        return nullptr;
+
+    TownPtr spStage = std::make_shared<Town>(stageId, stageDataKey, params);
+    spStage->SetNavMesh(pNavMesh);
+    registerStage(stageId, stageDataKey, spStage);
+    m_spTown = spStage;
+
+    LOG_WRITE(LogLevel::Info, std::format("StageManager::CreateTown - stageId={} stageDataKey={}", stageId, stageDataKey));
+
+    return spStage;
+}
+
+FieldPtr StageManager::CreateField(int64 stageId, int64 stageDataKey)
+{
+    StageGridParams params;
+    const dtNavMesh* pNavMesh = nullptr;
+    if (!prepareNavStage(stageId, stageDataKey, "CreateField", params, pNavMesh))
+        return nullptr;
+
+    FieldPtr spStage = std::make_shared<Field>(stageId, stageDataKey, params);
+    spStage->SetNavMesh(pNavMesh);
+    registerStage(stageId, stageDataKey, spStage);
+
+    LOG_WRITE(LogLevel::Info, std::format("StageManager::CreateField - stageId={} stageDataKey={}", stageId, stageDataKey));
+
+    return spStage;
+}
+
+bool StageManager::prepareNavStage(int64 stageId, int64 stageDataKey, const char* logTag,
+                                   StageGridParams& outParams, const dtNavMesh*& outNavMesh)
+{
     if (!m_pGameServer)
     {
-        LOG_WRITE(LogLevel::Error, std::format("StageManager::CreateTown - not initialized. stageId={}", stageId));
-        return nullptr;
+        LOG_WRITE(LogLevel::Error, std::format("StageManager::{} - not initialized. stageId={}", logTag, stageId));
+        return false;
     }
 
     const GameData_Stage* pStageData = GameDataTable_Stage::FindData(stageDataKey);
     if (!pStageData)
     {
-        LOG_WRITE(LogLevel::Error, std::format("StageManager::CreateTown - GameData_Stage not found. stageId={}, stageDataKey={}", stageId, stageDataKey));
-        return nullptr;
+        LOG_WRITE(LogLevel::Error, std::format("StageManager::{} - GameData_Stage not found. stageId={}, stageDataKey={}", logTag, stageId, stageDataKey));
+        return false;
     }
 
     StagePtr spExisting;
     if (m_safeStages.Find(stageId, spExisting))
     {
-        LOG_WRITE(LogLevel::Error, std::format("StageManager::CreateTown - stageId already exists. stageId={}", stageId));
-        return nullptr;
+        LOG_WRITE(LogLevel::Error, std::format("StageManager::{} - stageId already exists. stageId={}", logTag, stageId));
+        return false;
     }
 
     // 1) GameData_Stage 에서 stageType/navMeshFileName/sectorSize 읽는다. worldMin/Max 는 fallback.
-    StageGridParams params = LoadStageGridParams(stageDataKey);
+    outParams = LoadStageGridParams(stageDataKey);
 
     // 2) NavMesh 메타가 있으면 worldMin/Max 를 해당 메타의 bounds 로 덮어쓴다.
     //    메타가 없으면(파일 누락 등) fallback 그대로 사용.
-    const dtNavMesh*   pNavMesh = nullptr;
-    const NavMeshMeta* pMeta    = nullptr;
-    if (!params.navMeshFileName.empty())
+    outNavMesh = nullptr;
+    const NavMeshMeta* pMeta = nullptr;
+    if (!outParams.navMeshFileName.empty())
     {
-        pNavMesh = m_pGameServer->GetNavMeshManager().Find(params.navMeshFileName);
-        pMeta    = m_pGameServer->GetNavMeshManager().FindMeta(params.navMeshFileName);
+        outNavMesh = m_pGameServer->GetNavMeshManager().Find(outParams.navMeshFileName);
+        pMeta      = m_pGameServer->GetNavMeshManager().FindMeta(outParams.navMeshFileName);
     }
 
     if (pMeta)
     {
-        params.worldMinX = pMeta->minX;
-        params.worldMinZ = pMeta->minZ;
-        params.worldMaxX = pMeta->maxX;
-        params.worldMaxZ = pMeta->maxZ;
+        outParams.worldMinX = pMeta->minX;
+        outParams.worldMinZ = pMeta->minZ;
+        outParams.worldMaxX = pMeta->maxX;
+        outParams.worldMaxZ = pMeta->maxZ;
         LOG_WRITE(LogLevel::Info, std::format(
-            "StageManager::CreateTown - using NavMesh meta bounds. stageId={} navMesh={} bounds=({:.3f},{:.3f})~({:.3f},{:.3f})",
-            stageId, params.navMeshFileName,
-            params.worldMinX, params.worldMinZ, params.worldMaxX, params.worldMaxZ));
+            "StageManager::{} - using NavMesh meta bounds. stageId={} navMesh={} bounds=({:.3f},{:.3f})~({:.3f},{:.3f})",
+            logTag, stageId, outParams.navMeshFileName,
+            outParams.worldMinX, outParams.worldMinZ, outParams.worldMaxX, outParams.worldMaxZ));
     }
-    else if (!params.navMeshFileName.empty())
+    else if (!outParams.navMeshFileName.empty())
     {
         LOG_WRITE(LogLevel::Warn, std::format(
-            "StageManager::CreateTown - NavMesh meta not found, using fallback bounds. stageId={} navMesh={}",
-            stageId, params.navMeshFileName));
+            "StageManager::{} - NavMesh meta not found, using fallback bounds. stageId={} navMesh={}",
+            logTag, stageId, outParams.navMeshFileName));
     }
 
-    // 3) Town 생성. 명시적 params 를 전달하는 생성자 사용.
-    TownPtr spStage = std::make_shared<Town>(stageId, stageDataKey, params);
+    if (!outNavMesh && !outParams.navMeshFileName.empty())
+    {
+        LOG_WRITE(LogLevel::Warn, std::format(
+            "StageManager::{} - NavMesh not found. stageId={} navMesh={} (길찾기 비활성화)",
+            logTag, stageId, outParams.navMeshFileName));
+    }
+
+    return true;
+}
+
+void StageManager::registerStage(int64 stageId, int64 stageDataKey, const StagePtr& spStage)
+{
     spStage->SetGameServer(m_pGameServer);
-
-    // 4) NavMesh 객체 부착. nullptr 이면 길찾기 비활성화.
-    if (!pNavMesh && !params.navMeshFileName.empty())
-    {
-        LOG_WRITE(LogLevel::Warn, std::format(
-            "StageManager::CreateTown - NavMesh not found. stageId={} navMesh={} (길찾기 비활성화)",
-            stageId, params.navMeshFileName));
-    }
-    spStage->SetNavMesh(pNavMesh);
 
     const int32 threadIdx = computeStageThreadIndex(stageId);
     m_pGameServer->AssignContents(threadIdx, spStage);
 
+    // 등록은 m_safeStages 먼저, 인덱스 나중 (조회 측은 인덱스 miss만 발생).
     m_safeStages.Insert(stageId, spStage);
-    m_spTown = spStage;
-
-    LOG_WRITE(LogLevel::Info, std::format("StageManager::CreateTown - stageId={} assignedThreadIndex={}",
-        stageId, threadIdx));
-
-    return spStage;
+    {
+        std::lock_guard<std::mutex> lock(m_dataKeyIndexMutex);
+        m_stageIdsByDataKey[stageDataKey].push_back(stageId);
+    }
 }
 
 StagePtr StageManager::Find(int64 stageId) const
@@ -157,6 +191,27 @@ StagePtr StageManager::Find(int64 stageId) const
     if (m_safeStages.Find(stageId, spStage))
         return spStage;
     return nullptr;
+}
+
+std::vector<StagePtr> StageManager::FindStagesByDataKey(int64 stageDataKey) const
+{
+    std::vector<int64> stageIds;
+    {
+        std::lock_guard<std::mutex> lock(m_dataKeyIndexMutex);
+        auto it = m_stageIdsByDataKey.find(stageDataKey);
+        if (it != m_stageIdsByDataKey.end())
+            stageIds = it->second;
+    }
+
+    std::vector<StagePtr> stages;
+    stages.reserve(stageIds.size());
+    for (int64 stageId : stageIds)
+    {
+        StagePtr spStage;
+        if (m_safeStages.Find(stageId, spStage))
+            stages.push_back(std::move(spStage));
+    }
+    return stages;
 }
 
 int32 StageManager::computeStageThreadIndex(int64 stageId) const

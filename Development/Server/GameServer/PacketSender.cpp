@@ -10,20 +10,6 @@
 
 void PacketSender::SendStageEnterNtf(int64 userId, int64 stageId, int64 stageDataKey, float myPosX, float myPosY, float myPosZ, float myYaw)
 {
-    // StageEnterNtf 보다 먼저 스탯/HP를 보낸다.
-    // 클라는 StageEnterNtf 를 받을 때면 이미 Game 씬 + LocalPlayer 스폰이 끝난 상태라
-    // 스탯 핸들러가 대상 캐릭터를 찾을 수 있다. 또 최대치(StatUpdateNtf)가 현재HP(HpMpNtf)보다
-    // 먼저 가야 클라에서 clamp 가 올바르므로 이 순서로 보낸다.
-    UserPtr spUser;
-    if (m_safeUsers.Find(userId, spUser) && spUser)
-    {
-        if (CharacterPtr spCharacter = spUser->GetCurrentCharacter())
-        {
-            SendStatUpdateNtf(userId, *spCharacter);
-            SendHpMpNtf(userId, spCharacter->GetCurHp(), spCharacter->GetCurMp());
-        }
-    }
-
     GamePacket::StageEnterNtf ntf;
     ntf.set_stage_id(stageId);
     ntf.set_stage_data_key(stageDataKey);
@@ -34,8 +20,32 @@ void PacketSender::SendStageEnterNtf(int64 userId, int64 stageId, int64 stageDat
 
     SendToUser(userId, Common::GAME_PACKET_ID_STAGE_ENTER_NTF, ntf);
 
+    // 스탯/HP 는 StageEnterNtf 뒤에 보낸다.
+    // 클라는 StageEnterNtf 를 받는 시점에 LocalPlayer 를 스폰하므로(2단계 입장),
+    // 그 뒤에 도착해야 스탯 핸들러가 대상 캐릭터를 찾을 수 있다 (TCP 순서 보장).
+    // 최대치(StatUpdateNtf)가 현재HP(HpMpNtf)보다 먼저 가야 클라 clamp 가 올바르다.
+    UserPtr spUser;
+    if (m_safeUsers.Find(userId, spUser) && spUser)
+    {
+        if (CharacterPtr spCharacter = spUser->GetCurrentCharacter())
+        {
+            SendStatUpdateNtf(userId, *spCharacter);
+            SendHpMpNtf(userId, spCharacter->GetCurHp(), spCharacter->GetCurMp());
+        }
+    }
+
     LOG_WRITE(LogLevel::Info, std::format("PacketSender: StageEnterNtf sent. userId={} stageId={} stageKey={} pos=({},{},{}) yaw={}",
         userId, stageId, stageDataKey, myPosX, myPosY, myPosZ, myYaw));
+}
+
+void PacketSender::SendStageMoveRes(int64 userId, EResultCode resultCode, const std::string& errorMsg, int64 targetStageDataKey)
+{
+    GamePacket::StageMoveRes res;
+    res.set_result_code(static_cast<int32>(resultCode));
+    res.set_error_msg(errorMsg);
+    res.set_target_stage_data_key(targetStageDataKey);
+
+    SendToUser(userId, Common::GAME_PACKET_ID_STAGE_MOVE_RES, res);
 }
 
 void PacketSender::SendObjectVisibilityNtf(int64 userId,

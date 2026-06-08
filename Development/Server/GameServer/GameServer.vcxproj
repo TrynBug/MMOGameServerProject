@@ -107,6 +107,7 @@
     <ClInclude Include="Sector.h" />
     <ClInclude Include="SystemStage.h" />
     <ClInclude Include="Town.h" />
+    <ClInclude Include="Field.h" />
     <ClInclude Include="User.h" />
     <ClInclude Include="Character.h" />
     <ClInclude Include="Monster.h" />
@@ -139,6 +140,7 @@
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="SystemStage.cpp" />
     <ClCompile Include="Town.cpp" />
+    <ClCompile Include="Field.cpp" />
     <ClCompile Include="User.cpp" />
     <ClCompile Include="Character.cpp" />
     <ClCompile Include="Monster.cpp" />

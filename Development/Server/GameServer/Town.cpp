@@ -1,7 +1,5 @@
 #include "pch.h"
 #include "Town.h"
-#include "Character.h"     // GetCurrentCharacter가 CharacterPtr을 리턴하여 완전타입 필요
-#include "GameServer.h"   // StageEnterNtf 전송을 위해 완전 타입 필요
 
 Town::Town(int64 stageId, int64 stageDataKey)
     : Town(stageId, stageDataKey, LoadStageGridParams(stageDataKey))   // 위임. LoadStageGridParams는 1회만 호출.
@@ -41,27 +39,5 @@ void Town::OnStart()
         SpawnMonster(60, i * 1.f, 0, 30, 0.0f);
 }
 
-void Town::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
-{
-    // 부모 처리 (User를 m_users에, Character를 m_objects/m_userObjects에 등록).
-    Stage::OnUserEnter(spUser, spCharacter);
-
-    // 클라이언트에게 StageEnterNtf 전송.
-    GameServer* pGameServer = GetGameServer();
-    if (!pGameServer)
-    {
-        LOG_WRITE(LogLevel::Error, std::format("Town::OnUserEnter - GameServer not injected. stageId={} userId={}",
-            GetStageId(), spUser->GetUserId()));
-        return;
-    }
-
-    if (!spCharacter)
-    {
-        LOG_WRITE(LogLevel::Error, std::format("Town::OnUserEnter - no character. stageId={} userId={}",
-            GetStageId(), spUser->GetUserId()));
-        return;
-    }
-
-	pGameServer->GetPacketSender().SendStageEnterNtf(spUser->GetUserId(), GetStageId(), GetStageDataKey(),
-        spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), spCharacter->GetYaw());
-}
+// 유저 입장/캐릭터 스폰은 Stage 베이스의 2단계 입장 흐름이 처리한다
+// (OnUserEnter → 클라 StageLoadCompleteReq → spawnPendingCharacter → StageEnterNtf).

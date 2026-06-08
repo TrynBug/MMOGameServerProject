@@ -2,10 +2,24 @@
 
 #include "pch.h"
 
+#include "Enum/GameEnum_Stage.h"   // EStagePositionType
+
 // Character와의 순환 의존을 피하기 위한 forward declaration.
 class Character;
 using CharacterPtr  = std::shared_ptr<Character>;
 using CharacterWPtr = std::weak_ptr<Character>;
+
+// 유저의 Stage 소속 상태.
+// - None:    어느 Stage에도 캐릭터가 스폰되지 않음 (SystemStage 포함, 캐릭터 선택 전)
+// - Moving:  Stage 이동 중. 캐릭터가 old Stage에서 분리되어 m_spPendingCharacter에 보관됨.
+//            클라가 StageLoadCompleteReq를 보내면 target Stage가 스폰하고 InStage로 전환.
+// - InStage: 캐릭터가 Stage에 스폰 완료된 상태.
+enum class EUserStageState
+{
+    None,
+    Moving,
+    InStage,
+};
 
 // 유저(클라이언트) 1명을 나타내는 클래스
 // 서버구조개요.md의 '유저 클래스' 절 참조.
@@ -42,6 +56,27 @@ public:
     void          SetCurrentCharacter(const CharacterWPtr& wpCharacter) { m_wpCurrentCharacter = wpCharacter; }
     bool          HasSelectedCharacter() const { return !m_wpCurrentCharacter.expired(); }
 
+    // ── Stage 이동/입장 상태 ─────────────────────────────────────
+    // 상태는 서로 다른 스레드(코루틴 / old·target Stage 컨텐츠 스레드)에서 읽고 쓰므로 atomic.
+    // pending 캐릭터/위치타입은 "쓰기 → EnqueueMessage → 읽기" 순서가 큐 mutex로 보장되므로 일반 멤버.
+    EUserStageState GetStageState() const               { return m_stageState.load(std::memory_order_acquire); }
+    void            SetStageState(EUserStageState s)    { m_stageState.store(s, std::memory_order_release); }
+
+    // Stage 이동 동안 캐릭터를 임시 보관 (이 동안은 User가 유일한 강한 소유자).
+    // positionType: 도착 위치 (StageStartPosition 조회용). None이면 캐릭터의 현재 좌표 사용 (DB 복귀).
+    void SetPendingCharacter(const CharacterPtr& spCharacter, EStagePositionType positionType)
+    {
+        m_spPendingCharacter  = spCharacter;
+        m_pendingPositionType = positionType;
+    }
+    CharacterPtr       GetPendingCharacter() const     { return m_spPendingCharacter; }
+    EStagePositionType GetPendingPositionType() const  { return m_pendingPositionType; }
+    void               ClearPendingCharacter()
+    {
+        m_spPendingCharacter.reset();
+        m_pendingPositionType = EStagePositionType::None;
+    }
+
     // ── 클라 패킷 큐 ────────────────────────────────────────────
     // IOCP Worker가 push (thread-safe)
     void EnqueuePacket(netlib::PacketPtr spPacket);
@@ -61,6 +96,13 @@ private:
     // 현재 선택된 캐릭터 (weak_ptr).
     // 라이프타임: Stage가 강한 소유자. User는 weak로만 참조.
     CharacterWPtr m_wpCurrentCharacter;
+
+    // ── Stage 이동/입장 상태 ─────────────────────────────────────
+    std::atomic<EUserStageState> m_stageState{ EUserStageState::None };
+
+    // Stage 이동 동안의 캐릭터 임시 보관 (Moving 상태에서만 유효).
+    CharacterPtr       m_spPendingCharacter;
+    EStagePositionType m_pendingPositionType = EStagePositionType::None;
 
     // ── 클라 패킷 큐 ────────────────────────────────────────────
     std::mutex                       m_packetQueueMutex;

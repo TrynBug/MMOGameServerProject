@@ -68,13 +68,13 @@ StageGridParams LoadStageGridParams(int64 stageDataKey);
 // ─────────────────────────────────────────────────────────────
 
 // 유저 입장.
-// spCharacter가 있으면 Character도 함께 Stage 객체 컨테이너(m_objects, m_userObjects)에 등록된다.
-// SystemStage 입장 시에는 spCharacter == nullptr (캐릭터 선택 전).
-// Town/Field/Dungeon 입장 시에는 spCharacter가 설정되어야 한다.
+// 캐릭터 없이 유저만 Stage에 등록된다 (이후 클라 패킷은 이 Stage가 drain).
+// 캐릭터 스폰은 별도 단계: 유저가 Moving 상태로 pendingCharacter를 들고 있다가,
+// 클라가 StageLoadCompleteReq를 보내면 spawnPendingCharacter로 스폰된다 (2단계 입장).
+// SystemStage는 캐릭터가 아예 없으므로 이 메시지만으로 입장이 끝난다.
 struct StageMsg_UserEnter
 {
-    UserPtr      spUser;
-    CharacterPtr spCharacter;   // 선택된 캐릭터 객체. 없으면 nullptr.
+    UserPtr spUser;
 };
 
 // 유저 퇴장 (게이트웨이로부터 GatewayUserDisconnectNtf 수신 시,
@@ -314,10 +314,16 @@ protected:
     bool DespawnMonster(int64 objectId);
 
     // ── 시스템 메시지 처리 hooks (파생 클래스가 override 가능) ──
-    // 기본 동작: 유저 추가/제거 및 로그 출력.
-    // spCharacter가 nullptr이 아니면 Character를 m_objects/m_userObjects에도 등록.
-    virtual void OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter);
+    // 기본 동작: 유저를 m_users에 추가/제거 (캐릭터 스폰은 spawnPendingCharacter 별도 단계).
+    virtual void OnUserEnter(const UserPtr& spUser);
     virtual void OnUserLeave(int64 userId);
+
+    // 유저의 pendingCharacter를 이 Stage에 스폰한다 (StageLoadCompleteReq 수신 시 호출).
+    // - pendingPositionType != None이면 StageStartPosition 데이터의 좌표로 배치 (NavMesh 스냅 보정),
+    //   None이면 캐릭터의 현재 좌표 사용 (캐릭터 선택 입장 = DB 좌표 복귀).
+    // - 객체 컨테이너/sector 등록 + AOI visibility 전파 + StageEnterNtf 송신까지 수행.
+    // - 성공 시 유저 상태를 InStage로 전환하고 pendingCharacter를 비운다.
+    void spawnPendingCharacter(const UserPtr& spUser);
 
     // 유저가 클라이언트로부터 보낸 패킷 처리 진입점.
     // 패킷ID로 핸들러 테이블(getUserPacketHandlerMap)을 조회하여 해당 멤버 핸들러를 호출한다.
@@ -344,6 +350,14 @@ protected:
     void handleMoveStopReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
     void handleSkillCastReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
     void handleSkillProjectileHitReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+
+    // Stage 이동 요청 (동일/크로스 서버 통합. 현재는 동일 서버만 처리, 크로스서버는 Phase 2).
+    // old Stage(=this)의 컨텐츠 스레드에서 실행된다. 검증 → leave → pending 보관 → target enter → Res.
+    void handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+
+    // 클라 맵 로딩 완료 보고. target Stage(=this)의 컨텐츠 스레드에서 실행된다.
+    // Moving 상태의 유저면 spawnPendingCharacter로 스폰한다.
+    void handleStageLoadCompleteReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
 
     // ── 유저 컨테이너 접근 ──
     const std::unordered_map<int64, UserPtr>& GetUsers() const { return m_users; }

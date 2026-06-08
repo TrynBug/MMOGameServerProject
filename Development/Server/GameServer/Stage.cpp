@@ -11,6 +11,8 @@
 #include "Skill/ProjectileGroup.h"  // ProjectileGroup 완전타입 (m_skillProjectileGroups 조작)
 #include "Skill/SkillBake.h"        // BakeSkillEffectParams (폭발 발동 시)
 #include "Generated/GameData_Skill.h"  // GameDataTable_Skill::FindData (OnHitSkillKey 조회)
+#include "Generated/GameData_StageStartPosition.h"  // handleStageMoveReq/spawnPendingCharacter 의 도착 위치 조회
+#include "Enum/GameEnum_Common.h"  // EResultCode (StageMoveRes)
 
 #include <cmath>
 
@@ -655,7 +657,7 @@ void Stage::processSystemMessages()
             using T = std::decay_t<decltype(m)>;
             if constexpr (std::is_same_v<T, StageMsg_UserEnter>)
             {
-                OnUserEnter(m.spUser, m.spCharacter);
+                OnUserEnter(m.spUser);
             }
             else if constexpr (std::is_same_v<T, StageMsg_UserLeave>)
             {
@@ -665,7 +667,7 @@ void Stage::processSystemMessages()
     }
 }
 
-void Stage::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
+void Stage::OnUserEnter(const UserPtr& spUser)
 {
     if (!spUser)
         return;
@@ -674,64 +676,123 @@ void Stage::OnUserEnter(const UserPtr& spUser, const CharacterPtr& spCharacter)
     m_users[userId] = spUser;
     spUser->SetCurrentStageId(m_stageId);
 
-    // 캐릭터가 함께 입장하면 Stage 객체 컨테이너에도 등록.
-    if (spCharacter)
+    // 캐릭터 스폰은 별도 단계 (2단계 입장).
+    // 유저가 Moving 상태로 pendingCharacter를 들고 있으면, 클라의 StageLoadCompleteReq
+    // 수신 시 spawnPendingCharacter가 스폰한다. SystemStage는 캐릭터가 없으므로 여기서 끝.
+    LOG_WRITE(LogLevel::Info, std::format("Stage::OnUserEnter - stageId={} userId={} stageState={} totalUsers={}",
+        m_stageId, userId, static_cast<int32>(spUser->GetStageState()), m_users.size()));
+}
+
+void Stage::spawnPendingCharacter(const UserPtr& spUser)
+{
+    if (!spUser)
+        return;
+
+    const int64 userId = spUser->GetUserId();
+
+    CharacterPtr spCharacter = spUser->GetPendingCharacter();
+    if (!spCharacter)
     {
-        const int64 objectId = spCharacter->GetObjectId();
+        LOG_WRITE(LogLevel::Warn, std::format("Stage::spawnPendingCharacter - no pending character. stageId={} userId={}",
+            m_stageId, userId));
+        return;
+    }
 
-        // 캐릭터는 중요 오브젝트 → 매 tick(50ms) 업데이트. 등록 진입점에 주기를 명시 전달.
-        registerObject(spCharacter, k_characterUpdateIntervalMs, m_userObjects);
-
-        LOG_WRITE(LogLevel::Info, std::format("Stage::OnUserEnter - stageId={} userId={} characterId={} sector=({},{}) totalUsers={} totalObjects={}",
-            m_stageId, userId, objectId,
-            spCharacter->GetCurSectorX(), spCharacter->GetCurSectorZ(),
-            m_users.size(), m_objects.size()));
-
-        // ── visibility 전파 ────────────────────────────────────
-        // 주변 sector AOI 기반.
-        if (GameServer* pServer = GetGameServer())
+    // ── 도착 위치 결정 ────────────────────────────────────
+    // positionType != None 이면 StageStartPosition 데이터 좌표 (NavMesh 스냅 보정),
+    // None 이면 캐릭터의 현재 좌표 그대로 (캐릭터 선택 입장 = DB 좌표 복귀).
+    const EStagePositionType positionType = spUser->GetPendingPositionType();
+    if (positionType != EStagePositionType::None)
+    {
+        const GameData_StageStartPosition* pPosData =
+            GameDataTable_StageStartPosition::FindByStageAndType(GetStageDataKey(), positionType);
+        if (pPosData)
         {
-            const GamePacket::CharacterSpawnInfo myInfo = makeCharacterSpawnInfo(*spCharacter);
+            float x = static_cast<float>(pPosData->PosX);
+            float y = static_cast<float>(pPosData->PosY);
+            float z = static_cast<float>(pPosData->PosZ);
 
-            // 나에게 전송할 spawn 목록 (주변 sector의 모든 캐릭터(자기 포함) + 모든 몬스터).
-            std::vector<GamePacket::CharacterSpawnInfo> spawnsForMe;
-            spawnsForMe.reserve(16);
-            std::vector<GamePacket::MonsterSpawnInfo> monsterSpawnsForMe;
-            monsterSpawnsForMe.reserve(16);
+            // NavMesh 위로 스냅 (Y 보정 + walkable 보장). 실패 시 데이터 좌표 그대로.
+            float snapX = 0.f, snapY = 0.f, snapZ = 0.f;
+            if (SampleNavMeshPosition(x, y, z, 5.f, 5.f, 5.f, snapX, snapY, snapZ))
+            {
+                x = snapX; y = snapY; z = snapZ;
+            }
 
-            // 다른 캐릭터에게 전송할 용도의 "내 spawn 1개".
-            std::vector<GamePacket::CharacterSpawnInfo> singleSpawn = { myInfo };
-
-            ForEachAdjacentSector(spCharacter->GetCurSectorX(), spCharacter->GetCurSectorZ(), k_aoiRange,
-                [&](Sector* pSector)
-                {
-                    for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
-                    {
-                        Character* pOtherChar = static_cast<Character*>(pOtherObj);
-                        spawnsForMe.push_back(makeCharacterSpawnInfo(*pOtherChar));
-
-                        // 다른 캐릭터에게 내 spawn 전송 (자기 자신은 제외).
-                        if (otherObjId != objectId)
-                        {
-                            const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                            pServer->GetPacketSender().SendObjectVisibilityNtf(otherUserId, singleSpawn, {});
-                        }
-                    }
-
-                    // 주변 몬스터도 나에게 spawn 통보. (몬스터는 관찰자가 아니므로 받기만 한다.)
-                    for (const auto& [monsterObjId, pMonsterObj] : pSector->GetMonsters())
-                    {
-                        monsterSpawnsForMe.push_back(makeMonsterSpawnInfo(*static_cast<Monster*>(pMonsterObj)));
-                    }
-                });
-
-            pServer->GetPacketSender().SendObjectVisibilityNtf(userId, spawnsForMe, {}, monsterSpawnsForMe);
+            // 위치 배치 + 이동 상태 정지 (이전 Stage의 이동 잔여 상태 제거).
+            spCharacter->StopAt(x, y, z, static_cast<float>(pPosData->Yaw));
+        }
+        else
+        {
+            // 이동 요청 시 검증을 통과했으므로 이론상 도달 불가. 캐릭터 현재 좌표로 진행.
+            LOG_WRITE(LogLevel::Error, std::format(
+                "Stage::spawnPendingCharacter - StageStartPosition not found. stageId={} stageDataKey={} positionType={}",
+                m_stageId, GetStageDataKey(), static_cast<int32>(positionType)));
         }
     }
-    else
+
+    const int64 objectId = spCharacter->GetObjectId();
+
+    // 캐릭터는 중요 오브젝트 → 매 tick(50ms) 업데이트. 등록 진입점에 주기를 명시 전달.
+    registerObject(spCharacter, k_characterUpdateIntervalMs, m_userObjects);
+
+    // User ↔ Character 연결 + 상태 전환.
+    spUser->SetCurrentCharacter(spCharacter);
+    spUser->ClearPendingCharacter();
+    spUser->SetStageState(EUserStageState::InStage);
+
+    LOG_WRITE(LogLevel::Info, std::format("Stage::spawnPendingCharacter - stageId={} userId={} characterId={} sector=({},{}) totalUsers={} totalObjects={}",
+        m_stageId, userId, objectId,
+        spCharacter->GetCurSectorX(), spCharacter->GetCurSectorZ(),
+        m_users.size(), m_objects.size()));
+
+    // ── visibility 전파 ────────────────────────────────────
+    // 주변 sector AOI 기반.
+    GameServer* pServer = GetGameServer();
+    if (pServer)
     {
-        LOG_WRITE(LogLevel::Info, std::format("Stage::OnUserEnter - stageId={} userId={} (no character) totalUsers={}",
-            m_stageId, userId, m_users.size()));
+        const GamePacket::CharacterSpawnInfo myInfo = makeCharacterSpawnInfo(*spCharacter);
+
+        // 나에게 전송할 spawn 목록 (주변 sector의 모든 캐릭터(자기 포함) + 모든 몬스터).
+        std::vector<GamePacket::CharacterSpawnInfo> spawnsForMe;
+        spawnsForMe.reserve(16);
+        std::vector<GamePacket::MonsterSpawnInfo> monsterSpawnsForMe;
+        monsterSpawnsForMe.reserve(16);
+
+        // 다른 캐릭터에게 전송할 용도의 "내 spawn 1개".
+        std::vector<GamePacket::CharacterSpawnInfo> singleSpawn = { myInfo };
+
+        ForEachAdjacentSector(spCharacter->GetCurSectorX(), spCharacter->GetCurSectorZ(), k_aoiRange,
+            [&](Sector* pSector)
+            {
+                for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
+                {
+                    Character* pOtherChar = static_cast<Character*>(pOtherObj);
+                    spawnsForMe.push_back(makeCharacterSpawnInfo(*pOtherChar));
+
+                    // 다른 캐릭터에게 내 spawn 전송 (자기 자신은 제외).
+                    if (otherObjId != objectId)
+                    {
+                        const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
+                        pServer->GetPacketSender().SendObjectVisibilityNtf(otherUserId, singleSpawn, {});
+                    }
+                }
+
+                // 주변 몬스터도 나에게 spawn 통보. (몬스터는 관찰자가 아니므로 받기만 한다.)
+                for (const auto& [monsterObjId, pMonsterObj] : pSector->GetMonsters())
+                {
+                    monsterSpawnsForMe.push_back(makeMonsterSpawnInfo(*static_cast<Monster*>(pMonsterObj)));
+                }
+            });
+
+        // ── StageEnterNtf 를 먼저 보낸다 (StatUpdate/HpMp 는 PacketSender 가 그 뒤에 송신) ──
+        // 2단계 입장에서 클라는 StageEnterNtf 수신 시점에 LocalPlayer 를 생성한다.
+        // 그래야 뒤이어 오는 ObjectVisibilityNtf 의 자기 자신 항목을 식별해 스킵할 수 있다.
+        // (순서가 반대면 클라가 자기 캐릭터를 원격 캐릭터로 잘못 스폰 → 키 충돌.)
+        pServer->GetPacketSender().SendStageEnterNtf(userId, GetStageId(), GetStageDataKey(),
+            spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), spCharacter->GetYaw());
+
+        pServer->GetPacketSender().SendObjectVisibilityNtf(userId, spawnsForMe, {}, monsterSpawnsForMe);
     }
 }
 
@@ -825,6 +886,8 @@ const Stage::UserPacketHandlerMap& Stage::getUserPacketHandlerMap() const
         { Common::GAME_PACKET_ID_MOVE_STOP_REQ,            &Stage::handleMoveStopReq },
         { Common::GAME_PACKET_ID_SKILL_CAST_REQ,           &Stage::handleSkillCastReq },
         { Common::GAME_PACKET_ID_SKILL_PROJECTILE_HIT_REQ, &Stage::handleSkillProjectileHitReq },
+        { Common::GAME_PACKET_ID_STAGE_MOVE_REQ,           &Stage::handleStageMoveReq },
+        { Common::GAME_PACKET_ID_STAGE_LOAD_COMPLETE_REQ,  &Stage::handleStageLoadCompleteReq },
     };
     return sm_handlers;
 }
@@ -897,6 +960,122 @@ void Stage::handleMoveStopReq(const UserPtr& spUser, const netlib::PacketPtr& sp
     broadcastMoveNtf(*spCharacter);
 }
 
+void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+{
+    GamePacket::StageMoveReq req;
+    if (!deserializeUserPacket(spUser, spPacket, req))
+        return;
+
+    GameServer* pServer = GetGameServer();
+    if (!pServer)
+        return;
+
+    const int64 userId = spUser->GetUserId();
+
+    auto sendFail = [&](const std::string& reason)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("Stage::handleStageMoveReq - rejected. stageId={} userId={} targetKey={} reason={}",
+            m_stageId, userId, req.target_stage_data_key(), reason));
+        pServer->GetPacketSender().SendStageMoveRes(userId, EResultCode::Fail, reason, req.target_stage_data_key());
+    };
+
+    // ── 검증 ─────────────────────────────────────────────
+    // 크로스서버 이동은 Phase 2.
+    if (req.target_game_server_id() != 0 && req.target_game_server_id() != pServer->GetServerId())
+    {
+        sendFail("cross-server move not supported yet");
+        return;
+    }
+
+    // 전환 중 중복 요청 거부.
+    if (spUser->GetStageState() != EUserStageState::InStage)
+    {
+        sendFail("not in stage (moving?)");
+        return;
+    }
+
+    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+    if (!spCharacter || spCharacter->GetStage() != this)
+    {
+        sendFail("no character in this stage");
+        return;
+    }
+
+    const auto positionType = static_cast<EStagePositionType>(req.position_type());
+    if (positionType <= EStagePositionType::None || positionType >= EStagePositionType::Max)
+    {
+        sendFail("invalid position type");
+        return;
+    }
+
+    // 대상 Stage 해석. 인스턴스 선택 정책 v1: 정적 스테이지는 dataKey당 정확히 1개.
+    // (채널/인스턴스 던전 도입 시 이 지점에 선택 정책이 들어간다.)
+    std::vector<StagePtr> targets = pServer->GetStageManager().FindStagesByDataKey(req.target_stage_data_key());
+    if (targets.empty())
+    {
+        sendFail("target stage not found");
+        return;
+    }
+    if (targets.size() > 1)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("Stage::handleStageMoveReq - multiple instances for static stage. dataKey={} count={}",
+            req.target_stage_data_key(), targets.size()));
+        sendFail("ambiguous target stage");
+        return;
+    }
+
+    StagePtr spTarget = targets[0];
+    if (spTarget.get() == this)
+    {
+        sendFail("already in target stage");
+        return;
+    }
+
+    const EStageType targetType = spTarget->GetStageType();
+    if (targetType != EStageType::Town && targetType != EStageType::Field)
+    {
+        sendFail("target stage type not movable");
+        return;
+    }
+
+    // 도착 위치 데이터 존재 검증 (스폰 시점의 lookup 실패를 미리 차단).
+    if (!GameDataTable_StageStartPosition::FindByStageAndType(spTarget->GetStageDataKey(), positionType))
+    {
+        sendFail("no start position data");
+        return;
+    }
+
+    // ── 이동 확정 ─────────────────────────────────────────
+    // 1) 캐릭터를 User가 임시 보관 (이 순간부터 User가 유일한 강한 소유자).
+    spUser->SetPendingCharacter(spCharacter, positionType);
+    spUser->SetStageState(EUserStageState::Moving);
+
+    // 2) old Stage(=this)에서 퇴장: sector/컨테이너 제거 + AOI despawn + m_users 제거.
+    OnUserLeave(userId);
+
+    // 3) target Stage에 유저만 입장 (이후 클라 패킷은 target이 drain).
+    spTarget->EnqueueMessage(StageMsg_UserEnter{spUser});
+
+    // 4) 성공 응답 → 클라는 로딩 시작, 완료 시 StageLoadCompleteReq.
+    pServer->GetPacketSender().SendStageMoveRes(userId, EResultCode::Success, "", req.target_stage_data_key());
+
+    LOG_WRITE(LogLevel::Info, std::format("Stage::handleStageMoveReq - moving. userId={} from stageId={} to stageId={} (dataKey={}) positionType={}",
+        userId, m_stageId, spTarget->GetStageId(), req.target_stage_data_key(), static_cast<int32>(positionType)));
+}
+
+void Stage::handleStageLoadCompleteReq(const UserPtr& spUser, const netlib::PacketPtr& /*spPacket*/)
+{
+    // Moving 상태의 유저만 유효 (이외는 잘못된/중복 보고 → 무시).
+    if (spUser->GetStageState() != EUserStageState::Moving || !spUser->GetPendingCharacter())
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("Stage::handleStageLoadCompleteReq - unexpected. stageId={} userId={} stageState={}",
+            m_stageId, spUser->GetUserId(), static_cast<int32>(spUser->GetStageState())));
+        return;
+    }
+
+    spawnPendingCharacter(spUser);
+}
+
 void Stage::handleSkillCastReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
 {
     CharacterPtr spCharacter = spUser->GetCurrentCharacter();
@@ -938,8 +1117,16 @@ void Stage::processUserPackets()
 {
     // 각 유저의 패킷 큐를 drain하여 OnUserPacket 호출.
     // 이 루프는 Stage 스레드 전용 접근 구간이므로 m_users에 안전하게 접근 가능.
-    std::vector<netlib::PacketPtr> packets;
+    //
+    // m_users가 아닌 스냅샷을 순회하는 이유: 핸들러(handleStageMoveReq)가
+    // OnUserLeave로 m_users를 변경할 수 있어 직접 순회하면 iterator가 무효화된다.
+    std::vector<UserPtr> users;
+    users.reserve(m_users.size());
     for (auto& [userId, spUser] : m_users)
+        users.push_back(spUser);
+
+    std::vector<netlib::PacketPtr> packets;
+    for (auto& spUser : users)
     {
         spUser->DrainPackets(packets);
         if (packets.empty())
