@@ -28,7 +28,7 @@ namespace GamePacket {
             "GhZDb21tb24vcGFja2V0X2lkLnByb3RvGh5EYXRhU3RydWN0dXJlcy9jaGFy",
             "YWN0ZXIucHJvdG8iNQoOR2F0ZXdheUF1dGhSZXESDwoHdXNlcl9pZBgBIAEo",
             "AxISCgphdXRoX3Rva2VuGAIgASgEIjMKDEdhbWVFbnRlck50ZhIQCghzdGFn",
-            "ZV9pZBgBIAEoAxIRCglzdGFnZV9rZXkYAiABKAMiDwoNR2FtZUxvZ291dFJl",
+            "ZV9pZBgBIAEoAxIRCglzdGFnZV9rZXkYAiABKAUiDwoNR2FtZUxvZ291dFJl",
             "cSI6ChJGb3JjZURpc2Nvbm5lY3ROdGYSEwoLcmVhc29uX2NvZGUYASABKAUS",
             "DwoHbWVzc2FnZRgCIAEoCSrgAQoVRm9yY2VEaXNjb25uZWN0UmVhc29uEiAK",
             "HEZPUkNFX0RJU0NPTk5FQ1RfUkVBU09OX05PTkUQABIrCidGT1JDRV9ESVND",
@@ -384,13 +384,13 @@ namespace GamePacket {
 
     /// <summary>Field number for the "stage_key" field.</summary>
     public const int StageKeyFieldNumber = 2;
-    private long stageKey_;
+    private int stageKey_;
     /// <summary>
     /// 입장한 Stage 데이터 Key
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long StageKey {
+    public int StageKey {
       get { return stageKey_; }
       set {
         stageKey_ = value;
@@ -422,7 +422,7 @@ namespace GamePacket {
     public override int GetHashCode() {
       int hash = 1;
       if (StageId != 0L) hash ^= StageId.GetHashCode();
-      if (StageKey != 0L) hash ^= StageKey.GetHashCode();
+      if (StageKey != 0) hash ^= StageKey.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -445,9 +445,9 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(StageId);
       }
-      if (StageKey != 0L) {
+      if (StageKey != 0) {
         output.WriteRawTag(16);
-        output.WriteInt64(StageKey);
+        output.WriteInt32(StageKey);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -463,9 +463,9 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(StageId);
       }
-      if (StageKey != 0L) {
+      if (StageKey != 0) {
         output.WriteRawTag(16);
-        output.WriteInt64(StageKey);
+        output.WriteInt32(StageKey);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -480,8 +480,8 @@ namespace GamePacket {
       if (StageId != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageId);
       }
-      if (StageKey != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(StageKey);
+      if (StageKey != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(StageKey);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -498,7 +498,7 @@ namespace GamePacket {
       if (other.StageId != 0L) {
         StageId = other.StageId;
       }
-      if (other.StageKey != 0L) {
+      if (other.StageKey != 0) {
         StageKey = other.StageKey;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
@@ -525,7 +525,7 @@ namespace GamePacket {
             break;
           }
           case 16: {
-            StageKey = input.ReadInt64();
+            StageKey = input.ReadInt32();
             break;
           }
         }
@@ -552,7 +552,7 @@ namespace GamePacket {
             break;
           }
           case 16: {
-            StageKey = input.ReadInt64();
+            StageKey = input.ReadInt32();
             break;
           }
         }

@@ -74,7 +74,7 @@ inline constexpr GameEnterNtf::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
         stage_id_{::int64_t{0}},
-        stage_key_{::int64_t{0}} {}
+        stage_key_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR GameEnterNtf::GameEnterNtf(::_pbi::ConstantInitialized)
@@ -175,7 +175,7 @@ const char descriptor_table_protodef_GamePacket_2fsession_5fpacket_2eproto[] ABS
     "tures/character.proto\"5\n\016GatewayAuthReq\022"
     "\017\n\007user_id\030\001 \001(\003\022\022\n\nauth_token\030\002 \001(\004\"3\n\014"
     "GameEnterNtf\022\020\n\010stage_id\030\001 \001(\003\022\021\n\tstage_"
-    "key\030\002 \001(\003\"\017\n\rGameLogoutReq\":\n\022ForceDisco"
+    "key\030\002 \001(\005\"\017\n\rGameLogoutReq\":\n\022ForceDisco"
     "nnectNtf\022\023\n\013reason_code\030\001 \001(\005\022\017\n\007message"
     "\030\002 \001(\t*\340\001\n\025ForceDisconnectReason\022 \n\034FORC"
     "E_DISCONNECT_REASON_NONE\020\000\022+\n\'FORCE_DISC"
@@ -627,8 +627,8 @@ GameEnterNtf::_table_ = {
     ::_pbi::TcParser::GetTable<::GamePacket::GameEnterNtf>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // int64 stage_key = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(GameEnterNtf, _impl_.stage_key_), 1>(),
+    // int32 stage_key = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(GameEnterNtf, _impl_.stage_key_), 1>(),
      {16, 1, 0,
       PROTOBUF_FIELD_OFFSET(GameEnterNtf, _impl_.stage_key_)}},
     // int64 stage_id = 1;
@@ -640,8 +640,8 @@ GameEnterNtf::_table_ = {
   }}, {{
     // int64 stage_id = 1;
     {PROTOBUF_FIELD_OFFSET(GameEnterNtf, _impl_.stage_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
-    // int64 stage_key = 2;
-    {PROTOBUF_FIELD_OFFSET(GameEnterNtf, _impl_.stage_key_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int32 stage_key = 2;
+    {PROTOBUF_FIELD_OFFSET(GameEnterNtf, _impl_.stage_key_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
@@ -692,11 +692,11 @@ PROTOBUF_NOINLINE void GameEnterNtf::Clear() {
     }
   }
 
-  // int64 stage_key = 2;
+  // int32 stage_key = 2;
   if (CheckHasBit(cached_has_bits, 0x00000002U)) {
     if (this_._internal_stage_key() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<2>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<2>(
               stream, this_._internal_stage_key(), target);
     }
   }
@@ -734,10 +734,10 @@ PROTOBUF_NOINLINE void GameEnterNtf::Clear() {
             this_._internal_stage_id());
       }
     }
-    // int64 stage_key = 2;
+    // int32 stage_key = 2;
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
       if (this_._internal_stage_key() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_stage_key());
       }
     }

@@ -19,7 +19,7 @@ import "Common/packet_id.proto";
 // Stage 이동 요청 (클라 -> 서버)
 // 동일 게임서버 / 다른 게임서버 이동을 모두 이 패킷으로 요청한다 (서버가 분기).
 message StageMoveReq {
-    int64 target_stage_data_key = 1;   // 이동할 Stage 데이터 Key
+    int32 target_stage_data_key = 1;   // 이동할 Stage 데이터 Key
     int32 position_type = 2;           // EStagePositionType 값 (도착 위치 선택)
                                        // [치트 전용 임시] 포탈 도입 시 서버가 통과한 포탈로부터 결정한다.
     int32 target_game_server_id = 3;   // 0 = 현재 서버. [치트 전용 임시] 타 서버 지정.
@@ -33,7 +33,7 @@ message StageMoveReq {
 message StageMoveRes {
     int32 result_code = 1;             // EResultCode 값
     string error_msg = 2;              // 실패 시 사유 (성공 시 빈 문자열)
-    int64 target_stage_data_key = 3;   // 로딩할 Stage 데이터 Key
+    int32 target_stage_data_key = 3;   // 로딩할 Stage 데이터 Key
 }
 
 // Stage 로딩 완료 보고 (클라 -> 서버)
@@ -52,7 +52,7 @@ message StageLoadCompleteRes {
     int32 result_code = 1;     // EResultCode 값
     string error_msg = 2;      // 실패 시 사유 (성공 시 빈 문자열)
     int64 stage_id = 3;        // Stage Id (런타임 발급)
-    int64 stage_data_key = 4;  // Stage 데이터 Key
+    int32 stage_data_key = 4;  // Stage 데이터 Key
     float my_pos_x = 5;     // 서버가 결정한 내 spawn 위치
     float my_pos_y = 6;     // 높이
     float my_yaw   = 7;     // degree

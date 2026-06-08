@@ -227,8 +227,8 @@ class StageMoveRes final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kErrorMsgFieldNumber = 2,
-    kTargetStageDataKeyFieldNumber = 3,
     kResultCodeFieldNumber = 1,
+    kTargetStageDataKeyFieldNumber = 3,
   };
   // string error_msg = 2;
   void clear_error_msg() ;
@@ -245,16 +245,6 @@ class StageMoveRes final : public ::google::protobuf::Message
   ::std::string* PROTOBUF_NONNULL _internal_mutable_error_msg();
 
   public:
-  // int64 target_stage_data_key = 3;
-  void clear_target_stage_data_key() ;
-  ::int64_t target_stage_data_key() const;
-  void set_target_stage_data_key(::int64_t value);
-
-  private:
-  ::int64_t _internal_target_stage_data_key() const;
-  void _internal_set_target_stage_data_key(::int64_t value);
-
-  public:
   // int32 result_code = 1;
   void clear_result_code() ;
   ::int32_t result_code() const;
@@ -263,6 +253,16 @@ class StageMoveRes final : public ::google::protobuf::Message
   private:
   ::int32_t _internal_result_code() const;
   void _internal_set_result_code(::int32_t value);
+
+  public:
+  // int32 target_stage_data_key = 3;
+  void clear_target_stage_data_key() ;
+  ::int32_t target_stage_data_key() const;
+  void set_target_stage_data_key(::int32_t value);
+
+  private:
+  ::int32_t _internal_target_stage_data_key() const;
+  void _internal_set_target_stage_data_key(::int32_t value);
 
   public:
   // @@protoc_insertion_point(class_scope:GamePacket.StageMoveRes)
@@ -292,8 +292,8 @@ class StageMoveRes final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr error_msg_;
-    ::int64_t target_stage_data_key_;
     ::int32_t result_code_;
+    ::int32_t target_stage_data_key_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -449,14 +449,14 @@ class StageMoveReq final : public ::google::protobuf::Message
     kPositionTypeFieldNumber = 2,
     kTargetGameServerIdFieldNumber = 3,
   };
-  // int64 target_stage_data_key = 1;
+  // int32 target_stage_data_key = 1;
   void clear_target_stage_data_key() ;
-  ::int64_t target_stage_data_key() const;
-  void set_target_stage_data_key(::int64_t value);
+  ::int32_t target_stage_data_key() const;
+  void set_target_stage_data_key(::int32_t value);
 
   private:
-  ::int64_t _internal_target_stage_data_key() const;
-  void _internal_set_target_stage_data_key(::int64_t value);
+  ::int32_t _internal_target_stage_data_key() const;
+  void _internal_set_target_stage_data_key(::int32_t value);
 
   public:
   // int32 position_type = 2;
@@ -505,7 +505,7 @@ class StageMoveReq final : public ::google::protobuf::Message
         const StageMoveReq& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::int64_t target_stage_data_key_;
+    ::int32_t target_stage_data_key_;
     ::int32_t position_type_;
     ::int32_t target_game_server_id_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -660,10 +660,10 @@ class StageLoadCompleteRes final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kErrorMsgFieldNumber = 2,
-    kStageIdFieldNumber = 3,
     kResultCodeFieldNumber = 1,
-    kMyPosXFieldNumber = 5,
     kStageDataKeyFieldNumber = 4,
+    kStageIdFieldNumber = 3,
+    kMyPosXFieldNumber = 5,
     kMyPosYFieldNumber = 6,
     kMyYawFieldNumber = 7,
     kMyPosZFieldNumber = 8,
@@ -683,16 +683,6 @@ class StageLoadCompleteRes final : public ::google::protobuf::Message
   ::std::string* PROTOBUF_NONNULL _internal_mutable_error_msg();
 
   public:
-  // int64 stage_id = 3;
-  void clear_stage_id() ;
-  ::int64_t stage_id() const;
-  void set_stage_id(::int64_t value);
-
-  private:
-  ::int64_t _internal_stage_id() const;
-  void _internal_set_stage_id(::int64_t value);
-
-  public:
   // int32 result_code = 1;
   void clear_result_code() ;
   ::int32_t result_code() const;
@@ -703,6 +693,26 @@ class StageLoadCompleteRes final : public ::google::protobuf::Message
   void _internal_set_result_code(::int32_t value);
 
   public:
+  // int32 stage_data_key = 4;
+  void clear_stage_data_key() ;
+  ::int32_t stage_data_key() const;
+  void set_stage_data_key(::int32_t value);
+
+  private:
+  ::int32_t _internal_stage_data_key() const;
+  void _internal_set_stage_data_key(::int32_t value);
+
+  public:
+  // int64 stage_id = 3;
+  void clear_stage_id() ;
+  ::int64_t stage_id() const;
+  void set_stage_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_stage_id() const;
+  void _internal_set_stage_id(::int64_t value);
+
+  public:
   // float my_pos_x = 5;
   void clear_my_pos_x() ;
   float my_pos_x() const;
@@ -711,16 +721,6 @@ class StageLoadCompleteRes final : public ::google::protobuf::Message
   private:
   float _internal_my_pos_x() const;
   void _internal_set_my_pos_x(float value);
-
-  public:
-  // int64 stage_data_key = 4;
-  void clear_stage_data_key() ;
-  ::int64_t stage_data_key() const;
-  void set_stage_data_key(::int64_t value);
-
-  private:
-  ::int64_t _internal_stage_data_key() const;
-  void _internal_set_stage_data_key(::int64_t value);
 
   public:
   // float my_pos_y = 6;
@@ -780,10 +780,10 @@ class StageLoadCompleteRes final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr error_msg_;
-    ::int64_t stage_id_;
     ::int32_t result_code_;
+    ::int32_t stage_data_key_;
+    ::int64_t stage_id_;
     float my_pos_x_;
-    ::int64_t stage_data_key_;
     float my_pos_y_;
     float my_yaw_;
     float my_pos_z_;
@@ -945,27 +945,27 @@ extern const ::google::protobuf::internal::ClassDataFull StageLoadCompleteReq_cl
 
 // StageMoveReq
 
-// int64 target_stage_data_key = 1;
+// int32 target_stage_data_key = 1;
 inline void StageMoveReq::clear_target_stage_data_key() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.target_stage_data_key_ = ::int64_t{0};
+  _impl_.target_stage_data_key_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline ::int64_t StageMoveReq::target_stage_data_key() const {
+inline ::int32_t StageMoveReq::target_stage_data_key() const {
   // @@protoc_insertion_point(field_get:GamePacket.StageMoveReq.target_stage_data_key)
   return _internal_target_stage_data_key();
 }
-inline void StageMoveReq::set_target_stage_data_key(::int64_t value) {
+inline void StageMoveReq::set_target_stage_data_key(::int32_t value) {
   _internal_set_target_stage_data_key(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
   // @@protoc_insertion_point(field_set:GamePacket.StageMoveReq.target_stage_data_key)
 }
-inline ::int64_t StageMoveReq::_internal_target_stage_data_key() const {
+inline ::int32_t StageMoveReq::_internal_target_stage_data_key() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.target_stage_data_key_;
 }
-inline void StageMoveReq::_internal_set_target_stage_data_key(::int64_t value) {
+inline void StageMoveReq::_internal_set_target_stage_data_key(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.target_stage_data_key_ = value;
 }
@@ -1029,7 +1029,7 @@ inline void StageMoveRes::clear_result_code() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.result_code_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000002U);
 }
 inline ::int32_t StageMoveRes::result_code() const {
   // @@protoc_insertion_point(field_get:GamePacket.StageMoveRes.result_code)
@@ -1037,7 +1037,7 @@ inline ::int32_t StageMoveRes::result_code() const {
 }
 inline void StageMoveRes::set_result_code(::int32_t value) {
   _internal_set_result_code(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
   // @@protoc_insertion_point(field_set:GamePacket.StageMoveRes.result_code)
 }
 inline ::int32_t StageMoveRes::_internal_result_code() const {
@@ -1114,27 +1114,27 @@ inline void StageMoveRes::set_allocated_error_msg(::std::string* PROTOBUF_NULLAB
   // @@protoc_insertion_point(field_set_allocated:GamePacket.StageMoveRes.error_msg)
 }
 
-// int64 target_stage_data_key = 3;
+// int32 target_stage_data_key = 3;
 inline void StageMoveRes::clear_target_stage_data_key() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.target_stage_data_key_ = ::int64_t{0};
+  _impl_.target_stage_data_key_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000002U);
+                  0x00000004U);
 }
-inline ::int64_t StageMoveRes::target_stage_data_key() const {
+inline ::int32_t StageMoveRes::target_stage_data_key() const {
   // @@protoc_insertion_point(field_get:GamePacket.StageMoveRes.target_stage_data_key)
   return _internal_target_stage_data_key();
 }
-inline void StageMoveRes::set_target_stage_data_key(::int64_t value) {
+inline void StageMoveRes::set_target_stage_data_key(::int32_t value) {
   _internal_set_target_stage_data_key(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   // @@protoc_insertion_point(field_set:GamePacket.StageMoveRes.target_stage_data_key)
 }
-inline ::int64_t StageMoveRes::_internal_target_stage_data_key() const {
+inline ::int32_t StageMoveRes::_internal_target_stage_data_key() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.target_stage_data_key_;
 }
-inline void StageMoveRes::_internal_set_target_stage_data_key(::int64_t value) {
+inline void StageMoveRes::_internal_set_target_stage_data_key(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.target_stage_data_key_ = value;
 }
@@ -1152,7 +1152,7 @@ inline void StageLoadCompleteRes::clear_result_code() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.result_code_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000002U);
 }
 inline ::int32_t StageLoadCompleteRes::result_code() const {
   // @@protoc_insertion_point(field_get:GamePacket.StageLoadCompleteRes.result_code)
@@ -1160,7 +1160,7 @@ inline ::int32_t StageLoadCompleteRes::result_code() const {
 }
 inline void StageLoadCompleteRes::set_result_code(::int32_t value) {
   _internal_set_result_code(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
   // @@protoc_insertion_point(field_set:GamePacket.StageLoadCompleteRes.result_code)
 }
 inline ::int32_t StageLoadCompleteRes::_internal_result_code() const {
@@ -1242,7 +1242,7 @@ inline void StageLoadCompleteRes::clear_stage_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.stage_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000002U);
+                  0x00000008U);
 }
 inline ::int64_t StageLoadCompleteRes::stage_id() const {
   // @@protoc_insertion_point(field_get:GamePacket.StageLoadCompleteRes.stage_id)
@@ -1250,7 +1250,7 @@ inline ::int64_t StageLoadCompleteRes::stage_id() const {
 }
 inline void StageLoadCompleteRes::set_stage_id(::int64_t value) {
   _internal_set_stage_id(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   // @@protoc_insertion_point(field_set:GamePacket.StageLoadCompleteRes.stage_id)
 }
 inline ::int64_t StageLoadCompleteRes::_internal_stage_id() const {
@@ -1262,27 +1262,27 @@ inline void StageLoadCompleteRes::_internal_set_stage_id(::int64_t value) {
   _impl_.stage_id_ = value;
 }
 
-// int64 stage_data_key = 4;
+// int32 stage_data_key = 4;
 inline void StageLoadCompleteRes::clear_stage_data_key() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.stage_data_key_ = ::int64_t{0};
+  _impl_.stage_data_key_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000010U);
+                  0x00000004U);
 }
-inline ::int64_t StageLoadCompleteRes::stage_data_key() const {
+inline ::int32_t StageLoadCompleteRes::stage_data_key() const {
   // @@protoc_insertion_point(field_get:GamePacket.StageLoadCompleteRes.stage_data_key)
   return _internal_stage_data_key();
 }
-inline void StageLoadCompleteRes::set_stage_data_key(::int64_t value) {
+inline void StageLoadCompleteRes::set_stage_data_key(::int32_t value) {
   _internal_set_stage_data_key(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   // @@protoc_insertion_point(field_set:GamePacket.StageLoadCompleteRes.stage_data_key)
 }
-inline ::int64_t StageLoadCompleteRes::_internal_stage_data_key() const {
+inline ::int32_t StageLoadCompleteRes::_internal_stage_data_key() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.stage_data_key_;
 }
-inline void StageLoadCompleteRes::_internal_set_stage_data_key(::int64_t value) {
+inline void StageLoadCompleteRes::_internal_set_stage_data_key(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.stage_data_key_ = value;
 }
@@ -1292,7 +1292,7 @@ inline void StageLoadCompleteRes::clear_my_pos_x() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.my_pos_x_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000008U);
+                  0x00000010U);
 }
 inline float StageLoadCompleteRes::my_pos_x() const {
   // @@protoc_insertion_point(field_get:GamePacket.StageLoadCompleteRes.my_pos_x)
@@ -1300,7 +1300,7 @@ inline float StageLoadCompleteRes::my_pos_x() const {
 }
 inline void StageLoadCompleteRes::set_my_pos_x(float value) {
   _internal_set_my_pos_x(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
   // @@protoc_insertion_point(field_set:GamePacket.StageLoadCompleteRes.my_pos_x)
 }
 inline float StageLoadCompleteRes::_internal_my_pos_x() const {

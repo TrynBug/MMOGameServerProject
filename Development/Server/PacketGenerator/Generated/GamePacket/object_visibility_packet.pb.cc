@@ -55,7 +55,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 inline constexpr BuffSnapshotInfo::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        buff_key_{::int64_t{0}},
+        buff_key_{0},
         stack_count_{0},
         remain_time_ms_{0} {}
 
@@ -84,14 +84,14 @@ inline constexpr MonsterSpawnInfo::Impl_::Impl_(
       : _cached_size_{0},
         buffs_{},
         object_id_{::int64_t{0}},
-        monster_key_{::int64_t{0}},
+        monster_key_{0},
         pos_x_{0},
         pos_y_{0},
         yaw_{0},
         pos_z_{0},
+        is_dead_{false},
         cur_hp_{0},
-        max_hp_{0},
-        is_dead_{false} {}
+        max_hp_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR MonsterSpawnInfo::MonsterSpawnInfo(::_pbi::ConstantInitialized)
@@ -248,9 +248,9 @@ const ::uint32_t
         5,
         6,
         0,
-        9,
         7,
         8,
+        9,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectVisibilityNtf, _impl_._has_bits_),
         6, // hasbit index offset
@@ -288,7 +288,7 @@ const char descriptor_table_protodef_GamePacket_2fobject_5fvisibility_5fpacket_2
     protodesc_cold) = {
     "\n)GamePacket/object_visibility_packet.pr"
     "oto\022\nGamePacket\032\026Common/packet_id.proto\""
-    "Q\n\020BuffSnapshotInfo\022\020\n\010buff_key\030\001 \001(\003\022\023\n"
+    "Q\n\020BuffSnapshotInfo\022\020\n\010buff_key\030\001 \001(\005\022\023\n"
     "\013stack_count\030\002 \001(\005\022\026\n\016remain_time_ms\030\003 \001"
     "(\005\"\212\002\n\022CharacterSpawnInfo\022\021\n\tobject_id\030\001"
     " \001(\003\022\025\n\rowner_user_id\030\002 \001(\003\022\014\n\004name\030\003 \001("
@@ -298,7 +298,7 @@ const char descriptor_table_protodef_GamePacket_2fobject_5fvisibility_5fpacket_2
     "\n\003yaw\030\014 \001(\002\022\r\n\005pos_z\030\r \001(\002\022+\n\005buffs\030\016 \003("
     "\0132\034.GamePacket.BuffSnapshotInfo\"\322\001\n\020Mons"
     "terSpawnInfo\022\021\n\tobject_id\030\001 \001(\003\022\023\n\013monst"
-    "er_key\030\002 \001(\003\022\r\n\005pos_x\030\003 \001(\002\022\r\n\005pos_y\030\004 \001"
+    "er_key\030\002 \001(\005\022\r\n\005pos_x\030\003 \001(\002\022\r\n\005pos_y\030\004 \001"
     "(\002\022\013\n\003yaw\030\005 \001(\002\022\r\n\005pos_z\030\006 \001(\002\022+\n\005buffs\030"
     "\007 \003(\0132\034.GamePacket.BuffSnapshotInfo\022\017\n\007i"
     "s_dead\030\010 \001(\010\022\016\n\006cur_hp\030\t \001(\001\022\016\n\006max_hp\030\n"
@@ -452,8 +452,8 @@ BuffSnapshotInfo::_table_ = {
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // int64 buff_key = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(BuffSnapshotInfo, _impl_.buff_key_), 0>(),
+    // int32 buff_key = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(BuffSnapshotInfo, _impl_.buff_key_), 0>(),
      {8, 0, 0,
       PROTOBUF_FIELD_OFFSET(BuffSnapshotInfo, _impl_.buff_key_)}},
     // int32 stack_count = 2;
@@ -467,8 +467,8 @@ BuffSnapshotInfo::_table_ = {
   }}, {{
     65535, 65535
   }}, {{
-    // int64 buff_key = 1;
-    {PROTOBUF_FIELD_OFFSET(BuffSnapshotInfo, _impl_.buff_key_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int32 buff_key = 1;
+    {PROTOBUF_FIELD_OFFSET(BuffSnapshotInfo, _impl_.buff_key_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // int32 stack_count = 2;
     {PROTOBUF_FIELD_OFFSET(BuffSnapshotInfo, _impl_.stack_count_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // int32 remain_time_ms = 3;
@@ -514,11 +514,11 @@ PROTOBUF_NOINLINE void BuffSnapshotInfo::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 buff_key = 1;
+  // int32 buff_key = 1;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
     if (this_._internal_buff_key() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<1>(
               stream, this_._internal_buff_key(), target);
     }
   }
@@ -567,10 +567,10 @@ PROTOBUF_NOINLINE void BuffSnapshotInfo::Clear() {
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
-    // int64 buff_key = 1;
+    // int32 buff_key = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (this_._internal_buff_key() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_buff_key());
       }
     }
@@ -1379,9 +1379,9 @@ MonsterSpawnInfo::MonsterSpawnInfo(
                offsetof(Impl_, object_id_),
            reinterpret_cast<const char*>(&from._impl_) +
                offsetof(Impl_, object_id_),
-           offsetof(Impl_, is_dead_) -
+           offsetof(Impl_, max_hp_) -
                offsetof(Impl_, object_id_) +
-               sizeof(Impl_::is_dead_));
+               sizeof(Impl_::max_hp_));
 
   // @@protoc_insertion_point(copy_constructor:GamePacket.MonsterSpawnInfo)
 }
@@ -1396,9 +1396,9 @@ inline void MonsterSpawnInfo::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) 
   ::memset(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, object_id_),
            0,
-           offsetof(Impl_, is_dead_) -
+           offsetof(Impl_, max_hp_) -
                offsetof(Impl_, object_id_) +
-               sizeof(Impl_::is_dead_));
+               sizeof(Impl_::max_hp_));
 }
 MonsterSpawnInfo::~MonsterSpawnInfo() {
   // @@protoc_insertion_point(destructor:GamePacket.MonsterSpawnInfo)
@@ -1493,8 +1493,8 @@ MonsterSpawnInfo::_table_ = {
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(MonsterSpawnInfo, _impl_.object_id_), 1>(),
      {8, 1, 0,
       PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.object_id_)}},
-    // int64 monster_key = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(MonsterSpawnInfo, _impl_.monster_key_), 2>(),
+    // int32 monster_key = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MonsterSpawnInfo, _impl_.monster_key_), 2>(),
      {16, 2, 0,
       PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.monster_key_)}},
     // float pos_x = 3;
@@ -1518,16 +1518,16 @@ MonsterSpawnInfo::_table_ = {
      {58, 0, 0,
       PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.buffs_)}},
     // bool is_dead = 8;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(MonsterSpawnInfo, _impl_.is_dead_), 9>(),
-     {64, 9, 0,
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(MonsterSpawnInfo, _impl_.is_dead_), 7>(),
+     {64, 7, 0,
       PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.is_dead_)}},
     // double cur_hp = 9;
     {::_pbi::TcParser::FastF64S1,
-     {73, 7, 0,
+     {73, 8, 0,
       PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.cur_hp_)}},
     // double max_hp = 10;
     {::_pbi::TcParser::FastF64S1,
-     {81, 8, 0,
+     {81, 9, 0,
       PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.max_hp_)}},
     {::_pbi::TcParser::MiniParse, {}},
     {::_pbi::TcParser::MiniParse, {}},
@@ -1539,8 +1539,8 @@ MonsterSpawnInfo::_table_ = {
   }}, {{
     // int64 object_id = 1;
     {PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.object_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
-    // int64 monster_key = 2;
-    {PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.monster_key_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int32 monster_key = 2;
+    {PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.monster_key_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // float pos_x = 3;
     {PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.pos_x_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
     // float pos_y = 4;
@@ -1552,11 +1552,11 @@ MonsterSpawnInfo::_table_ = {
     // repeated .GamePacket.BuffSnapshotInfo buffs = 7;
     {PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.buffs_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
     // bool is_dead = 8;
-    {PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.is_dead_), _Internal::kHasBitsOffset + 9, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
+    {PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.is_dead_), _Internal::kHasBitsOffset + 7, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
     // double cur_hp = 9;
-    {PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.cur_hp_), _Internal::kHasBitsOffset + 7, 0, (0 | ::_fl::kFcOptional | ::_fl::kDouble)},
+    {PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.cur_hp_), _Internal::kHasBitsOffset + 8, 0, (0 | ::_fl::kFcOptional | ::_fl::kDouble)},
     // double max_hp = 10;
-    {PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.max_hp_), _Internal::kHasBitsOffset + 8, 0, (0 | ::_fl::kFcOptional | ::_fl::kDouble)},
+    {PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.max_hp_), _Internal::kHasBitsOffset + 9, 0, (0 | ::_fl::kFcOptional | ::_fl::kDouble)},
   }},
   {{
       {::_pbi::TcParser::GetTable<::GamePacket::BuffSnapshotInfo>()},
@@ -1577,13 +1577,13 @@ PROTOBUF_NOINLINE void MonsterSpawnInfo::Clear() {
   }
   if (BatchCheckHasBit(cached_has_bits, 0x000000feU)) {
     ::memset(&_impl_.object_id_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.cur_hp_) -
-        reinterpret_cast<char*>(&_impl_.object_id_)) + sizeof(_impl_.cur_hp_));
+        reinterpret_cast<char*>(&_impl_.is_dead_) -
+        reinterpret_cast<char*>(&_impl_.object_id_)) + sizeof(_impl_.is_dead_));
   }
   if (BatchCheckHasBit(cached_has_bits, 0x00000300U)) {
-    ::memset(&_impl_.max_hp_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.is_dead_) -
-        reinterpret_cast<char*>(&_impl_.max_hp_)) + sizeof(_impl_.is_dead_));
+    ::memset(&_impl_.cur_hp_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.max_hp_) -
+        reinterpret_cast<char*>(&_impl_.cur_hp_)) + sizeof(_impl_.max_hp_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -1617,11 +1617,11 @@ PROTOBUF_NOINLINE void MonsterSpawnInfo::Clear() {
     }
   }
 
-  // int64 monster_key = 2;
+  // int32 monster_key = 2;
   if (CheckHasBit(cached_has_bits, 0x00000004U)) {
     if (this_._internal_monster_key() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<2>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<2>(
               stream, this_._internal_monster_key(), target);
     }
   }
@@ -1676,7 +1676,7 @@ PROTOBUF_NOINLINE void MonsterSpawnInfo::Clear() {
   }
 
   // bool is_dead = 8;
-  if (CheckHasBit(cached_has_bits, 0x00000200U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000080U)) {
     if (this_._internal_is_dead() != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteBoolToArray(
@@ -1685,7 +1685,7 @@ PROTOBUF_NOINLINE void MonsterSpawnInfo::Clear() {
   }
 
   // double cur_hp = 9;
-  if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000100U)) {
     if (::absl::bit_cast<::uint64_t>(this_._internal_cur_hp()) != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteDoubleToArray(
@@ -1694,7 +1694,7 @@ PROTOBUF_NOINLINE void MonsterSpawnInfo::Clear() {
   }
 
   // double max_hp = 10;
-  if (CheckHasBit(cached_has_bits, 0x00000100U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000200U)) {
     if (::absl::bit_cast<::uint64_t>(this_._internal_max_hp()) != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteDoubleToArray(
@@ -1742,10 +1742,10 @@ PROTOBUF_NOINLINE void MonsterSpawnInfo::Clear() {
             this_._internal_object_id());
       }
     }
-    // int64 monster_key = 2;
+    // int32 monster_key = 2;
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
       if (this_._internal_monster_key() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_monster_key());
       }
     }
@@ -1773,24 +1773,24 @@ PROTOBUF_NOINLINE void MonsterSpawnInfo::Clear() {
         total_size += 5;
       }
     }
-    // double cur_hp = 9;
+    // bool is_dead = 8;
     if (CheckHasBit(cached_has_bits, 0x00000080U)) {
-      if (::absl::bit_cast<::uint64_t>(this_._internal_cur_hp()) != 0) {
-        total_size += 9;
+      if (this_._internal_is_dead() != 0) {
+        total_size += 2;
       }
     }
   }
   if (BatchCheckHasBit(cached_has_bits, 0x00000300U)) {
-    // double max_hp = 10;
+    // double cur_hp = 9;
     if (CheckHasBit(cached_has_bits, 0x00000100U)) {
-      if (::absl::bit_cast<::uint64_t>(this_._internal_max_hp()) != 0) {
+      if (::absl::bit_cast<::uint64_t>(this_._internal_cur_hp()) != 0) {
         total_size += 9;
       }
     }
-    // bool is_dead = 8;
+    // double max_hp = 10;
     if (CheckHasBit(cached_has_bits, 0x00000200U)) {
-      if (this_._internal_is_dead() != 0) {
-        total_size += 2;
+      if (::absl::bit_cast<::uint64_t>(this_._internal_max_hp()) != 0) {
+        total_size += 9;
       }
     }
   }
@@ -1850,20 +1850,20 @@ void MonsterSpawnInfo::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000080U)) {
-      if (::absl::bit_cast<::uint64_t>(from._internal_cur_hp()) != 0) {
-        _this->_impl_.cur_hp_ = from._impl_.cur_hp_;
+      if (from._internal_is_dead() != 0) {
+        _this->_impl_.is_dead_ = from._impl_.is_dead_;
       }
     }
   }
   if (BatchCheckHasBit(cached_has_bits, 0x00000300U)) {
     if (CheckHasBit(cached_has_bits, 0x00000100U)) {
-      if (::absl::bit_cast<::uint64_t>(from._internal_max_hp()) != 0) {
-        _this->_impl_.max_hp_ = from._impl_.max_hp_;
+      if (::absl::bit_cast<::uint64_t>(from._internal_cur_hp()) != 0) {
+        _this->_impl_.cur_hp_ = from._impl_.cur_hp_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000200U)) {
-      if (from._internal_is_dead() != 0) {
-        _this->_impl_.is_dead_ = from._impl_.is_dead_;
+      if (::absl::bit_cast<::uint64_t>(from._internal_max_hp()) != 0) {
+        _this->_impl_.max_hp_ = from._impl_.max_hp_;
       }
     }
   }
@@ -1886,8 +1886,8 @@ void MonsterSpawnInfo::InternalSwap(MonsterSpawnInfo* PROTOBUF_RESTRICT PROTOBUF
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   _impl_.buffs_.InternalSwap(&other->_impl_.buffs_);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.is_dead_)
-      + sizeof(MonsterSpawnInfo::_impl_.is_dead_)
+      PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.max_hp_)
+      + sizeof(MonsterSpawnInfo::_impl_.max_hp_)
       - PROTOBUF_FIELD_OFFSET(MonsterSpawnInfo, _impl_.object_id_)>(
           reinterpret_cast<char*>(&_impl_.object_id_),
           reinterpret_cast<char*>(&other->_impl_.object_id_));

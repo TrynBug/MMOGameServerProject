@@ -230,14 +230,14 @@ class BuffRemoveNtf final : public ::google::protobuf::Message
   void _internal_set_object_id(::int64_t value);
 
   public:
-  // int64 buff_key = 2;
+  // int32 buff_key = 2;
   void clear_buff_key() ;
-  ::int64_t buff_key() const;
-  void set_buff_key(::int64_t value);
+  ::int32_t buff_key() const;
+  void set_buff_key(::int32_t value);
 
   private:
-  ::int64_t _internal_buff_key() const;
-  void _internal_set_buff_key(::int64_t value);
+  ::int32_t _internal_buff_key() const;
+  void _internal_set_buff_key(::int32_t value);
 
   public:
   // @@protoc_insertion_point(class_scope:GamePacket.BuffRemoveNtf)
@@ -267,7 +267,7 @@ class BuffRemoveNtf final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::int64_t object_id_;
-    ::int64_t buff_key_;
+    ::int32_t buff_key_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -434,14 +434,14 @@ class BuffNtf final : public ::google::protobuf::Message
   void _internal_set_object_id(::int64_t value);
 
   public:
-  // int64 buff_key = 2;
+  // int32 buff_key = 2;
   void clear_buff_key() ;
-  ::int64_t buff_key() const;
-  void set_buff_key(::int64_t value);
+  ::int32_t buff_key() const;
+  void set_buff_key(::int32_t value);
 
   private:
-  ::int64_t _internal_buff_key() const;
-  void _internal_set_buff_key(::int64_t value);
+  ::int32_t _internal_buff_key() const;
+  void _internal_set_buff_key(::int32_t value);
 
   public:
   // int32 stack_count = 3;
@@ -491,7 +491,7 @@ class BuffNtf final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::int64_t object_id_;
-    ::int64_t buff_key_;
+    ::int32_t buff_key_;
     ::int32_t stack_count_;
     ::int32_t remain_time_ms_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -543,27 +543,27 @@ inline void BuffNtf::_internal_set_object_id(::int64_t value) {
   _impl_.object_id_ = value;
 }
 
-// int64 buff_key = 2;
+// int32 buff_key = 2;
 inline void BuffNtf::clear_buff_key() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.buff_key_ = ::int64_t{0};
+  _impl_.buff_key_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000002U);
 }
-inline ::int64_t BuffNtf::buff_key() const {
+inline ::int32_t BuffNtf::buff_key() const {
   // @@protoc_insertion_point(field_get:GamePacket.BuffNtf.buff_key)
   return _internal_buff_key();
 }
-inline void BuffNtf::set_buff_key(::int64_t value) {
+inline void BuffNtf::set_buff_key(::int32_t value) {
   _internal_set_buff_key(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000002U);
   // @@protoc_insertion_point(field_set:GamePacket.BuffNtf.buff_key)
 }
-inline ::int64_t BuffNtf::_internal_buff_key() const {
+inline ::int32_t BuffNtf::_internal_buff_key() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.buff_key_;
 }
-inline void BuffNtf::_internal_set_buff_key(::int64_t value) {
+inline void BuffNtf::_internal_set_buff_key(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.buff_key_ = value;
 }
@@ -647,27 +647,27 @@ inline void BuffRemoveNtf::_internal_set_object_id(::int64_t value) {
   _impl_.object_id_ = value;
 }
 
-// int64 buff_key = 2;
+// int32 buff_key = 2;
 inline void BuffRemoveNtf::clear_buff_key() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.buff_key_ = ::int64_t{0};
+  _impl_.buff_key_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000002U);
 }
-inline ::int64_t BuffRemoveNtf::buff_key() const {
+inline ::int32_t BuffRemoveNtf::buff_key() const {
   // @@protoc_insertion_point(field_get:GamePacket.BuffRemoveNtf.buff_key)
   return _internal_buff_key();
 }
-inline void BuffRemoveNtf::set_buff_key(::int64_t value) {
+inline void BuffRemoveNtf::set_buff_key(::int32_t value) {
   _internal_set_buff_key(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000002U);
   // @@protoc_insertion_point(field_set:GamePacket.BuffRemoveNtf.buff_key)
 }
-inline ::int64_t BuffRemoveNtf::_internal_buff_key() const {
+inline ::int32_t BuffRemoveNtf::_internal_buff_key() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.buff_key_;
 }
-inline void BuffRemoveNtf::_internal_set_buff_key(::int64_t value) {
+inline void BuffRemoveNtf::_internal_set_buff_key(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.buff_key_ = value;
 }

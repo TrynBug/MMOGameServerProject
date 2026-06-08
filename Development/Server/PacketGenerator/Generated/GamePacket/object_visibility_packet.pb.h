@@ -435,14 +435,14 @@ class BuffSnapshotInfo final : public ::google::protobuf::Message
     kStackCountFieldNumber = 2,
     kRemainTimeMsFieldNumber = 3,
   };
-  // int64 buff_key = 1;
+  // int32 buff_key = 1;
   void clear_buff_key() ;
-  ::int64_t buff_key() const;
-  void set_buff_key(::int64_t value);
+  ::int32_t buff_key() const;
+  void set_buff_key(::int32_t value);
 
   private:
-  ::int64_t _internal_buff_key() const;
-  void _internal_set_buff_key(::int64_t value);
+  ::int32_t _internal_buff_key() const;
+  void _internal_set_buff_key(::int32_t value);
 
   public:
   // int32 stack_count = 2;
@@ -491,7 +491,7 @@ class BuffSnapshotInfo final : public ::google::protobuf::Message
         const BuffSnapshotInfo& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::int64_t buff_key_;
+    ::int32_t buff_key_;
     ::int32_t stack_count_;
     ::int32_t remain_time_ms_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -652,9 +652,9 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
     kPosYFieldNumber = 4,
     kYawFieldNumber = 5,
     kPosZFieldNumber = 6,
+    kIsDeadFieldNumber = 8,
     kCurHpFieldNumber = 9,
     kMaxHpFieldNumber = 10,
-    kIsDeadFieldNumber = 8,
   };
   // repeated .GamePacket.BuffSnapshotInfo buffs = 7;
   int buffs_size() const;
@@ -683,14 +683,14 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
   void _internal_set_object_id(::int64_t value);
 
   public:
-  // int64 monster_key = 2;
+  // int32 monster_key = 2;
   void clear_monster_key() ;
-  ::int64_t monster_key() const;
-  void set_monster_key(::int64_t value);
+  ::int32_t monster_key() const;
+  void set_monster_key(::int32_t value);
 
   private:
-  ::int64_t _internal_monster_key() const;
-  void _internal_set_monster_key(::int64_t value);
+  ::int32_t _internal_monster_key() const;
+  void _internal_set_monster_key(::int32_t value);
 
   public:
   // float pos_x = 3;
@@ -733,6 +733,16 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
   void _internal_set_pos_z(float value);
 
   public:
+  // bool is_dead = 8;
+  void clear_is_dead() ;
+  bool is_dead() const;
+  void set_is_dead(bool value);
+
+  private:
+  bool _internal_is_dead() const;
+  void _internal_set_is_dead(bool value);
+
+  public:
   // double cur_hp = 9;
   void clear_cur_hp() ;
   double cur_hp() const;
@@ -751,16 +761,6 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
   private:
   double _internal_max_hp() const;
   void _internal_set_max_hp(double value);
-
-  public:
-  // bool is_dead = 8;
-  void clear_is_dead() ;
-  bool is_dead() const;
-  void set_is_dead(bool value);
-
-  private:
-  bool _internal_is_dead() const;
-  void _internal_set_is_dead(bool value);
 
   public:
   // @@protoc_insertion_point(class_scope:GamePacket.MonsterSpawnInfo)
@@ -791,14 +791,14 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::RepeatedPtrField< ::GamePacket::BuffSnapshotInfo > buffs_;
     ::int64_t object_id_;
-    ::int64_t monster_key_;
+    ::int32_t monster_key_;
     float pos_x_;
     float pos_y_;
     float yaw_;
     float pos_z_;
+    bool is_dead_;
     double cur_hp_;
     double max_hp_;
-    bool is_dead_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -1418,27 +1418,27 @@ extern const ::google::protobuf::internal::ClassDataFull ObjectVisibilityNtf_cla
 
 // BuffSnapshotInfo
 
-// int64 buff_key = 1;
+// int32 buff_key = 1;
 inline void BuffSnapshotInfo::clear_buff_key() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.buff_key_ = ::int64_t{0};
+  _impl_.buff_key_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline ::int64_t BuffSnapshotInfo::buff_key() const {
+inline ::int32_t BuffSnapshotInfo::buff_key() const {
   // @@protoc_insertion_point(field_get:GamePacket.BuffSnapshotInfo.buff_key)
   return _internal_buff_key();
 }
-inline void BuffSnapshotInfo::set_buff_key(::int64_t value) {
+inline void BuffSnapshotInfo::set_buff_key(::int32_t value) {
   _internal_set_buff_key(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
   // @@protoc_insertion_point(field_set:GamePacket.BuffSnapshotInfo.buff_key)
 }
-inline ::int64_t BuffSnapshotInfo::_internal_buff_key() const {
+inline ::int32_t BuffSnapshotInfo::_internal_buff_key() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.buff_key_;
 }
-inline void BuffSnapshotInfo::_internal_set_buff_key(::int64_t value) {
+inline void BuffSnapshotInfo::_internal_set_buff_key(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.buff_key_ = value;
 }
@@ -1947,27 +1947,27 @@ inline void MonsterSpawnInfo::_internal_set_object_id(::int64_t value) {
   _impl_.object_id_ = value;
 }
 
-// int64 monster_key = 2;
+// int32 monster_key = 2;
 inline void MonsterSpawnInfo::clear_monster_key() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.monster_key_ = ::int64_t{0};
+  _impl_.monster_key_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000004U);
 }
-inline ::int64_t MonsterSpawnInfo::monster_key() const {
+inline ::int32_t MonsterSpawnInfo::monster_key() const {
   // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.monster_key)
   return _internal_monster_key();
 }
-inline void MonsterSpawnInfo::set_monster_key(::int64_t value) {
+inline void MonsterSpawnInfo::set_monster_key(::int32_t value) {
   _internal_set_monster_key(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   // @@protoc_insertion_point(field_set:GamePacket.MonsterSpawnInfo.monster_key)
 }
-inline ::int64_t MonsterSpawnInfo::_internal_monster_key() const {
+inline ::int32_t MonsterSpawnInfo::_internal_monster_key() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.monster_key_;
 }
-inline void MonsterSpawnInfo::_internal_set_monster_key(::int64_t value) {
+inline void MonsterSpawnInfo::_internal_set_monster_key(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.monster_key_ = value;
 }
@@ -2133,7 +2133,7 @@ inline void MonsterSpawnInfo::clear_is_dead() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.is_dead_ = false;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000200U);
+                  0x00000080U);
 }
 inline bool MonsterSpawnInfo::is_dead() const {
   // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.is_dead)
@@ -2141,7 +2141,7 @@ inline bool MonsterSpawnInfo::is_dead() const {
 }
 inline void MonsterSpawnInfo::set_is_dead(bool value) {
   _internal_set_is_dead(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000200U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000080U);
   // @@protoc_insertion_point(field_set:GamePacket.MonsterSpawnInfo.is_dead)
 }
 inline bool MonsterSpawnInfo::_internal_is_dead() const {
@@ -2158,7 +2158,7 @@ inline void MonsterSpawnInfo::clear_cur_hp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.cur_hp_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000080U);
+                  0x00000100U);
 }
 inline double MonsterSpawnInfo::cur_hp() const {
   // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.cur_hp)
@@ -2166,7 +2166,7 @@ inline double MonsterSpawnInfo::cur_hp() const {
 }
 inline void MonsterSpawnInfo::set_cur_hp(double value) {
   _internal_set_cur_hp(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000080U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000100U);
   // @@protoc_insertion_point(field_set:GamePacket.MonsterSpawnInfo.cur_hp)
 }
 inline double MonsterSpawnInfo::_internal_cur_hp() const {
@@ -2183,7 +2183,7 @@ inline void MonsterSpawnInfo::clear_max_hp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.max_hp_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000100U);
+                  0x00000200U);
 }
 inline double MonsterSpawnInfo::max_hp() const {
   // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.max_hp)
@@ -2191,7 +2191,7 @@ inline double MonsterSpawnInfo::max_hp() const {
 }
 inline void MonsterSpawnInfo::set_max_hp(double value) {
   _internal_set_max_hp(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000100U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000200U);
   // @@protoc_insertion_point(field_set:GamePacket.MonsterSpawnInfo.max_hp)
 }
 inline double MonsterSpawnInfo::_internal_max_hp() const {

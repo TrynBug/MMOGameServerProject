@@ -26,7 +26,7 @@ namespace GamePacket {
           string.Concat(
             "CilHYW1lUGFja2V0L29iamVjdF92aXNpYmlsaXR5X3BhY2tldC5wcm90bxIK",
             "R2FtZVBhY2tldBoWQ29tbW9uL3BhY2tldF9pZC5wcm90byJRChBCdWZmU25h",
-            "cHNob3RJbmZvEhAKCGJ1ZmZfa2V5GAEgASgDEhMKC3N0YWNrX2NvdW50GAIg",
+            "cHNob3RJbmZvEhAKCGJ1ZmZfa2V5GAEgASgFEhMKC3N0YWNrX2NvdW50GAIg",
             "ASgFEhYKDnJlbWFpbl90aW1lX21zGAMgASgFIooCChJDaGFyYWN0ZXJTcGF3",
             "bkluZm8SEQoJb2JqZWN0X2lkGAEgASgDEhUKDW93bmVyX3VzZXJfaWQYAiAB",
             "KAMSDAoEbmFtZRgDIAEoCRIOCgZqb2JfaWQYBCABKAUSDQoFbGV2ZWwYBSAB",
@@ -34,7 +34,7 @@ namespace GamePacket {
             "Bm1heF9tcBgJIAEoARINCgVwb3NfeBgKIAEoAhINCgVwb3NfeRgLIAEoAhIL",
             "CgN5YXcYDCABKAISDQoFcG9zX3oYDSABKAISKwoFYnVmZnMYDiADKAsyHC5H",
             "YW1lUGFja2V0LkJ1ZmZTbmFwc2hvdEluZm8i0gEKEE1vbnN0ZXJTcGF3bklu",
-            "Zm8SEQoJb2JqZWN0X2lkGAEgASgDEhMKC21vbnN0ZXJfa2V5GAIgASgDEg0K",
+            "Zm8SEQoJb2JqZWN0X2lkGAEgASgDEhMKC21vbnN0ZXJfa2V5GAIgASgFEg0K",
             "BXBvc194GAMgASgCEg0KBXBvc195GAQgASgCEgsKA3lhdxgFIAEoAhINCgVw",
             "b3NfehgGIAEoAhIrCgVidWZmcxgHIAMoCzIcLkdhbWVQYWNrZXQuQnVmZlNu",
             "YXBzaG90SW5mbxIPCgdpc19kZWFkGAggASgIEg4KBmN1cl9ocBgJIAEoARIO",
@@ -111,13 +111,13 @@ namespace GamePacket {
 
     /// <summary>Field number for the "buff_key" field.</summary>
     public const int BuffKeyFieldNumber = 1;
-    private long buffKey_;
+    private int buffKey_;
     /// <summary>
     /// GameData_Buff 의 Key
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long BuffKey {
+    public int BuffKey {
       get { return buffKey_; }
       set {
         buffKey_ = value;
@@ -176,7 +176,7 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
-      if (BuffKey != 0L) hash ^= BuffKey.GetHashCode();
+      if (BuffKey != 0) hash ^= BuffKey.GetHashCode();
       if (StackCount != 0) hash ^= StackCount.GetHashCode();
       if (RemainTimeMs != 0) hash ^= RemainTimeMs.GetHashCode();
       if (_unknownFields != null) {
@@ -197,9 +197,9 @@ namespace GamePacket {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (BuffKey != 0L) {
+      if (BuffKey != 0) {
         output.WriteRawTag(8);
-        output.WriteInt64(BuffKey);
+        output.WriteInt32(BuffKey);
       }
       if (StackCount != 0) {
         output.WriteRawTag(16);
@@ -219,9 +219,9 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (BuffKey != 0L) {
+      if (BuffKey != 0) {
         output.WriteRawTag(8);
-        output.WriteInt64(BuffKey);
+        output.WriteInt32(BuffKey);
       }
       if (StackCount != 0) {
         output.WriteRawTag(16);
@@ -241,8 +241,8 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
-      if (BuffKey != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(BuffKey);
+      if (BuffKey != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(BuffKey);
       }
       if (StackCount != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(StackCount);
@@ -262,7 +262,7 @@ namespace GamePacket {
       if (other == null) {
         return;
       }
-      if (other.BuffKey != 0L) {
+      if (other.BuffKey != 0) {
         BuffKey = other.BuffKey;
       }
       if (other.StackCount != 0) {
@@ -291,7 +291,7 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            BuffKey = input.ReadInt64();
+            BuffKey = input.ReadInt32();
             break;
           }
           case 16: {
@@ -322,7 +322,7 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 8: {
-            BuffKey = input.ReadInt64();
+            BuffKey = input.ReadInt32();
             break;
           }
           case 16: {
@@ -1112,13 +1112,13 @@ namespace GamePacket {
 
     /// <summary>Field number for the "monster_key" field.</summary>
     public const int MonsterKeyFieldNumber = 2;
-    private long monsterKey_;
+    private int monsterKey_;
     /// <summary>
     /// GameData_Monster 의 Key
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long MonsterKey {
+    public int MonsterKey {
       get { return monsterKey_; }
       set {
         monsterKey_ = value;
@@ -1274,7 +1274,7 @@ namespace GamePacket {
     public override int GetHashCode() {
       int hash = 1;
       if (ObjectId != 0L) hash ^= ObjectId.GetHashCode();
-      if (MonsterKey != 0L) hash ^= MonsterKey.GetHashCode();
+      if (MonsterKey != 0) hash ^= MonsterKey.GetHashCode();
       if (PosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosX);
       if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
       if (Yaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Yaw);
@@ -1305,9 +1305,9 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(ObjectId);
       }
-      if (MonsterKey != 0L) {
+      if (MonsterKey != 0) {
         output.WriteRawTag(16);
-        output.WriteInt64(MonsterKey);
+        output.WriteInt32(MonsterKey);
       }
       if (PosX != 0F) {
         output.WriteRawTag(29);
@@ -1352,9 +1352,9 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(ObjectId);
       }
-      if (MonsterKey != 0L) {
+      if (MonsterKey != 0) {
         output.WriteRawTag(16);
-        output.WriteInt64(MonsterKey);
+        output.WriteInt32(MonsterKey);
       }
       if (PosX != 0F) {
         output.WriteRawTag(29);
@@ -1398,8 +1398,8 @@ namespace GamePacket {
       if (ObjectId != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(ObjectId);
       }
-      if (MonsterKey != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MonsterKey);
+      if (MonsterKey != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MonsterKey);
       }
       if (PosX != 0F) {
         size += 1 + 4;
@@ -1438,7 +1438,7 @@ namespace GamePacket {
       if (other.ObjectId != 0L) {
         ObjectId = other.ObjectId;
       }
-      if (other.MonsterKey != 0L) {
+      if (other.MonsterKey != 0) {
         MonsterKey = other.MonsterKey;
       }
       if (other.PosX != 0F) {
@@ -1487,7 +1487,7 @@ namespace GamePacket {
             break;
           }
           case 16: {
-            MonsterKey = input.ReadInt64();
+            MonsterKey = input.ReadInt32();
             break;
           }
           case 29: {
@@ -1546,7 +1546,7 @@ namespace GamePacket {
             break;
           }
           case 16: {
-            MonsterKey = input.ReadInt64();
+            MonsterKey = input.ReadInt32();
             break;
           }
           case 29: {

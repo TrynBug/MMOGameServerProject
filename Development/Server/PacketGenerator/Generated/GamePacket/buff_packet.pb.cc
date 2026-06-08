@@ -30,7 +30,7 @@ inline constexpr BuffRemoveNtf::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
         object_id_{::int64_t{0}},
-        buff_key_{::int64_t{0}} {}
+        buff_key_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR BuffRemoveNtf::BuffRemoveNtf(::_pbi::ConstantInitialized)
@@ -56,7 +56,7 @@ inline constexpr BuffNtf::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
         object_id_{::int64_t{0}},
-        buff_key_{::int64_t{0}},
+        buff_key_{0},
         stack_count_{0},
         remain_time_ms_{0} {}
 
@@ -120,10 +120,10 @@ const char descriptor_table_protodef_GamePacket_2fbuff_5fpacket_2eproto[] ABSL_A
     protodesc_cold) = {
     "\n\034GamePacket/buff_packet.proto\022\nGamePack"
     "et\032\026Common/packet_id.proto\"[\n\007BuffNtf\022\021\n"
-    "\tobject_id\030\001 \001(\003\022\020\n\010buff_key\030\002 \001(\003\022\023\n\013st"
+    "\tobject_id\030\001 \001(\003\022\020\n\010buff_key\030\002 \001(\005\022\023\n\013st"
     "ack_count\030\003 \001(\005\022\026\n\016remain_time_ms\030\004 \001(\005\""
     "4\n\rBuffRemoveNtf\022\021\n\tobject_id\030\001 \001(\003\022\020\n\010b"
-    "uff_key\030\002 \001(\003b\006proto3"
+    "uff_key\030\002 \001(\005b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_GamePacket_2fbuff_5fpacket_2eproto_deps[1] = {
@@ -275,8 +275,8 @@ BuffNtf::_table_ = {
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(BuffNtf, _impl_.object_id_), 0>(),
      {8, 0, 0,
       PROTOBUF_FIELD_OFFSET(BuffNtf, _impl_.object_id_)}},
-    // int64 buff_key = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(BuffNtf, _impl_.buff_key_), 1>(),
+    // int32 buff_key = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(BuffNtf, _impl_.buff_key_), 1>(),
      {16, 1, 0,
       PROTOBUF_FIELD_OFFSET(BuffNtf, _impl_.buff_key_)}},
     // int32 stack_count = 3;
@@ -288,8 +288,8 @@ BuffNtf::_table_ = {
   }}, {{
     // int64 object_id = 1;
     {PROTOBUF_FIELD_OFFSET(BuffNtf, _impl_.object_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
-    // int64 buff_key = 2;
-    {PROTOBUF_FIELD_OFFSET(BuffNtf, _impl_.buff_key_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int32 buff_key = 2;
+    {PROTOBUF_FIELD_OFFSET(BuffNtf, _impl_.buff_key_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // int32 stack_count = 3;
     {PROTOBUF_FIELD_OFFSET(BuffNtf, _impl_.stack_count_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // int32 remain_time_ms = 4;
@@ -344,11 +344,11 @@ PROTOBUF_NOINLINE void BuffNtf::Clear() {
     }
   }
 
-  // int64 buff_key = 2;
+  // int32 buff_key = 2;
   if (CheckHasBit(cached_has_bits, 0x00000002U)) {
     if (this_._internal_buff_key() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<2>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<2>(
               stream, this_._internal_buff_key(), target);
     }
   }
@@ -404,10 +404,10 @@ PROTOBUF_NOINLINE void BuffNtf::Clear() {
             this_._internal_object_id());
       }
     }
-    // int64 buff_key = 2;
+    // int32 buff_key = 2;
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
       if (this_._internal_buff_key() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_buff_key());
       }
     }
@@ -614,8 +614,8 @@ BuffRemoveNtf::_table_ = {
     ::_pbi::TcParser::GetTable<::GamePacket::BuffRemoveNtf>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // int64 buff_key = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(BuffRemoveNtf, _impl_.buff_key_), 1>(),
+    // int32 buff_key = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(BuffRemoveNtf, _impl_.buff_key_), 1>(),
      {16, 1, 0,
       PROTOBUF_FIELD_OFFSET(BuffRemoveNtf, _impl_.buff_key_)}},
     // int64 object_id = 1;
@@ -627,8 +627,8 @@ BuffRemoveNtf::_table_ = {
   }}, {{
     // int64 object_id = 1;
     {PROTOBUF_FIELD_OFFSET(BuffRemoveNtf, _impl_.object_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
-    // int64 buff_key = 2;
-    {PROTOBUF_FIELD_OFFSET(BuffRemoveNtf, _impl_.buff_key_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int32 buff_key = 2;
+    {PROTOBUF_FIELD_OFFSET(BuffRemoveNtf, _impl_.buff_key_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
@@ -679,11 +679,11 @@ PROTOBUF_NOINLINE void BuffRemoveNtf::Clear() {
     }
   }
 
-  // int64 buff_key = 2;
+  // int32 buff_key = 2;
   if (CheckHasBit(cached_has_bits, 0x00000002U)) {
     if (this_._internal_buff_key() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<2>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<2>(
               stream, this_._internal_buff_key(), target);
     }
   }
@@ -721,10 +721,10 @@ PROTOBUF_NOINLINE void BuffRemoveNtf::Clear() {
             this_._internal_object_id());
       }
     }
-    // int64 buff_key = 2;
+    // int32 buff_key = 2;
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
       if (this_._internal_buff_key() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_buff_key());
       }
     }

@@ -723,19 +723,19 @@ class SkillCastReq final : public ::google::protobuf::Message
     kOriginZFieldNumber = 4,
     kDirXFieldNumber = 5,
     kDirZFieldNumber = 6,
-    kSeedFieldNumber = 7,
     kTargetObjectIdFieldNumber = 8,
+    kSeedFieldNumber = 7,
     kTargetPosXFieldNumber = 9,
     kTargetPosZFieldNumber = 10,
   };
-  // int64 skill_key = 1;
+  // int32 skill_key = 1;
   void clear_skill_key() ;
-  ::int64_t skill_key() const;
-  void set_skill_key(::int64_t value);
+  ::int32_t skill_key() const;
+  void set_skill_key(::int32_t value);
 
   private:
-  ::int64_t _internal_skill_key() const;
-  void _internal_set_skill_key(::int64_t value);
+  ::int32_t _internal_skill_key() const;
+  void _internal_set_skill_key(::int32_t value);
 
   public:
   // float origin_x = 2;
@@ -788,16 +788,6 @@ class SkillCastReq final : public ::google::protobuf::Message
   void _internal_set_dir_z(float value);
 
   public:
-  // uint32 seed = 7;
-  void clear_seed() ;
-  ::uint32_t seed() const;
-  void set_seed(::uint32_t value);
-
-  private:
-  ::uint32_t _internal_seed() const;
-  void _internal_set_seed(::uint32_t value);
-
-  public:
   // int64 target_object_id = 8;
   void clear_target_object_id() ;
   ::int64_t target_object_id() const;
@@ -806,6 +796,16 @@ class SkillCastReq final : public ::google::protobuf::Message
   private:
   ::int64_t _internal_target_object_id() const;
   void _internal_set_target_object_id(::int64_t value);
+
+  public:
+  // uint32 seed = 7;
+  void clear_seed() ;
+  ::uint32_t seed() const;
+  void set_seed(::uint32_t value);
+
+  private:
+  ::uint32_t _internal_seed() const;
+  void _internal_set_seed(::uint32_t value);
 
   public:
   // float target_pos_x = 9;
@@ -854,14 +854,14 @@ class SkillCastReq final : public ::google::protobuf::Message
         const SkillCastReq& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::int64_t skill_key_;
+    ::int32_t skill_key_;
     float origin_x_;
     float origin_y_;
     float origin_z_;
     float dir_x_;
     float dir_z_;
-    ::uint32_t seed_;
     ::int64_t target_object_id_;
+    ::uint32_t seed_;
     float target_pos_x_;
     float target_pos_z_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -1016,8 +1016,8 @@ class SkillCastNtf final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kCasterObjectIdFieldNumber = 1,
-    kSkillKeyFieldNumber = 2,
     kEffectIdFieldNumber = 3,
+    kSkillKeyFieldNumber = 2,
     kOriginXFieldNumber = 4,
     kOriginYFieldNumber = 5,
     kOriginZFieldNumber = 6,
@@ -1036,16 +1036,6 @@ class SkillCastNtf final : public ::google::protobuf::Message
   void _internal_set_caster_object_id(::int64_t value);
 
   public:
-  // int64 skill_key = 2;
-  void clear_skill_key() ;
-  ::int64_t skill_key() const;
-  void set_skill_key(::int64_t value);
-
-  private:
-  ::int64_t _internal_skill_key() const;
-  void _internal_set_skill_key(::int64_t value);
-
-  public:
   // int64 effect_id = 3;
   void clear_effect_id() ;
   ::int64_t effect_id() const;
@@ -1054,6 +1044,16 @@ class SkillCastNtf final : public ::google::protobuf::Message
   private:
   ::int64_t _internal_effect_id() const;
   void _internal_set_effect_id(::int64_t value);
+
+  public:
+  // int32 skill_key = 2;
+  void clear_skill_key() ;
+  ::int32_t skill_key() const;
+  void set_skill_key(::int32_t value);
+
+  private:
+  ::int32_t _internal_skill_key() const;
+  void _internal_set_skill_key(::int32_t value);
 
   public:
   // float origin_x = 4;
@@ -1153,8 +1153,8 @@ class SkillCastNtf final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::int64_t caster_object_id_;
-    ::int64_t skill_key_;
     ::int64_t effect_id_;
+    ::int32_t skill_key_;
     float origin_x_;
     float origin_y_;
     float origin_z_;
@@ -1383,27 +1383,27 @@ extern const ::google::protobuf::internal::ClassDataFull SkillProjectileHitReq_c
 
 // SkillCastReq
 
-// int64 skill_key = 1;
+// int32 skill_key = 1;
 inline void SkillCastReq::clear_skill_key() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.skill_key_ = ::int64_t{0};
+  _impl_.skill_key_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline ::int64_t SkillCastReq::skill_key() const {
+inline ::int32_t SkillCastReq::skill_key() const {
   // @@protoc_insertion_point(field_get:GamePacket.SkillCastReq.skill_key)
   return _internal_skill_key();
 }
-inline void SkillCastReq::set_skill_key(::int64_t value) {
+inline void SkillCastReq::set_skill_key(::int32_t value) {
   _internal_set_skill_key(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
   // @@protoc_insertion_point(field_set:GamePacket.SkillCastReq.skill_key)
 }
-inline ::int64_t SkillCastReq::_internal_skill_key() const {
+inline ::int32_t SkillCastReq::_internal_skill_key() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.skill_key_;
 }
-inline void SkillCastReq::_internal_set_skill_key(::int64_t value) {
+inline void SkillCastReq::_internal_set_skill_key(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.skill_key_ = value;
 }
@@ -1538,7 +1538,7 @@ inline void SkillCastReq::clear_seed() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.seed_ = 0u;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000040U);
+                  0x00000080U);
 }
 inline ::uint32_t SkillCastReq::seed() const {
   // @@protoc_insertion_point(field_get:GamePacket.SkillCastReq.seed)
@@ -1546,7 +1546,7 @@ inline ::uint32_t SkillCastReq::seed() const {
 }
 inline void SkillCastReq::set_seed(::uint32_t value) {
   _internal_set_seed(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000080U);
   // @@protoc_insertion_point(field_set:GamePacket.SkillCastReq.seed)
 }
 inline ::uint32_t SkillCastReq::_internal_seed() const {
@@ -1563,7 +1563,7 @@ inline void SkillCastReq::clear_target_object_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.target_object_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000080U);
+                  0x00000040U);
 }
 inline ::int64_t SkillCastReq::target_object_id() const {
   // @@protoc_insertion_point(field_get:GamePacket.SkillCastReq.target_object_id)
@@ -1571,7 +1571,7 @@ inline ::int64_t SkillCastReq::target_object_id() const {
 }
 inline void SkillCastReq::set_target_object_id(::int64_t value) {
   _internal_set_target_object_id(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000080U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
   // @@protoc_insertion_point(field_set:GamePacket.SkillCastReq.target_object_id)
 }
 inline ::int64_t SkillCastReq::_internal_target_object_id() const {
@@ -1901,27 +1901,27 @@ inline void SkillCastNtf::_internal_set_caster_object_id(::int64_t value) {
   _impl_.caster_object_id_ = value;
 }
 
-// int64 skill_key = 2;
+// int32 skill_key = 2;
 inline void SkillCastNtf::clear_skill_key() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.skill_key_ = ::int64_t{0};
+  _impl_.skill_key_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000002U);
+                  0x00000004U);
 }
-inline ::int64_t SkillCastNtf::skill_key() const {
+inline ::int32_t SkillCastNtf::skill_key() const {
   // @@protoc_insertion_point(field_get:GamePacket.SkillCastNtf.skill_key)
   return _internal_skill_key();
 }
-inline void SkillCastNtf::set_skill_key(::int64_t value) {
+inline void SkillCastNtf::set_skill_key(::int32_t value) {
   _internal_set_skill_key(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   // @@protoc_insertion_point(field_set:GamePacket.SkillCastNtf.skill_key)
 }
-inline ::int64_t SkillCastNtf::_internal_skill_key() const {
+inline ::int32_t SkillCastNtf::_internal_skill_key() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.skill_key_;
 }
-inline void SkillCastNtf::_internal_set_skill_key(::int64_t value) {
+inline void SkillCastNtf::_internal_set_skill_key(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.skill_key_ = value;
 }
@@ -1931,7 +1931,7 @@ inline void SkillCastNtf::clear_effect_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.effect_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000002U);
 }
 inline ::int64_t SkillCastNtf::effect_id() const {
   // @@protoc_insertion_point(field_get:GamePacket.SkillCastNtf.effect_id)
@@ -1939,7 +1939,7 @@ inline ::int64_t SkillCastNtf::effect_id() const {
 }
 inline void SkillCastNtf::set_effect_id(::int64_t value) {
   _internal_set_effect_id(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
   // @@protoc_insertion_point(field_set:GamePacket.SkillCastNtf.effect_id)
 }
 inline ::int64_t SkillCastNtf::_internal_effect_id() const {

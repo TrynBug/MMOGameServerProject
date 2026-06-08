@@ -26,7 +26,7 @@ namespace GamePacket {
           string.Concat(
             "Ch1HYW1lUGFja2V0L3NraWxsX3BhY2tldC5wcm90bxIKR2FtZVBhY2tldBoW",
             "Q29tbW9uL3BhY2tldF9pZC5wcm90byLJAQoMU2tpbGxDYXN0UmVxEhEKCXNr",
-            "aWxsX2tleRgBIAEoAxIQCghvcmlnaW5feBgCIAEoAhIQCghvcmlnaW5feRgD",
+            "aWxsX2tleRgBIAEoBRIQCghvcmlnaW5feBgCIAEoAhIQCghvcmlnaW5feRgD",
             "IAEoAhIQCghvcmlnaW5fehgEIAEoAhINCgVkaXJfeBgFIAEoAhINCgVkaXJf",
             "ehgGIAEoAhIMCgRzZWVkGAcgASgNEhgKEHRhcmdldF9vYmplY3RfaWQYCCAB",
             "KAMSFAoMdGFyZ2V0X3Bvc194GAkgASgCEhQKDHRhcmdldF9wb3NfehgKIAEo",
@@ -36,7 +36,7 @@ namespace GamePacket {
             "X3RlcnJhaW4YBSABKAgSDQoFaGl0X3gYBiABKAISDQoFaGl0X3oYByABKAIi",
             "PwoVU2tpbGxQcm9qZWN0aWxlSGl0UmVxEiYKBGhpdHMYASADKAsyGC5HYW1l",
             "UGFja2V0LlNraWxsSGl0SXRlbSLHAQoMU2tpbGxDYXN0TnRmEhgKEGNhc3Rl",
-            "cl9vYmplY3RfaWQYASABKAMSEQoJc2tpbGxfa2V5GAIgASgDEhEKCWVmZmVj",
+            "cl9vYmplY3RfaWQYASABKAMSEQoJc2tpbGxfa2V5GAIgASgFEhEKCWVmZmVj",
             "dF9pZBgDIAEoAxIQCghvcmlnaW5feBgEIAEoAhIQCghvcmlnaW5feRgFIAEo",
             "AhIQCghvcmlnaW5fehgGIAEoAhINCgVkaXJfeBgHIAEoAhINCgVkaXJfehgI",
             "IAEoAhIMCgRzZWVkGAkgASgNEhUKDW1vdmVfZGlzdGFuY2UYCiABKAIiZgoO",
@@ -118,10 +118,10 @@ namespace GamePacket {
 
     /// <summary>Field number for the "skill_key" field.</summary>
     public const int SkillKeyFieldNumber = 1;
-    private long skillKey_;
+    private int skillKey_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long SkillKey {
+    public int SkillKey {
       get { return skillKey_; }
       set {
         skillKey_ = value;
@@ -286,7 +286,7 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
-      if (SkillKey != 0L) hash ^= SkillKey.GetHashCode();
+      if (SkillKey != 0) hash ^= SkillKey.GetHashCode();
       if (OriginX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(OriginX);
       if (OriginY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(OriginY);
       if (OriginZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(OriginZ);
@@ -314,9 +314,9 @@ namespace GamePacket {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (SkillKey != 0L) {
+      if (SkillKey != 0) {
         output.WriteRawTag(8);
-        output.WriteInt64(SkillKey);
+        output.WriteInt32(SkillKey);
       }
       if (OriginX != 0F) {
         output.WriteRawTag(21);
@@ -364,9 +364,9 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (SkillKey != 0L) {
+      if (SkillKey != 0) {
         output.WriteRawTag(8);
-        output.WriteInt64(SkillKey);
+        output.WriteInt32(SkillKey);
       }
       if (OriginX != 0F) {
         output.WriteRawTag(21);
@@ -414,8 +414,8 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
-      if (SkillKey != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(SkillKey);
+      if (SkillKey != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(SkillKey);
       }
       if (OriginX != 0F) {
         size += 1 + 4;
@@ -456,7 +456,7 @@ namespace GamePacket {
       if (other == null) {
         return;
       }
-      if (other.SkillKey != 0L) {
+      if (other.SkillKey != 0) {
         SkillKey = other.SkillKey;
       }
       if (other.OriginX != 0F) {
@@ -506,7 +506,7 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            SkillKey = input.ReadInt64();
+            SkillKey = input.ReadInt32();
             break;
           }
           case 21: {
@@ -565,7 +565,7 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 8: {
-            SkillKey = input.ReadInt64();
+            SkillKey = input.ReadInt32();
             break;
           }
           case 21: {
@@ -1321,10 +1321,10 @@ namespace GamePacket {
 
     /// <summary>Field number for the "skill_key" field.</summary>
     public const int SkillKeyFieldNumber = 2;
-    private long skillKey_;
+    private int skillKey_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long SkillKey {
+    public int SkillKey {
       get { return skillKey_; }
       set {
         skillKey_ = value;
@@ -1475,7 +1475,7 @@ namespace GamePacket {
     public override int GetHashCode() {
       int hash = 1;
       if (CasterObjectId != 0L) hash ^= CasterObjectId.GetHashCode();
-      if (SkillKey != 0L) hash ^= SkillKey.GetHashCode();
+      if (SkillKey != 0) hash ^= SkillKey.GetHashCode();
       if (EffectId != 0L) hash ^= EffectId.GetHashCode();
       if (OriginX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(OriginX);
       if (OriginY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(OriginY);
@@ -1506,9 +1506,9 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(CasterObjectId);
       }
-      if (SkillKey != 0L) {
+      if (SkillKey != 0) {
         output.WriteRawTag(16);
-        output.WriteInt64(SkillKey);
+        output.WriteInt32(SkillKey);
       }
       if (EffectId != 0L) {
         output.WriteRawTag(24);
@@ -1556,9 +1556,9 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(CasterObjectId);
       }
-      if (SkillKey != 0L) {
+      if (SkillKey != 0) {
         output.WriteRawTag(16);
-        output.WriteInt64(SkillKey);
+        output.WriteInt32(SkillKey);
       }
       if (EffectId != 0L) {
         output.WriteRawTag(24);
@@ -1605,8 +1605,8 @@ namespace GamePacket {
       if (CasterObjectId != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(CasterObjectId);
       }
-      if (SkillKey != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(SkillKey);
+      if (SkillKey != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(SkillKey);
       }
       if (EffectId != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(EffectId);
@@ -1647,7 +1647,7 @@ namespace GamePacket {
       if (other.CasterObjectId != 0L) {
         CasterObjectId = other.CasterObjectId;
       }
-      if (other.SkillKey != 0L) {
+      if (other.SkillKey != 0) {
         SkillKey = other.SkillKey;
       }
       if (other.EffectId != 0L) {
@@ -1698,7 +1698,7 @@ namespace GamePacket {
             break;
           }
           case 16: {
-            SkillKey = input.ReadInt64();
+            SkillKey = input.ReadInt32();
             break;
           }
           case 24: {
@@ -1757,7 +1757,7 @@ namespace GamePacket {
             break;
           }
           case 16: {
-            SkillKey = input.ReadInt64();
+            SkillKey = input.ReadInt32();
             break;
           }
           case 24: {

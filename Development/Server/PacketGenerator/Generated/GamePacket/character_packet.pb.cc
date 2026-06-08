@@ -86,8 +86,8 @@ inline constexpr CharacterSelectRes::Impl_::Impl_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
         character_{nullptr},
-        stage_data_key_{::int64_t{0}},
-        result_code_{0} {}
+        result_code_{0},
+        stage_data_key_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR CharacterSelectRes::CharacterSelectRes(::_pbi::ConstantInitialized)
@@ -203,10 +203,10 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectRes, _impl_.error_msg_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectRes, _impl_.character_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSelectRes, _impl_.stage_data_key_),
-        3,
+        2,
         0,
         1,
-        2,
+        3,
 };
 
 static const ::_pbi::MigrationSchema
@@ -238,7 +238,7 @@ const char descriptor_table_protodef_GamePacket_2fcharacter_5fpacket_2eproto[] A
     "haracterSelectRes\022\023\n\013result_code\030\001 \001(\005\022\021"
     "\n\terror_msg\030\002 \001(\t\022,\n\tcharacter\030\n \001(\0132\031.D"
     "ataStructures.Character\022\026\n\016stage_data_ke"
-    "y\030\t \001(\003J\004\010\003\020\004J\004\010\004\020\tb\006proto3"
+    "y\030\t \001(\005J\004\010\003\020\004J\004\010\004\020\tb\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_GamePacket_2fcharacter_5fpacket_2eproto_deps[1] = {
@@ -1526,12 +1526,12 @@ CharacterSelectRes::CharacterSelectRes(
                 ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.character_)
                 : nullptr;
   ::memcpy(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, stage_data_key_),
+               offsetof(Impl_, result_code_),
            reinterpret_cast<const char*>(&from._impl_) +
-               offsetof(Impl_, stage_data_key_),
-           offsetof(Impl_, result_code_) -
-               offsetof(Impl_, stage_data_key_) +
-               sizeof(Impl_::result_code_));
+               offsetof(Impl_, result_code_),
+           offsetof(Impl_, stage_data_key_) -
+               offsetof(Impl_, result_code_) +
+               sizeof(Impl_::stage_data_key_));
 
   // @@protoc_insertion_point(copy_constructor:GamePacket.CharacterSelectRes)
 }
@@ -1546,9 +1546,9 @@ inline void CharacterSelectRes::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena
   ::memset(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, character_),
            0,
-           offsetof(Impl_, result_code_) -
+           offsetof(Impl_, stage_data_key_) -
                offsetof(Impl_, character_) +
-               sizeof(Impl_::result_code_));
+               sizeof(Impl_::stage_data_key_));
 }
 CharacterSelectRes::~CharacterSelectRes() {
   // @@protoc_insertion_point(destructor:GamePacket.CharacterSelectRes)
@@ -1633,18 +1633,18 @@ CharacterSelectRes::_table_ = {
      {18, 0, 0,
       PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.error_msg_)}},
     // int32 result_code = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CharacterSelectRes, _impl_.result_code_), 3>(),
-     {8, 3, 0,
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CharacterSelectRes, _impl_.result_code_), 2>(),
+     {8, 2, 0,
       PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.result_code_)}},
   }}, {{
     65535, 65535
   }}, {{
     // int32 result_code = 1;
-    {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.result_code_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.result_code_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // string error_msg = 2;
     {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.error_msg_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // int64 stage_data_key = 9;
-    {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.stage_data_key_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int32 stage_data_key = 9;
+    {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.stage_data_key_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // .DataStructures.Character character = 10;
     {PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.character_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
   }},
@@ -1675,9 +1675,9 @@ PROTOBUF_NOINLINE void CharacterSelectRes::Clear() {
     }
   }
   if (BatchCheckHasBit(cached_has_bits, 0x0000000cU)) {
-    ::memset(&_impl_.stage_data_key_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.result_code_) -
-        reinterpret_cast<char*>(&_impl_.stage_data_key_)) + sizeof(_impl_.result_code_));
+    ::memset(&_impl_.result_code_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.stage_data_key_) -
+        reinterpret_cast<char*>(&_impl_.result_code_)) + sizeof(_impl_.stage_data_key_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -1703,7 +1703,7 @@ PROTOBUF_NOINLINE void CharacterSelectRes::Clear() {
 
   cached_has_bits = this_._impl_._has_bits_[0];
   // int32 result_code = 1;
-  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
     if (this_._internal_result_code() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<1>(
@@ -1721,11 +1721,11 @@ PROTOBUF_NOINLINE void CharacterSelectRes::Clear() {
     }
   }
 
-  // int64 stage_data_key = 9;
-  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+  // int32 stage_data_key = 9;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
     if (this_._internal_stage_data_key() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<9>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<9>(
               stream, this_._internal_stage_data_key(), target);
     }
   }
@@ -1775,18 +1775,18 @@ PROTOBUF_NOINLINE void CharacterSelectRes::Clear() {
       total_size += 1 +
                     ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.character_);
     }
-    // int64 stage_data_key = 9;
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (this_._internal_stage_data_key() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_stage_data_key());
-      }
-    }
     // int32 result_code = 1;
-    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
       if (this_._internal_result_code() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_result_code());
+      }
+    }
+    // int32 stage_data_key = 9;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (this_._internal_stage_data_key() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_stage_data_key());
       }
     }
   }
@@ -1828,13 +1828,13 @@ void CharacterSelectRes::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (from._internal_stage_data_key() != 0) {
-        _this->_impl_.stage_data_key_ = from._impl_.stage_data_key_;
+      if (from._internal_result_code() != 0) {
+        _this->_impl_.result_code_ = from._impl_.result_code_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (from._internal_result_code() != 0) {
-        _this->_impl_.result_code_ = from._impl_.result_code_;
+      if (from._internal_stage_data_key() != 0) {
+        _this->_impl_.stage_data_key_ = from._impl_.stage_data_key_;
       }
     }
   }
@@ -1859,8 +1859,8 @@ void CharacterSelectRes::InternalSwap(CharacterSelectRes* PROTOBUF_RESTRICT PROT
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.error_msg_, &other->_impl_.error_msg_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.result_code_)
-      + sizeof(CharacterSelectRes::_impl_.result_code_)
+      PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.stage_data_key_)
+      + sizeof(CharacterSelectRes::_impl_.stage_data_key_)
       - PROTOBUF_FIELD_OFFSET(CharacterSelectRes, _impl_.character_)>(
           reinterpret_cast<char*>(&_impl_.character_),
           reinterpret_cast<char*>(&other->_impl_.character_));

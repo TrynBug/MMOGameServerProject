@@ -21,7 +21,7 @@ import "Common/packet_id.proto";
 // origin 은 entry 효과의 중심/시작 위치 (투사체=캐스터 위치, 타겟형 장판=클릭 위치 등 클라가 결정).
 // target_* 은 오토타겟 결과(서버 검증용). 서버는 일단 신뢰하고 사용한다 (핵 검사는 후속).
 message SkillCastReq {
-    int64  skill_key        = 1;
+    int32  skill_key        = 1;
     float  origin_x         = 2;
     float  origin_y         = 3;   // 높이
     float  origin_z         = 4;   // 평면 깊이축
@@ -64,7 +64,7 @@ message SkillProjectileHitReq {
 // 시전한 클라는 effect_id 로 자기 투사체의 hit 를 SkillProjectileHitReq 에 담아 보고한다.
 message SkillCastNtf {
     int64  caster_object_id = 1;
-    int64  skill_key        = 2;
+    int32  skill_key        = 2;
     int64  effect_id        = 3;   // 서버가 발급한 투사체 그룹 ID (투사체 스킬이 아니면 0)
     float  origin_x         = 4;
     float  origin_y         = 5;   // 높이

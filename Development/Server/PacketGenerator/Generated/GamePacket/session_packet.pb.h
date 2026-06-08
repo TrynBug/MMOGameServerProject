@@ -621,14 +621,14 @@ class GameEnterNtf final : public ::google::protobuf::Message
   void _internal_set_stage_id(::int64_t value);
 
   public:
-  // int64 stage_key = 2;
+  // int32 stage_key = 2;
   void clear_stage_key() ;
-  ::int64_t stage_key() const;
-  void set_stage_key(::int64_t value);
+  ::int32_t stage_key() const;
+  void set_stage_key(::int32_t value);
 
   private:
-  ::int64_t _internal_stage_key() const;
-  void _internal_set_stage_key(::int64_t value);
+  ::int32_t _internal_stage_key() const;
+  void _internal_set_stage_key(::int32_t value);
 
   public:
   // @@protoc_insertion_point(class_scope:GamePacket.GameEnterNtf)
@@ -658,7 +658,7 @@ class GameEnterNtf final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::int64_t stage_id_;
-    ::int64_t stage_key_;
+    ::int32_t stage_key_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -969,27 +969,27 @@ inline void GameEnterNtf::_internal_set_stage_id(::int64_t value) {
   _impl_.stage_id_ = value;
 }
 
-// int64 stage_key = 2;
+// int32 stage_key = 2;
 inline void GameEnterNtf::clear_stage_key() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.stage_key_ = ::int64_t{0};
+  _impl_.stage_key_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000002U);
 }
-inline ::int64_t GameEnterNtf::stage_key() const {
+inline ::int32_t GameEnterNtf::stage_key() const {
   // @@protoc_insertion_point(field_get:GamePacket.GameEnterNtf.stage_key)
   return _internal_stage_key();
 }
-inline void GameEnterNtf::set_stage_key(::int64_t value) {
+inline void GameEnterNtf::set_stage_key(::int32_t value) {
   _internal_set_stage_key(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000002U);
   // @@protoc_insertion_point(field_set:GamePacket.GameEnterNtf.stage_key)
 }
-inline ::int64_t GameEnterNtf::_internal_stage_key() const {
+inline ::int32_t GameEnterNtf::_internal_stage_key() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.stage_key_;
 }
-inline void GameEnterNtf::_internal_set_stage_key(::int64_t value) {
+inline void GameEnterNtf::_internal_set_stage_key(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.stage_key_ = value;
 }

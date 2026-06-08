@@ -88,14 +88,14 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 inline constexpr SkillCastReq::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        skill_key_{::int64_t{0}},
+        skill_key_{0},
         origin_x_{0},
         origin_y_{0},
         origin_z_{0},
         dir_x_{0},
         dir_z_{0},
-        seed_{0u},
         target_object_id_{::int64_t{0}},
+        seed_{0u},
         target_pos_x_{0},
         target_pos_z_{0} {}
 
@@ -123,8 +123,8 @@ inline constexpr SkillCastNtf::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
         caster_object_id_{::int64_t{0}},
-        skill_key_{::int64_t{0}},
         effect_id_{::int64_t{0}},
+        skill_key_{0},
         origin_x_{0},
         origin_y_{0},
         origin_z_{0},
@@ -204,8 +204,8 @@ const ::uint32_t
         3,
         4,
         5,
-        6,
         7,
+        6,
         8,
         9,
         0x081, // bitmap
@@ -244,8 +244,8 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillCastNtf, _impl_.seed_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillCastNtf, _impl_.move_distance_),
         0,
-        1,
         2,
+        1,
         3,
         4,
         5,
@@ -285,7 +285,7 @@ const char descriptor_table_protodef_GamePacket_2fskill_5fpacket_2eproto[] ABSL_
     protodesc_cold) = {
     "\n\035GamePacket/skill_packet.proto\022\nGamePac"
     "ket\032\026Common/packet_id.proto\"\311\001\n\014SkillCas"
-    "tReq\022\021\n\tskill_key\030\001 \001(\003\022\020\n\010origin_x\030\002 \001("
+    "tReq\022\021\n\tskill_key\030\001 \001(\005\022\020\n\010origin_x\030\002 \001("
     "\002\022\020\n\010origin_y\030\003 \001(\002\022\020\n\010origin_z\030\004 \001(\002\022\r\n"
     "\005dir_x\030\005 \001(\002\022\r\n\005dir_z\030\006 \001(\002\022\014\n\004seed\030\007 \001("
     "\r\022\030\n\020target_object_id\030\010 \001(\003\022\024\n\014target_po"
@@ -297,7 +297,7 @@ const char descriptor_table_protodef_GamePacket_2fskill_5fpacket_2eproto[] ABSL_
     "t_z\030\007 \001(\002\"\?\n\025SkillProjectileHitReq\022&\n\004hi"
     "ts\030\001 \003(\0132\030.GamePacket.SkillHitItem\"\307\001\n\014S"
     "killCastNtf\022\030\n\020caster_object_id\030\001 \001(\003\022\021\n"
-    "\tskill_key\030\002 \001(\003\022\021\n\teffect_id\030\003 \001(\003\022\020\n\010o"
+    "\tskill_key\030\002 \001(\005\022\021\n\teffect_id\030\003 \001(\003\022\020\n\010o"
     "rigin_x\030\004 \001(\002\022\020\n\010origin_y\030\005 \001(\002\022\020\n\010origi"
     "n_z\030\006 \001(\002\022\r\n\005dir_x\030\007 \001(\002\022\r\n\005dir_z\030\010 \001(\002\022"
     "\014\n\004seed\030\t \001(\r\022\025\n\rmove_distance\030\n \001(\002\"f\n\016"
@@ -448,8 +448,8 @@ SkillCastReq::_table_ = {
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // int64 skill_key = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(SkillCastReq, _impl_.skill_key_), 0>(),
+    // int32 skill_key = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(SkillCastReq, _impl_.skill_key_), 0>(),
      {8, 0, 0,
       PROTOBUF_FIELD_OFFSET(SkillCastReq, _impl_.skill_key_)}},
     // float origin_x = 2;
@@ -473,12 +473,12 @@ SkillCastReq::_table_ = {
      {53, 5, 0,
       PROTOBUF_FIELD_OFFSET(SkillCastReq, _impl_.dir_z_)}},
     // uint32 seed = 7;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(SkillCastReq, _impl_.seed_), 6>(),
-     {56, 6, 0,
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(SkillCastReq, _impl_.seed_), 7>(),
+     {56, 7, 0,
       PROTOBUF_FIELD_OFFSET(SkillCastReq, _impl_.seed_)}},
     // int64 target_object_id = 8;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(SkillCastReq, _impl_.target_object_id_), 7>(),
-     {64, 7, 0,
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(SkillCastReq, _impl_.target_object_id_), 6>(),
+     {64, 6, 0,
       PROTOBUF_FIELD_OFFSET(SkillCastReq, _impl_.target_object_id_)}},
     // float target_pos_x = 9;
     {::_pbi::TcParser::FastF32S1,
@@ -496,8 +496,8 @@ SkillCastReq::_table_ = {
   }}, {{
     65535, 65535
   }}, {{
-    // int64 skill_key = 1;
-    {PROTOBUF_FIELD_OFFSET(SkillCastReq, _impl_.skill_key_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int32 skill_key = 1;
+    {PROTOBUF_FIELD_OFFSET(SkillCastReq, _impl_.skill_key_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // float origin_x = 2;
     {PROTOBUF_FIELD_OFFSET(SkillCastReq, _impl_.origin_x_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
     // float origin_y = 3;
@@ -509,9 +509,9 @@ SkillCastReq::_table_ = {
     // float dir_z = 6;
     {PROTOBUF_FIELD_OFFSET(SkillCastReq, _impl_.dir_z_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
     // uint32 seed = 7;
-    {PROTOBUF_FIELD_OFFSET(SkillCastReq, _impl_.seed_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kUInt32)},
+    {PROTOBUF_FIELD_OFFSET(SkillCastReq, _impl_.seed_), _Internal::kHasBitsOffset + 7, 0, (0 | ::_fl::kFcOptional | ::_fl::kUInt32)},
     // int64 target_object_id = 8;
-    {PROTOBUF_FIELD_OFFSET(SkillCastReq, _impl_.target_object_id_), _Internal::kHasBitsOffset + 7, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    {PROTOBUF_FIELD_OFFSET(SkillCastReq, _impl_.target_object_id_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // float target_pos_x = 9;
     {PROTOBUF_FIELD_OFFSET(SkillCastReq, _impl_.target_pos_x_), _Internal::kHasBitsOffset + 8, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
     // float target_pos_z = 10;
@@ -531,8 +531,8 @@ PROTOBUF_NOINLINE void SkillCastReq::Clear() {
   cached_has_bits = _impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x000000ffU)) {
     ::memset(&_impl_.skill_key_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.target_object_id_) -
-        reinterpret_cast<char*>(&_impl_.skill_key_)) + sizeof(_impl_.target_object_id_));
+        reinterpret_cast<char*>(&_impl_.seed_) -
+        reinterpret_cast<char*>(&_impl_.skill_key_)) + sizeof(_impl_.seed_));
   }
   if (BatchCheckHasBit(cached_has_bits, 0x00000300U)) {
     ::memset(&_impl_.target_pos_x_, 0, static_cast<::size_t>(
@@ -562,11 +562,11 @@ PROTOBUF_NOINLINE void SkillCastReq::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 skill_key = 1;
+  // int32 skill_key = 1;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
     if (this_._internal_skill_key() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<1>(
               stream, this_._internal_skill_key(), target);
     }
   }
@@ -617,7 +617,7 @@ PROTOBUF_NOINLINE void SkillCastReq::Clear() {
   }
 
   // uint32 seed = 7;
-  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000080U)) {
     if (this_._internal_seed() != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
@@ -626,7 +626,7 @@ PROTOBUF_NOINLINE void SkillCastReq::Clear() {
   }
 
   // int64 target_object_id = 8;
-  if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
     if (this_._internal_target_object_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<8>(
@@ -678,10 +678,10 @@ PROTOBUF_NOINLINE void SkillCastReq::Clear() {
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x000000ffU)) {
-    // int64 skill_key = 1;
+    // int32 skill_key = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (this_._internal_skill_key() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_skill_key());
       }
     }
@@ -715,18 +715,18 @@ PROTOBUF_NOINLINE void SkillCastReq::Clear() {
         total_size += 5;
       }
     }
-    // uint32 seed = 7;
-    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
-      if (this_._internal_seed() != 0) {
-        total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
-            this_._internal_seed());
-      }
-    }
     // int64 target_object_id = 8;
-    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
       if (this_._internal_target_object_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
             this_._internal_target_object_id());
+      }
+    }
+    // uint32 seed = 7;
+    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+      if (this_._internal_seed() != 0) {
+        total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+            this_._internal_seed());
       }
     }
   }
@@ -794,13 +794,13 @@ void SkillCastReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000040U)) {
-      if (from._internal_seed() != 0) {
-        _this->_impl_.seed_ = from._impl_.seed_;
+      if (from._internal_target_object_id() != 0) {
+        _this->_impl_.target_object_id_ = from._impl_.target_object_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000080U)) {
-      if (from._internal_target_object_id() != 0) {
-        _this->_impl_.target_object_id_ = from._impl_.target_object_id_;
+      if (from._internal_seed() != 0) {
+        _this->_impl_.seed_ = from._impl_.seed_;
       }
     }
   }
@@ -1678,13 +1678,13 @@ SkillCastNtf::_table_ = {
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(SkillCastNtf, _impl_.caster_object_id_), 0>(),
      {8, 0, 0,
       PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.caster_object_id_)}},
-    // int64 skill_key = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(SkillCastNtf, _impl_.skill_key_), 1>(),
-     {16, 1, 0,
+    // int32 skill_key = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(SkillCastNtf, _impl_.skill_key_), 2>(),
+     {16, 2, 0,
       PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.skill_key_)}},
     // int64 effect_id = 3;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(SkillCastNtf, _impl_.effect_id_), 2>(),
-     {24, 2, 0,
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(SkillCastNtf, _impl_.effect_id_), 1>(),
+     {24, 1, 0,
       PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.effect_id_)}},
     // float origin_x = 4;
     {::_pbi::TcParser::FastF32S1,
@@ -1724,10 +1724,10 @@ SkillCastNtf::_table_ = {
   }}, {{
     // int64 caster_object_id = 1;
     {PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.caster_object_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
-    // int64 skill_key = 2;
-    {PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.skill_key_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int32 skill_key = 2;
+    {PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.skill_key_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // int64 effect_id = 3;
-    {PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.effect_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    {PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.effect_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // float origin_x = 4;
     {PROTOBUF_FIELD_OFFSET(SkillCastNtf, _impl_.origin_x_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
     // float origin_y = 5;
@@ -1797,17 +1797,17 @@ PROTOBUF_NOINLINE void SkillCastNtf::Clear() {
     }
   }
 
-  // int64 skill_key = 2;
-  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+  // int32 skill_key = 2;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
     if (this_._internal_skill_key() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<2>(
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<2>(
               stream, this_._internal_skill_key(), target);
     }
   }
 
   // int64 effect_id = 3;
-  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
     if (this_._internal_effect_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<3>(
@@ -1911,18 +1911,18 @@ PROTOBUF_NOINLINE void SkillCastNtf::Clear() {
             this_._internal_caster_object_id());
       }
     }
-    // int64 skill_key = 2;
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (this_._internal_skill_key() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_skill_key());
-      }
-    }
     // int64 effect_id = 3;
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
       if (this_._internal_effect_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
             this_._internal_effect_id());
+      }
+    }
+    // int32 skill_key = 2;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (this_._internal_skill_key() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_skill_key());
       }
     }
     // float origin_x = 4;
@@ -1996,13 +1996,13 @@ void SkillCastNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (from._internal_skill_key() != 0) {
-        _this->_impl_.skill_key_ = from._impl_.skill_key_;
+      if (from._internal_effect_id() != 0) {
+        _this->_impl_.effect_id_ = from._impl_.effect_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (from._internal_effect_id() != 0) {
-        _this->_impl_.effect_id_ = from._impl_.effect_id_;
+      if (from._internal_skill_key() != 0) {
+        _this->_impl_.skill_key_ = from._impl_.skill_key_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {

@@ -54,5 +54,5 @@ message CharacterSelectRes {
     int32 result_code = 1;       // EResultCode 값
     string error_msg = 2;        // 실패 시 사유 메시지 (성공 시 빈 문자열)
     DataStructures.Character character = 10;  // 선택된 캐릭터 전체 데이터 (서버가 진실의 원천)
-    int64 stage_data_key = 9;    // 입장할 Stage 데이터 Key (클라가 로딩할 맵 리소스 식별)
+    int32 stage_data_key = 9;    // 입장할 Stage 데이터 Key (클라가 로딩할 맵 리소스 식별)
 }

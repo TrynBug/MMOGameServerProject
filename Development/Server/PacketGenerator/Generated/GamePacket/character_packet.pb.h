@@ -628,8 +628,8 @@ class CharacterSelectRes final : public ::google::protobuf::Message
   enum : int {
     kErrorMsgFieldNumber = 2,
     kCharacterFieldNumber = 10,
-    kStageDataKeyFieldNumber = 9,
     kResultCodeFieldNumber = 1,
+    kStageDataKeyFieldNumber = 9,
   };
   // string error_msg = 2;
   void clear_error_msg() ;
@@ -661,16 +661,6 @@ class CharacterSelectRes final : public ::google::protobuf::Message
   ::DataStructures::Character* PROTOBUF_NONNULL _internal_mutable_character();
 
   public:
-  // int64 stage_data_key = 9;
-  void clear_stage_data_key() ;
-  ::int64_t stage_data_key() const;
-  void set_stage_data_key(::int64_t value);
-
-  private:
-  ::int64_t _internal_stage_data_key() const;
-  void _internal_set_stage_data_key(::int64_t value);
-
-  public:
   // int32 result_code = 1;
   void clear_result_code() ;
   ::int32_t result_code() const;
@@ -679,6 +669,16 @@ class CharacterSelectRes final : public ::google::protobuf::Message
   private:
   ::int32_t _internal_result_code() const;
   void _internal_set_result_code(::int32_t value);
+
+  public:
+  // int32 stage_data_key = 9;
+  void clear_stage_data_key() ;
+  ::int32_t stage_data_key() const;
+  void set_stage_data_key(::int32_t value);
+
+  private:
+  ::int32_t _internal_stage_data_key() const;
+  void _internal_set_stage_data_key(::int32_t value);
 
   public:
   // @@protoc_insertion_point(class_scope:GamePacket.CharacterSelectRes)
@@ -709,8 +709,8 @@ class CharacterSelectRes final : public ::google::protobuf::Message
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr error_msg_;
     ::DataStructures::Character* PROTOBUF_NULLABLE character_;
-    ::int64_t stage_data_key_;
     ::int32_t result_code_;
+    ::int32_t stage_data_key_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -1525,7 +1525,7 @@ inline void CharacterSelectRes::clear_result_code() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.result_code_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000008U);
+                  0x00000004U);
 }
 inline ::int32_t CharacterSelectRes::result_code() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSelectRes.result_code)
@@ -1533,7 +1533,7 @@ inline ::int32_t CharacterSelectRes::result_code() const {
 }
 inline void CharacterSelectRes::set_result_code(::int32_t value) {
   _internal_set_result_code(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSelectRes.result_code)
 }
 inline ::int32_t CharacterSelectRes::_internal_result_code() const {
@@ -1703,27 +1703,27 @@ inline void CharacterSelectRes::set_allocated_character(::DataStructures::Charac
   // @@protoc_insertion_point(field_set_allocated:GamePacket.CharacterSelectRes.character)
 }
 
-// int64 stage_data_key = 9;
+// int32 stage_data_key = 9;
 inline void CharacterSelectRes::clear_stage_data_key() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.stage_data_key_ = ::int64_t{0};
+  _impl_.stage_data_key_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000008U);
 }
-inline ::int64_t CharacterSelectRes::stage_data_key() const {
+inline ::int32_t CharacterSelectRes::stage_data_key() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSelectRes.stage_data_key)
   return _internal_stage_data_key();
 }
-inline void CharacterSelectRes::set_stage_data_key(::int64_t value) {
+inline void CharacterSelectRes::set_stage_data_key(::int32_t value) {
   _internal_set_stage_data_key(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSelectRes.stage_data_key)
 }
-inline ::int64_t CharacterSelectRes::_internal_stage_data_key() const {
+inline ::int32_t CharacterSelectRes::_internal_stage_data_key() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.stage_data_key_;
 }
-inline void CharacterSelectRes::_internal_set_stage_data_key(::int64_t value) {
+inline void CharacterSelectRes::_internal_set_stage_data_key(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.stage_data_key_ = value;
 }

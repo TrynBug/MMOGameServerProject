@@ -20,7 +20,7 @@ import "Common/packet_id.proto";
 // 가시 범위 진입 시 해당 오브젝트가 보유한 버프 1개 (UI 뱃지용).
 // 스탯/HP 효과는 별도(StatUpdateNtf/HpMpNtf)로 전달되며, 여기는 표시 정보만 담는다.
 message BuffSnapshotInfo {
-    int64 buff_key       = 1;   // GameData_Buff 의 Key
+    int32 buff_key       = 1;   // GameData_Buff 의 Key
     int32 stack_count    = 2;
     int32 remain_time_ms = 3;   // 남은 시간(ms). -1 = 영구(카운트다운 표시 안 함)
 }
@@ -49,7 +49,7 @@ message CharacterSpawnInfo {
 // 좌표계: Unity 와 동일. Y가 높이, X-Z 가 평면.
 message MonsterSpawnInfo {
     int64 object_id   = 1;
-    int64 monster_key = 2;   // GameData_Monster 의 Key
+    int32 monster_key = 2;   // GameData_Monster 의 Key
     float pos_x       = 3;
     float pos_y       = 4;   // 높이
     float yaw         = 5;   // Y축 회전, degree 단위
