@@ -690,10 +690,10 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
 
     const int64 userId = spUser->GetUserId();
 
-    CharacterPtr spCharacter = spUser->GetPendingCharacter();
+    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
     if (!spCharacter)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::spawnPendingCharacter - no pending character. stageId={} userId={}",
+        LOG_WRITE(LogLevel::Warn, std::format("Stage::spawnPendingCharacter - no character. stageId={} userId={}",
             m_stageId, userId));
         return;
     }
@@ -745,9 +745,7 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     // 캐릭터는 중요 오브젝트 → 매 tick(50ms) 업데이트. 등록 진입점에 주기를 명시 전달.
     registerObject(spCharacter, k_characterUpdateIntervalMs, m_userObjects);
 
-    // User ↔ Character 연결 + 상태 전환.
-    spUser->SetCurrentCharacter(spCharacter);
-    spUser->ClearPendingCharacter();
+    // 상태 전환 (캐릭터 소유는 이미 User가 갖고 있으므로 별도 설정 불필요).
     spUser->SetStageState(EUserStageState::InStage);
 
     LOG_WRITE(LogLevel::Info, std::format("Stage::spawnPendingCharacter - stageId={} userId={} characterId={} sector=({},{}) totalUsers={} totalObjects={}",
@@ -1059,11 +1057,12 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
     }
 
     // ── 이동 확정 ─────────────────────────────────────────
-    // 1) 캐릭터를 User가 임시 보관 (이 순간부터 User가 유일한 강한 소유자).
-    spUser->SetPendingCharacter(spCharacter, positionType);
+    // 1) 도착 위치 타입만 보관하고 Moving 상태로 전환 (캐릭터 소유는 이미 User가 갖고 있음).
+    spUser->SetPendingPositionType(positionType);
     spUser->SetStageState(EUserStageState::Moving);
 
     // 2) old Stage(=this)에서 퇴장: sector/컨테이너 제거 + AOI despawn + m_users 제거.
+    //    캐릭터는 User가 계속 소유하므로 이 시점에 파괴되지 않는다.
     OnUserLeave(userId);
 
     // 3) target Stage에 유저만 입장 (이후 클라 패킷은 target이 drain).
@@ -1079,7 +1078,7 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
 void Stage::handleStageLoadCompleteReq(const UserPtr& spUser, const netlib::PacketPtr& /*spPacket*/)
 {
     // Moving 상태의 유저만 유효 (이외는 잘못된/중복 보고 → 무시).
-    if (spUser->GetStageState() != EUserStageState::Moving || !spUser->GetPendingCharacter())
+    if (spUser->GetStageState() != EUserStageState::Moving || !spUser->GetCurrentCharacter())
     {
         LOG_WRITE(LogLevel::Warn, std::format("Stage::handleStageLoadCompleteReq - unexpected. stageId={} userId={} stageState={}",
             m_stageId, spUser->GetUserId(), static_cast<int32>(spUser->GetStageState())));

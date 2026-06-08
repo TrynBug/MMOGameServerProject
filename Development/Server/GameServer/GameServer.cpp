@@ -562,8 +562,8 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
         co_return;
     }
 
-    // Character 객체 생성. 라이프타임은 스폰 후 target Stage가 최종소유
-    // (그 전까지는 User의 pendingCharacter가 임시 소유).
+    // Character 객체 생성. User가 강한 소유자가 된다 (선택~로그아웃까지 유지).
+    // Stage는 스폰되어 있는 동안만 같은 캐릭터를 컨테이너에 함께 보관한다.
     CharacterPtr spCharacter = std::make_shared<Character>();
     if (!spCharacter->Initialize(character))
     {
@@ -571,7 +571,8 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
         sendCharacterSelectRes(userId, EResultCode::Fail, "server error: character init", nullptr, 0);
         co_return;
     }
-    spCharacter->SetUser(spUser);   // Character -> User weak_ptr
+    spCharacter->SetUser(spUser);              // Character -> User weak_ptr
+    spUser->SetCurrentCharacter(spCharacter);  // User -> Character shared_ptr (소유)
 
     LOG_WRITE(LogLevel::Info, std::format("GameServer: character selected. userId={} characterId={} name='{}'",
         userId, character.character_id(), character.name()));
@@ -590,10 +591,10 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     sendCharacterSelectRes(userId, EResultCode::Success, "", &character, spTown->GetStageDataKey());
 
     // ── 7) 2단계 입장 시작 (Stage 이동과 동일한 골격) ─────────────────────
-    // 캐릭터를 User가 임시 보관(Moving)하고 Town에는 유저만 입장시킨다.
+    // 캐릭터는 이미 User가 소유 중. Town에는 유저만 입장시키고, 스폰은 LoadComplete 시.
     // 클라가 Game 씬 + 맵 로딩 후 StageLoadCompleteReq를 보내면 Town이 스폰하고 StageLoadCompleteRes를 보낸다.
     // positionType=None → 캐릭터의 DB 좌표 사용 (마지막 위치 복귀).
-    spUser->SetPendingCharacter(spCharacter, EStagePositionType::None);
+    spUser->SetPendingPositionType(EStagePositionType::None);
     spUser->SetStageState(EUserStageState::Moving);
 
     if (SystemStagePtr spSystemStage = m_stageManager.GetSystemStage())
