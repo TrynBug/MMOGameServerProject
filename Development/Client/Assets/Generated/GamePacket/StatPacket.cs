@@ -24,14 +24,14 @@ namespace GamePacket {
     static StatPacketReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChxHYW1lUGFja2V0L3N0YXRfcGFja2V0LnByb3RvEgpHYW1lUGFja2V0GhZD",
-            "b21tb24vcGFja2V0X2lkLnByb3RvIigKCVN0YXRFbnRyeRIMCgRzdGF0GAEg",
-            "ASgFEg0KBXZhbHVlGAIgASgBIkoKDVN0YXRVcGRhdGVOdGYSEQoJb2JqZWN0",
-            "X2lkGAEgASgDEiYKB2VudHJpZXMYAiADKAsyFS5HYW1lUGFja2V0LlN0YXRF",
-            "bnRyeSI8CgdIcE1wTnRmEhEKCW9iamVjdF9pZBgBIAEoAxIOCgZjdXJfaHAY",
-            "AiABKAESDgoGY3VyX21wGAMgASgBYgZwcm90bzM="));
+            "ChxHYW1lUGFja2V0L3N0YXRfcGFja2V0LnByb3RvEgpHYW1lUGFja2V0IigK",
+            "CVN0YXRFbnRyeRIMCgRzdGF0GAEgASgFEg0KBXZhbHVlGAIgASgBIkoKDVN0",
+            "YXRVcGRhdGVOdGYSEQoJb2JqZWN0X2lkGAEgASgDEiYKB2VudHJpZXMYAiAD",
+            "KAsyFS5HYW1lUGFja2V0LlN0YXRFbnRyeSI8CgdIcE1wTnRmEhEKCW9iamVj",
+            "dF9pZBgBIAEoAxIOCgZjdXJfaHAYAiABKAESDgoGY3VyX21wGAMgASgBYgZw",
+            "cm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, },
+          new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StatEntry), global::GamePacket.StatEntry.Parser, new[]{ "Stat", "Value" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StatUpdateNtf), global::GamePacket.StatUpdateNtf.Parser, new[]{ "ObjectId", "Entries" }, null, null, null, null),

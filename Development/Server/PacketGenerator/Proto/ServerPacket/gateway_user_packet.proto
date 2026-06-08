@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package ServerPacket;
 
-import "Common/packet_id.proto";
-
 // 유저 입장 알림 (게이트웨이 -> 게임서버)
 // 클라이언트가 인증 완료 후 게임서버로 전달됨
 message GatewayUserEnterNtf {

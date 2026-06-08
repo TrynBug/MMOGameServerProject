@@ -171,35 +171,28 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_GamePacket_2fsession_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\037GamePacket/session_packet.proto\022\nGameP"
-    "acket\032\026Common/packet_id.proto\032\036DataStruc"
-    "tures/character.proto\"5\n\016GatewayAuthReq\022"
-    "\017\n\007user_id\030\001 \001(\003\022\022\n\nauth_token\030\002 \001(\004\"3\n\014"
-    "GameEnterNtf\022\020\n\010stage_id\030\001 \001(\003\022\021\n\tstage_"
-    "key\030\002 \001(\005\"\017\n\rGameLogoutReq\":\n\022ForceDisco"
-    "nnectNtf\022\023\n\013reason_code\030\001 \001(\005\022\017\n\007message"
-    "\030\002 \001(\t*\340\001\n\025ForceDisconnectReason\022 \n\034FORC"
-    "E_DISCONNECT_REASON_NONE\020\000\022+\n\'FORCE_DISC"
-    "ONNECT_REASON_DUPLICATE_LOGIN\020\001\022+\n\'FORCE"
-    "_DISCONNECT_REASON_SERVER_SHUTDOWN\020\002\022\'\n#"
-    "FORCE_DISCONNECT_REASON_AUTH_FAILED\020\003\022\"\n"
-    "\036FORCE_DISCONNECT_REASON_KICKED\020\004b\006proto"
-    "3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_GamePacket_2fsession_5fpacket_2eproto_deps[2] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
-        &::descriptor_table_DataStructures_2fcharacter_2eproto,
+    "acket\"5\n\016GatewayAuthReq\022\017\n\007user_id\030\001 \001(\003"
+    "\022\022\n\nauth_token\030\002 \001(\004\"3\n\014GameEnterNtf\022\020\n\010"
+    "stage_id\030\001 \001(\003\022\021\n\tstage_key\030\002 \001(\005\"\017\n\rGam"
+    "eLogoutReq\":\n\022ForceDisconnectNtf\022\023\n\013reas"
+    "on_code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t*\340\001\n\025Force"
+    "DisconnectReason\022 \n\034FORCE_DISCONNECT_REA"
+    "SON_NONE\020\000\022+\n\'FORCE_DISCONNECT_REASON_DU"
+    "PLICATE_LOGIN\020\001\022+\n\'FORCE_DISCONNECT_REAS"
+    "ON_SERVER_SHUTDOWN\020\002\022\'\n#FORCE_DISCONNECT"
+    "_REASON_AUTH_FAILED\020\003\022\"\n\036FORCE_DISCONNEC"
+    "T_REASON_KICKED\020\004b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fsession_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fsession_5fpacket_2eproto = {
     false,
     false,
-    521,
+    465,
     descriptor_table_protodef_GamePacket_2fsession_5fpacket_2eproto,
     "GamePacket/session_packet.proto",
     &descriptor_table_GamePacket_2fsession_5fpacket_2eproto_once,
-    descriptor_table_GamePacket_2fsession_5fpacket_2eproto_deps,
-    2,
+    nullptr,
+    0,
     4,
     schemas,
     file_default_instances,

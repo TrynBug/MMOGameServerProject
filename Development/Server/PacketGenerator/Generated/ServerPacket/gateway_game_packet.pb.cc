@@ -199,31 +199,26 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_ServerPacket_2fgateway_5fgame_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n&ServerPacket/gateway_game_packet.proto"
-    "\022\014ServerPacket\032\026Common/packet_id.proto\"O"
-    "\n\026GameToGatewayPacketNtf\022\017\n\007user_id\030\001 \001("
-    "\003\022\023\n\013packet_type\030\002 \001(\005\022\017\n\007payload\030\003 \001(\014\""
-    "S\n\031GameToGatewayBroadcastNtf\022\020\n\010user_ids"
-    "\030\001 \003(\003\022\023\n\013packet_type\030\002 \001(\005\022\017\n\007payload\030\003"
-    " \001(\014\"b\n\027UserMoveToGameServerReq\022\017\n\007user_"
-    "id\030\001 \001(\003\022\035\n\025target_game_server_id\030\002 \001(\005\022"
-    "\027\n\017target_stage_id\030\003 \001(\005\">\n\033UserMoveToGa"
-    "meServerFailNtf\022\017\n\007user_id\030\001 \001(\003\022\016\n\006reas"
-    "on\030\002 \001(\tb\006proto3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto_deps[1] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    "\022\014ServerPacket\"O\n\026GameToGatewayPacketNtf"
+    "\022\017\n\007user_id\030\001 \001(\003\022\023\n\013packet_type\030\002 \001(\005\022\017"
+    "\n\007payload\030\003 \001(\014\"S\n\031GameToGatewayBroadcas"
+    "tNtf\022\020\n\010user_ids\030\001 \003(\003\022\023\n\013packet_type\030\002 "
+    "\001(\005\022\017\n\007payload\030\003 \001(\014\"b\n\027UserMoveToGameSe"
+    "rverReq\022\017\n\007user_id\030\001 \001(\003\022\035\n\025target_game_"
+    "server_id\030\002 \001(\005\022\027\n\017target_stage_id\030\003 \001(\005"
+    "\">\n\033UserMoveToGameServerFailNtf\022\017\n\007user_"
+    "id\030\001 \001(\003\022\016\n\006reason\030\002 \001(\tb\006proto3"
 };
 static ::absl::once_flag descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto = {
     false,
     false,
-    416,
+    392,
     descriptor_table_protodef_ServerPacket_2fgateway_5fgame_5fpacket_2eproto,
     "ServerPacket/gateway_game_packet.proto",
     &descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto_once,
-    descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto_deps,
-    1,
+    nullptr,
+    0,
     4,
     schemas,
     file_default_instances,

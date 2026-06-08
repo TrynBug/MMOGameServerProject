@@ -127,27 +127,22 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_ServerPacket_2fchat_5fserver_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n%ServerPacket/chat_server_packet.proto\022"
-    "\014ServerPacket\032\026Common/packet_id.proto\"P\n"
-    "\020ChatBroadcastReq\022\026\n\016sender_user_id\030\001 \001("
-    "\003\022\023\n\013sender_name\030\002 \001(\t\022\017\n\007message\030\003 \001(\t\""
-    "P\n\020ChatBroadcastNtf\022\026\n\016sender_user_id\030\001 "
-    "\001(\003\022\023\n\013sender_name\030\002 \001(\t\022\017\n\007message\030\003 \001("
-    "\tb\006proto3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_ServerPacket_2fchat_5fserver_5fpacket_2eproto_deps[1] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    "\014ServerPacket\"P\n\020ChatBroadcastReq\022\026\n\016sen"
+    "der_user_id\030\001 \001(\003\022\023\n\013sender_name\030\002 \001(\t\022\017"
+    "\n\007message\030\003 \001(\t\"P\n\020ChatBroadcastNtf\022\026\n\016s"
+    "ender_user_id\030\001 \001(\003\022\023\n\013sender_name\030\002 \001(\t"
+    "\022\017\n\007message\030\003 \001(\tb\006proto3"
 };
 static ::absl::once_flag descriptor_table_ServerPacket_2fchat_5fserver_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2fchat_5fserver_5fpacket_2eproto = {
     false,
     false,
-    249,
+    225,
     descriptor_table_protodef_ServerPacket_2fchat_5fserver_5fpacket_2eproto,
     "ServerPacket/chat_server_packet.proto",
     &descriptor_table_ServerPacket_2fchat_5fserver_5fpacket_2eproto_once,
-    descriptor_table_ServerPacket_2fchat_5fserver_5fpacket_2eproto_deps,
-    1,
+    nullptr,
+    0,
     2,
     schemas,
     file_default_instances,

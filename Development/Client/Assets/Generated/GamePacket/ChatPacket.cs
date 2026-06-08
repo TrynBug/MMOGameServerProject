@@ -24,13 +24,12 @@ namespace GamePacket {
     static ChatPacketReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChxHYW1lUGFja2V0L2NoYXRfcGFja2V0LnByb3RvEgpHYW1lUGFja2V0GhZD",
-            "b21tb24vcGFja2V0X2lkLnByb3RvIh4KC0NoYXRTZW5kUmVxEg8KB21lc3Nh",
-            "Z2UYASABKAkiSwoLQ2hhdFJlY3ZOdGYSFgoOc2VuZGVyX3VzZXJfaWQYASAB",
-            "KAMSEwoLc2VuZGVyX25hbWUYAiABKAkSDwoHbWVzc2FnZRgDIAEoCWIGcHJv",
-            "dG8z"));
+            "ChxHYW1lUGFja2V0L2NoYXRfcGFja2V0LnByb3RvEgpHYW1lUGFja2V0Ih4K",
+            "C0NoYXRTZW5kUmVxEg8KB21lc3NhZ2UYASABKAkiSwoLQ2hhdFJlY3ZOdGYS",
+            "FgoOc2VuZGVyX3VzZXJfaWQYASABKAMSEwoLc2VuZGVyX25hbWUYAiABKAkS",
+            "DwoHbWVzc2FnZRgDIAEoCWIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, },
+          new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ChatSendReq), global::GamePacket.ChatSendReq.Parser, new[]{ "Message" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ChatRecvNtf), global::GamePacket.ChatRecvNtf.Parser, new[]{ "SenderUserId", "SenderName", "Message" }, null, null, null, null)

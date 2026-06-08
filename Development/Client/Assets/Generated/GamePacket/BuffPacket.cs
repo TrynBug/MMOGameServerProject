@@ -24,13 +24,13 @@ namespace GamePacket {
     static BuffPacketReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChxHYW1lUGFja2V0L2J1ZmZfcGFja2V0LnByb3RvEgpHYW1lUGFja2V0GhZD",
-            "b21tb24vcGFja2V0X2lkLnByb3RvIlsKB0J1ZmZOdGYSEQoJb2JqZWN0X2lk",
-            "GAEgASgDEhAKCGJ1ZmZfa2V5GAIgASgFEhMKC3N0YWNrX2NvdW50GAMgASgF",
-            "EhYKDnJlbWFpbl90aW1lX21zGAQgASgFIjQKDUJ1ZmZSZW1vdmVOdGYSEQoJ",
-            "b2JqZWN0X2lkGAEgASgDEhAKCGJ1ZmZfa2V5GAIgASgFYgZwcm90bzM="));
+            "ChxHYW1lUGFja2V0L2J1ZmZfcGFja2V0LnByb3RvEgpHYW1lUGFja2V0IlsK",
+            "B0J1ZmZOdGYSEQoJb2JqZWN0X2lkGAEgASgDEhAKCGJ1ZmZfa2V5GAIgASgF",
+            "EhMKC3N0YWNrX2NvdW50GAMgASgFEhYKDnJlbWFpbl90aW1lX21zGAQgASgF",
+            "IjQKDUJ1ZmZSZW1vdmVOdGYSEQoJb2JqZWN0X2lkGAEgASgDEhAKCGJ1ZmZf",
+            "a2V5GAIgASgFYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, },
+          new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.BuffNtf), global::GamePacket.BuffNtf.Parser, new[]{ "ObjectId", "BuffKey", "StackCount", "RemainTimeMs" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.BuffRemoveNtf), global::GamePacket.BuffRemoveNtf.Parser, new[]{ "ObjectId", "BuffKey" }, null, null, null, null)

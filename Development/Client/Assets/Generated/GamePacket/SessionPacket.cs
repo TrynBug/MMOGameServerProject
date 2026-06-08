@@ -25,19 +25,18 @@ namespace GamePacket {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Ch9HYW1lUGFja2V0L3Nlc3Npb25fcGFja2V0LnByb3RvEgpHYW1lUGFja2V0",
-            "GhZDb21tb24vcGFja2V0X2lkLnByb3RvGh5EYXRhU3RydWN0dXJlcy9jaGFy",
-            "YWN0ZXIucHJvdG8iNQoOR2F0ZXdheUF1dGhSZXESDwoHdXNlcl9pZBgBIAEo",
-            "AxISCgphdXRoX3Rva2VuGAIgASgEIjMKDEdhbWVFbnRlck50ZhIQCghzdGFn",
-            "ZV9pZBgBIAEoAxIRCglzdGFnZV9rZXkYAiABKAUiDwoNR2FtZUxvZ291dFJl",
-            "cSI6ChJGb3JjZURpc2Nvbm5lY3ROdGYSEwoLcmVhc29uX2NvZGUYASABKAUS",
-            "DwoHbWVzc2FnZRgCIAEoCSrgAQoVRm9yY2VEaXNjb25uZWN0UmVhc29uEiAK",
-            "HEZPUkNFX0RJU0NPTk5FQ1RfUkVBU09OX05PTkUQABIrCidGT1JDRV9ESVND",
-            "T05ORUNUX1JFQVNPTl9EVVBMSUNBVEVfTE9HSU4QARIrCidGT1JDRV9ESVND",
-            "T05ORUNUX1JFQVNPTl9TRVJWRVJfU0hVVERPV04QAhInCiNGT1JDRV9ESVND",
-            "T05ORUNUX1JFQVNPTl9BVVRIX0ZBSUxFRBADEiIKHkZPUkNFX0RJU0NPTk5F",
-            "Q1RfUkVBU09OX0tJQ0tFRBAEYgZwcm90bzM="));
+            "IjUKDkdhdGV3YXlBdXRoUmVxEg8KB3VzZXJfaWQYASABKAMSEgoKYXV0aF90",
+            "b2tlbhgCIAEoBCIzCgxHYW1lRW50ZXJOdGYSEAoIc3RhZ2VfaWQYASABKAMS",
+            "EQoJc3RhZ2Vfa2V5GAIgASgFIg8KDUdhbWVMb2dvdXRSZXEiOgoSRm9yY2VE",
+            "aXNjb25uZWN0TnRmEhMKC3JlYXNvbl9jb2RlGAEgASgFEg8KB21lc3NhZ2UY",
+            "AiABKAkq4AEKFUZvcmNlRGlzY29ubmVjdFJlYXNvbhIgChxGT1JDRV9ESVND",
+            "T05ORUNUX1JFQVNPTl9OT05FEAASKwonRk9SQ0VfRElTQ09OTkVDVF9SRUFT",
+            "T05fRFVQTElDQVRFX0xPR0lOEAESKwonRk9SQ0VfRElTQ09OTkVDVF9SRUFT",
+            "T05fU0VSVkVSX1NIVVRET1dOEAISJwojRk9SQ0VfRElTQ09OTkVDVF9SRUFT",
+            "T05fQVVUSF9GQUlMRUQQAxIiCh5GT1JDRV9ESVNDT05ORUNUX1JFQVNPTl9L",
+            "SUNLRUQQBGIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, global::DataStructures.CharacterReflection.Descriptor, },
+          new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::GamePacket.ForceDisconnectReason), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.GatewayAuthReq), global::GamePacket.GatewayAuthReq.Parser, new[]{ "UserId", "AuthToken" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.GameEnterNtf), global::GamePacket.GameEnterNtf.Parser, new[]{ "StageId", "StageKey" }, null, null, null, null),

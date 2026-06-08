@@ -1,8 +1,7 @@
-﻿syntax = "proto3";
+syntax = "proto3";
 
 package GamePacket;
 
-import "Common/packet_id.proto";
 import "DataStructures/item.proto";
 
 // 아이템 사용 요청 (클라 -> 서버)

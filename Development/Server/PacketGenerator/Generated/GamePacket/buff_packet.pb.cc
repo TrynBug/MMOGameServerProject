@@ -119,26 +119,21 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_GamePacket_2fbuff_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\034GamePacket/buff_packet.proto\022\nGamePack"
-    "et\032\026Common/packet_id.proto\"[\n\007BuffNtf\022\021\n"
-    "\tobject_id\030\001 \001(\003\022\020\n\010buff_key\030\002 \001(\005\022\023\n\013st"
-    "ack_count\030\003 \001(\005\022\026\n\016remain_time_ms\030\004 \001(\005\""
-    "4\n\rBuffRemoveNtf\022\021\n\tobject_id\030\001 \001(\003\022\020\n\010b"
-    "uff_key\030\002 \001(\005b\006proto3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_GamePacket_2fbuff_5fpacket_2eproto_deps[1] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    "et\"[\n\007BuffNtf\022\021\n\tobject_id\030\001 \001(\003\022\020\n\010buff"
+    "_key\030\002 \001(\005\022\023\n\013stack_count\030\003 \001(\005\022\026\n\016remai"
+    "n_time_ms\030\004 \001(\005\"4\n\rBuffRemoveNtf\022\021\n\tobje"
+    "ct_id\030\001 \001(\003\022\020\n\010buff_key\030\002 \001(\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fbuff_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fbuff_5fpacket_2eproto = {
     false,
     false,
-    221,
+    197,
     descriptor_table_protodef_GamePacket_2fbuff_5fpacket_2eproto,
     "GamePacket/buff_packet.proto",
     &descriptor_table_GamePacket_2fbuff_5fpacket_2eproto_once,
-    descriptor_table_GamePacket_2fbuff_5fpacket_2eproto_deps,
-    1,
+    nullptr,
+    0,
     2,
     schemas,
     file_default_instances,

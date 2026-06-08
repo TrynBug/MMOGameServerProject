@@ -151,27 +151,22 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_GamePacket_2fstat_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\034GamePacket/stat_packet.proto\022\nGamePack"
-    "et\032\026Common/packet_id.proto\"(\n\tStatEntry\022"
-    "\014\n\004stat\030\001 \001(\005\022\r\n\005value\030\002 \001(\001\"J\n\rStatUpda"
-    "teNtf\022\021\n\tobject_id\030\001 \001(\003\022&\n\007entries\030\002 \003("
-    "\0132\025.GamePacket.StatEntry\"<\n\007HpMpNtf\022\021\n\to"
-    "bject_id\030\001 \001(\003\022\016\n\006cur_hp\030\002 \001(\001\022\016\n\006cur_mp"
-    "\030\003 \001(\001b\006proto3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_GamePacket_2fstat_5fpacket_2eproto_deps[1] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    "et\"(\n\tStatEntry\022\014\n\004stat\030\001 \001(\005\022\r\n\005value\030\002"
+    " \001(\001\"J\n\rStatUpdateNtf\022\021\n\tobject_id\030\001 \001(\003"
+    "\022&\n\007entries\030\002 \003(\0132\025.GamePacket.StatEntry"
+    "\"<\n\007HpMpNtf\022\021\n\tobject_id\030\001 \001(\003\022\016\n\006cur_hp"
+    "\030\002 \001(\001\022\016\n\006cur_mp\030\003 \001(\001b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fstat_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fstat_5fpacket_2eproto = {
     false,
     false,
-    254,
+    230,
     descriptor_table_protodef_GamePacket_2fstat_5fpacket_2eproto,
     "GamePacket/stat_packet.proto",
     &descriptor_table_GamePacket_2fstat_5fpacket_2eproto_once,
-    descriptor_table_GamePacket_2fstat_5fpacket_2eproto_deps,
-    1,
+    nullptr,
+    0,
     3,
     schemas,
     file_default_instances,

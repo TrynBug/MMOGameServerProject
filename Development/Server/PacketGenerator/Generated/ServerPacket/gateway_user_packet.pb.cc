@@ -158,28 +158,24 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_ServerPacket_2fgateway_5fuser_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n&ServerPacket/gateway_user_packet.proto"
-    "\022\014ServerPacket\032\026Common/packet_id.proto\"M"
-    "\n\023GatewayUserEnterNtf\022\017\n\007user_id\030\001 \001(\003\022\022"
-    "\n\ngateway_id\030\002 \001(\005\022\021\n\tclient_ip\030\003 \001(\t\"+\n"
-    "\030GatewayUserDisconnectNtf\022\017\n\007user_id\030\001 \001"
-    "(\003\"h\n\025GatewayUserRerouteNtf\022\017\n\007user_id\030\001"
-    " \001(\003\022\022\n\ngateway_id\030\002 \001(\005\022\027\n\017target_stage"
-    "_id\030\003 \001(\005\022\021\n\tclient_ip\030\004 \001(\tb\006proto3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_ServerPacket_2fgateway_5fuser_5fpacket_2eproto_deps[1] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    "\022\014ServerPacket\"M\n\023GatewayUserEnterNtf\022\017\n"
+    "\007user_id\030\001 \001(\003\022\022\n\ngateway_id\030\002 \001(\005\022\021\n\tcl"
+    "ient_ip\030\003 \001(\t\"+\n\030GatewayUserDisconnectNt"
+    "f\022\017\n\007user_id\030\001 \001(\003\"h\n\025GatewayUserReroute"
+    "Ntf\022\017\n\007user_id\030\001 \001(\003\022\022\n\ngateway_id\030\002 \001(\005"
+    "\022\027\n\017target_stage_id\030\003 \001(\005\022\021\n\tclient_ip\030\004"
+    " \001(\tb\006proto3"
 };
 static ::absl::once_flag descriptor_table_ServerPacket_2fgateway_5fuser_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2fgateway_5fuser_5fpacket_2eproto = {
     false,
     false,
-    316,
+    292,
     descriptor_table_protodef_ServerPacket_2fgateway_5fuser_5fpacket_2eproto,
     "ServerPacket/gateway_user_packet.proto",
     &descriptor_table_ServerPacket_2fgateway_5fuser_5fpacket_2eproto_once,
-    descriptor_table_ServerPacket_2fgateway_5fuser_5fpacket_2eproto_deps,
-    1,
+    nullptr,
+    0,
     3,
     schemas,
     file_default_instances,

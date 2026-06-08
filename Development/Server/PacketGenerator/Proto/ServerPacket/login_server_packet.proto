@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package ServerPacket;
 
-import "Common/packet_id.proto";
-
 
 // 인증 토큰 사전 전달 (로그인서버 -> 게이트웨이서버)
 // 로그인 성공 후, 클라이언트가 게이트웨이에 접속하기 전에 미리 전달한다.

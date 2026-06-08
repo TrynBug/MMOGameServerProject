@@ -24,14 +24,14 @@ namespace GamePacket {
     static LoginPacketReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Ch1HYW1lUGFja2V0L2xvZ2luX3BhY2tldC5wcm90bxIKR2FtZVBhY2tldBoW",
-            "Q29tbW9uL3BhY2tldF9pZC5wcm90byIuCghMb2dpblJlcRIQCghsb2dpbl9p",
-            "ZBgBIAEoCRIQCghwYXNzd29yZBgCIAEoCSJ9CghMb2dpblJlcxIPCgdzdWNj",
-            "ZXNzGAEgASgIEhEKCWVycm9yX21zZxgCIAEoCRIPCgd1c2VyX2lkGAMgASgD",
-            "EhIKCmF1dGhfdG9rZW4YBCABKAQSEgoKZ2F0ZXdheV9pcBgFIAEoCRIUCgxn",
-            "YXRld2F5X3BvcnQYBiABKAViBnByb3RvMw=="));
+            "Ch1HYW1lUGFja2V0L2xvZ2luX3BhY2tldC5wcm90bxIKR2FtZVBhY2tldCIu",
+            "CghMb2dpblJlcRIQCghsb2dpbl9pZBgBIAEoCRIQCghwYXNzd29yZBgCIAEo",
+            "CSJ9CghMb2dpblJlcxIPCgdzdWNjZXNzGAEgASgIEhEKCWVycm9yX21zZxgC",
+            "IAEoCRIPCgd1c2VyX2lkGAMgASgDEhIKCmF1dGhfdG9rZW4YBCABKAQSEgoK",
+            "Z2F0ZXdheV9pcBgFIAEoCRIUCgxnYXRld2F5X3BvcnQYBiABKAViBnByb3Rv",
+            "Mw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, },
+          new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.LoginReq), global::GamePacket.LoginReq.Parser, new[]{ "LoginId", "Password" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.LoginRes), global::GamePacket.LoginRes.Parser, new[]{ "Success", "ErrorMsg", "UserId", "AuthToken", "GatewayIp", "GatewayPort" }, null, null, null, null)

@@ -197,32 +197,27 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_GamePacket_2fstage_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\035GamePacket/stage_packet.proto\022\nGamePac"
-    "ket\032\026Common/packet_id.proto\"c\n\014StageMove"
-    "Req\022\035\n\025target_stage_data_key\030\001 \001(\005\022\025\n\rpo"
-    "sition_type\030\002 \001(\005\022\035\n\025target_game_server_"
-    "id\030\003 \001(\005\"U\n\014StageMoveRes\022\023\n\013result_code\030"
-    "\001 \001(\005\022\021\n\terror_msg\030\002 \001(\t\022\035\n\025target_stage"
-    "_data_key\030\003 \001(\005\"\026\n\024StageLoadCompleteReq\""
-    "\256\001\n\024StageLoadCompleteRes\022\023\n\013result_code\030"
-    "\001 \001(\005\022\021\n\terror_msg\030\002 \001(\t\022\020\n\010stage_id\030\003 \001"
-    "(\003\022\026\n\016stage_data_key\030\004 \001(\005\022\020\n\010my_pos_x\030\005"
-    " \001(\002\022\020\n\010my_pos_y\030\006 \001(\002\022\016\n\006my_yaw\030\007 \001(\002\022\020"
-    "\n\010my_pos_z\030\010 \001(\002b\006proto3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_GamePacket_2fstage_5fpacket_2eproto_deps[1] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    "ket\"c\n\014StageMoveReq\022\035\n\025target_stage_data"
+    "_key\030\001 \001(\005\022\025\n\rposition_type\030\002 \001(\005\022\035\n\025tar"
+    "get_game_server_id\030\003 \001(\005\"U\n\014StageMoveRes"
+    "\022\023\n\013result_code\030\001 \001(\005\022\021\n\terror_msg\030\002 \001(\t"
+    "\022\035\n\025target_stage_data_key\030\003 \001(\005\"\026\n\024Stage"
+    "LoadCompleteReq\"\256\001\n\024StageLoadCompleteRes"
+    "\022\023\n\013result_code\030\001 \001(\005\022\021\n\terror_msg\030\002 \001(\t"
+    "\022\020\n\010stage_id\030\003 \001(\003\022\026\n\016stage_data_key\030\004 \001"
+    "(\005\022\020\n\010my_pos_x\030\005 \001(\002\022\020\n\010my_pos_y\030\006 \001(\002\022\016"
+    "\n\006my_yaw\030\007 \001(\002\022\020\n\010my_pos_z\030\010 \001(\002b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fstage_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fstage_5fpacket_2eproto = {
     false,
     false,
-    464,
+    440,
     descriptor_table_protodef_GamePacket_2fstage_5fpacket_2eproto,
     "GamePacket/stage_packet.proto",
     &descriptor_table_GamePacket_2fstage_5fpacket_2eproto_once,
-    descriptor_table_GamePacket_2fstage_5fpacket_2eproto_deps,
-    1,
+    nullptr,
+    0,
     4,
     schemas,
     file_default_instances,

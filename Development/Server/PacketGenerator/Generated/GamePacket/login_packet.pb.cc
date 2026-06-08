@@ -133,27 +133,22 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_GamePacket_2flogin_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\035GamePacket/login_packet.proto\022\nGamePac"
-    "ket\032\026Common/packet_id.proto\".\n\010LoginReq\022"
-    "\020\n\010login_id\030\001 \001(\t\022\020\n\010password\030\002 \001(\t\"}\n\010L"
-    "oginRes\022\017\n\007success\030\001 \001(\010\022\021\n\terror_msg\030\002 "
-    "\001(\t\022\017\n\007user_id\030\003 \001(\003\022\022\n\nauth_token\030\004 \001(\004"
-    "\022\022\n\ngateway_ip\030\005 \001(\t\022\024\n\014gateway_port\030\006 \001"
-    "(\005b\006proto3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_GamePacket_2flogin_5fpacket_2eproto_deps[1] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    "ket\".\n\010LoginReq\022\020\n\010login_id\030\001 \001(\t\022\020\n\010pas"
+    "sword\030\002 \001(\t\"}\n\010LoginRes\022\017\n\007success\030\001 \001(\010"
+    "\022\021\n\terror_msg\030\002 \001(\t\022\017\n\007user_id\030\003 \001(\003\022\022\n\n"
+    "auth_token\030\004 \001(\004\022\022\n\ngateway_ip\030\005 \001(\t\022\024\n\014"
+    "gateway_port\030\006 \001(\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2flogin_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2flogin_5fpacket_2eproto = {
     false,
     false,
-    250,
+    226,
     descriptor_table_protodef_GamePacket_2flogin_5fpacket_2eproto,
     "GamePacket/login_packet.proto",
     &descriptor_table_GamePacket_2flogin_5fpacket_2eproto_once,
-    descriptor_table_GamePacket_2flogin_5fpacket_2eproto_deps,
-    1,
+    nullptr,
+    0,
     2,
     schemas,
     file_default_instances,

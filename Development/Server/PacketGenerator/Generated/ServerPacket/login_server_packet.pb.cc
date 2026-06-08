@@ -113,26 +113,21 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_ServerPacket_2flogin_5fserver_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n&ServerPacket/login_server_packet.proto"
-    "\022\014ServerPacket\032\026Common/packet_id.proto\"P"
-    "\n\021LoginAuthTokenNtf\022\017\n\007user_id\030\001 \001(\003\022\022\n\n"
-    "auth_token\030\002 \001(\004\022\026\n\016expire_time_ms\030\003 \001(\003"
-    "\"$\n\021LoginDuplicateNtf\022\017\n\007user_id\030\001 \001(\003b\006"
-    "proto3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto_deps[1] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    "\022\014ServerPacket\"P\n\021LoginAuthTokenNtf\022\017\n\007u"
+    "ser_id\030\001 \001(\003\022\022\n\nauth_token\030\002 \001(\004\022\026\n\016expi"
+    "re_time_ms\030\003 \001(\003\"$\n\021LoginDuplicateNtf\022\017\n"
+    "\007user_id\030\001 \001(\003b\006proto3"
 };
 static ::absl::once_flag descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto = {
     false,
     false,
-    206,
+    182,
     descriptor_table_protodef_ServerPacket_2flogin_5fserver_5fpacket_2eproto,
     "ServerPacket/login_server_packet.proto",
     &descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto_once,
-    descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto_deps,
-    1,
+    nullptr,
+    0,
     2,
     schemas,
     file_default_instances,

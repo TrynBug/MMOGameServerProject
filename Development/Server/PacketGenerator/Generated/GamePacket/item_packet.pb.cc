@@ -115,27 +115,25 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_GamePacket_2fitem_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\034GamePacket/item_packet.proto\022\nGamePack"
-    "et\032\026Common/packet_id.proto\032\031DataStructur"
-    "es/item.proto\"\035\n\nItemUseReq\022\017\n\007item_id\030\001"
-    " \001(\003\"R\n\nItemUseRes\022\017\n\007success\030\001 \001(\010\022\017\n\007m"
-    "essage\030\002 \001(\t\022\"\n\004item\030\003 \001(\0132\024.DataStructu"
-    "res.Itemb\006proto3"
+    "et\032\031DataStructures/item.proto\"\035\n\nItemUse"
+    "Req\022\017\n\007item_id\030\001 \001(\003\"R\n\nItemUseRes\022\017\n\007su"
+    "ccess\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\022\"\n\004item\030\003 \001"
+    "(\0132\024.DataStructures.Itemb\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_GamePacket_2fitem_5fpacket_2eproto_deps[2] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    descriptor_table_GamePacket_2fitem_5fpacket_2eproto_deps[1] = {
         &::descriptor_table_DataStructures_2fitem_2eproto,
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fitem_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fitem_5fpacket_2eproto = {
     false,
     false,
-    216,
+    192,
     descriptor_table_protodef_GamePacket_2fitem_5fpacket_2eproto,
     "GamePacket/item_packet.proto",
     &descriptor_table_GamePacket_2fitem_5fpacket_2eproto_once,
     descriptor_table_GamePacket_2fitem_5fpacket_2eproto_deps,
-    2,
+    1,
     2,
     schemas,
     file_default_instances,

@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package GamePacket;
 
-import "Common/packet_id.proto";
-
 // ──────────────────────────────────────────────
 // Stage 이동
 // ──────────────────────────────────────────────

@@ -24,19 +24,18 @@ namespace GamePacket {
     static StagePacketReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Ch1HYW1lUGFja2V0L3N0YWdlX3BhY2tldC5wcm90bxIKR2FtZVBhY2tldBoW",
-            "Q29tbW9uL3BhY2tldF9pZC5wcm90byJjCgxTdGFnZU1vdmVSZXESHQoVdGFy",
-            "Z2V0X3N0YWdlX2RhdGFfa2V5GAEgASgFEhUKDXBvc2l0aW9uX3R5cGUYAiAB",
-            "KAUSHQoVdGFyZ2V0X2dhbWVfc2VydmVyX2lkGAMgASgFIlUKDFN0YWdlTW92",
-            "ZVJlcxITCgtyZXN1bHRfY29kZRgBIAEoBRIRCgllcnJvcl9tc2cYAiABKAkS",
-            "HQoVdGFyZ2V0X3N0YWdlX2RhdGFfa2V5GAMgASgFIhYKFFN0YWdlTG9hZENv",
-            "bXBsZXRlUmVxIq4BChRTdGFnZUxvYWRDb21wbGV0ZVJlcxITCgtyZXN1bHRf",
-            "Y29kZRgBIAEoBRIRCgllcnJvcl9tc2cYAiABKAkSEAoIc3RhZ2VfaWQYAyAB",
-            "KAMSFgoOc3RhZ2VfZGF0YV9rZXkYBCABKAUSEAoIbXlfcG9zX3gYBSABKAIS",
-            "EAoIbXlfcG9zX3kYBiABKAISDgoGbXlfeWF3GAcgASgCEhAKCG15X3Bvc196",
-            "GAggASgCYgZwcm90bzM="));
+            "Ch1HYW1lUGFja2V0L3N0YWdlX3BhY2tldC5wcm90bxIKR2FtZVBhY2tldCJj",
+            "CgxTdGFnZU1vdmVSZXESHQoVdGFyZ2V0X3N0YWdlX2RhdGFfa2V5GAEgASgF",
+            "EhUKDXBvc2l0aW9uX3R5cGUYAiABKAUSHQoVdGFyZ2V0X2dhbWVfc2VydmVy",
+            "X2lkGAMgASgFIlUKDFN0YWdlTW92ZVJlcxITCgtyZXN1bHRfY29kZRgBIAEo",
+            "BRIRCgllcnJvcl9tc2cYAiABKAkSHQoVdGFyZ2V0X3N0YWdlX2RhdGFfa2V5",
+            "GAMgASgFIhYKFFN0YWdlTG9hZENvbXBsZXRlUmVxIq4BChRTdGFnZUxvYWRD",
+            "b21wbGV0ZVJlcxITCgtyZXN1bHRfY29kZRgBIAEoBRIRCgllcnJvcl9tc2cY",
+            "AiABKAkSEAoIc3RhZ2VfaWQYAyABKAMSFgoOc3RhZ2VfZGF0YV9rZXkYBCAB",
+            "KAUSEAoIbXlfcG9zX3gYBSABKAISEAoIbXlfcG9zX3kYBiABKAISDgoGbXlf",
+            "eWF3GAcgASgCEhAKCG15X3Bvc196GAggASgCYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, },
+          new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageMoveReq), global::GamePacket.StageMoveReq.Parser, new[]{ "TargetStageDataKey", "PositionType", "TargetGameServerId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageMoveRes), global::GamePacket.StageMoveRes.Parser, new[]{ "ResultCode", "ErrorMsg", "TargetStageDataKey" }, null, null, null, null),

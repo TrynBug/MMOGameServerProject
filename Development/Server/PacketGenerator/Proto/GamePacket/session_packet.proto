@@ -2,9 +2,6 @@ syntax = "proto3";
 
 package GamePacket;
 
-import "Common/packet_id.proto";
-import "DataStructures/character.proto";
-
 // ──────────────────────────────────────────────
 // 게임 접속 / 퇴장 패킷 (클라이언트 <-> 게이트웨이/게임서버)
 // ──────────────────────────────────────────────

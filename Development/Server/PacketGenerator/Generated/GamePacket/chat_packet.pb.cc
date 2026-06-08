@@ -119,25 +119,20 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_GamePacket_2fchat_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\034GamePacket/chat_packet.proto\022\nGamePack"
-    "et\032\026Common/packet_id.proto\"\036\n\013ChatSendRe"
-    "q\022\017\n\007message\030\001 \001(\t\"K\n\013ChatRecvNtf\022\026\n\016sen"
-    "der_user_id\030\001 \001(\003\022\023\n\013sender_name\030\002 \001(\t\022\017"
-    "\n\007message\030\003 \001(\tb\006proto3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_GamePacket_2fchat_5fpacket_2eproto_deps[1] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    "et\"\036\n\013ChatSendReq\022\017\n\007message\030\001 \001(\t\"K\n\013Ch"
+    "atRecvNtf\022\026\n\016sender_user_id\030\001 \001(\003\022\023\n\013sen"
+    "der_name\030\002 \001(\t\022\017\n\007message\030\003 \001(\tb\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fchat_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fchat_5fpacket_2eproto = {
     false,
     false,
-    183,
+    159,
     descriptor_table_protodef_GamePacket_2fchat_5fpacket_2eproto,
     "GamePacket/chat_packet.proto",
     &descriptor_table_GamePacket_2fchat_5fpacket_2eproto_once,
-    descriptor_table_GamePacket_2fchat_5fpacket_2eproto_deps,
-    1,
+    nullptr,
+    0,
     2,
     schemas,
     file_default_instances,

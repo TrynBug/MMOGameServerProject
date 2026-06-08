@@ -284,41 +284,37 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_GamePacket_2fskill_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\035GamePacket/skill_packet.proto\022\nGamePac"
-    "ket\032\026Common/packet_id.proto\"\311\001\n\014SkillCas"
-    "tReq\022\021\n\tskill_key\030\001 \001(\005\022\020\n\010origin_x\030\002 \001("
-    "\002\022\020\n\010origin_y\030\003 \001(\002\022\020\n\010origin_z\030\004 \001(\002\022\r\n"
-    "\005dir_x\030\005 \001(\002\022\r\n\005dir_z\030\006 \001(\002\022\014\n\004seed\030\007 \001("
-    "\r\022\030\n\020target_object_id\030\010 \001(\003\022\024\n\014target_po"
-    "s_x\030\t \001(\002\022\024\n\014target_pos_z\030\n \001(\002\"\257\001\n\014Skil"
-    "lHitItem\022\021\n\teffect_id\030\001 \001(\003\022\030\n\020projectil"
-    "e_index\030\002 \001(\005\022\030\n\020target_object_id\030\003 \001(\003\022"
-    "\035\n\025exploded_at_max_range\030\004 \001(\010\022\033\n\023explod"
-    "ed_on_terrain\030\005 \001(\010\022\r\n\005hit_x\030\006 \001(\002\022\r\n\005hi"
-    "t_z\030\007 \001(\002\"\?\n\025SkillProjectileHitReq\022&\n\004hi"
-    "ts\030\001 \003(\0132\030.GamePacket.SkillHitItem\"\307\001\n\014S"
-    "killCastNtf\022\030\n\020caster_object_id\030\001 \001(\003\022\021\n"
-    "\tskill_key\030\002 \001(\005\022\021\n\teffect_id\030\003 \001(\003\022\020\n\010o"
-    "rigin_x\030\004 \001(\002\022\020\n\010origin_y\030\005 \001(\002\022\020\n\010origi"
-    "n_z\030\006 \001(\002\022\r\n\005dir_x\030\007 \001(\002\022\r\n\005dir_z\030\010 \001(\002\022"
-    "\014\n\004seed\030\t \001(\r\022\025\n\rmove_distance\030\n \001(\002\"f\n\016"
-    "SkillDamageNtf\022\030\n\020target_object_id\030\001 \001(\003"
-    "\022\016\n\006damage\030\002 \001(\002\022\024\n\014is_duplicate\030\003 \001(\010\022\024"
-    "\n\014remaining_hp\030\004 \001(\002b\006proto3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_GamePacket_2fskill_5fpacket_2eproto_deps[1] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    "ket\"\311\001\n\014SkillCastReq\022\021\n\tskill_key\030\001 \001(\005\022"
+    "\020\n\010origin_x\030\002 \001(\002\022\020\n\010origin_y\030\003 \001(\002\022\020\n\010o"
+    "rigin_z\030\004 \001(\002\022\r\n\005dir_x\030\005 \001(\002\022\r\n\005dir_z\030\006 "
+    "\001(\002\022\014\n\004seed\030\007 \001(\r\022\030\n\020target_object_id\030\010 "
+    "\001(\003\022\024\n\014target_pos_x\030\t \001(\002\022\024\n\014target_pos_"
+    "z\030\n \001(\002\"\257\001\n\014SkillHitItem\022\021\n\teffect_id\030\001 "
+    "\001(\003\022\030\n\020projectile_index\030\002 \001(\005\022\030\n\020target_"
+    "object_id\030\003 \001(\003\022\035\n\025exploded_at_max_range"
+    "\030\004 \001(\010\022\033\n\023exploded_on_terrain\030\005 \001(\010\022\r\n\005h"
+    "it_x\030\006 \001(\002\022\r\n\005hit_z\030\007 \001(\002\"\?\n\025SkillProjec"
+    "tileHitReq\022&\n\004hits\030\001 \003(\0132\030.GamePacket.Sk"
+    "illHitItem\"\307\001\n\014SkillCastNtf\022\030\n\020caster_ob"
+    "ject_id\030\001 \001(\003\022\021\n\tskill_key\030\002 \001(\005\022\021\n\teffe"
+    "ct_id\030\003 \001(\003\022\020\n\010origin_x\030\004 \001(\002\022\020\n\010origin_"
+    "y\030\005 \001(\002\022\020\n\010origin_z\030\006 \001(\002\022\r\n\005dir_x\030\007 \001(\002"
+    "\022\r\n\005dir_z\030\010 \001(\002\022\014\n\004seed\030\t \001(\r\022\025\n\rmove_di"
+    "stance\030\n \001(\002\"f\n\016SkillDamageNtf\022\030\n\020target"
+    "_object_id\030\001 \001(\003\022\016\n\006damage\030\002 \001(\002\022\024\n\014is_d"
+    "uplicate\030\003 \001(\010\022\024\n\014remaining_hp\030\004 \001(\002b\006pr"
+    "oto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fskill_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fskill_5fpacket_2eproto = {
     false,
     false,
-    828,
+    804,
     descriptor_table_protodef_GamePacket_2fskill_5fpacket_2eproto,
     "GamePacket/skill_packet.proto",
     &descriptor_table_GamePacket_2fskill_5fpacket_2eproto_once,
-    descriptor_table_GamePacket_2fskill_5fpacket_2eproto_deps,
-    1,
+    nullptr,
+    0,
     5,
     schemas,
     file_default_instances,

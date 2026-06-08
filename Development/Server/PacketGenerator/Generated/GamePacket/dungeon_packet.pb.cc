@@ -350,36 +350,31 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_GamePacket_2fdungeon_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\037GamePacket/dungeon_packet.proto\022\nGameP"
-    "acket\032\026Common/packet_id.proto\"\026\n\024PublicD"
-    "ungeonListReq\"\177\n\021PublicDungeonInfo\022\022\n\ndu"
-    "ngeon_id\030\001 \001(\003\022\023\n\013template_id\030\002 \001(\005\022\025\n\rc"
-    "urrent_users\030\003 \001(\005\022\025\n\rstart_time_ms\030\004 \001("
-    "\003\022\023\n\013end_time_ms\030\005 \001(\003\"G\n\024PublicDungeonL"
-    "istRes\022/\n\010dungeons\030\001 \003(\0132\035.GamePacket.Pu"
-    "blicDungeonInfo\"+\n\025PublicDungeonEnterReq"
-    "\022\022\n\ndungeon_id\030\001 \001(\003\"3\n\017DungeonEnterRes\022"
-    "\017\n\007success\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\"+\n\024Use"
-    "rDungeonCreateReq\022\023\n\013template_id\030\001 \001(\005\"L"
-    "\n\024UserDungeonCreateRes\022\017\n\007success\030\001 \001(\010\022"
-    "\017\n\007message\030\002 \001(\t\022\022\n\ndungeon_id\030\003 \001(\003\")\n\023"
-    "UserDungeonCloseReq\022\022\n\ndungeon_id\030\001 \001(\003\""
-    "6\n\020DungeonClosedNtf\022\022\n\ndungeon_id\030\001 \001(\003\022"
-    "\016\n\006reason\030\002 \001(\tb\006proto3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_GamePacket_2fdungeon_5fpacket_2eproto_deps[1] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    "acket\"\026\n\024PublicDungeonListReq\"\177\n\021PublicD"
+    "ungeonInfo\022\022\n\ndungeon_id\030\001 \001(\003\022\023\n\013templa"
+    "te_id\030\002 \001(\005\022\025\n\rcurrent_users\030\003 \001(\005\022\025\n\rst"
+    "art_time_ms\030\004 \001(\003\022\023\n\013end_time_ms\030\005 \001(\003\"G"
+    "\n\024PublicDungeonListRes\022/\n\010dungeons\030\001 \003(\013"
+    "2\035.GamePacket.PublicDungeonInfo\"+\n\025Publi"
+    "cDungeonEnterReq\022\022\n\ndungeon_id\030\001 \001(\003\"3\n\017"
+    "DungeonEnterRes\022\017\n\007success\030\001 \001(\010\022\017\n\007mess"
+    "age\030\002 \001(\t\"+\n\024UserDungeonCreateReq\022\023\n\013tem"
+    "plate_id\030\001 \001(\005\"L\n\024UserDungeonCreateRes\022\017"
+    "\n\007success\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\022\022\n\ndung"
+    "eon_id\030\003 \001(\003\")\n\023UserDungeonCloseReq\022\022\n\nd"
+    "ungeon_id\030\001 \001(\003\"6\n\020DungeonClosedNtf\022\022\n\nd"
+    "ungeon_id\030\001 \001(\003\022\016\n\006reason\030\002 \001(\tb\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fdungeon_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fdungeon_5fpacket_2eproto = {
     false,
     false,
-    623,
+    599,
     descriptor_table_protodef_GamePacket_2fdungeon_5fpacket_2eproto,
     "GamePacket/dungeon_packet.proto",
     &descriptor_table_GamePacket_2fdungeon_5fpacket_2eproto_once,
-    descriptor_table_GamePacket_2fdungeon_5fpacket_2eproto_deps,
-    1,
+    nullptr,
+    0,
     9,
     schemas,
     file_default_instances,

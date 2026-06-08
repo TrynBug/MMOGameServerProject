@@ -287,42 +287,38 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_GamePacket_2fobject_5fvisibility_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n)GamePacket/object_visibility_packet.pr"
-    "oto\022\nGamePacket\032\026Common/packet_id.proto\""
-    "Q\n\020BuffSnapshotInfo\022\020\n\010buff_key\030\001 \001(\005\022\023\n"
-    "\013stack_count\030\002 \001(\005\022\026\n\016remain_time_ms\030\003 \001"
-    "(\005\"\212\002\n\022CharacterSpawnInfo\022\021\n\tobject_id\030\001"
-    " \001(\003\022\025\n\rowner_user_id\030\002 \001(\003\022\014\n\004name\030\003 \001("
-    "\t\022\016\n\006job_id\030\004 \001(\005\022\r\n\005level\030\005 \001(\005\022\n\n\002hp\030\006"
-    " \001(\001\022\016\n\006max_hp\030\007 \001(\001\022\n\n\002mp\030\010 \001(\001\022\016\n\006max_"
-    "mp\030\t \001(\001\022\r\n\005pos_x\030\n \001(\002\022\r\n\005pos_y\030\013 \001(\002\022\013"
-    "\n\003yaw\030\014 \001(\002\022\r\n\005pos_z\030\r \001(\002\022+\n\005buffs\030\016 \003("
-    "\0132\034.GamePacket.BuffSnapshotInfo\"\322\001\n\020Mons"
-    "terSpawnInfo\022\021\n\tobject_id\030\001 \001(\003\022\023\n\013monst"
-    "er_key\030\002 \001(\005\022\r\n\005pos_x\030\003 \001(\002\022\r\n\005pos_y\030\004 \001"
-    "(\002\022\013\n\003yaw\030\005 \001(\002\022\r\n\005pos_z\030\006 \001(\002\022+\n\005buffs\030"
-    "\007 \003(\0132\034.GamePacket.BuffSnapshotInfo\022\017\n\007i"
-    "s_dead\030\010 \001(\010\022\016\n\006cur_hp\030\t \001(\001\022\016\n\006max_hp\030\n"
-    " \001(\001\"\232\001\n\023ObjectVisibilityNtf\0228\n\020characte"
-    "r_spawns\030\001 \003(\0132\036.GamePacket.CharacterSpa"
-    "wnInfo\0224\n\016monster_spawns\030\002 \003(\0132\034.GamePac"
-    "ket.MonsterSpawnInfo\022\023\n\013despawn_ids\030\n \003("
-    "\003\"=\n\016ObjectDeathNtf\022\021\n\tobject_id\030\001 \001(\003\022\030"
-    "\n\020killer_object_id\030\002 \001(\003b\006proto3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto_deps[1] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    "oto\022\nGamePacket\"Q\n\020BuffSnapshotInfo\022\020\n\010b"
+    "uff_key\030\001 \001(\005\022\023\n\013stack_count\030\002 \001(\005\022\026\n\016re"
+    "main_time_ms\030\003 \001(\005\"\212\002\n\022CharacterSpawnInf"
+    "o\022\021\n\tobject_id\030\001 \001(\003\022\025\n\rowner_user_id\030\002 "
+    "\001(\003\022\014\n\004name\030\003 \001(\t\022\016\n\006job_id\030\004 \001(\005\022\r\n\005lev"
+    "el\030\005 \001(\005\022\n\n\002hp\030\006 \001(\001\022\016\n\006max_hp\030\007 \001(\001\022\n\n\002"
+    "mp\030\010 \001(\001\022\016\n\006max_mp\030\t \001(\001\022\r\n\005pos_x\030\n \001(\002\022"
+    "\r\n\005pos_y\030\013 \001(\002\022\013\n\003yaw\030\014 \001(\002\022\r\n\005pos_z\030\r \001"
+    "(\002\022+\n\005buffs\030\016 \003(\0132\034.GamePacket.BuffSnaps"
+    "hotInfo\"\322\001\n\020MonsterSpawnInfo\022\021\n\tobject_i"
+    "d\030\001 \001(\003\022\023\n\013monster_key\030\002 \001(\005\022\r\n\005pos_x\030\003 "
+    "\001(\002\022\r\n\005pos_y\030\004 \001(\002\022\013\n\003yaw\030\005 \001(\002\022\r\n\005pos_z"
+    "\030\006 \001(\002\022+\n\005buffs\030\007 \003(\0132\034.GamePacket.BuffS"
+    "napshotInfo\022\017\n\007is_dead\030\010 \001(\010\022\016\n\006cur_hp\030\t"
+    " \001(\001\022\016\n\006max_hp\030\n \001(\001\"\232\001\n\023ObjectVisibilit"
+    "yNtf\0228\n\020character_spawns\030\001 \003(\0132\036.GamePac"
+    "ket.CharacterSpawnInfo\0224\n\016monster_spawns"
+    "\030\002 \003(\0132\034.GamePacket.MonsterSpawnInfo\022\023\n\013"
+    "despawn_ids\030\n \003(\003\"=\n\016ObjectDeathNtf\022\021\n\to"
+    "bject_id\030\001 \001(\003\022\030\n\020killer_object_id\030\002 \001(\003"
+    "b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto = {
     false,
     false,
-    872,
+    848,
     descriptor_table_protodef_GamePacket_2fobject_5fvisibility_5fpacket_2eproto,
     "GamePacket/object_visibility_packet.proto",
     &descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto_once,
-    descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto_deps,
-    1,
+    nullptr,
+    0,
     5,
     schemas,
     file_default_instances,

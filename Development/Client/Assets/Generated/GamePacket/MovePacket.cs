@@ -24,19 +24,19 @@ namespace GamePacket {
     static MovePacketReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChxHYW1lUGFja2V0L21vdmVfcGFja2V0LnByb3RvEgpHYW1lUGFja2V0GhZD",
-            "b21tb24vcGFja2V0X2lkLnByb3RvImoKC01vdmVEZXN0UmVxEg4KBmRlc3Rf",
-            "eBgBIAEoAhIOCgZkZXN0X3kYAiABKAISDgoGZGVzdF96GAMgASgCEg0KBXBv",
-            "c194GAQgASgCEg0KBXBvc195GAUgASgCEg0KBXBvc196GAYgASgCIkcKC01v",
-            "dmVTdG9wUmVxEg0KBXBvc194GAEgASgCEg0KBXBvc195GAIgASgCEgsKA3lh",
-            "dxgDIAEoAhINCgVwb3NfehgEIAEoAiKZAQoHTW92ZU50ZhIRCglvYmplY3Rf",
-            "aWQYASABKAMSDQoFcG9zX3gYAiABKAISDQoFcG9zX3kYAyABKAISCwoDeWF3",
-            "GAQgASgCEg4KBmRlc3RfeBgFIAEoAhIOCgZkZXN0X3kYBiABKAISEQoJaXNf",
-            "bW92aW5nGAcgASgIEg0KBXBvc196GAggASgCEg4KBmRlc3RfehgJIAEoAiJN",
-            "ChFNb3ZlUG9zQ29ycmVjdE50ZhINCgVwb3NfeBgBIAEoAhINCgVwb3NfeRgC",
-            "IAEoAhINCgVwb3NfehgDIAEoAhILCgN5YXcYBCABKAJiBnByb3RvMw=="));
+            "ChxHYW1lUGFja2V0L21vdmVfcGFja2V0LnByb3RvEgpHYW1lUGFja2V0ImoK",
+            "C01vdmVEZXN0UmVxEg4KBmRlc3RfeBgBIAEoAhIOCgZkZXN0X3kYAiABKAIS",
+            "DgoGZGVzdF96GAMgASgCEg0KBXBvc194GAQgASgCEg0KBXBvc195GAUgASgC",
+            "Eg0KBXBvc196GAYgASgCIkcKC01vdmVTdG9wUmVxEg0KBXBvc194GAEgASgC",
+            "Eg0KBXBvc195GAIgASgCEgsKA3lhdxgDIAEoAhINCgVwb3NfehgEIAEoAiKZ",
+            "AQoHTW92ZU50ZhIRCglvYmplY3RfaWQYASABKAMSDQoFcG9zX3gYAiABKAIS",
+            "DQoFcG9zX3kYAyABKAISCwoDeWF3GAQgASgCEg4KBmRlc3RfeBgFIAEoAhIO",
+            "CgZkZXN0X3kYBiABKAISEQoJaXNfbW92aW5nGAcgASgIEg0KBXBvc196GAgg",
+            "ASgCEg4KBmRlc3RfehgJIAEoAiJNChFNb3ZlUG9zQ29ycmVjdE50ZhINCgVw",
+            "b3NfeBgBIAEoAhINCgVwb3NfeRgCIAEoAhINCgVwb3NfehgDIAEoAhILCgN5",
+            "YXcYBCABKAJiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Common.PacketIdReflection.Descriptor, },
+          new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.MoveDestReq), global::GamePacket.MoveDestReq.Parser, new[]{ "DestX", "DestY", "DestZ", "PosX", "PosY", "PosZ" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.MoveStopReq), global::GamePacket.MoveStopReq.Parser, new[]{ "PosX", "PosY", "Yaw", "PosZ" }, null, null, null, null),

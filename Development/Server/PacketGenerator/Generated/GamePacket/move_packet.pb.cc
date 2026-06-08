@@ -228,33 +228,28 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_GamePacket_2fmove_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\034GamePacket/move_packet.proto\022\nGamePack"
-    "et\032\026Common/packet_id.proto\"j\n\013MoveDestRe"
-    "q\022\016\n\006dest_x\030\001 \001(\002\022\016\n\006dest_y\030\002 \001(\002\022\016\n\006des"
-    "t_z\030\003 \001(\002\022\r\n\005pos_x\030\004 \001(\002\022\r\n\005pos_y\030\005 \001(\002\022"
-    "\r\n\005pos_z\030\006 \001(\002\"G\n\013MoveStopReq\022\r\n\005pos_x\030\001"
-    " \001(\002\022\r\n\005pos_y\030\002 \001(\002\022\013\n\003yaw\030\003 \001(\002\022\r\n\005pos_"
-    "z\030\004 \001(\002\"\231\001\n\007MoveNtf\022\021\n\tobject_id\030\001 \001(\003\022\r"
-    "\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y\030\003 \001(\002\022\013\n\003yaw\030\004 \001("
-    "\002\022\016\n\006dest_x\030\005 \001(\002\022\016\n\006dest_y\030\006 \001(\002\022\021\n\tis_"
-    "moving\030\007 \001(\010\022\r\n\005pos_z\030\010 \001(\002\022\016\n\006dest_z\030\t "
-    "\001(\002\"M\n\021MovePosCorrectNtf\022\r\n\005pos_x\030\001 \001(\002\022"
-    "\r\n\005pos_y\030\002 \001(\002\022\r\n\005pos_z\030\003 \001(\002\022\013\n\003yaw\030\004 \001"
-    "(\002b\006proto3"
-};
-static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_GamePacket_2fmove_5fpacket_2eproto_deps[1] = {
-        &::descriptor_table_Common_2fpacket_5fid_2eproto,
+    "et\"j\n\013MoveDestReq\022\016\n\006dest_x\030\001 \001(\002\022\016\n\006des"
+    "t_y\030\002 \001(\002\022\016\n\006dest_z\030\003 \001(\002\022\r\n\005pos_x\030\004 \001(\002"
+    "\022\r\n\005pos_y\030\005 \001(\002\022\r\n\005pos_z\030\006 \001(\002\"G\n\013MoveSt"
+    "opReq\022\r\n\005pos_x\030\001 \001(\002\022\r\n\005pos_y\030\002 \001(\002\022\013\n\003y"
+    "aw\030\003 \001(\002\022\r\n\005pos_z\030\004 \001(\002\"\231\001\n\007MoveNtf\022\021\n\to"
+    "bject_id\030\001 \001(\003\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y\030\003"
+    " \001(\002\022\013\n\003yaw\030\004 \001(\002\022\016\n\006dest_x\030\005 \001(\002\022\016\n\006des"
+    "t_y\030\006 \001(\002\022\021\n\tis_moving\030\007 \001(\010\022\r\n\005pos_z\030\010 "
+    "\001(\002\022\016\n\006dest_z\030\t \001(\002\"M\n\021MovePosCorrectNtf"
+    "\022\r\n\005pos_x\030\001 \001(\002\022\r\n\005pos_y\030\002 \001(\002\022\r\n\005pos_z\030"
+    "\003 \001(\002\022\013\n\003yaw\030\004 \001(\002b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fmove_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fmove_5fpacket_2eproto = {
     false,
     false,
-    490,
+    466,
     descriptor_table_protodef_GamePacket_2fmove_5fpacket_2eproto,
     "GamePacket/move_packet.proto",
     &descriptor_table_GamePacket_2fmove_5fpacket_2eproto_once,
-    descriptor_table_GamePacket_2fmove_5fpacket_2eproto_deps,
-    1,
+    nullptr,
+    0,
     4,
     schemas,
     file_default_instances,
