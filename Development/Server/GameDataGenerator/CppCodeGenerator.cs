@@ -185,8 +185,8 @@ namespace GameDataGenerator
             sb.AppendLine($"    virtual ~GameDataTableBase_{tableName}() = default;");
             sb.AppendLine();
             sb.AppendLine("public:");
-            sb.AppendLine($"    static const GameData_{tableName}* FindData(int64_t key);");
-            sb.AppendLine($"    static const std::map<int64_t, const GameData_{tableName}*>& GetDataMap() {{ return sm_dataMap; }}");
+            sb.AppendLine($"    static const GameData_{tableName}* FindData(int32_t key);");
+            sb.AppendLine($"    static const std::map<int32_t, const GameData_{tableName}*>& GetDataMap() {{ return sm_dataMap; }}");
             sb.AppendLine();
             sb.AppendLine("public:");
             sb.AppendLine($"    const char* GetDataName() override {{ return \"{tableName}\"; }}");
@@ -195,7 +195,7 @@ namespace GameDataGenerator
             sb.AppendLine("    virtual bool makeGameData(const std::string& line) override;");
             sb.AppendLine();
             sb.AppendLine("protected:");
-            sb.AppendLine($"    inline static std::map<int64_t, const GameData_{tableName}*> sm_dataMap;");
+            sb.AppendLine($"    inline static std::map<int32_t, const GameData_{tableName}*> sm_dataMap;");
             sb.AppendLine("};");
 
             return sb.ToString();
@@ -218,7 +218,7 @@ namespace GameDataGenerator
             sb.AppendLine($"#include \"GameDataBase_{tableName}.h\"");
             sb.AppendLine($"#include \"GameData_{tableName}.h\"");
             sb.AppendLine();
-            sb.AppendLine($"const GameData_{tableName}* GameDataTableBase_{tableName}::FindData(int64_t key)");
+            sb.AppendLine($"const GameData_{tableName}* GameDataTableBase_{tableName}::FindData(int32_t key)");
             sb.AppendLine("{");
             sb.AppendLine("    auto iter = sm_dataMap.find(key);");
             sb.AppendLine("    if (iter == sm_dataMap.cend())");
