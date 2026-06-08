@@ -34,10 +34,12 @@ namespace GameDataGenerator
             for (int row = 2; row <= lastRow; row++)
             {
                 string enumName = sheet.Cell(row, 1).GetString().Trim();
-                string fileGroup = sheet.Cell(row, 2).GetString().Trim();
-                string intValueStr = sheet.Cell(row, 3).GetString().Trim();
-                string valueName = sheet.Cell(row, 4).GetString().Trim();
-                string koreanName = sheet.Cell(row, 5).GetString().Trim();
+                string description = sheet.Cell(row, 2).GetString().Trim();
+                string fileGroup = sheet.Cell(row, 3).GetString().Trim();
+                string intValueStr = sheet.Cell(row, 4).GetString().Trim();
+                string valueName = sheet.Cell(row, 5).GetString().Trim();
+                string koreanName = sheet.Cell(row, 6).GetString().Trim();
+                string valueDesc = sheet.Cell(row, 7).GetString().Trim();
 
                 if (string.IsNullOrEmpty(enumName) || string.IsNullOrEmpty(valueName))
                     continue;
@@ -47,7 +49,8 @@ namespace GameDataGenerator
 
                 if (!enumMap.TryGetValue(enumName, out var enumInfo))
                 {
-                    enumInfo = new EnumInfo { EnumName = enumName, FileGroup = fileGroup };
+                    enumInfo = new EnumInfo { EnumName = enumName, Description = description, FileGroup = fileGroup };
+                    enumInfo.Values.Add(new EnumValueInfo { IntValue = 0, ValueName = "None" });
                     enumMap[enumName] = enumInfo;
                     result.Add(enumInfo);
                 }
@@ -56,7 +59,8 @@ namespace GameDataGenerator
                 {
                     IntValue = intValue,
                     ValueName = valueName,
-                    KoreanName = koreanName
+                    KoreanName = koreanName,
+                    Description = valueDesc
                 });
             }
 

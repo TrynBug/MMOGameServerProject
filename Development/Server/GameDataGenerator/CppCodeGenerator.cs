@@ -44,11 +44,17 @@ namespace GameDataGenerator
 
             foreach (var enumInfo in enums)
             {
+                if (!string.IsNullOrEmpty(enumInfo.Description))
+                    sb.AppendLine($"/* {enumInfo.Description} */");
                 sb.AppendLine($"enum class E{enumInfo.EnumName} : int");
                 sb.AppendLine("{");
                 foreach (var v in enumInfo.Values)
                 {
-                    string comment = string.IsNullOrEmpty(v.KoreanName) ? "" : $"  // {v.KoreanName}";
+                    string comment = "";
+                    if (!string.IsNullOrEmpty(v.KoreanName))
+                        comment = $"  // {v.KoreanName}";
+                    if (!string.IsNullOrEmpty(v.Description))
+                        comment += (comment.Length == 0 ? "  // " : "    // ") + $"{v.Description}";
                     sb.AppendLine($"    {v.ValueName,-20} = {v.IntValue},{comment}");
                 }
                 sb.AppendLine($"    {"Max",-20}");
