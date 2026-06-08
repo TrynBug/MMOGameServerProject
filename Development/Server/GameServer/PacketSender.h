@@ -46,9 +46,11 @@ public:
     void SendToUser(int64 userId, int32 packetType, const TMessage& message);
 
     // ── 패킷별 편의 함수 ───────────────────────────────────────
-    // Stage 입장 완료 알림 전송 (StageEnterNtf).
-    // 서버가 결정한 spawn 위치/회전만 포함. 다른 주변 오브젝트 정보는 ObjectVisibilityNtf로 별도 전송.
-    void SendStageEnterNtf(int64 userId, int64 stageId, int64 stageDataKey, float myPosX, float myPosY, float myPosZ, float myYaw);
+    // Stage 로딩 완료 결과 + 캐릭터 스폰 확정 전송 (StageLoadCompleteRes).
+    // 클라의 StageLoadCompleteReq에 대한 응답. 서버가 결정한 spawn 위치/회전을 포함한다.
+    // 다른 주변 오브젝트 정보는 ObjectVisibilityNtf로 별도 전송.
+    void SendStageLoadCompleteRes(int64 userId, EResultCode resultCode, int64 stageId, int64 stageDataKey,
+                                  float myPosX, float myPosY, float myPosZ, float myYaw);
 
     // Stage 이동 요청 결과 전송 (StageMoveRes). 성공 = 클라는 로딩 시작.
     void SendStageMoveRes(int64 userId, EResultCode resultCode, const std::string& errorMsg, int64 targetStageDataKey);

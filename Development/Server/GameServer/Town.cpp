@@ -40,4 +40,4 @@ void Town::OnStart()
 }
 
 // 유저 입장/캐릭터 스폰은 Stage 베이스의 2단계 입장 흐름이 처리한다
-// (OnUserEnter → 클라 StageLoadCompleteReq → spawnPendingCharacter → StageEnterNtf).
+// (OnUserEnter → 클라 StageLoadCompleteReq → spawnPendingCharacter → StageLoadCompleteRes).

@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "PacketSender.h"
-#include "Character.h"   // SendStageEnterNtf / SendStatUpdateNtf 의 Character 멤버 접근(스탯/HP)
+#include "Character.h"   // SendStageLoadCompleteRes / SendStatUpdateNtf 의 Character 멤버 접근(스탯/HP)
 
 // ─────────────────────────────────────────────────────────────
 // PacketSender 의 패킷별 송신 구현.
@@ -8,20 +8,23 @@
 // 원래 GameServer.cpp / GameServerBuff.cpp 에 흩어져 있던 Send*** 들을 한 곳으로 모았다.
 // ─────────────────────────────────────────────────────────────
 
-void PacketSender::SendStageEnterNtf(int64 userId, int64 stageId, int64 stageDataKey, float myPosX, float myPosY, float myPosZ, float myYaw)
+void PacketSender::SendStageLoadCompleteRes(int64 userId, EResultCode resultCode, int64 stageId, int64 stageDataKey,
+                                            float myPosX, float myPosY, float myPosZ, float myYaw)
 {
-    GamePacket::StageEnterNtf ntf;
-    ntf.set_stage_id(stageId);
-    ntf.set_stage_data_key(stageDataKey);
-    ntf.set_my_pos_x(myPosX);
-    ntf.set_my_pos_y(myPosY);
-    ntf.set_my_pos_z(myPosZ);
-    ntf.set_my_yaw(myYaw);
+    GamePacket::StageLoadCompleteRes res;
+    res.set_result_code(static_cast<int32>(resultCode));
+    res.set_error_msg("");
+    res.set_stage_id(stageId);
+    res.set_stage_data_key(stageDataKey);
+    res.set_my_pos_x(myPosX);
+    res.set_my_pos_y(myPosY);
+    res.set_my_pos_z(myPosZ);
+    res.set_my_yaw(myYaw);
 
-    SendToUser(userId, Common::GAME_PACKET_ID_STAGE_ENTER_NTF, ntf);
+    SendToUser(userId, Common::GAME_PACKET_ID_STAGE_LOAD_COMPLETE_RES, res);
 
-    // 스탯/HP 는 StageEnterNtf 뒤에 보낸다.
-    // 클라는 StageEnterNtf 를 받는 시점에 LocalPlayer 를 스폰하므로(2단계 입장),
+    // 스탯/HP 는 StageLoadCompleteRes 뒤에 보낸다.
+    // 클라는 이 패킷 수신 시점에 LocalPlayer 를 활성화/배치하므로(2단계 입장),
     // 그 뒤에 도착해야 스탯 핸들러가 대상 캐릭터를 찾을 수 있다 (TCP 순서 보장).
     // 최대치(StatUpdateNtf)가 현재HP(HpMpNtf)보다 먼저 가야 클라 clamp 가 올바르다.
     UserPtr spUser;
@@ -34,7 +37,7 @@ void PacketSender::SendStageEnterNtf(int64 userId, int64 stageId, int64 stageDat
         }
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("PacketSender: StageEnterNtf sent. userId={} stageId={} stageKey={} pos=({},{},{}) yaw={}",
+    LOG_WRITE(LogLevel::Info, std::format("PacketSender: StageLoadCompleteRes sent. userId={} stageId={} stageKey={} pos=({},{},{}) yaw={}",
         userId, stageId, stageDataKey, myPosX, myPosY, myPosZ, myYaw));
 }
 

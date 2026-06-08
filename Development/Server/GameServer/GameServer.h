@@ -99,11 +99,11 @@ private:
     db::DetachedCoTask handleClientCharacterSelect(int64 userId, GamePacket::CharacterSelectReq req);
 
     // 캐릭터 선택 결과 전송 (CharacterSelectRes). 성공/실패 모두 이 함수로 송신.
-    //   - 성공: resultCode=Success, errorMsg="", characterId/stageDataKey 채움 (클라는 로딩 시작)
-    //   - 실패: resultCode=Fail,    errorMsg=사유
-    // 스폰 좌표는 이 패킷에 싣지 않는다. 로딩 완료 후 StageEnterNtf가 좌표의 단일 출처.
+    //   - 성공: resultCode=Success, errorMsg="", pCharacter(전체 데이터)/stageDataKey 채움 (클라는 데이터모델 보관 후 로딩 시작)
+    //   - 실패: resultCode=Fail,    errorMsg=사유, pCharacter=nullptr
+    // 스폰 좌표는 이 패킷에 싣지 않는다. 로딩 완료 후 StageLoadCompleteRes가 좌표의 단일 출처.
     void sendCharacterSelectRes(int64 userId, EResultCode resultCode, const std::string& errorMsg,
-                                int64 characterId, int64 stageDataKey);
+                                const DataStructures::Character* pCharacter, int64 stageDataKey);
 
 private:
     // NavMesh 데이터 관리, 길찾기 기능 제공

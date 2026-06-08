@@ -699,8 +699,13 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     }
 
     // ── 도착 위치 결정 ────────────────────────────────────
-    // positionType != None 이면 StageStartPosition 데이터 좌표 (NavMesh 스냅 보정),
-    // None 이면 캐릭터의 현재 좌표 그대로 (캐릭터 선택 입장 = DB 좌표 복귀).
+    // 기본값은 캐릭터의 현재 좌표 (positionType == None: 캐릭터 선택 입장 = DB 좌표 복귀).
+    // positionType != None 이면 StageStartPosition 데이터 좌표로 덮어쓰고 NavMesh 스냅 보정.
+    float posX = spCharacter->GetPosX();
+    float posY = spCharacter->GetPosY();
+    float posZ = spCharacter->GetPosZ();
+    float yaw  = spCharacter->GetYaw();
+
     const EStagePositionType positionType = spUser->GetPendingPositionType();
     if (positionType != EStagePositionType::None)
     {
@@ -708,19 +713,17 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
             GameDataTable_StageStartPosition::FindByStageAndType(GetStageDataKey(), positionType);
         if (pPosData)
         {
-            float x = static_cast<float>(pPosData->PosX);
-            float y = static_cast<float>(pPosData->PosY);
-            float z = static_cast<float>(pPosData->PosZ);
+            posX = static_cast<float>(pPosData->PosX);
+            posY = static_cast<float>(pPosData->PosY);
+            posZ = static_cast<float>(pPosData->PosZ);
+            yaw  = static_cast<float>(pPosData->Yaw);
 
             // NavMesh 위로 스냅 (Y 보정 + walkable 보장). 실패 시 데이터 좌표 그대로.
             float snapX = 0.f, snapY = 0.f, snapZ = 0.f;
-            if (SampleNavMeshPosition(x, y, z, 5.f, 5.f, 5.f, snapX, snapY, snapZ))
+            if (SampleNavMeshPosition(posX, posY, posZ, 5.f, 5.f, 5.f, snapX, snapY, snapZ))
             {
-                x = snapX; y = snapY; z = snapZ;
+                posX = snapX; posY = snapY; posZ = snapZ;
             }
-
-            // 위치 배치 + 이동 상태 정지 (이전 Stage의 이동 잔여 상태 제거).
-            spCharacter->StopAt(x, y, z, static_cast<float>(pPosData->Yaw));
         }
         else
         {
@@ -730,6 +733,12 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
                 m_stageId, GetStageDataKey(), static_cast<int32>(positionType)));
         }
     }
+
+    // 서브클래스가 도착 위치/회전을 보정할 수 있다 (기본 no-op).
+    OnResolveSpawnTransform(spCharacter, positionType, posX, posY, posZ, yaw);
+
+    // 위치 배치 + 이동 상태 정지 (이전 Stage의 이동 잔여 상태 제거).
+    spCharacter->StopAt(posX, posY, posZ, yaw);
 
     const int64 objectId = spCharacter->GetObjectId();
 
@@ -785,15 +794,19 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
                 }
             });
 
-        // ── StageEnterNtf 를 먼저 보낸다 (StatUpdate/HpMp 는 PacketSender 가 그 뒤에 송신) ──
-        // 2단계 입장에서 클라는 StageEnterNtf 수신 시점에 LocalPlayer 를 생성한다.
+        // ── StageLoadCompleteRes 를 먼저 보낸다 (StatUpdate/HpMp 는 PacketSender 가 그 뒤에 송신) ──
+        // 2단계 입장에서 클라는 이 패킷 수신 시점에 보관 중인 LocalPlayer 를 활성화/배치한다.
         // 그래야 뒤이어 오는 ObjectVisibilityNtf 의 자기 자신 항목을 식별해 스킵할 수 있다.
         // (순서가 반대면 클라가 자기 캐릭터를 원격 캐릭터로 잘못 스폰 → 키 충돌.)
-        pServer->GetPacketSender().SendStageEnterNtf(userId, GetStageId(), GetStageDataKey(),
+        pServer->GetPacketSender().SendStageLoadCompleteRes(userId, EResultCode::Success, GetStageId(), GetStageDataKey(),
             spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), spCharacter->GetYaw());
 
         pServer->GetPacketSender().SendObjectVisibilityNtf(userId, spawnsForMe, {}, monsterSpawnsForMe);
     }
+
+    // 스폰 완료 후 서브클래스 훅 (기본 no-op). 캐릭터가 Stage에 등록되고 통보까지 끝난 뒤 호출.
+    // 예: 입장 버프 부여, 이벤트 트리거.
+    OnCharacterSpawned(spUser, spCharacter);
 }
 
 void Stage::OnUserLeave(int64 userId)

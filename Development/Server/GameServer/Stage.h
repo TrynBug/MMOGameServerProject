@@ -321,9 +321,22 @@ protected:
     // 유저의 pendingCharacter를 이 Stage에 스폰한다 (StageLoadCompleteReq 수신 시 호출).
     // - pendingPositionType != None이면 StageStartPosition 데이터의 좌표로 배치 (NavMesh 스냅 보정),
     //   None이면 캐릭터의 현재 좌표 사용 (캐릭터 선택 입장 = DB 좌표 복귀).
-    // - 객체 컨테이너/sector 등록 + AOI visibility 전파 + StageEnterNtf 송신까지 수행.
+    // - 객체 컨테이너/sector 등록 + AOI visibility 전파 + StageLoadCompleteRes 송신까지 수행.
     // - 성공 시 유저 상태를 InStage로 전환하고 pendingCharacter를 비운다.
+    // 스폰 전/후 서브클래스 확장점은 OnResolveSpawnTransform / OnCharacterSpawned 참조.
     void spawnPendingCharacter(const UserPtr& spUser);
+
+    // ── StageLoadCompleteReq 처리(spawnPendingCharacter) 중 호출되는 서브클래스 확장 훅 ──
+    // 모두 컨텐츠 스레드에서 호출되며, 기본 구현은 no-op이다.
+
+    // 스폰 직전: 도착 위치/회전을 서브클래스가 보정할 수 있다 (StageStartPosition 기본값 위에 덮어쓰기).
+    // posX/Y/Z, yaw는 in/out 파라미터. 예: 던전이 동적으로 계산한 입구 좌표로 변경.
+    virtual void OnResolveSpawnTransform(const CharacterPtr& spCharacter, EStagePositionType positionType,
+                                         float& posX, float& posY, float& posZ, float& yaw) {}
+
+    // 스폰 완료 후: 캐릭터가 Stage에 등록되고 클라/주변 AOI에 통보된 뒤 호출.
+    // 예: 입장 버프 부여, NPC/이벤트 트리거.
+    virtual void OnCharacterSpawned(const UserPtr& spUser, const CharacterPtr& spCharacter) {}
 
     // 유저가 클라이언트로부터 보낸 패킷 처리 진입점.
     // 패킷ID로 핸들러 테이블(getUserPacketHandlerMap)을 조회하여 해당 멤버 핸들러를 호출한다.

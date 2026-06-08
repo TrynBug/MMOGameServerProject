@@ -493,9 +493,10 @@ void GameServer::sendCharacterCreateRes(int64 userId, EResultCode resultCode, co
 // 1) DB에서 (user_id, character_id) 로 캐릭터 조회
 // 2) 없는 캐릭터면 CharacterSelectRes(Fail) 전송 후 종료
 // 3) owner_user_id 검증 (DB 쇄괴 방어)
-// 4) User에 현재 캐릭터 설정
-// 5) SystemStage에서 제거 (UserLeave push)
-// 6) Town으로 입장 (UserEnter push) → Town이 StageEnterNtf 전송
+// 4) User 조회 + 상태 검증, Character 객체 생성
+// 5) CharacterSelectRes(전체 데이터) 송신 → 클라가 데이터모델 보관 + 로딩 시작
+// 6) 2단계 입장(Moving) 시작: SystemStage 제거 + Town 입장
+//    → 클라 StageLoadCompleteReq → Town이 spawn + StageLoadCompleteRes 전송
 db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePacket::CharacterSelectReq req)
 {
     const int64 characterId = req.character_id();
@@ -512,7 +513,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     if (!result.success)
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect DB select failed. userId={} err={}", userId, result.errorMsg));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: db select", characterId, 0);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: db select", nullptr, 0);
         co_return;
     }
 
@@ -521,7 +522,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     {
         LOG_WRITE(LogLevel::Warn, std::format("GameServer: CharacterSelect - character not found. userId={} characterId={}",
             userId, characterId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "character not found", characterId, 0);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "character not found", nullptr, 0);
         co_return;
     }
 
@@ -531,7 +532,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - failed to parse character JSON. userId={} characterId={}",
             userId, characterId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: parse", characterId, 0);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: parse", nullptr, 0);
         co_return;
     }
 
@@ -540,7 +541,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - owner mismatch. userId={} characterOwner={} characterId={}",
             userId, character.owner_user_id(), characterId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "not character owner", characterId, 0);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "not character owner", nullptr, 0);
         co_return;
     }
 
@@ -557,7 +558,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     {
         LOG_WRITE(LogLevel::Warn, std::format("GameServer: CharacterSelect - invalid stage state. userId={} state={}",
             userId, static_cast<int32>(spUser->GetStageState())));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "already entering or in stage", characterId, 0);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "already entering or in stage", nullptr, 0);
         co_return;
     }
 
@@ -567,7 +568,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     if (!spCharacter->Initialize(character))
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - Character Initialize failed. userId={} characterId={}", userId, characterId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: character init", characterId, 0);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: character init", nullptr, 0);
         co_return;
     }
     spCharacter->SetUser(spUser);   // Character -> User weak_ptr
@@ -580,13 +581,17 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     if (!spTown)
     {
         LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - Town is null. userId={}", userId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: no town", characterId, 0);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: no town", nullptr, 0);
         co_return;
     }
 
-    // ── 6) 2단계 입장 시작 (Stage 이동과 동일한 골격) ─────────────────────
+    // ── 6) 클라에게 CharacterSelectRes(성공) 송신 → 클라는 전체 데이터로 LocalPlayer 데이터모델을 만들고 로딩 시작 ──
+    // 스폰을 시작하는 EnqueueMessage 보다 먼저 Res 를 보낸다 (클라가 데이터모델을 먼저 갖춘 뒤 로딩하도록).
+    sendCharacterSelectRes(userId, EResultCode::Success, "", &character, spTown->GetStageDataKey());
+
+    // ── 7) 2단계 입장 시작 (Stage 이동과 동일한 골격) ─────────────────────
     // 캐릭터를 User가 임시 보관(Moving)하고 Town에는 유저만 입장시킨다.
-    // 클라가 Game 씬 + 맵 로딩 후 StageLoadCompleteReq를 보내면 Town이 스폰하고 StageEnterNtf를 보낸다.
+    // 클라가 Game 씬 + 맵 로딩 후 StageLoadCompleteReq를 보내면 Town이 스폰하고 StageLoadCompleteRes를 보낸다.
     // positionType=None → 캐릭터의 DB 좌표 사용 (마지막 위치 복귀).
     spUser->SetPendingCharacter(spCharacter, EStagePositionType::None);
     spUser->SetStageState(EUserStageState::Moving);
@@ -596,24 +601,21 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
         spSystemStage->EnqueueMessage(StageMsg_UserLeave{userId});
     }
     spTown->EnqueueMessage(StageMsg_UserEnter{spUser});
-
-    // ── 7) 클라에게 CharacterSelectRes(성공) 송신 → 클라는 로딩 시작 ──────
-    sendCharacterSelectRes(userId, EResultCode::Success, "",
-        character.character_id(), spTown->GetStageDataKey());
 }
 
 void GameServer::sendCharacterSelectRes(int64 userId, EResultCode resultCode, const std::string& errorMsg,
-                                        int64 characterId, int64 stageDataKey)
+                                        const DataStructures::Character* pCharacter, int64 stageDataKey)
 {
     GamePacket::CharacterSelectRes res;
     res.set_result_code(static_cast<int32>(resultCode));
     res.set_error_msg(errorMsg);
-    res.set_character_id(characterId);
+    if (pCharacter)
+        *res.mutable_character() = *pCharacter;
     res.set_stage_data_key(stageDataKey);
     m_packetSender.SendToUser(userId, Common::GAME_PACKET_ID_CHARACTER_SELECT_RES, res);
 
     LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterSelectRes sent. userId={} resultCode={} characterId={} stageDataKey={}",
-        userId, static_cast<int32>(resultCode), characterId, stageDataKey));
+        userId, static_cast<int32>(resultCode), pCharacter ? pCharacter->character_id() : 0, stageDataKey));
 }
 
 // 게이트웨이로부터 GatewayUserDisconnectNtf 수신
