@@ -47,6 +47,7 @@ namespace Client.Game
             // 월드 오브젝트 관리 패킷만 등록.
             // 캐릭터 선택 관련 패킷 (CharacterListNtf, CharacterCreateRes) 은 CharacterSelector 가 담당.
             PacketDispatcher.Instance.Register<StageEnterNtf>(GamePacketId.StageEnterNtf, onStageEnterNtf);
+            PacketDispatcher.Instance.Register<StageMoveRes>(GamePacketId.StageMoveRes, onStageMoveRes);
             PacketDispatcher.Instance.Register<ObjectVisibilityNtf>(GamePacketId.ObjectVisibilityNtf, onObjectVisibilityNtf);
             PacketDispatcher.Instance.Register<MoveNtf>(GamePacketId.MoveNtf, onMoveNtf);
             PacketDispatcher.Instance.Register<MovePosCorrectNtf>(GamePacketId.MovePosCorrectNtf, onMovePosCorrectNtf);
@@ -66,21 +67,50 @@ namespace Client.Game
 
         // ─── 외부 API ──────────────────────────────────────────────────
 
-        // CharacterSelector 가 호출. 선택된 캐릭터를 LocalPlayer 로 스폰.
-        public PlayerCharacter SpawnLocalPlayer(long userId, string name, Vector3 pos, float dirY)
+        // 스테이지 로딩 시작 (2단계 입장의 클라 측 절차).
+        // 기존 오브젝트 전부 제거 → NavMesh 교체 → 서버에 로딩 완료 보고.
+        // 호출 경로: 최초 입장(GameScene.Init) / 스테이지 이동(onStageMoveRes 성공).
+        // 이후 서버가 캐릭터를 스폰하고 StageEnterNtf 를 보내면 onStageEnterNtf 가 LocalPlayer 를 만든다.
+        public void BeginStageLoad(long stageDataKey)
         {
-            if (m_characters.TryGetValue(userId, out PlayerCharacter existing))
+            Debug.Log($"[StageManager] BeginStageLoad: stageDataKey={stageDataKey}");
+
+            // 기존 스테이지 잔여물 정리 (LocalPlayer 포함 → 정리 동안 조작 입력이 자연히 무력화됨).
+            despawnAllObjects();
+
+            // NavMesh 교체 (같은 스테이지면 NavMeshService 가 no-op).
+            // 맵 프리팹 교체는 스테이지별 맵 리소스가 생기면 여기에 추가된다.
+            loadNavMeshForStage(stageDataKey);
+
+            // 로딩 완료 보고 → 서버가 캐릭터 스폰 + StageEnterNtf.
+            NetworkManager net = NetworkManager.Instance;
+            if (net == null || !net.IsConnected)
             {
-                Debug.LogWarning($"[StageManager] LocalPlayer already exists. userId={userId}. Reusing.");
-                existing.SetPosition(pos, dirY);
-                LocalPlayer = existing;
-                return existing;
+                Debug.LogError("[StageManager] NetworkManager 가 연결되지 않음. StageLoadCompleteReq 송신 실패");
+                return;
+            }
+            net.Send(GamePacketId.StageLoadCompleteReq, new StageLoadCompleteReq());
+        }
+
+        // 스테이지 이동 요청 (치트/UI 가 호출). 서버가 StageMoveRes 로 응답한다.
+        public void RequestStageMove(long stageDataKey, EStagePositionType positionType, int targetGameServerId = 0)
+        {
+            NetworkManager net = NetworkManager.Instance;
+            if (net == null || !net.IsConnected)
+            {
+                Debug.LogError("[StageManager] NetworkManager 가 연결되지 않음. StageMoveReq 송신 실패");
+                return;
             }
 
-            PlayerCharacter pc = CharacterFactory.Create(userId, name, isLocalPlayer: true, pos, dirY);
-            m_characters.Add(userId, pc);
-            LocalPlayer = pc;
-            return pc;
+            StageMoveReq req = new StageMoveReq
+            {
+                TargetStageDataKey = stageDataKey,
+                PositionType = (int)positionType,
+                TargetGameServerId = targetGameServerId,
+            };
+            net.Send(GamePacketId.StageMoveReq, req);
+
+            Debug.Log($"[StageManager] Sent StageMoveReq: stageDataKey={stageDataKey} positionType={positionType}");
         }
 
         // object_id 로 액터(캐릭터/몬스터)를 찾는다. 없으면 null. (SkillSystem 의 데미지 라우팅용)
@@ -98,20 +128,46 @@ namespace Client.Game
 
         // ─── 패킷 핸들러 ────────────────────────────────────────────────
 
-        // 유저가 스테이지에 입장 성공
+        // 스테이지 이동 요청 결과. 성공이면 로딩 시작 (2단계 입장).
+        private void onStageMoveRes(StageMoveRes res)
+        {
+            if ((EResultCode)res.ResultCode != EResultCode.Success)
+            {
+                Debug.LogError($"[StageManager] StageMoveRes 실패: {res.ErrorMsg} (code={res.ResultCode})");
+                return;
+            }
+
+            Debug.Log($"[StageManager] StageMoveRes OK. targetStageDataKey={res.TargetStageDataKey}");
+            BeginStageLoad(res.TargetStageDataKey);
+        }
+
+        // 캐릭터 스폰 확정 (서버가 StageLoadCompleteReq 처리 후 송신).
         private void onStageEnterNtf(StageEnterNtf ntf)
         {
             Debug.Log($"[StageManager] StageEnterNtf: stage={ntf.StageId}");
 
-            // 새 Stage 의 NavMesh 로 갈아끼움.
-            // 같은 stage 면 NavMeshService 가 no-op 처리. Game 씬 진입 시에는 GameScene.Init 에서
-            // 먼저 로드되고, 이후 같은 게임서버 내 Stage 이동 시에는 이 파트가 갱신을 담당한다.
+            // NavMesh 안전망. 정상 흐름이면 BeginStageLoad 에서 이미 로드됨 (no-op).
             loadNavMeshForStage(ntf.StageDataKey);
 
-            // 서버가 알려준 spawn 위치/회전으로 내 캐릭터 동기화
+            // 서버가 알려준 spawn 위치/회전으로 LocalPlayer 생성/동기화.
+            // 2단계 입장에서는 이 시점이 LocalPlayer 의 생성 시점이다 (BeginStageLoad 가 전부 정리했음).
+            Vector3 spawnPos = new Vector3(ntf.MyPosX, ntf.MyPosY, ntf.MyPosZ);
             if (LocalPlayer != null)
             {
-                LocalPlayer.SetPosition(new Vector3(ntf.MyPosX, ntf.MyPosY, ntf.MyPosZ), ntf.MyYaw);
+                LocalPlayer.SetPosition(spawnPos, ntf.MyYaw);
+            }
+            else
+            {
+                SelectedSpawnInfo selected = CharacterDataCache.Instance.SelectedSpawn;
+                if (selected == null)
+                {
+                    Debug.LogError("[StageManager] StageEnterNtf: SelectedSpawn 캐시가 없어 LocalPlayer 를 만들 수 없습니다.");
+                    return;
+                }
+
+                PlayerCharacter pc = CharacterFactory.Create(selected.CharacterId, selected.Name, isLocalPlayer: true, spawnPos, ntf.MyYaw);
+                m_characters.Add(selected.CharacterId, pc);
+                LocalPlayer = pc;
             }
 
             CurrentStageId = ntf.StageId;
@@ -375,6 +431,26 @@ namespace Client.Game
             if (mo != null)
                 m_monsters.Add(objectId, mo);
             return mo;
+        }
+
+        // 스테이지의 모든 오브젝트 제거 (LocalPlayer 포함). 스테이지 로딩 시작 시 호출.
+        private void despawnAllObjects()
+        {
+            foreach (PlayerCharacter character in m_characters.Values)
+            {
+                if (character != null)
+                    Destroy(character.gameObject);
+            }
+            m_characters.Clear();
+
+            foreach (MonsterObject monster in m_monsters.Values)
+            {
+                if (monster != null)
+                    Destroy(monster.gameObject);
+            }
+            m_monsters.Clear();
+
+            LocalPlayer = null;
         }
 
         // 오브젝트 공용 디스폰. objectId 로 캐릭터/몬스터 어느 쪽이든 찾아 제거한다.

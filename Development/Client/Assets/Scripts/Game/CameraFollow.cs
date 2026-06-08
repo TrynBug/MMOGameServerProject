@@ -21,7 +21,7 @@ namespace Client.Game
     {
         [Header("View Angle")]
         [Tooltip("아래로 내려다보는 각도 (도). 45~55 가 쿼터뷰 표준.")]
-        [SerializeField] private float m_pitchDeg = 50f;
+        [SerializeField] private float m_pitchDeg = 55f;
 
         [Tooltip("수평 회전 각도 (도). 0 이면 정북향, 45 면 북동향. 트오세 느낌은 45 근처.")]
         [SerializeField] private float m_yawDeg = 45f;

@@ -38,15 +38,13 @@ namespace Client.Game
             Characters = new List<Character>(characters);
         }
 
-        public void SetSelectedSpawn(long characterId, string name, long stageId, Vector3 pos, float yaw)
+        public void SetSelectedSpawn(long characterId, string name, long stageDataKey)
         {
             SelectedSpawn = new SelectedSpawnInfo
             {
                 CharacterId = characterId,
                 Name = name,
-                StageId = stageId,
-                Position = pos,
-                Yaw = yaw,
+                StageDataKey = stageDataKey,
             };
         }
 
@@ -59,12 +57,11 @@ namespace Client.Game
     }
 
     // CharacterSelectRes(성공) 결과를 Game 씬으로 넘기기 위한 컨테이너.
+    // 스폰 좌표는 들어있지 않다 — 좌표는 로딩 완료 후 StageEnterNtf 가 단일 출처 (2단계 입장).
     public class SelectedSpawnInfo
     {
         public long CharacterId;
         public string Name;
-        public long StageId;
-        public Vector3 Position;
-        public float Yaw;
+        public long StageDataKey;
     }
 }

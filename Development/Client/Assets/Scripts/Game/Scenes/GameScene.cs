@@ -9,10 +9,10 @@ namespace Client.Game
     // Start 시점에 Init() 이 호출된다.
     //
     // 책임:
-    //   - CharacterDataCache 의 SelectedSpawn 정보로 LocalPlayer 스폰을 StageManager 에 요청
+    //   - 최초 입장 시 StageManager 에 스테이지 로딩 시작 요청 (BeginStageLoad)
+    //     → 로딩 완료 보고(StageLoadCompleteReq) → 서버가 스폰 → StageEnterNtf 로 LocalPlayer 생성
     //
     // 책임이 아닌 것:
-    //   - NavMesh 로드 (StageManager 가 StageEnterNtf 수신 시 stage_data_key 로 처리)
     //   - 게임 로직 (StageManager 가 함)
     //   - 캐릭터 GameObject 생성 (CharacterFactory 가 함)
     //   - 패킷 핸들링 (StageManager 가 함)
@@ -22,7 +22,7 @@ namespace Client.Game
         {
             Debug.Log("[GameScene] Init");
 
-            // 캐시에서 spawn 정보 꺼내기. 정상 흐름이면 CharacterSelector 가 채워놨음.
+            // 캐시에서 선택 결과 꺼내기. 정상 흐름이면 CharacterSelector 가 채워놨음.
             SelectedSpawnInfo spawn = CharacterDataCache.Instance.SelectedSpawn;
             if (spawn == null)
             {
@@ -30,21 +30,18 @@ namespace Client.Game
                 return;
             }
 
-            // 같은 씬의 StageManager 에 LocalPlayer 스폰 요청.
-            // NavMesh 는 StageManager 가 StageEnterNtf 를 받을 때 로드한다 (입장 직후 도착).
             if (StageManager.Instance == null)
             {
                 Debug.LogError("[GameScene] StageManager.Instance is null. Game 씬에 StageManager 를 배치했는지 확인하세요.");
                 return;
             }
 
-            StageManager.Instance.SpawnLocalPlayer(
-                userId: spawn.CharacterId,
-                name: spawn.Name,
-                pos: spawn.Position,
-                dirY: spawn.Yaw);
+            // 스테이지 로딩 시작 (NavMesh 교체 → StageLoadCompleteReq 송신).
+            // LocalPlayer 는 이후 StageEnterNtf 수신 시 StageManager 가 스폰한다.
+            StageManager.Instance.BeginStageLoad(spawn.StageDataKey);
 
-            Debug.Log($"[GameScene] LocalPlayer spawned. characterId={spawn.CharacterId} stageId={spawn.StageId} pos={spawn.Position} yaw={spawn.Yaw}");
+            // 스테이지 이동 치트 키 (F5~F8). 코드로 부착하여 씬 에셋 수정 불필요.
+            gameObject.AddComponent<StageMoveCheat>();
 
             // Create the local player's buff bar HUD (code-built, no prefab/art needed).
             Managers.Managers.UI.ShowSceneUI<UI_BuffBar>();

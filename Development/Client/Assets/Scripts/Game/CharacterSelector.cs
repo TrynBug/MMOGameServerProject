@@ -114,18 +114,17 @@ namespace Client.Game
                 return;
             }
 
-            Debug.Log($"[CharacterSelector] CharacterSelectRes OK. characterId={res.CharacterId}, stageId={res.StageId}, pos=({res.PosX:F2},{res.PosY:F2},{res.PosZ:F2})");
+            Debug.Log($"[CharacterSelector] CharacterSelectRes OK. characterId={res.CharacterId}, stageDataKey={res.StageDataKey}");
 
             // 선택된 캐릭터 이름은 캐시의 Characters 목록에서 찾아옴.
             string name = findCharacterName(res.CharacterId);
 
-            // spawn 정보를 캐시에 저장 (Game 씬에서 꺼내 씀)
+            // 선택 결과를 캐시에 저장 (Game 씬에서 꺼내 씀).
+            // 스폰 좌표는 없음 — 로딩 완료 보고 후 StageEnterNtf 로 받는다 (2단계 입장).
             CharacterDataCache.Instance.SetSelectedSpawn(
                 characterId: res.CharacterId,
                 name: name,
-                stageId: res.StageId,
-                pos: new Vector3(res.PosX, res.PosY, res.PosZ),
-                yaw: res.Yaw);
+                stageDataKey: res.StageDataKey);
 
             // Game 씬으로 전환
             setStatus("게임 입장 중...");
