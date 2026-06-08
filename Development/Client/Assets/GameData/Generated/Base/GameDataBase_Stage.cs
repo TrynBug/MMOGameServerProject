@@ -21,17 +21,17 @@ namespace GameData
     // Stage 데이터 파일 전체를 표현합니다.
     public class GameDataTableBase_Stage : GameDataTableBase
     {
-        protected static Dictionary<long, GameData_Stage> sm_dataMap = new();
+        protected static Dictionary<int, GameData_Stage> sm_dataMap = new();
 
         public override string GetDataName() => "Stage";
 
-        public static GameData_Stage FindData(long key)
+        public static GameData_Stage FindData(int key)
         {
             sm_dataMap.TryGetValue(key, out var data);
             return data;
         }
 
-        public static IReadOnlyDictionary<long, GameData_Stage> GetDataMap() => sm_dataMap;
+        public static IReadOnlyDictionary<int, GameData_Stage> GetDataMap() => sm_dataMap;
 
         protected override bool MakeGameData(string line)
         {

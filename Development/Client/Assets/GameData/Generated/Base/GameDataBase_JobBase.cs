@@ -67,17 +67,17 @@ namespace GameData
     // JobBase 데이터 파일 전체를 표현합니다.
     public class GameDataTableBase_JobBase : GameDataTableBase
     {
-        protected static Dictionary<long, GameData_JobBase> sm_dataMap = new();
+        protected static Dictionary<int, GameData_JobBase> sm_dataMap = new();
 
         public override string GetDataName() => "JobBase";
 
-        public static GameData_JobBase FindData(long key)
+        public static GameData_JobBase FindData(int key)
         {
             sm_dataMap.TryGetValue(key, out var data);
             return data;
         }
 
-        public static IReadOnlyDictionary<long, GameData_JobBase> GetDataMap() => sm_dataMap;
+        public static IReadOnlyDictionary<int, GameData_JobBase> GetDataMap() => sm_dataMap;
 
         protected override bool MakeGameData(string line)
         {

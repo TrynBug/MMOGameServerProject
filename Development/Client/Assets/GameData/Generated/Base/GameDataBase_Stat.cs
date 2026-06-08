@@ -21,17 +21,17 @@ namespace GameData
     // Stat 데이터 파일 전체를 표현합니다.
     public class GameDataTableBase_Stat : GameDataTableBase
     {
-        protected static Dictionary<long, GameData_Stat> sm_dataMap = new();
+        protected static Dictionary<int, GameData_Stat> sm_dataMap = new();
 
         public override string GetDataName() => "Stat";
 
-        public static GameData_Stat FindData(long key)
+        public static GameData_Stat FindData(int key)
         {
             sm_dataMap.TryGetValue(key, out var data);
             return data;
         }
 
-        public static IReadOnlyDictionary<long, GameData_Stat> GetDataMap() => sm_dataMap;
+        public static IReadOnlyDictionary<int, GameData_Stat> GetDataMap() => sm_dataMap;
 
         protected override bool MakeGameData(string line)
         {

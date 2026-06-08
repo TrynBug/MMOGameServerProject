@@ -22,17 +22,17 @@ namespace GameData
     // StageStartPosition 데이터 파일 전체를 표현합니다.
     public class GameDataTableBase_StageStartPosition : GameDataTableBase
     {
-        protected static Dictionary<long, GameData_StageStartPosition> sm_dataMap = new();
+        protected static Dictionary<int, GameData_StageStartPosition> sm_dataMap = new();
 
         public override string GetDataName() => "StageStartPosition";
 
-        public static GameData_StageStartPosition FindData(long key)
+        public static GameData_StageStartPosition FindData(int key)
         {
             sm_dataMap.TryGetValue(key, out var data);
             return data;
         }
 
-        public static IReadOnlyDictionary<long, GameData_StageStartPosition> GetDataMap() => sm_dataMap;
+        public static IReadOnlyDictionary<int, GameData_StageStartPosition> GetDataMap() => sm_dataMap;
 
         protected override bool MakeGameData(string line)
         {

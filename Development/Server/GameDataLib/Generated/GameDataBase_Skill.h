@@ -71,8 +71,8 @@ protected:
     virtual ~GameDataTableBase_Skill() = default;
 
 public:
-    static const GameData_Skill* FindData(int64_t key);
-    static const std::map<int64_t, const GameData_Skill*>& GetDataMap() { return sm_dataMap; }
+    static const GameData_Skill* FindData(int32_t key);
+    static const std::map<int32_t, const GameData_Skill*>& GetDataMap() { return sm_dataMap; }
 
 public:
     const char* GetDataName() override { return "Skill"; }
@@ -81,5 +81,5 @@ protected:
     virtual bool makeGameData(const std::string& line) override;
 
 protected:
-    inline static std::map<int64_t, const GameData_Skill*> sm_dataMap;
+    inline static std::map<int32_t, const GameData_Skill*> sm_dataMap;
 };

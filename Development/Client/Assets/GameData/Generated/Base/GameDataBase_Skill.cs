@@ -55,17 +55,17 @@ namespace GameData
     // Skill 데이터 파일 전체를 표현합니다.
     public class GameDataTableBase_Skill : GameDataTableBase
     {
-        protected static Dictionary<long, GameData_Skill> sm_dataMap = new();
+        protected static Dictionary<int, GameData_Skill> sm_dataMap = new();
 
         public override string GetDataName() => "Skill";
 
-        public static GameData_Skill FindData(long key)
+        public static GameData_Skill FindData(int key)
         {
             sm_dataMap.TryGetValue(key, out var data);
             return data;
         }
 
-        public static IReadOnlyDictionary<long, GameData_Skill> GetDataMap() => sm_dataMap;
+        public static IReadOnlyDictionary<int, GameData_Skill> GetDataMap() => sm_dataMap;
 
         protected override bool MakeGameData(string line)
         {

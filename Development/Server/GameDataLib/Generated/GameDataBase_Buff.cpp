@@ -10,7 +10,7 @@
 #include "GameDataBase_Buff.h"
 #include "GameData_Buff.h"
 
-const GameData_Buff* GameDataTableBase_Buff::FindData(int64_t key)
+const GameData_Buff* GameDataTableBase_Buff::FindData(int32_t key)
 {
     auto iter = sm_dataMap.find(key);
     if (iter == sm_dataMap.cend())

@@ -86,8 +86,8 @@ protected:
     virtual ~GameDataTableBase_JobBase() = default;
 
 public:
-    static const GameData_JobBase* FindData(int64_t key);
-    static const std::map<int64_t, const GameData_JobBase*>& GetDataMap() { return sm_dataMap; }
+    static const GameData_JobBase* FindData(int32_t key);
+    static const std::map<int32_t, const GameData_JobBase*>& GetDataMap() { return sm_dataMap; }
 
 public:
     const char* GetDataName() override { return "JobBase"; }
@@ -96,5 +96,5 @@ protected:
     virtual bool makeGameData(const std::string& line) override;
 
 protected:
-    inline static std::map<int64_t, const GameData_JobBase*> sm_dataMap;
+    inline static std::map<int32_t, const GameData_JobBase*> sm_dataMap;
 };

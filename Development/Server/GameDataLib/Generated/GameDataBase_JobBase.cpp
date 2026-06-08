@@ -10,7 +10,7 @@
 #include "GameDataBase_JobBase.h"
 #include "GameData_JobBase.h"
 
-const GameData_JobBase* GameDataTableBase_JobBase::FindData(int64_t key)
+const GameData_JobBase* GameDataTableBase_JobBase::FindData(int32_t key)
 {
     auto iter = sm_dataMap.find(key);
     if (iter == sm_dataMap.cend())

@@ -10,7 +10,7 @@
 #include "GameDataBase_StageStartPosition.h"
 #include "GameData_StageStartPosition.h"
 
-const GameData_StageStartPosition* GameDataTableBase_StageStartPosition::FindData(int64_t key)
+const GameData_StageStartPosition* GameDataTableBase_StageStartPosition::FindData(int32_t key)
 {
     auto iter = sm_dataMap.find(key);
     if (iter == sm_dataMap.cend())

@@ -10,7 +10,7 @@
 #include "GameDataBase_Skill.h"
 #include "GameData_Skill.h"
 
-const GameData_Skill* GameDataTableBase_Skill::FindData(int64_t key)
+const GameData_Skill* GameDataTableBase_Skill::FindData(int32_t key)
 {
     auto iter = sm_dataMap.find(key);
     if (iter == sm_dataMap.cend())

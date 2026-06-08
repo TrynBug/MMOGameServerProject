@@ -69,17 +69,17 @@ namespace GameData
     // Monster 데이터 파일 전체를 표현합니다.
     public class GameDataTableBase_Monster : GameDataTableBase
     {
-        protected static Dictionary<long, GameData_Monster> sm_dataMap = new();
+        protected static Dictionary<int, GameData_Monster> sm_dataMap = new();
 
         public override string GetDataName() => "Monster";
 
-        public static GameData_Monster FindData(long key)
+        public static GameData_Monster FindData(int key)
         {
             sm_dataMap.TryGetValue(key, out var data);
             return data;
         }
 
-        public static IReadOnlyDictionary<long, GameData_Monster> GetDataMap() => sm_dataMap;
+        public static IReadOnlyDictionary<int, GameData_Monster> GetDataMap() => sm_dataMap;
 
         protected override bool MakeGameData(string line)
         {

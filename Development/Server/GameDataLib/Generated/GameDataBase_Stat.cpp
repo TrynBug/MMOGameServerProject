@@ -10,7 +10,7 @@
 #include "GameDataBase_Stat.h"
 #include "GameData_Stat.h"
 
-const GameData_Stat* GameDataTableBase_Stat::FindData(int64_t key)
+const GameData_Stat* GameDataTableBase_Stat::FindData(int32_t key)
 {
     auto iter = sm_dataMap.find(key);
     if (iter == sm_dataMap.cend())

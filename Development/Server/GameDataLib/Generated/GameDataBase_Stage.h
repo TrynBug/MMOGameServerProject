@@ -37,8 +37,8 @@ protected:
     virtual ~GameDataTableBase_Stage() = default;
 
 public:
-    static const GameData_Stage* FindData(int64_t key);
-    static const std::map<int64_t, const GameData_Stage*>& GetDataMap() { return sm_dataMap; }
+    static const GameData_Stage* FindData(int32_t key);
+    static const std::map<int32_t, const GameData_Stage*>& GetDataMap() { return sm_dataMap; }
 
 public:
     const char* GetDataName() override { return "Stage"; }
@@ -47,5 +47,5 @@ protected:
     virtual bool makeGameData(const std::string& line) override;
 
 protected:
-    inline static std::map<int64_t, const GameData_Stage*> sm_dataMap;
+    inline static std::map<int32_t, const GameData_Stage*> sm_dataMap;
 };

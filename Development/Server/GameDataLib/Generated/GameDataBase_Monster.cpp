@@ -10,7 +10,7 @@
 #include "GameDataBase_Monster.h"
 #include "GameData_Monster.h"
 
-const GameData_Monster* GameDataTableBase_Monster::FindData(int64_t key)
+const GameData_Monster* GameDataTableBase_Monster::FindData(int32_t key)
 {
     auto iter = sm_dataMap.find(key);
     if (iter == sm_dataMap.cend())
