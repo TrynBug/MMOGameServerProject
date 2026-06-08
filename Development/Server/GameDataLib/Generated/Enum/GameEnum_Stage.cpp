@@ -28,3 +28,26 @@ std::string StageTypeToString(EStageType v)
     }
 }
 
+EStagePositionType StringToStagePositionType(const std::string& v)
+{
+    if (v == "None") return EStagePositionType::None;
+    if (v == "Default") return EStagePositionType::Default;
+    if (v == "Path1") return EStagePositionType::Path1;
+    if (v == "Path2") return EStagePositionType::Path2;
+    if (v == "Path3") return EStagePositionType::Path3;
+    return EStagePositionType::None;
+}
+
+std::string StagePositionTypeToString(EStagePositionType v)
+{
+    switch (v)
+    {
+    case EStagePositionType::None: return "None";
+    case EStagePositionType::Default: return "Default";
+    case EStagePositionType::Path1: return "Path1";
+    case EStagePositionType::Path2: return "Path2";
+    case EStagePositionType::Path3: return "Path3";
+    default: return "None";
+    }
+}
+

@@ -14,4 +14,14 @@ namespace GameData
         Dungeon              = 4,  // 던전
         Max                 
     }
+
+    public enum EStagePositionType
+    {
+        None                 = 0,
+        Default              = 1,  // 기본 시작위치
+        Path1                = 2,  // 경로1
+        Path2                = 3,  // 경로2
+        Path3                = 4,  // 경로3
+        Max                 
+    }
 }

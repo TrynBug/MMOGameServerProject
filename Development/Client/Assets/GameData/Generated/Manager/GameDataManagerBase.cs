@@ -28,6 +28,10 @@ namespace GameData
             if (!table_Stage.LoadData(csvPath))
                 return false;
 
+            var table_StageStartPosition = new GameDataTable_StageStartPosition();
+            if (!table_StageStartPosition.LoadData(csvPath))
+                return false;
+
             var table_Stat = new GameDataTable_Stat();
             if (!table_Stat.LoadData(csvPath))
                 return false;

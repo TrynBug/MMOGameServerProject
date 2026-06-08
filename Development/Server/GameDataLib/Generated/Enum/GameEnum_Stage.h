@@ -19,3 +19,16 @@ enum class EStageType : int
 EStageType StringToStageType(const std::string& v);
 std::string StageTypeToString(EStageType v);
 
+enum class EStagePositionType : int
+{
+    None                 = 0,
+    Default              = 1,  // 기본 시작위치
+    Path1                = 2,  // 경로1
+    Path2                = 3,  // 경로2
+    Path3                = 4,  // 경로3
+    Max                 
+};
+
+EStagePositionType StringToStagePositionType(const std::string& v);
+std::string StagePositionTypeToString(EStagePositionType v);
+

@@ -78,6 +78,18 @@
     <ClCompile Include="Generated\GameDataBase_Buff.cpp">
       <Filter>소스 파일\Generated</Filter>
     </ClCompile>
+    <ClCompile Include="Generated\GameData_StageStartPosition.cpp">
+      <Filter>소스 파일\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\GameDataBase_StageStartPosition.cpp">
+      <Filter>소스 파일\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\GameData_Skill.cpp">
+      <Filter>소스 파일\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\GameDataBase_Skill.cpp">
+      <Filter>소스 파일\Generated</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Generated\GameDataBase_Monster.h">
@@ -135,6 +147,18 @@
       <Filter>소스 파일\Generated</Filter>
     </ClInclude>
     <ClInclude Include="Generated\GameDataBase_Buff.h">
+      <Filter>소스 파일\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GameData_StageStartPosition.h">
+      <Filter>소스 파일\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GameDataBase_StageStartPosition.h">
+      <Filter>소스 파일\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GameData_Skill.h">
+      <Filter>소스 파일\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\GameDataBase_Skill.h">
       <Filter>소스 파일\Generated</Filter>
     </ClInclude>
   </ItemGroup>
