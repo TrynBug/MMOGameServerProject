@@ -21,7 +21,7 @@ namespace Client.Game
         // 버프 1개의 표시 상태.
         public class Entry
         {
-            public long  BuffKey;
+            public int   BuffKey;
             public int   StackCount;
             public int   RemainTimeMs;       // -1 = 영구
             public float ReceivedRealtime;   // 받은 시점 (Time.realtimeSinceStartup)
@@ -40,14 +40,14 @@ namespace Client.Game
         }
 
         // buffKey -> Entry.
-        private readonly Dictionary<long, Entry> m_buffs = new Dictionary<long, Entry>();
+        private readonly Dictionary<int, Entry> m_buffs = new Dictionary<int, Entry>();
 
         // 현재 보유 버프 (UI 순회용, 읽기 전용).
-        public IReadOnlyDictionary<long, Entry> Buffs => m_buffs;
+        public IReadOnlyDictionary<int, Entry> Buffs => m_buffs;
         public int Count => m_buffs.Count;
 
         // 추가/갱신 (BuffNtf). 같은 buffKey 면 스택/남은시간/받은시점 갱신.
-        public void Upsert(long buffKey, int stackCount, int remainTimeMs)
+        public void Upsert(int buffKey, int stackCount, int remainTimeMs)
         {
             if (!m_buffs.TryGetValue(buffKey, out Entry e))
             {
@@ -60,7 +60,7 @@ namespace Client.Game
         }
 
         // 제거 (BuffRemoveNtf). 없으면 no-op.
-        public void Remove(long buffKey)
+        public void Remove(int buffKey)
         {
             m_buffs.Remove(buffKey);
         }

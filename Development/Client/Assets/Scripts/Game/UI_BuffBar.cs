@@ -22,8 +22,8 @@ namespace Client.Game
         private enum Objects { BuffContainer }
 
         private Transform m_container;
-        private readonly Dictionary<long, UI_BuffIcon> m_icons = new Dictionary<long, UI_BuffIcon>();
-        private readonly List<long> m_removeScratch = new List<long>();
+        private readonly Dictionary<int, UI_BuffIcon> m_icons = new Dictionary<int, UI_BuffIcon>();
+        private readonly List<int> m_removeScratch = new List<int>();
 
         public override void Init()
         {
@@ -49,16 +49,16 @@ namespace Client.Game
 
             // 1) 더 이상 없는 버프의 아이콘 제거.
             m_removeScratch.Clear();
-            foreach (long key in m_icons.Keys)
+            foreach (int key in m_icons.Keys)
             {
                 if (!holder.Buffs.ContainsKey(key))
                     m_removeScratch.Add(key);
             }
-            foreach (long key in m_removeScratch)
+            foreach (int key in m_removeScratch)
                 removeIcon(key);
 
             // 2) 현재 버프 아이콘 생성/갱신.
-            foreach (KeyValuePair<long, BuffHolder.Entry> kv in holder.Buffs)
+            foreach (KeyValuePair<int, BuffHolder.Entry> kv in holder.Buffs)
             {
                 if (!m_icons.TryGetValue(kv.Key, out UI_BuffIcon icon))
                 {
@@ -74,7 +74,7 @@ namespace Client.Game
             }
         }
 
-        private static void applyToIcon(UI_BuffIcon icon, long buffKey, BuffHolder.Entry entry)
+        private static void applyToIcon(UI_BuffIcon icon, int buffKey, BuffHolder.Entry entry)
         {
             GameData_Buff data = GameDataTable_Buff.FindData(buffKey);
 
@@ -107,7 +107,7 @@ namespace Client.Game
             }
         }
 
-        private void removeIcon(long buffKey)
+        private void removeIcon(int buffKey)
         {
             if (m_icons.TryGetValue(buffKey, out UI_BuffIcon icon))
             {

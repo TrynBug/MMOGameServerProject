@@ -32,7 +32,7 @@ namespace Client.Game
         public Character LocalCharacter { get; private set; }
 
         // 최초 입장할 Stage 데이터 Key (CharacterSelectRes 의 stage_data_key).
-        public long SelectedStageDataKey { get; private set; }
+        public int SelectedStageDataKey { get; private set; }
 
         public void SetUserId(long userId)
         {
@@ -46,7 +46,7 @@ namespace Client.Game
         }
 
         // CharacterSelectRes(성공) 수신 시 호출. 전체 데이터 모델을 깊은 복사로 보관한다.
-        public void SetLocalCharacter(Character character, long stageDataKey)
+        public void SetLocalCharacter(Character character, int stageDataKey)
         {
             LocalCharacter = character.Clone();   // protobuf 깊은 복사 (송신 버퍼와 분리)
             SelectedStageDataKey = stageDataKey;

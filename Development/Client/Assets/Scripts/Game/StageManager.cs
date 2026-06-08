@@ -108,7 +108,7 @@ namespace Client.Game
         // LocalPlayer 숨김 → 원격 오브젝트 제거 → NavMesh 교체 → 서버에 로딩 완료 보고.
         // 호출 경로: 최초 입장(GameScene.Init) / 스테이지 이동(onStageMoveRes 성공).
         // 이후 서버가 캐릭터를 스폰하고 StageLoadCompleteRes 를 보내면 LocalPlayer 를 활성화/배치한다.
-        public void BeginStageLoad(long stageDataKey)
+        public void BeginStageLoad(int stageDataKey)
         {
             Debug.Log($"[StageManager] BeginStageLoad: stageDataKey={stageDataKey}");
 
@@ -141,7 +141,7 @@ namespace Client.Game
         }
 
         // 스테이지 이동 요청 (치트/UI 가 호출). 서버가 StageMoveRes 로 응답한다.
-        public void RequestStageMove(long stageDataKey, EStagePositionType positionType, int targetGameServerId = 0)
+        public void RequestStageMove(int stageDataKey, EStagePositionType positionType, int targetGameServerId = 0)
         {
             NetworkManager net = NetworkManager.Instance;
             if (net == null || !net.IsConnected)
@@ -437,7 +437,7 @@ namespace Client.Game
 
         // 디버그: 서버 Stage 의 sector 격자를 화면에 그린다.
         // sectorSize 는 stage_data_key 로 GameData_Stage 를 조회해서 얻는다.
-        private static void showSectorGridDebug(long stageDataKey, float groundY)
+        private static void showSectorGridDebug(int stageDataKey, float groundY)
         {
             GameData_Stage stageData = GameDataTable_Stage.FindData(stageDataKey);
             if (stageData == null)
@@ -464,7 +464,7 @@ namespace Client.Game
 
         // 몬스터 스폰. 게임데이터 Key 로 MonsterFactory 가 prefab 을 찾아 생성한다.
         // 이미 같은 objectId 가 있으면 위치만 갱신 (idempotent).
-        private MonsterObject spawnMonster(long objectId, long monsterKey, Vector3 pos, float dirY, bool isDead, double curHp, double maxHp)
+        private MonsterObject spawnMonster(long objectId, int monsterKey, Vector3 pos, float dirY, bool isDead, double curHp, double maxHp)
         {
             if (m_monsters.TryGetValue(objectId, out MonsterObject existing) && existing != null)
             {
@@ -526,7 +526,7 @@ namespace Client.Game
         // 게임데이터가 없거나 NavMeshFileName 이 비어있으면 경고만 남기고 진행
         // (PlayerCharacter 는 NavMesh 없으면 직선 이동으로 폴백함).
         // 같은 stage 가 이미 로드되어 있으면 NavMeshService.Load 가 no-op 처리.
-        private static void loadNavMeshForStage(long stageDataKey)
+        private static void loadNavMeshForStage(int stageDataKey)
         {
             GameData_Stage stageData = GameDataTable_Stage.FindData(stageDataKey);
             if (stageData == null)
@@ -553,7 +553,7 @@ namespace Client.Game
         // 프리팹이 아직 없으면 경고만 남기고 현재 씬 지오메트리를 그대로 둔다(no-op).
         //   → 스테이지별 맵 프리팹을 만들어 Resources/Stages/ 에 넣으면 자동으로 적용된다.
         //   (그 시점엔 Game 씬에 고정 배치된 정적 맵 지오메트리를 제거해야 중복되지 않는다.)
-        private void loadStageMap(long stageDataKey)
+        private void loadStageMap(int stageDataKey)
         {
             GameData_Stage stageData = GameDataTable_Stage.FindData(stageDataKey);
             if (stageData == null || string.IsNullOrEmpty(stageData.NavMeshFileName))

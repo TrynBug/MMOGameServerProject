@@ -23,7 +23,7 @@ namespace Client.Game
             if (kb.f8Key.wasPressedThisFrame) requestMove(103);
         }
 
-        private static void requestMove(long stageDataKey)
+        private static void requestMove(int stageDataKey)
         {
             if (StageManager.Instance == null)
             {

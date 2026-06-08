@@ -17,7 +17,7 @@ namespace Client.Game
     // 향후 Addressables / 풀링 도입 시 이 함수가 교체 지점이 된다.
     public static class MonsterFactory
     {
-        public static MonsterObject Create(long objectId, long monsterKey, Vector3 pos, float dirY, bool isDead, double curHp, double maxHp)
+        public static MonsterObject Create(long objectId, int monsterKey, Vector3 pos, float dirY, bool isDead, double curHp, double maxHp)
         {
             // 1) 몬스터 게임데이터 조회.
             GameData_Monster data = GameDataTable_Monster.FindData(monsterKey);

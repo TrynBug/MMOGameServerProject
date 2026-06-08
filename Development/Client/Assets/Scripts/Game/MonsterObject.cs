@@ -24,7 +24,7 @@ namespace Client.Game
         public long ObjectId { get; private set; }
 
         // 몬스터 게임데이터 Key (종류 식별).
-        public long MonsterKey { get; private set; }
+        public int MonsterKey { get; private set; }
 
         // 몬스터 등급 (노말~보스). 오토타게팅의 "최고 등급" 모드가 읽는다. 스폰 시 게임데이터에서 채운다.
         public EMonsterGrade Grade { get; private set; } = EMonsterGrade.Normal;
@@ -58,7 +58,7 @@ namespace Client.Game
         private IActorAnimator m_actorAnimator;
 
         // MonsterFactory 가 생성 직후 1회 호출.
-        public void Initialize(long objectId, long monsterKey, Vector3 pos, float dirY, bool isDead, double curHp, double maxHp)
+        public void Initialize(long objectId, int monsterKey, Vector3 pos, float dirY, bool isDead, double curHp, double maxHp)
         {
             ObjectId = objectId;
             MonsterKey = monsterKey;
@@ -83,7 +83,7 @@ namespace Client.Game
         }
 
         // 게임데이터에서 등급(Grade)을 읽어 채운다. HP(현재/최대)는 서버 권위값을 Initialize 에서 설정한다.
-        private void seedFromGameData(long monsterKey)
+        private void seedFromGameData(int monsterKey)
         {
             GameData_Monster data = GameDataTable_Monster.FindData(monsterKey);
             if (data == null)

@@ -13,7 +13,7 @@ namespace Client.Game
     //       (거부 경로가 생기면 미바인딩 그룹의 타임아웃 정리가 필요해질 수 있음.)
     public class SkillProjectileGroup
     {
-        public long SkillKey { get; }
+        public int SkillKey { get; }
         public long EffectId { get; private set; }   // 0 = 아직 서버 effect_id 미수신
         public bool HasEffectId => EffectId != 0;
 
@@ -25,7 +25,7 @@ namespace Client.Game
         private int m_aliveCount;   // 아직 종료되지 않은 투사체 수
         private readonly List<SkillHitItem> m_pending = new List<SkillHitItem>();
 
-        public SkillProjectileGroup(long skillKey)
+        public SkillProjectileGroup(int skillKey)
         {
             SkillKey = skillKey;
         }

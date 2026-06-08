@@ -28,14 +28,14 @@ namespace Client.Game
         public static SkillSystem Instance { get; private set; }
 
         // 마일스톤 1: OnSkill1 = 파이어볼. (스킬 슬롯 매핑은 추후 스킬창/장비에서.)
-        [SerializeField] private long m_skill1Key = 1001;
+        [SerializeField] private int m_skill1Key = 1001;
 
         // M1(범위 스킬): OnSkill2 = 얼음지대(1003), OnSkill3 = 전격방출(1008).
-        [SerializeField] private long m_skill2Key = 1003;
-        [SerializeField] private long m_skill3Key = 1008;
+        [SerializeField] private int m_skill2Key = 1003;
+        [SerializeField] private int m_skill3Key = 1008;
 
         // M2(이동 스킬): OnSkill4 = 글라이드(1004). 순간이동(1009) 테스트는 슬롯 키를 인스펙터에서 교체.
-        [SerializeField] private long m_skill4Key = 1004;
+        [SerializeField] private int m_skill4Key = 1004;
 
         // 단발(instant) 범위 비주얼의 표시 시간(초). 지속 데이터(LifetimeMs)가 없는 단일 틱 스킬에 사용.
         [SerializeField] private float m_areaInstantDisplaySec = 0.5f;
@@ -112,7 +112,7 @@ namespace Client.Game
         private void castSkill3() => tryCast(m_skill3Key);
         private void castSkill4() => tryCast(m_skill4Key);
 
-        private void tryCast(long skillKey)
+        private void tryCast(int skillKey)
         {
             if (Time.time < m_actionLockUntil)
                 return;   // 이전 시전 애니메이션(액션락) 중.
@@ -491,7 +491,7 @@ namespace Client.Game
             spawnRemoteVisual(ntf);
         }
 
-        private void bindEffectId(long skillKey, long effectId)
+        private void bindEffectId(int skillKey, long effectId)
         {
             if (effectId == 0)
                 return;
@@ -563,7 +563,7 @@ namespace Client.Game
             group?.MarkLaunched(dirs.Count);
         }
 
-        private void spawnOneProjectile(GameObject prefab, SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, long onHitSkillKey)
+        private void spawnOneProjectile(GameObject prefab, SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int onHitSkillKey)
         {
             GameObject go = Instantiate(prefab);
             go.name = "Projectile";
@@ -594,7 +594,7 @@ namespace Client.Game
 
         // 투사체가 끝난 위치에 OnHit 폭발(예: 파이어볼 폭발 1002)의 비주얼을 띄운다. Projectile 이 종료 시 호출.
         // 폭발 적중/대미지는 서버가 판정해 SkillDamageNtf 로 통보 — 여기서는 비주얼만 (시전 클라/원격 공용).
-        public void SpawnHitExplosionVisual(long explosionSkillKey, Vector3 pos, Vector3 dir)
+        public void SpawnHitExplosionVisual(int explosionSkillKey, Vector3 pos, Vector3 dir)
         {
             if (explosionSkillKey == 0)
                 return;
