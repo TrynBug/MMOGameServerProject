@@ -97,6 +97,9 @@ namespace GameDataGenerator
                 if (string.IsNullOrEmpty(fieldName))
                     continue;
 
+                if (dataType is not ("int32" or "int64" or "float" or "double" or "string" or "bool" or "enum"))
+                    Console.WriteLine($"  [오류] 알 수 없는 데이터타입 '{dataType}' (필드: {fieldName})");
+
                 var colInfo = new ColumnInfo
                 {
                     FieldName = fieldName,

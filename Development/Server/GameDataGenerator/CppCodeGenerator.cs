@@ -365,12 +365,14 @@ namespace GameDataGenerator
         {
             return col.DataType switch
             {
-                "int"    => "int64_t",
+                "int32"  => "int32_t",
+                "int64"  => "int64_t",
                 "string" => "std::string",
+                "float"  => "float",
                 "double" => "double",
                 "bool"   => "bool",
                 "enum"   => $"E{col.DataTypeDetail}",
-                _        => "int64_t"
+                _        => ""
             };
         }
 
@@ -378,12 +380,16 @@ namespace GameDataGenerator
         {
             return col.DataType switch
             {
-                "int"    => string.IsNullOrEmpty(col.DefaultValue) ? "0" : col.DefaultValue,
+                "int32"  => string.IsNullOrEmpty(col.DefaultValue) ? "0" : col.DefaultValue,
+                "int64"  => string.IsNullOrEmpty(col.DefaultValue) ? "0" : col.DefaultValue,
                 "string" => $"\"{col.DefaultValue}\"",
+                "float"  => string.IsNullOrEmpty(col.DefaultValue)
+                                ? "0.0f"
+                                : (col.DefaultValue.Contains('.') ? $"{col.DefaultValue}f" : $"{col.DefaultValue}.0f"),
                 "double" => string.IsNullOrEmpty(col.DefaultValue) ? "0.0" : col.DefaultValue,
                 "bool"   => col.DefaultValue.ToUpper() == "TRUE" ? "true" : "false",
                 "enum"   => $"E{col.DataTypeDetail}::{(string.IsNullOrEmpty(col.DefaultValue) ? "None" : col.DefaultValue)}",
-                _        => "0"
+                _        => ""
             };
         }
 
@@ -391,12 +397,14 @@ namespace GameDataGenerator
         {
             return col.DataType switch
             {
-                "int"    => "std::stoll(field)",
+                "int32"  => "std::stoi(field)",
+                "int64"  => "std::stoll(field)",
                 "string" => "field",
+                "float"  => "std::stof(field)",
                 "double" => "std::stod(field)",
                 "bool"   => "StringToBool(field)",
                 "enum"   => $"static_cast<E{col.DataTypeDetail}>(std::stoi(field))",
-                _        => "std::stoll(field)"
+                _        => ""
             };
         }
 

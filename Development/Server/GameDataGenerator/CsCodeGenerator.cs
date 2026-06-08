@@ -262,12 +262,14 @@ namespace GameDataGenerator
         {
             return col.DataType switch
             {
-                "int"    => "long",
+                "int32"  => "int",
+                "int64"  => "long",
                 "string" => "string",
+                "float"  => "float",
                 "double" => "double",
                 "bool"   => "bool",
                 "enum"   => $"E{col.DataTypeDetail}",
-                _        => "long"
+                _        => ""
             };
         }
 
@@ -275,12 +277,14 @@ namespace GameDataGenerator
         {
             return col.DataType switch
             {
-                "int"    => string.IsNullOrEmpty(col.DefaultValue) ? "0" : col.DefaultValue,
+                "int32"  => string.IsNullOrEmpty(col.DefaultValue) ? "0" : col.DefaultValue,
+                "int64"  => string.IsNullOrEmpty(col.DefaultValue) ? "0" : col.DefaultValue,
                 "string" => $"\"{col.DefaultValue}\"",
+                "float"  => string.IsNullOrEmpty(col.DefaultValue) ? "0f" : $"{col.DefaultValue}f",
                 "double" => string.IsNullOrEmpty(col.DefaultValue) ? "0.0" : col.DefaultValue,
                 "bool"   => col.DefaultValue.ToUpper() == "TRUE" ? "true" : "false",
                 "enum"   => $"E{col.DataTypeDetail}.{(string.IsNullOrEmpty(col.DefaultValue) ? "None" : col.DefaultValue)}",
-                _        => "0"
+                _        => ""
             };
         }
 
@@ -288,12 +292,14 @@ namespace GameDataGenerator
         {
             return col.DataType switch
             {
-                "int"    => $"long.Parse(fields[{index}])",
+                "int32"  => $"int.Parse(fields[{index}])",
+                "int64"  => $"long.Parse(fields[{index}])",
                 "string" => $"fields[{index}]",
+                "float"  => $"float.Parse(fields[{index}])",
                 "double" => $"double.Parse(fields[{index}])",
                 "bool"   => $"GameDataTableBase.StringToBool(fields[{index}])",
                 "enum"   => $"(E{col.DataTypeDetail})int.Parse(fields[{index}])",
-                _        => $"long.Parse(fields[{index}])"
+                _        => ""
             };
         }
 
