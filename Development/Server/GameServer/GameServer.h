@@ -117,7 +117,7 @@ private:
     netlib::FuncEventHandler     m_internalListenEventHandler;
     serverbase::PacketDispatcher m_internalPacketDispatcher;
 
-    // ── 게이트웨이서버 연결 관리 (LoginServer 패턴) ───────────────
+    // ── 게이트웨이서버 연결 관리 ───────────────
     SharedThreadSafeUnorderedMap<int32, netlib::ISessionPtr> m_safeGatewaySessions;
     ExclusiveThreadSafeUnorderedMap<int32, netlib::NetClientPtr> m_safeGatewayClients;
     SharedThreadSafeUnorderedMap<int32, ServerInfo> m_safeGatewayInfos;

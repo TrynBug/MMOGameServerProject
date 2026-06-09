@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Skill/SkillBake.h"
 
-#include "Generated/GameData_Skill.h"   // GameData_Skill 컬럼 접근
+#include "Generated/GameData_Skill.h"
 
 EffectParams BakeSkillEffectParams(const GameData_Skill& skill,
                                    EObjectType casterType,

@@ -1,18 +1,18 @@
 #include "pch.h"
 #include "Stage.h"
-#include "Character.h"   // OnUserEnter에서 Character를 m_objects에 등록하기 위해 완전타입 필요
-#include "Monster.h"     // SpawnMonster 에서 Monster 생성 + GameDataTable_Monster 조회를 위해 완전타입 필요
-#include "MonsterFsmAI.h"  // SpawnMonster 에서 기본 두뇌(FSM) 주입
-#include "GameServer.h"   // OnUserEnter/OnUserLeave에서 visibility 패킷 전송 위해 필요
-#include "StageNavMesh.h"  // SetNavMesh 구현에서 StageNavMesh 완전타입 필요
-#include "Skill/EffectShape.h"  // QueryEnemiesInShape 에서 EffectShape / Vector3 완전타입 필요
-#include "Skill/EffectParams.h"  // SpawnSkillAreaEffect 의 EffectParams 완전타입
-#include "Skill/AreaEffect.h"    // AreaEffect 완전타입 (m_skillAreaEffects 조작)
-#include "Skill/ProjectileGroup.h"  // ProjectileGroup 완전타입 (m_skillProjectileGroups 조작)
-#include "Skill/SkillBake.h"        // BakeSkillEffectParams (폭발 발동 시)
-#include "Generated/GameData_Skill.h"  // GameDataTable_Skill::FindData (OnHitSkillKey 조회)
-#include "Generated/GameData_StageStartPosition.h"  // handleStageMoveReq/spawnPendingCharacter 의 도착 위치 조회
-#include "Enum/GameEnum_Common.h"  // EResultCode (StageMoveRes)
+#include "Character.h"
+#include "Monster.h"
+#include "MonsterFsmAI.h"
+#include "GameServer.h"
+#include "StageNavMesh.h"
+#include "Skill/EffectShape.h"
+#include "Skill/EffectParams.h"
+#include "Skill/AreaEffect.h"
+#include "Skill/ProjectileGroup.h"
+#include "Skill/SkillBake.h"
+#include "Generated/GameData_Skill.h"
+#include "Generated/GameData_StageStartPosition.h"
+#include "Enum/GameEnum_Common.h"
 
 #include <cmath>
 

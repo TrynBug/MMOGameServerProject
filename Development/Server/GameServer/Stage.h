@@ -4,9 +4,9 @@
 #include "User.h"
 #include "Sector.h"
 #include "StageObject.h"
-#include "GameServerDefine.h"   // Vector3 (SpawnSkillProjectileGroup 의 std::vector<Vector3> 파라미터에 완전타입 필요)
+#include "GameServerDefine.h"
 
-#include "Enum/GameEnum_Stage.h"   // EStageType
+#include "Enum/GameEnum_Stage.h"
 #include "Generated/GameData_Stage.h"
 
 #include <variant>
@@ -116,13 +116,6 @@ using StageMessage = std::variant<
 // ── 객체 소유 ──
 // Stage가 모든 StageObject (유저/몬스터/프랍/드롭)를 shared_ptr로 소유한다.
 // 빠른 타입별 조회를 위해 통합 맵 + 타입별 맵을 함께 유지한다.
-//
-// 향후 단계에서 추가될 것:
-//   - User → StageObject 상속
-//   - 객체 입장/퇴장 시 섹터 갱신
-//   - AOI 진입/이탈 판정 및 패킷 전송
-//   - NavMesh 연결
-//   - 몬스터 / NPC
 class Stage : public serverbase::Contents
 {
 public:
@@ -475,13 +468,11 @@ private:
 
     // ── 유저 컨테이너 (컨텐츠 스레드 전용 접근) ──
     // Stage가 유저를 소유 (shared_ptr).
-    // (3단계에서 User가 StageObject를 상속받으면 m_objects로 옮겨질 예정)
     std::unordered_map<int64, UserPtr> m_users;
 
-    // ── StageObject 통합 + 타입별 소유 컨테이너 (3단계 이후 사용 예정) ──
+    // ── StageObject 통합 + 타입별 소유 컨테이너 ──
     // 모든 StageObject의 lifetime은 m_objects가 관리(shared_ptr).
     // 타입별 맵(m_userObjects 등)은 같은 shared_ptr을 빠른 조회용으로 보관.
-    // 현재 단계에서는 자료구조만 선언. 실제 사용은 3단계 이후.
     std::unordered_map<int64, StageObjectPtr> m_objects;
     std::unordered_map<int64, StageObjectPtr> m_userObjects;
     std::unordered_map<int64, StageObjectPtr> m_monsterObjects;

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "pch.h"
-#include "ServerBase.h"            // serverbase::ServerBase (SerializePacket 호출에 필요)
-#include "User.h"                  // UserPtr (맵 value 타입), User::GetGatewayId (SendToUser 템플릿에서 사용)
+#include "ServerBase.h"
+#include "User.h"
 #include "ThreadSafeUnorderedMap.h"
-#include "Enum/GameEnum_Common.h"  // EResultCode (SendStageMoveRes)
+#include "Enum/GameEnum_Common.h"
 
 // 전방선언 (SendStatUpdateNtf 의 const Character& 파라미터. 완전타입은 PacketSender.cpp 에서 include.)
 class Character;

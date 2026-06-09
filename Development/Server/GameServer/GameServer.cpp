@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "GameServer.h"
-#include "Character.h"   // handleClientCharacterSelect에서 Character 객체 생성
+#include "Character.h"
 
 namespace
 {

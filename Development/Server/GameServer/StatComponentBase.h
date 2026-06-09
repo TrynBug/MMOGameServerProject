@@ -2,8 +2,8 @@
 
 #include "pch.h"
 
-#include "Enum/GameEnum_Stat.h"          // EStat, EStatGroup, EStatOp
-#include "Generated/GameData_Stat.h"     // GameDataTable_Stat (역인덱스 조회)
+#include "Enum/GameEnum_Stat.h"
+#include "Generated/GameData_Stat.h"
 
 #include <functional>
 

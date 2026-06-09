@@ -1,8 +1,8 @@
 #pragma once
 
 #include "pch.h"
-#include "Skill/EffectParams.h"     // EffectParams, Vector3
-#include "Enum/GameEnum_Common.h"   // EObjectType
+#include "Skill/EffectParams.h"
+#include "Enum/GameEnum_Common.h"
 
 struct GameData_Skill;
 

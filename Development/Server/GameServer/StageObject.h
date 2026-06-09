@@ -2,7 +2,7 @@
 
 #include "pch.h"
 
-#include "Enum/GameEnum_Common.h"  // EObjectType
+#include "Enum/GameEnum_Common.h"
 
 // 전방선언
 class Stage;

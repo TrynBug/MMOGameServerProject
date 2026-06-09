@@ -1,13 +1,13 @@
 #include "pch.h"
 #include "Stage.h"
-#include "ActorObject.h"   // ApplyEffectDamage / OnSkillProjectileHit 의 ActorObject 완전타입
-#include "GameServer.h"    // SendSkill*Ntf / GenerateObjectId
-#include "Skill/EffectShape.h"   // QueryEnemiesInShape 의 EffectShape / Vector3
-#include "Skill/EffectParams.h"  // EffectParams 완전타입
-#include "Skill/AreaEffect.h"    // AreaEffect 완전타입 (m_skillAreaEffects 조작)
-#include "Skill/ProjectileGroup.h"  // ProjectileGroup 완전타입 (m_skillProjectileGroups 조작)
-#include "Skill/SkillBake.h"        // BakeSkillEffectParams (폭발 발동 시)
-#include "Generated/GameData_Skill.h"  // GameDataTable_Skill::FindData (OnHitSkillKey 조회)
+#include "ActorObject.h"
+#include "GameServer.h"
+#include "Skill/EffectShape.h"
+#include "Skill/EffectParams.h"
+#include "Skill/AreaEffect.h"
+#include "Skill/ProjectileGroup.h"
+#include "Skill/SkillBake.h"
+#include "Generated/GameData_Skill.h"
 
 #include <cmath>
 #include <random>
@@ -15,7 +15,6 @@
 // ─────────────────────────────────────────────────────────────
 // Stage 의 스킬 효과 서브시스템.
 // 범위공격(AreaEffect) / 투사체 그룹(ProjectileGroup) 의 spawn·tick·만료·대미지·시전통보를 담당한다.
-// Stage 클래스의 멤버 함수이며, 파일 크기 관리를 위해 Stage.cpp 에서 분리했다.
 // ─────────────────────────────────────────────────────────────
 
 namespace

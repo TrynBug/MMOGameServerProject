@@ -3,8 +3,8 @@
 #include "pch.h"
 
 #include "StatComponentBase.h"
-#include "Enum/GameEnum_Stat.h"          // EStat, EStatGroup, EStatOp
-#include "Generated/GameData_Stat.h"     // GameDataTable_Stat (역인덱스 조회)
+#include "Enum/GameEnum_Stat.h"
+#include "Generated/GameData_Stat.h"
 
 #include <functional>
 
@@ -19,7 +19,6 @@
 // 캐릭터는 모든 스탯을 가질 수 있으므로 조밀 배열이 적합하다.
 //
 // 공식/누적/합성 흐름은 StatComponentBase 가 담당한다.
-// 이 클래스는 저장 접근(getRaw/setRaw/setTotal)과, 캐릭터 전용 조회(Get)만 제공한다.
 //
 // ── 스레드 ──
 // 소속 Stage 의 컨텐츠 스레드에서만 접근한다. 별도 락 없음.

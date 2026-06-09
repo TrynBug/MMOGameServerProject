@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "Skill/AreaEffect.h"
 
-#include "Stage.h"        // QueryEnemiesInShape, ApplyEffectDamage
-#include "ActorObject.h"  // 적(StageObject)을 ActorObject 로 캐스팅하여 대미지 적용
+#include "Stage.h"
+#include "ActorObject.h"
 
 AreaEffect::AreaEffect(const EffectParams& params)
     : m_params(params)

@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "SkillComponent.h"
 
-#include "ActorObject.h"                // owner 의 위치/타입/ID/ApplySkillMovement
-#include "Stage.h"                      // SpawnSkillProjectileGroup / SpawnSkillAreaEffect
-#include "Skill/SkillBake.h"            // BakeSkillEffectParams
-#include "Generated/GameData_Skill.h"   // GameData_Skill / GameDataTable_Skill::FindData
+#include "ActorObject.h"
+#include "Stage.h"
+#include "Skill/SkillBake.h"
+#include "Generated/GameData_Skill.h"
 
 #include <cmath>
 

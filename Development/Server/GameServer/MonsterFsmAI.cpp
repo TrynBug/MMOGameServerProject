@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "MonsterFsmAI.h"
-#include "Monster.h"      // 두뇌는 Monster 의 공유 행동 API 를 호출하므로 완전타입 필요
+#include "Monster.h"
 
 #include <cmath>
 

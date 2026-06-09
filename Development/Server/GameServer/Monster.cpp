@@ -1,13 +1,13 @@
 #include "pch.h"
 #include "Monster.h"
-#include "Stage.h"      // 타겟 탐색(ForEachAdjacentSector)/길찾기(FindPath)/sector 갱신/FindObject
-#include "Sector.h"     // 타겟 탐색 시 GetUsers
+#include "Stage.h"
+#include "Sector.h"
 
 #include <cmath>
 
 namespace
 {
-    // ── 이동 임계값 (Character.cpp 와 동일 규약) ──
+    // ── 이동 임계값 ──
     constexpr float k_minMoveDistSq       = 0.01f;     // 0.1유닛 이내면 이동 안 함
     constexpr float k_radToDeg            = 57.2957795f;
     constexpr float k_waypointReachDistSq = 0.0025f;   // 5cm. 부동소수점 안전망.
@@ -68,7 +68,6 @@ bool Monster::applyBaseStats()
     }
 
     // (EStat, value) 쌍 목록을 순회하며 적용. Stat 이 None 인 슬롯은 건너뛴다.
-    // (JobBase 와 동일 패턴. 3번째 소비처가 생기면 템플릿 헬퍼로 통합 예정.)
     const int32 statCount = m_pMonsterData->GetStatCount();
     for (int32 i = 0; i < statCount; ++i)
     {
@@ -231,7 +230,7 @@ void Monster::ExecuteSkill(int32 index, StageObject* pTarget)
 }
 
 // ─────────────────────────────────────────────────────────────
-// 공유 행동 레이어 — 이동 (Character 패턴 미러링, 이동속도만 m_moveSpeed 사용)
+// 공유 행동 레이어 — 이동
 // ─────────────────────────────────────────────────────────────
 void Monster::MoveTo(float destX, float destY, float destZ, int64 deltaMs)
 {

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "pch.h"
-#include "GameServerDefine.h"        // Vector3
-#include "Skill/EffectShape.h"       // EffectShape
-#include "Enum/GameEnum_Common.h"    // EObjectType
-#include "Enum/GameEnum_Skill.h"     // ESkillEffectMotion, ESkillEffectDamage (게임데이터 생성 enum)
+#include "GameServerDefine.h"
+#include "Skill/EffectShape.h"
+#include "Enum/GameEnum_Common.h"
+#include "Enum/GameEnum_Skill.h"
 
 // 전방선언: 스킬 게임데이터. 여기서는 포인터 멤버로만 보관하므로 정의 없이도 컴파일된다.
 struct GameData_Skill;

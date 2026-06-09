@@ -3,8 +3,8 @@
 #include "pch.h"
 
 #include "StatComponentBase.h"
-#include "Enum/GameEnum_Stat.h"          // EStat, EStatGroup
-#include "Generated/GameData_Stat.h"     // GameDataTable_Stat (그룹→Total 스탯 변환)
+#include "Enum/GameEnum_Stat.h"
+#include "Generated/GameData_Stat.h"
 
 #include <functional>
 #include <unordered_map>

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "NavMeshManager.h"
 
-#include "nlohmann/json.hpp"  // nlohmann/json
+#include "nlohmann/json.hpp"
 
 #include <cmath>
 #include <cstdio>

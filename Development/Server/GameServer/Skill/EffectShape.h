@@ -1,8 +1,8 @@
 #pragma once
 
 #include "pch.h"
-#include "GameServerDefine.h"        // Vector3
-#include "Enum/GameEnum_Skill.h"     // ESkillEffectShape (게임데이터 생성 enum)
+#include "GameServerDefine.h"
+#include "Enum/GameEnum_Skill.h"
 
 // ─────────────────────────────────────────────────────────────
 // EffectShape — 스킬/효과의 범위 모양 (X-Z 평면)

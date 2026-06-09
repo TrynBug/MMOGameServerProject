@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "Character.h"
-#include "GameServer.h"           // buff hooks call SendStatUpdateNtf / SendHpMpNtf
-#include "Stage.h"               // SetDestination 에서 Stage::FindPath 호출
+#include "GameServer.h"
+#include "Stage.h"
 
-#include "Generated/GameData_JobBase.h"   // 생성 시 JobBase 기본스탯 적용
+#include "Generated/GameData_JobBase.h"
 
 #include <cmath>
 

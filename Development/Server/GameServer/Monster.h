@@ -3,10 +3,10 @@
 #include "pch.h"
 #include "ActorObject.h"
 #include "BasicStatComponent.h"
-#include "IMonsterAI.h"                     // 교체 가능한 두뇌(unique_ptr<IMonsterAI>)
+#include "IMonsterAI.h"
 
-#include "Enum/GameEnum_Stat.h"             // EStatGroup
-#include "Generated/GameData_Monster.h"     // GameData_Monster
+#include "Enum/GameEnum_Stat.h"
+#include "Generated/GameData_Monster.h"
 
 #include <vector>
 #include <memory>
@@ -200,7 +200,7 @@ private:
     // ── 스킬 ──────────────────────────────────────────────────
     std::vector<MonsterSkill> m_skills;
 
-    // ── 이동 상태 (Character 미러링) ──────────────────────────
+    // ── 이동 상태 ──────────────────────────
     bool  m_isMoving = false;
     // 이동 상태 변화 플래그. setDestination(시작/목적지변경)·StopMoving(정지)에서 set,
     // ConsumeMoveStateDirty 에서 reset. updateMonsters 가 MoveNtf 브로드캐스트 여부 판단에 사용.

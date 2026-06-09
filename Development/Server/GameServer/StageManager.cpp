@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "StageManager.h"
-#include "GameServer.h"   // AssignContents/RemoveContents/GetContentsThreadCount 호출
-#include "Stage.h"        // LoadStageGridParams
-#include "Map/NavMeshManager.h"  // NavMeshMeta
+#include "GameServer.h"
+#include "Stage.h"
+#include "Map/NavMeshManager.h"
 #include "Generated/GameData_Stage.h"
 
 void StageManager::Initialize(GameServer* pGameServer, int32 contentsThreadCount)

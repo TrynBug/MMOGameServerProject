@@ -2,10 +2,10 @@
 
 #include "pch.h"
 #include "StageObject.h"
-#include "BuffComponent.h"        // 액터가 버프 컴포넌트를 멤버로 소유
-#include "SkillComponent.h"       // 액터가 스킬 컴포넌트를 멤버로 소유
+#include "BuffComponent.h"
+#include "SkillComponent.h"
 
-#include "Enum/GameEnum_Stat.h"   // EStatGroup
+#include "Enum/GameEnum_Stat.h"
 
 // 전방선언: 스탯 컴포넌트 베이스 (파생이 GetStatComponent 로 노출)
 class StatComponentBase;
@@ -16,14 +16,6 @@ class StatComponentBase;
 //
 // StageObject 중에서 "상호작용 가능한 오브젝트" 의 공통 베이스 클래스이다.
 // Character, Monster, Pet, NPC 등이 이 클래스를 상속받는다.
-//
-// 예정된 공통 속성 (일부 미구현):
-//   - 스탯 (체력, 공격력, 이동속도 등) : 파생 클래스가 스탯 컴포넌트로 보유
-//   - 버프 / 디버프
-//   - 스킬
-//   - AI
-//   - 레벨
-//   - 생존 / 사망 상태  : 아래 현재HP/MP 로 표현
 //
 // ── 현재HP / 현재MP ──
 // 최대치(HpTotal/MpTotal 스탯)와 달리, 현재HP/MP 는 대미지/회복으로만 변하는 런타임 상태다.

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "pch.h"
-#include "GameServerDefine.h"      // Vector3
-#include "Enum/GameEnum_Skill.h"   // ENextSkillOrigin
+#include "GameServerDefine.h"
+#include "Enum/GameEnum_Skill.h"
 
 // 전방선언. 완전타입은 SkillComponent.cpp 에서 include.
 class ActorObject;

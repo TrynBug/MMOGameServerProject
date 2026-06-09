@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pch.h"
-#include "Skill/EffectParams.h"   // EffectParams
+#include "Skill/EffectParams.h"
 
 // 전방선언. Update 에서 포인터로만 사용하므로 완전타입은 AreaEffect.cpp 에서 include.
 class Stage;

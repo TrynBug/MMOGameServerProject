@@ -17,13 +17,6 @@ struct ProjectileHitResult
 //
 // 서버는 투사체를 매 tick 굴리지 않는다. 발사 파라미터 + 방향들만 들고 있다가,
 // 클라가 hit 을 보고하면 그 시점 위치를 즉석 역산하여 검증한다 (Stage::OnSkillProjectileHit).
-//
-// 중복타격 규칙:
-//   - 1개 투사체는 1개 타겟만 타격한다 (m_consumed).
-//   - 같은 타겟을 이 그룹이 2번째 이상 타격하면 대미지가 10% 로 감소하고 duplication flag 가 선다.
-//   - (폭발은 이 규칙 밖. 폭발끼리는 독립 — Stage 핸들러에서 직격 배율만 물려받는다.)
-//
-// 묶음 단위(그룹)로 관리하는 이유: 위 중복타격 감쇠가 "1회 시전" 단위로 적용되기 때문.
 class ProjectileGroup
 {
 public:

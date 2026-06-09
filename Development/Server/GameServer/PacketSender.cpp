@@ -1,11 +1,10 @@
 #include "pch.h"
 #include "PacketSender.h"
-#include "Character.h"   // SendStageLoadCompleteRes / SendStatUpdateNtf 의 Character 멤버 접근(스탯/HP)
+#include "Character.h"
 
 // ─────────────────────────────────────────────────────────────
 // PacketSender 의 패킷별 송신 구현.
 // 모든 함수는 SendToUser(공통 배관, PacketSender.h 템플릿)를 통해 게이트웨이로 전송한다.
-// 원래 GameServer.cpp / GameServerBuff.cpp 에 흩어져 있던 Send*** 들을 한 곳으로 모았다.
 // ─────────────────────────────────────────────────────────────
 
 void PacketSender::SendStageLoadCompleteRes(int64 userId, EResultCode resultCode, int64 stageId, int32 stageDataKey,
