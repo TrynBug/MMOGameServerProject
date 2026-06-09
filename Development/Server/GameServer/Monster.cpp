@@ -23,9 +23,10 @@ bool Monster::Initialize(int64 objectId, const GameData_Monster* pMonsterData)
 {
     if (pMonsterData == nullptr)
     {
-        LOG_WRITE(LogLevel::Error, std::format("Monster::Initialize - monster data is null. objectId={}", objectId));
+        LOG_WRITE(LogLevel::Error, std::format("monster data is null. objectId={}", objectId));
         return false;
     }
+
     if (!ActorObject::Initialize(objectId, EObjectType::Monster))
         return false;
 
@@ -62,7 +63,7 @@ bool Monster::applyBaseStats()
 {
     if (m_pMonsterData == nullptr)
     {
-        LOG_WRITE(LogLevel::Error, std::format("Monster::applyBaseStats - monster data is null. objectId={}", GetObjectId()));
+        LOG_WRITE(LogLevel::Error, std::format("monster data is null. objectId={}", GetObjectId()));
         return false;
     }
 
@@ -225,7 +226,7 @@ void Monster::ExecuteSkill(int32 index, StageObject* pTarget)
     //   - 원거리: 투사체 생성 + 클라 통보
     //   전투/스킬 시스템이 아직 없으므로 현재는 뼈대 검증용 로그만 남긴다.
     const MonsterSkill& skill = m_skills[index];
-    LOG_WRITE(LogLevel::Info, std::format("Monster::ExecuteSkill(STUB) - objectId={} skillId={} targetId={}",
+    LOG_WRITE(LogLevel::Info, std::format("(STUB) - objectId={} skillId={} targetId={}",
         GetObjectId(), skill.skillId, (pTarget != nullptr ? pTarget->GetObjectId() : 0)));
 }
 

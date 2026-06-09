@@ -5,8 +5,7 @@ bool StageObject::Initialize(int64 objectId, EObjectType objectType)
 {
     if (objectId == 0 || objectType == EObjectType::None)
     {
-        LOG_WRITE(LogLevel::Error, std::format("StageObject::Initialize - invalid args. objectId={} objectType={}",
-            objectId, static_cast<int>(objectType)));
+        LOG_WRITE(LogLevel::Error, std::format("invalid args. objectId={} objectType={}", objectId, static_cast<int>(objectType)));
         return false;
     }
 

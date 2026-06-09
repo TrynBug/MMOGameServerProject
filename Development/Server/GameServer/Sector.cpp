@@ -25,8 +25,7 @@ void Sector::AddObject(StageObject* pObject)
         m_drops[objectId] = pObject;
         break;
     default:
-        LOG_WRITE(LogLevel::Warn, std::format("Sector::AddObject - unknown objectType={} objectId={}",
-            static_cast<int>(objectType), objectId));
+        LOG_WRITE(LogLevel::Warn, std::format("unknown objectType={} objectId={}", static_cast<int>(objectType), objectId));
         break;
     }
 }
@@ -54,8 +53,7 @@ void Sector::RemoveObject(StageObject* pObject)
         m_drops.erase(objectId);
         break;
     default:
-        LOG_WRITE(LogLevel::Warn, std::format("Sector::RemoveObject - unknown objectType={} objectId={}",
-            static_cast<int>(objectType), objectId));
+        LOG_WRITE(LogLevel::Warn, std::format("unknown objectType={} objectId={}", static_cast<int>(objectType), objectId));
         break;
     }
 }

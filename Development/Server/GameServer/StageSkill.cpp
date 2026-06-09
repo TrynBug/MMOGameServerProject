@@ -26,8 +26,7 @@ namespace
 
 // (centerPos 를 중심으로) shape 범위 안의 "적" StageObject 들을 outEnemies 에 채운다. (X-Z 평면)
 // 진영 규칙(v1): Monster 시전자는 User(캐릭터)를, 그 외(User 등) 시전자는 Monster 를 대상으로 한다.
-void Stage::QueryEnemiesInShape(EObjectType casterType, const Vector3& centerPos,
-                                const EffectShape& shape, std::vector<StageObject*>& outEnemies)
+void Stage::QueryEnemiesInShape(EObjectType casterType, const Vector3& centerPos, const EffectShape& shape, std::vector<StageObject*>& outEnemies)
 {
     outEnemies.clear();
 

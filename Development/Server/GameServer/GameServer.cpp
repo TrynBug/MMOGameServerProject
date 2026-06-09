@@ -12,8 +12,7 @@ bool GameServer::OnInitialize()
     // ── 내부서버용 패킷 디스패처 ────────────────────────────────
     m_internalPacketDispatcher.SetUnknownPacketHandler([](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GameServer: unknown internal packetId={} sessionId={}",
-            spPacket->GetHeader()->type, spSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("unknown internal packetId={} sessionId={}", spPacket->GetHeader()->type, spSession->GetId()));
     });
 
     // ── 내부 서버 네트워크 이벤트 핸들러 등록 ───────────────────
@@ -36,8 +35,7 @@ bool GameServer::OnInitialize()
 
     m_gatewayDispatcher.SetUnknownPacketHandler([](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GameServer: unknown gateway packetId={} sessionId={}",
-            spPacket->GetHeader()->type, spSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("unknown gateway packetId={} sessionId={}", spPacket->GetHeader()->type, spSession->GetId()));
     });
 
     // ── 게이트웨이서버 네트워크 이벤트 핸들러 등록 ──────────────
@@ -66,7 +64,7 @@ bool GameServer::OnInitialize()
     const std::filesystem::path navMeshDir = currPath.parent_path() / "Map" / "NavMesh";
     if (!m_navMeshManager.LoadAll(navMeshDir))
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to initialize NavMeshManager. navMeshDir={}", navMeshDir.string()));
+        LOG_WRITE(LogLevel::Error, std::format("failed to initialize NavMeshManager. navMeshDir={}", navMeshDir.string()));
         return false;
     }
 
@@ -74,7 +72,7 @@ bool GameServer::OnInitialize()
     // StageManager가 Stage 생성 + SetGameServer + AssignContents까지 처리.
     if (GetContentsThreadCount() <= 0)
     {
-        LOG_WRITE(LogLevel::Error, "GameServer::OnInitialize - no contents threads available.");
+        LOG_WRITE(LogLevel::Error, "no contents threads available.");
         return false;
     }
 
@@ -83,14 +81,14 @@ bool GameServer::OnInitialize()
     const int64 systemStageId = GenerateObjectId();
     if (!m_stageManager.CreateSystemStage(systemStageId, k_systemStageDataKey))
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to create SystemStage. stageId={}, stageKey={}", systemStageId, k_systemStageDataKey));
+        LOG_WRITE(LogLevel::Error, std::format("failed to create SystemStage. stageId={}, stageKey={}", systemStageId, k_systemStageDataKey));
         return false;
     }
 
     const int64 townStageId = GenerateObjectId();
     if (!m_stageManager.CreateTown(townStageId, k_townStageDataKey))
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to create Town. stageId={}, stageKey={}", townStageId, k_townStageDataKey));
+        LOG_WRITE(LogLevel::Error, std::format("failed to create Town. stageId={}, stageKey={}", townStageId, k_townStageDataKey));
         return false;
     }
 
@@ -103,7 +101,7 @@ bool GameServer::OnInitialize()
         const int64 fieldStageId = GenerateObjectId();
         if (!m_stageManager.CreateField(fieldStageId, stageDataKey))
         {
-            LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to create Field. stageId={}, stageKey={}", fieldStageId, stageDataKey));
+            LOG_WRITE(LogLevel::Error, std::format("failed to create Field. stageId={}, stageKey={}", fieldStageId, stageDataKey));
             return false;
         }
     }
@@ -111,11 +109,11 @@ bool GameServer::OnInitialize()
     // ── GameDB 열기 ────────────────────────────────────────────
     if (!m_dbQueue.Open(k_gameDBPath, 1))
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer::OnInitialize - failed to open GameDB at {}", k_gameDBPath));
+        LOG_WRITE(LogLevel::Error, std::format("failed to open GameDB at {}", k_gameDBPath));
         return false;
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer::OnInitialize complete. serverId={}", GetServerId()));
+    LOG_WRITE(LogLevel::Info, std::format("complete. serverId={}", GetServerId()));
     return true;
 }
 
@@ -178,14 +176,14 @@ bool GameServer::onInternalAccept(const netlib::ISessionPtr& spSession)
     if (IsShuttingDown())
         return false;
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: internal server connected. sessionId={}", spSession->GetId()));
+    LOG_WRITE(LogLevel::Info, std::format("internal server connected. sessionId={}", spSession->GetId()));
     return true;
 }
 
 // 내부 서버 연결 끊김
 void GameServer::onInternalDisconnect(const netlib::ISessionPtr& spSession)
 {
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: internal server disconnected. sessionId={}", spSession->GetId()));
+    LOG_WRITE(LogLevel::Info, std::format("internal server disconnected. sessionId={}", spSession->GetId()));
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -197,7 +195,7 @@ void GameServer::onGatewayConnect(const netlib::ISessionPtr& spSession)
     // 세션에 빈 메타 정보를 부착한다. gatewayServerId는 handshake 전송 시 채운다.
     spSession->SetUserData(std::make_shared<InternalSessionMeta>());
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: gateway connected. sessionId={}", spSession->GetId()));
+    LOG_WRITE(LogLevel::Info, std::format("gateway connected. sessionId={}", spSession->GetId()));
 
     // 핸드셰이크 전송
     sendGameServerHandshakeReq(spSession);
@@ -209,14 +207,14 @@ void GameServer::onGatewayDisconnect(const netlib::ISessionPtr& spSession)
     InternalSessionMeta* pMeta = getInternalSessionMeta(spSession);
     if (!pMeta || !pMeta->handshakeDone)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GameServer: gateway disconnected before handshake. sessionId={}", spSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("gateway disconnected before handshake. sessionId={}", spSession->GetId()));
         return;
     }
 
     int32 gatewayId = pMeta->peerServerId;
     m_safeGatewaySessions.Erase(gatewayId);
 
-    LOG_WRITE(LogLevel::Warn, std::format("GameServer: gateway disconnected. gatewayId={}", gatewayId));
+    LOG_WRITE(LogLevel::Warn, std::format("gateway disconnected. gatewayId={}", gatewayId));
 }
 
 void GameServer::connectToGateway(int32 gatewayId, const std::string& ip, uint16 port)
@@ -228,11 +226,11 @@ void GameServer::connectToGateway(int32 gatewayId, const std::string& ip, uint16
     if (spClient)
     {
         m_safeGatewayClients.Insert(gatewayId, spClient);
-        LOG_WRITE(LogLevel::Info, std::format("GameServer: connecting to gateway {} {}:{}", gatewayId, ip, port));
+        LOG_WRITE(LogLevel::Info, std::format("connecting to gateway {} {}:{}", gatewayId, ip, port));
     }
     else
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GameServer: failed to create NetClient to gateway {} {}:{}", gatewayId, ip, port));
+        LOG_WRITE(LogLevel::Warn, std::format("failed to create NetClient to gateway {} {}:{}", gatewayId, ip, port));
     }
 }
 
@@ -245,7 +243,7 @@ void GameServer::disconnectFromGateway(int32 gatewayId)
     if (spClient)
         DisconnectToServer(spClient);
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: disconnected from gateway {}", gatewayId));
+    LOG_WRITE(LogLevel::Info, std::format("disconnected from gateway {}", gatewayId));
 }
 
 void GameServer::sendGameServerHandshakeReq(const netlib::ISessionPtr& spGatewaySession)
@@ -270,7 +268,7 @@ void GameServer::sendGameServerHandshakeReq(const netlib::ISessionPtr& spGateway
 
     if (gatewayId == 0)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GameServer: cannot identify gatewayId for session. sessionId={}", spGatewaySession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("cannot identify gatewayId for session. sessionId={}", spGatewaySession->GetId()));
         return;
     }
 
@@ -293,14 +291,13 @@ void GameServer::sendGameServerHandshakeReq(const netlib::ISessionPtr& spGateway
     auto spPacket = SerializePacket(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_REQ, req);
     if (!spPacket)
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer: failed to serialize GameServerHandshakeNtf. gatewayId={}", gatewayId));
+        LOG_WRITE(LogLevel::Error, std::format("failed to serialize GameServerHandshakeNtf. gatewayId={}", gatewayId));
         return;
     }
 
     spGatewaySession->Send(spPacket);
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: sent GameServerHandshakeNtf. myServerId={} gatewayId={}",
-        GetServerId(), gatewayId));
+    LOG_WRITE(LogLevel::Info, std::format("sent GameServerHandshakeNtf. myServerId={} gatewayId={}", GetServerId(), gatewayId));
 }
 
 InternalSessionMeta* GameServer::getInternalSessionMeta(const netlib::ISessionPtr& spSession)
@@ -323,13 +320,12 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
     const int32 gatewayId = msg.gateway_id();
     const std::string clientIp = msg.client_ip();
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: GatewayUserEnterNtf received. userId={} gatewayId={} clientIp={}",
-        userId, gatewayId, clientIp));
+    LOG_WRITE(LogLevel::Info, std::format("GatewayUserEnterNtf received. userId={} gatewayId={} clientIp={}", userId, gatewayId, clientIp));
 
     // 이미 입장한 유저인지 확인
     if (m_safeUsers.Contains(userId))
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GameServer: user already exists. userId={}", userId));
+        LOG_WRITE(LogLevel::Warn, std::format("user already exists. userId={}", userId));
         co_return;
     }
 
@@ -342,7 +338,7 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
 
     if (!result.success)
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer: DB select failed. userId={} err={}", userId, result.errorMsg));
+        LOG_WRITE(LogLevel::Error, std::format("DB select failed. userId={} err={}", userId, result.errorMsg));
         co_return;
     }
 
@@ -355,14 +351,13 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
         DataStructures::Character character;
         if (!packet::ProtoJsonSerializer::FromJson(dataJson, character))
         {
-            LOG_WRITE(LogLevel::Error, std::format("GameServer: failed to parse character JSON. userId={} row={}", userId, row));
+            LOG_WRITE(LogLevel::Error, std::format("failed to parse character JSON. userId={} row={}", userId, row));
             continue;
         }
         characters.push_back(std::move(character));
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: characters loaded from DB. userId={} count={}",
-        userId, characters.size()));
+    LOG_WRITE(LogLevel::Info, std::format("characters loaded from DB. userId={} count={}", userId, characters.size()));
 
     // ── 2) 유저 객체 생성 및 글로벌 맵 등록 ────────────────────
     UserPtr spUser = std::make_shared<User>(userId, gatewayId, clientIp);
@@ -377,7 +372,7 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
     }
     else
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer: system stage is null. userId={}", userId));
+        LOG_WRITE(LogLevel::Error, std::format("system stage is null. userId={}", userId));
         co_return;
     }
 
@@ -413,8 +408,7 @@ void GameServer::sendCharacterListNtf(int64 userId, const std::vector<DataStruct
     }
     m_packetSender.SendToUser(userId, Common::GAME_PACKET_ID_CHARACTER_LIST_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterListNtf sent. userId={} count={}",
-        userId, characters.size()));
+    LOG_WRITE(LogLevel::Info, std::format("CharacterListNtf sent. userId={} count={}", userId, characters.size()));
 }
 
 // 클라이언트 캐릭터 생성 요청 처리 → 코루틴
@@ -424,8 +418,7 @@ void GameServer::sendCharacterListNtf(int64 userId, const std::vector<DataStruct
 // 4) CharacterCreateRes 전송 (성공/실패)
 db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 userId, GamePacket::CharacterCreateReq req)
 {
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterCreateReq received. userId={} name='{}' jobId={}",
-        userId, req.name(), req.job_id()));
+    LOG_WRITE(LogLevel::Info, std::format("CharacterCreateReq received. userId={} name='{}' jobId={}", userId, req.name(), req.job_id()));
 
     // ── 1) 명칭 검증 ────────────────────────────────────────
     if (req.name().empty())
@@ -452,7 +445,7 @@ db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 userId, GamePac
     std::string dataJson;
     if (!packet::ProtoJsonSerializer::ToJson(character, dataJson))
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer: failed to serialize character to JSON. userId={}", userId));
+        LOG_WRITE(LogLevel::Error, std::format("failed to serialize character to JSON. userId={}", userId));
         sendCharacterCreateRes(userId, EResultCode::Fail, "server error: serialize", nullptr);
         co_return;
     }
@@ -465,12 +458,12 @@ db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 userId, GamePac
 
     if (!insertResult.success)
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterCreate DB insert failed. userId={} err={}", userId, insertResult.errorMsg));
+        LOG_WRITE(LogLevel::Error, std::format("CharacterCreate DB insert failed. userId={} err={}", userId, insertResult.errorMsg));
         sendCharacterCreateRes(userId, EResultCode::Fail, "server error: db insert", nullptr);
         co_return;
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: character created. userId={} characterId={} name='{}'",
+    LOG_WRITE(LogLevel::Info, std::format("character created. userId={} characterId={} name='{}'",
         userId, character.character_id(), character.name()));
 
     // ── 4) 성공 응답 ────────────────────────────────────────────
@@ -500,8 +493,7 @@ void GameServer::sendCharacterCreateRes(int64 userId, EResultCode resultCode, co
 db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePacket::CharacterSelectReq req)
 {
     const int64 characterId = req.character_id();
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterSelectReq received. userId={} characterId={}",
-        userId, characterId));
+    LOG_WRITE(LogLevel::Info, std::format("CharacterSelectReq received. userId={} characterId={}", userId, characterId));
 
     // ── 1) DB에서 해당 캐릭터 조회 ─────────────────────────────
     db::DBResult result = co_await m_dbQueue.ExecuteAsync(
@@ -512,7 +504,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
 
     if (!result.success)
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect DB select failed. userId={} err={}", userId, result.errorMsg));
+        LOG_WRITE(LogLevel::Error, std::format("CharacterSelect DB select failed. userId={} err={}", userId, result.errorMsg));
         sendCharacterSelectRes(userId, EResultCode::Fail, "server error: db select", nullptr, 0);
         co_return;
     }
@@ -520,8 +512,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     // ── 2) 없는 캐릭터 ─────────────────────────────────────────────
     if (result.IsEmpty())
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GameServer: CharacterSelect - character not found. userId={} characterId={}",
-            userId, characterId));
+        LOG_WRITE(LogLevel::Warn, std::format("CharacterSelect - character not found. userId={} characterId={}", userId, characterId));
         sendCharacterSelectRes(userId, EResultCode::Fail, "character not found", nullptr, 0);
         co_return;
     }
@@ -530,7 +521,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     const std::string dataJson = result.GetString(0, "data");
     if (!packet::ProtoJsonSerializer::FromJson(dataJson, character))
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - failed to parse character JSON. userId={} characterId={}",
+        LOG_WRITE(LogLevel::Error, std::format("CharacterSelect - failed to parse character JSON. userId={} characterId={}",
             userId, characterId));
         sendCharacterSelectRes(userId, EResultCode::Fail, "server error: parse", nullptr, 0);
         co_return;
@@ -539,7 +530,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     // ── 3) owner_user_id 검증 (PK가 (user_id, character_id) 이므로 이론상 통과해야 함, 안전장치) ──────────────────
     if (character.owner_user_id() != userId)
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - owner mismatch. userId={} characterOwner={} characterId={}",
+        LOG_WRITE(LogLevel::Error, std::format("CharacterSelect - owner mismatch. userId={} characterOwner={} characterId={}",
             userId, character.owner_user_id(), characterId));
         sendCharacterSelectRes(userId, EResultCode::Fail, "not character owner", nullptr, 0);
         co_return;
@@ -549,14 +540,14 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     UserPtr spUser;
     if (!m_safeUsers.Find(userId, spUser) || !spUser)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GameServer: CharacterSelect - user not found in global map. userId={}", userId));
+        LOG_WRITE(LogLevel::Warn, std::format("CharacterSelect - user not found in global map. userId={}", userId));
         co_return;
     }
 
     // 이미 입장 중(Moving)이거나 입장 완료(InStage)면 중복 선택 거부.
     if (spUser->GetStageState() != EUserStageState::None)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GameServer: CharacterSelect - invalid stage state. userId={} state={}",
+        LOG_WRITE(LogLevel::Warn, std::format("CharacterSelect - invalid stage state. userId={} state={}",
             userId, static_cast<int32>(spUser->GetStageState())));
         sendCharacterSelectRes(userId, EResultCode::Fail, "already entering or in stage", nullptr, 0);
         co_return;
@@ -567,21 +558,21 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
     CharacterPtr spCharacter = std::make_shared<Character>();
     if (!spCharacter->Initialize(character))
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - Character Initialize failed. userId={} characterId={}", userId, characterId));
+        LOG_WRITE(LogLevel::Error, std::format("CharacterSelect - Character Initialize failed. userId={} characterId={}", userId, characterId));
         sendCharacterSelectRes(userId, EResultCode::Fail, "server error: character init", nullptr, 0);
         co_return;
     }
     spCharacter->SetUser(spUser);              // Character -> User weak_ptr
     spUser->SetCurrentCharacter(spCharacter);  // User -> Character shared_ptr (소유)
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: character selected. userId={} characterId={} name='{}'",
+    LOG_WRITE(LogLevel::Info, std::format("character selected. userId={} characterId={} name='{}'",
         userId, character.character_id(), character.name()));
 
     // ── 5) Town 확인 ─────────────────────────────────────────────────────
     TownPtr spTown = m_stageManager.GetTown();
     if (!spTown)
     {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer: CharacterSelect - Town is null. userId={}", userId));
+        LOG_WRITE(LogLevel::Error, std::format("CharacterSelect - Town is null. userId={}", userId));
         sendCharacterSelectRes(userId, EResultCode::Fail, "server error: no town", nullptr, 0);
         co_return;
     }
@@ -615,7 +606,7 @@ void GameServer::sendCharacterSelectRes(int64 userId, EResultCode resultCode, co
     res.set_stage_data_key(stageDataKey);
     m_packetSender.SendToUser(userId, Common::GAME_PACKET_ID_CHARACTER_SELECT_RES, res);
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: CharacterSelectRes sent. userId={} resultCode={} characterId={} stageDataKey={}",
+    LOG_WRITE(LogLevel::Info, std::format("CharacterSelectRes sent. userId={} resultCode={} characterId={} stageDataKey={}",
         userId, static_cast<int32>(resultCode), pCharacter ? pCharacter->character_id() : 0, stageDataKey));
 }
 
@@ -625,12 +616,12 @@ void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSess
 {
     const int64 userId = msg.user_id();
 
-    LOG_WRITE(LogLevel::Info, std::format("GameServer: GatewayUserDisconnectNtf received. userId={}", userId));
+    LOG_WRITE(LogLevel::Info, std::format("GatewayUserDisconnectNtf received. userId={}", userId));
 
     UserPtr spUser;
     if (!m_safeUsers.EraseAndGet(userId, spUser) || !spUser)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GameServer: user not found on disconnect. userId={}", userId));
+        LOG_WRITE(LogLevel::Warn, std::format("user not found on disconnect. userId={}", userId));
         return;
     }
 
@@ -642,8 +633,7 @@ void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSess
     }
     else
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GameServer: user disconnect - unknown stageId. userId={} stageId={}",
-            userId, currentStageId));
+        LOG_WRITE(LogLevel::Warn, std::format("user disconnect - unknown stageId. userId={} stageId={}", userId, currentStageId));
     }
 }
 
@@ -679,7 +669,7 @@ void GameServer::handleRelayedClientPacket(const netlib::PacketPtr& spPacket)
     // 사이드카 크기 검증 (게이트웨이는 int64 userId 8바이트를 붙이기로 약속)
     if (spPacket->GetSidecarSize() != sizeof(int64))
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GameServer: unexpected sidecar size. expected={} actual={} packetType={}",
+        LOG_WRITE(LogLevel::Warn, std::format("unexpected sidecar size. expected={} actual={} packetType={}",
             sizeof(int64), spPacket->GetSidecarSize(), spPacket->GetHeader()->type));
         return;
     }
@@ -692,7 +682,7 @@ void GameServer::handleRelayedClientPacket(const netlib::PacketPtr& spPacket)
     UserPtr spUser;
     if (!m_safeUsers.Find(userId, spUser) || !spUser)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GameServer: relayed client packet for unknown user. userId={} packetType={}",
+        LOG_WRITE(LogLevel::Warn, std::format("relayed client packet for unknown user. userId={} packetType={}",
             userId, spPacket->GetHeader()->type));
         return;
     }
@@ -707,7 +697,7 @@ void GameServer::handleRelayedClientPacket(const netlib::PacketPtr& spPacket)
         GamePacket::CharacterCreateReq req;
         if (!DeserializePacket(*spPacket, req))
         {
-            LOG_WRITE(LogLevel::Warn, std::format("GameServer: failed to deserialize CharacterCreateReq. userId={}", userId));
+            LOG_WRITE(LogLevel::Warn, std::format("failed to deserialize CharacterCreateReq. userId={}", userId));
             return;
         }
         handleClientCharacterCreate(userId, std::move(req));
@@ -718,7 +708,7 @@ void GameServer::handleRelayedClientPacket(const netlib::PacketPtr& spPacket)
         GamePacket::CharacterSelectReq req;
         if (!DeserializePacket(*spPacket, req))
         {
-            LOG_WRITE(LogLevel::Warn, std::format("GameServer: failed to deserialize CharacterSelectReq. userId={}", userId));
+            LOG_WRITE(LogLevel::Warn, std::format("failed to deserialize CharacterSelectReq. userId={}", userId));
             return;
         }
         handleClientCharacterSelect(userId, std::move(req));

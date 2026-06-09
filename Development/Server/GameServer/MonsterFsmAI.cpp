@@ -32,6 +32,7 @@ void MonsterFsmAI::Update(Monster& monster, int64 deltaMs)
     // 사망 우선 처리.
     if (m_state == EMonsterState::Dead)
         return;
+
     if (monster.IsDead())
     {
         enterDead(monster);
@@ -166,6 +167,7 @@ void MonsterFsmAI::updateAttack(Monster& monster, int64 /*deltaMs*/)
     bool needReposition = (dist > monster.GetAttackRange());
     if (monster.IsRanged() && dist < monster.GetDesiredRange() * k_rangedBandRatio)
         needReposition = true;
+
     if (needReposition)
     {
         m_state = EMonsterState::Chase;

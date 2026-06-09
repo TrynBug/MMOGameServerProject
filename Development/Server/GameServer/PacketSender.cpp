@@ -37,7 +37,7 @@ void PacketSender::SendStageLoadCompleteRes(int64 userId, EResultCode resultCode
         }
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("PacketSender: StageLoadCompleteRes sent. userId={} stageId={} stageKey={} pos=({},{},{}) yaw={}",
+    LOG_WRITE(LogLevel::Info, std::format("StageLoadCompleteRes sent. userId={} stageId={} stageKey={} pos=({},{},{}) yaw={}",
         userId, stageId, stageDataKey, myPosX, myPosY, myPosZ, myYaw));
 }
 
@@ -61,10 +61,12 @@ void PacketSender::SendObjectVisibilityNtf(int64 userId,
     {
         *ntf.add_character_spawns() = spawn;
     }
+
     for (const auto& spawn : monsterSpawns)
     {
         *ntf.add_monster_spawns() = spawn;
     }
+
     for (int64 id : despawnIds)
     {
         ntf.add_despawn_ids(id);
@@ -72,7 +74,7 @@ void PacketSender::SendObjectVisibilityNtf(int64 userId,
 
     SendToUser(userId, Common::GAME_PACKET_ID_OBJECT_VISIBILITY_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("PacketSender: ObjectVisibilityNtf sent. userId={} characterSpawns={} monsterSpawns={} despawns={}",
+    LOG_WRITE(LogLevel::Info, std::format("ObjectVisibilityNtf sent. userId={} characterSpawns={} monsterSpawns={} despawns={}",
         userId, characterSpawns.size(), monsterSpawns.size(), despawnIds.size()));
 }
 
@@ -104,8 +106,7 @@ void PacketSender::SendMovePosCorrectNtf(int64 userId, float posX, float posY, f
 
     SendToUser(userId, Common::GAME_PACKET_ID_MOVE_POS_CORRECT_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("PacketSender: MovePosCorrectNtf sent. userId={} pos=({},{},{}) yaw={}",
-        userId, posX, posY, posZ, yaw));
+    LOG_WRITE(LogLevel::Info, std::format("MovePosCorrectNtf sent. userId={} pos=({},{},{}) yaw={}", userId, posX, posY, posZ, yaw));
 }
 
 void PacketSender::SendStatUpdateNtf(int64 userId, const Character& character)
@@ -123,7 +124,7 @@ void PacketSender::SendStatUpdateNtf(int64 userId, const Character& character)
 
     SendToUser(userId, Common::GAME_PACKET_ID_STAT_UPDATE_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("PacketSender: StatUpdateNtf sent. userId={} objectId={} count={}",
+    LOG_WRITE(LogLevel::Info, std::format("StatUpdateNtf sent. userId={} objectId={} count={}",
         userId, character.GetObjectId(), ntf.entries_size()));
 }
 

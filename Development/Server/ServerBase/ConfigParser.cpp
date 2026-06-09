@@ -13,7 +13,7 @@ bool ConfigParser::Load(const std::string& filePath)
     std::ifstream file(filePath);
     if (!file.is_open())
     {
-        LOG_WRITE(LogLevel::Error, std::format("ConfigParser::Load - cannot open file: {}", filePath));
+        LOG_WRITE(LogLevel::Error, std::format("cannot open file: {}", filePath));
         return false;
     }
 

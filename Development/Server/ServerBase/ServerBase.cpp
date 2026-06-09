@@ -56,11 +56,11 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
     // IoContext (IOCP + worker 스레드) 초기화
     if (!m_ioContext.Initialize(config.ioContextConfig))
     {
-        LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - IoContext Initialize failed");
+        LOG_WRITE(LogLevel::Error, "IoContext Initialize failed");
         return false;
     }
 
-    LOG_WRITE(LogLevel::Info, "ServerBase::Initialize - IoContext initialized");
+    LOG_WRITE(LogLevel::Info, "IoContext initialized");
 
 	// 클라이언트 Listen용 NetServer 초기화
     if (config.useClientListenServer)
@@ -68,19 +68,19 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
         netlib::FuncEventHandler* pHandler = GetClientListenEventHandler();
         if (!pHandler)
         {
-            LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - useClientListenServer=true but GetClientListenEventHandler() returned nullptr");
+            LOG_WRITE(LogLevel::Error, "useClientListenServer=true but GetClientListenEventHandler() returned nullptr");
             return false;
         }
 
         m_spClientListenServer = std::make_unique<netlib::NetServer>(&m_ioContext);
         if (!m_spClientListenServer->Initialize(config.clientListenServerConfig))
         {
-            LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - client listen NetServer Initialize failed");
+            LOG_WRITE(LogLevel::Error, "client listen NetServer Initialize failed");
             return false;
         }
 
         m_spClientListenServer->SetEventHandler(pHandler);
-        LOG_WRITE(LogLevel::Info, std::format("ServerBase::Initialize - client listen NetServer initialized on port {}", config.clientListenServerConfig.port));
+        LOG_WRITE(LogLevel::Info, std::format("client listen NetServer initialized on port {}", config.clientListenServerConfig.port));
     }
 
     // 내부 서버 Listen용 NetServer 초기화
@@ -89,19 +89,19 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
         netlib::FuncEventHandler* pHandler = GetInternalListenEventHandler();
         if (!pHandler)
         {
-            LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - useInternalListenServer=true but GetInternalListenEventHandler() returned nullptr");
+            LOG_WRITE(LogLevel::Error, "useInternalListenServer=true but GetInternalListenEventHandler() returned nullptr");
             return false;
         }
 
         m_spInternalListenServer = std::make_unique<netlib::NetServer>(&m_ioContext);
         if (!m_spInternalListenServer->Initialize(config.internalListenServerConfig))
         {
-            LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - internal listen NetServer Initialize failed");
+            LOG_WRITE(LogLevel::Error, "internal listen NetServer Initialize failed");
             return false;
         }
         
         m_spInternalListenServer->SetEventHandler(pHandler);
-        LOG_WRITE(LogLevel::Info, std::format("ServerBase::Initialize - internal listen NetServer initialized on port {}", config.internalListenServerConfig.port));
+        LOG_WRITE(LogLevel::Info, std::format("internal listen NetServer initialized on port {}", config.internalListenServerConfig.port));
     }
 
     // 컨텐츠 스레드 생성
@@ -114,7 +114,7 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
             m_contentsThreads.push_back(std::move(spThread));
         }
 
-        LOG_WRITE(LogLevel::Info, std::format("ServerBase::Initialize - {} contents thread(s) started", config.numContentsThreads));
+        LOG_WRITE(LogLevel::Info, std::format("{} contents thread(s) started", config.numContentsThreads));
     }
 
     // 타이머 시작
@@ -137,14 +137,15 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
         m_spRegistryClient = std::make_unique<RegistryClient>();
         if (!m_spRegistryClient->Initialize(this, regConfig))
         {
-            LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - RegistryClient Initialize failed");
+            LOG_WRITE(LogLevel::Error, "RegistryClient Initialize failed");
             return false;
         }
 
         // 등록 거부 시 서버 종료
         m_spRegistryClient->SetRegisterRejectedCallback([this](const std::string& reason)
         {
-            LOG_WRITE(LogLevel::Error, std::format("ServerBase: register rejected by registry - {}. shutting down.", reason));
+            LOG_WRITE(LogLevel::Error, std::format("register rejected by registry - {}. shutting down.", reason));
+
             RequestShutdown();
         });
 
@@ -153,18 +154,18 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
             OnServerInfoUpdated(info);
         });
 
-        LOG_WRITE(LogLevel::Info, "ServerBase::Initialize - RegistryClient initialized");
+        LOG_WRITE(LogLevel::Info, "RegistryClient initialized");
     }
 
     // 서브클래스 hook 함수 호출
     if (!OnInitialize())
     {
-        LOG_WRITE(LogLevel::Error, "ServerBase::Initialize - OnInitialize() failed");
+        LOG_WRITE(LogLevel::Error, "OnInitialize() failed");
         return false;
     }
 
     m_bRunning = true;
-    LOG_WRITE(LogLevel::Info, std::format("ServerBase::Initialize - {} initialized successfully", serverTypeName));
+    LOG_WRITE(LogLevel::Info, std::format("{} initialized successfully", serverTypeName));
     return true;
 }
 
@@ -176,10 +177,10 @@ bool ServerBase::StartAccept()
     {
         if (!m_spClientListenServer->StartAccept())
         {
-            LOG_WRITE(LogLevel::Error, "ServerBase::StartAccept - client listen StartAccept failed");
+            LOG_WRITE(LogLevel::Error, "client listen StartAccept failed");
             return false;
         }
-        LOG_WRITE(LogLevel::Info, std::format("ServerBase::StartAccept - accepting client connections on port {}", m_config.clientListenServerConfig.port));
+        LOG_WRITE(LogLevel::Info, std::format("accepting client connections on port {}", m_config.clientListenServerConfig.port));
         started = true;
     }
 
@@ -187,16 +188,16 @@ bool ServerBase::StartAccept()
     {
         if (!m_spInternalListenServer->StartAccept())
         {
-            LOG_WRITE(LogLevel::Error, "ServerBase::StartAccept - internal listen StartAccept failed");
+            LOG_WRITE(LogLevel::Error, "internal listen StartAccept failed");
             return false;
         }
-        LOG_WRITE(LogLevel::Info, std::format("ServerBase::StartAccept - accepting internal server connections on port {}", m_config.internalListenServerConfig.port));
+        LOG_WRITE(LogLevel::Info, std::format("accepting internal server connections on port {}", m_config.internalListenServerConfig.port));
         started = true;
     }
 
     if (!started)
     {
-        LOG_WRITE(LogLevel::Warn, "ServerBase::StartAccept - no listen NetServer configured");
+        LOG_WRITE(LogLevel::Warn, "no listen NetServer configured");
         return false;
     }
 
@@ -207,23 +208,24 @@ bool ServerBase::StartRegistryClient()
 {
     if (!m_spRegistryClient)
     {
-        LOG_WRITE(LogLevel::Warn, "ServerBase::StartRegistryClient - no RegistryClient configured");
+        LOG_WRITE(LogLevel::Warn, "no RegistryClient configured");
         return false;
     }
 
     m_spRegistryClient->Start();
-    LOG_WRITE(LogLevel::Info, "ServerBase::StartRegistryClient - started");
+    LOG_WRITE(LogLevel::Info, "started");
     return true;
 }
 
 void ServerBase::Run()
 {
-    LOG_WRITE(LogLevel::Info, "ServerBase::Run - server is running. waiting for shutdown signal...");
+    LOG_WRITE(LogLevel::Info, "server is running. waiting for shutdown signal...");
 
     std::unique_lock<std::mutex> lock(m_shutdownMutex);
     m_shutdownCv.wait(lock, [this] { return !m_bRunning.load(); });
 
-    LOG_WRITE(LogLevel::Info, "ServerBase::Run - shutdown signal received. shutting down...");
+    LOG_WRITE(LogLevel::Info, "shutdown signal received. shutting down...");
+
     shutdownInternal();
 }
 
@@ -232,7 +234,7 @@ void ServerBase::RequestShutdown()
     if (m_bShuttingDown.exchange(true))
         return;  // 이미 종료 진행 중
 
-    LOG_WRITE(LogLevel::Info, "ServerBase::RequestShutdown - graceful shutdown requested");
+    LOG_WRITE(LogLevel::Info, "graceful shutdown requested");
 
     // 레지스트리에 종료 알림
     if (m_spRegistryClient && m_spRegistryClient->IsRegistered())
@@ -242,12 +244,13 @@ void ServerBase::RequestShutdown()
     if (m_spClientListenServer)
     {
         m_spClientListenServer->StopAccept();
-        LOG_WRITE(LogLevel::Info, "ServerBase::RequestShutdown - client listen accept stopped");
+        LOG_WRITE(LogLevel::Info, "client listen accept stopped");
     }
+
     if (m_spInternalListenServer)
     {
         m_spInternalListenServer->StopAccept();
-        LOG_WRITE(LogLevel::Info, "ServerBase::RequestShutdown - internal listen accept stopped");
+        LOG_WRITE(LogLevel::Info, "internal listen accept stopped");
     }
 
     // 서브클래스 훅 (유저 이탈 대기 등)
@@ -263,14 +266,14 @@ void ServerBase::RequestShutdown()
 
 void ServerBase::shutdownInternal()
 {
-    LOG_WRITE(LogLevel::Info, "ServerBase::shutdownInternal - begin");
+    LOG_WRITE(LogLevel::Info, "begin");
 
     // 컨텐츠 스레드 정지
     for (auto& spThread : m_contentsThreads)
         spThread->Stop();
 
     m_contentsThreads.clear();
-    LOG_WRITE(LogLevel::Info, "ServerBase::shutdownInternal - contents threads stopped");
+    LOG_WRITE(LogLevel::Info, "contents threads stopped");
 
     // 타이머 정지
     m_timer.Stop();
@@ -290,30 +293,32 @@ void ServerBase::shutdownInternal()
 
         m_serverConnections.clear();
     }
-    LOG_WRITE(LogLevel::Info, "ServerBase::shutdownInternal - server connections closed");
+    LOG_WRITE(LogLevel::Info, "server connections closed");
 
     // Listen NetServer 종료
     if (m_spClientListenServer)
     {
         m_spClientListenServer->Shutdown();
         m_spClientListenServer.reset();
-        LOG_WRITE(LogLevel::Info, "ServerBase::shutdownInternal - client listen NetServer shutdown");
+        LOG_WRITE(LogLevel::Info, "client listen NetServer shutdown");
     }
+
     if (m_spInternalListenServer)
     {
         m_spInternalListenServer->Shutdown();
         m_spInternalListenServer.reset();
-        LOG_WRITE(LogLevel::Info, "ServerBase::shutdownInternal - internal listen NetServer shutdown");
+        LOG_WRITE(LogLevel::Info, "internal listen NetServer shutdown");
     }
 
     // IoContext 종료 (Worker 스레드 종료)
     m_ioContext.Shutdown();
-    LOG_WRITE(LogLevel::Info, "ServerBase::shutdownInternal - IoContext shutdown");
+    LOG_WRITE(LogLevel::Info, "IoContext shutdown");
 
     // 서브클래스 훅
     OnShutdown();
 
-    LOG_WRITE(LogLevel::Info, "ServerBase::shutdownInternal - complete");
+    LOG_WRITE(LogLevel::Info, "complete");
+
     Logger::Shutdown();
 }
 
@@ -327,7 +332,7 @@ netlib::NetClientPtr ServerBase::ConnectToServer(const std::string& ip, uint16 p
     auto spClient = std::make_shared<netlib::NetClient>(&m_ioContext);
     if (!spClient->Initialize(clientConfig))
     {
-        LOG_WRITE(LogLevel::Error, std::format("ServerBase::ConnectToServer - Initialize failed for {}:{}", ip, port));
+        LOG_WRITE(LogLevel::Error, std::format("Initialize failed for {}:{}", ip, port));
         return nullptr;
     }
 
@@ -339,7 +344,7 @@ netlib::NetClientPtr ServerBase::ConnectToServer(const std::string& ip, uint16 p
         m_serverConnections.push_back(spClient);
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("ServerBase::ConnectToServer - connecting to {}:{}", ip, port));
+    LOG_WRITE(LogLevel::Info, std::format("connecting to {}:{}", ip, port));
     return spClient;
 }
 
@@ -363,9 +368,10 @@ void ServerBase::AssignContents(int32 threadIndex, ContentsPtr spContents)
 {
     if (threadIndex < 0 || threadIndex >= static_cast<int32>(m_contentsThreads.size()))
     {
-        LOG_WRITE(LogLevel::Error, std::format("ServerBase::AssignContents - invalid threadIndex: {}", threadIndex));
+        LOG_WRITE(LogLevel::Error, std::format("invalid threadIndex: {}", threadIndex));
         return;
     }
+
     m_contentsThreads[threadIndex]->AddContents(std::move(spContents));
 }
 
@@ -373,9 +379,10 @@ void ServerBase::RemoveContents(int32 threadIndex, ContentsPtr spContents)
 {
     if (threadIndex < 0 || threadIndex >= static_cast<int32>(m_contentsThreads.size()))
     {
-        LOG_WRITE(LogLevel::Error, std::format("ServerBase::RemoveContents - invalid threadIndex: {}", threadIndex));
+        LOG_WRITE(LogLevel::Error, std::format("invalid threadIndex: {}", threadIndex));
         return;
     }
+
     m_contentsThreads[threadIndex]->RemoveContents(std::move(spContents));
 }
 

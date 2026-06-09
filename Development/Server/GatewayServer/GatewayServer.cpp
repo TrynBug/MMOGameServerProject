@@ -31,7 +31,7 @@ bool GatewayServer::OnInitialize()
 
     m_gameServerDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spGameSession, const netlib::PacketPtr& spPacket)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: unknown game server packetId={}, sessionId={}", spPacket->GetHeader()->type, spGameSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("unknown game server packetId={}, sessionId={}", spPacket->GetHeader()->type, spGameSession->GetId()));
     });
 
     // 로그인서버 패킷 디스패처 등록
@@ -46,7 +46,7 @@ bool GatewayServer::OnInitialize()
 
     m_loginServerDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spLoginSession, const netlib::PacketPtr& spPacket)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: unknown login server packetId={}, sessionId={}", spPacket->GetHeader()->type, spLoginSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("unknown login server packetId={}, sessionId={}", spPacket->GetHeader()->type, spLoginSession->GetId()));
     });
 
     // 클라이언트 포트 이벤트 핸들러 등록
@@ -76,7 +76,7 @@ bool GatewayServer::OnInitialize()
         cleanupExpiredPrevGameServer(); // 클라의 이전접속 게임서버정보 만료된거 제거
     });
 
-    LOG_WRITE(LogLevel::Info, "GatewayServer::OnInitialize complete");
+    LOG_WRITE(LogLevel::Info, "complete");
     return true;
 }
 
@@ -152,7 +152,7 @@ void GatewayServer::onClientDisconnect(const netlib::ISessionPtr& spSession)
     if (!spUser)
         return;
 
-    LOG_WRITE(LogLevel::Info, std::format("GatewayServer: client disconnected. userId={}", userId));
+    LOG_WRITE(LogLevel::Info, std::format("client disconnected. userId={}", userId));
 
     if (spUser->gameServerId != 0)
     {
@@ -244,7 +244,7 @@ void GatewayServer::onInternalDisconnect(const netlib::ISessionPtr& spSession)
         if (gameServerId == 0)
             return;
 
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: game server disconnected. gameServerId={}", gameServerId));
+        LOG_WRITE(LogLevel::Warn, std::format("game server disconnected. gameServerId={}", gameServerId));
 
         m_safeGameServerSessions.Erase(gameServerId);
 
@@ -259,7 +259,7 @@ void GatewayServer::onInternalDisconnect(const netlib::ISessionPtr& spSession)
     }
     else if (pMeta->sessionType == ESessionType::LoginServer)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: login server disconnected. sessionId={}", spSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("login server disconnected. sessionId={}", spSession->GetId()));
     }
 }
 
@@ -271,7 +271,7 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
     SessionMetaInfo* pMeta = getSessionMeta(spClientSession);
     if (!pMeta || pMeta->userId != 0)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: auth req on already authenticated session. sessionId={}", spClientSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("auth req on already authenticated session. sessionId={}", spClientSession->GetId()));
         spClientSession->Disconnect();
         return;
     }
@@ -281,7 +281,7 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
 
     if (!consumeAuthToken(userId, authToken))
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: auth failed. userId={}, sessionId={}", userId, spClientSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("auth failed. userId={}, sessionId={}", userId, spClientSession->GetId()));
         spClientSession->Disconnect();
         return;
     }
@@ -290,7 +290,7 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
     GatewayUserPtr spExisting;
     if (m_safeUsers.Find(userId, spExisting))
     {
-        LOG_WRITE(LogLevel::Info, std::format("GatewayServer: duplicate connection. userId={} disconnecting old session.", userId));
+        LOG_WRITE(LogLevel::Info, std::format("duplicate connection. userId={} disconnecting old session.", userId));
         spExisting->spClientSession->Disconnect();
     }
 
@@ -298,7 +298,7 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
     auto gameServer = selectGameServer(userId);
     if (!gameServer.has_value())
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: no available game server for userId={}", userId));
+        LOG_WRITE(LogLevel::Warn, std::format("no available game server for userId={}", userId));
         spClientSession->Disconnect();
         return;
     }
@@ -316,7 +316,7 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
 
     upsertPrevGameServer(userId, gameServer->serverId);
 
-    LOG_WRITE(LogLevel::Info, std::format("GatewayServer: client authenticated. userId={}, gameServerId={}", userId, gameServer->serverId));
+    LOG_WRITE(LogLevel::Info, std::format("client authenticated. userId={}, gameServerId={}", userId, gameServer->serverId));
 
     // 게임서버에 유저 입장 알림
     ServerPacket::GatewayUserEnterNtf ntf;
@@ -348,7 +348,7 @@ void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spClientSession
     int64 userId = pMeta->userId;
     if (!spPacket->SetSidecar(&userId, sizeof(userId)))
     {
-        LOG_WRITE(LogLevel::Error, std::format("GatewayServer: SetSidecar failed. userId={} packetType={}", userId, spPacket->GetHeader()->type));
+        LOG_WRITE(LogLevel::Error, std::format("SetSidecar failed. userId={} packetType={}", userId, spPacket->GetHeader()->type));
         return;
     }
 
@@ -374,7 +374,7 @@ void GatewayServer::handleLoginServerHandshakeReq(const netlib::ISessionPtr& spL
     ServerType loginServerType = static_cast<ServerType>(msg.server_type());
     if (ServerType::Login != loginServerType)
     {
-        LOG_WRITE(LogLevel::Error, std::format("GatewayServer: login server handshake invalid server type. loginServerId={}, serverType={}", loginServerId, msg.server_type()));
+        LOG_WRITE(LogLevel::Error, std::format("login server handshake invalid server type. loginServerId={}, serverType={}", loginServerId, msg.server_type()));
         return;
     }
 
@@ -396,19 +396,19 @@ void GatewayServer::handleLoginServerHandshakeReq(const netlib::ISessionPtr& spL
     netlib::PacketPtr spPacket = SerializePacket(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_RES, res);
     spLoginSession->Send(spPacket);
 
-    LOG_WRITE(LogLevel::Info, std::format("GatewayServer: login server handshake complete. loginServerId={}", loginServerId));
+    LOG_WRITE(LogLevel::Info, std::format("login server handshake complete. loginServerId={}", loginServerId));
 }
 
 void GatewayServer::handleLoginAuthTokenNtf(const netlib::ISessionPtr& /*spLoginSession*/, const ServerPacket::LoginAuthTokenNtf& msg)
 {
     storeAuthToken(msg.user_id(), msg.auth_token(), msg.expire_time_ms());
-    LOG_WRITE(LogLevel::Info, std::format("GatewayServer: auth token stored. userId={}", msg.user_id()));
+    LOG_WRITE(LogLevel::Info, std::format("auth token stored. userId={}", msg.user_id()));
 }
 
 void GatewayServer::handleLoginDuplicateNtf(const netlib::ISessionPtr& /*spLoginSession*/, const ServerPacket::LoginDuplicateNtf& msg)
 {
     int64 userId = msg.user_id();
-    LOG_WRITE(LogLevel::Info, std::format("GatewayServer: duplicate login notified. userId={}", userId));
+    LOG_WRITE(LogLevel::Info, std::format("duplicate login notified. userId={}", userId));
     forceDisconnectUser(userId, "Duplicate login");
 }
 
@@ -430,7 +430,7 @@ void GatewayServer::handleGameServerHandshakeReq(const netlib::ISessionPtr& spGa
     ServerType gameServerType = static_cast<ServerType>(msg.server_type());
     if (ServerType::Game != gameServerType)
     {
-        LOG_WRITE(LogLevel::Error, std::format("GatewayServer: game server handshake invalid server type. gameServerId={}, serverType={}", gameServerId, msg.server_type()));
+        LOG_WRITE(LogLevel::Error, std::format("game server handshake invalid server type. gameServerId={}, serverType={}", gameServerId, msg.server_type()));
         return;
     }
 
@@ -454,7 +454,7 @@ void GatewayServer::handleGameServerHandshakeReq(const netlib::ISessionPtr& spGa
     netlib::PacketPtr spPacket = SerializePacket(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_RES, res);
     spGameSession->Send(spPacket);
 
-    LOG_WRITE(LogLevel::Info, std::format("GatewayServer: game server handshake complete. gameServerId={}", gameServerId));
+    LOG_WRITE(LogLevel::Info, std::format("game server handshake complete. gameServerId={}", gameServerId));
 }
 
 void GatewayServer::handleGameToGatewayPacket(const netlib::ISessionPtr& /*spGameSession*/, const ServerPacket::GameToGatewayPacketNtf& msg)
@@ -472,11 +472,7 @@ void GatewayServer::handleGameToGatewayPacket(const netlib::ISessionPtr& /*spGam
     if (!spPacket)
         return;
 
-    spPacket->SetHeader(
-        static_cast<uint16>(totalSize),
-        static_cast<uint16>(msg.packet_type()),
-        netlib::PacketFlags::None
-    );
+    spPacket->SetHeader(static_cast<uint16>(totalSize), static_cast<uint16>(msg.packet_type()), netlib::PacketFlags::None);
     std::memcpy(spPacket->GetPayload(), payload.data(), payload.size());
 
     spUser->spClientSession->Send(spPacket);
@@ -491,11 +487,7 @@ void GatewayServer::handleGameToGatewayBroadcast(const netlib::ISessionPtr& /*sp
     if (!spPacket)
         return;
 
-    spPacket->SetHeader(
-        static_cast<uint16>(totalSize),
-        static_cast<uint16>(msg.packet_type()),
-        netlib::PacketFlags::None
-    );
+    spPacket->SetHeader(static_cast<uint16>(totalSize), static_cast<uint16>(msg.packet_type()), netlib::PacketFlags::None);
     std::memcpy(spPacket->GetPayload(), payload.data(), payload.size());
 
     m_safeUsers.ForEach([&](const int64& userId, const GatewayUserPtr& spUser)
@@ -524,7 +516,7 @@ void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spGa
     netlib::ISessionPtr spTargetSession;
     if (!m_safeGameServerSessions.Find(targetGameServerId, spTargetSession))
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer: target game server not found. targetGameServerId={}, userId={}", targetGameServerId, userId));
+        LOG_WRITE(LogLevel::Warn, std::format("target game server not found. targetGameServerId={}, userId={}", targetGameServerId, userId));
 
         ServerPacket::UserMoveToGameServerFailNtf failNtf;
         failNtf.set_user_id(userId);
@@ -545,7 +537,7 @@ void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spGa
 
     upsertPrevGameServer(userId, targetGameServerId);
 
-    LOG_WRITE(LogLevel::Info, std::format("GatewayServer: user rerouted. userId={} -> gameServerId={}", userId, targetGameServerId));
+    LOG_WRITE(LogLevel::Info, std::format("user rerouted. userId={} -> gameServerId={}", userId, targetGameServerId));
 
     ServerPacket::GatewayUserRerouteNtf rerouteNtf;
     rerouteNtf.set_user_id(userId);
@@ -657,7 +649,7 @@ void GatewayServer::sendToGameServer(int32 gameServerId, netlib::PacketPtr spPac
     netlib::ISessionPtr spSession;
     if (!m_safeGameServerSessions.Find(gameServerId, spSession))
     {
-        LOG_WRITE(LogLevel::Warn, std::format("GatewayServer::sendToGameServer - no session for gameServerId={}", gameServerId));
+        LOG_WRITE(LogLevel::Warn, std::format("no session for gameServerId={}", gameServerId));
         return;
     }
 
@@ -670,7 +662,7 @@ void GatewayServer::forceDisconnectUser(int64 userId, const std::string& reason)
     if (!m_safeUsers.Find(userId, spUser) || !spUser->spClientSession)
         return;
 
-    LOG_WRITE(LogLevel::Info, std::format("GatewayServer: force disconnecting userId={}, reason={}", userId, reason));
+    LOG_WRITE(LogLevel::Info, std::format("force disconnecting userId={}, reason={}", userId, reason));
 
     GamePacket::ForceDisconnectNtf ntf;
     ntf.set_reason_code(GamePacket::FORCE_DISCONNECT_REASON_SERVER_SHUTDOWN);

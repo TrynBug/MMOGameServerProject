@@ -51,17 +51,13 @@ public:
     //   1. findNearestPoly 로 start/end 폴리곤 찾기
     //   2. findPath 로 폴리곤 시퀀스 (corridor)
     //   3. findStraightPath 로 string-pulling 된 직선 경로 (waypoint 리스트)
-    bool FindPath(float startX, float startY, float startZ,
-                  float endX,   float endY,   float endZ,
-                  std::vector<float>& outWaypoints) const;
+    bool FindPath(float startX, float startY, float startZ, float endX, float endY, float endZ, std::vector<float>& outWaypoints) const;
 
     // 주어진 (x,y,z) 근처의 NavMesh 표면 점을 찾는다 (Y 스냅 + walkable 검증용).
     // 검색 박스(halfExtent, 각 축 반경) 안에서 가장 가까운 NavMesh 폴리곤 위의 점을 out* 에 채운다.
     // 입력 Y 를 신뢰할 수 없는 경우(예: 스폰) halfExtentY 를 넉넉히 잡으면 바닥 높이로 스냅된다.
     // 리턴: NavMesh 준비됨 + 박스 안에 폴리곤 있으면 true(out* 채움), 아니면 false(out* 미변경).
-    bool SamplePosition(float x, float y, float z,
-                        float halfExtentX, float halfExtentY, float halfExtentZ,
-                        float& outX, float& outY, float& outZ) const;
+    bool SamplePosition(float x, float y, float z, float halfExtentX, float halfExtentY, float halfExtentZ, float& outX, float& outY, float& outZ) const;
 
 private:
     const dtNavMesh* m_pNavMesh  = nullptr;   // 참조만 (소유 안 함)

@@ -12,7 +12,7 @@ bool LoginServer::OnInitialize()
 
     m_packetDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("LoginServer: unknown client packetId={}", spPacket->GetHeader()->type));
+        LOG_WRITE(LogLevel::Warn, std::format("unknown client packetId={}", spPacket->GetHeader()->type));
         spSession->Disconnect();
     });
 
@@ -24,7 +24,7 @@ bool LoginServer::OnInitialize()
 
     m_gatewayDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("LoginServer: unknown gateway packetId={} sessionId={}", spPacket->GetHeader()->type, spSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("unknown gateway packetId={} sessionId={}", spPacket->GetHeader()->type, spSession->GetId()));
     });
 
     // 클라이언트 네트워크 이벤트 핸들러 등록
@@ -48,7 +48,7 @@ bool LoginServer::OnInitialize()
     LOG_WRITE(LogLevel::Info, std::format("Resolved DB path={}", std::filesystem::absolute("AccountDB.db").string()));
     if (!m_dbQueue.Open("AccountDB.db", 1))
     {
-        LOG_WRITE(LogLevel::Error, "LoginServer::OnInitialize - failed to open AccountDB");
+        LOG_WRITE(LogLevel::Error, "failed to open AccountDB");
         return false;
     }
 
@@ -58,7 +58,7 @@ bool LoginServer::OnInitialize()
         cleanupExpiredPrevGateway();
     });
 
-    LOG_WRITE(LogLevel::Info, "LoginServer::OnInitialize complete");
+    LOG_WRITE(LogLevel::Info, "complete");
     return true;
 }
 
@@ -121,7 +121,7 @@ void LoginServer::onGatewayConnect(const netlib::ISessionPtr& spSession)
     netlib::PacketPtr spPacket = SerializePacket(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_REQ, req);
     spSession->Send(spPacket);
 
-    LOG_WRITE(LogLevel::Info, std::format("LoginServer: gateway connected. send handshake req. sessionId={}", spSession->GetId()));
+    LOG_WRITE(LogLevel::Info, std::format("gateway connected. send handshake req. sessionId={}", spSession->GetId()));
 }
 // 게이트웨이서버 연결끊김
 void LoginServer::onGatewayDisconnect(const netlib::ISessionPtr& spSession)
@@ -129,14 +129,14 @@ void LoginServer::onGatewayDisconnect(const netlib::ISessionPtr& spSession)
     InternalSessionMeta* pMeta = getInternalSessionMeta(spSession);
     if (!pMeta || !pMeta->handshakeDone)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("LoginServer: gateway disconnected before handshake. sessionId={}", spSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("gateway disconnected before handshake. sessionId={}", spSession->GetId()));
         return;
     }
 
     int32 gatewayId = pMeta->peerServerId;
     m_safeGatewaySessions.Erase(gatewayId);
 
-    LOG_WRITE(LogLevel::Warn, std::format("LoginServer: gateway disconnected. gatewayId={}", gatewayId));
+    LOG_WRITE(LogLevel::Warn, std::format("gateway disconnected. gatewayId={}", gatewayId));
 }
 
 // 로그인 요청 처리 (코루틴 함수)
@@ -161,7 +161,7 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
 
     if (!result.success || result.IsEmpty())
     {
-        LOG_WRITE(LogLevel::Info, std::format("LoginServer: login failed - user not found. loginId={}", loginId));
+        LOG_WRITE(LogLevel::Info, std::format("login failed - user not found. loginId={}", loginId));
         sendLoginFailed(spSession, "Invalid ID or password");
         co_return;
     }
@@ -182,7 +182,7 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     // TODO: 실제 해시 검증으로 교체 (bcrypt 등)
     if (password != user.login_password_hash())
     {
-        LOG_WRITE(LogLevel::Info, std::format("LoginServer: login failed - wrong password. loginId={}", loginId));
+        LOG_WRITE(LogLevel::Info, std::format("login failed - wrong password. loginId={}", loginId));
         sendLoginFailed(spSession, "Invalid ID or password");
         co_return;
     }
@@ -191,7 +191,7 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     auto existingEntry = findLoginEntry(userId);
     if (existingEntry.has_value())
     {
-        LOG_WRITE(LogLevel::Info, std::format("LoginServer: duplicate login detected. userId={} existing gatewayId={}", userId, existingEntry->gatewayServerId));
+        LOG_WRITE(LogLevel::Info, std::format("duplicate login detected. userId={} existing gatewayId={}", userId, existingEntry->gatewayServerId));
         sendDuplicateLoginToGateway(existingEntry->gatewayServerId, userId);
     }
 
@@ -199,7 +199,7 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     auto gateway = selectGateway(userId);
     if (!gateway.has_value())
     {
-        LOG_WRITE(LogLevel::Warn, std::format("LoginServer: no available gateway for userId={}", userId));
+        LOG_WRITE(LogLevel::Warn, std::format("no available gateway for userId={}", userId));
         sendLoginFailed(spSession, "Server is busy. Please try again later.");
         co_return;
     }
@@ -212,7 +212,7 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     upsertLoginEntry(userId, gateway->serverId);
     sendLoginSuccess(spSession, userId, authToken, *gateway);
 
-    LOG_WRITE(LogLevel::Info, std::format("LoginServer: login success. userId={} gateway={}:{}", userId, gateway->ip, gateway->internalPort));
+    LOG_WRITE(LogLevel::Info, std::format("login success. userId={} gateway={}:{}", userId, gateway->ip, gateway->internalPort));
 }
 
 // 게이트웨이서버로부터 HandshakeRes를 받음
@@ -281,7 +281,7 @@ void LoginServer::connectToGateway(int32 gatewayId, const std::string& ip, uint1
     if (spClient)
     {
         m_safeGatewayClients.Insert(gatewayId, spClient);
-        LOG_WRITE(LogLevel::Info, std::format("LoginServer: connecting to gateway {} {}:{}", gatewayId, ip, port));
+        LOG_WRITE(LogLevel::Info, std::format("connecting to gateway {} {}:{}", gatewayId, ip, port));
     }
 }
 
@@ -297,7 +297,7 @@ void LoginServer::disconnectFromGateway(int32 gatewayId)
 
     // m_safeGatewaySessions 정리는 onGatewayDisconnect 콜백에서 자동 처리됨
 
-    LOG_WRITE(LogLevel::Info, std::format("LoginServer: disconnected from gateway {}", gatewayId));
+    LOG_WRITE(LogLevel::Info, std::format("disconnected from gateway {}", gatewayId));
 }
 
 std::optional<ServerInfo> LoginServer::selectGateway(int64 userId) const
@@ -341,7 +341,7 @@ void LoginServer::sendAuthTokenToGateway(int32 gatewayId, int64 userId, uint64 a
     netlib::ISessionPtr spSession;
     if (!m_safeGatewaySessions.Find(gatewayId, spSession))
     {
-        LOG_WRITE(LogLevel::Warn, std::format("LoginServer::sendAuthTokenToGateway - no session for gatewayId={}", gatewayId));
+        LOG_WRITE(LogLevel::Warn, std::format("no session for gatewayId={}", gatewayId));
         return;
     }
 
@@ -409,7 +409,7 @@ void LoginServer::handleUserDisconnectNtf(const netlib::ISessionPtr& /*spSession
 {
     int64 userId = ntf.user_id();
     removeLoginEntry(userId);
-    LOG_WRITE(LogLevel::Info, std::format("LoginServer: user disconnected, removed from loginMap. userId={}", userId));
+    LOG_WRITE(LogLevel::Info, std::format("user disconnected, removed from loginMap. userId={}", userId));
 }
 
 // 인증 토큰 생성

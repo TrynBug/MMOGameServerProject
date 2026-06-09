@@ -98,15 +98,13 @@ int64 SkillComponent::firePhase(const GameData_Skill& skill, const Vector3& orig
 
     m_lastMoveDistance = 0.0f;   // 이동 페이즈에서만 갱신.
 
-    EffectParams params = BakeSkillEffectParams(
-        skill, m_pOwner->GetObjectType(), m_pOwner->GetObjectId(), origin, m_castDir, m_castSeed);
+    EffectParams params = BakeSkillEffectParams(skill, m_pOwner->GetObjectType(), m_pOwner->GetObjectId(), origin, m_castDir, m_castSeed);
 
     switch (skill.EffectDamage)
     {
     case ESkillEffectDamage::ContactHit:   // 투사체 (직격 보고 기반)
     {
-        std::vector<Vector3> dirs = computeFanDirs(
-            m_castDir, static_cast<int32>(skill.ProjectileCount), static_cast<float>(skill.FanAngleDeg));
+        std::vector<Vector3> dirs = computeFanDirs(m_castDir, static_cast<int32>(skill.ProjectileCount), static_cast<float>(skill.FanAngleDeg));
         return pStage->SpawnSkillProjectileGroup(params, dirs);   // 발급된 effectId 리턴
     }
     case ESkillEffectDamage::Area:         // 범위 (서버 주도 틱)

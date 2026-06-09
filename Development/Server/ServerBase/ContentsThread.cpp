@@ -72,6 +72,7 @@ void ContentsThread::threadProc()
                     spContents->Start();
                     m_contents.push_back(std::move(spContents));
                 }
+
                 m_pendingAdd.clear();
             }
 
@@ -88,6 +89,7 @@ void ContentsThread::threadProc()
                         m_contents.erase(iter);
                     }
                 }
+
                 m_pendingRemove.clear();
             }
         }
@@ -123,6 +125,7 @@ void ContentsThread::threadProc()
     {
         spContents->Stop();
     }
+
     m_contents.clear();
 }
 

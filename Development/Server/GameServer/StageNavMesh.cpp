@@ -17,7 +17,7 @@ StageNavMesh::StageNavMesh(const dtNavMesh* pNavMesh)
     dtNavMeshQuery* pQuery = dtAllocNavMeshQuery();
     if (!pQuery)
     {
-        LOG_WRITE(LogLevel::Error, "StageNavMesh: dtAllocNavMeshQuery failed.");
+        LOG_WRITE(LogLevel::Error, "dtAllocNavMeshQuery failed.");
         m_pNavMesh = nullptr;
         return;
     }
@@ -27,8 +27,7 @@ StageNavMesh::StageNavMesh(const dtNavMesh* pNavMesh)
     const dtStatus status = pQuery->init(pNavMesh, 2048);
     if (dtStatusFailed(status))
     {
-        LOG_WRITE(LogLevel::Error, std::format("StageNavMesh: dtNavMeshQuery::init failed. status=0x{:x}",
-            static_cast<uint32>(status)));
+        LOG_WRITE(LogLevel::Error, std::format("dtNavMeshQuery::init failed. status=0x{:x}", static_cast<uint32>(status)));
         dtFreeNavMeshQuery(pQuery);
         m_pNavMesh = nullptr;
         return;
@@ -61,7 +60,7 @@ bool StageNavMesh::FindPath(float startX, float startY, float startZ,
 
     if (!IsReady())
     {
-        LOG_WRITE(LogLevel::Warn, "StageNavMesh::FindPath - NavMeshQuery not ready.");
+        LOG_WRITE(LogLevel::Warn, "NavMeshQuery not ready.");
         return false;
     }
 
@@ -79,16 +78,14 @@ bool StageNavMesh::FindPath(float startX, float startY, float startZ,
     dtStatus status = m_pNavQuery->findNearestPoly(startPos, halfExtents, m_pNavFilter, &startRef, nearestStart);
     if (dtStatusFailed(status) || startRef == 0)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("StageNavMesh::FindPath - findNearestPoly(start) failed. start=({},{},{})",
-            startX, startY, startZ));
+        LOG_WRITE(LogLevel::Warn, std::format("findNearestPoly(start) failed. start=({},{},{})", startX, startY, startZ));
         return false;
     }
 
     status = m_pNavQuery->findNearestPoly(endPos, halfExtents, m_pNavFilter, &endRef, nearestEnd);
     if (dtStatusFailed(status) || endRef == 0)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("StageNavMesh::FindPath - findNearestPoly(end) failed. end=({},{},{})",
-            endX, endY, endZ));
+        LOG_WRITE(LogLevel::Warn, std::format("findNearestPoly(end) failed. end=({},{},{})", endX, endY, endZ));
         return false;
     }
 
@@ -97,12 +94,10 @@ bool StageNavMesh::FindPath(float startX, float startY, float startZ,
     dtPolyRef pathRefs[k_maxPathPolys];
     int pathCount = 0;
 
-    status = m_pNavQuery->findPath(startRef, endRef, nearestStart, nearestEnd, m_pNavFilter,
-        pathRefs, &pathCount, k_maxPathPolys);
+    status = m_pNavQuery->findPath(startRef, endRef, nearestStart, nearestEnd, m_pNavFilter, pathRefs, &pathCount, k_maxPathPolys);
     if (dtStatusFailed(status) || pathCount == 0)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("StageNavMesh::FindPath - findPath failed. status=0x{:x} pathCount={}",
-            static_cast<uint32>(status), pathCount));
+        LOG_WRITE(LogLevel::Warn, std::format("findPath failed. status=0x{:x} pathCount={}", static_cast<uint32>(status), pathCount));
         return false;
     }
 
@@ -117,7 +112,7 @@ bool StageNavMesh::FindPath(float startX, float startY, float startZ,
         straightPath, straightPathFlags, straightPathRefs, &straightCount, k_maxStraightPath, 0);
     if (dtStatusFailed(status) || straightCount == 0)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("StageNavMesh::FindPath - findStraightPath failed. status=0x{:x} straightCount={}",
+        LOG_WRITE(LogLevel::Warn, std::format("findStraightPath failed. status=0x{:x} straightCount={}",
             static_cast<uint32>(status), straightCount));
         return false;
     }

@@ -62,8 +62,7 @@ bool Character::applyJobBaseStats()
     {
         // JobBase 데이터가 없으면 기본스탯을 적용할 수 없으므로 초기화 실패로 처리한다(false 리턴).
         // 호출자 Character::Initialize 가 false 를 받아 캐릭터 생성을 중단한다.
-        LOG_WRITE(LogLevel::Error, std::format("Character::applyJobBaseStats - JobBase not found. objectId={} jobId={}",
-            GetObjectId(), m_protoData.job_id()));
+        LOG_WRITE(LogLevel::Error, std::format("JobBase not found. objectId={} jobId={}", GetObjectId(), m_protoData.job_id()));
         return false;
     }
 
@@ -120,17 +119,17 @@ void Character::SetDestination(float destX, float destY, float destZ)
     bool pathFound = false;
     if (pStage)
     {
-        pathFound = pStage->FindPath(GetPosX(), GetPosY(), GetPosZ(),
-                                     destX, destY, destZ,
-                                     m_waypoints);
+        pathFound = pStage->FindPath(GetPosX(), GetPosY(), GetPosZ(), destX, destY, destZ, m_waypoints);
     }
+
     if (!pathFound || m_waypoints.size() < 3)
     {
         // 직선 fallback. waypoint = [목적지] 한 점.
-        LOG_WRITE(LogLevel::Warn, std::format("Character::SetDestination - FindPath failed, using straight-line fallback. objectId={} from=({},{},{}) to=({},{},{})",
+        LOG_WRITE(LogLevel::Warn, std::format("FindPath failed, using straight-line fallback. objectId={} from=({},{},{}) to=({},{},{})",
             GetObjectId(),
             GetPosX(), GetPosY(), GetPosZ(),
             destX, destY, destZ));
+
         m_waypoints.clear();
         m_waypoints.push_back(destX);
         m_waypoints.push_back(destY);

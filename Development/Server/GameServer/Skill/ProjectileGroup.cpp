@@ -39,6 +39,7 @@ ProjectileHitResult ProjectileGroup::TryHit(int32 projectileIndex, int64 targetI
 
     if (projectileIndex < 0 || projectileIndex >= static_cast<int32>(m_consumed.size()))
         return result;        // 잘못된 index → accepted=false
+
     if (m_consumed[projectileIndex])
         return result;        // 이미 다른 적을 친 투사체 (1투사체 1타겟)
 
@@ -65,6 +66,7 @@ bool ProjectileGroup::TryConsume(int32 projectileIndex)
 {
     if (projectileIndex < 0 || projectileIndex >= static_cast<int32>(m_consumed.size()))
         return false;
+
     if (m_consumed[projectileIndex])
         return false;   // 이미 종료된 투사체
 

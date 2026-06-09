@@ -53,8 +53,7 @@ bool NavMeshManager::LoadAll(const std::filesystem::path& dirPath)
     std::error_code ec;
     if (!fs::exists(dirPath, ec) || !fs::is_directory(dirPath, ec))
     {
-        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::LoadAll - directory not found. path={}",
-            dirPath.string()));
+        LOG_WRITE(LogLevel::Error, std::format("directory not found. path={}", dirPath.string()));
         return false;
     }
 
@@ -75,8 +74,7 @@ bool NavMeshManager::LoadAll(const std::filesystem::path& dirPath)
         // 중복 키 검사.
         if (m_navMeshes.find(name) != m_navMeshes.end())
         {
-            LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::LoadAll - duplicate navmesh name. name={} path={}",
-                name, filePath.string()));
+            LOG_WRITE(LogLevel::Error, std::format("duplicate navmesh name. name={} path={}", name, filePath.string()));
             ++failCount;
             continue;
         }
@@ -92,8 +90,7 @@ bool NavMeshManager::LoadAll(const std::filesystem::path& dirPath)
         m_navMeshes[name] = pNavMesh;
         ++successCount;
 
-        LOG_WRITE(LogLevel::Info, std::format("NavMeshManager::LoadAll - loaded. name={} path={}",
-            name, filePath.string()));
+        LOG_WRITE(LogLevel::Info, std::format("loaded. name={} path={}", name, filePath.string()));
 
         // ── 메타 로드 + 검증 ─────────────────────────────────────
         // 같은 디렉토리의 "<binFileName>.navmeta.json" 을 시도.
@@ -102,8 +99,7 @@ bool NavMeshManager::LoadAll(const std::filesystem::path& dirPath)
         const fs::path metaPath = filePath.string() + ".navmeta.json";
         if (!fs::exists(metaPath, ec))
         {
-            LOG_WRITE(LogLevel::Warn, std::format("NavMeshManager::LoadAll - meta file not found. name={} metaPath={}",
-                name, metaPath.string()));
+            LOG_WRITE(LogLevel::Warn, std::format("meta file not found. name={} metaPath={}", name, metaPath.string()));
             continue;
         }
 
@@ -121,14 +117,14 @@ bool NavMeshManager::LoadAll(const std::filesystem::path& dirPath)
         m_navMeshMetas[name] = meta;
 
         LOG_WRITE(LogLevel::Info, std::format(
-            "NavMeshManager::LoadAll - meta loaded. name={} bounds=({:.3f},{:.3f})~({:.3f},{:.3f}) tilesCount={} walkablePolygonsCount={}",
+            "meta loaded. name={} bounds=({:.3f},{:.3f})~({:.3f},{:.3f}) tilesCount={} walkablePolygonsCount={}",
             name, meta.minX, meta.minZ, meta.maxX, meta.maxZ, meta.tilesCount, meta.walkablePolygonsCount));
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("NavMeshManager::LoadAll - done. dir={} success={} fail={} metaCount={}",
+    LOG_WRITE(LogLevel::Info, std::format("done. dir={} success={} fail={} metaCount={}",
         dirPath.string(), successCount, failCount, static_cast<int32>(m_navMeshMetas.size())));
 
-    return successCount > 0;
+    return successCount > 0 && failCount == 0;
 }
 
 const dtNavMesh* NavMeshManager::Find(const std::string& name) const
@@ -164,8 +160,7 @@ dtNavMesh* NavMeshManager::loadNavMeshFromFile(const std::filesystem::path& file
     FILE* pFile = nullptr;
     if (_wfopen_s(&pFile, filePath.wstring().c_str(), L"rb") != 0 || !pFile)
     {
-        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadNavMeshFromFile - failed to open. path={}",
-            filePath.string()));
+        LOG_WRITE(LogLevel::Error, std::format("failed to open. path={}", filePath.string()));
         return nullptr;
     }
 
@@ -173,36 +168,32 @@ dtNavMesh* NavMeshManager::loadNavMeshFromFile(const std::filesystem::path& file
     NavMeshSetHeader header;
     if (std::fread(&header, sizeof(NavMeshSetHeader), 1, pFile) != 1)
     {
-        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadNavMeshFromFile - failed to read header. path={}",
-            filePath.string()));
+        LOG_WRITE(LogLevel::Error, std::format("failed to read header. path={}", filePath.string()));
         std::fclose(pFile);
         return nullptr;
     }
 
     if (header.magic != k_navMeshSetMagic)
     {
-        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadNavMeshFromFile - invalid magic. path={} magic=0x{:x}",
-            filePath.string(), header.magic));
+        LOG_WRITE(LogLevel::Error, std::format("invalid magic. path={} magic=0x{:x}", filePath.string(), header.magic));
         std::fclose(pFile);
         return nullptr;
     }
     if (header.version != k_navMeshSetVersion)
     {
-        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadNavMeshFromFile - unsupported version. path={} version={}",
-            filePath.string(), header.version));
+        LOG_WRITE(LogLevel::Error, std::format("unsupported version. path={} version={}", filePath.string(), header.version));
         std::fclose(pFile);
         return nullptr;
     }
     if (header.numTiles <= 0)
     {
-        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadNavMeshFromFile - numTiles <= 0. path={} numTiles={}",
-            filePath.string(), header.numTiles));
+        LOG_WRITE(LogLevel::Error, std::format("numTiles <= 0. path={} numTiles={}", filePath.string(), header.numTiles));
         std::fclose(pFile);
         return nullptr;
     }
 
     LOG_WRITE(LogLevel::Info, std::format(
-        "NavMeshManager::loadNavMeshFromFile - header ok. path={} magic=0x{:x} version={} numTiles={} "
+        "header ok. path={} magic=0x{:x} version={} numTiles={} "
         "orig=({:.3f},{:.3f},{:.3f}) tileW={:.3f} tileH={:.3f} maxTiles={} maxPolys={}",
         filePath.string(), static_cast<uint32>(header.magic), header.version, header.numTiles,
         header.params.orig[0], header.params.orig[1], header.params.orig[2],
@@ -213,8 +204,7 @@ dtNavMesh* NavMeshManager::loadNavMeshFromFile(const std::filesystem::path& file
     dtNavMesh* pNavMesh = dtAllocNavMesh();
     if (!pNavMesh)
     {
-        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadNavMeshFromFile - dtAllocNavMesh failed. path={}",
-            filePath.string()));
+        LOG_WRITE(LogLevel::Error, std::format("dtAllocNavMesh failed. path={}", filePath.string()));
         std::fclose(pFile);
         return nullptr;
     }
@@ -222,8 +212,7 @@ dtNavMesh* NavMeshManager::loadNavMeshFromFile(const std::filesystem::path& file
     dtStatus status = pNavMesh->init(&header.params);
     if (dtStatusFailed(status))
     {
-        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadNavMeshFromFile - dtNavMesh::init failed. path={} status=0x{:x}",
-            filePath.string(), static_cast<uint32>(status)));
+        LOG_WRITE(LogLevel::Error, std::format("dtNavMesh::init failed. path={} status=0x{:x}", filePath.string(), static_cast<uint32>(status)));
         dtFreeNavMesh(pNavMesh);
         std::fclose(pFile);
         return nullptr;
@@ -237,8 +226,7 @@ dtNavMesh* NavMeshManager::loadNavMeshFromFile(const std::filesystem::path& file
         NavMeshTileHeader tileHeader;
         if (std::fread(&tileHeader, sizeof(NavMeshTileHeader), 1, pFile) != 1)
         {
-            LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadNavMeshFromFile - failed to read tile header. path={} tileIndex={}",
-                filePath.string(), i));
+            LOG_WRITE(LogLevel::Error, std::format("failed to read tile header. path={} tileIndex={}", filePath.string(), i));
             dtFreeNavMesh(pNavMesh);
             std::fclose(pFile);
             return nullptr;
@@ -256,8 +244,7 @@ dtNavMesh* NavMeshManager::loadNavMeshFromFile(const std::filesystem::path& file
         unsigned char* pTileData = static_cast<unsigned char*>(dtAlloc(tileHeader.dataSize, DT_ALLOC_PERM));
         if (!pTileData)
         {
-            LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadNavMeshFromFile - dtAlloc failed. path={} tileIndex={} dataSize={}",
-                filePath.string(), i, tileHeader.dataSize));
+            LOG_WRITE(LogLevel::Error, std::format("dtAlloc failed. path={} tileIndex={} dataSize={}", filePath.string(), i, tileHeader.dataSize));
             dtFreeNavMesh(pNavMesh);
             std::fclose(pFile);
             return nullptr;
@@ -265,7 +252,7 @@ dtNavMesh* NavMeshManager::loadNavMeshFromFile(const std::filesystem::path& file
 
         if (std::fread(pTileData, tileHeader.dataSize, 1, pFile) != 1)
         {
-            LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadNavMeshFromFile - failed to read tile data. path={} tileIndex={} dataSize={}",
+            LOG_WRITE(LogLevel::Error, std::format("failed to read tile data. path={} tileIndex={} dataSize={}",
                 filePath.string(), i, tileHeader.dataSize));
             dtFree(pTileData);
             dtFreeNavMesh(pNavMesh);
@@ -282,7 +269,7 @@ dtNavMesh* NavMeshManager::loadNavMeshFromFile(const std::filesystem::path& file
                 std::memcpy(&tileDataMagic, pTileData, 4);
 
             LOG_WRITE(LogLevel::Error, std::format(
-                "NavMeshManager::loadNavMeshFromFile - addTile failed. path={} tileIndex={} status=0x{:x} "
+                "addTile failed. path={} tileIndex={} status=0x{:x} "
                 "tileDataMagic=0x{:x} (expect 0x56414e44 'DNAV')",
                 filePath.string(), i, static_cast<uint32>(status), tileDataMagic));
             // addTile 실패 시 데이터는 우리가 free 해야 함 (NavMesh가 안 받음).
@@ -296,7 +283,7 @@ dtNavMesh* NavMeshManager::loadNavMeshFromFile(const std::filesystem::path& file
     }
 
     LOG_WRITE(LogLevel::Info, std::format(
-        "NavMeshManager::loadNavMeshFromFile - tile loop done. path={} numTiles={} added={} skipped={}",
+        "tile loop done. path={} numTiles={} added={} skipped={}",
         filePath.string(), header.numTiles, addedCount, skippedCount));
 
     std::fclose(pFile);
@@ -356,8 +343,7 @@ bool NavMeshManager::loadMetaFromFile(const std::filesystem::path& metaPath, Nav
     std::ifstream ifs(metaPath, std::ios::in | std::ios::binary);
     if (!ifs.is_open())
     {
-        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadMetaFromFile - failed to open. path={}",
-            metaPath.string()));
+        LOG_WRITE(LogLevel::Error, std::format("failed to open. path={}", metaPath.string()));
         return false;
     }
 
@@ -368,8 +354,7 @@ bool NavMeshManager::loadMetaFromFile(const std::filesystem::path& metaPath, Nav
     }
     catch (const std::exception& ex)
     {
-        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadMetaFromFile - json parse failed. path={} reason={}",
-            metaPath.string(), ex.what()));
+        LOG_WRITE(LogLevel::Error, std::format("json parse failed. path={} reason={}", metaPath.string(), ex.what()));
         return false;
     }
 
@@ -385,8 +370,7 @@ bool NavMeshManager::loadMetaFromFile(const std::filesystem::path& metaPath, Nav
     }
     catch (const std::exception& ex)
     {
-        LOG_WRITE(LogLevel::Error, std::format("NavMeshManager::loadMetaFromFile - missing/invalid field. path={} reason={}",
-            metaPath.string(), ex.what()));
+        LOG_WRITE(LogLevel::Error, std::format("missing/invalid field. path={} reason={}", metaPath.string(), ex.what()));
         return false;
     }
 
@@ -411,7 +395,7 @@ void NavMeshManager::validateMeta(const std::string& name, const NavMeshMeta& me
         return;
 
     LOG_WRITE(LogLevel::Error, std::format(
-        "NavMeshManager::validateMeta - mismatch. name={} "
+        "mismatch. name={} "
         "metaBounds=({:.3f},{:.3f})~({:.3f},{:.3f}) actualBounds=({:.3f},{:.3f})~({:.3f},{:.3f}) "
         "metaTiles={} actualTiles={} metaPolys={} actualPolys={} "
         "(NavMesh 를 다시 빌드해 주세요. 서버는 메타 bounds 를 사용해 계속 진행합니다.)",

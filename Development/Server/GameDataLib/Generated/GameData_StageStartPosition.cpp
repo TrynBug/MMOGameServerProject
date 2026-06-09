@@ -25,7 +25,7 @@ bool GameDataTable_StageStartPosition::OnAddData(const GameData* pRawData)
     if (!inserted)
     {
         LOG_WRITE(LogLevel::Error, std::format(
-            "GameDataTable_StageStartPosition::OnAddData - duplicate (StageKey, StagePositionType). Key={} StageKey={} positionType={}",
+            "duplicate (StageKey, StagePositionType). Key={} StageKey={} positionType={}",
             pData->Key, pData->StageKey, static_cast<int>(pData->StagePositionType)));
         return false;
     }
@@ -40,9 +40,7 @@ bool GameDataTable_StageStartPosition::OnLoadComplete()
     {
         if (!GameDataTable_Stage::FindData(pData->StageKey))
         {
-            LOG_WRITE(LogLevel::Error, std::format(
-                "GameDataTable_StageStartPosition::OnLoadComplete - unknown StageKey. Key={} StageKey={}",
-                pData->Key, pData->StageKey));
+            LOG_WRITE(LogLevel::Error, std::format( "unknown StageKey. Key={} StageKey={}", pData->Key, pData->StageKey));
             return false;
         }
     }
@@ -55,9 +53,7 @@ bool GameDataTable_StageStartPosition::OnLoadComplete()
 
         if (!FindByStageAndType(stageKey, EStagePositionType::Default))
         {
-            LOG_WRITE(LogLevel::Error, std::format(
-                "GameDataTable_StageStartPosition::OnLoadComplete - missing Default position. StageKey={}",
-                stageKey));
+            LOG_WRITE(LogLevel::Error, std::format( "missing Default position. StageKey={}", stageKey));
             return false;
         }
     }

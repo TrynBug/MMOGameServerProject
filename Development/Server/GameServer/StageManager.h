@@ -73,8 +73,7 @@ private:
     // NavMesh 기반 Stage(Town/Field)의 공통 준비:
     // GameData 조회 → 중복 stageId 검사 → params 구성 + NavMesh 메타로 bounds 덮어쓰기.
     // 실패 시 false (에러 로그는 내부에서 남김). outNavMesh는 nullptr일 수 있음 (길찾기 비활성화).
-    bool prepareNavStage(int64 stageId, int32 stageDataKey, const char* logTag,
-                         StageGridParams& outParams, const dtNavMesh*& outNavMesh);
+    bool prepareNavStage(int64 stageId, int32 stageDataKey, const char* logTag, StageGridParams& outParams, const dtNavMesh*& outNavMesh);
 
     GameServer* m_pGameServer = nullptr;
     int32 m_contentsThreadCount = 0;

@@ -25,7 +25,7 @@ bool RegistryServer::OnInitialize()
 
     m_packetDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: unknown packetId={} sessionId={}", spPacket->GetHeader()->type, spSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("unknown packetId={} sessionId={}", spPacket->GetHeader()->type, spSession->GetId()));
     });
 
     // 네트워크 이벤트 핸들러 콜백 등록
@@ -44,7 +44,7 @@ bool RegistryServer::OnInitialize()
 
     // TODO: RegistryDB에서 기존 serverId 데이터 로드
     // 현재는 메모리만 사용 (DB 연동은 이후 구현)
-    LOG_WRITE(LogLevel::Info, "RegistryServer::OnInitialize - DB load skipped (not implemented yet)");
+    LOG_WRITE(LogLevel::Info, "DB load skipped (not implemented yet)");
 
     // 하트비트 전송 타이머 (30초)
     m_heartbeatSendTimerId = GetTimer().Register(k_heartbeatIntervalMs, [this]()
@@ -58,7 +58,7 @@ bool RegistryServer::OnInitialize()
         checkHeartbeatTimeout();
     });
 
-    LOG_WRITE(LogLevel::Info, "RegistryServer::OnInitialize complete");
+    LOG_WRITE(LogLevel::Info, "complete");
     return true;
 }
 
@@ -76,7 +76,7 @@ bool RegistryServer::onAccept(const netlib::ISessionPtr& spSession)
 
 void RegistryServer::onConnect(const netlib::ISessionPtr& spSession)
 {
-    LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server connected. sessionId={}", spSession->GetId()));
+    LOG_WRITE(LogLevel::Info, std::format("server connected. sessionId={}", spSession->GetId()));
 }
 
 void RegistryServer::onDisconnect(const netlib::ISessionPtr& spSession)
@@ -84,7 +84,7 @@ void RegistryServer::onDisconnect(const netlib::ISessionPtr& spSession)
     ServerSessionMetaInfo* pMeta = getServerSessionMeta(spSession);
     if (!pMeta || pMeta->serverId == 0)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: unregistered server disconnected. sessionId={}", spSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("unregistered server disconnected. sessionId={}", spSession->GetId()));
         return;
     }
 
@@ -99,7 +99,7 @@ void RegistryServer::onDisconnect(const netlib::ISessionPtr& spSession)
     entry.spSession = nullptr;
     m_safeServerEntries.Insert(serverId, entry);
 
-    LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: server disconnected. serverId={} type={}", serverId, static_cast<int>(entry.serverType)));
+    LOG_WRITE(LogLevel::Warn, std::format("server disconnected. serverId={} type={}", serverId, static_cast<int>(entry.serverType)));
 
     broadcastServerInfo(entry);
 }
@@ -123,7 +123,7 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
     std::string errorMsg;
     if (!validateRegistration(serverId, type, ip, internalPort, errorMsg))
     {
-        LOG_WRITE(LogLevel::Error, std::format("RegistryServer: registration rejected. serverId={} reason={}", serverId, errorMsg));
+        LOG_WRITE(LogLevel::Error, std::format("registration rejected. serverId={} reason={}", serverId, errorMsg));
 
         ServerPacket::RegistryRegisterRes res;
         res.set_success(false);
@@ -156,7 +156,7 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
     if (pMeta)
         pMeta->serverId = serverId;
 
-    LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server registered. serverId={} type={} ip={}, clientPort={}, internalPort={}", serverId, static_cast<int>(type), ip, clientPort, internalPort));
+    LOG_WRITE(LogLevel::Info, std::format("server registered. serverId={} type={} ip={}, clientPort={}, internalPort={}", serverId, static_cast<int>(type), ip, clientPort, internalPort));
 
     // 서버 등록 완료 응답
     {
@@ -258,7 +258,7 @@ void RegistryServer::handleShutdownReq(const netlib::ISessionPtr& spSession, con
     entry.status = ServerStatus::ShuttingDown;
     m_safeServerEntries.Insert(pMeta->serverId, entry);
 
-    LOG_WRITE(LogLevel::Info, std::format("RegistryServer: server shutdown requested. serverId={} type={}", pMeta->serverId, static_cast<int>(entry.serverType)));
+    LOG_WRITE(LogLevel::Info, std::format("server shutdown requested. serverId={} type={}", pMeta->serverId, static_cast<int>(entry.serverType)));
 
     broadcastServerInfo(entry);
 }
@@ -314,7 +314,7 @@ void RegistryServer::broadcastServerInfo(const ServerEntry& serverEntry)
 
     if (!spPacket)
     {
-        LOG_WRITE(LogLevel::Error, "RegistryServer::broadcastServerInfo - serialize failed");
+        LOG_WRITE(LogLevel::Error, "serialize failed");
         return;
     }
 
@@ -381,7 +381,7 @@ void RegistryServer::checkHeartbeatTimeout()
 
         if (entry.spSession)
         {
-            LOG_WRITE(LogLevel::Warn, std::format("RegistryServer: heartbeat timeout. serverId={} disconnecting...", serverId));
+            LOG_WRITE(LogLevel::Warn, std::format("heartbeat timeout. serverId={} disconnecting...", serverId));
             entry.spSession->Disconnect();
         }
     }

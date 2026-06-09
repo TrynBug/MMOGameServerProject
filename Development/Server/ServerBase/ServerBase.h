@@ -146,11 +146,7 @@ public:
                 return nullptr;
         }
 
-        spPacket->SetHeader(
-            static_cast<uint16>(totalSize),
-            static_cast<uint16>(packetId),
-            netlib::PacketFlags::None
-        );
+        spPacket->SetHeader(static_cast<uint16>(totalSize), static_cast<uint16>(packetId), netlib::PacketFlags::None);
 
         return spPacket;
     }
@@ -159,11 +155,7 @@ public:
     template<typename TMsg>
     bool DeserializePacket(const netlib::Packet& packet, TMsg& outMsg)
     {
-        return packet::ProtoSerializer::Deserialize(
-            packet.GetPayload(),
-            packet.GetPayloadSize(),
-            outMsg
-        );
+        return packet::ProtoSerializer::Deserialize(packet.GetPayload(), packet.GetPayloadSize(), outMsg);
     }
 
 protected:

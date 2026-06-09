@@ -86,8 +86,7 @@ void Timer::threadProc()
 
         // 100ms 동안 기다린다.
         std::unique_lock<std::mutex> lock(m_mutex);
-        m_cv.wait_for(lock, std::chrono::milliseconds(100),
-            [this] { return !m_bRunning.load(); });
+        m_cv.wait_for(lock, std::chrono::milliseconds(100), [this] { return !m_bRunning.load(); });
     }
 }
 

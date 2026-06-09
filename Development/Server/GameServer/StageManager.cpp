@@ -46,21 +46,21 @@ SystemStagePtr StageManager::CreateSystemStage(int64 stageId, int32 stageDataKey
 {
     if (!m_pGameServer)
     {
-        LOG_WRITE(LogLevel::Error, std::format("StageManager::CreateSystemStage - not initialized. stageId={}", stageId));
+        LOG_WRITE(LogLevel::Error, std::format("not initialized. stageId={}", stageId));
         return nullptr;
     }
 
 	const GameData_Stage* pStageData = GameDataTable_Stage::FindData(stageDataKey);
     if (!pStageData)
     {
-        LOG_WRITE(LogLevel::Error, std::format("StageManager::CreateSystemStage - GameData_Stage not found. stageId={}, stageDataKey={}", stageId, stageDataKey));
+        LOG_WRITE(LogLevel::Error, std::format("GameData_Stage not found. stageId={}, stageDataKey={}", stageId, stageDataKey));
         return nullptr;
     }
 
     StagePtr spExisting;
     if (m_safeStages.Find(stageId, spExisting))
     {
-        LOG_WRITE(LogLevel::Error, std::format("StageManager::CreateSystemStage - stageId already exists. stageId={}", stageId));
+        LOG_WRITE(LogLevel::Error, std::format("stageId already exists. stageId={}", stageId));
         return nullptr;
     }
 
@@ -68,7 +68,7 @@ SystemStagePtr StageManager::CreateSystemStage(int64 stageId, int32 stageDataKey
     registerStage(stageId, stageDataKey, spStage);
     m_spSystemStage = spStage;
 
-    LOG_WRITE(LogLevel::Info, std::format("StageManager::CreateSystemStage - stageId={}", stageId));
+    LOG_WRITE(LogLevel::Info, std::format("stageId={}", stageId));
 
     return spStage;
 }
@@ -85,7 +85,7 @@ TownPtr StageManager::CreateTown(int64 stageId, int32 stageDataKey)
     registerStage(stageId, stageDataKey, spStage);
     m_spTown = spStage;
 
-    LOG_WRITE(LogLevel::Info, std::format("StageManager::CreateTown - stageId={} stageDataKey={}", stageId, stageDataKey));
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} stageDataKey={}", stageId, stageDataKey));
 
     return spStage;
 }
@@ -101,31 +101,30 @@ FieldPtr StageManager::CreateField(int64 stageId, int32 stageDataKey)
     spStage->SetNavMesh(pNavMesh);
     registerStage(stageId, stageDataKey, spStage);
 
-    LOG_WRITE(LogLevel::Info, std::format("StageManager::CreateField - stageId={} stageDataKey={}", stageId, stageDataKey));
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} stageDataKey={}", stageId, stageDataKey));
 
     return spStage;
 }
 
-bool StageManager::prepareNavStage(int64 stageId, int32 stageDataKey, const char* logTag,
-                                   StageGridParams& outParams, const dtNavMesh*& outNavMesh)
+bool StageManager::prepareNavStage(int64 stageId, int32 stageDataKey, const char* logTag, StageGridParams& outParams, const dtNavMesh*& outNavMesh)
 {
     if (!m_pGameServer)
     {
-        LOG_WRITE(LogLevel::Error, std::format("StageManager::{} - not initialized. stageId={}", logTag, stageId));
+        LOG_WRITE(LogLevel::Error, std::format("{} - not initialized. stageId={}", logTag, stageId));
         return false;
     }
 
     const GameData_Stage* pStageData = GameDataTable_Stage::FindData(stageDataKey);
     if (!pStageData)
     {
-        LOG_WRITE(LogLevel::Error, std::format("StageManager::{} - GameData_Stage not found. stageId={}, stageDataKey={}", logTag, stageId, stageDataKey));
+        LOG_WRITE(LogLevel::Error, std::format("{} - GameData_Stage not found. stageId={}, stageDataKey={}", logTag, stageId, stageDataKey));
         return false;
     }
 
     StagePtr spExisting;
     if (m_safeStages.Find(stageId, spExisting))
     {
-        LOG_WRITE(LogLevel::Error, std::format("StageManager::{} - stageId already exists. stageId={}", logTag, stageId));
+        LOG_WRITE(LogLevel::Error, std::format("{} - stageId already exists. stageId={}", logTag, stageId));
         return false;
     }
 
@@ -149,21 +148,21 @@ bool StageManager::prepareNavStage(int64 stageId, int32 stageDataKey, const char
         outParams.worldMaxX = pMeta->maxX;
         outParams.worldMaxZ = pMeta->maxZ;
         LOG_WRITE(LogLevel::Info, std::format(
-            "StageManager::{} - using NavMesh meta bounds. stageId={} navMesh={} bounds=({:.3f},{:.3f})~({:.3f},{:.3f})",
+            "{} - using NavMesh meta bounds. stageId={} navMesh={} bounds=({:.3f},{:.3f})~({:.3f},{:.3f})",
             logTag, stageId, outParams.navMeshFileName,
             outParams.worldMinX, outParams.worldMinZ, outParams.worldMaxX, outParams.worldMaxZ));
     }
     else if (!outParams.navMeshFileName.empty())
     {
         LOG_WRITE(LogLevel::Warn, std::format(
-            "StageManager::{} - NavMesh meta not found, using fallback bounds. stageId={} navMesh={}",
+            "{} - NavMesh meta not found, using fallback bounds. stageId={} navMesh={}",
             logTag, stageId, outParams.navMeshFileName));
     }
 
     if (!outNavMesh && !outParams.navMeshFileName.empty())
     {
         LOG_WRITE(LogLevel::Warn, std::format(
-            "StageManager::{} - NavMesh not found. stageId={} navMesh={} (길찾기 비활성화)",
+            "{} - NavMesh not found. stageId={} navMesh={} (길찾기 비활성화)",
             logTag, stageId, outParams.navMeshFileName));
     }
 

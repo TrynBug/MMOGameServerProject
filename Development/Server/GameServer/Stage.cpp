@@ -114,7 +114,7 @@ StageGridParams LoadStageGridParams(int32 stageDataKey)
     const GameData_Stage* pData = GameDataTable_Stage::FindData(stageDataKey);
     if (!pData)
     {
-        LOG_WRITE(LogLevel::Error, std::format("LoadStageGridParams: GameData_Stage not found. stageDataKey={}. using fallback values.", stageDataKey));
+        LOG_WRITE(LogLevel::Error, std::format("GameData_Stage not found. stageDataKey={}. using fallback values.", stageDataKey));
         params.stageType  = EStageType::None;
         params.navMeshFileName.clear();
         params.sectorSize = k_fallbackSectorSize;
@@ -157,8 +157,7 @@ void Stage::SetNavMesh(const dtNavMesh* pNavMesh)
     // pNavMesh 가 nullptr 이면 StageNavMesh 생성자가 IsReady()=false 로 둘다.
     m_pStageNavMesh = std::make_unique<StageNavMesh>(pNavMesh);
 
-    LOG_WRITE(LogLevel::Info, std::format("Stage::SetNavMesh - stageId={} ready={}",
-        m_stageId, m_pStageNavMesh->IsReady()));
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} ready={}", m_stageId, m_pStageNavMesh->IsReady()));
 }
 
 bool Stage::FindPath(float startX, float startY, float startZ,
@@ -168,7 +167,7 @@ bool Stage::FindPath(float startX, float startY, float startZ,
     outWaypoints.clear();
     if (!m_pStageNavMesh)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::FindPath - StageNavMesh not set. stageId={}", m_stageId));
+        LOG_WRITE(LogLevel::Warn, std::format("StageNavMesh not set. stageId={}", m_stageId));
         return false;
     }
     return m_pStageNavMesh->FindPath(startX, startY, startZ, endX, endY, endZ, outWaypoints);
@@ -258,14 +257,13 @@ void Stage::initializeSectorGrid()
     // 입력값 검증
     if (m_sectorSize <= 0.0)
     {
-        LOG_WRITE(LogLevel::Error, std::format("Stage::initializeSectorGrid - invalid sectorSize={}. stageId={}",
-            m_sectorSize, m_stageId));
+        LOG_WRITE(LogLevel::Error, std::format("invalid sectorSize={}. stageId={}", m_sectorSize, m_stageId));
         return;
     }
 
     if (m_worldMaxX <= m_worldMinX || m_worldMaxZ <= m_worldMinZ)
     {
-        LOG_WRITE(LogLevel::Error, std::format("Stage::initializeSectorGrid - invalid world bounds. stageId={} min=({},{}) max=({},{})",
+        LOG_WRITE(LogLevel::Error, std::format("invalid world bounds. stageId={} min=({},{}) max=({},{})",
             m_stageId, m_worldMinX, m_worldMinZ, m_worldMaxX, m_worldMaxZ));
         return;
     }
@@ -278,8 +276,7 @@ void Stage::initializeSectorGrid()
 
     if (m_sectorCountX <= 0 || m_sectorCountZ <= 0)
     {
-        LOG_WRITE(LogLevel::Error, std::format("Stage::initializeSectorGrid - sector count <= 0. stageId={} count=({}x{})",
-            m_stageId, m_sectorCountX, m_sectorCountZ));
+        LOG_WRITE(LogLevel::Error, std::format("sector count <= 0. stageId={} count=({}x{})", m_stageId, m_sectorCountX, m_sectorCountZ));
         return;
     }
 
@@ -295,7 +292,7 @@ void Stage::initializeSectorGrid()
         }
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("Stage::initializeSectorGrid - stageId={} world=({},{})~({},{}) sectorSize={} grid={}x{} totalSectors={}",
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} world=({},{})~({},{}) sectorSize={} grid={}x{} totalSectors={}",
         m_stageId,
         m_worldMinX, m_worldMinZ, m_worldMaxX, m_worldMaxZ,
         m_sectorSize, m_sectorCountX, m_sectorCountZ, totalSectors));
@@ -352,8 +349,7 @@ Sector* Stage::GetSectorByPos(float posX, float posZ)
 
 void Stage::OnStart()
 {
-    LOG_WRITE(LogLevel::Info, std::format("Stage::OnStart - stageId={} stageType={}",
-        m_stageId, static_cast<int>(m_stageType)));
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} stageType={}", m_stageId, static_cast<int>(m_stageType)));
 }
 
 void Stage::OnUpdate(int64 deltaMs)
@@ -391,7 +387,7 @@ void Stage::OnUpdate(int64 deltaMs)
 
 void Stage::OnStop()
 {
-    LOG_WRITE(LogLevel::Info, std::format("Stage::OnStop - stageId={} stageType={} userCount={}",
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} stageType={} userCount={}",
         m_stageId, static_cast<int>(m_stageType), m_users.size()));
 
     // 남아있는 유저들은 그대로 두고 종료. GameServer 종료 흐름에서 별도 처리됨.
@@ -409,16 +405,14 @@ Monster* Stage::SpawnMonster(int32 monsterKey, float posX, float posY, float pos
     const GameData_Monster* pMonsterData = GameDataTable_Monster::FindData(monsterKey);
     if (!pMonsterData)
     {
-        LOG_WRITE(LogLevel::Error, std::format("Stage::SpawnMonster - GameData_Monster not found. stageId={} monsterKey={}",
-            m_stageId, monsterKey));
+        LOG_WRITE(LogLevel::Error, std::format("GameData_Monster not found. stageId={} monsterKey={}", m_stageId, monsterKey));
         return nullptr;
     }
 
     GameServer* pServer = GetGameServer();
     if (!pServer)
     {
-        LOG_WRITE(LogLevel::Error, std::format("Stage::SpawnMonster - GameServer not injected. stageId={} monsterKey={}",
-            m_stageId, monsterKey));
+        LOG_WRITE(LogLevel::Error, std::format("GameServer not injected. stageId={} monsterKey={}", m_stageId, monsterKey));
         return nullptr;
     }
 
@@ -439,7 +433,7 @@ Monster* Stage::SpawnMonster(int32 monsterKey, float posX, float posY, float pos
                 k_spawnSampleHalfExtentXZ, k_spawnSampleHalfExtentY, k_spawnSampleHalfExtentXZ,
                 snappedX, snappedY, snappedZ))
         {
-            LOG_WRITE(LogLevel::Error, std::format("Stage::SpawnMonster - spawn pos not on NavMesh, rejected. stageId={} monsterKey={} pos=({},{},{})",
+            LOG_WRITE(LogLevel::Error, std::format("spawn pos not on NavMesh, rejected. stageId={} monsterKey={} pos=({},{},{})",
                 m_stageId, monsterKey, posX, posY, posZ));
             return nullptr;
         }
@@ -453,7 +447,7 @@ Monster* Stage::SpawnMonster(int32 monsterKey, float posX, float posY, float pos
     int32 spawnSectorZ = 0;
     if (!GetSectorIndex(spawnX, spawnZ, spawnSectorX, spawnSectorZ))
     {
-        LOG_WRITE(LogLevel::Error, std::format("Stage::SpawnMonster - spawn pos out of world bounds, rejected. stageId={} monsterKey={} pos=({},{},{})",
+        LOG_WRITE(LogLevel::Error, std::format("spawn pos out of world bounds, rejected. stageId={} monsterKey={} pos=({},{},{})",
             m_stageId, monsterKey, spawnX, spawnY, spawnZ));
         return nullptr;
     }
@@ -463,8 +457,7 @@ Monster* Stage::SpawnMonster(int32 monsterKey, float posX, float posY, float pos
     MonsterPtr spMonster = std::make_shared<Monster>();
     if (!spMonster->Initialize(objectId, pMonsterData))
     {
-        LOG_WRITE(LogLevel::Error, std::format("Stage::SpawnMonster - Monster Initialize failed. stageId={} monsterKey={} objectId={}",
-            m_stageId, monsterKey, objectId));
+        LOG_WRITE(LogLevel::Error, std::format("Monster Initialize failed. stageId={} monsterKey={} objectId={}", m_stageId, monsterKey, objectId));
         return nullptr;
     }
     spMonster->SetAI(std::make_unique<MonsterFsmAI>());   // 기본 두뇌: FSM (보스 등은 향후 BT 로 교체)
@@ -475,7 +468,7 @@ Monster* Stage::SpawnMonster(int32 monsterKey, float posX, float posY, float pos
     // 몬스터 업데이트 주기는 등록 진입점에 명시 전달 (현재 매 tick; 향후 잡몹은 더 긴 주기로).
     registerObject(spMonster, k_monsterUpdateIntervalMs, m_monsterObjects);
 
-    LOG_WRITE(LogLevel::Info, std::format("Stage::SpawnMonster - stageId={} monsterKey={} objectId={} pos=({},{},{}) yaw={} sector=({},{}) totalObjects={}",
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} monsterKey={} objectId={} pos=({},{},{}) yaw={} sector=({},{}) totalObjects={}",
         m_stageId, monsterKey, objectId, spawnX, spawnY, spawnZ, yaw,
         spMonster->GetCurSectorX(), spMonster->GetCurSectorZ(), m_objects.size()));
 
@@ -495,8 +488,7 @@ bool Stage::DespawnMonster(int64 objectId)
     auto iter = m_monsterObjects.find(objectId);
     if (iter == m_monsterObjects.end())
     {
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::DespawnMonster - monster not found. stageId={} objectId={}",
-            m_stageId, objectId));
+        LOG_WRITE(LogLevel::Warn, std::format("monster not found. stageId={} objectId={}", m_stageId, objectId));
         return false;
     }
 
@@ -511,8 +503,7 @@ bool Stage::DespawnMonster(int64 objectId)
     m_monsterObjects.erase(iter);
     m_objects.erase(objectId);
 
-    LOG_WRITE(LogLevel::Info, std::format("Stage::DespawnMonster - stageId={} objectId={} totalObjects={}",
-        m_stageId, objectId, m_objects.size()));
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} objectId={} totalObjects={}", m_stageId, objectId, m_objects.size()));
 
     // 주변 sector AOI 안의 유저들에게 despawn 통보.
     if (GameServer* pServer = GetGameServer())
@@ -558,7 +549,7 @@ void Stage::addObjectToSector(StageObject* pObject)
     if (!GetSectorIndex(pObject->GetPosX(), pObject->GetPosZ(), sectorX, sectorZ))
     {
         // 맵 범위 밖. 섹터에 등록 안 함. (-1, -1)로 유지.
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::addObjectToSector - object pos out of world bounds. stageId={} objectId={} pos=({},{},{})",
+        LOG_WRITE(LogLevel::Warn, std::format("object pos out of world bounds. stageId={} objectId={} pos=({},{},{})",
             m_stageId, pObject->GetObjectId(), pObject->GetPosX(), pObject->GetPosY(), pObject->GetPosZ()));
         pObject->SetCurSector(-1, -1);
         return;
@@ -567,8 +558,7 @@ void Stage::addObjectToSector(StageObject* pObject)
     Sector* pSector = GetSector(sectorX, sectorZ);
     if (!pSector)
     {
-        LOG_WRITE(LogLevel::Error, std::format("Stage::addObjectToSector - sector not found. stageId={} sector=({},{})",
-            m_stageId, sectorX, sectorZ));
+        LOG_WRITE(LogLevel::Error, std::format("sector not found. stageId={} sector=({},{})", m_stageId, sectorX, sectorZ));
         pObject->SetCurSector(-1, -1);
         return;
     }
@@ -635,7 +625,7 @@ void Stage::UpdateObjectSector(StageObject* pObject)
     }
     pObject->SetCurSector(newSectorX, newSectorZ);
 
-    LOG_WRITE(LogLevel::Debug, std::format("Stage::UpdateObjectSector - stageId={} objectId={} ({},{}) -> ({},{})",
+    LOG_WRITE(LogLevel::Debug, std::format("stageId={} objectId={} ({},{}) -> ({},{})",
         m_stageId, pObject->GetObjectId(), oldSectorX, oldSectorZ, newSectorX, newSectorZ));
 }
 
@@ -679,7 +669,7 @@ void Stage::OnUserEnter(const UserPtr& spUser)
     // 캐릭터 스폰은 별도 단계 (2단계 입장).
     // 유저가 Moving 상태로 pendingCharacter를 들고 있으면, 클라의 StageLoadCompleteReq
     // 수신 시 spawnPendingCharacter가 스폰한다. SystemStage는 캐릭터가 없으므로 여기서 끝.
-    LOG_WRITE(LogLevel::Info, std::format("Stage::OnUserEnter - stageId={} userId={} stageState={} totalUsers={}",
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} userId={} stageState={} totalUsers={}",
         m_stageId, userId, static_cast<int32>(spUser->GetStageState()), m_users.size()));
 }
 
@@ -693,8 +683,7 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     CharacterPtr spCharacter = spUser->GetCurrentCharacter();
     if (!spCharacter)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::spawnPendingCharacter - no character. stageId={} userId={}",
-            m_stageId, userId));
+        LOG_WRITE(LogLevel::Warn, std::format("no character. stageId={} userId={}", m_stageId, userId));
         return;
     }
 
@@ -729,7 +718,7 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
         {
             // 이동 요청 시 검증을 통과했으므로 이론상 도달 불가. 캐릭터 현재 좌표로 진행.
             LOG_WRITE(LogLevel::Error, std::format(
-                "Stage::spawnPendingCharacter - StageStartPosition not found. stageId={} stageDataKey={} positionType={}",
+                "StageStartPosition not found. stageId={} stageDataKey={} positionType={}",
                 m_stageId, GetStageDataKey(), static_cast<int32>(positionType)));
         }
     }
@@ -748,7 +737,7 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     // 상태 전환 (캐릭터 소유는 이미 User가 갖고 있으므로 별도 설정 불필요).
     spUser->SetStageState(EUserStageState::InStage);
 
-    LOG_WRITE(LogLevel::Info, std::format("Stage::spawnPendingCharacter - stageId={} userId={} characterId={} sector=({},{}) totalUsers={} totalObjects={}",
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} userId={} characterId={} sector=({},{}) totalUsers={} totalObjects={}",
         m_stageId, userId, objectId,
         spCharacter->GetCurSectorX(), spCharacter->GetCurSectorZ(),
         m_users.size(), m_objects.size()));
@@ -812,8 +801,7 @@ void Stage::OnUserLeave(int64 userId)
     auto iter = m_users.find(userId);
     if (iter == m_users.end())
     {
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserLeave - user not found. stageId={} userId={}",
-            m_stageId, userId));
+        LOG_WRITE(LogLevel::Warn, std::format("user not found. stageId={} userId={}", m_stageId, userId));
         return;
     }
 
@@ -844,7 +832,7 @@ void Stage::OnUserLeave(int64 userId)
 
     m_users.erase(iter);
 
-    LOG_WRITE(LogLevel::Info, std::format("Stage::OnUserLeave - stageId={} userId={} totalUsers={} totalObjects={}",
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} userId={} totalUsers={} totalObjects={}",
         m_stageId, userId, m_users.size(), m_objects.size()));
 
     // 주변 sector의 다른 캐릭터들에게 despawn broadcast.
@@ -880,7 +868,7 @@ void Stage::OnUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacke
     if (iter == handlerMap.end())
     {
         // 등록되지 않은 패킷은 디버그 로그.
-        LOG_WRITE(LogLevel::Debug, std::format("Stage::OnUserPacket - unhandled. stageId={} userId={} packetType={} payloadSize={}",
+        LOG_WRITE(LogLevel::Debug, std::format("unhandled. stageId={} userId={} packetType={} payloadSize={}",
             m_stageId, spUser->GetUserId(),
             packetType, spPacket->GetPayloadSize()));
         return;
@@ -909,7 +897,7 @@ bool Stage::deserializeUserPacket(const UserPtr& spUser, const netlib::PacketPtr
 {
     if (!GetGameServer() || !GetGameServer()->DeserializePacket(*spPacket, outMsg))
     {
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - failed to deserialize. stageId={} userId={} packetType={}",
+        LOG_WRITE(LogLevel::Warn, std::format("failed to deserialize. stageId={} userId={} packetType={}",
             m_stageId, spUser->GetUserId(), spPacket->GetHeader()->type));
         return false;
     }
@@ -921,8 +909,7 @@ void Stage::handleMoveDestReq(const UserPtr& spUser, const netlib::PacketPtr& sp
     CharacterPtr spCharacter = spUser->GetCurrentCharacter();
     if (!spCharacter || spCharacter->GetStage() != this)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveDestReq but no character or wrong stage. stageId={} userId={}",
-            m_stageId, spUser->GetUserId()));
+        LOG_WRITE(LogLevel::Warn, std::format("MoveDestReq but no character or wrong stage. stageId={} userId={}", m_stageId, spUser->GetUserId()));
         return;
     }
 
@@ -939,8 +926,7 @@ void Stage::handleMoveStopReq(const UserPtr& spUser, const netlib::PacketPtr& sp
     CharacterPtr spCharacter = spUser->GetCurrentCharacter();
     if (!spCharacter || spCharacter->GetStage() != this)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveStopReq but no character or wrong stage. stageId={} userId={}",
-            m_stageId, spUser->GetUserId()));
+        LOG_WRITE(LogLevel::Warn, std::format("MoveStopReq but no character or wrong stage. stageId={} userId={}", m_stageId, spUser->GetUserId()));
         return;
     }
 
@@ -962,7 +948,7 @@ void Stage::handleMoveStopReq(const UserPtr& spUser, const netlib::PacketPtr& sp
     else
     {
         // 서버 위치로 고정. 향후 위치 보정 패킷 추가 예정.
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - MoveStopReq position out of tolerance. stageId={} userId={} clientPos=({},{},{}) serverPos=({},{},{})",
+        LOG_WRITE(LogLevel::Warn, std::format("MoveStopReq position out of tolerance. stageId={} userId={} clientPos=({},{},{}) serverPos=({},{},{})",
             m_stageId, spUser->GetUserId(),
             req.pos_x(), req.pos_y(), req.pos_z(),
             spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ()));
@@ -985,7 +971,7 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
 
     auto sendFail = [&](const std::string& reason)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::handleStageMoveReq - rejected. stageId={} userId={} targetKey={} reason={}",
+        LOG_WRITE(LogLevel::Warn, std::format("rejected. stageId={} userId={} targetKey={} reason={}",
             m_stageId, userId, req.target_stage_data_key(), reason));
         pServer->GetPacketSender().SendStageMoveRes(userId, EResultCode::Fail, reason, req.target_stage_data_key());
     };
@@ -1029,7 +1015,7 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
     }
     if (targets.size() > 1)
     {
-        LOG_WRITE(LogLevel::Error, std::format("Stage::handleStageMoveReq - multiple instances for static stage. dataKey={} count={}",
+        LOG_WRITE(LogLevel::Error, std::format("multiple instances for static stage. dataKey={} count={}",
             req.target_stage_data_key(), targets.size()));
         sendFail("ambiguous target stage");
         return;
@@ -1071,7 +1057,7 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
     // 4) 성공 응답 → 클라는 로딩 시작, 완료 시 StageLoadCompleteReq.
     pServer->GetPacketSender().SendStageMoveRes(userId, EResultCode::Success, "", req.target_stage_data_key());
 
-    LOG_WRITE(LogLevel::Info, std::format("Stage::handleStageMoveReq - moving. userId={} from stageId={} to stageId={} (dataKey={}) positionType={}",
+    LOG_WRITE(LogLevel::Info, std::format("moving. userId={} from stageId={} to stageId={} (dataKey={}) positionType={}",
         userId, m_stageId, spTarget->GetStageId(), req.target_stage_data_key(), static_cast<int32>(positionType)));
 }
 
@@ -1080,7 +1066,7 @@ void Stage::handleStageLoadCompleteReq(const UserPtr& spUser, const netlib::Pack
     // Moving 상태의 유저만 유효 (이외는 잘못된/중복 보고 → 무시).
     if (spUser->GetStageState() != EUserStageState::Moving || !spUser->GetCurrentCharacter())
     {
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::handleStageLoadCompleteReq - unexpected. stageId={} userId={} stageState={}",
+        LOG_WRITE(LogLevel::Warn, std::format("unexpected. stageId={} userId={} stageState={}",
             m_stageId, spUser->GetUserId(), static_cast<int32>(spUser->GetStageState())));
         return;
     }
@@ -1093,8 +1079,7 @@ void Stage::handleSkillCastReq(const UserPtr& spUser, const netlib::PacketPtr& s
     CharacterPtr spCharacter = spUser->GetCurrentCharacter();
     if (!spCharacter || spCharacter->GetStage() != this)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("Stage::OnUserPacket - SkillCastReq but no character or wrong stage. stageId={} userId={}",
-            m_stageId, spUser->GetUserId()));
+        LOG_WRITE(LogLevel::Warn, std::format("SkillCastReq but no character or wrong stage. stageId={} userId={}", m_stageId, spUser->GetUserId()));
         return;
     }
 

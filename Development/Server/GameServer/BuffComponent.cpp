@@ -15,8 +15,7 @@ void BuffComponent::ApplyBuff(int32 buffKey, int64 casterObjectId)
     const GameData_Buff* pData = GameDataTable_Buff::FindData(buffKey);
     if (pData == nullptr)
     {
-        LOG_WRITE(LogLevel::Error, std::format("BuffComponent::ApplyBuff - unknown buffKey={} objectId={}",
-            buffKey, m_pOwner ? m_pOwner->GetObjectId() : 0));
+        LOG_WRITE(LogLevel::Error, std::format("unknown buffKey={} objectId={}", buffKey, m_pOwner ? m_pOwner->GetObjectId() : 0));
         return;
     }
 

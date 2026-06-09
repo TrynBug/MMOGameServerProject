@@ -62,9 +62,7 @@ public:
                                  const std::vector<GamePacket::MonsterSpawnInfo>& monsterSpawns = {});
 
     // 이동 알림 전송 (MoveNtf). 상태 변화 시점에 Stage가 sector AOI 순회하면서 unicast.
-    void SendMoveNtf(int64 userId, int64 objectId,
-                     float posX, float posY, float posZ, float yaw,
-                     float destX, float destY, float destZ, bool isMoving);
+    void SendMoveNtf(int64 userId, int64 objectId, float posX, float posY, float posZ, float yaw, float destX, float destY, float destZ, bool isMoving);
 
     // 위치 보정 알림 전송 (MovePosCorrectNtf). 서버가 클라/서버 위치 오차가 크다고 판단했을 때 unicast.
     void SendMovePosCorrectNtf(int64 userId, float posX, float posY, float posZ, float yaw);
@@ -107,16 +105,14 @@ void PacketSender::SendToUser(int64 userId, int32 packetType, const TMessage& me
     UserPtr spUser;
     if (!m_safeUsers.Find(userId, spUser) || !spUser)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("PacketSender::SendToUser - user not found. userId={} packetType={}",
-            userId, packetType));
+        LOG_WRITE(LogLevel::Warn, std::format("user not found. userId={} packetType={}", userId, packetType));
         return;
     }
 
     netlib::ISessionPtr spGatewaySession;
     if (!m_safeGatewaySessions.Find(spUser->GetGatewayId(), spGatewaySession) || !spGatewaySession)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("PacketSender::SendToUser - gateway session not found. userId={} gatewayId={} packetType={}",
-            userId, spUser->GetGatewayId(), packetType));
+        LOG_WRITE(LogLevel::Warn, std::format("gateway session not found. userId={} gatewayId={} packetType={}", userId, spUser->GetGatewayId(), packetType));
         return;
     }
 
@@ -124,8 +120,7 @@ void PacketSender::SendToUser(int64 userId, int32 packetType, const TMessage& me
     std::string payload;
     if (!message.SerializeToString(&payload))
     {
-        LOG_WRITE(LogLevel::Error, std::format("PacketSender::SendToUser - failed to serialize payload. userId={} packetType={}",
-            userId, packetType));
+        LOG_WRITE(LogLevel::Error, std::format("failed to serialize payload. userId={} packetType={}", userId, packetType));
         return;
     }
 
@@ -138,8 +133,7 @@ void PacketSender::SendToUser(int64 userId, int32 packetType, const TMessage& me
     auto spPacket = m_server.SerializePacket(Common::SERVER_PACKET_ID_GAME_TO_GATEWAY_PACKET_NTF, ntf);
     if (!spPacket)
     {
-        LOG_WRITE(LogLevel::Error, std::format("PacketSender::SendToUser - failed to serialize GameToGatewayPacketNtf. userId={} packetType={}",
-            userId, packetType));
+        LOG_WRITE(LogLevel::Error, std::format("failed to serialize GameToGatewayPacketNtf. userId={} packetType={}", userId, packetType));
         return;
     }
 

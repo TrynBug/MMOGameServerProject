@@ -15,8 +15,7 @@ public:
     template<typename TMsg>
     void Register(int packetId, std::function<void(const netlib::ISessionPtr&, const TMsg&)> handler)
     {
-        m_handlers[static_cast<uint16>(packetId)] =
-            [handler](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
+        m_handlers[static_cast<uint16>(packetId)] = [handler](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
             {
                 TMsg msg;
                 if (!packet::ProtoSerializer::Deserialize(spPacket->GetPayload(), spPacket->GetPayloadSize(), msg))
@@ -26,6 +25,7 @@ public:
                     // 실제 끊김 처리는 서버별 정책에 따라 UnknownHandler 또는 상위 코드에서 담당.
                     return;
                 }
+
                 handler(spSession, msg);
             };
     }

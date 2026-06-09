@@ -71,12 +71,13 @@ void StatComponentBase::changeStat(EStat stat, double value, bool bAdd)
     const GameData_Stat* pData = GameDataTable_Stat::FindDataByStat(stat);
     if (pData == nullptr)
     {
-        LOG_WRITE(LogLevel::Error, std::format("StatComponentBase::changeStat - unknown stat. (Stat={})", static_cast<int>(stat)));
+        LOG_WRITE(LogLevel::Error, std::format("unknown stat. (Stat={})", static_cast<int>(stat)));
         return;
     }
+
     if (pData->StatOp == EStatOp::Total)
     {
-        LOG_WRITE(LogLevel::Error, std::format("StatComponentBase::changeStat - cannot change a Total stat directly. (Stat={})", static_cast<int>(stat)));
+        LOG_WRITE(LogLevel::Error, std::format("cannot change a Total stat directly. (Stat={})", static_cast<int>(stat)));
         return;
     }
 

@@ -177,9 +177,7 @@ public:
 
     // 길찾기. StageNavMesh 가 초기화 안 됐거나 nullptr 이면 false.
     // 좌표계: Unity 와 동일. outWaypoints 는 (x,y,z) 세트 순서로 채워짐.
-    bool FindPath(float startX, float startY, float startZ,
-                  float endX,   float endY,   float endZ,
-                  std::vector<float>& outWaypoints) const;
+    bool FindPath(float startX, float startY, float startZ, float endX, float endY, float endZ, std::vector<float>& outWaypoints) const;
 
     // NavMesh 가 설정/준비되어 길찾기·스냅이 가능한 상태인지.
     bool HasNavMesh() const;
@@ -225,8 +223,7 @@ public:
     // casterType 을 값으로 받는 이유: 효과가 지속되는 동안 시전자 객체가 사라져도 안전하게 하기 위함.
     // shape 의 bounding 반경으로 후보 섹터를 추린 뒤 정밀 판정한다. outEnemies 는 먼저 clear 된다.
     // 비소유 raw 포인터 — 해당 tick 내 사용 (컨텐츠 스레드 전용).
-    void QueryEnemiesInShape(EObjectType casterType, const Vector3& centerPos,
-                             const EffectShape& shape, std::vector<StageObject*>& outEnemies);
+    void QueryEnemiesInShape(EObjectType casterType, const Vector3& centerPos, const EffectShape& shape, std::vector<StageObject*>& outEnemies);
 
     // 스킬 효과(범위 대미지) 하나를 월드에 시작시킨다. SkillComponent 가 bake 한 EffectParams 를 넘긴다.
     // (투사체=ProjectileGroup 은 별도 경로. 이 함수는 Area 효과 전용.)
@@ -412,17 +409,13 @@ private:
     // Character가 sector를 바꿔을 때 visibility 갱신.
     // oldAOI − newAOI 안의 캐릭터들에게는 despawn (나, 상대 서로),
     // newAOI − oldAOI 안의 캐릭터들에게는 spawn (나, 상대 서로) 전송.
-    void updateVisibilityOnSectorChange(Character& character,
-                                        int32 oldSectorX, int32 oldSectorZ,
-                                        int32 newSectorX, int32 newSectorZ);
+    void updateVisibilityOnSectorChange(Character& character, int32 oldSectorX, int32 oldSectorZ, int32 newSectorX, int32 newSectorZ);
 
     // Monster가 sector를 바꿨을 때 visibility 갱신 (단방향: 유저에게만 통보).
     // newAOI − oldAOI 안의 유저들에게는 이 몬스터 spawn (이동 중이면 직후 MoveNtf 도),
     // oldAOI − newAOI 안의 유저들에게는 이 몬스터 despawn 전송.
     // 몬스터는 관찰자가 아니므로 캐릭터판과 달리 서로 교환하지 않는다.
-    void updateMonsterVisibilityOnSectorChange(Monster& monster,
-                                               int32 oldSectorX, int32 oldSectorZ,
-                                               int32 newSectorX, int32 newSectorZ);
+    void updateMonsterVisibilityOnSectorChange(Monster& monster, int32 oldSectorX, int32 oldSectorZ, int32 newSectorX, int32 newSectorZ);
 
     // 섹터 그리드 초기화 (생성자에서 1회 호출)
     void initializeSectorGrid();
@@ -434,8 +427,7 @@ private:
     // 반드시 이 함수를 거친다. updateIntervalMs 는 필수 인자 — 오브젝트 종류에 맞는 업데이트
     // 주기를 호출자가 명시적으로 지정해야 한다 (자동 기본값 없음).
     // 통합 컨테이너(m_objects)와 전달된 타입별 맵에 등록하고, Stage/업데이트주기/sector 를 설정한다.
-    void registerObject(const StageObjectPtr& spObject, int64 updateIntervalMs,
-                        std::unordered_map<int64, StageObjectPtr>& typeMap);
+    void registerObject(const StageObjectPtr& spObject, int64 updateIntervalMs, std::unordered_map<int64, StageObjectPtr>& typeMap);
 
     // 객체를 자신의 현재 좌표 기준으로 sector에 등록.
     // pObject->m_curSectorX/Y를 갱신. 맵 범위 밖이면 등록 안 함.
