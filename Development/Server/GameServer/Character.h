@@ -100,6 +100,11 @@ public:
     // 좌표계: Unity 와 동일. Y는 높이, X-Z 가 평면. yaw는 Y축 회전, degree.
     bool  IsMoving()    const override { return m_isMoving; }
 
+    // 클라 이동 입력 화해용. 서버가 마지막으로 처리한 MoveIntentReq.input_seq.
+    // SnapshotNtf.ack_input_seq 로 본인에게 되돌려준다(클라가 예측을 replay 화해).
+    uint32 GetLastInputSeq() const     { return m_lastInputSeq; }
+    void   SetLastInputSeq(uint32 seq) { m_lastInputSeq = seq; }
+
     // 목적지 설정 + 이동 시작.
     // Stage::FindPath 로 waypoint 리스트를 얻어 따라가기 시작.
     // 길찾기 실패 시 직선 이동 fallback (waypoint = [목적지] 한 개).
@@ -107,7 +112,7 @@ public:
     // yaw 는 첫 waypoint 방향으로 자동 계산.
     void SetDestination(float destX, float destY, float destZ);
 
-    // 즉시 정지 + 현재 위치/yaw 설정. MoveStopReq 처리용.
+    // 즉시 정지 + 현재 위치/yaw 설정. MoveIntentReq(STOP) 처리/스폰 배치용.
     // waypoint 리스트도 비운다.
     void StopAt(float posX, float posY, float posZ, float yaw);
 
@@ -146,6 +151,9 @@ private:
     // ── 이동 상태 ────────────────────────────────────────────
     // m_isMoving = false 면 다른 이동 멤버는 의미 없음.
     bool  m_isMoving = false;
+
+    // 마지막으로 처리한 클라 이동 입력 seq (화해용). SnapshotNtf.ack_input_seq 로 송신.
+    uint32 m_lastInputSeq = 0;
 
     // Waypoint 리스트. (x, y, z) 트리플 순서로 floats * 3N 개.
     // 비어있지 않으면 [0..2] 는 첫 번째 waypoint, [3..5] 는 두 번째, ...

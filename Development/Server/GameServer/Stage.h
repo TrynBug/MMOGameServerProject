@@ -349,8 +349,7 @@ protected:
     bool deserializeUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacket, TMsg& outMsg);
 
     // 개별 패킷 핸들러. getUserPacketHandlerMap 테이블에 등록되어 OnUserPacket 이 호출한다.
-    void handleMoveDestReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
-    void handleMoveStopReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+    void handleMoveIntentReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
     void handleSkillCastReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
     void handleSkillProjectileHitReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
 

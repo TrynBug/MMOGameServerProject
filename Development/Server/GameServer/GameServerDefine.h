@@ -58,22 +58,6 @@ constexpr int32 k_aoiRange = 1;
 constexpr int64 k_characterUpdateIntervalMs = 50;    // 캐릭터: 매 tick (중요)
 constexpr int64 k_monsterUpdateIntervalMs   = 50;     // 몬스터: 매 tick (스냅샷 스트리밍 부드러움용). TODO: AI think(성김)/이동 integrate(매tick) 분리로 비용 최적화.
 
-// ── 스냅샷 가변 송신율 (buildAndSendSnapshots) ────────────────────
-// 이동 중 오브젝트는 매 tick(20Hz) 보내 부드러움을 유지하고, 유휴 오브젝트는 heartbeat 주기로만
-// 보내 부하를 줄인다. 정지 직후 몇 tick 은 최종 위치를 확실히 전하기 위해 계속 보낸다.
-constexpr uint32 k_snapshotIdleHeartbeatTicks = 20;   // 유휴 오브젝트 heartbeat 주기(tick). 20 = 1초. objectId 로 스태거되어 분산됨.
-constexpr int32  k_snapshotPostStopTicks      = 3;    // 정지 직후 최종 위치를 마저 보낼 tick 수.
-
-// MoveStopReq 수신 시 클라 위치와 서버 위치의 허용 오차 (X-Z 평면 거리, 유닛).
-// MoveDestReq/MoveStopReq 둘 다 이 값을 사용.
-// 이 범위 내면 클라 위치 인정, 초과면 MovePosCorrectNtf 송신.
-//
-// 값 결정 근거:
-//   - 이동 방향이 바뀌면 클라가 200ms 주기로 더 자주 경로를 다시 잡는 동안 서버는 500ms 동안 옷 경로를
-//     따라가기 때문에 1~1.5m 정도의 누적 오차가 자연스럽게 발생.
-//   - 3.0m 면 이런 정상 플레이에서는 통과, 텍일포트 수준의 이상 이동만 감지.
-//   - 향후 이동중 vs 정지시 동적 tolerance, 속도 기반 검증 등으로 개선 예정.
-constexpr float k_movePositionTolerance = 3.0f;
 
 // 내부서버 세션 추가 데이터
 struct InternalSessionMeta

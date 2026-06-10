@@ -96,16 +96,9 @@ public:
     // 아직 주기에 도달하지 않았으면 false (이번 tick 의 Update 는 건너뛴다).
     bool  AdvanceUpdateClock(int64 deltaMs, int64& outElapsedMs);
 
-    // ── 스냅샷 송신 스케줄 (가변 송신율) ───────────────────────────
-    // 이동 중이 아닌 오브젝트는 매 tick 보내지 않는다. Stage::buildAndSendSnapshots 가
-    // 매 tick 이 상태를 계산(이동중 / 정지직후 / 유휴 heartbeat)하여 송신 여부를 정한다.
-    // 파생(Character/Monster)이 이동 상태를 노출한다. 안 움직이는 오브젝트는 기본 false.
+    // 이동 상태 노출(파생 Character/Monster 가 override). 스냅샷의 isMoving 플래그 산출에 쓰인다.
+    // 안 움직이는 오브젝트(프랍 등)는 기본 false.
     virtual bool IsMoving() const { return false; }
-
-    bool  IsSnapshotDue() const             { return m_snapshotDueThisTick; }
-    void  SetSnapshotDue(bool due)          { m_snapshotDueThisTick = due; }
-    int32 GetSnapshotPostStopTicks() const  { return m_snapshotPostStopTicks; }
-    void  SetSnapshotPostStopTicks(int32 t) { m_snapshotPostStopTicks = t; }
 
 private:
     int64       m_objectId   = 0;
@@ -135,10 +128,6 @@ private:
     // m_updateAccumMs    : 마지막 Update 이후 누적된 경과시간(ms). 주기 도달 시 0 으로 리셋.
     int64       m_updateIntervalMs = 0;
     int64       m_updateAccumMs    = 0;
-
-    // 스냅샷 가변 송신율 상태. buildAndSendSnapshots 가 매 tick 갱신/소비.
-    bool        m_snapshotDueThisTick   = false;   // 이번 tick 이 오브젝트를 스냅샷에 포함할지.
-    int32       m_snapshotPostStopTicks = 0;       // 정지 직후 최종 위치를 마저 보낼 남은 tick 수.
 };
 
 using StageObjectPtr  = std::shared_ptr<StageObject>;

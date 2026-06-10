@@ -882,8 +882,7 @@ void Stage::OnUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacke
 const Stage::UserPacketHandlerMap& Stage::getUserPacketHandlerMap() const
 {
     static const UserPacketHandlerMap sm_handlers = {
-        { Common::GAME_PACKET_ID_MOVE_DEST_REQ,            &Stage::handleMoveDestReq },
-        { Common::GAME_PACKET_ID_MOVE_STOP_REQ,            &Stage::handleMoveStopReq },
+        { Common::GAME_PACKET_ID_MOVE_INTENT_REQ,          &Stage::handleMoveIntentReq },
         { Common::GAME_PACKET_ID_SKILL_CAST_REQ,           &Stage::handleSkillCastReq },
         { Common::GAME_PACKET_ID_SKILL_PROJECTILE_HIT_REQ, &Stage::handleSkillProjectileHitReq },
         { Common::GAME_PACKET_ID_STAGE_MOVE_REQ,           &Stage::handleStageMoveReq },
@@ -905,43 +904,36 @@ bool Stage::deserializeUserPacket(const UserPtr& spUser, const netlib::PacketPtr
     return true;
 }
 
-void Stage::handleMoveDestReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+void Stage::handleMoveIntentReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
 {
     CharacterPtr spCharacter = spUser->GetCurrentCharacter();
     if (!spCharacter || spCharacter->GetStage() != this)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("MoveDestReq but no character or wrong stage. stageId={} userId={}", m_stageId, spUser->GetUserId()));
+        LOG_WRITE(LogLevel::Warn, std::format("MoveIntentReq but no character or wrong stage. stageId={} userId={}", m_stageId, spUser->GetUserId()));
         return;
     }
 
-    GamePacket::MoveDestReq req;
+    GamePacket::MoveIntentReq req;
     if (!deserializeUserPacket(spUser, spPacket, req))
         return;
 
-    spCharacter->SetDestination(req.dest_x(), req.dest_y(), req.dest_z());
-    // 이동 복제는 buildAndSendSnapshots 가 매 tick 처리한다(별도 MoveNtf 송신 없음).
-}
+    // 화해 기준: 마지막으로 처리한 입력 seq 기록 (SnapshotNtf.ack_input_seq 로 본인에게 송신).
+    spCharacter->SetLastInputSeq(req.input_seq());
 
-void Stage::handleMoveStopReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
-{
-    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
-    if (!spCharacter || spCharacter->GetStage() != this)
+    // 위치 권위는 서버. 클라는 "의도"만 보낸다(위치 미수신).
+    switch (req.intent())
     {
-        LOG_WRITE(LogLevel::Warn, std::format("MoveStopReq but no character or wrong stage. stageId={} userId={}", m_stageId, spUser->GetUserId()));
-        return;
+    case GamePacket::MOVE_INTENT_TO:
+        spCharacter->SetDestination(req.dest_x(), req.dest_y(), req.dest_z());
+        break;
+    case GamePacket::MOVE_INTENT_STOP:
+        // 서버 시뮬레이션 현재 위치에서 정지(클라 위치 채택 안 함). yaw 만 클라 hint 반영.
+        spCharacter->StopAt(spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), req.yaw());
+        break;
+    default:
+        break;
     }
-
-    GamePacket::MoveStopReq req;
-    if (!deserializeUserPacket(spUser, spPacket, req))
-        return;
-
-    // 위치 권위는 서버다. 클라가 보고한 정지 위치(req.pos_*)는 채택하지 않는다.
-    // 채택하면 서버 위치가 그 순간 점프하고, 그 점프가 SnapshotNtf 로 주변에 전달되어
-    // 관찰자 화면에서 캐릭터가 멈출 때 snap 으로 보인다. 또 이 캐릭터를 쫓던 몬스터의 타겟도
-    // 함께 점프해 떨림을 유발한다. 따라서 서버 시뮬레이션의 현재 위치에서 멈추고,
-    // yaw(바라보는 방향)만 클라 값을 반영한다.
-    // (본인 캐릭터의 예측↔서버 위치 오차 보정은 Phase 2 화해에서 처리한다.)
-    spCharacter->StopAt(spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), req.yaw());
+    // 이동 복제는 buildAndSendSnapshots 가 매 tick 처리한다.
 }
 
 void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
@@ -1178,33 +1170,8 @@ void Stage::buildAndSendSnapshots()
     if (!pServer)
         return;
 
-    // ── pass 1: 오브젝트별로 이번 tick 송신 여부(due)를 결정한다 ──
-    // 유저별 AOI 와 무관하게 오브젝트 자체 상태로 한 번만 계산한다(여러 관찰자에게 일관).
-    //  - 이동 중: 매 tick 송신(부드러움). 정지 직후 k_snapshotPostStopTicks tick 더 송신(최종 위치 보장).
-    //  - 유휴: objectId 로 스태거된 heartbeat 주기에만 송신(부하 분산).
-    for (auto& [objId, spObject] : m_objects)
-    {
-        StageObject* pObj = spObject.get();
-        bool due;
-        if (pObj->IsMoving())
-        {
-            pObj->SetSnapshotPostStopTicks(k_snapshotPostStopTicks);
-            due = true;
-        }
-        else if (pObj->GetSnapshotPostStopTicks() > 0)
-        {
-            pObj->SetSnapshotPostStopTicks(pObj->GetSnapshotPostStopTicks() - 1);
-            due = true;
-        }
-        else
-        {
-            const uint32 phase = static_cast<uint32>(objId % k_snapshotIdleHeartbeatTicks);
-            due = ((m_serverTickSeq + phase) % k_snapshotIdleHeartbeatTicks == 0);
-        }
-        pObj->SetSnapshotDue(due);
-    }
-
-    // ── pass 2: 각 유저에게 자기 AOI 안의 "due" 오브젝트만 모아 송신 ──
+    // 각 유저에게 자기 AOI 안의 보이는 오브젝트(캐릭터/몬스터)를 매 tick 모아 송신한다.
+    // (가변 송신율/유휴 throttle 은 추후 별도 시스템으로 설계 — 지금은 단순히 전 객체 매 tick.)
     for (auto& [userId, spUser] : m_users)
     {
         Character* pMe = spUser->GetCurrentCharacter().get();
@@ -1218,15 +1185,13 @@ void Stage::buildAndSendSnapshots()
 
         GamePacket::SnapshotNtf ntf;
         ntf.set_server_tick_seq(m_serverTickSeq);
-        ntf.set_ack_input_seq(0);   // Phase 3(의도 입력)에서 본인 마지막 처리 입력 seq 로 교체.
+        ntf.set_ack_input_seq(pMe->GetLastInputSeq());   // 본인 마지막 처리 입력 seq (클라 화해용).
 
         ForEachAdjacentSector(centerX, centerZ, k_aoiRange,
             [&](Sector* pSector)
             {
                 for (const auto& [objId, pObj] : pSector->GetUsers())
                 {
-                    if (!pObj->IsSnapshotDue())
-                        continue;   // 이번 tick 송신 대상 아님(유휴 등) → 스킵.
                     const Character* pChar = static_cast<const Character*>(pObj);
                     GamePacket::ActorStateInfo* pState = ntf.add_states();
                     pState->set_object_id(pChar->GetObjectId());
@@ -1241,8 +1206,6 @@ void Stage::buildAndSendSnapshots()
                 }
                 for (const auto& [objId, pObj] : pSector->GetMonsters())
                 {
-                    if (!pObj->IsSnapshotDue())
-                        continue;   // 이번 tick 송신 대상 아님(유휴 등) → 스킵.
                     const Monster* pMon = static_cast<const Monster*>(pObj);
                     GamePacket::ActorStateInfo* pState = ntf.add_states();
                     pState->set_object_id(pMon->GetObjectId());
