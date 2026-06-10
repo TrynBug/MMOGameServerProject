@@ -171,8 +171,6 @@ bool StageManager::prepareNavStage(int64 stageId, int32 stageDataKey, const char
 
 void StageManager::registerStage(int64 stageId, int32 stageDataKey, const StagePtr& spStage)
 {
-    spStage->SetGameServer(m_pGameServer);
-
     const int32 threadIdx = computeStageThreadIndex(stageId);
     m_pGameServer->AssignContents(threadIdx, spStage);
 

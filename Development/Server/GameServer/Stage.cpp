@@ -399,12 +399,7 @@ Monster* Stage::SpawnMonster(int32 monsterKey, float posX, float posY, float pos
         return nullptr;
     }
 
-    GameServer* pServer = GetGameServer();
-    if (!pServer)
-    {
-        LOG_WRITE(LogLevel::Error, std::format("GameServer not injected. stageId={} monsterKey={}", m_stageId, monsterKey));
-        return nullptr;
-    }
+    GameServer* pServer = &GameServer::Instance();
 
     // ── 스폰 위치 검증 + NavMesh Y 스냅 ──────────────────────
     // NavMesh 가 있으면 표면으로 스냅(Y 보정 + walkable 검증). 검색 박스 안에 walkable 폴리곤이
@@ -496,15 +491,15 @@ bool Stage::DespawnMonster(int64 objectId)
     LOG_WRITE(LogLevel::Info, std::format("stageId={} objectId={} totalObjects={}", m_stageId, objectId, m_objects.size()));
 
     // 주변 sector AOI 안의 유저들에게 despawn 통보.
-    if (GameServer* pServer = GetGameServer())
-    {
-        const std::vector<int64> despawnIds = { objectId };
-        ForEachUserInAoi(sx, sz,
-            [&](int64 userId)
-            {
-                pServer->GetPacketSender().SendObjectVisibilityNtf(userId, {}, despawnIds);
-            });
-    }
+    GameServer* pServer = &GameServer::Instance();
+
+    const std::vector<int64> despawnIds = { objectId };
+    ForEachUserInAoi(sx, sz,
+        [&](int64 userId)
+        {
+            pServer->GetPacketSender().SendObjectVisibilityNtf(userId, {}, despawnIds);
+        });
+
 
     return true;
 }
@@ -734,52 +729,51 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
 
     // ── visibility 전파 ────────────────────────────────────
     // 주변 sector AOI 기반.
-    GameServer* pServer = GetGameServer();
-    if (pServer)
-    {
-        const GamePacket::CharacterSpawnInfo myInfo = makeCharacterSpawnInfo(*spCharacter);
+    GameServer* pServer = &GameServer::Instance();
 
-        // 나에게 전송할 spawn 목록 (주변 sector의 모든 캐릭터(자기 포함) + 모든 몬스터).
-        std::vector<GamePacket::CharacterSpawnInfo> spawnsForMe;
-        spawnsForMe.reserve(16);
-        std::vector<GamePacket::MonsterSpawnInfo> monsterSpawnsForMe;
-        monsterSpawnsForMe.reserve(16);
+    const GamePacket::CharacterSpawnInfo myInfo = makeCharacterSpawnInfo(*spCharacter);
 
-        // 다른 캐릭터에게 전송할 용도의 "내 spawn 1개".
-        std::vector<GamePacket::CharacterSpawnInfo> singleSpawn = { myInfo };
+    // 나에게 전송할 spawn 목록 (주변 sector의 모든 캐릭터(자기 포함) + 모든 몬스터).
+    std::vector<GamePacket::CharacterSpawnInfo> spawnsForMe;
+    spawnsForMe.reserve(16);
+    std::vector<GamePacket::MonsterSpawnInfo> monsterSpawnsForMe;
+    monsterSpawnsForMe.reserve(16);
 
-        ForEachAdjacentSector(spCharacter->GetCurSectorX(), spCharacter->GetCurSectorZ(), k_aoiRange,
-            [&](Sector* pSector)
+    // 다른 캐릭터에게 전송할 용도의 "내 spawn 1개".
+    std::vector<GamePacket::CharacterSpawnInfo> singleSpawn = { myInfo };
+
+    ForEachAdjacentSector(spCharacter->GetCurSectorX(), spCharacter->GetCurSectorZ(), k_aoiRange,
+        [&](Sector* pSector)
+        {
+            for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
             {
-                for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
+                Character* pOtherChar = static_cast<Character*>(pOtherObj);
+                spawnsForMe.push_back(makeCharacterSpawnInfo(*pOtherChar));
+
+                // 다른 캐릭터에게 내 spawn 전송 (자기 자신은 제외).
+                if (otherObjId != objectId)
                 {
-                    Character* pOtherChar = static_cast<Character*>(pOtherObj);
-                    spawnsForMe.push_back(makeCharacterSpawnInfo(*pOtherChar));
-
-                    // 다른 캐릭터에게 내 spawn 전송 (자기 자신은 제외).
-                    if (otherObjId != objectId)
-                    {
-                        const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                        pServer->GetPacketSender().SendObjectVisibilityNtf(otherUserId, singleSpawn, {});
-                    }
+                    const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
+                    pServer->GetPacketSender().SendObjectVisibilityNtf(otherUserId, singleSpawn, {});
                 }
+            }
 
-                // 주변 몬스터도 나에게 spawn 통보. (몬스터는 관찰자가 아니므로 받기만 한다.)
-                for (const auto& [monsterObjId, pMonsterObj] : pSector->GetMonsters())
-                {
-                    monsterSpawnsForMe.push_back(makeMonsterSpawnInfo(*static_cast<Monster*>(pMonsterObj)));
-                }
-            });
+            // 주변 몬스터도 나에게 spawn 통보. (몬스터는 관찰자가 아니므로 받기만 한다.)
+            for (const auto& [monsterObjId, pMonsterObj] : pSector->GetMonsters())
+            {
+                monsterSpawnsForMe.push_back(makeMonsterSpawnInfo(*static_cast<Monster*>(pMonsterObj)));
+            }
+        });
 
-        // ── StageLoadCompleteRes 를 먼저 보낸다 (StatUpdate/HpMp 는 PacketSender 가 그 뒤에 송신) ──
-        // 2단계 입장에서 클라는 이 패킷 수신 시점에 보관 중인 LocalPlayer 를 활성화/배치한다.
-        // 그래야 뒤이어 오는 ObjectVisibilityNtf 의 자기 자신 항목을 식별해 스킵할 수 있다.
-        // (순서가 반대면 클라가 자기 캐릭터를 원격 캐릭터로 잘못 스폰 → 키 충돌.)
-        pServer->GetPacketSender().SendStageLoadCompleteRes(userId, EResultCode::Success, GetStageId(), GetStageDataKey(),
-            spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), spCharacter->GetYaw());
+    // ── StageLoadCompleteRes 를 먼저 보낸다 (StatUpdate/HpMp 는 PacketSender 가 그 뒤에 송신) ──
+    // 2단계 입장에서 클라는 이 패킷 수신 시점에 보관 중인 LocalPlayer 를 활성화/배치한다.
+    // 그래야 뒤이어 오는 ObjectVisibilityNtf 의 자기 자신 항목을 식별해 스킵할 수 있다.
+    // (순서가 반대면 클라가 자기 캐릭터를 원격 캐릭터로 잘못 스폰 → 키 충돌.)
+    pServer->GetPacketSender().SendStageLoadCompleteRes(userId, EResultCode::Success, GetStageId(), GetStageDataKey(),
+        spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), spCharacter->GetYaw());
 
-        pServer->GetPacketSender().SendObjectVisibilityNtf(userId, spawnsForMe, {}, monsterSpawnsForMe);
-    }
+    pServer->GetPacketSender().SendObjectVisibilityNtf(userId, spawnsForMe, {}, monsterSpawnsForMe);
+    
 
     // 스폰 완료 후 서브클래스 훅 (기본 no-op). 캐릭터가 Stage에 등록되고 통보까지 끝난 뒤 호출.
     // 예: 입장 버프 부여, 이벤트 트리거.
@@ -828,21 +822,20 @@ void Stage::OnUserLeave(int64 userId)
     // 주변 sector의 다른 캐릭터들에게 despawn broadcast.
     if (leavingObjectId != 0)
     {
-        if (GameServer* pServer = GetGameServer())
-        {
-            std::vector<int64> despawnIds = { leavingObjectId };
+        GameServer* pServer = &GameServer::Instance();
 
-            ForEachAdjacentSector(leavingSectorX, leavingSectorZ, k_aoiRange,
-                [&](Sector* pSector)
+        std::vector<int64> despawnIds = { leavingObjectId };
+
+        ForEachAdjacentSector(leavingSectorX, leavingSectorZ, k_aoiRange,
+            [&](Sector* pSector)
+            {
+                for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
                 {
-                    for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
-                    {
-                        Character* pOtherChar = static_cast<Character*>(pOtherObj);
-                        const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                        pServer->GetPacketSender().SendObjectVisibilityNtf(otherUserId, {}, despawnIds);
-                    }
-                });
-        }
+                    Character* pOtherChar = static_cast<Character*>(pOtherObj);
+                    const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
+                    pServer->GetPacketSender().SendObjectVisibilityNtf(otherUserId, {}, despawnIds);
+                }
+            });
     }
 }
 
@@ -887,7 +880,7 @@ const Stage::UserPacketHandlerMap& Stage::getUserPacketHandlerMap() const
 template <typename TMsg>
 bool Stage::deserializeUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacket, TMsg& outMsg)
 {
-    if (!GetGameServer() || !GetGameServer()->DeserializePacket(*spPacket, outMsg))
+    if (!GameServer::Instance().DeserializePacket(*spPacket, outMsg))
     {
         LOG_WRITE(LogLevel::Warn, std::format("failed to deserialize. stageId={} userId={} packetType={}",
             m_stageId, spUser->GetUserId(), spPacket->GetHeader()->type));
@@ -936,9 +929,7 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
     if (!deserializeUserPacket(spUser, spPacket, req))
         return;
 
-    GameServer* pServer = GetGameServer();
-    if (!pServer)
-        return;
+    GameServer* pServer = &GameServer::Instance();
 
     const int64 userId = spUser->GetUserId();
 
@@ -1057,9 +1048,7 @@ void Stage::handleCheatReq(const UserPtr& spUser, const netlib::PacketPtr& spPac
     if (!deserializeUserPacket(spUser, spPacket, req))
         return;
 
-    GameServer* pServer = GetGameServer();
-    if (!pServer)
-        return;
+    GameServer* pServer = &GameServer::Instance();
 
     const std::vector<std::string> args(req.args().begin(), req.args().end());
     const cheat::Result result = pServer->GetCheatManager().Execute(*this, spUser, req.name(), args);
@@ -1187,9 +1176,7 @@ void Stage::updateCharacters(int64 deltaMs)
 // 가변 송신율: 변화 있는 객체만 매 tick, 유휴 객체는 heartbeat 주기로 포함. 헤더는 매 tick 항상 송신.
 void Stage::buildAndSendSnapshots()
 {
-    GameServer* pServer = GetGameServer();
-    if (!pServer)
-        return;
+    GameServer* pServer = &GameServer::Instance();
 
     // pass 1: 오브젝트별로 이번 tick 송신 여부(due)를 한 번 계산한다(여러 관찰자에게 일관).
     //   due = 위치/회전 변화 OR heartbeat. 위치 변화 기준이라 이동·대시·넉백·정지 최종위치가 자동 포함된다.
@@ -1261,9 +1248,7 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
                                            int32 oldSectorX, int32 oldSectorZ,
                                            int32 newSectorX, int32 newSectorZ)
 {
-    GameServer* pServer = GetGameServer();
-    if (!pServer)
-        return;
+    GameServer* pServer = &GameServer::Instance();
 
     const int64 myObjectId = character.GetObjectId();
     const int64 myUserId   = character.GetProto().owner_user_id();
@@ -1364,9 +1349,7 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
                                                   int32 oldSectorX, int32 oldSectorZ,
                                                   int32 newSectorX, int32 newSectorZ)
 {
-    GameServer* pServer = GetGameServer();
-    if (!pServer)
-        return;
+    GameServer* pServer = &GameServer::Instance();
 
     const int64 monsterObjectId = monster.GetObjectId();
 
@@ -1421,9 +1404,7 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
 // Sends to every user in the actor's AOI; the owner is included if they are a user in their own sector.
 void Stage::BroadcastBuffNtf(const ActorObject& actor, int32 buffKey, int32 stackCount, int32 remainMs)
 {
-    GameServer* pServer = GetGameServer();
-    if (!pServer)
-        return;
+    GameServer* pServer = &GameServer::Instance();
 
     const int64 objectId = actor.GetObjectId();
     ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
@@ -1435,9 +1416,7 @@ void Stage::BroadcastBuffNtf(const ActorObject& actor, int32 buffKey, int32 stac
 
 void Stage::BroadcastBuffRemoveNtf(const ActorObject& actor, int32 buffKey)
 {
-    GameServer* pServer = GetGameServer();
-    if (!pServer)
-        return;
+    GameServer* pServer = &GameServer::Instance();
 
     const int64 objectId = actor.GetObjectId();
     ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),

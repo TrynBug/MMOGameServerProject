@@ -134,9 +134,7 @@ void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerOb
     // HP 가 0 이하로 떨어졌으면 이번 호출에서 사망 전환 (1회만 true).
     const bool justDied = (remainingHp <= 0.0) && target.MarkDead(killerObjectId);
 
-    GameServer* pServer = GetGameServer();
-    if (pServer == nullptr)
-        return;
+    GameServer* pServer = &GameServer::Instance();
 
     const int64 targetObjectId = target.GetObjectId();
     ForEachUserInAoi(target.GetCurSectorX(), target.GetCurSectorZ(),
@@ -154,9 +152,7 @@ void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerOb
 // 사망한 대상 주변 AOI 유저들에게 사망을 통보(ObjectDeathNtf). 클라 사망 연출용.
 void Stage::BroadcastObjectDeathNtf(const ActorObject& actor, int64 killerObjectId)
 {
-    GameServer* pServer = GetGameServer();
-    if (pServer == nullptr)
-        return;
+    GameServer* pServer = &GameServer::Instance();
 
     const int64 objectId = actor.GetObjectId();
     ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
@@ -172,8 +168,8 @@ int64 Stage::SpawnSkillProjectileGroup(const EffectParams& params, const std::ve
     EffectParams p = params;
 
     // effectId 발급 (클라가 hit 보고 시 이 id 로 그룹을 지목한다).
-    if (GameServer* pServer = GetGameServer())
-        p.effectId = pServer->GenerateObjectId();
+    GameServer* pServer = &GameServer::Instance();
+    p.effectId = pServer->GenerateObjectId();
 
     const int64 effectId = p.effectId;
     auto spGroup = std::make_unique<ProjectileGroup>();
@@ -262,9 +258,7 @@ void Stage::BroadcastSkillCastNtf(const ActorObject& caster, int32 skillKey, int
                                   const Vector3& origin, const Vector3& dir, uint32 seed,
                                   float moveDistance)
 {
-    GameServer* pServer = GetGameServer();
-    if (pServer == nullptr)
-        return;
+    GameServer* pServer = &GameServer::Instance();
 
     const int64 casterObjectId = caster.GetObjectId();
     ForEachUserInAoi(caster.GetCurSectorX(), caster.GetCurSectorZ(),

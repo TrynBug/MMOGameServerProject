@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pch.h"
+#include <cassert>
 #include "GameServerDefine.h"
 #include "SystemStage.h"
 #include "Town.h"
@@ -23,11 +24,19 @@ public:
     GameServer()
         : m_packetSender(*this, m_safeUsers, m_safeGatewaySessions)
     {
+        assert(s_pInstance == nullptr);   // 인스턴스는 반드시 1개
+        s_pInstance = this;
     }
-    ~GameServer() override = default;
+    ~GameServer() override { s_pInstance = nullptr; }
 
     GameServer(const GameServer&) = delete;
     GameServer& operator=(const GameServer&) = delete;
+
+    // ── 전역 단일 인스턴스 접근 ────────────────────────────────
+    // 비용 = 포인터 1회 로드(인라인). lazy-init 가드가 없어 Meyers 싱글톤보다 싸다.
+    // s_pInstance 는 main 에서 GameServer 가 1회 생성될 때(단일 스레드 시작 구간) 세팅되고
+    // 이후로는 읽기만 하므로 동기화가 필요 없다.
+    static GameServer& Instance() { return *s_pInstance; }
 
     // ── 패킷 송신 ──────────────────────────────────────────────
     // 클라이언트로 나가는 모든 Send***Ntf 는 PacketSender 가 담당한다. Stage/컴포넌트는
@@ -112,6 +121,9 @@ private:
                                 const DataStructures::Character* pCharacter, int32 stageDataKey);
 
 private:
+    // 전역 단일 인스턴스 포인터. 생성자에서 1회 세팅, 소멸자에서 해제. Instance() 가 역참조한다.
+    static inline GameServer* s_pInstance = nullptr;
+
     // NavMesh 데이터 관리, 길찾기 기능 제공
     NavMeshManager m_navMeshManager;
 

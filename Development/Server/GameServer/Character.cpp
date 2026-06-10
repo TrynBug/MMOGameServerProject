@@ -193,10 +193,8 @@ void Character::OnStatsChangedByBuff()
     Stage* pStage = GetStage();
     if (pStage == nullptr)
         return;
-    GameServer* pServer = pStage->GetGameServer();
-    if (pServer == nullptr)
-        return;
-    pServer->GetPacketSender().SendStatUpdateNtf(GetProto().owner_user_id(), *this);
+
+    GameServer::Instance().GetPacketSender().SendStatUpdateNtf(GetProto().owner_user_id(), *this);
 }
 
 void Character::OnHpChangedByBuff()
@@ -205,8 +203,6 @@ void Character::OnHpChangedByBuff()
     Stage* pStage = GetStage();
     if (pStage == nullptr)
         return;
-    GameServer* pServer = pStage->GetGameServer();
-    if (pServer == nullptr)
-        return;
-    pServer->GetPacketSender().SendHpMpNtf(GetProto().owner_user_id(), GetCurHp(), GetCurMp());
+    
+    GameServer::Instance().GetPacketSender().SendHpMpNtf(GetProto().owner_user_id(), GetCurHp(), GetCurMp());
 }

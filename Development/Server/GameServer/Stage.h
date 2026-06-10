@@ -182,11 +182,6 @@ public:
                                float halfExtentX, float halfExtentY, float halfExtentZ,
                                float& outX, float& outY, float& outZ) const;
 
-    // GameServer 주입. 생성 직후 소유자가 설정한다.
-    // Stage 파생 클래스가 패킷 전송 등을 위해 사용.
-    void          SetGameServer(GameServer* pGameServer) { m_pGameServer = pGameServer; }
-    GameServer*   GetGameServer() const                  { return m_pGameServer; }
-
     // 외부 스레드에서 시스템 메시지를 push (thread-safe).
     // 다음 OnUpdate에서 처리된다.
     void      EnqueueMessage(StageMessage msg);
@@ -427,10 +422,6 @@ private:
     int64      m_stageId   = 0;
     EStageType m_stageType = EStageType::None;
 	const GameData_Stage* m_pStageData = nullptr;   // 현재 Stage의 데이터. 반드시 null이 아님.
-
-    // GameServer 포인터 (소유권 없음, 주입자가 lifetime 보장).
-    // SetGameServer로 주입되며, Stage 파생이 패킷 전송 등을 하기 위해 사용.
-    GameServer* m_pGameServer = nullptr;
 
     // Stage 단조 증가 시계 (ms). OnUpdate 마다 deltaMs 누적. 스킬 효과/투사체 타이밍 기준.
     int64      m_stageClockMs = 0;
