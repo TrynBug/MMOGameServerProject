@@ -7,6 +7,34 @@ namespace
     constexpr const char* k_gameDBPath = "GameDB.db";
 }
 
+// ── [치트] 패킷 로깅 헬퍼 정의 (선언은 GameServerDefine.h) ──────────────
+namespace packetlog
+{
+    EPacketLogMode EffectiveMode(const User& user)
+    {
+        const EPacketLogMode userMode   = user.GetCheatPacketLogMode();
+        const EPacketLogMode globalMode = GameServer::Instance().GetCheatManager().GetGlobalPacketLogMode();
+        return (userMode >= globalMode) ? userMode : globalMode;   // None < Name < Detail
+    }
+
+    void LogPacket(const char* dir, int64 userId, uint16 packetType, const google::protobuf::Message* pMsg)
+    {
+        const std::string& name = Common::GamePacketId_Name(static_cast<Common::GamePacketId>(packetType));
+        const char* pName = name.empty() ? "UNKNOWN" : name.c_str();
+
+        if (pMsg != nullptr)
+        {
+            std::string json;
+            packet::ProtoJsonSerializer::ToJson(*pMsg, json);
+            LOG_WRITE(LogLevel::Info, std::format("[PKT][{}] uid={} {}({}) {}", dir, userId, pName, packetType, json));
+        }
+        else
+        {
+            LOG_WRITE(LogLevel::Info, std::format("[PKT][{}] uid={} {}({})", dir, userId, pName, packetType));
+        }
+    }
+}
+
 bool GameServer::OnInitialize()
 {
     // ── 내부서버용 패킷 디스패처 ────────────────────────────────
@@ -690,6 +718,13 @@ void GameServer::handleRelayedClientPacket(const netlib::PacketPtr& spPacket)
     // 캐릭터 선택/생성 단계 패킷은 GameServer가 직접 처리 (DB 코루틴 필요).
     // 그외 게임 플레이 패킷은 User 패킷큐에 push → Stage가 처리.
     const uint16 packetType = spPacket->GetHeader()->type;
+
+    // [치트] 수신 패킷 로깅. name 모드는 여기서 이름만 1줄(모든 수신 커버). detail 모드는
+    // 타입이 살아나는 지점(아래 case들 / Stage::deserializeUserPacket)에서 이름+JSON 1줄로 찍는다.
+    const EPacketLogMode logMode = packetlog::EffectiveMode(*spUser);
+    if (logMode == EPacketLogMode::Name)
+        packetlog::LogPacket("C->S", userId, packetType, nullptr);
+
     switch (packetType)
     {
     case Common::GAME_PACKET_ID_CHARACTER_CREATE_REQ:
@@ -700,6 +735,8 @@ void GameServer::handleRelayedClientPacket(const netlib::PacketPtr& spPacket)
             LOG_WRITE(LogLevel::Warn, std::format("failed to deserialize CharacterCreateReq. userId={}", userId));
             return;
         }
+        if (logMode == EPacketLogMode::Detail)
+            packetlog::LogPacket("C->S", userId, packetType, &req);
         handleClientCharacterCreate(userId, std::move(req));
         return;
     }
@@ -711,6 +748,8 @@ void GameServer::handleRelayedClientPacket(const netlib::PacketPtr& spPacket)
             LOG_WRITE(LogLevel::Warn, std::format("failed to deserialize CharacterSelectReq. userId={}", userId));
             return;
         }
+        if (logMode == EPacketLogMode::Detail)
+            packetlog::LogPacket("C->S", userId, packetType, &req);
         handleClientCharacterSelect(userId, std::move(req));
         return;
     }

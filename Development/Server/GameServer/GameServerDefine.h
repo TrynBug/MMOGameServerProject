@@ -72,3 +72,22 @@ struct InternalSessionMeta
     int32      peerServerId = 0;         // 서버ID
     bool       isConnector = false;      // true: 이 서버가 connect한 세션, false: 이 서버가 accept한 세션
 };
+
+// ── 패킷 로깅 치트 (개발용) ───────────────────────────────────────
+// packet / packet all / packetdetail / packetdetail all 치트의 상태/헬퍼.
+// 모드 단계: None < Name < Detail. 유효 모드 = max(유저별, 글로벌).
+enum class EPacketLogMode : uint8 { None = 0, Name = 1, Detail = 2 };
+
+class User;
+namespace google { namespace protobuf { class Message; } }
+
+namespace packetlog
+{
+    // 유효 로그 모드 = max(해당 유저의 per-client 모드, CheatManager 의 글로벌 모드).
+    EPacketLogMode EffectiveMode(const User& user);
+
+    // 패킷 1건을 서버 로그에 1줄로 출력한다.
+    //   pMsg != nullptr : 이름 + JSON(내용),  nullptr : 이름만.
+    //   dir : "S->C" 또는 "C->S".
+    void LogPacket(const char* dir, int64 userId, uint16 packetType, const google::protobuf::Message* pMsg);
+}

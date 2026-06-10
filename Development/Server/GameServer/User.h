@@ -2,7 +2,8 @@
 
 #include "pch.h"
 
-#include "Enum/GameEnum_Stage.h"   // EStagePositionType
+#include "Enum/GameEnum_Stage.h" 
+#include "GameServerDefine.h"
 
 // Character와의 순환 의존을 피하기 위한 forward declaration.
 class Character;
@@ -72,6 +73,11 @@ public:
     EStagePositionType GetPendingPositionType() const          { return m_pendingPositionType; }
     void               SetPendingPositionType(EStagePositionType positionType) { m_pendingPositionType = positionType; }
 
+    // ── [치트] 패킷 로깅 모드 (per-client) ────────────────────────
+    // packet/packetdetail 치트가 값을 설정한다. 패킷 송신, 패킷 수신 수신할 때마다 이 값을 읽는다.
+    EPacketLogMode     GetCheatPacketLogMode() const             { return m_cheatPacketLogMode; }
+    void               SetCheatPacketLogMode(EPacketLogMode mode) { m_cheatPacketLogMode = mode; }
+
     // ── 클라 패킷 큐 ────────────────────────────────────────────
     // IOCP Worker가 push (thread-safe)
     void EnqueuePacket(netlib::PacketPtr spPacket);
@@ -96,6 +102,9 @@ private:
 
     // 이동/입장 시 도착 위치 타입 (전환 데이터, 수명 무관).
     EStagePositionType m_pendingPositionType = EStagePositionType::None;
+
+    // [치트] per-client 패킷 로깅 모드. 기본 None.
+    EPacketLogMode m_cheatPacketLogMode = EPacketLogMode::None;
 
     // ── 클라 패킷 큐 ────────────────────────────────────────────
     std::mutex                       m_packetQueueMutex;

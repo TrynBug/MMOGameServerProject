@@ -886,6 +886,12 @@ bool Stage::deserializeUserPacket(const UserPtr& spUser, const netlib::PacketPtr
             m_stageId, spUser->GetUserId(), spPacket->GetHeader()->type));
         return false;
     }
+
+    // [치트] detail 모드: 수신 게임플레이 패킷을 이름+JSON 1줄로 출력.
+    // (name 모드는 handleRelayedClientPacket 진입부가 담당하므로 여기선 detail 만.)
+    if (packetlog::EffectiveMode(*spUser) == EPacketLogMode::Detail)
+        packetlog::LogPacket("C->S", spUser->GetUserId(), spPacket->GetHeader()->type, &outMsg);
+
     return true;
 }
 
@@ -1051,7 +1057,7 @@ void Stage::handleCheatReq(const UserPtr& spUser, const netlib::PacketPtr& spPac
     GameServer* pServer = &GameServer::Instance();
 
     const std::vector<std::string> args(req.args().begin(), req.args().end());
-    const cheat::Result result = pServer->GetCheatManager().Execute(*this, spUser, req.name(), args);
+    const CheatResult result = pServer->GetCheatManager().Execute(*this, spUser, req.name(), args);
 
     GamePacket::CheatRes res;
     res.set_success(result.success);

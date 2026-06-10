@@ -5,6 +5,7 @@
 #include "User.h"
 #include "ThreadSafeUnorderedMap.h"
 #include "Enum/GameEnum_Common.h"
+#include "GameServerDefine.h" 
 
 // 전방선언 (SendStatUpdateNtf 의 const Character& 파라미터. 완전타입은 PacketSender.cpp 에서 include.)
 class Character;
@@ -116,6 +117,11 @@ void PacketSender::SendToUser(int64 userId, int32 packetType, const TMessage& me
         LOG_WRITE(LogLevel::Warn, std::format("gateway session not found. userId={} gatewayId={} packetType={}", userId, spUser->GetGatewayId(), packetType));
         return;
     }
+
+    // [치트] 송신 패킷 로깅. message 가 타입으로 살아있어 이름·JSON 모두 한 줄로 가능.
+    if (const EPacketLogMode logMode = packetlog::EffectiveMode(*spUser); logMode != EPacketLogMode::None)
+        packetlog::LogPacket("S->C", userId, static_cast<uint16>(packetType),
+                             logMode == EPacketLogMode::Detail ? &message : nullptr);
 
     // 내부 패킷 바디(클라용)를 먼저 직렬화한다.
     std::string payload;
