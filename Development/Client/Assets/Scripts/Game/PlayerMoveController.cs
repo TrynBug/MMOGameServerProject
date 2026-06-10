@@ -30,8 +30,11 @@ namespace Client.Game
         // 외부에서 자기 PlayerCharacter 에 접근할 일이 있을 때 (MouseInputHandler 등)
         public PlayerCharacter Character { get; private set; }
 
-        // 서버에 MoveDestReq 보내는 주기 (초). 클라이언트.md 규칙: 500ms.
-        [SerializeField] private float m_sendIntervalSec = 0.5f;
+        // 서버에 MoveDestReq 보내는 주기 (초).
+        // 스냅샷 스트리밍 모델에선 관찰자가 보는 권위 위치가 이 dest 로 구동되므로, 너무 성기면
+        // 관찰자 화면에서 경로 어긋남/정지 시 snap 이 생긴다. 100ms(10Hz)로 신선도를 높인다.
+        // (Phase 3 의도 입력 전환 시 MoveIntentReq 로 대체.)
+        [SerializeField] private float m_sendIntervalSec = 0.1f;
 
         // 같은 목적지면 굳이 안 보냄 (대역폭 절약). 단위는 sqr distance.
         [SerializeField] private float m_minDestChangeSqr = 0.01f;

@@ -1,20 +1,17 @@
 using GameData;
-using MMO.Client.Navigation;
-using System.Collections.Generic;
 using UnityEngine;
+using Client.Network;
 
 namespace Client.Game
 {
     // 1마리 몬스터를 표현하는 컴포넌트.
     // 서버의 ObjectVisibilityNtf(monster_spawns) 수신 시 StageManager 가 동적으로 생성한다.
     //
-    // ── 이동 (서버 권위) ──
-    // 서버가 MoveNtf 로 목적지/정지를 보낸다. 다른 유저 캐릭터와 동일한 모델이다.
-    //   - is_moving=true  : SetMoveDestination(dest) → 클라가 자기 NavMesh 로 경로를 만들어 따라감.
-    //   - is_moving=false : SetPosition(pos, yaw)    → 서버 위치로 즉시 스냅.
-    // 추종 로직은 PlayerCharacter 의 원격 캐릭터 처리와 동일하다. (향후 공통 추종 컴포넌트로 묶을 수 있음)
+    // ── 이동 (서버 권위, 원격 보간) ──
+    // 서버가 SnapshotNtf 로 권위 위치를 매 tick 스트리밍한다. 몬스터는 항상 원격이므로
+    // navmesh 재현 없이 스냅샷 사이를 보간(SnapshotInterpolator)해서 그린다. (PlayerCharacter 의 원격 처리와 동일.)
     //
-    // 애니메이션은 IActorAnimator(AnimatorActorAnimator)를 통해 idle/move 를 재생한다(서버 MoveNtf 기반).
+    // 애니메이션은 IActorAnimator 를 통해 idle/move 를 재생한다(스냅샷의 이동 플래그 기반).
     // HP/스탯/버프는 ActorObject 에서 상속한다. 현재 HP 는 SkillDamageNtf 의 remaining_hp 로 갱신되고,
     // 최대 HP 는 스폰 시 게임데이터로 시드한다(서버가 몬스터 스탯 패킷을 보내기 전까지의 v1 처리).
     // prefab 은 임의의 아트 에셋이라 이 컴포넌트가 미리 붙어있지 않을 수 있어 MonsterFactory 가 런타임에 AddComponent 한다.
@@ -29,29 +26,10 @@ namespace Client.Game
         // 몬스터 등급 (노말~보스). 오토타게팅의 "최고 등급" 모드가 읽는다. 스폰 시 게임데이터에서 채운다.
         public EMonsterGrade Grade { get; private set; } = EMonsterGrade.Normal;
 
-        // 이동 속도(유닛/초). 서버 Monster 의 이동속도와 맞춰야 시각적으로 자연스럽다.
-        // TODO(데이터): 서버/클라가 GameData_Monster 의 이동속도를 공유하거나 MoveNtf 에 실어 보내도록.
-        [SerializeField] private float m_moveSpeed = 4f;
-        [SerializeField] private float m_rotateSpeedDeg = 720f;   // 초당 회전 각도 (deg/sec)
-
-        // PlayerCharacter 와 동일 규약 (원격 추종 일관성).
-        private const float k_arriveThreshold = 0.05f;    // 최종 목적지 도착 판정 거리
-        private const float k_waypointThreshold = 0.25f;  // 중간 waypoint 도달 판정 거리
-        private const float k_repathIntervalSec = 0.2f;   // NavMesh 경로 재계산 최소 간격
-        private const float k_repathMinMoveSqr = 0.25f;   // 목적지가 0.5m 이상 바뀌어야 재계산 (sqr)
-        private const float k_sampleRadius = 2.0f;        // NavMesh 위로 위치 보정 검색 반경
-
-        private bool m_hasMoveDest = false;
-        private Vector3 m_moveDest;
-
-        // 현재 따라가는 경로 (waypoint 리스트). m_pathIndex 가 현재 향하는 waypoint.
-        private readonly List<Vector3> m_path = new List<Vector3>(32);
-        private int m_pathIndex;
-
-        private float m_lastPathTime = -999f;   // 마지막 FindPath 시점 (Time.time)
-        private Vector3 m_lastPathDest;          // 마지막 FindPath 목적지
-
-        public bool IsMoving => m_hasMoveDest;
+        // ── 원격 보간 ──────────────────────────────────────────────
+        // 몬스터는 항상 원격이다. 서버 SnapshotNtf 위치를 보간 버퍼로 따라간다.
+        private readonly SnapshotInterpolator m_interp = new SnapshotInterpolator();
+        private bool m_remoteMoving;
 
         // 공통 애니메이터. idle/move 등 의미론적 상태를 Animator 파라미터로 변환한다.
         // 없을 수 있음(아트 미적용 prefab) → 그 경우 애니메이션 없이 동작.
@@ -77,7 +55,7 @@ namespace Client.Game
             // (모든 컴포넌트가 부착된 뒤 호출되는) Initialize 에서 찾는다. 없으면 애니메이션 없이 동작.
             m_actorAnimator = GetComponentInChildren<IActorAnimator>();
 
-            // corpse 유지 중 늦게 진입한 경우(is_dead): 이동 정지 + 사망 끝 포즈로 고정(애니메이션 재생 없음).
+            // corpse 유지 중 늦게 진입한 경우(is_dead): 사망 끝 포즈로 고정(애니메이션 재생 없음).
             if (isDead)
                 SpawnAsCorpse();
         }
@@ -90,64 +68,47 @@ namespace Client.Game
                 return;
 
             Grade = data.Grade;
-            // HP(현재/최대)는 서버 권위값을 Initialize 에서 설정하므로 여기서는 다루지 않는다.
         }
 
-        // ─── 서버 MoveNtf 처리 ───────────────────────────────────────────
+        // ─── 서버 스냅샷 처리 ─────────────────────────────────────────────
 
-        // is_moving=false: 서버 위치로 즉시 스냅 + 이동 취소.
-        public void SetPosition(Vector3 pos, float dirY)
+        // 서버 SnapshotNtf 수신 시 호출(StageManager). 보간 버퍼에 쌓는다.
+        public void OnSnapshot(double serverTimeMs, Vector3 pos, float yaw, bool moving)
         {
-            transform.position = pos;
-            transform.rotation = Quaternion.Euler(0f, dirY, 0f);
-            m_hasMoveDest = false;
-            m_path.Clear();
-            m_pathIndex = 0;
+            m_interp.Push(serverTimeMs, pos, yaw, moving);
         }
 
-        // is_moving=true: 목적지로 이동 시작/갱신.
-        // dest 를 NavMesh 위로 보정 후 경로 계산. NavMesh 미로드 시 직선 폴백. (PlayerCharacter 와 동일)
-        public void SetMoveDestination(Vector3 dest)
+        private void Update()
         {
-            if (IsDead)
-                return;   // 시체는 이동하지 않는다.
+            updateRemoteInterpolation();
+            updateAnimator();
+        }
 
-            if (!NavMeshService.IsLoaded)
-            {
-                if (!m_hasMoveDest)
-                    Debug.LogWarning("[MonsterObject] NavMesh 가 로드되지 않았습니다. 직선 이동으로 폴백합니다.");
-
-                m_moveDest = dest;
-                m_hasMoveDest = true;
-                m_path.Clear();
-                m_pathIndex = 0;
+        // 1프레임 보간. NetClock 렌더 시각의 위치/회전을 적용한다.
+        private void updateRemoteInterpolation()
+        {
+            if (!NetClock.IsReady)
                 return;
+            if (m_interp.Sample(NetClock.RenderTimeMs, out Vector3 pos, out float yaw, out bool moving))
+            {
+                transform.position = pos;
+                transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+                m_remoteMoving = moving;
             }
-
-            // 목적지를 NavMesh 위로 클램프 (서버 dest 가 살짝 벗어나도 안전).
-            if (!NavMeshService.ClampToNavMesh(transform.position, dest, out Vector3 destOnNav))
-                return;   // 클램프 실패(몬스터가 NavMesh 밖인 드문 상황). 현재 상태 유지.
-
-            m_moveDest = destOnNav;
-            m_hasMoveDest = true;
-
-            bool needRepath =
-                m_path.Count == 0 ||
-                (Time.time - m_lastPathTime) >= k_repathIntervalSec ||
-                (destOnNav - m_lastPathDest).sqrMagnitude >= k_repathMinMoveSqr;
-
-            if (needRepath)
-                recalculatePath(destOnNav);
         }
 
-        public void StopMove()
+        // 이동 상태(스냅샷 플래그)를 애니메이터에 반영. 매 프레임 그대로 밀어넣는다.
+        private void updateAnimator()
         {
-            m_hasMoveDest = false;
-            m_path.Clear();
-            m_pathIndex = 0;
+            if (m_actorAnimator == null)
+                return;
+
+            m_actorAnimator.SetMoving(m_remoteMoving);
         }
 
-        // 사망 처리: 이동 정지 + 사망 애니메이션. 이미 사망 상태면 멱등.
+        // ─── 사망 처리 ────────────────────────────────────────────────────
+
+        // 사망 처리: 사망 애니메이션. 이미 사망 상태면 멱등.
         public override void OnDeath()
         {
             enterDeadState(playAnimation: true);   // 막 죽음: 사망 애니메이션을 처음부터 재생.
@@ -159,151 +120,17 @@ namespace Client.Game
             enterDeadState(playAnimation: false);
         }
 
-        // 사망 상태 진입 공통 처리. 이미 사망이면 멱등. playAnimation=true 면 처음부터 재생, false 면 끝 포즈 고정.
+        // 사망 상태 진입 공통 처리. 이미 사망이면 멱등.
+        // 이동은 서버 권위라 사망 시 서버가 위치를 멈추고 스냅샷이 그대로 유지되므로 클라가 따로 멈출 필요 없다.
         private void enterDeadState(bool playAnimation)
         {
             if (IsDead)
                 return;
             base.OnDeath();   // IsDead = true (ActorObject)
-            StopMove();
             if (playAnimation)
                 m_actorAnimator?.PlayDead();
             else
                 m_actorAnimator?.SetDeadPose();
-        }
-
-        private void recalculatePath(Vector3 destOnNav)
-        {
-            Vector3 startPos = transform.position;
-            if (NavMeshService.SamplePosition(startPos, k_sampleRadius, out Vector3 startOnNav))
-                startPos = startOnNav;
-
-            bool ok = NavMeshService.FindPath(startPos, destOnNav, m_path);
-            m_pathIndex = 0;
-            m_lastPathTime = Time.time;
-            m_lastPathDest = destOnNav;
-
-            if (!ok)
-                m_path.Clear();   // 경로 못 찾음 → 이동 중단.
-        }
-
-        // ─── 이동 시뮬레이션 ─────────────────────────────────────────────
-
-        private void Update()
-        {
-            updateMovement();
-            updateAnimator();
-        }
-
-        // 이동 상태(IsMoving)를 애니메이터에 반영. 값 변화 감지는 애니메이터 구현이 처리하므로 매 프레임 그대로 밀어넣는다.
-        private void updateAnimator()
-        {
-            if (m_actorAnimator == null)
-                return;
-
-            m_actorAnimator.SetMoving(m_hasMoveDest);
-        }
-
-        private void updateMovement()
-        {
-            if (!m_hasMoveDest)
-                return;
-
-            // NavMesh 폴백 (직선): m_path 가 비어있고 m_moveDest 만 있는 경우.
-            if (m_path.Count == 0)
-            {
-                moveStraightTo(m_moveDest, finalDest: true);
-                return;
-            }
-
-            // 안전 가드.
-            if (m_pathIndex >= m_path.Count)
-            {
-                StopMove();
-                return;
-            }
-
-            bool isLastWaypoint = (m_pathIndex == m_path.Count - 1);
-            Vector3 target = m_path[m_pathIndex];   // target.y 는 NavMesh 표면 Y.
-            float threshold = isLastWaypoint ? k_arriveThreshold : k_waypointThreshold;
-
-            Vector3 cur = transform.position;
-            Vector3 diff = target - cur;
-            float dist = diff.magnitude;
-
-            if (dist < threshold)
-            {
-                if (isLastWaypoint)
-                {
-                    transform.position = target;
-                    StopMove();
-                    return;
-                }
-                m_pathIndex++;
-                return;
-            }
-
-            Vector3 dir = diff / dist;
-            float step = m_moveSpeed * Time.deltaTime;
-
-            if (step >= dist)
-            {
-                transform.position = target;
-                if (isLastWaypoint)
-                    StopMove();
-                else
-                    m_pathIndex++;
-            }
-            else
-            {
-                transform.position = cur + dir * step;
-            }
-
-            rotateTowardsDirection(dir);
-        }
-
-        // 진행 방향으로 부드럽게 회전 (수평면, Y축 회전만).
-        private void rotateTowardsDirection(Vector3 dir)
-        {
-            Vector3 flat = new Vector3(dir.x, 0f, dir.z);
-            if (flat.sqrMagnitude < 0.0001f)
-                return;
-
-            Quaternion targetRot = Quaternion.LookRotation(flat);
-            transform.rotation = Quaternion.RotateTowards(
-                transform.rotation,
-                targetRot,
-                m_rotateSpeedDeg * Time.deltaTime);
-        }
-
-        // NavMesh 없을 때 직선 폴백 이동.
-        private void moveStraightTo(Vector3 target, bool finalDest)
-        {
-            Vector3 cur = transform.position;
-            Vector3 diff = target - cur;
-            float dist = diff.magnitude;
-
-            if (dist < k_arriveThreshold)
-            {
-                transform.position = target;
-                if (finalDest) m_hasMoveDest = false;
-                return;
-            }
-
-            Vector3 dir = diff / dist;
-            float step = m_moveSpeed * Time.deltaTime;
-
-            if (step >= dist)
-            {
-                transform.position = target;
-                if (finalDest) m_hasMoveDest = false;
-            }
-            else
-            {
-                transform.position = cur + dir * step;
-            }
-
-            rotateTowardsDirection(dir);
         }
     }
 }

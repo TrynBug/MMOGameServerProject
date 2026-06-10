@@ -14,7 +14,7 @@ namespace Client.Game
     //
     // 책임:
     //   - LocalPlayer(영속) 와 주변 캐릭터들의 GameObject 관리 (컬렉션)
-    //   - StageLoadCompleteRes, StageMoveRes, ObjectVisibilityNtf, MoveNtf, MovePosCorrectNtf 처리
+    //   - StageLoadCompleteRes, StageMoveRes, ObjectVisibilityNtf, SnapshotNtf, MovePosCorrectNtf 처리
     //   - LocalPlayer 1회 생성(EnsureLocalPlayer) 후 스테이지 이동마다 숨김/재배치
     //
     // 책임이 아닌 것:
@@ -60,7 +60,7 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<StageLoadCompleteRes>(GamePacketId.StageLoadCompleteRes, onStageLoadCompleteRes);
             PacketDispatcher.Instance.Register<StageMoveRes>(GamePacketId.StageMoveRes, onStageMoveRes);
             PacketDispatcher.Instance.Register<ObjectVisibilityNtf>(GamePacketId.ObjectVisibilityNtf, onObjectVisibilityNtf);
-            PacketDispatcher.Instance.Register<MoveNtf>(GamePacketId.MoveNtf, onMoveNtf);
+            PacketDispatcher.Instance.Register<SnapshotNtf>(GamePacketId.SnapshotNtf, onSnapshotNtf);
             PacketDispatcher.Instance.Register<MovePosCorrectNtf>(GamePacketId.MovePosCorrectNtf, onMovePosCorrectNtf);
             PacketDispatcher.Instance.Register<StatUpdateNtf>(GamePacketId.StatUpdateNtf, onStatUpdateNtf);
             PacketDispatcher.Instance.Register<HpMpNtf>(GamePacketId.HpMpNtf, onHpMpNtf);
@@ -123,6 +123,9 @@ namespace Client.Game
 
             // 원격 오브젝트(타 캐릭터/몬스터)만 제거. LocalPlayer 는 위에서 숨김 처리.
             despawnRemoteObjects();
+
+            // 스테이지가 바뀌면 보간 재생 시계를 초기화 (이전 스테이지 서버시각이 섞이지 않도록).
+            NetClock.Reset();
 
             // NavMesh 교체 (같은 스테이지면 NavMeshService 가 no-op).
             loadNavMeshForStage(stageDataKey);
@@ -304,41 +307,39 @@ namespace Client.Game
             Debug.Log($"[StageManager] ObjectDeathNtf: ObjectId={ntf.ObjectId} killer={ntf.KillerObjectId}");
         }
 
-        // 스테이지내의 오브젝트가 이동했을때 서버가 보내는 패킷.
-        //
-        // 다른 캐릭터의 위치 동기화 전략:
-        //   - is_moving = true  : pos 무시, dest 로 SetMoveDestination 호출.
-        //                         PlayerCharacter 가 자기 NavMesh 로 경로 계산해 자연스럽게 이동.
-        //   - is_moving = false : 서버 pos/yaw 로 스냅.
-        //   - 자기 캐릭터의 MoveNtf 는 무시 (자기 위치 보정은 MovePosCorrectNtf 가 담당).
-        private void onMoveNtf(MoveNtf ntf)
+        // 서버 AOI 스냅샷 수신. 원격 액터(타 캐릭터/몬스터)는 보간 버퍼에 쌓고,
+        // 본인 캐릭터 항목은 무시한다(자기 위치 화해는 Phase 2).
+        // spawn 전인 object_id 의 상태는 조용히 버린다(다음 ObjectVisibilityNtf 후 따라온다).
+        private void onSnapshotNtf(SnapshotNtf ntf)
         {
-            if (LocalPlayer != null && LocalPlayer.UserId == ntf.ObjectId)
-            {
-                // 내 캐릭터 이동 패킷은 무시.
-                return;
-            }
+            NetClock.OnServerTick(ntf.ServerTickSeq);
+            double serverMs = ntf.ServerTickSeq * NetClock.ServerTickIntervalMs;
 
-            // 캐릭터 우선 조회. 없으면 몬스터로 라우팅. (둘 다 object_id 기반, 동일 처리)
-            if (m_characters.TryGetValue(ntf.ObjectId, out PlayerCharacter character) && character != null)
-            {
-                if (ntf.IsMoving)
-                    character.SetMoveDestination(new Vector3(ntf.DestX, ntf.DestY, ntf.DestZ));
-                else
-                    character.SetPosition(new Vector3(ntf.PosX, ntf.PosY, ntf.PosZ), ntf.Yaw);
-                return;
-            }
+            long myObjectId = (LocalPlayer != null) ? LocalPlayer.UserId : 0;
 
-            if (m_monsters.TryGetValue(ntf.ObjectId, out MonsterObject monster) && monster != null)
+            foreach (ActorStateInfo s in ntf.States)
             {
-                if (ntf.IsMoving)
-                    monster.SetMoveDestination(new Vector3(ntf.DestX, ntf.DestY, ntf.DestZ));
-                else
-                    monster.SetPosition(new Vector3(ntf.PosX, ntf.PosY, ntf.PosZ), ntf.Yaw);
-                return;
-            }
+                Vector3 pos = new Vector3(s.PosX, s.PosY, s.PosZ);
 
-            Debug.LogWarning($"[StageManager] MoveNtf: object not found. ObjectId={ntf.ObjectId}");
+                if (LocalPlayer != null && s.ObjectId == myObjectId)
+                {
+                    LocalPlayer.ReconcileTo(pos, s.Yaw);   // 본인: 예측↔서버 화해 (Phase 2)
+                    continue;
+                }
+
+                bool moving = (s.Flags & 0x1u) != 0;
+
+                if (m_characters.TryGetValue(s.ObjectId, out PlayerCharacter character) && character != null)
+                    character.OnSnapshot(serverMs, pos, s.Yaw, moving);
+                else if (m_monsters.TryGetValue(s.ObjectId, out MonsterObject monster) && monster != null)
+                    monster.OnSnapshot(serverMs, pos, s.Yaw, moving);
+            }
+        }
+
+        // 원격 보간 재생 시계를 매 프레임 전진시킨다.
+        private void Update()
+        {
+            NetClock.Tick(Time.deltaTime);
         }
 
         // 서버가 내 위치와 서버 위치의 오차가 허용 이상이라고 판단했을 때 보내는 패킷.
@@ -452,8 +453,9 @@ namespace Client.Game
         {
             if (m_characters.TryGetValue(userId, out PlayerCharacter existing))
             {
-                Debug.LogWarning($"[StageManager] character already exists. userId={userId}. Reusing.");
-                existing.SetPosition(pos, dirY);
+                // 이미 존재(원격은 보간 중)하면 위치를 직접 덮어쓰지 않는다 — 스냅샷 보간과 충돌해 깜빡임/snap 유발.
+                // 중복 spawn 은 위치 갱신 없이 무시한다(위치는 SnapshotNtf 가 담당).
+                Debug.LogWarning($"[StageManager] character already exists. userId={userId}. Reusing (pos untouched).");
                 return existing;
             }
 
@@ -468,8 +470,7 @@ namespace Client.Game
         {
             if (m_monsters.TryGetValue(objectId, out MonsterObject existing) && existing != null)
             {
-                existing.transform.position = pos;
-                existing.transform.rotation = Quaternion.Euler(0f, dirY, 0f);
+                // 이미 존재(보간 중)하면 위치를 직접 덮어쓰지 않는다 — 스냅샷 보간과 충돌. 중복 spawn 무시.
                 return existing;
             }
 

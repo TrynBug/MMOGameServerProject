@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using MMO.Client.Navigation;
 using UnityEngine;
+using Client.Network;
 
 namespace Client.Game
 {
@@ -22,10 +23,15 @@ namespace Client.Game
         [SerializeField] private bool m_useMoveSpeedOverride = false;   // (에디터 전용)이동속도를 오버라이드 할건지 여부
         [SerializeField] private float m_moveSpeedOverride = 5f;        // (에디터 전용)이동속도를 오버라이드할 값
         [SerializeField] private float m_rotateSpeedDeg = 720f;      // 초당 회전 각도 (deg/sec). 720 = 0.5초에 한바퀴.
+
         private const float k_arriveThreshold = 0.05f;               // 최종 목적지 도착 판정 거리
         private const float k_waypointThreshold = 0.25f;             // 중간 waypoint 도달 판정 거리
-        private const float k_repathIntervalSec = 0.2f;              // NavMesh 경로 재계산 최소 간격
-        private const float k_repathMinMoveSqr = 0.25f;              // 목적지가 이 거리(0.5m) 이상 바뀌어야 재계산 (sqr)
+        // repath throttle 을 사실상 제거(0)한다. 홀드 이동 중 커서 지면점(dest)은 매 프레임 조금씩
+        // 움직이는데, throttle 이 있으면 dest 가 0.5m 움직일 때마다 끊겨서 갱신되어 heading 이 계단식으로
+        // 떨린다. 매 프레임 repath 하면 dest 를 연속 추적해 heading 이 매끄럽다. 본인 캐릭터 1개만
+        // 길찾기하므로 매 프레임 FindPath 비용은 무시할 수준. (FindPath 실패 시 직선 폴백이 처리.)
+        private const float k_repathIntervalSec = 0f;                // 0 = 매 프레임 재계산(연속 dest 추적)
+        private const float k_repathMinMoveSqr = 0f;                 // 0 = dest 변화량 무관(간격 조건만으로 매 프레임)
         private const float k_sampleRadius = 2.0f;                   // NavMesh 위로 위치 보정할 때 검색 반경
 
         private bool m_hasMoveDest = false;
@@ -55,6 +61,24 @@ namespace Client.Game
         private float m_skillMoveElapsed;
 
         public bool IsSkillMoving => m_skillMoving;
+
+        // ── 원격 캐릭터 보간 (Phase 1) ───────────────────────────────
+        // 타 유저(IsLocalPlayer=false)는 navmesh 재현 대신 서버 SnapshotNtf 를 보간한다.
+        // 본인(LocalPlayer)은 예측이 우선이라 이 버퍼를 쓰지 않는다(자기 위치 화해는 Phase 2).
+        private readonly SnapshotInterpolator m_interp = new SnapshotInterpolator();
+        private bool m_remoteMoving;
+
+        // ── 본인 캐릭터 화해 (Phase 2) ───────────────────────────────
+        // 본인(LocalPlayer)은 예측으로 움직이되, 서버 권위 위치(SnapshotNtf)와 비교해 보정한다.
+        //  - 이동 중: 예측 신뢰(보정 안 함). 큰 desync 만 즉시 스냅.
+        //  - 정지 중: 보관해둔 서버 권위 위치로 Update 가 매 프레임 부드럽게 수렴.
+        private const float k_reconcileHardSnap  = 3.0f;   // 이 초과 오차는 명백한 desync(텔레포트/넉백/거부) → 즉시 스냅
+        private const float k_reconcileEaseRate  = 8f;     // 정지 시 수렴 속도(1/s, 시간상수의 역수). 클수록 빨리 붙음.
+        private const float k_reconcileDeadzone  = 0.5f;  // 이 이내 오차는 보정 안 함. 정지 시 sub-tick 예측 선행(약 1 서버틱)으로 뒤로 밀리는 것을 방지.
+
+        // 최신 서버 권위 위치(SnapshotNtf 본인 항목). 정지 시 이 값으로 수렴한다.
+        private Vector3 m_serverAuthPos;
+        private bool    m_hasServerAuthPos;
 
         // ─── Animator ────────────────────────────────────────────────
         // Visual 하위에 부착된 Animator. Awake 에서 찾아둠.
@@ -179,6 +203,69 @@ namespace Client.Game
             m_skillMoving = false; // 스킬 강제이동도 취소
             m_path.Clear();
             m_pathIndex = 0;
+        }
+
+        // 서버 SnapshotNtf 수신 시 호출(StageManager). 원격 캐릭터만 보간 버퍼에 쌓는다.
+        // 본인은 예측이 우선이라 무시한다(자기 위치 화해는 Phase 2).
+        public void OnSnapshot(double serverTimeMs, Vector3 pos, float yaw, bool moving)
+        {
+            if (IsLocalPlayer)
+                return;
+            m_interp.Push(serverTimeMs, pos, yaw, moving);
+        }
+
+        // 원격 캐릭터 1프레임 보간. NetClock 렌더 시각의 위치/회전을 적용한다.
+        private void updateRemoteInterpolation()
+        {
+            if (!NetClock.IsReady)
+                return;
+            if (m_interp.Sample(NetClock.RenderTimeMs, out Vector3 pos, out float yaw, out bool moving))
+            {
+                transform.position = pos;
+                transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+                m_remoteMoving = moving;
+            }
+        }
+
+        // 본인 캐릭터 화해(Phase 2). 서버 SnapshotNtf 의 본인 항목으로 StageManager 가 호출한다.
+        // 예측 위치(transform)와 서버 권위 위치(authPos)의 오차를 데드존/이즈/스냅 3단계로 보정한다.
+        // yaw 는 평소엔 클라(이동 방향)가 주도하고, 하드 스냅 때만 서버 값을 따른다.
+        public void ReconcileTo(Vector3 authPos, float authYaw)
+        {
+            if (!IsLocalPlayer)
+                return;
+            if (m_skillMoving)
+                return;   // 스킬 강제이동은 서버와 동일 공식 → 보정 생략(간섭 방지).
+
+            // 최신 서버 권위 위치를 보관한다(정지 시 Update 가 프레임 단위로 이 값으로 수렴).
+            m_serverAuthPos = authPos;
+            m_hasServerAuthPos = true;
+
+            // 큰 desync(텔레포트/넉백/거부)는 이동 여부와 무관하게 즉시 스냅.
+            if (Vector3.Distance(transform.position, authPos) > k_reconcileHardSnap)
+            {
+                SetPosition(authPos, authYaw);
+                m_hasServerAuthPos = false;
+            }
+            // 그 외 소프트 보정은 정지 상태에서 updateReconcileEase 가 매 프레임 수행(이동 중엔 예측 신뢰).
+        }
+
+        // 정지 상태에서 서버 권위 위치로 매 프레임 부드럽게 수렴(화해). deltaTime 기반이라 프레임율과
+        // 무관하게 일정한 시간상수로 좁혀지며, 스냅샷 단위가 아니라 매 프레임이라 끊김이 없다.
+        private void updateReconcileEase()
+        {
+            // 데드존을 이동속도에 비례시킨다. 클라 예측은 서버(50ms tick)보다 최대 1~2 tick 앞서므로,
+            // 그만큼의 선행(speed*~0.12s)은 보정하지 않아야 정지 시 뒤로 당겨지지 않는다.
+            // (k_reconcileDeadzone 은 저속에서의 최소 바닥값.)
+            float deadzone = Mathf.Max(k_reconcileDeadzone, GetMoveSpeed() * 0.12f);
+            Vector3 cur = transform.position;
+            if (Vector3.Distance(cur, m_serverAuthPos) <= deadzone)
+            {
+                m_hasServerAuthPos = false;   // 작은 예측 선행은 보정 안 함 → 정지 시 뒤로 밀림 없음.
+                return;
+            }
+            float t = 1f - Mathf.Exp(-k_reconcileEaseRate * Time.deltaTime);
+            transform.position = Vector3.Lerp(cur, m_serverAuthPos, t);
         }
 
         // ─── 이동 ───────────────────────────────────────────────────────
@@ -329,14 +416,50 @@ namespace Client.Game
             {
                 // 경로 못 찾음. 이동 중단.
                 m_path.Clear();
+                return;
+            }
+
+            // FindPath 의 첫 점은 보통 시작 위치 자체(navmesh 재투영점)다. 현재 위치와 거의 같은 선두
+            // waypoint 들을 스킵한다. 안 그러면 잦은 repath(홀드 이동 중)마다 캐릭터가 재투영된 시작점으로
+            // 미세하게 끌려가 heading 이 좌우로 떨린다(이동량 크기는 정상이라 눈에 안 띄지만 시각적 떨림).
+            // 서버 setDestination 의 선두 waypoint 스킵과 동일한 처리.
+            float px = transform.position.x;
+            float pz = transform.position.z;
+            while (m_pathIndex < m_path.Count)
+            {
+                float dx = m_path[m_pathIndex].x - px;
+                float dz = m_path[m_pathIndex].z - pz;
+                if (dx * dx + dz * dz > k_waypointThreshold * k_waypointThreshold)
+                    break;   // 의미 있는 거리의 waypoint — 여기서부터 따라간다.
+                m_pathIndex++;
+            }
+            if (m_pathIndex >= m_path.Count)
+            {
+                // 모든 점이 현재 위치 근처 → 따라갈 waypoint 없음. 직선 폴백(moveStraightTo)이 처리하도록 비운다.
+                m_path.Clear();
+                m_pathIndex = 0;
             }
         }
 
         private void Update()
         {
-            // 이동 로직은 m_hasMoveDest 가 true 일 때만 돌고,
-            // Animator 갱신은 정지 전환(true -> false)도 잡아야 하므로 매 프레임 호출.
+            // 원격 캐릭터(타 유저)는 서버 스냅샷을 보간한다 (navmesh 재현 안 함).
+            if (!IsLocalPlayer)
+            {
+                updateRemoteInterpolation();
+                updateAnimator();
+                return;
+            }
+
+            // 본인(LocalPlayer): 클라 예측 이동.
             updateMovement();
+
+            // 정지 상태에서만 서버 권위 위치로 매 프레임 부드럽게 수렴(화해). 이동 중엔 예측 신뢰.
+            // (스냅샷 단위로 당기면 끊겨 보이므로 Update 에서 deltaTime 기반으로 수렴.)
+            if (!m_hasMoveDest && !m_skillMoving && m_hasServerAuthPos)
+                updateReconcileEase();
+
+            // Animator 갱신은 정지 전환(true -> false)도 잡아야 하므로 매 프레임 호출.
             updateAnimator();
         }
 
@@ -348,7 +471,9 @@ namespace Client.Game
         {
             if (m_animator == null) return;
 
-            float target = m_hasMoveDest ? 1f : 0f;
+            // 본인은 예측 이동상태(m_hasMoveDest), 원격은 보간 스냅샷의 이동 플래그(m_remoteMoving)를 쓴다.
+            bool isMoving = IsLocalPlayer ? m_hasMoveDest : m_remoteMoving;
+            float target = isMoving ? 1f : 0f;
             m_animator.SetFloat(s_paramSpeed, target, k_speedDampTime, Time.deltaTime);
         }
 
@@ -372,76 +497,71 @@ namespace Client.Game
                 return;
             }
 
-            // NavMesh waypoint 따라가기:
-            // - 현재 인덱스의 waypoint 까지 직선 이동
-            // - 도달하면 다음 waypoint 로 인덱스 증가
-            // - 마지막 waypoint 도달하면 정지
+            // NavMesh waypoint 따라가기. 서버 시뮬레이션과 동일하게, 이번 프레임 이동량(remain)을
+            // while 루프로 소모하여 한 프레임에 여러 waypoint 를 이어서 통과한다.
+            // (이전엔 프레임당 waypoint 1개만 처리하고 자투리를 버려서 서버보다 느렸고, 그 결과
+            //  점점 뒤처져 정지 시 앞으로 당겨지는 snap/끊김과 이동 중 미세 떨림이 생겼다.)
+            float remain = GetMoveSpeed() * Time.deltaTime;
+            Vector3 lastDir = Vector3.zero;
 
-            // 안전 가드: 이전 호출 후 다른 코드가 path 를 비웠을 수 있음.
-            if (m_pathIndex >= m_path.Count)
+            while (remain > 0f)
             {
-                m_hasMoveDest = false;
-                m_path.Clear();
-                m_pathIndex = 0;
-                return;
-            }
-
-            bool isLastWaypoint = (m_pathIndex == m_path.Count - 1);
-            Vector3 target = m_path[m_pathIndex];
-            // target.y 는 NavMesh 에서 채워준 지형 표면 Y 이므로 그대로 사용.
-            // (이전에는 transform.position.y 로 덮어써서 지형이 고르지 않아 캐릭터가 파뭐혀버렸음)
-
-            float threshold = isLastWaypoint ? k_arriveThreshold : k_waypointThreshold;
-
-            Vector3 cur = transform.position;
-            Vector3 diff = target - cur;
-            float dist = diff.magnitude;
-
-            if (dist < threshold)
-            {
-                // waypoint 도달.
-                if (isLastWaypoint)
-                {
-                    transform.position = target;
-                    m_hasMoveDest = false;
-                    m_path.Clear();
-                    m_pathIndex = 0;
-                    return;
-                }
-
-                // 중간 waypoint: 다음으로 진행. 진행 후에도 이번 프레임 step 을 다 못 쓴 셈인데,
-                // 단순성을 위해 다음 프레임으로 미룬다 (waypoint 간격이 통상 step 보다 충분히 큼).
-                m_pathIndex++;
-                return;
-            }
-
-            Vector3 dir = diff / dist;
-            float moveSpeed = GetMoveSpeed();
-            float step = moveSpeed * Time.deltaTime;
-
-            if (step >= dist)
-            {
-                // 이번 프레임에 waypoint 를 지나칠 거면 정확히 waypoint 에 도착시키고
-                // 다음 프레임에서 다음 waypoint 로 이어가게 함.
-                transform.position = target;
-                if (isLastWaypoint)
+                // 안전 가드: path 가 비었거나 인덱스가 끝을 넘으면 정지.
+                if (m_pathIndex >= m_path.Count)
                 {
                     m_hasMoveDest = false;
                     m_path.Clear();
                     m_pathIndex = 0;
+                    break;
                 }
-                else
+
+                bool isLastWaypoint = (m_pathIndex == m_path.Count - 1);
+                Vector3 target = m_path[m_pathIndex];   // target.y 는 NavMesh 표면 Y.
+                Vector3 cur = transform.position;
+                Vector3 diff = target - cur;
+                float dist = diff.magnitude;
+
+                if (dist <= 1e-4f)
                 {
+                    // 이미 이 waypoint 위. 다음으로 진행(마지막이면 정지).
+                    if (isLastWaypoint)
+                    {
+                        m_hasMoveDest = false;
+                        m_path.Clear();
+                        m_pathIndex = 0;
+                        break;
+                    }
                     m_pathIndex++;
+                    continue;
                 }
-            }
-            else
-            {
-                transform.position = cur + dir * step;
+
+                Vector3 dir = diff / dist;
+                lastDir = dir;
+
+                if (dist <= remain)
+                {
+                    // 이번 프레임에 이 waypoint 도달. 정확히 스냅하고 자투리(remain)로 다음 구간 계속.
+                    transform.position = target;
+                    remain -= dist;
+                    if (isLastWaypoint)
+                    {
+                        m_hasMoveDest = false;
+                        m_path.Clear();
+                        m_pathIndex = 0;
+                        break;
+                    }
+                    m_pathIndex++;
+                    continue;
+                }
+
+                // 이번 프레임엔 도달 못 함. 방향으로 remain 만큼 전진하고 종료.
+                transform.position = cur + dir * remain;
+                remain = 0f;
             }
 
             // 진행 방향을 바라보기 (수평면에서만 회전, y축 회전만). 부드럽게 보간.
-            rotateTowardsDirection(dir);
+            if (lastDir.sqrMagnitude > 0f)
+                rotateTowardsDirection(lastDir);
         }
 
         // 주어진 방향(dir, 수평면)으로 캐릭터를 부드럽게 회전시킨다.
