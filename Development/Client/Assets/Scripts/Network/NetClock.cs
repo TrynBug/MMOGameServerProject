@@ -19,7 +19,7 @@
         // 목표와 차이가 이 값을 넘으면(스파이크/스테이지 이동 등) 부드럽게 따라가지 않고 즉시 resync.
         private const double k_resyncThresholdMs = 500.0;
 
-        private static bool s_initialized;
+        private static bool   s_initialized;
         private static double s_latestServerMs;   // 수신한 최신 서버시각
         private static double s_playbackMs;        // 현재 재생 시각 (RenderTimeMs)
 

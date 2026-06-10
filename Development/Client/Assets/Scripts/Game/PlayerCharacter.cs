@@ -68,17 +68,26 @@ namespace Client.Game
         private readonly SnapshotInterpolator m_interp = new SnapshotInterpolator();
         private bool m_remoteMoving;
 
-        // ── 본인 캐릭터 화해 (Phase 2) ───────────────────────────────
-        // 본인(LocalPlayer)은 예측으로 움직이되, 서버 권위 위치(SnapshotNtf)와 비교해 보정한다.
-        //  - 이동 중: 예측 신뢰(보정 안 함). 큰 desync 만 즉시 스냅.
-        //  - 정지 중: 보관해둔 서버 권위 위치로 Update 가 매 프레임 부드럽게 수렴.
-        private const float k_reconcileHardSnap  = 3.0f;   // 이 초과 오차는 명백한 desync(텔레포트/넉백/거부) → 즉시 스냅
-        private const float k_reconcileEaseRate  = 8f;     // 정지 시 수렴 속도(1/s, 시간상수의 역수). 클수록 빨리 붙음.
-        private const float k_reconcileDeadzone  = 0.5f;  // 이 이내 오차는 보정 안 함. 정지 시 sub-tick 예측 선행(약 1 서버틱)으로 뒤로 밀리는 것을 방지.
+        // ── 본인 캐릭터 화해 (Phase 3: 지연보상 입력 재시뮬) ──────────────
+        // 서버 authPos 는 ~RTT 과거다. 그래서 authPos 를 "그동안 갈 거리(RTT)"만큼 앞으로 재시뮬한
+        // 기대 위치(expected)와 현재 예측을 비교한다. 이러면 예측 선행을 desync 로 오인해 뒤로 당기지 않고,
+        // 이동 중에도 정밀 보정된다. 저핑(localhost)에선 오차≈0 → 보정 거의 없음(현 동작과 동일). 고핑에서 효과.
+        private const float k_reconcileHardSnap   = 3.0f;   // 이 초과 오차는 명백한 desync(텔레포트/넉백/거부) → 즉시 스냅
+        private const float k_reconcileDeadzone   = 0.3f;   // 이 이내 오차는 무시(예측 신뢰, 잔떨림 방지)
+        private const float k_posErrorBleedPerSec = 6f;     // 위치 오차를 매 프레임 풀어내는 속도(1/s). 클수록 빨리 보정.
 
-        // 최신 서버 권위 위치(SnapshotNtf 본인 항목). 정지 시 이 값으로 수렴한다.
-        private Vector3 m_serverAuthPos;
-        private bool    m_hasServerAuthPos;
+        // 서버 기준으로 당겨야 할 잔여 위치 오차. 매 프레임 조금씩 적용해 소진(스냅샷율과 무관, 부드러움).
+        private Vector3 m_posError;
+
+        // RTT 추정(ms, EMA) + 입력 송신시각 기록(seq→localMs). ack 로 RTT 측정 + replay 시간 산출.
+        private float m_rttMs;
+        private readonly Dictionary<uint, float> m_inputSendMs = new Dictionary<uint, float>(16);
+        private readonly List<uint> m_pruneScratch = new List<uint>(16);
+
+        // 최신 송신 이동 의도(게이팅용). 이 seq 가 ack 돼야 서버가 현재 dest 로 움직이는 중이라 본다.
+        private uint    m_latestInputSeq;
+        private Vector3 m_latestDest;
+        private bool    m_latestIsStop = true;
 
         // ─── Animator ────────────────────────────────────────────────
         // Visual 하위에 부착된 Animator. Awake 에서 찾아둠.
@@ -227,45 +236,88 @@ namespace Client.Game
             }
         }
 
-        // 본인 캐릭터 화해(Phase 2). 서버 SnapshotNtf 의 본인 항목으로 StageManager 가 호출한다.
-        // 예측 위치(transform)와 서버 권위 위치(authPos)의 오차를 데드존/이즈/스냅 3단계로 보정한다.
-        // yaw 는 평소엔 클라(이동 방향)가 주도하고, 하드 스냅 때만 서버 값을 따른다.
-        public void ReconcileTo(Vector3 authPos, float authYaw)
+        // PlayerMoveController 가 MoveIntentReq 송신 직후 호출. RTT 측정 + 게이팅용 기록.
+        public void NotifyInputSent(uint seq, Vector3 dest, bool isStop)
+        {
+            m_inputSendMs[seq] = Time.unscaledTime * 1000f;
+            m_latestInputSeq = seq;
+            m_latestDest = dest;
+            m_latestIsStop = isStop;
+        }
+
+        // 본인 캐릭터 화해(Phase 3). 서버 SnapshotNtf 의 본인 항목으로 StageManager 가 호출한다.
+        //   ackSeq  = 서버가 마지막으로 처리한 입력 seq
+        //   authPos = 그 시점(≈RTT 과거)의 서버 권위 위치
+        // authPos 를 RTT 만큼 앞으로 재시뮬한 기대 위치와 현재 예측의 오차만 보정한다.
+        public void ReconcileTo(Vector3 authPos, float authYaw, uint ackSeq)
         {
             if (!IsLocalPlayer)
                 return;
             if (m_skillMoving)
-                return;   // 스킬 강제이동은 서버와 동일 공식 → 보정 생략(간섭 방지).
+                return;   // 스킬 강제이동은 서버와 동일 공식 → 보정 생략.
 
-            // 최신 서버 권위 위치를 보관한다(정지 시 Update 가 프레임 단위로 이 값으로 수렴).
-            m_serverAuthPos = authPos;
-            m_hasServerAuthPos = true;
+            // RTT 추정: ack 된 입력의 송신시각과 현재의 차이 (EMA 로 안정화).
+            if (m_inputSendMs.TryGetValue(ackSeq, out float sentMs))
+            {
+                float sample = Time.unscaledTime * 1000f - sentMs;
+                m_rttMs = (m_rttMs <= 0f) ? sample : Mathf.Lerp(m_rttMs, sample, 0.1f);
+                pruneInputRecords(ackSeq);
+            }
 
-            // 큰 desync(텔레포트/넉백/거부)는 이동 여부와 무관하게 즉시 스냅.
+            // 큰 desync(텔레포트/넉백/거부)는 무조건 즉시 스냅.
             if (Vector3.Distance(transform.position, authPos) > k_reconcileHardSnap)
             {
                 SetPosition(authPos, authYaw);
-                m_hasServerAuthPos = false;
-            }
-            // 그 외 소프트 보정은 정지 상태에서 updateReconcileEase 가 매 프레임 수행(이동 중엔 예측 신뢰).
-        }
-
-        // 정지 상태에서 서버 권위 위치로 매 프레임 부드럽게 수렴(화해). deltaTime 기반이라 프레임율과
-        // 무관하게 일정한 시간상수로 좁혀지며, 스냅샷 단위가 아니라 매 프레임이라 끊김이 없다.
-        private void updateReconcileEase()
-        {
-            // 데드존을 이동속도에 비례시킨다. 클라 예측은 서버(50ms tick)보다 최대 1~2 tick 앞서므로,
-            // 그만큼의 선행(speed*~0.12s)은 보정하지 않아야 정지 시 뒤로 당겨지지 않는다.
-            // (k_reconcileDeadzone 은 저속에서의 최소 바닥값.)
-            float deadzone = Mathf.Max(k_reconcileDeadzone, GetMoveSpeed() * 0.12f);
-            Vector3 cur = transform.position;
-            if (Vector3.Distance(cur, m_serverAuthPos) <= deadzone)
-            {
-                m_hasServerAuthPos = false;   // 작은 예측 선행은 보정 안 함 → 정지 시 뒤로 밀림 없음.
+                m_posError = Vector3.zero;
                 return;
             }
-            float t = 1f - Mathf.Exp(-k_reconcileEaseRate * Time.deltaTime);
-            transform.position = Vector3.Lerp(cur, m_serverAuthPos, t);
+
+            // 게이팅: 서버가 아직 우리의 최신 이동 의도를 반영 못 했으면(ack < 최신 seq) 소프트 보정 생략.
+            // (서버가 옛 dest 로 움직이는 중이라, 비교하면 dest 지연을 desync 로 오인한다.)
+            if (ackSeq < m_latestInputSeq)
+                return;
+
+            // authPos 를 RTT 만큼 앞으로 재시뮬해 "지금 있어야 할" 기대 위치를 만든다.
+            // 이동 중이면 서버가 향하는 dest(최신 acked dest) 방향으로 straight 재시뮬(짧은 구간이라 navmesh 근사 무시).
+            Vector3 expected = authPos;
+            if (m_hasMoveDest && !m_latestIsStop)
+            {
+                float replayDist = GetMoveSpeed() * (m_rttMs / 1000f);
+                expected = Vector3.MoveTowards(authPos, m_latestDest, replayDist);
+            }
+
+            Vector3 err = expected - transform.position;
+
+            // 데드존: 이동 중엔 작게(0.3) — RTT 재시뮬 보상이 선행을 이미 상쇄하므로 잔오차만 본다.
+            //         정지 중엔 속도 비례로 크게 — 멈춘 객체는 앞으로 재시뮬할 수 없어 예측 선행(~1틱)이
+            //         그대로 오차로 남는데, 이를 보정하면 "뒤로 당김"이 생긴다. 그래서 그만큼은 무시한다.
+            float deadzone = (m_hasMoveDest && !m_latestIsStop)
+                ? k_reconcileDeadzone
+                : Mathf.Max(k_reconcileDeadzone, GetMoveSpeed() * 0.12f);
+
+            m_posError = (err.magnitude > deadzone) ? err : Vector3.zero;
+        }
+
+        // ackSeq 이하의 송신 기록 제거(메모리 누수 방지). 작은 dict 라 단순 순회.
+        private void pruneInputRecords(uint ackSeq)
+        {
+            m_pruneScratch.Clear();
+            foreach (var kv in m_inputSendMs)
+                if (kv.Key <= ackSeq) m_pruneScratch.Add(kv.Key);
+            for (int i = 0; i < m_pruneScratch.Count; i++)
+                m_inputSendMs.Remove(m_pruneScratch[i]);
+        }
+
+        // 위치 오차(m_posError)를 매 프레임 일정 비율로 풀어 적용한다(스냅샷율 무관, 부드러움).
+        // 이동 중에도 동작 — 동기화돼 있으면 오차≈0 이라 떨림 없음.
+        private void applyPosErrorBleed()
+        {
+            if (m_posError.sqrMagnitude < 1e-8f)
+                return;
+            float f = 1f - Mathf.Exp(-k_posErrorBleedPerSec * Time.deltaTime);
+            Vector3 step = m_posError * f;
+            transform.position += step;
+            m_posError -= step;
         }
 
         // ─── 이동 ───────────────────────────────────────────────────────
@@ -454,10 +506,9 @@ namespace Client.Game
             // 본인(LocalPlayer): 클라 예측 이동.
             updateMovement();
 
-            // 정지 상태에서만 서버 권위 위치로 매 프레임 부드럽게 수렴(화해). 이동 중엔 예측 신뢰.
-            // (스냅샷 단위로 당기면 끊겨 보이므로 Update 에서 deltaTime 기반으로 수렴.)
-            if (!m_hasMoveDest && !m_skillMoving && m_hasServerAuthPos)
-                updateReconcileEase();
+            // 서버 권위와의 위치 오차를 매 프레임 부드럽게 보정(이동 중/정지 모두). 동기화돼 있으면 오차≈0.
+            if (!m_skillMoving)
+                applyPosErrorBleed();
 
             // Animator 갱신은 정지 전환(true -> false)도 잡아야 하므로 매 프레임 호출.
             updateAnimator();

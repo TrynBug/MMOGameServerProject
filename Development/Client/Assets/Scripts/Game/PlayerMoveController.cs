@@ -10,11 +10,11 @@ namespace Client.Game
     //
     // 책임:
     //   1) MouseInputHandler 가 호출하는 RequestMoveTo(worldPos) 를 받아서
-    //      - PlayerCharacter.SetMoveDestination 호출 (즉시 클라 이동 시작)
-    //      - 500ms 주기로 MoveDestReq 를 서버에 송신
+    //      - PlayerCharacter.SetMoveDestination 호출 (즉시 클라 이동 시작/예측)
+    //      - ~100ms 주기로 MoveIntentReq(MOVE_TO, dest) 를 서버에 송신 (위치 미포함, input_seq 부여)
     //   2) 마우스 클릭을 뗀 순간을 InputManager.MouseClickedUp 으로 감지해서
     //      - PlayerCharacter.StopMove 호출
-    //      - MoveStopReq 1회 송신
+    //      - MoveIntentReq(STOP) 1회 송신
     //
     // 부착:
     //   LocalPlayer 의 GameObject 에 PlayerCharacter 와 함께 붙는다.
@@ -30,7 +30,7 @@ namespace Client.Game
         // 외부에서 자기 PlayerCharacter 에 접근할 일이 있을 때 (MouseInputHandler 등)
         public PlayerCharacter Character { get; private set; }
 
-        // 서버에 MoveDestReq 보내는 주기 (초).
+        // 서버에 MoveIntentReq(MOVE_TO) 보내는 주기 (초).
         // 스냅샷 스트리밍 모델에선 관찰자가 보는 권위 위치가 이 dest 로 구동되므로, 너무 성기면
         // 관찰자 화면에서 경로 어긋남/정지 시 snap 이 생긴다. 100ms(10Hz)로 신선도를 높인다.
         // (Phase 3 의도 입력 전환 시 MoveIntentReq 로 대체.)
@@ -51,6 +51,9 @@ namespace Client.Game
 
         // 마지막 송신 후 경과 시간 (sec). 큰 값으로 시작해서 첫 호출에 즉시 보내짐.
         private float m_timeSinceLastSend = float.MaxValue;
+
+        // 단조 증가 입력 번호(화해용). 매 MoveIntentReq 마다 +1. 서버가 SnapshotNtf.ack_input_seq 로 되돌려준다.
+        private uint m_inputSeq = 0;
 
         private void Awake()
         {
@@ -101,7 +104,7 @@ namespace Client.Game
             if (m_hasLastSent && (m_pendingDest - m_lastSentDest).sqrMagnitude < m_minDestChangeSqr)
                 return;
 
-            sendMoveDestReq(m_pendingDest, transform.position, transform.eulerAngles.y);
+            sendMoveIntent(EMoveIntent.MoveIntentTo, m_pendingDest, transform.eulerAngles.y);
             m_lastSentDest = m_pendingDest;
             m_hasLastSent = true;
             m_timeSinceLastSend = 0f;
@@ -118,57 +121,42 @@ namespace Client.Game
                 Character.StopMove();
             }
 
-            // 서버에 현재 위치 알림
-            Vector3 curPos = transform.position;
-            sendMoveStopReq(curPos, transform.eulerAngles.y);
+            // 서버에 정지 의도 전송 (위치는 안 보냄 — 서버 권위).
+            sendMoveIntent(EMoveIntent.MoveIntentStop, transform.position, transform.eulerAngles.y);
 
             // 송신 상태 리셋
             m_hasPendingDest = false;
             m_hasLastSent = false;
             m_timeSinceLastSend = 0f;
 
-            if (m_debugLog) Debug.Log("[PlayerMoveController] mouse up -> StopMove + MoveStopReq");
+            if (m_debugLog) Debug.Log("[PlayerMoveController] mouse up -> StopMove + MoveIntent(STOP)");
         }
 
-        private void sendMoveDestReq(Vector3 dest, Vector3 curPos, float dirY)
+        // 이동 의도 전송. 위치는 보내지 않는다(서버 권위). input_seq 를 붙여 서버가 화해 기준으로 쓰게 한다.
+        // intent=STOP 일 때 dest 는 무시된다(서버가 자기 위치에서 정지).
+        private void sendMoveIntent(EMoveIntent intent, Vector3 dest, float dirY)
         {
             NetworkManager net = NetworkManager.Instance;
             if (net == null || !net.IsConnected) return;
 
-            MoveDestReq req = new MoveDestReq
+            MoveIntentReq req = new MoveIntentReq
             {
+                InputSeq     = ++m_inputSeq,
+                ClientTimeMs = (uint)(Time.time * 1000f),
+                Intent       = intent,
                 DestX = dest.x,
                 DestY = dest.y,
                 DestZ = dest.z,
-                PosX  = curPos.x,
-                PosY  = curPos.y,
-                PosZ  = curPos.z,
+                Yaw   = dirY,
             };
-            net.Send(GamePacketId.MoveDestReq, req);
+            net.Send(GamePacketId.MoveIntentReq, req);
+
+            // 화해(RTT 측정/게이팅)용으로 이 입력을 PlayerCharacter 에 기록.
+            Character.NotifyInputSent(m_inputSeq, dest, intent == EMoveIntent.MoveIntentStop);
 
             if (m_debugLog)
             {
-                Debug.Log($"[PlayerMoveController] MoveDestReq dest=({dest.x:F2},{dest.y:F2},{dest.z:F2}) pos=({curPos.x:F2},{curPos.y:F2},{curPos.z:F2}) dirY={dirY:F1}");
-            }
-        }
-
-        private void sendMoveStopReq(Vector3 pos, float dirY)
-        {
-            NetworkManager net = NetworkManager.Instance;
-            if (net == null || !net.IsConnected) return;
-
-            MoveStopReq req = new MoveStopReq
-            {
-                PosX = pos.x,
-                PosY = pos.y,
-                PosZ = pos.z,
-                Yaw  = dirY,
-            };
-            net.Send(GamePacketId.MoveStopReq, req);
-
-            if (m_debugLog)
-            {
-                Debug.Log($"[PlayerMoveController] MoveStopReq pos=({pos.x:F2},{pos.y:F2},{pos.z:F2}) dirY={dirY:F1}");
+                Debug.Log($"[PlayerMoveController] MoveIntent {intent} seq={m_inputSeq} dest=({dest.x:F2},{dest.y:F2},{dest.z:F2}) dirY={dirY:F1}");
             }
         }
     }

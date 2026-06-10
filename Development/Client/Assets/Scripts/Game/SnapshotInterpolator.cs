@@ -24,10 +24,10 @@ namespace Client.Game
         // 시계열 샘플(TimeMs 오름차순). 보통 2~4개만 유지된다(렌더 시점 이전 1개 + 이후 몇 개).
         private readonly List<Entry> m_buffer = new List<Entry>(8);
 
-        // 이 시간(ms) 이상 공백 후 새 샘플이 오면 버퍼를 비운다(공백 구간 보간 방지).
-        // 가변 송신율에서 유휴 오브젝트는 heartbeat 주기로만 오므로, 재이동 시 공백을 보간하면
-        // 천천히 미끄러져 보인다. 비우면 새 시작점으로 스냅된다(유휴→이동 시작 위치가 거의 같아 점프 미미).
-        private const double k_maxGapMs = 250.0;
+        // 위치가 이 거리(유닛) 이상 점프하면(텔레포트/블링크 등) 그 사이를 보간하지 않고 새 시작점으로 스냅한다.
+        // 시간 기반 clear 는 가변 송신율에서 유휴→재이동 시 첫 점만 남겨 끊김을 유발했다. 유휴 객체는
+        // 위치가 변하지 않으므로(시작점=유휴점) 위치 기반으로 바꾸면 유휴→재이동은 매끈하고, 진짜 점프만 스냅된다.
+        private const float k_maxJumpSqr = 64f;   // 8u^2
 
         public bool HasData => m_buffer.Count > 0;
 
@@ -37,11 +37,13 @@ namespace Client.Game
             int n = m_buffer.Count;
             if (n > 0)
             {
-                double lastT = m_buffer[n - 1].TimeMs;
-                if (serverTimeMs <= lastT)
+                Entry last = m_buffer[n - 1];
+                if (serverTimeMs <= last.TimeMs)
                     return;   // 순서 어긋남/중복 → 무시.
-                if (serverTimeMs - lastT > k_maxGapMs)
-                    m_buffer.Clear();   // 큰 공백(유휴 후 재이동/AOI 재진입) → 공백 보간 방지, 새 시작점으로.
+                // 위치가 크게 점프하면(텔레포트/블링크) 그 사이를 보간하지 않고 새 시작점으로 스냅.
+                // 유휴→재이동은 위치 변화가 거의 없어 clear 되지 않는다(매끄럽게 이어짐).
+                if ((pos - last.Pos).sqrMagnitude > k_maxJumpSqr)
+                    m_buffer.Clear();
             }
 
             m_buffer.Add(new Entry { TimeMs = serverTimeMs, Pos = pos, Yaw = yaw, Moving = moving });
