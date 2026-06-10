@@ -43,13 +43,17 @@ void Logger::Initialize(const std::string& logDir,
     spdlog::init_thread_pool(asyncQueueSize, 1);
 
     // 콘솔 출력용 sink 생성 (색상 출력 sink)
+    // 메시지(%v)만 레벨별 색으로 출력한다. %^...%$ 는 컬러 sink 에서만 색을 입히는 패턴 마커이다.
+    // 함수/라인은 패턴 플래그(%!/%#)로 출력 → %v 에는 순수 메시지만 남아 메시지만 색칠된다.
     auto spConsoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     spConsoleSink->set_level(toSpdlogLevel(level));
+    spConsoleSink->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%!:%#] %^%v%$");
 
-    // 파일 출력용 sink 생성 (날짜별로 파일이 생성된다)
+    // 파일 출력용 sink 생성 (날짜별로 파일이 생성된다). 색 없이 평문 (%^%$ 없음).
     std::string filePath = logDir + "/" + prefix + "_" + strNow;
     auto spFileSink = std::make_shared<spdlog::sinks::daily_file_format_sink_mt>(filePath + "_%Y-%m-%d.log", 0, 0);
     spFileSink->set_level(toSpdlogLevel(level));
+    spFileSink->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%!:%#] %v");
 
     // 비동기 로거 생성
     auto spLogger = std::make_shared<spdlog::async_logger>(
@@ -61,8 +65,7 @@ void Logger::Initialize(const std::string& logDir,
 
     spLogger->set_level(toSpdlogLevel(level));
 
-    // 로그 포맷: [시각] [레벨] 메시지
-    spLogger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] %v");
+    // 패턴은 sink 별로 설정했으므로(콘솔=색, 파일=평문) 로거 레벨 set_pattern 은 호출하지 않는다.
 
     // 전역 로거로 등록
     spdlog::register_logger(spLogger);
@@ -87,24 +90,11 @@ void Logger::Shutdown()
 
 void Logger::LogWrite(const LogLevel logLevel, const std::string& msg, const std::source_location loc)
 {
-    switch (logLevel)
-    {
-    case LogLevel::Debug: 
-        spdlog::debug(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
-        break;
-    case LogLevel::Info: 
-        spdlog::info(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
-        break;
-    case LogLevel::Warn: 
-        spdlog::warn(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
-        break;
-    case LogLevel::Error: 
-        spdlog::error(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
-        break;
-    default: 
-        spdlog::error(std::format("[{}:{}] {}", loc.function_name(), loc.line(), msg));
-        break;
-    }
+    // 함수/라인은 패턴 플래그(%! / %#)로 출력되도록 source_loc 로 넘긴다.
+    // 이렇게 하면 %v 에는 순수 메시지만 남아, 콘솔에서 메시지만 레벨색으로 칠할 수 있다.
+    spdlog::default_logger_raw()->log(
+        spdlog::source_loc{ loc.file_name(), static_cast<int>(loc.line()), loc.function_name() },
+        toSpdlogLevel(logLevel), msg);
 }
 
 void Logger::SetLevel(LogLevel level)
