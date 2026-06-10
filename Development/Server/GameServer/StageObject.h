@@ -114,7 +114,14 @@ public:
         float yawDiff = m_yaw - m_lastSentYaw;
         if (yawDiff < 0.0f) yawDiff = -yawDiff;
 
-        const bool changed   = (dx * dx + dz * dz) > kPosEpsSq || yawDiff > kYawEpsDeg;
+        // 이동 플래그 전환(이동↔정지)도 due 사유. 같은 자리에서 멈추면(StopAt(현재위치))
+        // 위치 변화가 없어 누락되던 정지 스냅샷을 즉시 보내 클라가 1초(heartbeat) 동안
+        // 제자리 달리기 후 뒤로 튕기는 현상을 막는다.
+        const bool moving = IsMoving();
+
+        const bool changed   = (dx * dx + dz * dz) > kPosEpsSq
+                            || yawDiff > kYawEpsDeg
+                            || moving != m_lastSentMoving;
         const bool heartbeat = (currentTickSeq - m_lastSentTickSeq) >= heartbeatTicks;
         m_snapshotDue = changed || heartbeat;
 
@@ -123,6 +130,7 @@ public:
             m_lastSentPosX    = m_posX;
             m_lastSentPosZ    = m_posZ;
             m_lastSentYaw     = m_yaw;
+            m_lastSentMoving  = moving;
             m_lastSentTickSeq = currentTickSeq;
         }
         return m_snapshotDue;
@@ -162,6 +170,7 @@ private:
     float       m_lastSentPosX    = 0.0f;
     float       m_lastSentPosZ    = 0.0f;
     float       m_lastSentYaw     = 0.0f;
+    bool        m_lastSentMoving  = false;
     uint32      m_lastSentTickSeq = 0;
     bool        m_snapshotDue     = false;
 };
