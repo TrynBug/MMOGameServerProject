@@ -45,9 +45,6 @@ namespace Client.Game
             // LocalPlayer 는 이후 StageLoadCompleteRes 수신 시 활성화+배치된다.
             StageManager.Instance.BeginStageLoad(CharacterDataCache.Instance.SelectedStageDataKey);
 
-            // 스테이지 이동 치트 키 (F5~F8). 코드로 부착하여 씬 에셋 수정 불필요.
-            gameObject.AddComponent<StageMoveCheat>();
-
             // Create the local player's buff bar HUD (code-built, no prefab/art needed).
             Managers.Managers.UI.ShowSceneUI<UI_BuffBar>();
         }
