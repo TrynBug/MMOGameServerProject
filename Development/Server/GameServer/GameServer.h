@@ -9,6 +9,7 @@
 #include "Map/NavMeshManager.h"
 #include "ThreadSafeUnorderedMap.h"
 #include "PacketSender.h"
+#include "CheatManager.h"
 
 // GameServer는 게임로직(Stage, 유저, 전투, 스킬 등)을 처리하는 서버이다.
 // - 클라이언트와 직접 연결되지 않는다. 게이트웨이서버를 통해 클라이언트와 통신한다.
@@ -41,6 +42,11 @@ public:
     // StageManager 접근. Stage 가 이동 대상 Stage 를 해석(FindStagesByDataKey)할 때 사용.
     StageManager&       GetStageManager()       { return m_stageManager; }
     const StageManager& GetStageManager() const { return m_stageManager; }
+
+    // CheatManager 접근. Stage::handleCheatReq 가 치트 실행을 위임할 때, 그리고
+    // 다른 시스템이 치트 플래그(예: IsGodMode)를 조회할 때 사용. (개발용)
+    CheatManager&       GetCheatManager()       { return m_cheatManager; }
+    const CheatManager& GetCheatManager() const { return m_cheatManager; }
 
 protected:
     // ServerBase 훅
@@ -112,6 +118,10 @@ private:
     // 모든 Stage(SystemStage / Town / Field / Dungeon)를 관리한다.
     // 생성, 조회, 컨텐츠 스레드 배정, GameServer 주입을 캡슐화.
     StageManager m_stageManager;
+
+    // 치트 처리 + 치트 상태(플래그 등) 보관. 개발용.
+    // (CHEAT_REQ 패킷 수신은 _DEBUG 한정이지만, 플래그 조회를 위해 클래스는 항상 존재한다.)
+    CheatManager m_cheatManager;
 
     // ── 내부 서버용 이벤트 핸들러, 패킷 디스패처 ───────────────────
     netlib::FuncEventHandler     m_internalListenEventHandler;

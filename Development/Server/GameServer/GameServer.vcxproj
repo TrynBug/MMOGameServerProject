@@ -97,6 +97,7 @@
   </ItemDefinitionGroup>
   <!-- 헤더 파일 -->
   <ItemGroup>
+    <ClInclude Include="CheatManager.h" />
     <ClInclude Include="IMonsterAI.h" />
     <ClInclude Include="Map\NavMeshManager.h" />
     <ClInclude Include="MonsterFsmAI.h" />
@@ -131,6 +132,7 @@
   </ItemGroup>
   <!-- 소스 파일 -->
   <ItemGroup>
+    <ClCompile Include="CheatManager.cpp" />
     <ClCompile Include="Map\NavMeshManager.cpp" />
     <ClCompile Include="MonsterFsmAI.cpp" />
     <ClCompile Include="pch.cpp">

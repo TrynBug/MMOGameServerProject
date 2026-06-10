@@ -361,6 +361,10 @@ protected:
     // Moving 상태의 유저면 spawnPendingCharacter로 스폰한다.
     void handleStageLoadCompleteReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
 
+    // [치트] 클라 치트 콘솔의 서버치트 요청(CheatReq) 처리. _DEBUG 빌드에서만 테이블에 등록된다.
+    // name 으로 치트 핸들러를 찾아 실행하고 CheatRes 로 결과 메시지를 회신한다 (StageCheat.cpp / Stage.cpp).
+    void handleCheatReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+
     // ── 유저 컨테이너 접근 ──
     const std::unordered_map<int64, UserPtr>& GetUsers() const { return m_users; }
 
@@ -427,9 +431,6 @@ private:
     // GameServer 포인터 (소유권 없음, 주입자가 lifetime 보장).
     // SetGameServer로 주입되며, Stage 파생이 패킷 전송 등을 하기 위해 사용.
     GameServer* m_pGameServer = nullptr;
-
-    // 5초 주기 heartbeat 로그용 누적 시간
-    int64      m_heartbeatAccumMs = 0;
 
     // Stage 단조 증가 시계 (ms). OnUpdate 마다 deltaMs 누적. 스킬 효과/투사체 타이밍 기준.
     int64      m_stageClockMs = 0;

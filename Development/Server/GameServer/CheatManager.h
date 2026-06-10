@@ -1,0 +1,69 @@
+#pragma once
+
+#include <atomic>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+// 치트 처리 + 치트 상태 보관 매니저 (개발용).
+// GameServer 가 멤버로 1개 소유한다 (다른 Manager 들과 동일한 패턴).
+//
+// - Execute: CheatReq 의 name 으로 핸들러를 찾아 실행하고 결과를 돌려준다.
+//   핸들러는 요청 유저가 속한 Stage 의 컨텐츠 스레드에서 호출된다.
+//   핸들러가 "멤버 함수" 라 매니저 상태(플래그 등)를 읽고 쓸 수 있다.
+// - 상태(플래그): 여러 Stage 의 컨텐츠 스레드에서 접근될 수 있으므로 thread-safe 하게 둔다 (atomic).
+//
+// 컴파일/게이팅:
+//   매니저 자체는 항상 컴파일된다. 그래야 다른 시스템이 #ifdef 없이
+//   GetCheatManager().IsGodMode() 처럼 플래그를 조회할 수 있다.
+//   치트 "명령 수신" 경로(Stage 의 CHEAT_REQ 핸들러 등록)만 _DEBUG 로 막혀 있어,
+//   라이브 빌드에서는 명령이 들어오지 않아 플래그가 기본값에서 바뀌지 않는다.
+
+class Stage;
+class User;
+using UserPtr = std::shared_ptr<User>;
+
+namespace cheat
+{
+    // 치트 1건 실행 결과. Stage::handleCheatReq 가 CheatRes 로 변환한다.
+    struct Result
+    {
+        bool        success = false;
+        std::string message;
+    };
+}
+
+class CheatManager
+{
+public:
+    CheatManager();
+
+    CheatManager(const CheatManager&)            = delete;
+    CheatManager& operator=(const CheatManager&) = delete;
+
+    // name 으로 치트를 찾아 실행한다. 없으면 success=false, message="unknown cheat: ...".
+    // stage/spUser 는 호출 컨텍스트(해당 Stage 의 컨텐츠 스레드).
+    cheat::Result Execute(Stage& stage, const UserPtr& spUser,
+                          const std::string& name, const std::vector<std::string>& args);
+
+    // ── 치트 상태 (예시) ──────────────────────────────────────────
+    // 치트로 토글되고, 다른 시스템이 조회한다 (예: 전투에서 무적 처리).
+    bool IsGodMode() const { return m_godMode.load(std::memory_order_acquire); }
+
+private:
+    // 핸들러 시그니처: 매니저 자신(상태 접근) + 컨텍스트(Stage/User) + 인자 -> 결과.
+    using Handler = cheat::Result (CheatManager::*)(Stage& stage, const UserPtr& spUser,
+                                                    const std::vector<std::string>& args);
+
+    // ── 개별 치트 ─────────────────────────────────────────────
+    // 새 서버치트 = 핸들러 멤버 함수 작성 + 생성자의 m_table 에 한 줄 등록.
+    cheat::Result cheatPing(Stage& stage, const UserPtr& spUser, const std::vector<std::string>& args);
+    cheat::Result cheatGod (Stage& stage, const UserPtr& spUser, const std::vector<std::string>& args);
+
+    // 치트 이름 -> 핸들러.
+    std::unordered_map<std::string, Handler> m_table;
+
+    // ── 상태 ─────────────────────────────────────────────────
+    std::atomic<bool> m_godMode{ false };
+};

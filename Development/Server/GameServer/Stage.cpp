@@ -86,8 +86,6 @@ namespace
     constexpr float k_spawnSampleHalfExtentXZ = 5.0f;
     constexpr float k_spawnSampleHalfExtentY  = 1000.0f;
 
-    constexpr int64 k_heartbeatIntervalMs = 5000;   // 5초마다 1번 heartbeat 로그
-
     // GameData_Stage 에는 worldMin/Max 이 없습니다 (NavMesh 메타에서 가져옵). 그래서 LoadStageGridParams 의
     // 기본값으로 아래 fallback 을 쓴다. 조건:
     //   - NavMesh 가 필요한 Stage(Town 등)는 생성 과정에서 NavMeshManager 의 NavMeshMeta 로
@@ -375,15 +373,6 @@ void Stage::OnUpdate(int64 deltaMs)
 
     // 6.5 AOI 스냅샷 스트리밍 (이동 복제). 이번 tick 시뮬레이션 결과(위치)를 주변 유저에게 송신.
     buildAndSendSnapshots();
-
-    // 7. heartbeat 로그 (5초마다 1번)
-    m_heartbeatAccumMs += deltaMs;
-    if (m_heartbeatAccumMs >= k_heartbeatIntervalMs)
-    {
-        m_heartbeatAccumMs = 0;
-        LOG_WRITE(LogLevel::Debug, std::format("Stage heartbeat. stageId={} stageType={} userCount={}",
-            m_stageId, static_cast<int>(m_stageType), m_users.size()));
-    }
 }
 
 void Stage::OnStop()
@@ -887,6 +876,9 @@ const Stage::UserPacketHandlerMap& Stage::getUserPacketHandlerMap() const
         { Common::GAME_PACKET_ID_SKILL_PROJECTILE_HIT_REQ, &Stage::handleSkillProjectileHitReq },
         { Common::GAME_PACKET_ID_STAGE_MOVE_REQ,           &Stage::handleStageMoveReq },
         { Common::GAME_PACKET_ID_STAGE_LOAD_COMPLETE_REQ,  &Stage::handleStageLoadCompleteReq },
+#ifdef _DEBUG
+        { Common::GAME_PACKET_ID_CHEAT_REQ,                &Stage::handleCheatReq },
+#endif
     };
     return sm_handlers;
 }
@@ -1054,6 +1046,33 @@ void Stage::handleStageLoadCompleteReq(const UserPtr& spUser, const netlib::Pack
 
     spawnPendingCharacter(spUser);
 }
+
+#ifdef _DEBUG
+// [치트] 서버치트 요청 처리(개발용). 이 함수는 "패킷 ↔ 치트모듈" 어댑터 역할만 한다.
+// 실제 치트 핸들러/테이블은 CheatCommand.cpp 에 모여 있어 Stage 가 치트로 지저분해지지 않는다.
+// 새 서버치트 추가는 CheatCommand.cpp 에서만 하면 된다 (이 파일 변경 불필요).
+void Stage::handleCheatReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+{
+    GamePacket::CheatReq req;
+    if (!deserializeUserPacket(spUser, spPacket, req))
+        return;
+
+    GameServer* pServer = GetGameServer();
+    if (!pServer)
+        return;
+
+    const std::vector<std::string> args(req.args().begin(), req.args().end());
+    const cheat::Result result = pServer->GetCheatManager().Execute(*this, spUser, req.name(), args);
+
+    GamePacket::CheatRes res;
+    res.set_success(result.success);
+    res.set_message(result.message);
+    pServer->GetPacketSender().SendToUser(spUser->GetUserId(), Common::GAME_PACKET_ID_CHEAT_RES, res);
+
+    LOG_WRITE(LogLevel::Info, std::format("cheat. stageId={} userId={} name={} success={}",
+        m_stageId, spUser->GetUserId(), req.name(), result.success));
+}
+#endif // _DEBUG
 
 void Stage::handleSkillCastReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
 {
