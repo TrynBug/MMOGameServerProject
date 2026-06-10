@@ -29,6 +29,10 @@ namespace Client.Game
         // 위치가 변하지 않으므로(시작점=유휴점) 위치 기반으로 바꾸면 유휴→재이동은 매끈하고, 진짜 점프만 스냅된다.
         private const float k_maxJumpSqr = 64f;   // 8u^2
 
+        // 버퍼 언더런(다음 점이 아직 안 옴) 시, 마지막 구간 속도로 최대 이만큼만 외삽한다(폭주 방지 캡).
+        // 패킷 지연/유실 시 원격 객체가 멈칫하지 않고 자연스럽게 이어진다. 정지/유휴(moving=false)는 외삽 안 함.
+        private const double k_maxExtrapMs = 200.0;
+
         public bool HasData => m_buffer.Count > 0;
 
         // 새 스냅샷 샘플 추가. 과거(또는 동일) 시각의 중복/역순 샘플은 버린다.
@@ -71,10 +75,35 @@ namespace Client.Game
                 return true;
             }
 
-            // 렌더 시점이 최신 샘플보다 미래(버퍼 고갈) → 최신 샘플로 클램프(hold).
+            // 렌더 시점이 최신 샘플보다 미래(버퍼 고갈) → 외삽 또는 hold.
             if (renderMs >= m_buffer[n - 1].TimeMs)
             {
                 Entry last = m_buffer[n - 1];
+
+                // 마지막 점이 이동 중이고 직전 점이 있으면, 마지막 구간 속도로 짧게 등속 외삽한다.
+                // (정지/유휴 moving=false 는 외삽하지 않고 그대로 hold — 멈춘 객체가 흘러가지 않게.)
+                if (n >= 2 && last.Moving)
+                {
+                    Entry prev = m_buffer[n - 2];
+                    double segMs = last.TimeMs - prev.TimeMs;
+                    double ahead = renderMs - last.TimeMs;
+                    if (ahead > k_maxExtrapMs) ahead = k_maxExtrapMs;   // 캡(폭주 방지)
+
+                    if (segMs > 1e-3)
+                    {
+                        float t = (float)(ahead / segMs);
+                        pos = last.Pos + (last.Pos - prev.Pos) * t;   // 등속 외삽
+                    }
+                    else
+                    {
+                        pos = last.Pos;
+                    }
+                    yaw = last.Yaw;
+                    moving = last.Moving;
+                    return true;
+                }
+
+                // 정지/유휴 또는 점 1개 → 마지막 점으로 hold.
                 pos = last.Pos;
                 yaw = last.Yaw;
                 moving = last.Moving;
