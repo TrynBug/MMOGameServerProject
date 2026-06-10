@@ -1165,15 +1165,20 @@ void Stage::updateCharacters(int64 deltaMs)
 // 상태를 SnapshotNtf 로 모아 unicast 한다. spawn/despawn 은 ObjectVisibilityNtf 가 담당하므로
 // 여기서는 위치/yaw/flags(transform)만 운반한다.
 // 클라: 원격 액터는 스냅샷 사이를 보간, 본인 캐릭터(object_id 일치)는 화해에 사용한다.
-// (v1: AOI 내 전 객체를 매 tick 전송. 가변 송신율/델타 압축은 후속 단계.)
+// 가변 송신율: 변화 있는 객체만 매 tick, 유휴 객체는 heartbeat 주기로 포함. 헤더는 매 tick 항상 송신.
 void Stage::buildAndSendSnapshots()
 {
     GameServer* pServer = GetGameServer();
     if (!pServer)
         return;
 
-    // 각 유저에게 자기 AOI 안의 보이는 오브젝트(캐릭터/몬스터)를 매 tick 모아 송신한다.
-    // (가변 송신율/유휴 throttle 은 추후 별도 시스템으로 설계 — 지금은 단순히 전 객체 매 tick.)
+    // pass 1: 오브젝트별로 이번 tick 송신 여부(due)를 한 번 계산한다(여러 관찰자에게 일관).
+    //   due = 위치/회전 변화 OR heartbeat. 위치 변화 기준이라 이동·대시·넉백·정지 최종위치가 자동 포함된다.
+    for (auto& [objId, spObject] : m_objects)
+        spObject->EvaluateSnapshotDue(m_serverTickSeq, k_snapshotIdleHeartbeatTicks);
+
+    // pass 2: 각 유저에게 자기 AOI 안의 due 오브젝트를 모아 송신한다.
+    // 헤더(tick_seq/ack)는 due 가 없어도 매 tick 항상 보낸다 — 클라 보간 시계를 굶기지 않기 위함.
     for (auto& [userId, spUser] : m_users)
     {
         Character* pMe = spUser->GetCurrentCharacter().get();
@@ -1194,6 +1199,8 @@ void Stage::buildAndSendSnapshots()
             {
                 for (const auto& [objId, pObj] : pSector->GetUsers())
                 {
+                    if (!pObj->IsSnapshotDue())
+                        continue;   // 이번 tick 변화 없음(유휴) → 스킵.
                     const Character* pChar = static_cast<const Character*>(pObj);
                     GamePacket::ActorStateInfo* pState = ntf.add_states();
                     pState->set_object_id(pChar->GetObjectId());
@@ -1208,6 +1215,8 @@ void Stage::buildAndSendSnapshots()
                 }
                 for (const auto& [objId, pObj] : pSector->GetMonsters())
                 {
+                    if (!pObj->IsSnapshotDue())
+                        continue;   // 이번 tick 변화 없음(유휴) → 스킵.
                     const Monster* pMon = static_cast<const Monster*>(pObj);
                     GamePacket::ActorStateInfo* pState = ntf.add_states();
                     pState->set_object_id(pMon->GetObjectId());
@@ -1222,6 +1231,8 @@ void Stage::buildAndSendSnapshots()
                 }
             });
 
+        // due 객체가 있을 때만 전송. 빈 스냅샷 keepalive 는 불필요 — NetClock 이 로컬 시간으로 자체 전진하고,
+        // 유휴 객체도 heartbeat 로 ≥1Hz 는 보내므로 클라 시계가 굶지 않는다.
         if (ntf.states_size() > 0)
             pServer->GetPacketSender().SendSnapshotNtf(userId, ntf);
     }

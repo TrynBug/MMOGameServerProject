@@ -58,6 +58,11 @@ constexpr int32 k_aoiRange = 1;
 constexpr int64 k_characterUpdateIntervalMs = 50;    // 캐릭터: 매 tick (중요)
 constexpr int64 k_monsterUpdateIntervalMs   = 50;     // 몬스터: 매 tick (스냅샷 스트리밍 부드러움용). TODO: AI think(성김)/이동 integrate(매tick) 분리로 비용 최적화.
 
+// ── 스냅샷 가변 송신율 ────────────────────────────────────────────
+// 위치/회전이 바뀐 오브젝트는 매 tick(20Hz), 유휴 오브젝트는 이 주기로만 스냅샷에 포함한다.
+// (헤더는 매 tick 항상 전송하여 클라 보간 시계를 굶기지 않는다 — 목록만 가변.)
+constexpr uint32 k_snapshotIdleHeartbeatTicks = 20;   // 유휴 오브젝트 갱신 주기(tick). 20 = 1초.
+
 
 // 내부서버 세션 추가 데이터
 struct InternalSessionMeta

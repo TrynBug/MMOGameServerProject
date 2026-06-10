@@ -100,6 +100,35 @@ public:
     // 안 움직이는 오브젝트(프랍 등)는 기본 false.
     virtual bool IsMoving() const { return false; }
 
+    // ── 스냅샷 가변 송신율 ────────────────────────────────────────
+    // 이번 tick 에 이 오브젝트를 스냅샷에 포함할지(due) 평가하고, due 면 마지막 송신 상태를 갱신한다.
+    // due = 위치/회전이 의미있게 바뀜(이동·대시·넉백·정지 최종위치 모두 포함) OR heartbeat 주기 도달(유휴 갱신).
+    // Stage::buildAndSendSnapshots 가 pass1 에서 매 tick 호출하고, pass2 에서 IsSnapshotDue() 로 읽는다.
+    bool EvaluateSnapshotDue(uint32 currentTickSeq, uint32 heartbeatTicks)
+    {
+        constexpr float kPosEpsSq  = 0.0001f;   // (0.01u)^2
+        constexpr float kYawEpsDeg = 1.0f;
+
+        const float dx = m_posX - m_lastSentPosX;
+        const float dz = m_posZ - m_lastSentPosZ;
+        float yawDiff = m_yaw - m_lastSentYaw;
+        if (yawDiff < 0.0f) yawDiff = -yawDiff;
+
+        const bool changed   = (dx * dx + dz * dz) > kPosEpsSq || yawDiff > kYawEpsDeg;
+        const bool heartbeat = (currentTickSeq - m_lastSentTickSeq) >= heartbeatTicks;
+        m_snapshotDue = changed || heartbeat;
+
+        if (m_snapshotDue)
+        {
+            m_lastSentPosX    = m_posX;
+            m_lastSentPosZ    = m_posZ;
+            m_lastSentYaw     = m_yaw;
+            m_lastSentTickSeq = currentTickSeq;
+        }
+        return m_snapshotDue;
+    }
+    bool IsSnapshotDue() const { return m_snapshotDue; }
+
 private:
     int64       m_objectId   = 0;
     EObjectType m_objectType = EObjectType::None;
@@ -128,6 +157,13 @@ private:
     // m_updateAccumMs    : 마지막 Update 이후 누적된 경과시간(ms). 주기 도달 시 0 으로 리셋.
     int64       m_updateIntervalMs = 0;
     int64       m_updateAccumMs    = 0;
+
+    // 스냅샷 가변 송신율 상태. EvaluateSnapshotDue 가 갱신.
+    float       m_lastSentPosX    = 0.0f;
+    float       m_lastSentPosZ    = 0.0f;
+    float       m_lastSentYaw     = 0.0f;
+    uint32      m_lastSentTickSeq = 0;
+    bool        m_snapshotDue     = false;
 };
 
 using StageObjectPtr  = std::shared_ptr<StageObject>;
