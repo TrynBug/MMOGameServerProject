@@ -924,7 +924,9 @@ void Stage::handleMoveIntentReq(const UserPtr& spUser, const netlib::PacketPtr& 
     switch (req.intent())
     {
     case GamePacket::MOVE_INTENT_TO:
-        spCharacter->SetDestination(req.dest_x(), req.dest_y(), req.dest_z());
+        // 시전 액션락(제자리시전) 중에는 이동 입력을 무시한다(서버 권위). 잠금 해제 후 다시 받는다.
+        if (!spCharacter->IsActionLocked())
+            spCharacter->SetDestination(req.dest_x(), req.dest_y(), req.dest_z());
         break;
     case GamePacket::MOVE_INTENT_STOP:
         // 서버 시뮬레이션 현재 위치에서 정지(클라 위치 채택 안 함). yaw 만 클라 hint 반영.

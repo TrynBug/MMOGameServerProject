@@ -164,6 +164,19 @@ void Character::StopAt(float posX, float posY, float posZ, float yaw)
     m_curWaypointIdx = 0;
 }
 
+void Character::ApplyActionLock(int64 lockMs)
+{
+    if (lockMs <= 0)
+        return;
+    if (lockMs > m_actionLockRemainingMs)
+        m_actionLockRemainingMs = lockMs;
+
+    // 시전 시작 시 현재 이동을 즉시 정지(시전 위치에 고정). 서버 권위로 멈춰야 클라 화해도 따라온다.
+    m_isMoving = false;
+    m_waypoints.clear();
+    m_curWaypointIdx = 0;
+}
+
 void Character::faceCurrentWaypoint()
 {
     // m_curWaypointIdx 가 유효한 인덱스인 상태에서 호출되어야 함.
@@ -181,6 +194,14 @@ void Character::faceCurrentWaypoint()
 
 void Character::Update(int64 deltaMs)
 {
+    // 시전 액션락 카운트다운. >0 인 동안은 이동하지 않는다(handleMoveIntentReq 가 이동 입력도 무시).
+    if (m_actionLockRemainingMs > 0)
+    {
+        m_actionLockRemainingMs -= deltaMs;
+        if (m_actionLockRemainingMs < 0)
+            m_actionLockRemainingMs = 0;
+    }
+
     // 스킬 강제이동이 우선한다 (일반 이동과 배타적).
     if (m_skillMoving)
     {

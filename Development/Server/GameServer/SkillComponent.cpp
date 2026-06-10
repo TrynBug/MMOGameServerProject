@@ -14,7 +14,12 @@ void SkillComponent::TryCast(int32 skillKey, const Vector3& origin, const Vector
     if (pSkill == nullptr)
         return;
 
-    // TODO(skill 5c): 쿨타임/마나/액션락 게이팅. 현재는 무조건 시전(진행 중이면 덮어씀).
+    // 제자리시전(Stationary)은 ActionLockMs 동안 이동을 막는다(서버 권위). 시전 시작 시 즉시 적용.
+    // (이동시전 Mobile / 이동기 Mobility 는 이동 허용이라 잠그지 않는다.)
+    if (pSkill->CastClass == ESkillCastClass::Stationary && pSkill->ActionLockMs > 0)
+        m_pOwner->ApplyActionLock(pSkill->ActionLockMs);
+
+    // TODO(skill 5c): 쿨타임/마나 게이팅. 현재는 무조건 시전(진행 중이면 덮어씀).
     m_active    = true;
     m_elapsedMs = 0;
     m_castDir   = dir;

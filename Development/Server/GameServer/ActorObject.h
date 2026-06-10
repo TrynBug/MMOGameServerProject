@@ -71,6 +71,10 @@ public:
     // 파생이 자신의 이동 방식으로 구현한다 (Character=대시/순간이동, Monster=무시). 기본은 no-op. (5d 예정.)
     virtual void ApplySkillMovement(const Vector3& dir, float distance, int32 durationMs) {}
 
+    // 스킬 시전 액션락(시전 중 이동 불가)을 적용한다. SkillComponent 가 Stationary 시전 시 호출.
+    // 파생이 자기 방식으로 구현 (Character=현재 이동 정지+잠금 카운트다운, Monster=무시 — FSM이 시전 중 정지).
+    virtual void ApplyActionLock(int64 lockMs) {}
+
     // 그룹의 총합 스탯값(예: EStatGroup::Hp → HpTotal)을 리턴한다. 파생이 제공.
     //   - Character : CharacterStatComponent 의 해당 Total 스탯
     //   - Monster   : BasicStatComponent::GetTotal(group)

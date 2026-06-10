@@ -131,6 +131,13 @@ public:
     // 스킬 강제이동 진행 중인지. (일반 이동과 별개 상태.)
     bool IsSkillMoving() const { return m_skillMoving; }
 
+    // 시전 액션락 적용(ActorObject 훅 override). Stationary 시전 동안 이동 입력을 막는다.
+    // 현재 이동을 즉시 정지시키고 lockMs 동안 잠근다. 카운트다운은 Update 에서 진행.
+    void ApplyActionLock(int64 lockMs) override;
+
+    // 시전 액션락 중인지. handleMoveIntentReq 가 이동 입력 무시 판정에 사용.
+    bool IsActionLocked() const { return m_actionLockRemainingMs > 0; }
+
 private:
     // Initialize 에서 호출. JobBase 게임데이터의 기본스탯을 m_statComponent 에 적용한다.
     bool applyJobBaseStats();
@@ -154,6 +161,9 @@ private:
 
     // 마지막으로 처리한 클라 이동 입력 seq (화해용). SnapshotNtf.ack_input_seq 로 송신.
     uint32 m_lastInputSeq = 0;
+
+    // 시전 액션락 잔여시간(ms). >0 이면 이동 입력 무시. Update 에서 deltaMs 만큼 감소.
+    int64 m_actionLockRemainingMs = 0;
 
     // Waypoint 리스트. (x, y, z) 트리플 순서로 floats * 3N 개.
     // 비어있지 않으면 [0..2] 는 첫 번째 waypoint, [3..5] 는 두 번째, ...
