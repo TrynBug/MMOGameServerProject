@@ -56,7 +56,13 @@ constexpr int32 k_aoiRange = 1;
 // Stage 등록 시 각 오브젝트에 명시적으로 전달하는 업데이트 주기. 서버 tick(50ms)의 배수.
 // 중요 오브젝트(캐릭터)는 매 tick, 그 외는 종류에 맞게 조정한다.
 constexpr int64 k_characterUpdateIntervalMs = 50;    // 캐릭터: 매 tick (중요)
-constexpr int64 k_monsterUpdateIntervalMs   = 500;    // 몬스터 tick (향후 잡몹 보스몹 구분 예정)
+constexpr int64 k_monsterUpdateIntervalMs   = 50;     // 몬스터: 매 tick (스냅샷 스트리밍 부드러움용). TODO: AI think(성김)/이동 integrate(매tick) 분리로 비용 최적화.
+
+// ── 스냅샷 가변 송신율 (buildAndSendSnapshots) ────────────────────
+// 이동 중 오브젝트는 매 tick(20Hz) 보내 부드러움을 유지하고, 유휴 오브젝트는 heartbeat 주기로만
+// 보내 부하를 줄인다. 정지 직후 몇 tick 은 최종 위치를 확실히 전하기 위해 계속 보낸다.
+constexpr uint32 k_snapshotIdleHeartbeatTicks = 20;   // 유휴 오브젝트 heartbeat 주기(tick). 20 = 1초. objectId 로 스태거되어 분산됨.
+constexpr int32  k_snapshotPostStopTicks      = 3;    // 정지 직후 최종 위치를 마저 보낼 tick 수.
 
 // MoveStopReq 수신 시 클라 위치와 서버 위치의 허용 오차 (X-Z 평면 거리, 유닛).
 // MoveDestReq/MoveStopReq 둘 다 이 값을 사용.

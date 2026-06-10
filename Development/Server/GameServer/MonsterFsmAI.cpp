@@ -7,6 +7,7 @@
 namespace
 {
     constexpr float k_rangedBandRatio = 0.8f;    // 원거리 유지거리 허용 하한 비율 (떨림 방지)
+    constexpr float k_attackLeaveMargin = 0.5f;  // Attack→Chase 이탈 히스테리시스 여유(유닛). 경계 토글 방지.
     constexpr float k_returnArriveDistSq = 0.25f;   // 스폰지점 0.5유닛 이내면 복귀 완료
 
     // 근접 추격 시 타겟 한 점으로 몰리는(겹침) 것을 막기 위한 어택 슬롯.
@@ -164,7 +165,10 @@ void MonsterFsmAI::updateAttack(Monster& monster, int64 /*deltaMs*/)
     const float dist = std::sqrt(dx * dx + dz * dz);
 
     // 사거리를 벗어났으면 다시 추격 (원거리는 너무 가까워도 재배치).
-    bool needReposition = (dist > monster.GetAttackRange());
+    // 히스테리시스: Chase→Attack 진입은 attackRange 이내(updateChase)지만, Attack→Chase 이탈은
+    // attackRange + 여유(k_attackLeaveMargin) 초과일 때만. 경계에서 두 상태를 오가며 생기는
+    // 미세 떨림(재배치 반복)을 막는다.
+    bool needReposition = (dist > monster.GetAttackRange() + k_attackLeaveMargin);
     if (monster.IsRanged() && dist < monster.GetDesiredRange() * k_rangedBandRatio)
         needReposition = true;
 

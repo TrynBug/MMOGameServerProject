@@ -35,11 +35,8 @@ bool Character::Initialize(const DataStructures::Character& protoData)
     SetPos(protoData.pos_x(), protoData.pos_y(), protoData.pos_z());
     SetYaw(protoData.yaw());
 
-    // 이동 상태는 정지로 시작. dest = 현재 위치.
+    // 이동 상태는 정지로 시작.
     m_isMoving = false;
-    m_destX    = protoData.pos_x();
-    m_destY    = protoData.pos_y();
-    m_destZ    = protoData.pos_z();
 
     // JobBase 게임데이터의 기본스탯을 스탯 컴포넌트에 적용.
     // (향후 레벨/아이템/마스터리/버프는 이어서 각각의 소스가 ApplyStat 한다.)
@@ -107,11 +104,6 @@ void Character::SetDestination(float destX, float destY, float destZ)
         return;
     }
 
-    // 최종 목적지 보관 (MoveNtf 송신용).
-    m_destX = destX;
-    m_destY = destY;
-    m_destZ = destZ;
-
     // Stage NavMesh 로 waypoint 계산.
     // Stage 가 없거나 FindPath 실패하면 직선 이동 fallback ([목적지] 한 점).
     m_waypoints.clear();
@@ -167,9 +159,6 @@ void Character::StopAt(float posX, float posY, float posZ, float yaw)
 {
     SetPos(posX, posY, posZ);
     SetYaw(yaw);
-    m_destX    = posX;
-    m_destY    = posY;
-    m_destZ    = posZ;
     m_isMoving = false;
     m_waypoints.clear();
     m_curWaypointIdx = 0;

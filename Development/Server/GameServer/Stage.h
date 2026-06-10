@@ -382,22 +382,13 @@ private:
     // 진행 중인 스킬 효과(AreaEffect)들을 tick 하고 만료된 것을 제거한다. OnUpdate 에서 매 tick 호출.
     void updateSkillEffects(int64 deltaMs);
 
+    // 매 tick AOI 스냅샷 송신 (이동 복제의 중심). 각 유저에게 자기 AOI 내 보이는 오브젝트
+    // (캐릭터/몬스터)의 현재 권위 상태(위치/yaw/flags)를 SnapshotNtf 로 모아 unicast 한다.
+    // 클라는 원격 액터를 이 스냅샷들로 보간하고, 본인 캐릭터는 화해에 사용한다.
+    void buildAndSendSnapshots();
+
     // effectId 로 진행 중인 투사체 그룹을 찾는다. 없으면 nullptr.
     ProjectileGroup* findSkillProjectileGroup(int64 effectId);
-
-    // Character의 현재 이동 상태를 그 주변 sector의 모든 캐릭터(자기 포함)에게 MoveNtf로 알린다.
-    // 이동 시작/정지/도착 등 *상태 변화 시점*에서 호출.
-    void broadcastMoveNtf(const Character& character);
-
-    // Monster 버전. 몬스터는 클라 요청 없이 FSM 이 서버에서 이동을 구동하므로,
-    // updateMonsters 에서 이동 상태 변화(ConsumeMoveStateDirty)가 감지될 때 호출한다.
-    void broadcastMoveNtf(const Monster& monster);
-
-    // 위 두 broadcastMoveNtf 의 공용 구현. 주어진 이동 상태를 (sectorX, sectorZ) 주변 AOI 의
-    // 모든 유저에게 MoveNtf 로 전송한다. objectId 로 클라가 대상 오브젝트(캐릭터/몬스터)를 식별한다.
-    void sendMoveNtfToAoi(int64 objectId, int32 sectorX, int32 sectorZ,
-                          float posX, float posY, float posZ, float yaw,
-                          float destX, float destY, float destZ, bool isMoving);
 
     // Character가 sector를 바꿔을 때 visibility 갱신.
     // oldAOI − newAOI 안의 캐릭터들에게는 despawn (나, 상대 서로),
@@ -443,6 +434,9 @@ private:
 
     // Stage 단조 증가 시계 (ms). OnUpdate 마다 deltaMs 누적. 스킬 효과/투사체 타이밍 기준.
     int64      m_stageClockMs = 0;
+
+    // 스냅샷 스트리밍용 서버 단조 증가 tick 번호. OnUpdate 마다 +1. 클라 보간 시계 기준이 된다.
+    uint32     m_serverTickSeq = 0;
 
     // ── 맵/섹터 정보 ─────────────────────────────────────────────
     // GameData_Stage에서 double로 제공되므로 멤버도 double.

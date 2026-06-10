@@ -250,8 +250,7 @@ void Monster::MoveTo(float destX, float destY, float destZ, int64 deltaMs)
     if (Stage* pStage = GetStage())
         pStage->UpdateObjectSector(this);
 
-    // TODO(통신): 몬스터 이동을 주변 유저에게 MoveNtf 로 브로드캐스트해야 클라가 움직임을 본다.
-    //   (현재는 서버 권위 위치만 갱신. Character 의 broadcastMoveNtf 에 대응하는 몬스터 경로 필요.)
+    // 이동 복제는 Stage::buildAndSendSnapshots 의 스냅샷 스트리밍이 담당한다(서버 권위 위치를 매 tick 송신).
 }
 
 void Monster::SnapToSpawn()
@@ -263,8 +262,6 @@ void Monster::SnapToSpawn()
 
 void Monster::StopMoving()
 {
-    if (m_isMoving)
-        m_moveStateDirty = true;   // 이동 -> 정지 상태 변화.
     m_isMoving = false;
     m_waypoints.clear();
     m_curWaypointIdx = 0;
@@ -280,10 +277,6 @@ void Monster::setDestination(float destX, float destY, float destZ)
         StopMoving();
         return;
     }
-
-    m_destX = destX;
-    m_destY = destY;
-    m_destZ = destZ;
 
     // Stage NavMesh 로 waypoint 계산. 실패 시 직선 fallback.
     m_waypoints.clear();
@@ -319,7 +312,6 @@ void Monster::setDestination(float destX, float destY, float destZ)
     }
 
     m_isMoving = true;
-    m_moveStateDirty = true;   // 새 목적지로 이동 시작/갱신 — 상태 변화.
     faceWaypoint();
 }
 

@@ -235,10 +235,7 @@ void Stage::updateMonsters(int64 deltaMs)
         if (oldSectorX != newSectorX || oldSectorZ != newSectorZ)
             updateMonsterVisibilityOnSectorChange(*pMonster, oldSectorX, oldSectorZ, newSectorX, newSectorZ);
 
-        // 이동 상태가 바뀜으면(추격 시작/목적지 변경/정지) 주변 유저에게 MoveNtf 브로드캐스트.
-        // 매 tick 이 아니라 상태 변화 시점에만 (Monster 내부 throttled repath + 정지 시 dirty).
-        if (pMonster->ConsumeMoveStateDirty())
-            broadcastMoveNtf(*pMonster);
+        // (이동 복제는 buildAndSendSnapshots 의 스냅샷 스트리밍이 담당. 별도 MoveNtf 브로드캐스트 없음.)
 
         // Buff tick (expire + DoT/HoT). Monster::Update already settled its sector.
         pMonster->GetBuffComponent().Update(elapsedMs);
@@ -356,6 +353,7 @@ void Stage::OnUpdate(int64 deltaMs)
 {
     // 0. Stage 단조 시계 갱신 (스킬 효과/투사체 타이밍 기준).
     m_stageClockMs += deltaMs;
+    ++m_serverTickSeq;   // 스냅샷 스트리밍용 tick 번호 (클라 보간 시계 기준).
 
     // 1. 시스템 메시지 처리 (유저 입장/퇴장 등)
     processSystemMessages();
@@ -374,6 +372,9 @@ void Stage::OnUpdate(int64 deltaMs)
 
     // 6. 진행 중인 스킬 효과(AreaEffect) tick + 만료 처리
     updateSkillEffects(deltaMs);
+
+    // 6.5 AOI 스냅샷 스트리밍 (이동 복제). 이번 tick 시뮬레이션 결과(위치)를 주변 유저에게 송신.
+    buildAndSendSnapshots();
 
     // 7. heartbeat 로그 (5초마다 1번)
     m_heartbeatAccumMs += deltaMs;
@@ -918,7 +919,7 @@ void Stage::handleMoveDestReq(const UserPtr& spUser, const netlib::PacketPtr& sp
         return;
 
     spCharacter->SetDestination(req.dest_x(), req.dest_y(), req.dest_z());
-    broadcastMoveNtf(*spCharacter);
+    // 이동 복제는 buildAndSendSnapshots 가 매 tick 처리한다(별도 MoveNtf 송신 없음).
 }
 
 void Stage::handleMoveStopReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
@@ -934,27 +935,13 @@ void Stage::handleMoveStopReq(const UserPtr& spUser, const netlib::PacketPtr& sp
     if (!deserializeUserPacket(spUser, spPacket, req))
         return;
 
-    // 클라/서버 위치 오차 검증. X-Z 평면 거리로 계산 (Y는 NavMesh가 결정하므로 비교 제외).
-    // 오차 범위 내면 클라 위치 인정, 초과면 서버 위치로 고정.
-    const float dx = req.pos_x() - spCharacter->GetPosX();
-    const float dz = req.pos_z() - spCharacter->GetPosZ();
-    const float distSq = dx * dx + dz * dz;
-    const float tolSq  = k_movePositionTolerance * k_movePositionTolerance;
-
-    if (distSq <= tolSq)
-    {
-        spCharacter->StopAt(req.pos_x(), req.pos_y(), req.pos_z(), req.yaw());
-    }
-    else
-    {
-        // 서버 위치로 고정. 향후 위치 보정 패킷 추가 예정.
-        LOG_WRITE(LogLevel::Warn, std::format("MoveStopReq position out of tolerance. stageId={} userId={} clientPos=({},{},{}) serverPos=({},{},{})",
-            m_stageId, spUser->GetUserId(),
-            req.pos_x(), req.pos_y(), req.pos_z(),
-            spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ()));
-        spCharacter->StopAt(spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), req.yaw());
-    }
-    broadcastMoveNtf(*spCharacter);
+    // 위치 권위는 서버다. 클라가 보고한 정지 위치(req.pos_*)는 채택하지 않는다.
+    // 채택하면 서버 위치가 그 순간 점프하고, 그 점프가 SnapshotNtf 로 주변에 전달되어
+    // 관찰자 화면에서 캐릭터가 멈출 때 snap 으로 보인다. 또 이 캐릭터를 쫓던 몬스터의 타겟도
+    // 함께 점프해 떨림을 유발한다. 따라서 서버 시뮬레이션의 현재 위치에서 멈추고,
+    // yaw(바라보는 방향)만 클라 값을 반영한다.
+    // (본인 캐릭터의 예측↔서버 위치 오차 보정은 Phase 2 화해에서 처리한다.)
+    spCharacter->StopAt(spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), req.yaw());
 }
 
 void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
@@ -1155,11 +1142,7 @@ void Stage::updateCharacters(int64 deltaMs)
         const int32 oldSectorX = pCharacter->GetCurSectorX();
         const int32 oldSectorZ = pCharacter->GetCurSectorZ();
 
-        // Update 가 void 가 되어 도착 여부를 직접 리턴하지 않으므로,
-        // 이동→정지 전환을 IsMoving() 변화로 감지한다 (도착·안전망 정지 모두 포함).
-        const bool wasMoving = pCharacter->IsMoving();
         pCharacter->Update(elapsedMs);
-        const bool arrived = wasMoving && !pCharacter->IsMoving();
 
         // 좌표가 바뀌었을 수 있으면 sector 갱신 (도착했거나 이동 중 모두).
         UpdateObjectSector(pCharacter);
@@ -1178,46 +1161,105 @@ void Stage::updateCharacters(int64 deltaMs)
             updateVisibilityOnSectorChange(*pCharacter, oldSectorX, oldSectorZ, newSectorX, newSectorZ);
         }
 
-        // 도착했으면 (이동 → 정지로 상태 변경) 주변에 MoveNtf 알림.
-        if (arrived)
-        {
-            broadcastMoveNtf(*pCharacter);
-        }
     }
 }
 
-void Stage::broadcastMoveNtf(const Character& character)
-{
-    sendMoveNtfToAoi(character.GetObjectId(),
-                     character.GetCurSectorX(), character.GetCurSectorZ(),
-                     character.GetPosX(), character.GetPosY(), character.GetPosZ(), character.GetYaw(),
-                     character.GetDestX(), character.GetDestY(), character.GetDestZ(),
-                     character.IsMoving());
-}
-
-void Stage::broadcastMoveNtf(const Monster& monster)
-{
-    sendMoveNtfToAoi(monster.GetObjectId(),
-                     monster.GetCurSectorX(), monster.GetCurSectorZ(),
-                     monster.GetPosX(), monster.GetPosY(), monster.GetPosZ(), monster.GetYaw(),
-                     monster.GetDestX(), monster.GetDestY(), monster.GetDestZ(),
-                     monster.IsMoving());
-}
-
-void Stage::sendMoveNtfToAoi(int64 objectId, int32 sectorX, int32 sectorZ,
-                             float posX, float posY, float posZ, float yaw,
-                             float destX, float destY, float destZ, bool isMoving)
+// ─────────────────────────────────────────────────────────────
+// AOI 스냅샷 스트리밍 (이동 복제의 중심)
+// ─────────────────────────────────────────────────────────────
+// 각 유저에게 자기 AOI(k_aoiRange) 안의 "이미 보이는" 오브젝트(캐릭터/몬스터)의 현재 권위
+// 상태를 SnapshotNtf 로 모아 unicast 한다. spawn/despawn 은 ObjectVisibilityNtf 가 담당하므로
+// 여기서는 위치/yaw/flags(transform)만 운반한다.
+// 클라: 원격 액터는 스냅샷 사이를 보간, 본인 캐릭터(object_id 일치)는 화해에 사용한다.
+// (v1: AOI 내 전 객체를 매 tick 전송. 가변 송신율/델타 압축은 후속 단계.)
+void Stage::buildAndSendSnapshots()
 {
     GameServer* pServer = GetGameServer();
     if (!pServer)
         return;
 
-    // 주변 sector AOI 의 모든 유저에게 unicast. (sector 가 -1 이면 ForEachUserInAoi 가 no-op.)
-    ForEachUserInAoi(sectorX, sectorZ,
-        [&](int64 userId)
+    // ── pass 1: 오브젝트별로 이번 tick 송신 여부(due)를 결정한다 ──
+    // 유저별 AOI 와 무관하게 오브젝트 자체 상태로 한 번만 계산한다(여러 관찰자에게 일관).
+    //  - 이동 중: 매 tick 송신(부드러움). 정지 직후 k_snapshotPostStopTicks tick 더 송신(최종 위치 보장).
+    //  - 유휴: objectId 로 스태거된 heartbeat 주기에만 송신(부하 분산).
+    for (auto& [objId, spObject] : m_objects)
+    {
+        StageObject* pObj = spObject.get();
+        bool due;
+        if (pObj->IsMoving())
         {
-            pServer->GetPacketSender().SendMoveNtf(userId, objectId, posX, posY, posZ, yaw, destX, destY, destZ, isMoving);
-        });
+            pObj->SetSnapshotPostStopTicks(k_snapshotPostStopTicks);
+            due = true;
+        }
+        else if (pObj->GetSnapshotPostStopTicks() > 0)
+        {
+            pObj->SetSnapshotPostStopTicks(pObj->GetSnapshotPostStopTicks() - 1);
+            due = true;
+        }
+        else
+        {
+            const uint32 phase = static_cast<uint32>(objId % k_snapshotIdleHeartbeatTicks);
+            due = ((m_serverTickSeq + phase) % k_snapshotIdleHeartbeatTicks == 0);
+        }
+        pObj->SetSnapshotDue(due);
+    }
+
+    // ── pass 2: 각 유저에게 자기 AOI 안의 "due" 오브젝트만 모아 송신 ──
+    for (auto& [userId, spUser] : m_users)
+    {
+        Character* pMe = spUser->GetCurrentCharacter().get();
+        if (!pMe || pMe->GetStage() != this)
+            continue;
+
+        const int32 centerX = pMe->GetCurSectorX();
+        const int32 centerZ = pMe->GetCurSectorZ();
+        if (centerX < 0 || centerZ < 0)
+            continue;   // 섹터 미소속(맵 밖)이면 스킵.
+
+        GamePacket::SnapshotNtf ntf;
+        ntf.set_server_tick_seq(m_serverTickSeq);
+        ntf.set_ack_input_seq(0);   // Phase 3(의도 입력)에서 본인 마지막 처리 입력 seq 로 교체.
+
+        ForEachAdjacentSector(centerX, centerZ, k_aoiRange,
+            [&](Sector* pSector)
+            {
+                for (const auto& [objId, pObj] : pSector->GetUsers())
+                {
+                    if (!pObj->IsSnapshotDue())
+                        continue;   // 이번 tick 송신 대상 아님(유휴 등) → 스킵.
+                    const Character* pChar = static_cast<const Character*>(pObj);
+                    GamePacket::ActorStateInfo* pState = ntf.add_states();
+                    pState->set_object_id(pChar->GetObjectId());
+                    pState->set_pos_x(pChar->GetPosX());
+                    pState->set_pos_y(pChar->GetPosY());
+                    pState->set_pos_z(pChar->GetPosZ());
+                    pState->set_yaw(pChar->GetYaw());
+                    uint32 flags = 0;
+                    if (pChar->IsMoving()) flags |= 0x1u;
+                    if (pChar->IsDead())   flags |= 0x2u;
+                    pState->set_flags(flags);
+                }
+                for (const auto& [objId, pObj] : pSector->GetMonsters())
+                {
+                    if (!pObj->IsSnapshotDue())
+                        continue;   // 이번 tick 송신 대상 아님(유휴 등) → 스킵.
+                    const Monster* pMon = static_cast<const Monster*>(pObj);
+                    GamePacket::ActorStateInfo* pState = ntf.add_states();
+                    pState->set_object_id(pMon->GetObjectId());
+                    pState->set_pos_x(pMon->GetPosX());
+                    pState->set_pos_y(pMon->GetPosY());
+                    pState->set_pos_z(pMon->GetPosZ());
+                    pState->set_yaw(pMon->GetYaw());
+                    uint32 flags = 0;
+                    if (pMon->IsMoving()) flags |= 0x1u;
+                    if (pMon->IsDead())   flags |= 0x2u;
+                    pState->set_flags(flags);
+                }
+            });
+
+        if (ntf.states_size() > 0)
+            pServer->GetPacketSender().SendSnapshotNtf(userId, ntf);
+    }
 }
 
 void Stage::updateVisibilityOnSectorChange(Character& character,
@@ -1343,10 +1385,8 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
     };
 
     // ── newAOI − oldAOI: 새로 이 몬스터를 보게 된 유저들에게 spawn ──
-    // 이동 중이면 spawn 직후 MoveNtf 도 보내 클라가 바로 따라가게 한다. spawn 정보엔
-    // 이동 상태가 없어 그냥 두면 다음 상태변화 broadcast 전까지 정지한 것처럼 보임.
+    // (spawn 직후 위치는 다음 tick 의 SnapshotNtf 가 갱신한다. 이동 중이어도 곧 따라온다.)
     const std::vector<GamePacket::MonsterSpawnInfo> singleMonster = { makeMonsterSpawnInfo(monster) };
-    const bool monsterMoving = monster.IsMoving();
 
     ForEachAdjacentSector(newSectorX, newSectorZ, k_aoiRange,
         [&](Sector* pSector)
@@ -1360,12 +1400,6 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
                 Character* pOtherChar = static_cast<Character*>(pOtherObj);
                 const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
                 pServer->GetPacketSender().SendObjectVisibilityNtf(otherUserId, {}, {}, singleMonster);
-                if (monsterMoving)
-                {
-                    pServer->GetPacketSender().SendMoveNtf(otherUserId, monsterObjectId,
-                        monster.GetPosX(), monster.GetPosY(), monster.GetPosZ(), monster.GetYaw(),
-                        monster.GetDestX(), monster.GetDestY(), monster.GetDestZ(), true);
-                }
             }
         });
 

@@ -30,7 +30,7 @@ public:
 
     // ── 패킷 송신 ──────────────────────────────────────────────
     // 클라이언트로 나가는 모든 Send***Ntf 는 PacketSender 가 담당한다. Stage/컴포넌트는
-    // GetPacketSender() 로 얻어서 호출한다 (예: GetPacketSender().SendMoveNtf(...)).
+    // GetPacketSender() 로 얻어서 호출한다 (예: GetPacketSender().SendSnapshotNtf(...)).
     PacketSender&       GetPacketSender()       { return m_packetSender; }
     const PacketSender& GetPacketSender() const { return m_packetSender; }
 

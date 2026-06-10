@@ -77,24 +77,6 @@ void PacketSender::SendObjectVisibilityNtf(int64 userId,
         userId, characterSpawns.size(), monsterSpawns.size(), despawnIds.size()));
 }
 
-void PacketSender::SendMoveNtf(int64 userId, int64 objectId,
-                               float posX, float posY, float posZ, float yaw,
-                               float destX, float destY, float destZ, bool isMoving)
-{
-    GamePacket::MoveNtf ntf;
-    ntf.set_object_id(objectId);
-    ntf.set_pos_x(posX);
-    ntf.set_pos_y(posY);
-    ntf.set_pos_z(posZ);
-    ntf.set_yaw(yaw);
-    ntf.set_dest_x(destX);
-    ntf.set_dest_y(destY);
-    ntf.set_dest_z(destZ);
-    ntf.set_is_moving(isMoving);
-
-    SendToUser(userId, Common::GAME_PACKET_ID_MOVE_NTF, ntf);
-}
-
 void PacketSender::SendMovePosCorrectNtf(int64 userId, float posX, float posY, float posZ, float yaw)
 {
     GamePacket::MovePosCorrectNtf ntf;
@@ -106,6 +88,12 @@ void PacketSender::SendMovePosCorrectNtf(int64 userId, float posX, float posY, f
     SendToUser(userId, Common::GAME_PACKET_ID_MOVE_POS_CORRECT_NTF, ntf);
 
     LOG_WRITE(LogLevel::Info, std::format("MovePosCorrectNtf sent. userId={} pos=({},{},{}) yaw={}", userId, posX, posY, posZ, yaw));
+}
+
+void PacketSender::SendSnapshotNtf(int64 userId, const GamePacket::SnapshotNtf& ntf)
+{
+    // 고빈도(매 tick) 패킷이라 로그를 남기지 않는다. ntf 는 Stage 가 AOI 순회로 채워 전달한다.
+    SendToUser(userId, Common::GAME_PACKET_ID_SNAPSHOT_NTF, ntf);
 }
 
 void PacketSender::SendStatUpdateNtf(int64 userId, const Character& character)

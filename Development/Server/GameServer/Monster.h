@@ -89,24 +89,10 @@ public:
     // 공유 행동 레이어 (두뇌가 호출)
     // ─────────────────────────────────────────────────────────
     // ── 이동 ──
-    bool IsMoving() const { return m_isMoving; }
+    bool IsMoving() const override { return m_isMoving; }
     void StopMoving();
     // destX/Z 로 이동(throttled repath 포함) + sector 갱신. 매 tick 호출.
     void MoveTo(float destX, float destY, float destZ, int64 deltaMs);
-
-    // 현재 이동 목적지 (MoveNtf 브로드캐스트용). is_moving=false 일 때는 의미 없음.
-    float GetDestX() const { return m_destX; }
-    float GetDestY() const { return m_destY; }
-    float GetDestZ() const { return m_destZ; }
-
-    // 이동 상태 변화(시작/목적지 변경/정지)가 있었는지 소비(읽고 리셋)한다.
-    // Stage::updateMonsters 가 매 tick 확인하여 변화가 있을 때만 MoveNtf 를 브로드캐스트한다.
-    bool ConsumeMoveStateDirty()
-    {
-        const bool dirty = m_moveStateDirty;
-        m_moveStateDirty = false;
-        return dirty;
-    }
 
     // 사망 후 시체(corpse) 경과시간을 deltaMs 만큼 누적하고, 유지시간(k_corpseDurationMs)을
     // 넘으면 true 를 리턴한다(=디스폰 타이밍). Stage::updateMonsters 가 사망한 몬스터에게만 매 tick 호출한다.
@@ -202,12 +188,6 @@ private:
 
     // ── 이동 상태 ──────────────────────────
     bool  m_isMoving = false;
-    // 이동 상태 변화 플래그. setDestination(시작/목적지변경)·StopMoving(정지)에서 set,
-    // ConsumeMoveStateDirty 에서 reset. updateMonsters 가 MoveNtf 브로드캐스트 여부 판단에 사용.
-    bool  m_moveStateDirty = false;
-    float m_destX = 0.0f;
-    float m_destY = 0.0f;
-    float m_destZ = 0.0f;
     // Waypoint 리스트. (x, y, z) 트리플 순서로 floats * 3N 개. m_isMoving=true 동안만 의미.
     std::vector<float> m_waypoints;
     int32 m_curWaypointIdx = 0;

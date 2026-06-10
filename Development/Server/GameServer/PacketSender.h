@@ -61,11 +61,12 @@ public:
                                  const std::vector<int64>& despawnIds,
                                  const std::vector<GamePacket::MonsterSpawnInfo>& monsterSpawns = {});
 
-    // 이동 알림 전송 (MoveNtf). 상태 변화 시점에 Stage가 sector AOI 순회하면서 unicast.
-    void SendMoveNtf(int64 userId, int64 objectId, float posX, float posY, float posZ, float yaw, float destX, float destY, float destZ, bool isMoving);
-
     // 위치 보정 알림 전송 (MovePosCorrectNtf). 서버가 클라/서버 위치 오차가 크다고 판단했을 때 unicast.
     void SendMovePosCorrectNtf(int64 userId, float posX, float posY, float posZ, float yaw);
+
+    // AOI 스냅샷 전송 (SnapshotNtf). Stage 가 매 tick 유저별로 AOI 내 보이는 오브젝트 상태를 모아 unicast.
+    // 고빈도 패킷이라 로그를 남기지 않는다.
+    void SendSnapshotNtf(int64 userId, const GamePacket::SnapshotNtf& ntf);
 
     // 스탯 스냅샷 전송 (StatUpdateNtf). character 의 0 아닌 스탯만 담아 본인에게 unicast.
     void SendStatUpdateNtf(int64 userId, const Character& character);

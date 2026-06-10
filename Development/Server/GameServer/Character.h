@@ -35,8 +35,7 @@ using UserWPtr = std::weak_ptr<User>;
 // ── 이동 (NavMesh 기반) ──
 // SetDestination 호출 시 Stage::FindPath 로 waypoint 리스트를 얻어 따라간다.
 // 길찾기 실패 시 [목적지] 한 점으로만 채워 직선 이동 fallback.
-// MoveNtf 의 dest 는 "최종 목적지" 의미 (waypoint 중간점이 아님).
-// 클라는 받은 dest 로 자기 NavMesh 길찾기를 따로 수행하여 같은 경로를 재현한다.
+// 서버가 권위 위치를 매 tick SnapshotNtf 로 스트리밍한다(클라 본인은 예측+화해, 원격은 보간).
 class Character : public ActorObject
 {
 public:
@@ -99,11 +98,7 @@ public:
 
     // ── 이동 ──────────────────────────────────────────────────────────
     // 좌표계: Unity 와 동일. Y는 높이, X-Z 가 평면. yaw는 Y축 회전, degree.
-    // dest 는 "최종 목적지" 의미 (waypoint 중간점이 아님). MoveNtf 송신에 사용.
-    bool  IsMoving()    const { return m_isMoving; }
-    float GetDestX()    const { return m_destX; }
-    float GetDestY()    const { return m_destY; }   // 높이
-    float GetDestZ()    const { return m_destZ; }   // 평면 깊이축
+    bool  IsMoving()    const override { return m_isMoving; }
 
     // 목적지 설정 + 이동 시작.
     // Stage::FindPath 로 waypoint 리스트를 얻어 따라가기 시작.
@@ -149,13 +144,8 @@ private:
     CharacterStatComponent    m_statComponent;
 
     // ── 이동 상태 ────────────────────────────────────────────
-    // m_isMoving = false 면 다른 멤버는 의미 없음 (단, m_destX/Y/Z 는 마지막 정지 위치를 보관).
+    // m_isMoving = false 면 다른 이동 멤버는 의미 없음.
     bool  m_isMoving = false;
-
-    // 최종 목적지 (SetDestination 인자). MoveNtf 의 dest 필드로 송신.
-    float m_destX = 0.0f;
-    float m_destY = 0.0f;   // 높이
-    float m_destZ = 0.0f;   // 평면 깊이축
 
     // Waypoint 리스트. (x, y, z) 트리플 순서로 floats * 3N 개.
     // 비어있지 않으면 [0..2] 는 첫 번째 waypoint, [3..5] 는 두 번째, ...
