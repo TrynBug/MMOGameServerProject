@@ -26,6 +26,7 @@
     <ClCompile Include="Generated\GamePacket\buff_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\character_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\chat_packet.pb.cc" />
+    <ClCompile Include="Generated\GamePacket\cheat_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\dungeon_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\item_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\login_packet.pb.cc" />
@@ -56,6 +57,7 @@
     <ClInclude Include="Generated\GamePacket\buff_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\character_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\chat_packet.pb.h" />
+    <ClInclude Include="Generated\GamePacket\cheat_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\dungeon_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\item_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\login_packet.pb.h" />
@@ -84,6 +86,7 @@
     <None Include="Proto\GamePacket\buff_packet.proto" />
     <None Include="Proto\GamePacket\character_packet.proto" />
     <None Include="Proto\GamePacket\chat_packet.proto" />
+    <None Include="Proto\GamePacket\cheat_packet.proto" />
     <None Include="Proto\GamePacket\dungeon_packet.proto" />
     <None Include="Proto\GamePacket\item_packet.proto" />
     <None Include="Proto\GamePacket\login_packet.proto" />

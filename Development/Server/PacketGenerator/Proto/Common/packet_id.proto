@@ -74,6 +74,10 @@ enum GamePacketId {
     GAME_PACKET_ID_SKILL_CAST_NTF           = 8003;   // 서버 -> 클라: 시전 통보 (비주얼 재현 + 시전 클라에 effectId 전달)
     GAME_PACKET_ID_SKILL_DAMAGE_NTF         = 8004;   // 서버 -> 클라: 대미지 통보 (숫자 표시 / HP / 사망)
     GAME_PACKET_ID_SKILL_CAST_REJECT_NTF    = 8005;   // 서버 -> 클라: 시전 거부 (쿳타임/마나 부족 등. 5c 에서 사용)
+
+    // 9000~9999: 치트 (개발용. 서버는 _DEBUG 빌드에서만 처리)
+    GAME_PACKET_ID_CHEAT_REQ = 9001;   // 클라 -> 서버: 치트 실행 요청 (name + args)
+    GAME_PACKET_ID_CHEAT_RES = 9002;   // 서버 -> 클라: 치트 실행 결과 (success + message)
 }
 
 // 서버 <-> 서버 패킷 ID
