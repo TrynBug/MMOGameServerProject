@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Client.Network;
 
 namespace Client.Game
 {
@@ -33,6 +34,10 @@ namespace Client.Game
         // 패킷 지연/유실 시 원격 객체가 멈칫하지 않고 자연스럽게 이어진다. 정지/유휴(moving=false)는 외삽 안 함.
         private const double k_maxExtrapMs = 200.0;
 
+        // 직전 샘플과의 시간 간격이 이보다 크면 "유휴(정지) 후 재개"로 본다(이동 중 샘플은 ~50ms 간격).
+        // 이때 직전 샘플 타임스탬프를 InterpDelay 만큼 당겨 재개 구간을 짧은 램프로 만든다(출발 순간이동 방지).
+        private const double k_resumeRebaseGapMs = 200.0;
+
         public bool HasData => m_buffer.Count > 0;
 
         // 새 스냅샷 샘플 추가. 과거(또는 동일) 시각의 중복/역순 샘플은 버린다.
@@ -44,10 +49,22 @@ namespace Client.Game
                 Entry last = m_buffer[n - 1];
                 if (serverTimeMs <= last.TimeMs)
                     return;   // 순서 어긋남/중복 → 무시.
-                // 위치가 크게 점프하면(텔레포트/블링크) 그 사이를 보간하지 않고 새 시작점으로 스냅.
-                // 유휴→재이동은 위치 변화가 거의 없어 clear 되지 않는다(매끄럽게 이어짐).
+
                 if ((pos - last.Pos).sqrMagnitude > k_maxJumpSqr)
+                {
+                    // 위치가 크게 점프(텔레포트/블링크) → 그 사이를 보간하지 않고 새 시작점으로 스냅.
                     m_buffer.Clear();
+                }
+                else if (serverTimeMs - last.TimeMs > k_resumeRebaseGapMs)
+                {
+                    // 유휴(정지) 후 이동 재개: 직전(정지) 샘플의 타임스탬프가 오래돼서, 새 샘플과 사이에
+                    // 긴 보간 구간이 생긴다. 재생시각(RenderTime)은 유휴 동안 hold 로 그 구간 끝까지
+                    // 따라잡은 상태라, 새 샘플이 들어오는 순간 한 프레임에 앞으로 튄다(출발 시 짧은 순간이동).
+                    // 직전 샘플을 InterpDelay 만큼 과거로 재스탬프해 재개 구간을 보간지연 길이의 짧은 램프로
+                    // 만든다 → RenderTime 이 구간 시작(u≈0)에서 출발, 정지 위치에서 부드럽게 가속.
+                    last.TimeMs = serverTimeMs - NetClock.InterpDelayMs;
+                    m_buffer[n - 1] = last;
+                }
             }
 
             m_buffer.Add(new Entry { TimeMs = serverTimeMs, Pos = pos, Yaw = yaw, Moving = moving });
