@@ -19,11 +19,12 @@
 //   GameData_Monster 에 스킬 컬럼(스킬ID/사거리/쿨다운/선딜)이 추가되면 거기서 읽어 채운다.
 struct MonsterSkill
 {
-    int32 skillId             = 0;      // 스킬 식별자 (향후 스킬 데이터 키)
-    float range               = 0.0f;   // 사용 가능 사거리 (이 거리 이내 타겟)
-    int64 cooldownMs          = 0;      // 쿨다운 (ms)
-    int64 castTimeMs          = 0;      // 선딜/시전 시간 (ms). 0 이면 즉시 발동.
-    int64 remainingCooldownMs = 0;      // 남은 쿨다운 (ms, 런타임)
+    int32  skillId             = 0;      // 스킬 식별자 (향후 스킬 데이터 키)
+    float  range               = 0.0f;   // 사용 가능 사거리 (이 거리 이내 타겟)
+    int64  cooldownMs          = 0;      // 쿨다운 (ms)
+    int64  castTimeMs          = 0;      // 선딜/시전 시간 (ms). 0 이면 즉시 발동.
+    int64  remainingCooldownMs = 0;      // 남은 쿨다운 (ms, 런타임)
+    double damage              = 0.0;    // 적중 시 대미지 (서버 권위). v1: 종류 데이터의 Str 기반.
 };
 
 // ─────────────────────────────────────────────────────────────

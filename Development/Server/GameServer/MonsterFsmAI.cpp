@@ -21,8 +21,10 @@ namespace
     constexpr int32 k_attackSlotInnerCount = 8;     // 안쪽 링 슬롯 개수
     constexpr int32 k_attackSlotOuterCount = 12;    // 바깥 링 슬롯 개수
     constexpr int32 k_attackSlotTotalCount = k_attackSlotInnerCount + k_attackSlotOuterCount;
-    constexpr float k_attackSlotInnerRatio = 0.8f;  // 안쪽 링 반지름 = 공격사거리 * 이 비율
-    constexpr float k_attackSlotOuterRatio = 1.5f;  // 바깥 링 반지름 = 공격사거리 * 이 비율
+    // 두 링 모두 공격사거리 안에 들어오게 1.0 미만으로 둔다(바깥 링 몬스터도 공격 가능).
+    // attackRange=2.0 기준: 안쪽≈1.1u, 바깥≈1.7u (+지터 ±0.25 → 최대 1.95 < 2.0).
+    constexpr float k_attackSlotInnerRatio = 0.55f;  // 안쪽 링 반지름 = 공격사거리 * 이 비율
+    constexpr float k_attackSlotOuterRatio = 0.85f;  // 바깥 링 반지름 = 공격사거리 * 이 비율
     constexpr float k_attackSlotAngleJitter = 0.15f; // 각도 지터 최대치 (rad)
     constexpr float k_attackSlotRadiusJitter = 0.25f; // 반지름 지터 최대치 (유닛)
     constexpr float k_twoPi = 6.2831853f;

@@ -42,11 +42,16 @@ bool Monster::Initialize(int64 objectId, const GameData_Monster* pMonsterData)
 
     // TODO(데이터): 스킬을 GameData_Monster 에서 읽어 채운다. 지금은 뼈대 검증용 하드코딩.
     //   기본 공격(선딜 없음, 짧은 쿨다운) + 시전 스킬(선딜 800ms, 긴 쿨다운) 예시.
+    // v1 대미지: 종류 데이터의 Str(물리) 총합을 기준으로. 데이터에 Str 이 없으면 fallback.
+    const double baseAtk = GetStatTotal(EStatGroup::Str);
+    const double atk = (baseAtk > 0.0) ? baseAtk : 5.0;
+
     MonsterSkill basicAttack;
     basicAttack.skillId    = 1;
     basicAttack.range      = m_attackRange;
     basicAttack.cooldownMs = 1500;
     basicAttack.castTimeMs = 0;
+    basicAttack.damage     = atk;
     m_skills.push_back(basicAttack);
 
     MonsterSkill castSkill;
@@ -54,6 +59,7 @@ bool Monster::Initialize(int64 objectId, const GameData_Monster* pMonsterData)
     castSkill.range      = m_attackRange;
     castSkill.cooldownMs = 5000;
     castSkill.castTimeMs = 800;
+    castSkill.damage     = atk * 2.0;   // 시전 스킬은 더 큰 대미지.
     m_skills.push_back(castSkill);
 
     return true;
@@ -218,15 +224,25 @@ void Monster::ExecuteSkill(int32 index, StageObject* pTarget)
 {
     if (index < 0 || index >= static_cast<int32>(m_skills.size()))
         return;
+    if (pTarget == nullptr)
+        return;
 
-    // TODO(전투): 실제 스킬 효과 구현.
-    //   - 스킬 데이터(데미지 계수/판정 범위/투사체 등) 조회
-    //   - 근접: 즉시 판정 → 대상 ActorObject 에 데미지 적용
-    //   - 원거리: 투사체 생성 + 클라 통보
-    //   전투/스킬 시스템이 아직 없으므로 현재는 뼈대 검증용 로그만 남긴다.
+    Stage* pStage = GetStage();
+    if (pStage == nullptr)
+        return;
+
+    // 대상은 유저(캐릭터)여야 한다 (진영 규칙: 몬스터 → 유저). 사망한 대상은 제외.
+    if (pTarget->GetObjectType() != EObjectType::User)
+        return;
+    ActorObject* pTargetActor = static_cast<ActorObject*>(pTarget);
+    if (pTargetActor->IsDead())
+        return;
+
     const MonsterSkill& skill = m_skills[index];
-    LOG_WRITE(LogLevel::Info, std::format("(STUB) - objectId={} skillId={} targetId={}",
-        GetObjectId(), skill.skillId, (pTarget != nullptr ? pTarget->GetObjectId() : 0)));
+
+    // 서버 권위 대미지 적용 + 주변 AOI 에 SkillDamageNtf(숫자/HP), 사망 시 ObjectDeathNtf 브로드캐스트.
+    // (v1: 단일 대상 즉시 판정. 방어력 감산/원거리 투사체/공격 모션 통보는 후속.)
+    pStage->ApplyEffectDamage(*pTargetActor, skill.damage, GetObjectId());
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -346,19 +362,13 @@ bool Monster::updateMovement(int64 deltaMs)
         {
             if (isLastWaypoint)
             {
-                // 최종 목적지에 이번 tick 안에 닿을 수 있다.
-                // 슬롯에 칼같이 스냅(SetPos)하면 마지막 자투리만큼 순간이동처럼 보인다.
-                // 대신 이번 tick 에 갈 수 있는 만큼만 직선 이동하고, 나머지는 다음 tick 에 마저 간다.
-                // (도착이 최대 1 tick 늦어질 뿐, 점프가 사라진다. 슬롯은 hint 라 정밀 도달 불필요.)
-                const float nx = dx / dist;
-                const float nz = dz / dist;
-                const float ratio = remainMoveDist / dist;
-                const float dy = wy - GetPosY();
-                SetPos(GetPosX() + nx * remainMoveDist,
-                    GetPosY() + dy * ratio,
-                    GetPosZ() + nz * remainMoveDist);
-                remainMoveDist = 0.0f;
-                continue;
+                // 최종 목적지(슬롯) 도달: 정확히 슬롯에 맞추고 정지한다.
+                // (예전엔 정지 없이 remainMoveDist 만큼 직선 이동해 슬롯을 넘었다가 다음 tick 에 되돌아오길
+                //  반복 → 제자리에서 진동. 특히 공격사거리 밖 바깥 링 슬롯 몬스터는 Attack 상태로 못 가
+                //  영영 진동했다. 자투리(<1 tick)는 스냅해도 클라 보간으로 보이지 않으므로 깔끔히 정지.)
+                SetPos(wx, wy, wz);
+                StopMoving();
+                return true;
             }
 
             // 중간 waypoint: 스냅 후 자투리 거리로 다음 구간을 이어서 이동(연속적, 점프 없음).
