@@ -27,8 +27,9 @@ enum GamePacketId {
     // 1000~1999: 이동
     GAME_PACKET_ID_MOVE_DEST_REQ = 1001;   // 클라 -> 서버: 목적지로 이동 시작/갱신
     GAME_PACKET_ID_MOVE_STOP_REQ = 1002;   // 클라 -> 서버: 즉시 정지 + 현재 위치 동기화
-    GAME_PACKET_ID_MOVE_NTF      = 1003;   // 서버 -> 클라: 이동 알림 (상태변화 시 브로드캐스트)
+    // 1003: 과거 MOVE_NTF 자리. SNAPSHOT_NTF(1005) 스냅샷 스트리밍으로 대체되어 제거됨.
     GAME_PACKET_ID_MOVE_POS_CORRECT_NTF = 1004;   // 서버 -> 클라: 위치 보정 (클라 위치와 서버 위치가 너무 어깄났을 때)
+    GAME_PACKET_ID_SNAPSHOT_NTF         = 1005;   // 서버 -> 클라: AOI 객체 상태 스냅샷 스트림 (매 tick 주기 송신. 이동 복제의 중심)
 
     // 2000~2999: 아이템
     GAME_PACKET_ID_ITEM_USE_REQ = 2001;   // 클라 -> 서버: 아이템 사용 요청

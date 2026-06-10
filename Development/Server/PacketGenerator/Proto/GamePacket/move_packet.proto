@@ -38,21 +38,7 @@ message MoveStopReq {
     float pos_z = 4;             // 평면 깊이축
 }
 
-// 이동 알림 (서버 -> 클라 브로드캐스트)
-// 상태 변화(이동 시작/목적지 변경/정지) 시점에 주변 유저에게 broadcast.
-// 클라는 이를 받아 해당 object의 위치/목적지를 갱신한다.
-// 클라/서버가 같은 직선 이동 시뮬레이션을 수행한다고 가정.
-message MoveNtf {
-    int64 object_id = 1;     // = character_id (현재는)
-    float pos_x     = 2;     // 현재 위치
-    float pos_y     = 3;     // 높이
-    float yaw       = 4;     // degree
-    float dest_x    = 5;     // 이동 목적지 (정지 상태면 pos와 동일)
-    float dest_y    = 6;     // 높이
-    bool  is_moving = 7;     // 이동 중 여부
-    float pos_z     = 8;     // 현재 위치 평면 깊이축
-    float dest_z    = 9;     // 목적지 평면 깊이축
-}
+// (과거 MoveNtf 메시지 자리. SnapshotNtf 스냅샷 스트리밍으로 대체되어 제거됨.)
 
 // 위치 보정 알림 (서버 -> 해당 클라만 unicast)
 // 서버가 클라 위치와 서버 위치가 허용 오차를 초과한 것을 감지했을 때 전송.
@@ -64,4 +50,28 @@ message MovePosCorrectNtf {
     float pos_y = 2;             // 높이
     float pos_z = 3;             // 평면 깊이축
     float yaw   = 4;             // degree
+}
+
+// ──────────────────────────────────────────────
+// 스냅샷 스트리밍 (서버 -> 클라, 매 tick 주기 송신)
+// ──────────────────────────────────────────────
+// 서버가 매 tick AOI 내 "이미 보이는" 오브젝트들의 권위 위치를 묶어 보낸다.
+// spawn/despawn 은 ObjectVisibilityNtf 가 담당하고, 여기서는 transform 만 운반한다.
+// 클라: 원격 액터는 스냅샷 사이를 보간(interpolation), 본인 캐릭터는 화해(reconciliation)에 사용한다.
+
+// 오브젝트 1개의 현재 상태 (캐릭터/몬스터 공용. object_id 로 식별).
+message ActorStateInfo {
+    int64  object_id = 1;
+    float  pos_x = 2;
+    float  pos_y = 3;            // 높이
+    float  pos_z = 4;            // 평면 깊이축
+    float  yaw   = 5;            // degree
+    uint32 flags = 6;            // bit0=isMoving, bit1=isDead (애니메이션/보간 힌트)
+}
+
+// AOI 스냅샷 (서버 -> 해당 유저 unicast)
+message SnapshotNtf {
+    uint32 server_tick_seq = 1;          // 서버 단조 증가 tick 번호 (클라 보간 시계 기준)
+    uint32 ack_input_seq   = 2;          // 이 유저의 마지막 처리된 입력 seq (화해용. Phase 3 전까지 0)
+    repeated ActorStateInfo states = 3;  // AOI 내 보이는 오브젝트들의 현재 상태
 }
