@@ -19,11 +19,6 @@ class dtNavMesh;
 // 헤더에서는 전방선언만, 멤버는 unique_ptr 로 보관 (Stage 소멸자가 .cpp 에 있어야 함).
 class StageNavMesh;
 
-
-// GameServer와의 직접 의존을 피하기 위한 forward declaration.
-// (Stage 파생 클래스에서 GameServer의 서비스(패킷 전송 등)를 호출해야 할 때 사용.)
-class GameServer;
-
 // Character forward declaration (StageMsg_UserEnter 등에서 사용).
 class Character;
 using CharacterPtr = std::shared_ptr<Character>;

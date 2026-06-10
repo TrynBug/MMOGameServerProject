@@ -134,13 +134,13 @@ void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerOb
     // HP 가 0 이하로 떨어졌으면 이번 호출에서 사망 전환 (1회만 true).
     const bool justDied = (remainingHp <= 0.0) && target.MarkDead(killerObjectId);
 
-    GameServer* pServer = &GameServer::Instance();
+    GameServer& server = GameServer::Instance();
 
     const int64 targetObjectId = target.GetObjectId();
     ForEachUserInAoi(target.GetCurSectorX(), target.GetCurSectorZ(),
         [&](int64 userId)
         {
-            pServer->GetPacketSender().SendSkillDamageNtf(userId, targetObjectId, damage, isDuplicate, remainingHp);
+            server.GetPacketSender().SendSkillDamageNtf(userId, targetObjectId, damage, isDuplicate, remainingHp);
         });
 
     // 새로 사망했으면 별도 사망 통보 (대미지 외 사인도 있을 수 있어 SkillDamageNtf 와 분리).
@@ -152,13 +152,13 @@ void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerOb
 // 사망한 대상 주변 AOI 유저들에게 사망을 통보(ObjectDeathNtf). 클라 사망 연출용.
 void Stage::BroadcastObjectDeathNtf(const ActorObject& actor, int64 killerObjectId)
 {
-    GameServer* pServer = &GameServer::Instance();
+    GameServer& server = GameServer::Instance();
 
     const int64 objectId = actor.GetObjectId();
     ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
         [&](int64 userId)
         {
-            pServer->GetPacketSender().SendObjectDeathNtf(userId, objectId, killerObjectId);
+            server.GetPacketSender().SendObjectDeathNtf(userId, objectId, killerObjectId);
         });
 }
 
@@ -168,8 +168,7 @@ int64 Stage::SpawnSkillProjectileGroup(const EffectParams& params, const std::ve
     EffectParams p = params;
 
     // effectId 발급 (클라가 hit 보고 시 이 id 로 그룹을 지목한다).
-    GameServer* pServer = &GameServer::Instance();
-    p.effectId = pServer->GenerateObjectId();
+    p.effectId = GameServer::Instance().GenerateObjectId();
 
     const int64 effectId = p.effectId;
     auto spGroup = std::make_unique<ProjectileGroup>();
@@ -258,13 +257,13 @@ void Stage::BroadcastSkillCastNtf(const ActorObject& caster, int32 skillKey, int
                                   const Vector3& origin, const Vector3& dir, uint32 seed,
                                   float moveDistance)
 {
-    GameServer* pServer = &GameServer::Instance();
+    GameServer& server = GameServer::Instance();
 
     const int64 casterObjectId = caster.GetObjectId();
     ForEachUserInAoi(caster.GetCurSectorX(), caster.GetCurSectorZ(),
         [&](int64 userId)
         {
-            pServer->GetPacketSender().SendSkillCastNtf(userId, casterObjectId, skillKey, effectId,
+            server.GetPacketSender().SendSkillCastNtf(userId, casterObjectId, skillKey, effectId,
                                       origin.x, origin.y, origin.z, dir.x, dir.z, seed, moveDistance);
         });
 }

@@ -6,8 +6,6 @@
 #include "Field.h"
 #include "ThreadSafeUnorderedMap.h"
 
-class GameServer;
-
 // ─────────────────────────────────────────────────────────────
 // StageManager
 // ─────────────────────────────────────────────────────────────
@@ -36,7 +34,7 @@ public:
     // GameServer 포인터와 컨텐츠 스레드 개수를 받아 초기화.
     // - pGameServer: Stage가 GameServer 서비스(패킷 전송 등)를 호출하기 위해 필요.
     // - contentsThreadCount: Stage를 컨텐츠 스레드에 배정할 때 mod 연산에 사용.
-    void Initialize(GameServer* pGameServer, int32 contentsThreadCount);
+    void Initialize(int32 contentsThreadCount);
 
     // 등록된 모든 Stage를 컨텐츠 스레드에서 제거하고 내부 map을 비운다.
     // GameServer Shutdown 흐름에서 호출.
@@ -75,7 +73,6 @@ private:
     // 실패 시 false (에러 로그는 내부에서 남김). outNavMesh는 nullptr일 수 있음 (길찾기 비활성화).
     bool prepareNavStage(int64 stageId, int32 stageDataKey, const char* logTag, StageGridParams& outParams, const dtNavMesh*& outNavMesh);
 
-    GameServer* m_pGameServer = nullptr;
     int32 m_contentsThreadCount = 0;
 
     // 모든 Stage의 강한 소유자. key=stageId, value=StagePtr.

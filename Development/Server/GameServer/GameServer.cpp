@@ -104,7 +104,7 @@ bool GameServer::OnInitialize()
         return false;
     }
 
-    m_stageManager.Initialize(this, GetContentsThreadCount());
+    m_stageManager.Initialize(GetContentsThreadCount());
 
     const int64 systemStageId = GenerateObjectId();
     if (!m_stageManager.CreateSystemStage(systemStageId, k_systemStageDataKey))

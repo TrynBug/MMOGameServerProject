@@ -1,15 +1,14 @@
 #include "pch.h"
 #include "GameServer.h"
 
-static GameServer* g_pServer = nullptr;
-
 // 프로그램 강제종료 시 서버를 정상종료하고 종료되도록 하는 이벤트핸들러
 BOOL WINAPI consoleCtrlHandler(DWORD ctrlType)
 {
     if (ctrlType == CTRL_C_EVENT || ctrlType == CTRL_CLOSE_EVENT)
     {
-        if (g_pServer)
-            g_pServer->RequestShutdown();
+        // 핸들러는 별도 스레드에서 호출된다. 생성 전/소멸 후 구간을 대비해 null 허용 접근자를 쓴다.
+        if (GameServer* pServer = GameServer::InstanceOrNull())
+            pServer->RequestShutdown();
         return TRUE;
     }
     return FALSE;
@@ -65,7 +64,6 @@ int main()
 
     // 서버 시작
     GameServer server;
-    g_pServer = &server;
 
     SetConsoleCtrlHandler(consoleCtrlHandler, TRUE);
 

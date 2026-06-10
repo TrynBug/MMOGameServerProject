@@ -5,9 +5,8 @@
 #include "Map/NavMeshManager.h"
 #include "Generated/GameData_Stage.h"
 
-void StageManager::Initialize(GameServer* pGameServer, int32 contentsThreadCount)
+void StageManager::Initialize(int32 contentsThreadCount)
 {
-    m_pGameServer = pGameServer;
     m_contentsThreadCount = contentsThreadCount;
 }
 
@@ -30,11 +29,9 @@ void StageManager::Clear()
 
     for (auto& [stageId, spStage] : snapshot)
     {
-        if (m_pGameServer)
-        {
-            const int32 threadIdx = computeStageThreadIndex(stageId);
-            m_pGameServer->RemoveContents(threadIdx, spStage);
-        }
+        const int32 threadIdx = computeStageThreadIndex(stageId);
+        GameServer::Instance().RemoveContents(threadIdx, spStage);
+        
         m_safeStages.Erase(stageId);
     }
 
@@ -44,12 +41,6 @@ void StageManager::Clear()
 
 SystemStagePtr StageManager::CreateSystemStage(int64 stageId, int32 stageDataKey)
 {
-    if (!m_pGameServer)
-    {
-        LOG_WRITE(LogLevel::Error, std::format("not initialized. stageId={}", stageId));
-        return nullptr;
-    }
-
 	const GameData_Stage* pStageData = GameDataTable_Stage::FindData(stageDataKey);
     if (!pStageData)
     {
@@ -108,12 +99,6 @@ FieldPtr StageManager::CreateField(int64 stageId, int32 stageDataKey)
 
 bool StageManager::prepareNavStage(int64 stageId, int32 stageDataKey, const char* logTag, StageGridParams& outParams, const dtNavMesh*& outNavMesh)
 {
-    if (!m_pGameServer)
-    {
-        LOG_WRITE(LogLevel::Error, std::format("{} - not initialized. stageId={}", logTag, stageId));
-        return false;
-    }
-
     const GameData_Stage* pStageData = GameDataTable_Stage::FindData(stageDataKey);
     if (!pStageData)
     {
@@ -137,8 +122,8 @@ bool StageManager::prepareNavStage(int64 stageId, int32 stageDataKey, const char
     const NavMeshMeta* pMeta = nullptr;
     if (!outParams.navMeshFileName.empty())
     {
-        outNavMesh = m_pGameServer->GetNavMeshManager().Find(outParams.navMeshFileName);
-        pMeta      = m_pGameServer->GetNavMeshManager().FindMeta(outParams.navMeshFileName);
+        outNavMesh = GameServer::Instance().GetNavMeshManager().Find(outParams.navMeshFileName);
+        pMeta      = GameServer::Instance().GetNavMeshManager().FindMeta(outParams.navMeshFileName);
     }
 
     if (pMeta)
@@ -172,7 +157,7 @@ bool StageManager::prepareNavStage(int64 stageId, int32 stageDataKey, const char
 void StageManager::registerStage(int64 stageId, int32 stageDataKey, const StagePtr& spStage)
 {
     const int32 threadIdx = computeStageThreadIndex(stageId);
-    m_pGameServer->AssignContents(threadIdx, spStage);
+    GameServer::Instance().AssignContents(threadIdx, spStage);
 
     // 등록은 m_safeStages 먼저, 인덱스 나중 (조회 측은 인덱스 miss만 발생).
     m_safeStages.Insert(stageId, spStage);

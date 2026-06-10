@@ -38,6 +38,9 @@ public:
     // 이후로는 읽기만 하므로 동기화가 필요 없다.
     static GameServer& Instance() { return *s_pInstance; }
 
+    // 생성 전 / 소멸 후에는 nullptr 일 수 있는 컨텍스트(예: 콘솔 컨트롤 핸들러)에서 안전하게 접근.
+    static GameServer* InstanceOrNull() { return s_pInstance; }
+
     // ── 패킷 송신 ──────────────────────────────────────────────
     // 클라이언트로 나가는 모든 Send***Ntf 는 PacketSender 가 담당한다. Stage/컴포넌트는
     // GetPacketSender() 로 얻어서 호출한다 (예: GetPacketSender().SendSnapshotNtf(...)).
