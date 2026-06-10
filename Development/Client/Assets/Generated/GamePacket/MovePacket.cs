@@ -24,23 +24,24 @@ namespace GamePacket {
     static MovePacketReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChxHYW1lUGFja2V0L21vdmVfcGFja2V0LnByb3RvEgpHYW1lUGFja2V0ImoK",
-            "C01vdmVEZXN0UmVxEg4KBmRlc3RfeBgBIAEoAhIOCgZkZXN0X3kYAiABKAIS",
-            "DgoGZGVzdF96GAMgASgCEg0KBXBvc194GAQgASgCEg0KBXBvc195GAUgASgC",
-            "Eg0KBXBvc196GAYgASgCIkcKC01vdmVTdG9wUmVxEg0KBXBvc194GAEgASgC",
-            "Eg0KBXBvc195GAIgASgCEgsKA3lhdxgDIAEoAhINCgVwb3NfehgEIAEoAiJN",
-            "ChFNb3ZlUG9zQ29ycmVjdE50ZhINCgVwb3NfeBgBIAEoAhINCgVwb3NfeRgC",
-            "IAEoAhINCgVwb3NfehgDIAEoAhILCgN5YXcYBCABKAIibAoOQWN0b3JTdGF0",
-            "ZUluZm8SEQoJb2JqZWN0X2lkGAEgASgDEg0KBXBvc194GAIgASgCEg0KBXBv",
-            "c195GAMgASgCEg0KBXBvc196GAQgASgCEgsKA3lhdxgFIAEoAhINCgVmbGFn",
-            "cxgGIAEoDSJpCgtTbmFwc2hvdE50ZhIXCg9zZXJ2ZXJfdGlja19zZXEYASAB",
-            "KA0SFQoNYWNrX2lucHV0X3NlcRgCIAEoDRIqCgZzdGF0ZXMYAyADKAsyGi5H",
-            "YW1lUGFja2V0LkFjdG9yU3RhdGVJbmZvYgZwcm90bzM="));
+            "ChxHYW1lUGFja2V0L21vdmVfcGFja2V0LnByb3RvEgpHYW1lUGFja2V0IqAB",
+            "Cg1Nb3ZlSW50ZW50UmVxEhEKCWlucHV0X3NlcRgBIAEoDRIWCg5jbGllbnRf",
+            "dGltZV9tcxgCIAEoDRInCgZpbnRlbnQYAyABKA4yFy5HYW1lUGFja2V0LkVN",
+            "b3ZlSW50ZW50Eg4KBmRlc3RfeBgEIAEoAhIOCgZkZXN0X3kYBSABKAISDgoG",
+            "ZGVzdF96GAYgASgCEgsKA3lhdxgHIAEoAiJNChFNb3ZlUG9zQ29ycmVjdE50",
+            "ZhINCgVwb3NfeBgBIAEoAhINCgVwb3NfeRgCIAEoAhINCgVwb3NfehgDIAEo",
+            "AhILCgN5YXcYBCABKAIibAoOQWN0b3JTdGF0ZUluZm8SEQoJb2JqZWN0X2lk",
+            "GAEgASgDEg0KBXBvc194GAIgASgCEg0KBXBvc195GAMgASgCEg0KBXBvc196",
+            "GAQgASgCEgsKA3lhdxgFIAEoAhINCgVmbGFncxgGIAEoDSJpCgtTbmFwc2hv",
+            "dE50ZhIXCg9zZXJ2ZXJfdGlja19zZXEYASABKA0SFQoNYWNrX2lucHV0X3Nl",
+            "cRgCIAEoDRIqCgZzdGF0ZXMYAyADKAsyGi5HYW1lUGFja2V0LkFjdG9yU3Rh",
+            "dGVJbmZvKk0KC0VNb3ZlSW50ZW50EhQKEE1PVkVfSU5URU5UX05PTkUQABIS",
+            "Cg5NT1ZFX0lOVEVOVF9UTxABEhQKEE1PVkVfSU5URU5UX1NUT1AQAmIGcHJv",
+            "dG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.MoveDestReq), global::GamePacket.MoveDestReq.Parser, new[]{ "DestX", "DestY", "DestZ", "PosX", "PosY", "PosZ" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.MoveStopReq), global::GamePacket.MoveStopReq.Parser, new[]{ "PosX", "PosY", "Yaw", "PosZ" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::GamePacket.EMoveIntent), }, null, new pbr::GeneratedClrTypeInfo[] {
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.MoveIntentReq), global::GamePacket.MoveIntentReq.Parser, new[]{ "InputSeq", "ClientTimeMs", "Intent", "DestX", "DestY", "DestZ", "Yaw" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.MovePosCorrectNtf), global::GamePacket.MovePosCorrectNtf.Parser, new[]{ "PosX", "PosY", "PosZ", "Yaw" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ActorStateInfo), global::GamePacket.ActorStateInfo.Parser, new[]{ "ObjectId", "PosX", "PosY", "PosZ", "Yaw", "Flags" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SnapshotNtf), global::GamePacket.SnapshotNtf.Parser, new[]{ "ServerTickSeq", "AckInputSeq", "States" }, null, null, null, null)
@@ -49,26 +50,38 @@ namespace GamePacket {
     #endregion
 
   }
+  #region Enums
+  public enum EMoveIntent {
+    [pbr::OriginalName("MOVE_INTENT_NONE")] MoveIntentNone = 0,
+    /// <summary>
+    /// dest 로 이동 시작/갱신
+    /// </summary>
+    [pbr::OriginalName("MOVE_INTENT_TO")] MoveIntentTo = 1,
+    /// <summary>
+    /// 즉시 정지
+    /// </summary>
+    [pbr::OriginalName("MOVE_INTENT_STOP")] MoveIntentStop = 2,
+  }
+
+  #endregion
+
   #region Messages
   /// <summary>
-  /// 목적지로 이동 시작/갱신 (클라 -> 서버)
-  /// 캐릭터를 (dest_x, dest_y, dest_z)로 이동시켜달라는 요청.
-  /// 좌표계: Unity 와 동일. Y는 높이, X-Z 가 평면.
-  /// 이미 이동 중일 때 다시 받으면 목적지를 갱신한다.
-  /// pos_x/y/z는 클라의 현재 위치. 서버가 이를 서버 위치와 비교하여 오차가 크면
-  /// MovePosCorrectNtf를 보낸다. 서버 위치 자체는 이 요청으로 변경되지 않음.
+  /// 이동 의도 (클라 -> 서버). 위치는 보내지 않는다(서버 권위).
+  /// input_seq: 클라 단조 증가 입력 번호. 서버가 SnapshotNtf.ack_input_seq 로 되돌려주어
+  ///            클라가 "서버가 내 입력을 어디까지 반영했는지" 알고 예측을 화해(replay)한다.
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
-  public sealed partial class MoveDestReq : pb::IMessage<MoveDestReq>
+  public sealed partial class MoveIntentReq : pb::IMessage<MoveIntentReq>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<MoveDestReq> _parser = new pb::MessageParser<MoveDestReq>(() => new MoveDestReq());
+    private static readonly pb::MessageParser<MoveIntentReq> _parser = new pb::MessageParser<MoveIntentReq>(() => new MoveIntentReq());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<MoveDestReq> Parser { get { return _parser; } }
+    public static pb::MessageParser<MoveIntentReq> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -84,7 +97,7 @@ namespace GamePacket {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public MoveDestReq() {
+    public MoveIntentReq() {
       OnConstruction();
     }
 
@@ -92,25 +105,68 @@ namespace GamePacket {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public MoveDestReq(MoveDestReq other) : this() {
+    public MoveIntentReq(MoveIntentReq other) : this() {
+      inputSeq_ = other.inputSeq_;
+      clientTimeMs_ = other.clientTimeMs_;
+      intent_ = other.intent_;
       destX_ = other.destX_;
       destY_ = other.destY_;
       destZ_ = other.destZ_;
-      posX_ = other.posX_;
-      posY_ = other.posY_;
-      posZ_ = other.posZ_;
+      yaw_ = other.yaw_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public MoveDestReq Clone() {
-      return new MoveDestReq(this);
+    public MoveIntentReq Clone() {
+      return new MoveIntentReq(this);
+    }
+
+    /// <summary>Field number for the "input_seq" field.</summary>
+    public const int InputSeqFieldNumber = 1;
+    private uint inputSeq_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public uint InputSeq {
+      get { return inputSeq_; }
+      set {
+        inputSeq_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "client_time_ms" field.</summary>
+    public const int ClientTimeMsFieldNumber = 2;
+    private uint clientTimeMs_;
+    /// <summary>
+    /// 클라 송신 시각(ms). 로깅/향후 RTT 추정용.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public uint ClientTimeMs {
+      get { return clientTimeMs_; }
+      set {
+        clientTimeMs_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "intent" field.</summary>
+    public const int IntentFieldNumber = 3;
+    private global::GamePacket.EMoveIntent intent_ = global::GamePacket.EMoveIntent.MoveIntentNone;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::GamePacket.EMoveIntent Intent {
+      get { return intent_; }
+      set {
+        intent_ = value;
+      }
     }
 
     /// <summary>Field number for the "dest_x" field.</summary>
-    public const int DestXFieldNumber = 1;
+    public const int DestXFieldNumber = 4;
     private float destX_;
+    /// <summary>
+    /// intent=MOVE_TO 일 때 목적지. 좌표계: Unity 동일(Y=높이, X-Z 평면).
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public float DestX {
@@ -121,11 +177,8 @@ namespace GamePacket {
     }
 
     /// <summary>Field number for the "dest_y" field.</summary>
-    public const int DestYFieldNumber = 2;
+    public const int DestYFieldNumber = 5;
     private float destY_;
-    /// <summary>
-    /// 높이
-    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public float DestY {
@@ -136,11 +189,8 @@ namespace GamePacket {
     }
 
     /// <summary>Field number for the "dest_z" field.</summary>
-    public const int DestZFieldNumber = 3;
+    public const int DestZFieldNumber = 6;
     private float destZ_;
-    /// <summary>
-    /// 평면 깊이축
-    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public float DestZ {
@@ -150,397 +200,11 @@ namespace GamePacket {
       }
     }
 
-    /// <summary>Field number for the "pos_x" field.</summary>
-    public const int PosXFieldNumber = 4;
-    private float posX_;
-    /// <summary>
-    /// 클라 현재 위치 (검증용)
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float PosX {
-      get { return posX_; }
-      set {
-        posX_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "pos_y" field.</summary>
-    public const int PosYFieldNumber = 5;
-    private float posY_;
-    /// <summary>
-    /// 높이
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float PosY {
-      get { return posY_; }
-      set {
-        posY_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "pos_z" field.</summary>
-    public const int PosZFieldNumber = 6;
-    private float posZ_;
-    /// <summary>
-    /// 평면 깊이축
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float PosZ {
-      get { return posZ_; }
-      set {
-        posZ_ = value;
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override bool Equals(object other) {
-      return Equals(other as MoveDestReq);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(MoveDestReq other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(DestX, other.DestX)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(DestY, other.DestY)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(DestZ, other.DestZ)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosX, other.PosX)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (DestX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(DestX);
-      if (DestY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(DestY);
-      if (DestZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(DestZ);
-      if (PosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosX);
-      if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
-      if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void WriteTo(pb::CodedOutputStream output) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      output.WriteRawMessage(this);
-    #else
-      if (DestX != 0F) {
-        output.WriteRawTag(13);
-        output.WriteFloat(DestX);
-      }
-      if (DestY != 0F) {
-        output.WriteRawTag(21);
-        output.WriteFloat(DestY);
-      }
-      if (DestZ != 0F) {
-        output.WriteRawTag(29);
-        output.WriteFloat(DestZ);
-      }
-      if (PosX != 0F) {
-        output.WriteRawTag(37);
-        output.WriteFloat(PosX);
-      }
-      if (PosY != 0F) {
-        output.WriteRawTag(45);
-        output.WriteFloat(PosY);
-      }
-      if (PosZ != 0F) {
-        output.WriteRawTag(53);
-        output.WriteFloat(PosZ);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    #endif
-    }
-
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (DestX != 0F) {
-        output.WriteRawTag(13);
-        output.WriteFloat(DestX);
-      }
-      if (DestY != 0F) {
-        output.WriteRawTag(21);
-        output.WriteFloat(DestY);
-      }
-      if (DestZ != 0F) {
-        output.WriteRawTag(29);
-        output.WriteFloat(DestZ);
-      }
-      if (PosX != 0F) {
-        output.WriteRawTag(37);
-        output.WriteFloat(PosX);
-      }
-      if (PosY != 0F) {
-        output.WriteRawTag(45);
-        output.WriteFloat(PosY);
-      }
-      if (PosZ != 0F) {
-        output.WriteRawTag(53);
-        output.WriteFloat(PosZ);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(ref output);
-      }
-    }
-    #endif
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int CalculateSize() {
-      int size = 0;
-      if (DestX != 0F) {
-        size += 1 + 4;
-      }
-      if (DestY != 0F) {
-        size += 1 + 4;
-      }
-      if (DestZ != 0F) {
-        size += 1 + 4;
-      }
-      if (PosX != 0F) {
-        size += 1 + 4;
-      }
-      if (PosY != 0F) {
-        size += 1 + 4;
-      }
-      if (PosZ != 0F) {
-        size += 1 + 4;
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(MoveDestReq other) {
-      if (other == null) {
-        return;
-      }
-      if (other.DestX != 0F) {
-        DestX = other.DestX;
-      }
-      if (other.DestY != 0F) {
-        DestY = other.DestY;
-      }
-      if (other.DestZ != 0F) {
-        DestZ = other.DestZ;
-      }
-      if (other.PosX != 0F) {
-        PosX = other.PosX;
-      }
-      if (other.PosY != 0F) {
-        PosY = other.PosY;
-      }
-      if (other.PosZ != 0F) {
-        PosZ = other.PosZ;
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(pb::CodedInputStream input) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      input.ReadRawMessage(this);
-    #else
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 13: {
-            DestX = input.ReadFloat();
-            break;
-          }
-          case 21: {
-            DestY = input.ReadFloat();
-            break;
-          }
-          case 29: {
-            DestZ = input.ReadFloat();
-            break;
-          }
-          case 37: {
-            PosX = input.ReadFloat();
-            break;
-          }
-          case 45: {
-            PosY = input.ReadFloat();
-            break;
-          }
-          case 53: {
-            PosZ = input.ReadFloat();
-            break;
-          }
-        }
-      }
-    #endif
-    }
-
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
-            break;
-          case 13: {
-            DestX = input.ReadFloat();
-            break;
-          }
-          case 21: {
-            DestY = input.ReadFloat();
-            break;
-          }
-          case 29: {
-            DestZ = input.ReadFloat();
-            break;
-          }
-          case 37: {
-            PosX = input.ReadFloat();
-            break;
-          }
-          case 45: {
-            PosY = input.ReadFloat();
-            break;
-          }
-          case 53: {
-            PosZ = input.ReadFloat();
-            break;
-          }
-        }
-      }
-    }
-    #endif
-
-  }
-
-  /// <summary>
-  /// 즉시 정지 + 현재 위치 동기화 (클라 -> 서버)
-  /// 캐릭터를 즉시 멈추고, 클라가 보낸 현재 위치를 서버 위치와 비교한다.
-  /// 오차 범위 내면 클라 위치를 인정 (위치 보정 패킷은 향후 추가).
-  /// </summary>
-  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
-  public sealed partial class MoveStopReq : pb::IMessage<MoveStopReq>
-  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      , pb::IBufferMessage
-  #endif
-  {
-    private static readonly pb::MessageParser<MoveStopReq> _parser = new pb::MessageParser<MoveStopReq>(() => new MoveStopReq());
-    private pb::UnknownFieldSet _unknownFields;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<MoveStopReq> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::GamePacket.MovePacketReflection.Descriptor.MessageTypes[1]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public MoveStopReq() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public MoveStopReq(MoveStopReq other) : this() {
-      posX_ = other.posX_;
-      posY_ = other.posY_;
-      yaw_ = other.yaw_;
-      posZ_ = other.posZ_;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public MoveStopReq Clone() {
-      return new MoveStopReq(this);
-    }
-
-    /// <summary>Field number for the "pos_x" field.</summary>
-    public const int PosXFieldNumber = 1;
-    private float posX_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float PosX {
-      get { return posX_; }
-      set {
-        posX_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "pos_y" field.</summary>
-    public const int PosYFieldNumber = 2;
-    private float posY_;
-    /// <summary>
-    /// 높이
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float PosY {
-      get { return posY_; }
-      set {
-        posY_ = value;
-      }
-    }
-
     /// <summary>Field number for the "yaw" field.</summary>
-    public const int YawFieldNumber = 3;
+    public const int YawFieldNumber = 7;
     private float yaw_;
     /// <summary>
-    /// degree
+    /// 바라보는 방향 hint (권위 아님)
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -551,40 +215,28 @@ namespace GamePacket {
       }
     }
 
-    /// <summary>Field number for the "pos_z" field.</summary>
-    public const int PosZFieldNumber = 4;
-    private float posZ_;
-    /// <summary>
-    /// 평면 깊이축
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float PosZ {
-      get { return posZ_; }
-      set {
-        posZ_ = value;
-      }
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
-      return Equals(other as MoveStopReq);
+      return Equals(other as MoveIntentReq);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(MoveStopReq other) {
+    public bool Equals(MoveIntentReq other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosX, other.PosX)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
+      if (InputSeq != other.InputSeq) return false;
+      if (ClientTimeMs != other.ClientTimeMs) return false;
+      if (Intent != other.Intent) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(DestX, other.DestX)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(DestY, other.DestY)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(DestZ, other.DestZ)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Yaw, other.Yaw)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -592,10 +244,13 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
-      if (PosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosX);
-      if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
+      if (InputSeq != 0) hash ^= InputSeq.GetHashCode();
+      if (ClientTimeMs != 0) hash ^= ClientTimeMs.GetHashCode();
+      if (Intent != global::GamePacket.EMoveIntent.MoveIntentNone) hash ^= Intent.GetHashCode();
+      if (DestX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(DestX);
+      if (DestY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(DestY);
+      if (DestZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(DestZ);
       if (Yaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Yaw);
-      if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -614,21 +269,33 @@ namespace GamePacket {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (PosX != 0F) {
-        output.WriteRawTag(13);
-        output.WriteFloat(PosX);
+      if (InputSeq != 0) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(InputSeq);
       }
-      if (PosY != 0F) {
-        output.WriteRawTag(21);
-        output.WriteFloat(PosY);
+      if (ClientTimeMs != 0) {
+        output.WriteRawTag(16);
+        output.WriteUInt32(ClientTimeMs);
+      }
+      if (Intent != global::GamePacket.EMoveIntent.MoveIntentNone) {
+        output.WriteRawTag(24);
+        output.WriteEnum((int) Intent);
+      }
+      if (DestX != 0F) {
+        output.WriteRawTag(37);
+        output.WriteFloat(DestX);
+      }
+      if (DestY != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(DestY);
+      }
+      if (DestZ != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(DestZ);
       }
       if (Yaw != 0F) {
-        output.WriteRawTag(29);
+        output.WriteRawTag(61);
         output.WriteFloat(Yaw);
-      }
-      if (PosZ != 0F) {
-        output.WriteRawTag(37);
-        output.WriteFloat(PosZ);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -640,21 +307,33 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (PosX != 0F) {
-        output.WriteRawTag(13);
-        output.WriteFloat(PosX);
+      if (InputSeq != 0) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(InputSeq);
       }
-      if (PosY != 0F) {
-        output.WriteRawTag(21);
-        output.WriteFloat(PosY);
+      if (ClientTimeMs != 0) {
+        output.WriteRawTag(16);
+        output.WriteUInt32(ClientTimeMs);
+      }
+      if (Intent != global::GamePacket.EMoveIntent.MoveIntentNone) {
+        output.WriteRawTag(24);
+        output.WriteEnum((int) Intent);
+      }
+      if (DestX != 0F) {
+        output.WriteRawTag(37);
+        output.WriteFloat(DestX);
+      }
+      if (DestY != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(DestY);
+      }
+      if (DestZ != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(DestZ);
       }
       if (Yaw != 0F) {
-        output.WriteRawTag(29);
+        output.WriteRawTag(61);
         output.WriteFloat(Yaw);
-      }
-      if (PosZ != 0F) {
-        output.WriteRawTag(37);
-        output.WriteFloat(PosZ);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -666,16 +345,25 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
-      if (PosX != 0F) {
+      if (InputSeq != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(InputSeq);
+      }
+      if (ClientTimeMs != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(ClientTimeMs);
+      }
+      if (Intent != global::GamePacket.EMoveIntent.MoveIntentNone) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Intent);
+      }
+      if (DestX != 0F) {
         size += 1 + 4;
       }
-      if (PosY != 0F) {
+      if (DestY != 0F) {
+        size += 1 + 4;
+      }
+      if (DestZ != 0F) {
         size += 1 + 4;
       }
       if (Yaw != 0F) {
-        size += 1 + 4;
-      }
-      if (PosZ != 0F) {
         size += 1 + 4;
       }
       if (_unknownFields != null) {
@@ -686,21 +374,30 @@ namespace GamePacket {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(MoveStopReq other) {
+    public void MergeFrom(MoveIntentReq other) {
       if (other == null) {
         return;
       }
-      if (other.PosX != 0F) {
-        PosX = other.PosX;
+      if (other.InputSeq != 0) {
+        InputSeq = other.InputSeq;
       }
-      if (other.PosY != 0F) {
-        PosY = other.PosY;
+      if (other.ClientTimeMs != 0) {
+        ClientTimeMs = other.ClientTimeMs;
+      }
+      if (other.Intent != global::GamePacket.EMoveIntent.MoveIntentNone) {
+        Intent = other.Intent;
+      }
+      if (other.DestX != 0F) {
+        DestX = other.DestX;
+      }
+      if (other.DestY != 0F) {
+        DestY = other.DestY;
+      }
+      if (other.DestZ != 0F) {
+        DestZ = other.DestZ;
       }
       if (other.Yaw != 0F) {
         Yaw = other.Yaw;
-      }
-      if (other.PosZ != 0F) {
-        PosZ = other.PosZ;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -721,20 +418,32 @@ namespace GamePacket {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
-          case 13: {
-            PosX = input.ReadFloat();
+          case 8: {
+            InputSeq = input.ReadUInt32();
             break;
           }
-          case 21: {
-            PosY = input.ReadFloat();
+          case 16: {
+            ClientTimeMs = input.ReadUInt32();
             break;
           }
-          case 29: {
-            Yaw = input.ReadFloat();
+          case 24: {
+            Intent = (global::GamePacket.EMoveIntent) input.ReadEnum();
             break;
           }
           case 37: {
-            PosZ = input.ReadFloat();
+            DestX = input.ReadFloat();
+            break;
+          }
+          case 45: {
+            DestY = input.ReadFloat();
+            break;
+          }
+          case 53: {
+            DestZ = input.ReadFloat();
+            break;
+          }
+          case 61: {
+            Yaw = input.ReadFloat();
             break;
           }
         }
@@ -756,20 +465,32 @@ namespace GamePacket {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
-          case 13: {
-            PosX = input.ReadFloat();
+          case 8: {
+            InputSeq = input.ReadUInt32();
             break;
           }
-          case 21: {
-            PosY = input.ReadFloat();
+          case 16: {
+            ClientTimeMs = input.ReadUInt32();
             break;
           }
-          case 29: {
-            Yaw = input.ReadFloat();
+          case 24: {
+            Intent = (global::GamePacket.EMoveIntent) input.ReadEnum();
             break;
           }
           case 37: {
-            PosZ = input.ReadFloat();
+            DestX = input.ReadFloat();
+            break;
+          }
+          case 45: {
+            DestY = input.ReadFloat();
+            break;
+          }
+          case 53: {
+            DestZ = input.ReadFloat();
+            break;
+          }
+          case 61: {
+            Yaw = input.ReadFloat();
             break;
           }
         }
@@ -801,7 +522,7 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GamePacket.MovePacketReflection.Descriptor.MessageTypes[2]; }
+      get { return global::GamePacket.MovePacketReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1122,7 +843,7 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GamePacket.MovePacketReflection.Descriptor.MessageTypes[3]; }
+      get { return global::GamePacket.MovePacketReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1520,7 +1241,7 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GamePacket.MovePacketReflection.Descriptor.MessageTypes[4]; }
+      get { return global::GamePacket.MovePacketReflection.Descriptor.MessageTypes[3]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1571,7 +1292,7 @@ namespace GamePacket {
     public const int AckInputSeqFieldNumber = 2;
     private uint ackInputSeq_;
     /// <summary>
-    /// 이 유저의 마지막 처리된 입력 seq (화해용. Phase 3 전까지 0)
+    /// 이 유저의 마지막 처리된 MoveIntentReq.input_seq (클라 화해용)
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
