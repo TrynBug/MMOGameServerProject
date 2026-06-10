@@ -7,10 +7,9 @@
 
 namespace
 {
-    // ── 이동 임계값 ──
-    constexpr float k_minMoveDistSq       = 0.01f;     // 0.1유닛 이내면 이동 안 함
-    constexpr float k_radToDeg            = 57.2957795f;
-    constexpr float k_waypointReachDistSq = 0.0025f;   // 5cm. 부동소수점 안전망.
+    // ── 이동 임계값 (FaceTarget yaw 계산용) ──
+    constexpr float k_minMoveDistSq = 0.01f;     // 0.1유닛 이내면 회전 안 함
+    constexpr float k_radToDeg      = 57.2957795f;
 
     // throttled repath: 목표점이 1유닛 이상 움직이면 재길찾기.
     constexpr float k_repathDistSq = 1.0f;
@@ -253,15 +252,16 @@ void Monster::MoveTo(float destX, float destY, float destZ, int64 deltaMs)
     // throttled repath: 목표점이 충분히 바뀌었거나 정지 상태면 새 경로 계산.
     const float pdx = destX - m_pathTargetX;
     const float pdz = destZ - m_pathTargetZ;
-    if (!m_isMoving || !m_hasPathTarget || (pdx * pdx + pdz * pdz) > k_repathDistSq)
+    if (!m_mover.IsMoving() || !m_hasPathTarget || (pdx * pdx + pdz * pdz) > k_repathDistSq)
     {
-        setDestination(destX, destY, destZ);
+        // Monster 는 매 tick repath 가능하므로 직선 폴백 로그는 끈다(스팸 방지).
+        m_mover.SetDestination(*this, destX, destY, destZ, /*logFallback*/ false);
         m_pathTargetX  = destX;
         m_pathTargetZ  = destZ;
         m_hasPathTarget = true;
     }
 
-    updateMovement(deltaMs);
+    m_mover.Update(*this, deltaMs, m_moveSpeed);
 
     if (Stage* pStage = GetStage())
         pStage->UpdateObjectSector(this);
@@ -278,129 +278,6 @@ void Monster::SnapToSpawn()
 
 void Monster::StopMoving()
 {
-    m_isMoving = false;
-    m_waypoints.clear();
-    m_curWaypointIdx = 0;
+    m_mover.Stop();
     m_hasPathTarget = false;
-}
-
-void Monster::setDestination(float destX, float destY, float destZ)
-{
-    const float dx = destX - GetPosX();
-    const float dz = destZ - GetPosZ();
-    if (dx * dx + dz * dz < k_minMoveDistSq)
-    {
-        StopMoving();
-        return;
-    }
-
-    // Stage NavMesh 로 waypoint 계산. 실패 시 직선 fallback.
-    m_waypoints.clear();
-    Stage* pStage = GetStage();
-    bool pathFound = false;
-    if (pStage != nullptr)
-        pathFound = pStage->FindPath(GetPosX(), GetPosY(), GetPosZ(), destX, destY, destZ, m_waypoints);
-
-    if (!pathFound || m_waypoints.size() < 3)
-    {
-        m_waypoints.clear();
-        m_waypoints.push_back(destX);
-        m_waypoints.push_back(destY);
-        m_waypoints.push_back(destZ);
-    }
-
-    // 현재 위치와 거의 같은 선두 waypoint 스킵.
-    m_curWaypointIdx = 0;
-    while (m_curWaypointIdx * 3 + 2 < static_cast<int32>(m_waypoints.size()))
-    {
-        const float wx = m_waypoints[m_curWaypointIdx * 3 + 0];
-        const float wz = m_waypoints[m_curWaypointIdx * 3 + 2];
-        const float wdx = wx - GetPosX();
-        const float wdz = wz - GetPosZ();
-        if (wdx * wdx + wdz * wdz > k_waypointReachDistSq)
-            break;
-        ++m_curWaypointIdx;
-    }
-    if (m_curWaypointIdx * 3 + 2 >= static_cast<int32>(m_waypoints.size()))
-    {
-        StopMoving();
-        return;
-    }
-
-    m_isMoving = true;
-    faceWaypoint();
-}
-
-bool Monster::updateMovement(int64 deltaMs)
-{
-    if (!m_isMoving)
-        return false;
-
-    if (m_waypoints.empty() || m_curWaypointIdx * 3 + 2 >= static_cast<int32>(m_waypoints.size()))
-    {
-        StopMoving();
-        return true;
-    }
-
-    float remainMoveDist = m_moveSpeed * (static_cast<float>(deltaMs) / 1000.0f);
-
-    // 한 tick 안에 여러 waypoint 를 통과할 수 있어 while 루프.
-    while (remainMoveDist > 0.0f)
-    {
-        const float wx = m_waypoints[m_curWaypointIdx * 3 + 0];
-        const float wy = m_waypoints[m_curWaypointIdx * 3 + 1];
-        const float wz = m_waypoints[m_curWaypointIdx * 3 + 2];
-
-        const float dx = wx - GetPosX();
-        const float dz = wz - GetPosZ();
-        const float dist = std::sqrt(dx * dx + dz * dz);
-
-        // 현재 waypoint 가 경로의 마지막(= 최종 목적지)인지 확인한다.
-        const bool isLastWaypoint = (m_curWaypointIdx * 3 + 5 >= static_cast<int32>(m_waypoints.size()));
-
-        if (dist <= remainMoveDist)
-        {
-            if (isLastWaypoint)
-            {
-                // 최종 목적지(슬롯) 도달: 정확히 슬롯에 맞추고 정지한다.
-                // (예전엔 정지 없이 remainMoveDist 만큼 직선 이동해 슬롯을 넘었다가 다음 tick 에 되돌아오길
-                //  반복 → 제자리에서 진동. 특히 공격사거리 밖 바깥 링 슬롯 몬스터는 Attack 상태로 못 가
-                //  영영 진동했다. 자투리(<1 tick)는 스냅해도 클라 보간으로 보이지 않으므로 깔끔히 정지.)
-                SetPos(wx, wy, wz);
-                StopMoving();
-                return true;
-            }
-
-            // 중간 waypoint: 스냅 후 자투리 거리로 다음 구간을 이어서 이동(연속적, 점프 없음).
-            SetPos(wx, wy, wz);
-            remainMoveDist -= dist;
-            ++m_curWaypointIdx;
-            faceWaypoint();
-            continue;
-        }
-
-        // 이번 tick 에는 도달 못 함. 방향으로 remainMoveDist 만큼 이동. Y 는 비례 보간.
-        const float nx = dx / dist;
-        const float nz = dz / dist;
-        const float ratio = remainMoveDist / dist;
-        const float dy = wy - GetPosY();
-        SetPos(GetPosX() + nx * remainMoveDist,
-               GetPosY() + dy * ratio,
-               GetPosZ() + nz * remainMoveDist);
-        remainMoveDist = 0.0f;
-    }
-
-    return false;
-}
-
-void Monster::faceWaypoint()
-{
-    const float wx = m_waypoints[m_curWaypointIdx * 3 + 0];
-    const float wz = m_waypoints[m_curWaypointIdx * 3 + 2];
-    const float dx = wx - GetPosX();
-    const float dz = wz - GetPosZ();
-    if (dx * dx + dz * dz < k_minMoveDistSq)
-        return;
-    // Unity 호환: yaw_deg = atan2(dx, dz) * 180/PI (+Z 정면).
-    SetYaw(std::atan2(dx, dz) * k_radToDeg);
 }

@@ -57,6 +57,9 @@
     <ClCompile Include="Monster.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="WaypointMover.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="CharacterStatComponent.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -144,6 +147,9 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="Monster.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="WaypointMover.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="CharacterStatComponent.h">

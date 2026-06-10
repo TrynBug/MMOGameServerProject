@@ -9,18 +9,8 @@
 
 namespace
 {
-    // 같은 위치 판정 임계값 제곱 (X-Z 평면, 유닛^2).
-    // 0.1유닛 이내(=10cm) 이면 이동 안 함.
-    constexpr float k_minMoveDistSq = 0.01f;
-
-    // 라디안 -> degree 변환 상수
+    // 라디안 -> degree 변환 상수 (스킬 강제이동 yaw 계산용).
     constexpr float k_radToDeg = 57.2957795f;   // 180.0f / PI
-
-    // waypoint 도달 판정 임계값 제곱 (X-Z 평면, 유닛^2).
-    // 0.05유닛 = 5cm. moveDist (5m/s * 50ms = 0.25m) 보다 작아서
-    // 도달 판정은 항상 "이번 tick 의 moveDist >= 남은 거리" 로 처리됨.
-    // 이 값은 안전망 용도 (부동소수점 오차로 영원히 도달 못 하는 케이스 방지).
-    constexpr float k_waypointReachDistSq = 0.0025f;
 }
 
 bool Character::Initialize(const DataStructures::Character& protoData)
@@ -35,8 +25,7 @@ bool Character::Initialize(const DataStructures::Character& protoData)
     SetPos(protoData.pos_x(), protoData.pos_y(), protoData.pos_z());
     SetYaw(protoData.yaw());
 
-    // 이동 상태는 정지로 시작.
-    m_isMoving = false;
+    // 이동 상태는 정지로 시작(WaypointMover 기본값이 정지).
 
     // JobBase 게임데이터의 기본스탯을 스탯 컴포넌트에 적용.
     // (향후 레벨/아이템/마스터리/버프는 이어서 각각의 소스가 ApplyStat 한다.)
@@ -91,77 +80,15 @@ void Character::SetDestination(float destX, float destY, float destZ)
     if (m_skillMoving)
         return;
 
-    // X-Z 평면 거리로 이동 여부 판정. Y(높이) 변화는 이동 트리거에 사용하지 않음.
-    const float dx = destX - GetPosX();
-    const float dz = destZ - GetPosZ();
-    const float distSq = dx * dx + dz * dz;
-
-    if (distSq < k_minMoveDistSq)
-    {
-        m_isMoving = false;
-        m_waypoints.clear();
-        m_curWaypointIdx = 0;
-        return;
-    }
-
-    // Stage NavMesh 로 waypoint 계산.
-    // Stage 가 없거나 FindPath 실패하면 직선 이동 fallback ([목적지] 한 점).
-    m_waypoints.clear();
-    Stage* pStage = GetStage();
-    bool pathFound = false;
-    if (pStage)
-    {
-        pathFound = pStage->FindPath(GetPosX(), GetPosY(), GetPosZ(), destX, destY, destZ, m_waypoints);
-    }
-
-    if (!pathFound || m_waypoints.size() < 3)
-    {
-        // 직선 fallback. waypoint = [목적지] 한 점.
-        LOG_WRITE(LogLevel::Warn, std::format("FindPath failed, using straight-line fallback. objectId={} from=({},{},{}) to=({},{},{})",
-            GetObjectId(),
-            GetPosX(), GetPosY(), GetPosZ(),
-            destX, destY, destZ));
-
-        m_waypoints.clear();
-        m_waypoints.push_back(destX);
-        m_waypoints.push_back(destY);
-        m_waypoints.push_back(destZ);
-    }
-
-    // findStraightPath 의 첫 점은 시작 위치 자체일 수 있음 — 현재 위치와 거의 같으면 스킵.
-    // 그 다음 점이 실제로 향해갈 첫 waypoint.
-    m_curWaypointIdx = 0;
-    while (m_curWaypointIdx * 3 + 2 < static_cast<int32>(m_waypoints.size()))
-    {
-        const float wx = m_waypoints[m_curWaypointIdx * 3 + 0];
-        const float wz = m_waypoints[m_curWaypointIdx * 3 + 2];
-        const float wdx = wx - GetPosX();
-        const float wdz = wz - GetPosZ();
-        if (wdx * wdx + wdz * wdz > k_waypointReachDistSq)
-            break;   // 이 waypoint 는 의미 있는 거리, 여기서 멈춤.
-        ++m_curWaypointIdx;
-    }
-
-    // 모든 waypoint 가 현재 위치와 너무 가까우면 이동 무시.
-    if (m_curWaypointIdx * 3 + 2 >= static_cast<int32>(m_waypoints.size()))
-    {
-        m_isMoving = false;
-        m_waypoints.clear();
-        m_curWaypointIdx = 0;
-        return;
-    }
-
-    m_isMoving = true;
-    faceCurrentWaypoint();
+    // 경로 계산/추적은 공유 컴포넌트가 담당. 직선 폴백 시 Warn 로그 출력(클릭 이동이라 빈도 낮음).
+    m_mover.SetDestination(*this, destX, destY, destZ, /*logFallback*/ true);
 }
 
 void Character::StopAt(float posX, float posY, float posZ, float yaw)
 {
     SetPos(posX, posY, posZ);
     SetYaw(yaw);
-    m_isMoving = false;
-    m_waypoints.clear();
-    m_curWaypointIdx = 0;
+    m_mover.Stop();
 }
 
 void Character::ApplyActionLock(int64 lockMs)
@@ -172,24 +99,7 @@ void Character::ApplyActionLock(int64 lockMs)
         m_actionLockRemainingMs = lockMs;
 
     // 시전 시작 시 현재 이동을 즉시 정지(시전 위치에 고정). 서버 권위로 멈춰야 클라 화해도 따라온다.
-    m_isMoving = false;
-    m_waypoints.clear();
-    m_curWaypointIdx = 0;
-}
-
-void Character::faceCurrentWaypoint()
-{
-    // m_curWaypointIdx 가 유효한 인덱스인 상태에서 호출되어야 함.
-    // 현재 위치에서 해당 waypoint 까지의 X-Z 평면 방향으로 yaw 갱신.
-    const float wx = m_waypoints[m_curWaypointIdx * 3 + 0];
-    const float wz = m_waypoints[m_curWaypointIdx * 3 + 2];
-    const float dx = wx - GetPosX();
-    const float dz = wz - GetPosZ();
-    if (dx * dx + dz * dz < k_minMoveDistSq)
-        return;   // 너무 가까우면 yaw 유지.
-
-    // Unity 호환: dirY_deg = atan2(dx, dz) * 180/PI (+Z 정면, 시계방향)
-    SetYaw(std::atan2(dx, dz) * k_radToDeg);
+    m_mover.Stop();
 }
 
 void Character::Update(int64 deltaMs)
@@ -209,68 +119,8 @@ void Character::Update(int64 deltaMs)
         return;
     }
 
-    if (!m_isMoving)
-        return;
-
-    // 안전망: waypoint 가 비었거나 인덱스가 유효 범위 밖이면 정지.
-    if (m_waypoints.empty() || m_curWaypointIdx * 3 + 2 >= static_cast<int32>(m_waypoints.size()))
-    {
-        m_isMoving = false;
-        m_waypoints.clear();
-        m_curWaypointIdx = 0;
-        return;
-    }
-
-    // 이번 tick 에 이동할 총 거리.
-    const float moveSpeed = static_cast<float>(m_statComponent.Get(EStat::MoveSpdTotal));
-    float remainMoveDist = moveSpeed * (static_cast<float>(deltaMs) / 1000.0f);
-
-    // waypoint 들을 따라가면서 remainMoveDist 를 소모. 도달할 때마다 다음 waypoint.
-    // 한 tick 안에 여러 waypoint 를 통과할 수 있어서 while 루프.
-    while (remainMoveDist > 0.0f)
-    {
-        const float wx = m_waypoints[m_curWaypointIdx * 3 + 0];
-        const float wy = m_waypoints[m_curWaypointIdx * 3 + 1];
-        const float wz = m_waypoints[m_curWaypointIdx * 3 + 2];
-
-        const float dx = wx - GetPosX();
-        const float dz = wz - GetPosZ();
-        const float distSq = dx * dx + dz * dz;
-        const float dist = std::sqrt(distSq);
-
-        if (dist <= remainMoveDist)
-        {
-            // 이 waypoint 에 도달. 정확히 스냅.
-            SetPos(wx, wy, wz);
-            remainMoveDist -= dist;
-
-            // 다음 waypoint 로 진행.
-            ++m_curWaypointIdx;
-            if (m_curWaypointIdx * 3 + 2 >= static_cast<int32>(m_waypoints.size()))
-            {
-                // 마지막 waypoint 도달 → 최종 목적지 도달.
-                m_isMoving = false;
-                m_waypoints.clear();
-                m_curWaypointIdx = 0;
-                return;
-            }
-            // 다음 waypoint 방향으로 yaw 갱신.
-            faceCurrentWaypoint();
-            // 루프 계속 (남은 remainMoveDist 로 다음 waypoint 향해 진행).
-            continue;
-        }
-
-        // 이번 tick 안에는 waypoint 에 도달 못 함. 방향으로 remainMoveDist 만큼 이동.
-        // Y 는 (waypoint Y - 시작 Y) 를 비례로 보간 (단순 선형).
-        const float nx = dx / dist;
-        const float nz = dz / dist;
-        const float ratio = remainMoveDist / dist;
-        const float dy = wy - GetPosY();
-        SetPos(GetPosX() + nx * remainMoveDist,
-               GetPosY() + dy * ratio,
-               GetPosZ() + nz * remainMoveDist);
-        remainMoveDist = 0.0f;
-    }
+    // 경로 추적은 공유 컴포넌트가 담당. 이동속도는 캐릭터 스탯에서.
+    m_mover.Update(*this, deltaMs, static_cast<float>(m_statComponent.Get(EStat::MoveSpdTotal)));
 }
 
 void Character::ApplySkillMovement(const Vector3& dir, float distance, int32 durationMs)
@@ -285,9 +135,7 @@ void Character::ApplySkillMovement(const Vector3& dir, float distance, int32 dur
     dz /= len;
 
     // 강제이동은 일반(waypoint) 이동을 중단시킨다.
-    m_isMoving = false;
-    m_waypoints.clear();
-    m_curWaypointIdx = 0;
+    m_mover.Stop();
 
     // 시전 방향으로 즉시 회전 (Unity 호환 yaw).
     SetYaw(std::atan2(dx, dz) * k_radToDeg);

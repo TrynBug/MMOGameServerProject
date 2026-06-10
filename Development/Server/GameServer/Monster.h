@@ -4,6 +4,7 @@
 #include "ActorObject.h"
 #include "BasicStatComponent.h"
 #include "IMonsterAI.h"
+#include "WaypointMover.h"
 
 #include "Enum/GameEnum_Stat.h"
 #include "Generated/GameData_Monster.h"
@@ -90,7 +91,7 @@ public:
     // 공유 행동 레이어 (두뇌가 호출)
     // ─────────────────────────────────────────────────────────
     // ── 이동 ──
-    bool IsMoving() const override { return m_isMoving; }
+    bool IsMoving() const override { return m_mover.IsMoving(); }
     void StopMoving();
     // destX/Z 로 이동(throttled repath 포함) + sector 갱신. 매 tick 호출.
     void MoveTo(float destX, float destY, float destZ, int64 deltaMs);
@@ -148,11 +149,6 @@ private:
     // 매 tick housekeeping: 스킬 쿨다운 진행.
     void tickSkillCooldowns(int64 deltaMs);
 
-    // ── 이동 내부 구현 (Character 패턴 미러링) ──
-    void setDestination(float destX, float destY, float destZ);
-    bool updateMovement(int64 deltaMs);   // 최종 목적지 도달 시 true
-    void faceWaypoint();
-
 private:
     // 몬스터 종류 데이터 (소유권 없음, 게임데이터는 로드 후 불변).
     const GameData_Monster* m_pMonsterData = nullptr;
@@ -187,11 +183,9 @@ private:
     // ── 스킬 ──────────────────────────────────────────────────
     std::vector<MonsterSkill> m_skills;
 
-    // ── 이동 상태 ──────────────────────────
-    bool  m_isMoving = false;
-    // Waypoint 리스트. (x, y, z) 트리플 순서로 floats * 3N 개. m_isMoving=true 동안만 의미.
-    std::vector<float> m_waypoints;
-    int32 m_curWaypointIdx = 0;
+    // ── 이동 ──────────────────────────────
+    // 경로(waypoint) 기반 이동은 공유 컴포넌트가 담당(Character 와 동일 로직).
+    WaypointMover m_mover;
     // 마지막으로 길찾기한 목표점 (throttled repath 판정용).
     bool  m_hasPathTarget = false;
     float m_pathTargetX = 0.0f;

@@ -3,8 +3,7 @@
 #include "pch.h"
 #include "ActorObject.h"
 #include "CharacterStatComponent.h"
-
-#include <vector>
+#include "WaypointMover.h"
 
 // 전방선언 (User <-> Character 양방향 참조의 한쪽)
 class User;
@@ -98,7 +97,7 @@ public:
 
     // ── 이동 ──────────────────────────────────────────────────────────
     // 좌표계: Unity 와 동일. Y는 높이, X-Z 가 평면. yaw는 Y축 회전, degree.
-    bool  IsMoving()    const override { return m_isMoving; }
+    bool  IsMoving()    const override { return m_mover.IsMoving(); }
 
     // 클라 이동 입력 화해용. 서버가 마지막으로 처리한 MoveIntentReq.input_seq.
     // SnapshotNtf.ack_input_seq 로 본인에게 되돌려준다(클라가 예측을 replay 화해).
@@ -145,35 +144,21 @@ private:
     // 스킬 강제이동 1 tick 전진. ease-out 위치 갱신, duration 종료 시 끝점 스냅.
     void advanceSkillMove(int64 deltaMs);
 
-    // 현재 waypoint 를 향해 이동 시작 시점에 yaw 를 갱신.
-    // (X-Z 평면 상의 방향. Unity 호환 degree.)
-    void faceCurrentWaypoint();
-
     DataStructures::Character m_protoData;
     UserWPtr                  m_wpUser;
 
     // 캐릭터 스탯 컴포넌트. 생성자에서 JobBase 기본스탯을 적용한다.
     CharacterStatComponent    m_statComponent;
 
-    // ── 이동 상태 ────────────────────────────────────────────
-    // m_isMoving = false 면 다른 이동 멤버는 의미 없음.
-    bool  m_isMoving = false;
+    // ── 이동 ──────────────────────────────────────────────────
+    // 경로(waypoint) 기반 이동은 공유 컴포넌트가 담당(Monster 와 동일 로직).
+    WaypointMover m_mover;
 
     // 마지막으로 처리한 클라 이동 입력 seq (화해용). SnapshotNtf.ack_input_seq 로 송신.
     uint32 m_lastInputSeq = 0;
 
     // 시전 액션락 잔여시간(ms). >0 이면 이동 입력 무시. Update 에서 deltaMs 만큼 감소.
     int64 m_actionLockRemainingMs = 0;
-
-    // Waypoint 리스트. (x, y, z) 트리플 순서로 floats * 3N 개.
-    // 비어있지 않으면 [0..2] 는 첫 번째 waypoint, [3..5] 는 두 번째, ...
-    // 마지막 waypoint 가 최종 목적지에 해당.
-    // m_isMoving=true 동안만 의미 있음.
-    std::vector<float> m_waypoints;
-
-    // m_waypoints 에서 현재 향해가는 waypoint 인덱스 (트리플 단위, 0-based).
-    // 0 이면 m_waypoints[0..2] 를 향함. 도달 시 ++.
-    int32 m_curWaypointIdx = 0;
 
     // ── 스킬 강제이동 상태 (5d) ─────────────────────────────────
     // 일반 이동(m_isMoving/waypoint)과 별개. m_skillMoving=true 동안 Update 가 ease-out 으로 전진.
