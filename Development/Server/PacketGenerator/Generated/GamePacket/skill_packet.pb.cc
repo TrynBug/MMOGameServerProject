@@ -63,7 +63,9 @@ inline constexpr SkillDamageNtf::Impl_::Impl_(
         target_object_id_{::int64_t{0}},
         damage_{0},
         is_duplicate_{false},
-        remaining_hp_{0} {}
+        attacker_object_id_{::int64_t{0}},
+        remaining_hp_{0},
+        source_skill_key_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR SkillDamageNtf::SkillDamageNtf(::_pbi::ConstantInitialized)
@@ -255,15 +257,19 @@ const ::uint32_t
         9,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillDamageNtf, _impl_._has_bits_),
-        7, // hasbit index offset
+        9, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillDamageNtf, _impl_.target_object_id_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillDamageNtf, _impl_.damage_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillDamageNtf, _impl_.is_duplicate_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::SkillDamageNtf, _impl_.remaining_hp_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::SkillDamageNtf, _impl_.attacker_object_id_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::SkillDamageNtf, _impl_.source_skill_key_),
         0,
         1,
         2,
+        4,
         3,
+        5,
 };
 
 static const ::_pbi::MigrationSchema
@@ -300,16 +306,17 @@ const char descriptor_table_protodef_GamePacket_2fskill_5fpacket_2eproto[] ABSL_
     "ct_id\030\003 \001(\003\022\020\n\010origin_x\030\004 \001(\002\022\020\n\010origin_"
     "y\030\005 \001(\002\022\020\n\010origin_z\030\006 \001(\002\022\r\n\005dir_x\030\007 \001(\002"
     "\022\r\n\005dir_z\030\010 \001(\002\022\014\n\004seed\030\t \001(\r\022\025\n\rmove_di"
-    "stance\030\n \001(\002\"f\n\016SkillDamageNtf\022\030\n\020target"
-    "_object_id\030\001 \001(\003\022\016\n\006damage\030\002 \001(\002\022\024\n\014is_d"
-    "uplicate\030\003 \001(\010\022\024\n\014remaining_hp\030\004 \001(\002b\006pr"
-    "oto3"
+    "stance\030\n \001(\002\"\234\001\n\016SkillDamageNtf\022\030\n\020targe"
+    "t_object_id\030\001 \001(\003\022\016\n\006damage\030\002 \001(\002\022\024\n\014is_"
+    "duplicate\030\003 \001(\010\022\024\n\014remaining_hp\030\004 \001(\002\022\032\n"
+    "\022attacker_object_id\030\005 \001(\003\022\030\n\020source_skil"
+    "l_key\030\006 \001(\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fskill_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fskill_5fpacket_2eproto = {
     false,
     false,
-    804,
+    859,
     descriptor_table_protodef_GamePacket_2fskill_5fpacket_2eproto,
     "GamePacket/skill_packet.proto",
     &descriptor_table_GamePacket_2fskill_5fpacket_2eproto_once,
@@ -2107,9 +2114,9 @@ inline void SkillDamageNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   ::memset(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, target_object_id_),
            0,
-           offsetof(Impl_, remaining_hp_) -
+           offsetof(Impl_, source_skill_key_) -
                offsetof(Impl_, target_object_id_) +
-               sizeof(Impl_::remaining_hp_));
+               sizeof(Impl_::source_skill_key_));
 }
 SkillDamageNtf::~SkillDamageNtf() {
   // @@protoc_insertion_point(destructor:GamePacket.SkillDamageNtf)
@@ -2168,16 +2175,16 @@ SkillDamageNtf::GetClassData() const {
   return SkillDamageNtf_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 4, 0, 0, 2>
+const ::_pbi::TcParseTable<3, 6, 0, 0, 2>
 SkillDamageNtf::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_._has_bits_),
     0, // no _extensions_
-    4, 24,  // max_field_number, fast_idx_mask
+    6, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967280,  // skipmap
+    4294967232,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    4,  // num_field_entries
+    6,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     SkillDamageNtf_class_data_.base(),
@@ -2187,10 +2194,7 @@ SkillDamageNtf::_table_ = {
     ::_pbi::TcParser::GetTable<::GamePacket::SkillDamageNtf>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // float remaining_hp = 4;
-    {::_pbi::TcParser::FastF32S1,
-     {37, 3, 0,
-      PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_.remaining_hp_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // int64 target_object_id = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(SkillDamageNtf, _impl_.target_object_id_), 0>(),
      {8, 0, 0,
@@ -2203,6 +2207,19 @@ SkillDamageNtf::_table_ = {
     {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(SkillDamageNtf, _impl_.is_duplicate_), 2>(),
      {24, 2, 0,
       PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_.is_duplicate_)}},
+    // float remaining_hp = 4;
+    {::_pbi::TcParser::FastF32S1,
+     {37, 4, 0,
+      PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_.remaining_hp_)}},
+    // int64 attacker_object_id = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(SkillDamageNtf, _impl_.attacker_object_id_), 3>(),
+     {40, 3, 0,
+      PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_.attacker_object_id_)}},
+    // int32 source_skill_key = 6;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(SkillDamageNtf, _impl_.source_skill_key_), 5>(),
+     {48, 5, 0,
+      PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_.source_skill_key_)}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -2213,7 +2230,11 @@ SkillDamageNtf::_table_ = {
     // bool is_duplicate = 3;
     {PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_.is_duplicate_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
     // float remaining_hp = 4;
-    {PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_.remaining_hp_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    {PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_.remaining_hp_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // int64 attacker_object_id = 5;
+    {PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_.attacker_object_id_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int32 source_skill_key = 6;
+    {PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_.source_skill_key_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
@@ -2227,10 +2248,10 @@ PROTOBUF_NOINLINE void SkillDamageNtf::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
     ::memset(&_impl_.target_object_id_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.remaining_hp_) -
-        reinterpret_cast<char*>(&_impl_.target_object_id_)) + sizeof(_impl_.remaining_hp_));
+        reinterpret_cast<char*>(&_impl_.source_skill_key_) -
+        reinterpret_cast<char*>(&_impl_.target_object_id_)) + sizeof(_impl_.source_skill_key_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -2283,11 +2304,29 @@ PROTOBUF_NOINLINE void SkillDamageNtf::Clear() {
   }
 
   // float remaining_hp = 4;
-  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
     if (::absl::bit_cast<::uint32_t>(this_._internal_remaining_hp()) != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteFloatToArray(
           4, this_._internal_remaining_hp(), target);
+    }
+  }
+
+  // int64 attacker_object_id = 5;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (this_._internal_attacker_object_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<5>(
+              stream, this_._internal_attacker_object_id(), target);
+    }
+  }
+
+  // int32 source_skill_key = 6;
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (this_._internal_source_skill_key() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<6>(
+              stream, this_._internal_source_skill_key(), target);
     }
   }
 
@@ -2316,7 +2355,7 @@ PROTOBUF_NOINLINE void SkillDamageNtf::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
     // int64 target_object_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (this_._internal_target_object_id() != 0) {
@@ -2336,10 +2375,24 @@ PROTOBUF_NOINLINE void SkillDamageNtf::Clear() {
         total_size += 2;
       }
     }
-    // float remaining_hp = 4;
+    // int64 attacker_object_id = 5;
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (this_._internal_attacker_object_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_attacker_object_id());
+      }
+    }
+    // float remaining_hp = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
       if (::absl::bit_cast<::uint32_t>(this_._internal_remaining_hp()) != 0) {
         total_size += 5;
+      }
+    }
+    // int32 source_skill_key = 6;
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (this_._internal_source_skill_key() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_source_skill_key());
       }
     }
   }
@@ -2361,7 +2414,7 @@ void SkillDamageNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (from._internal_target_object_id() != 0) {
         _this->_impl_.target_object_id_ = from._impl_.target_object_id_;
@@ -2378,8 +2431,18 @@ void SkillDamageNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (from._internal_attacker_object_id() != 0) {
+        _this->_impl_.attacker_object_id_ = from._impl_.attacker_object_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
       if (::absl::bit_cast<::uint32_t>(from._internal_remaining_hp()) != 0) {
         _this->_impl_.remaining_hp_ = from._impl_.remaining_hp_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (from._internal_source_skill_key() != 0) {
+        _this->_impl_.source_skill_key_ = from._impl_.source_skill_key_;
       }
     }
   }
@@ -2401,8 +2464,8 @@ void SkillDamageNtf::InternalSwap(SkillDamageNtf* PROTOBUF_RESTRICT PROTOBUF_NON
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_.remaining_hp_)
-      + sizeof(SkillDamageNtf::_impl_.remaining_hp_)
+      PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_.source_skill_key_)
+      + sizeof(SkillDamageNtf::_impl_.source_skill_key_)
       - PROTOBUF_FIELD_OFFSET(SkillDamageNtf, _impl_.target_object_id_)>(
           reinterpret_cast<char*>(&_impl_.target_object_id_),
           reinterpret_cast<char*>(&other->_impl_.target_object_id_));

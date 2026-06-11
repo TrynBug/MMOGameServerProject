@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package GamePacket;
+
+// ──────────────────────────────────────────────
+// 능력(공격) 시전 패킷 — 몬스터/NPC/엘리트 공용
+// ──────────────────────────────────────────────
+//
+// 흐름:
+// - 서버 AI(FSM/BT)가 Monster::TryBeginCast → Windup 진입 시점에 AOI 브로드캐스트.
+// - 클라(원격): caster 를 origin/dir 로 회전 고정 → skill_key 로 GameData_Skill 조회 →
+//   CastAnim 윈드업 재생 + EffectShape/size 로 바닥 텔레그래프를 windup_ms 동안 채움.
+// - 실제 대미지/효과는 windup 종료 후 SkillDamageNtf / SkillCastNtf 로 도착(이 패킷엔 효과 없음).
+//
+// 좌표/방향: Unity 동일. Y=높이, X-Z 평면. dir 은 정규화 X-Z (dir_y 는 0 이라 생략).
+// 플레이어 SkillCastNtf 가 "발동(효과 재현)" 통보인 것과 달리, 이 패킷은 "시작(예고)" 통보다.
+
+message AbilityCastNtf {
+    int64  caster_object_id = 1;   // 시전자(몬스터/NPC) object_id
+    int32  skill_key        = 2;   // GameData_Skill.Key (능력 = 스킬 데이터)
+    int64  target_object_id = 3;   // 조준 대상(없으면 0). 추적형 예고/디버그용
+    float  origin_x         = 4;   // 예고 기준점(근접/투사체=시전자, 타겟장판=고정된 타겟 위치)
+    float  origin_y         = 5;   // 높이
+    float  origin_z         = 6;   // 평면 깊이축
+    float  dir_x            = 7;   // 고정된 시전 방향(정규화 X-Z)
+    float  dir_z            = 8;
+    int32  windup_ms        = 9;   // 선딜(=CastDelayMs). 클라 텔레그래프 채움 시간. 0=즉발(예고 없음)
+}

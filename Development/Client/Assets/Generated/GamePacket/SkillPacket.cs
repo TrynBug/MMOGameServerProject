@@ -39,9 +39,11 @@ namespace GamePacket {
             "bGxfa2V5GAIgASgFEhEKCWVmZmVjdF9pZBgDIAEoAxIQCghvcmlnaW5feBgE",
             "IAEoAhIQCghvcmlnaW5feRgFIAEoAhIQCghvcmlnaW5fehgGIAEoAhINCgVk",
             "aXJfeBgHIAEoAhINCgVkaXJfehgIIAEoAhIMCgRzZWVkGAkgASgNEhUKDW1v",
-            "dmVfZGlzdGFuY2UYCiABKAIiZgoOU2tpbGxEYW1hZ2VOdGYSGAoQdGFyZ2V0",
-            "X29iamVjdF9pZBgBIAEoAxIOCgZkYW1hZ2UYAiABKAISFAoMaXNfZHVwbGlj",
-            "YXRlGAMgASgIEhQKDHJlbWFpbmluZ19ocBgEIAEoAmIGcHJvdG8z"));
+            "dmVfZGlzdGFuY2UYCiABKAIinAEKDlNraWxsRGFtYWdlTnRmEhgKEHRhcmdl",
+            "dF9vYmplY3RfaWQYASABKAMSDgoGZGFtYWdlGAIgASgCEhQKDGlzX2R1cGxp",
+            "Y2F0ZRgDIAEoCBIUCgxyZW1haW5pbmdfaHAYBCABKAISGgoSYXR0YWNrZXJf",
+            "b2JqZWN0X2lkGAUgASgDEhgKEHNvdXJjZV9za2lsbF9rZXkYBiABKAViBnBy",
+            "b3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -49,7 +51,7 @@ namespace GamePacket {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillHitItem), global::GamePacket.SkillHitItem.Parser, new[]{ "EffectId", "ProjectileIndex", "TargetObjectId", "ExplodedAtMaxRange", "ExplodedOnTerrain", "HitX", "HitZ" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillProjectileHitReq), global::GamePacket.SkillProjectileHitReq.Parser, new[]{ "Hits" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillCastNtf), global::GamePacket.SkillCastNtf.Parser, new[]{ "CasterObjectId", "SkillKey", "EffectId", "OriginX", "OriginY", "OriginZ", "DirX", "DirZ", "Seed", "MoveDistance" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillDamageNtf), global::GamePacket.SkillDamageNtf.Parser, new[]{ "TargetObjectId", "Damage", "IsDuplicate", "RemainingHp" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SkillDamageNtf), global::GamePacket.SkillDamageNtf.Parser, new[]{ "TargetObjectId", "Damage", "IsDuplicate", "RemainingHp", "AttackerObjectId", "SourceSkillKey" }, null, null, null, null)
           }));
     }
     #endregion
@@ -1801,6 +1803,7 @@ namespace GamePacket {
   /// <summary>
   /// 대미지 통보 (서버 -> 클라 브로드캐스트)
   /// 클라는 대미지 숫자를 표시하고 대상의 HP 를 갱신한다.
+  /// (확장) 공격자/공격종류로 방향 피격표식·연출을 분기한다. proto3 라 필드 추가는 wire 호환.
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class SkillDamageNtf : pb::IMessage<SkillDamageNtf>
@@ -1841,6 +1844,8 @@ namespace GamePacket {
       damage_ = other.damage_;
       isDuplicate_ = other.isDuplicate_;
       remainingHp_ = other.remainingHp_;
+      attackerObjectId_ = other.attackerObjectId_;
+      sourceSkillKey_ = other.sourceSkillKey_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1907,6 +1912,36 @@ namespace GamePacket {
       }
     }
 
+    /// <summary>Field number for the "attacker_object_id" field.</summary>
+    public const int AttackerObjectIdFieldNumber = 5;
+    private long attackerObjectId_;
+    /// <summary>
+    /// 누가 때렸나 → 방향 피격표식/연출 (없으면 0)
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long AttackerObjectId {
+      get { return attackerObjectId_; }
+      set {
+        attackerObjectId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "source_skill_key" field.</summary>
+    public const int SourceSkillKeyFieldNumber = 6;
+    private int sourceSkillKey_;
+    /// <summary>
+    /// 어떤 공격인가 → hit VFX/사운드 분기 (GameData_Skill.Key. 없으면 0)
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int SourceSkillKey {
+      get { return sourceSkillKey_; }
+      set {
+        sourceSkillKey_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -1926,6 +1961,8 @@ namespace GamePacket {
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Damage, other.Damage)) return false;
       if (IsDuplicate != other.IsDuplicate) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(RemainingHp, other.RemainingHp)) return false;
+      if (AttackerObjectId != other.AttackerObjectId) return false;
+      if (SourceSkillKey != other.SourceSkillKey) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1937,6 +1974,8 @@ namespace GamePacket {
       if (Damage != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Damage);
       if (IsDuplicate != false) hash ^= IsDuplicate.GetHashCode();
       if (RemainingHp != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(RemainingHp);
+      if (AttackerObjectId != 0L) hash ^= AttackerObjectId.GetHashCode();
+      if (SourceSkillKey != 0) hash ^= SourceSkillKey.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1971,6 +2010,14 @@ namespace GamePacket {
         output.WriteRawTag(37);
         output.WriteFloat(RemainingHp);
       }
+      if (AttackerObjectId != 0L) {
+        output.WriteRawTag(40);
+        output.WriteInt64(AttackerObjectId);
+      }
+      if (SourceSkillKey != 0) {
+        output.WriteRawTag(48);
+        output.WriteInt32(SourceSkillKey);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1997,6 +2044,14 @@ namespace GamePacket {
         output.WriteRawTag(37);
         output.WriteFloat(RemainingHp);
       }
+      if (AttackerObjectId != 0L) {
+        output.WriteRawTag(40);
+        output.WriteInt64(AttackerObjectId);
+      }
+      if (SourceSkillKey != 0) {
+        output.WriteRawTag(48);
+        output.WriteInt32(SourceSkillKey);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -2018,6 +2073,12 @@ namespace GamePacket {
       }
       if (RemainingHp != 0F) {
         size += 1 + 4;
+      }
+      if (AttackerObjectId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(AttackerObjectId);
+      }
+      if (SourceSkillKey != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(SourceSkillKey);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -2042,6 +2103,12 @@ namespace GamePacket {
       }
       if (other.RemainingHp != 0F) {
         RemainingHp = other.RemainingHp;
+      }
+      if (other.AttackerObjectId != 0L) {
+        AttackerObjectId = other.AttackerObjectId;
+      }
+      if (other.SourceSkillKey != 0) {
+        SourceSkillKey = other.SourceSkillKey;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -2078,6 +2145,14 @@ namespace GamePacket {
             RemainingHp = input.ReadFloat();
             break;
           }
+          case 40: {
+            AttackerObjectId = input.ReadInt64();
+            break;
+          }
+          case 48: {
+            SourceSkillKey = input.ReadInt32();
+            break;
+          }
         }
       }
     #endif
@@ -2111,6 +2186,14 @@ namespace GamePacket {
           }
           case 37: {
             RemainingHp = input.ReadFloat();
+            break;
+          }
+          case 40: {
+            AttackerObjectId = input.ReadInt64();
+            break;
+          }
+          case 48: {
+            SourceSkillKey = input.ReadInt32();
             break;
           }
         }

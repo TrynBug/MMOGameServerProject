@@ -75,9 +75,12 @@ message SkillCastNtf {
 
 // 대미지 통보 (서버 -> 클라 브로드캐스트)
 // 클라는 대미지 숫자를 표시하고 대상의 HP 를 갱신한다.
+// (확장) 공격자/공격종류로 방향 피격표식·연출을 분기한다. proto3 라 필드 추가는 wire 호환.
 message SkillDamageNtf {
-    int64 target_object_id = 1;
-    float damage           = 2;   // 적용된 대미지 (배율 적용 후 최종값)
-    bool  is_duplicate     = 3;   // 중복타격으로 감소된 대미지인지 (표시용 flag)
-    float remaining_hp     = 4;   // 대미지 적용 후 대상의 남은 HP
+    int64 target_object_id   = 1;
+    float damage             = 2;   // 적용된 대미지 (배율 적용 후 최종값)
+    bool  is_duplicate       = 3;   // 중복타격으로 감소된 대미지인지 (표시용 flag)
+    float remaining_hp       = 4;   // 대미지 적용 후 대상의 남은 HP
+    int64 attacker_object_id = 5;   // 누가 때렸나 → 방향 피격표식/연출 (없으면 0)
+    int32 source_skill_key   = 6;   // 어떤 공격인가 → hit VFX/사운드 분기 (GameData_Skill.Key. 없으면 0)
 }

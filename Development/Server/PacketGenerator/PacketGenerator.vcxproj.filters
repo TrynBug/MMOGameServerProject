@@ -129,6 +129,9 @@
     <ClInclude Include="Generated\GamePacket\cheat_packet.pb.h">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClInclude>
+    <ClInclude Include="Generated\GamePacket\ability_packet.pb.h">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ProtoSerializer.cpp">
@@ -215,6 +218,9 @@
     <ClCompile Include="Generated\GamePacket\cheat_packet.pb.cc">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClCompile>
+    <ClCompile Include="Generated\GamePacket\ability_packet.pb.cc">
+      <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="generate_proto.bat">
@@ -287,6 +293,9 @@
       <Filter>소스 파일\Proto\GamePacket</Filter>
     </None>
     <None Include="Proto\GamePacket\cheat_packet.proto">
+      <Filter>소스 파일\Proto\GamePacket</Filter>
+    </None>
+    <None Include="Proto\GamePacket\ability_packet.proto">
       <Filter>소스 파일\Proto\GamePacket</Filter>
     </None>
   </ItemGroup>

@@ -493,7 +493,9 @@ class SkillDamageNtf final : public ::google::protobuf::Message
     kTargetObjectIdFieldNumber = 1,
     kDamageFieldNumber = 2,
     kIsDuplicateFieldNumber = 3,
+    kAttackerObjectIdFieldNumber = 5,
     kRemainingHpFieldNumber = 4,
+    kSourceSkillKeyFieldNumber = 6,
   };
   // int64 target_object_id = 1;
   void clear_target_object_id() ;
@@ -525,6 +527,16 @@ class SkillDamageNtf final : public ::google::protobuf::Message
   void _internal_set_is_duplicate(bool value);
 
   public:
+  // int64 attacker_object_id = 5;
+  void clear_attacker_object_id() ;
+  ::int64_t attacker_object_id() const;
+  void set_attacker_object_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_attacker_object_id() const;
+  void _internal_set_attacker_object_id(::int64_t value);
+
+  public:
   // float remaining_hp = 4;
   void clear_remaining_hp() ;
   float remaining_hp() const;
@@ -535,11 +547,21 @@ class SkillDamageNtf final : public ::google::protobuf::Message
   void _internal_set_remaining_hp(float value);
 
   public:
+  // int32 source_skill_key = 6;
+  void clear_source_skill_key() ;
+  ::int32_t source_skill_key() const;
+  void set_source_skill_key(::int32_t value);
+
+  private:
+  ::int32_t _internal_source_skill_key() const;
+  void _internal_set_source_skill_key(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:GamePacket.SkillDamageNtf)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 4,
+  static const ::google::protobuf::internal::TcParseTable<3, 6,
                                    0, 0,
                                    2>
       _table_;
@@ -564,7 +586,9 @@ class SkillDamageNtf final : public ::google::protobuf::Message
     ::int64_t target_object_id_;
     float damage_;
     bool is_duplicate_;
+    ::int64_t attacker_object_id_;
     float remaining_hp_;
+    ::int32_t source_skill_key_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -2209,7 +2233,7 @@ inline void SkillDamageNtf::clear_remaining_hp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.remaining_hp_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000008U);
+                  0x00000010U);
 }
 inline float SkillDamageNtf::remaining_hp() const {
   // @@protoc_insertion_point(field_get:GamePacket.SkillDamageNtf.remaining_hp)
@@ -2217,7 +2241,7 @@ inline float SkillDamageNtf::remaining_hp() const {
 }
 inline void SkillDamageNtf::set_remaining_hp(float value) {
   _internal_set_remaining_hp(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
   // @@protoc_insertion_point(field_set:GamePacket.SkillDamageNtf.remaining_hp)
 }
 inline float SkillDamageNtf::_internal_remaining_hp() const {
@@ -2227,6 +2251,56 @@ inline float SkillDamageNtf::_internal_remaining_hp() const {
 inline void SkillDamageNtf::_internal_set_remaining_hp(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.remaining_hp_ = value;
+}
+
+// int64 attacker_object_id = 5;
+inline void SkillDamageNtf::clear_attacker_object_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.attacker_object_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline ::int64_t SkillDamageNtf::attacker_object_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.SkillDamageNtf.attacker_object_id)
+  return _internal_attacker_object_id();
+}
+inline void SkillDamageNtf::set_attacker_object_id(::int64_t value) {
+  _internal_set_attacker_object_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:GamePacket.SkillDamageNtf.attacker_object_id)
+}
+inline ::int64_t SkillDamageNtf::_internal_attacker_object_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.attacker_object_id_;
+}
+inline void SkillDamageNtf::_internal_set_attacker_object_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.attacker_object_id_ = value;
+}
+
+// int32 source_skill_key = 6;
+inline void SkillDamageNtf::clear_source_skill_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.source_skill_key_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000020U);
+}
+inline ::int32_t SkillDamageNtf::source_skill_key() const {
+  // @@protoc_insertion_point(field_get:GamePacket.SkillDamageNtf.source_skill_key)
+  return _internal_source_skill_key();
+}
+inline void SkillDamageNtf::set_source_skill_key(::int32_t value) {
+  _internal_set_source_skill_key(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
+  // @@protoc_insertion_point(field_set:GamePacket.SkillDamageNtf.source_skill_key)
+}
+inline ::int32_t SkillDamageNtf::_internal_source_skill_key() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.source_skill_key_;
+}
+inline void SkillDamageNtf::_internal_set_source_skill_key(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.source_skill_key_ = value;
 }
 
 #ifdef __GNUC__
