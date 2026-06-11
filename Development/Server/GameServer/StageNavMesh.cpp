@@ -5,6 +5,8 @@
 #include "DetourNavMesh.h"
 #include "DetourNavMeshQuery.h"
 
+#include <random>
+
 StageNavMesh::StageNavMesh(const dtNavMesh* pNavMesh)
     : m_pNavMesh(pNavMesh)
 {
@@ -146,5 +148,46 @@ bool StageNavMesh::SamplePosition(float x, float y, float z,
     outX = nearestPt[0];
     outY = nearestPt[1];
     outZ = nearestPt[2];
+    return true;
+}
+
+namespace
+{
+    // findRandomPointAroundCircle 용 [0,1) 난수. 컨텐츠 스레드별 독립 RNG (rand() 전역상태 경쟁 회피).
+    float navFrand()
+    {
+        static thread_local std::mt19937 rng(std::random_device{}());
+        static thread_local std::uniform_real_distribution<float> dist(0.f, 1.f);
+        return dist(rng);
+    }
+}
+
+bool StageNavMesh::SampleRandomPoint(float cx, float cy, float cz, float radius,
+                                     float& outX, float& outY, float& outZ) const
+{
+    if (!IsReady())
+        return false;
+
+    // 1) center 근처의 시작 폴리곤을 찾는다 (Y 불확실 → Y 검색 반경 넉넉히).
+    const float center[3]      = { cx, cy, cz };
+    const float searchXZ       = (radius > 2.f) ? radius : 2.f;
+    const float halfExtents[3] = { searchXZ, 1000.f, searchXZ };
+
+    dtPolyRef startRef   = 0;
+    float     startPt[3] = { 0, 0, 0 };
+    dtStatus  status = m_pNavQuery->findNearestPoly(center, halfExtents, m_pNavFilter, &startRef, startPt);
+    if (dtStatusFailed(status) || startRef == 0)
+        return false;
+
+    // 2) 시작 폴리곤 기준 반경 내 walkable 랜덤 좌표.
+    dtPolyRef randomRef   = 0;
+    float     randomPt[3] = { 0, 0, 0 };
+    status = m_pNavQuery->findRandomPointAroundCircle(startRef, startPt, radius, m_pNavFilter, navFrand, &randomRef, randomPt);
+    if (dtStatusFailed(status) || randomRef == 0)
+        return false;
+
+    outX = randomPt[0];
+    outY = randomPt[1];
+    outZ = randomPt[2];
     return true;
 }

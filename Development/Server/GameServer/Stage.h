@@ -19,6 +19,10 @@ class dtNavMesh;
 // 헤더에서는 전방선언만, 멤버는 unique_ptr 로 보관 (Stage 소멸자가 .cpp 에 있어야 함).
 class StageNavMesh;
 
+// 배치데이터(에디터 export) 로더 + 몬스터 스폰 관리자. StageNavMesh 와 동일하게 unique_ptr 보관.
+class StageLayout;
+class MonsterSpawner;
+
 // Character forward declaration (StageMsg_UserEnter 등에서 사용).
 class Character;
 using CharacterPtr = std::shared_ptr<Character>;
@@ -114,6 +118,9 @@ using StageMessage = std::variant<
 // 빠른 타입별 조회를 위해 통합 맵 + 타입별 맵을 함께 유지한다.
 class Stage : public serverbase::Contents
 {
+    // MonsterSpawner 가 SpawnMonster/DespawnMonster(protected) 를 직접 호출한다 (Stage 가 소유, 단일 스레드).
+    friend class MonsterSpawner;
+
 public:
     // 명시적 grid 값으로 생성.
     Stage(int64 stageId, int32 stageDataKey, EStageType stageType,
@@ -177,6 +184,11 @@ public:
     bool SampleNavMeshPosition(float x, float y, float z,
                                float halfExtentX, float halfExtentY, float halfExtentZ,
                                float& outX, float& outY, float& outZ) const;
+
+    // (cx,cy,cz) 중심 반경 radius 안의 walkable 랜덤 좌표를 찾는다 (밀도존 스폰 배치용). StageNavMesh 에 위임.
+    // NavMesh 미설정/미준비거나 반경 내 폴리곤이 없으면 false (out* 미변경).
+    bool SampleRandomNavPoint(float cx, float cy, float cz, float radius,
+                              float& outX, float& outY, float& outZ) const;
 
     // 외부 스레드에서 시스템 메시지를 push (thread-safe).
     // 다음 OnUpdate에서 처리된다.
@@ -474,6 +486,12 @@ private:
     // 길찾기 로직 + dtNavMeshQuery/dtQueryFilter lifetime 은 StageNavMesh 가 담당.
     // Stage 가 nullptr 이면 NavMesh 미설정 상태 (길찾기 비활성화).
     std::unique_ptr<StageNavMesh> m_pStageNavMesh;
+
+    // ── 배치데이터 + 몬스터 스폰 ───────────────────────────────
+    // 레이아웃(에디터 export) + 스포너 관리자. OnStart 에서 로드, OnUpdate 에서 tick.
+    // 완전타입 의존 회피 위해 unique_ptr 보관 (소멸자는 Stage.cpp).
+    std::unique_ptr<StageLayout>    m_pLayout;
+    std::unique_ptr<MonsterSpawner> m_pSpawner;
 
     // ── 스킬 효과 ──────────────────────────────
     // 진행 중인 범위 효과(AreaEffect)들. updateSkillEffects 에서 tick + 만료 sweep.

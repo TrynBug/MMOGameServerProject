@@ -87,6 +87,12 @@
     <ClCompile Include="StageNavMesh.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="StageLayout.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MonsterSpawner.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="MonsterFsmAI.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -106,6 +112,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="CheatManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MonsterCombatComponent.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -173,6 +182,12 @@
     <ClInclude Include="StageNavMesh.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
+    <ClInclude Include="StageLayout.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MonsterSpawner.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
     <ClInclude Include="IMonsterAI.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
@@ -205,6 +220,9 @@
     </ClInclude>
     <ClInclude Include="CheatManager.h">
       <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MonsterCombatComponent.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

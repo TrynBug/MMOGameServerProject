@@ -5,6 +5,8 @@
 #include "MonsterFsmAI.h"
 #include "GameServer.h"
 #include "StageNavMesh.h"
+#include "StageLayout.h"
+#include "MonsterSpawner.h"
 #include "Skill/EffectShape.h"
 #include "Skill/EffectParams.h"
 #include "Skill/AreaEffect.h"
@@ -186,6 +188,14 @@ bool Stage::SampleNavMeshPosition(float x, float y, float z,
     return m_pStageNavMesh->SamplePosition(x, y, z, halfExtentX, halfExtentY, halfExtentZ, outX, outY, outZ);
 }
 
+bool Stage::SampleRandomNavPoint(float cx, float cy, float cz, float radius,
+                                 float& outX, float& outY, float& outZ) const
+{
+    if (!m_pStageNavMesh)
+        return false;
+    return m_pStageNavMesh->SampleRandomPoint(cx, cy, cz, radius, outX, outY, outZ);
+}
+
 StageObject* Stage::FindObject(int64 objectId)
 {
     auto it = m_objects.find(objectId);
@@ -346,6 +356,13 @@ Sector* Stage::GetSectorByPos(float posX, float posZ)
 void Stage::OnStart()
 {
     LOG_WRITE(LogLevel::Info, std::format("stageId={} stageType={}", m_stageId, static_cast<int>(m_stageType)));
+
+    // 배치데이터(에디터 export) 로드 + 몬스터 스포너 초기화. 실제 채움은 OnUpdate 의 Update 에서.
+    m_pLayout  = std::make_unique<StageLayout>();
+    m_pLayout->Load(GetStageDataKey());
+
+    m_pSpawner = std::make_unique<MonsterSpawner>();
+    m_pSpawner->Load(*this, *m_pLayout);
 }
 
 void Stage::OnUpdate(int64 deltaMs)
@@ -365,6 +382,10 @@ void Stage::OnUpdate(int64 deltaMs)
 
     // 4. 몬스터 AI(FSM) 시뮬레이션 + sector 갱신
     updateMonsters(deltaMs);
+
+    // 4.5 몬스터 스포너 (밀도 유지/리스폰/활성화). 데이터 구동 스폰.
+    if (m_pSpawner)
+        m_pSpawner->Update(deltaMs);
 
     // 5. 파생 클래스 로직
     OnStageUpdate(deltaMs);

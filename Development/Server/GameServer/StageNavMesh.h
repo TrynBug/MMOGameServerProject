@@ -59,6 +59,11 @@ public:
     // 리턴: NavMesh 준비됨 + 박스 안에 폴리곤 있으면 true(out* 채움), 아니면 false(out* 미변경).
     bool SamplePosition(float x, float y, float z, float halfExtentX, float halfExtentY, float halfExtentZ, float& outX, float& outY, float& outZ) const;
 
+    // (cx,cy,cz) 중심 반경 radius 안의 walkable 랜덤 좌표를 찾는다 (밀도존 스폰 배치용).
+    // dtNavMeshQuery::findRandomPointAroundCircle 래핑.
+    // 리턴: NavMesh 준비됨 + 시작 폴리곤 + 랜덤 폴리곤 찾으면 true(out* 채움), 아니면 false(out* 미변경).
+    bool SampleRandomPoint(float cx, float cy, float cz, float radius, float& outX, float& outY, float& outZ) const;
+
 private:
     const dtNavMesh* m_pNavMesh  = nullptr;   // 참조만 (소유 안 함)
     dtNavMeshQuery*  m_pNavQuery = nullptr;   // 소유

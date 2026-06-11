@@ -72,7 +72,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;Logger.lib;DBConnector.lib;Detour.lib;Recast.lib;$(spdlogLibsDebug);$(protobufLibsDebug);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;Logger.lib;DBConnector.lib;Detour.lib;Recast.lib;lua.lib;$(spdlogLibsDebug);$(protobufLibsDebug);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -92,7 +92,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;Logger.lib;DBConnector.lib;Detour.lib;Recast.lib;$(spdlogLibs);$(protobufLibs);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;Logger.lib;DBConnector.lib;Detour.lib;Recast.lib;lua.lib;$(spdlogLibs);$(protobufLibs);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <!-- 헤더 파일 -->
@@ -105,6 +105,8 @@
     <ClInclude Include="GameServerDefine.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="StageNavMesh.h" />
+    <ClInclude Include="StageLayout.h" />
+    <ClInclude Include="MonsterSpawner.h" />
     <ClInclude Include="StageObject.h" />
     <ClInclude Include="ActorObject.h" />
     <ClInclude Include="BuffInstance.h" />
@@ -142,6 +144,8 @@
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StageSkill.cpp" />
     <ClCompile Include="StageNavMesh.cpp" />
+    <ClCompile Include="StageLayout.cpp" />
+    <ClCompile Include="MonsterSpawner.cpp" />
     <ClCompile Include="StageObject.cpp" />
     <ClCompile Include="ActorObject.cpp" />
     <ClCompile Include="BuffComponent.cpp" />
