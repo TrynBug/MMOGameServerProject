@@ -6,6 +6,7 @@
 #include "Skill/EffectParams.h"
 #include "Skill/AreaEffect.h"
 #include "Skill/ProjectileGroup.h"
+#include "Skill/MonsterProjectile.h"
 #include "Skill/SkillBake.h"
 #include "Generated/GameData_Skill.h"
 
@@ -118,10 +119,77 @@ void Stage::updateSkillEffects(int64 deltaMs)
         else
             ++iter;
     }
+
+    // 서버 권위 몬스터 투사체: 매 tick 전진+충돌 판정. 만료(적중/최대사거리)된 것은 swap-and-pop 제거.
+    for (size_t i = 0; i < m_monsterProjectiles.size(); )
+    {
+        if (m_monsterProjectiles[i]->Update(this, deltaMs))
+        {
+            m_monsterProjectiles[i] = std::move(m_monsterProjectiles.back());
+            m_monsterProjectiles.pop_back();
+        }
+        else
+        {
+            ++i;
+        }
+    }
+}
+
+// 서버 권위 몬스터 투사체를 월드에 등록한다 (매 tick updateSkillEffects 에서 전진+충돌).
+void Stage::SpawnMonsterProjectile(const EffectParams& params)
+{
+    m_monsterProjectiles.push_back(std::make_unique<MonsterProjectile>(params));
+}
+
+// 몬스터 투사체 1 tick: Linear 전진 → hit 반경 안 적 검사 → 적중/최대사거리 시 (폭발 후) 소멸.
+// 정의를 여기 두는 이유: Stage 완전타입 + 효과 파이프라인(QueryEnemiesInShape/ApplyEffectDamage/bake)이 필요.
+bool MonsterProjectile::Update(Stage* pStage, int64 deltaMs)
+{
+    if (m_expired)
+        return true;
+
+    m_elapsedMs += deltaMs;
+    const Vector3 pos = CalcEffectPosition(m_params, m_params.dir, m_elapsedMs);
+
+    // 충돌: hit 반경(shape.radius, 0 이면 작은 기본값) 안의 적(진영 규칙: Monster→User) 검사.
+    EffectShape hit;
+    hit.type   = ESkillEffectShape::Circle;
+    hit.radius = (m_params.shape.radius > 0.0f) ? m_params.shape.radius : 0.5f;
+
+    std::vector<StageObject*> enemies;
+    pStage->QueryEnemiesInShape(m_params.casterObjectType, pos, hit, enemies);
+
+    const bool hitSomething = !enemies.empty();
+    if (hitSomething)
+    {
+        // 1투사체 1적: 가장 먼저 잡힌 적에게 직격. (QueryEnemiesInShape 가 사망 대상은 이미 제외.)
+        pStage->ApplyEffectDamage(*static_cast<ActorObject*>(enemies[0]),
+                                  m_params.damageAmount, m_params.casterObjectId, /*isDuplicate*/ false, m_params.skillKey);
+    }
+
+    const bool reachedMax = (pos - m_params.origin).LengthSqXZ() >= m_params.maxRange * m_params.maxRange;
+
+    if (hitSomething || reachedMax)
+    {
+        // 폭발 연계 (OnHitSkillKey): 적중/최대사거리 위치에 폭발 스킬을 발동한다 (적중은 서버 판정).
+        if (m_params.onHitSkillKey != 0)
+        {
+            if (const GameData_Skill* pExplosion = GameDataTable_Skill::FindData(m_params.onHitSkillKey))
+            {
+                EffectParams explosionParams = BakeSkillEffectParams(
+                    *pExplosion, m_params.casterObjectType, m_params.casterObjectId, pos, m_params.dir, m_params.seed);
+                pStage->SpawnSkillAreaEffect(explosionParams);
+            }
+        }
+        m_expired = true;
+        return true;
+    }
+
+    return false;
 }
 
 // 효과(스킬)에 의한 대미지를 target 의 현재 HP 에서 감소시키고, 주변 AOI 유저들에게 SkillDamageNtf 를 broadcast 한다.
-void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerObjectId, bool isDuplicate)
+void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerObjectId, bool isDuplicate, int32 sourceSkillKey)
 {
     // 이미 사망한 대상에는 추가 대미지를 적용하지 않는다 (사망 후 같은 틱의 잔여 투사체 등 차단).
     if (target.IsDead())
@@ -140,7 +208,9 @@ void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerOb
     ForEachUserInAoi(target.GetCurSectorX(), target.GetCurSectorZ(),
         [&](int64 userId)
         {
-            server.GetPacketSender().SendSkillDamageNtf(userId, targetObjectId, damage, isDuplicate, remainingHp);
+            // killerObjectId = 공격자. 클라가 방향 피격표식/연출 분기에 attacker/sourceSkillKey 사용.
+            server.GetPacketSender().SendSkillDamageNtf(userId, targetObjectId, damage, isDuplicate, remainingHp,
+                                                        killerObjectId, sourceSkillKey);
         });
 
     // 새로 사망했으면 별도 사망 통보 (대미지 외 사인도 있을 수 있어 SkillDamageNtf 와 분리).
@@ -265,5 +335,20 @@ void Stage::BroadcastSkillCastNtf(const ActorObject& caster, int32 skillKey, int
         {
             server.GetPacketSender().SendSkillCastNtf(userId, casterObjectId, skillKey, effectId,
                                       origin.x, origin.y, origin.z, dir.x, dir.z, seed, moveDistance);
+        });
+}
+
+// 능력 시전 "시작" 통보를 시전자 주변 AOI 유저들에게 broadcast. (몬스터/NPC/엘리트 공용)
+void Stage::BroadcastAbilityCastNtf(const ActorObject& caster, int32 skillKey, int64 targetObjectId,
+                                    const Vector3& origin, const Vector3& dir, int32 windupMs)
+{
+    GameServer& server = GameServer::Instance();
+
+    const int64 casterObjectId = caster.GetObjectId();
+    ForEachUserInAoi(caster.GetCurSectorX(), caster.GetCurSectorZ(),
+        [&](int64 userId)
+        {
+            server.GetPacketSender().SendAbilityCastNtf(userId, casterObjectId, skillKey, targetObjectId,
+                                      origin.x, origin.y, origin.z, dir.x, dir.z, windupMs);
         });
 }

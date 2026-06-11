@@ -155,15 +155,35 @@ void PacketSender::SendBuffRemoveNtf(int64 userId, int64 objectId, int32 buffKey
     SendToUser(userId, Common::GAME_PACKET_ID_BUFF_REMOVE_NTF, ntf);
 }
 
-void PacketSender::SendSkillDamageNtf(int64 userId, int64 targetObjectId, double damage, bool isDuplicate, double remainingHp)
+void PacketSender::SendSkillDamageNtf(int64 userId, int64 targetObjectId, double damage, bool isDuplicate, double remainingHp,
+                                      int64 attackerObjectId, int32 sourceSkillKey)
 {
     GamePacket::SkillDamageNtf ntf;
     ntf.set_target_object_id(targetObjectId);
     ntf.set_damage(static_cast<float>(damage));
     ntf.set_is_duplicate(isDuplicate);
     ntf.set_remaining_hp(static_cast<float>(remainingHp));
+    ntf.set_attacker_object_id(attackerObjectId);
+    ntf.set_source_skill_key(sourceSkillKey);
 
     SendToUser(userId, Common::GAME_PACKET_ID_SKILL_DAMAGE_NTF, ntf);
+}
+
+void PacketSender::SendAbilityCastNtf(int64 userId, int64 casterObjectId, int32 skillKey, int64 targetObjectId,
+                                      float originX, float originY, float originZ, float dirX, float dirZ, int32 windupMs)
+{
+    GamePacket::AbilityCastNtf ntf;
+    ntf.set_caster_object_id(casterObjectId);
+    ntf.set_skill_key(skillKey);
+    ntf.set_target_object_id(targetObjectId);
+    ntf.set_origin_x(originX);
+    ntf.set_origin_y(originY);
+    ntf.set_origin_z(originZ);
+    ntf.set_dir_x(dirX);
+    ntf.set_dir_z(dirZ);
+    ntf.set_windup_ms(windupMs);
+
+    SendToUser(userId, Common::GAME_PACKET_ID_ABILITY_CAST_NTF, ntf);
 }
 
 void PacketSender::SendSkillCastNtf(int64 userId, int64 casterObjectId, int32 skillKey, int64 effectId,

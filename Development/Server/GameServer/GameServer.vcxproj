@@ -116,6 +116,7 @@
     <ClInclude Include="User.h" />
     <ClInclude Include="Character.h" />
     <ClInclude Include="Monster.h" />
+    <ClInclude Include="MonsterCombatComponent.h" />
     <ClInclude Include="WaypointMover.h" />
     <ClInclude Include="StatComponentBase.h" />
     <ClInclude Include="CharacterStatComponent.h" />
@@ -151,6 +152,7 @@
     <ClCompile Include="User.cpp" />
     <ClCompile Include="Character.cpp" />
     <ClCompile Include="Monster.cpp" />
+    <ClCompile Include="MonsterCombatComponent.cpp" />
     <ClCompile Include="WaypointMover.cpp" />
     <ClCompile Include="StatComponentBase.cpp" />
     <ClCompile Include="CharacterStatComponent.cpp" />

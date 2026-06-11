@@ -81,12 +81,19 @@ public:
     void SendBuffRemoveNtf(int64 userId, int64 objectId, int32 buffKey);
 
     // 스킬 대미지 알림 전송 (SkillDamageNtf). Stage 가 대미지 적용 시점에 대상 주변 AOI 유저들에게 broadcast.
-    void SendSkillDamageNtf(int64 userId, int64 targetObjectId, double damage, bool isDuplicate, double remainingHp);
+    // attackerObjectId/sourceSkillKey 는 클라 방향 피격표식·연출 분기용 (없으면 0).
+    void SendSkillDamageNtf(int64 userId, int64 targetObjectId, double damage, bool isDuplicate, double remainingHp,
+                            int64 attackerObjectId = 0, int32 sourceSkillKey = 0);
 
     // 스킬 시전 알림 전송 (SkillCastNtf). Stage 가 시전자 주변 AOI 유저들에게 broadcast. 클라 비주얼 재현용.
     void SendSkillCastNtf(int64 userId, int64 casterObjectId, int32 skillKey, int64 effectId,
                           float originX, float originY, float originZ, float dirX, float dirZ, uint32 seed,
                           float moveDistance);
+
+    // 능력 시전 "시작" 알림 전송 (AbilityCastNtf). Stage 가 시전자 주변 AOI 유저들에게 broadcast.
+    // 클라가 윈드업 모션 + 텔레그래프를 재생한다 (몬스터/NPC/엘리트 공용).
+    void SendAbilityCastNtf(int64 userId, int64 casterObjectId, int32 skillKey, int64 targetObjectId,
+                            float originX, float originY, float originZ, float dirX, float dirZ, int32 windupMs);
 
     // 오브젝트 사망 알림 전송 (ObjectDeathNtf). Stage 가 사망한 대상 주변 AOI 유저들에게 broadcast. 클라 사망 연출용.
     void SendObjectDeathNtf(int64 userId, int64 objectId, int64 killerObjectId);

@@ -11,8 +11,8 @@
 // ─────────────────────────────────────────────────────────────
 //   Idle    : 대기. 주변에서 어그로 타겟을 탐색.
 //   Chase   : 타겟 추격(근접) / 사거리 유지 이동(원거리, 카이팅).
-//   Attack  : 사거리 안에서 사용할 스킬을 선택.
-//   Casting : 스킬 선딜(시전 시간) 동안 잠금. 완료 시 스킬 발동.
+//   Attack  : 사거리 안에서 사용할 스킬을 선택 → Monster::TryBeginCast 로 시전 시작.
+//             윈드업/발동/회복 잠금은 Monster(몸체)가 처리하므로 FSM 에 Casting 상태가 없다.
 //   Return  : 리쉬 초과/타겟 소실 시 스폰지점으로 복귀.
 //   Dead    : 사망. 실제 디스폰/리스폰은 Stage 가 처리.
 enum class EMonsterState
@@ -20,7 +20,6 @@ enum class EMonsterState
     Idle,
     Chase,
     Attack,
-    Casting,
     Return,
     Dead,
 };
@@ -47,12 +46,9 @@ private:
     void updateIdle(Monster& monster, int64 deltaMs);
     void updateChase(Monster& monster, int64 deltaMs);
     void updateAttack(Monster& monster, int64 deltaMs);
-    void updateCasting(Monster& monster, int64 deltaMs);
     void updateReturn(Monster& monster, int64 deltaMs);
     void enterDead(Monster& monster);
 
 private:
-    EMonsterState m_state             = EMonsterState::Idle;
-    int32         m_castingSkillIndex = -1;   // Casting 중인 스킬 인덱스 (-1 = 없음)
-    int64         m_castRemainingMs   = 0;    // 남은 선딜 (ms)
+    EMonsterState m_state = EMonsterState::Idle;
 };

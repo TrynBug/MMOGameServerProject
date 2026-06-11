@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "Monster.h"
 #include "Stage.h"
-#include "Sector.h"
+
+#include "Generated/GameData_Skill.h"     // Initialize 의 스킬 스펙 로드(GameDataTable_Skill::FindData)
+#include "Generated/GameData_MonsterAI.h" // AI 프로파일(aggro/leash/desired/engaged)
 
 #include <cmath>
 
@@ -16,6 +18,10 @@ namespace
 
     // 사망 후 시체 유지 시간(ms). 이 시간이 지나면 디스폰한다.
     constexpr int64 k_corpseDurationMs = 30000;
+
+    // 이동속도 기본값(유닛/초). 종류 데이터에 MoveSpd 스탯이 없을 때의 fallback.
+    // TODO(데이터): GameData_Monster 의 MoveSpd* 스탯으로 시드되면 이 fallback 은 불필요.
+    constexpr double k_defaultMoveSpeed = 4.0;
 }
 
 bool Monster::Initialize(int64 objectId, const GameData_Monster* pMonsterData)
@@ -35,31 +41,48 @@ bool Monster::Initialize(int64 objectId, const GameData_Monster* pMonsterData)
     if (!applyBaseStats())
         return false;
 
-    // 현재 HP/MP 를 최대치로 초기화 (스폰 시 풀피).
-    FillHp();
-    FillMp();
+    // AI 프로파일 로드 (GameData_MonsterAI, AIKey 참조). 없으면 멤버 기본값 유지.
+    if (const GameData_MonsterAI* pAI = GameDataTable_MonsterAI::FindData(m_pMonsterData->AIKey))
+    {
+        m_aggroRange              = pAI->AggroRange;
+        m_leashRange              = pAI->LeashRange;
+        m_desiredRange            = pAI->DesiredRange;
+        m_engagedUpdateIntervalMs = pAI->EngagedUpdateIntervalMs;
+        // AIType 은 두뇌 선택용(현재 Fsm 만 구현, SpawnMonster 가 주입). BehaviorTree 는 나중.
+    }
 
-    // TODO(데이터): 스킬을 GameData_Monster 에서 읽어 채운다. 지금은 뼈대 검증용 하드코딩.
-    //   기본 공격(선딜 없음, 짧은 쿨다운) + 시전 스킬(선딜 800ms, 긴 쿨다운) 예시.
-    // v1 대미지: 종류 데이터의 Str(물리) 총합을 기준으로. 데이터에 Str 이 없으면 fallback.
-    const double baseAtk = GetStatTotal(EStatGroup::Str);
-    const double atk = (baseAtk > 0.0) ? baseAtk : 5.0;
+    // 이동속도: 종류 데이터의 MoveSpd 스탯에서 온다. 데이터에 없으면(Total<=0) 기본값으로 시드.
+    // (MoveTo 는 GetStatTotal(EStatGroup::MoveSpd) 를 읽으므로, 0 이면 움직이지 못한다.)
+    if (GetStatTotal(EStatGroup::MoveSpd) <= 0.0)
+        m_statComponent.ApplyStat(EStat::MoveSpdAdd, k_defaultMoveSpeed);
 
-    MonsterSkill basicAttack;
-    basicAttack.skillId    = 1;
-    basicAttack.range      = m_attackRange;
-    basicAttack.cooldownMs = 1500;
-    basicAttack.castTimeMs = 0;
-    basicAttack.damage     = atk;
-    m_skills.push_back(basicAttack);
+    // 스킬을 GameData_Monster 의 SkillKey# 에서 읽어 채운다 (우선순위 = 순서).
+    // 정적 스펙(사거리/쿨다운/윈드업/후딜/대미지계수)은 GameData_Skill 에서, 런타임 쿨다운만 MonsterSkill 이 보유.
+    // v1 대미지 = DamageCoeff × 공격력(StrTotal, 없으면 1).
+    const double atkPower = (GetStatTotal(EStatGroup::Str) > 0.0) ? GetStatTotal(EStatGroup::Str) : 1.0;
+    const int32 skillKeyCount = m_pMonsterData->GetSkillKeyCount();
+    for (int32 i = 0; i < skillKeyCount; ++i)
+    {
+        const int32 skillKey = m_pMonsterData->GetSkillKey(i);
+        if (skillKey == 0)
+            continue;   // 빈 슬롯
 
-    MonsterSkill castSkill;
-    castSkill.skillId    = 2;
-    castSkill.range      = m_attackRange;
-    castSkill.cooldownMs = 5000;
-    castSkill.castTimeMs = 800;
-    castSkill.damage     = atk * 2.0;   // 시전 스킬은 더 큰 대미지.
-    m_skills.push_back(castSkill);
+        const GameData_Skill* pSkill = GameDataTable_Skill::FindData(skillKey);
+        if (pSkill == nullptr)
+        {
+            LOG_WRITE(LogLevel::Error, std::format("monster skill data not found. objectId={} skillKey={}", GetObjectId(), skillKey));
+            continue;   // 데이터 누락 시 해당 ability 만 건너뛴다 (초기화 자체는 계속).
+        }
+
+        MonsterSkill skill;
+        skill.skillId      = skillKey;               // = GameData_Skill.Key (AbilityCastNtf/SkillDamageNtf 에 실음)
+        skill.range        = pSkill->MaxRange;
+        skill.cooldownMs   = pSkill->CooldownMs;
+        skill.castTimeMs   = pSkill->CastDelayMs;
+        skill.actionLockMs = pSkill->ActionLockMs;
+        skill.damage       = pSkill->DamageCoeff * atkPower;
+        m_combat.AddSkill(skill);
+    }
 
     return true;
 }
@@ -108,81 +131,16 @@ void Monster::Update(int64 deltaMs)
         m_spawnPointSet = true;
     }
 
-    // 스킬 쿨다운 진행 (행위 주체 상태이므로 두뇌 종류와 무관하게 여기서 처리).
-    tickSkillCooldowns(deltaMs);
+    // 전투 컴포넌트 진행(쿨다운 + 캐스트 페이즈) — integrate. 두뇌보다 먼저.
+    // (윈드업 만료 시 여기서 효과가 발동되고, 두뇌는 GetCombat().IsCastBusy 동안 행동을 미룬다.)
+    m_combat.Update(deltaMs);
 
     // 의사결정/행동은 두뇌에 위임.
     if (m_ai)
         m_ai->Update(*this, deltaMs);
 }
 
-void Monster::tickSkillCooldowns(int64 deltaMs)
-{
-    for (MonsterSkill& skill : m_skills)
-    {
-        if (skill.remainingCooldownMs > 0)
-        {
-            skill.remainingCooldownMs -= deltaMs;
-            if (skill.remainingCooldownMs < 0)
-                skill.remainingCooldownMs = 0;
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────
-// 공유 행동 레이어 — 타겟
-// ─────────────────────────────────────────────────────────────
-void Monster::AcquireTarget()
-{
-    Stage* pStage = GetStage();
-    if (pStage == nullptr)
-        return;
-
-    // 어그로 범위를 덮는 sector 범위 계산 (최소 1).
-    const double sectorSize = pStage->GetSectorSize();
-    int32 sectorRange = 1;
-    if (sectorSize > 0.0)
-    {
-        sectorRange = static_cast<int32>(std::ceil(m_aggroRange / sectorSize));
-        if (sectorRange < 1)
-            sectorRange = 1;
-    }
-
-    const float myX = GetPosX();
-    const float myZ = GetPosZ();
-
-    int64 bestId = 0;
-    float bestSq = m_aggroRange * m_aggroRange;   // 이 값 이하인 유저만 후보.
-
-    pStage->ForEachAdjacentSector(GetCurSectorX(), GetCurSectorZ(), sectorRange,
-        [&](Sector* pSector)
-        {
-            for (const auto& pair : pSector->GetUsers())
-            {
-                const StageObject* pUser = pair.second;
-                const float udx = pUser->GetPosX() - myX;
-                const float udz = pUser->GetPosZ() - myZ;
-                const float dsq = udx * udx + udz * udz;
-                if (dsq <= bestSq)
-                {
-                    bestSq = dsq;
-                    bestId = pUser->GetObjectId();
-                }
-            }
-        });
-
-    m_targetObjectId = bestId;
-}
-
-StageObject* Monster::GetTarget() const
-{
-    if (m_targetObjectId == 0)
-        return nullptr;
-    Stage* pStage = GetStage();
-    if (pStage == nullptr)
-        return nullptr;
-    return pStage->FindObject(m_targetObjectId);   // 사라졌으면 nullptr.
-}
+// (타겟 탐색/해소(AcquireTarget/GetTarget/HasTarget/ClearTarget)는 MonsterCombatComponent 로 통합.)
 
 void Monster::FaceTarget(const StageObject* pTarget)
 {
@@ -196,53 +154,8 @@ void Monster::FaceTarget(const StageObject* pTarget)
     SetYaw(std::atan2(dx, dz) * k_radToDeg);
 }
 
-// ─────────────────────────────────────────────────────────────
-// 공유 행동 레이어 — 스킬
-// ─────────────────────────────────────────────────────────────
-int32 Monster::SelectReadySkill(float distToTarget) const
-{
-    // 목록 순서 = 우선순위. 쿨다운 끝 + 사거리 내 첫 스킬을 고른다.
-    // (가장 가벼운 형태의 상황별 선택. 가중치/조건이 필요하면 여기서 확장.)
-    for (size_t i = 0; i < m_skills.size(); ++i)
-    {
-        const MonsterSkill& skill = m_skills[i];
-        if (skill.remainingCooldownMs <= 0 && distToTarget <= skill.range)
-            return static_cast<int32>(i);
-    }
-    return -1;
-}
-
-void Monster::StartSkillCooldown(int32 index)
-{
-    if (index < 0 || index >= static_cast<int32>(m_skills.size()))
-        return;
-    m_skills[index].remainingCooldownMs = m_skills[index].cooldownMs;
-}
-
-void Monster::ExecuteSkill(int32 index, StageObject* pTarget)
-{
-    if (index < 0 || index >= static_cast<int32>(m_skills.size()))
-        return;
-    if (pTarget == nullptr)
-        return;
-
-    Stage* pStage = GetStage();
-    if (pStage == nullptr)
-        return;
-
-    // 대상은 유저(캐릭터)여야 한다 (진영 규칙: 몬스터 → 유저). 사망한 대상은 제외.
-    if (pTarget->GetObjectType() != EObjectType::User)
-        return;
-    ActorObject* pTargetActor = static_cast<ActorObject*>(pTarget);
-    if (pTargetActor->IsDead())
-        return;
-
-    const MonsterSkill& skill = m_skills[index];
-
-    // 서버 권위 대미지 적용 + 주변 AOI 에 SkillDamageNtf(숫자/HP), 사망 시 ObjectDeathNtf 브로드캐스트.
-    // (v1: 단일 대상 즉시 판정. 방어력 감산/원거리 투사체/공격 모션 통보는 후속.)
-    pStage->ApplyEffectDamage(*pTargetActor, skill.damage, GetObjectId());
-}
+// (스킬 선택 + 캐스트 생애주기(TryBeginCast/advanceCast/onCastStrike/CancelCast) + 효과 발동은
+//  MonsterCombatComponent 로 이동했다. Monster::Update 가 m_combat.Update 로 진행, 두뇌는 GetCombat() 으로 호출.)
 
 // ─────────────────────────────────────────────────────────────
 // 공유 행동 레이어 — 이동
@@ -261,7 +174,8 @@ void Monster::MoveTo(float destX, float destY, float destZ, int64 deltaMs)
         m_hasPathTarget = true;
     }
 
-    m_mover.Update(*this, deltaMs, m_moveSpeed);
+    // 이동속도는 MoveSpdTotal 스탯에서 (버프/디버프 자동 반영).
+    m_mover.Update(*this, deltaMs, static_cast<float>(GetStatTotal(EStatGroup::MoveSpd)));
 
     if (Stage* pStage = GetStage())
         pStage->UpdateObjectSector(this);

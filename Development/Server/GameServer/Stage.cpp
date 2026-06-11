@@ -9,6 +9,7 @@
 #include "Skill/EffectParams.h"
 #include "Skill/AreaEffect.h"
 #include "Skill/ProjectileGroup.h"
+#include "Skill/MonsterProjectile.h"
 #include "Skill/SkillBake.h"
 #include "Generated/GameData_Skill.h"
 #include "Generated/GameData_StageStartPosition.h"

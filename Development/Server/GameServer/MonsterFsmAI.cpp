@@ -42,12 +42,15 @@ void MonsterFsmAI::Update(Monster& monster, int64 deltaMs)
         return;
     }
 
+    // 캐스트(윈드업/회복) 중에는 새 의사결정을 하지 않는다. 진행은 Monster::advanceCast 가 담당(커밋 유지).
+    if (monster.GetCombat().IsCastBusy())
+        return;
+
     switch (m_state)
     {
     case EMonsterState::Idle:    updateIdle(monster, deltaMs);    break;
     case EMonsterState::Chase:   updateChase(monster, deltaMs);   break;
     case EMonsterState::Attack:  updateAttack(monster, deltaMs);  break;
-    case EMonsterState::Casting: updateCasting(monster, deltaMs); break;
     case EMonsterState::Return:  updateReturn(monster, deltaMs);  break;
     case EMonsterState::Dead:    break;
     }
@@ -56,14 +59,17 @@ void MonsterFsmAI::Update(Monster& monster, int64 deltaMs)
 void MonsterFsmAI::updateIdle(Monster& monster, int64 /*deltaMs*/)
 {
     // 주변 어그로 타겟 탐색. 찾으면 추격으로 전환.
-    monster.AcquireTarget();
-    if (monster.HasTarget())
+    monster.GetCombat().AcquireTarget();
+    if (monster.GetCombat().HasTarget())
+    {
+        monster.SetEngagedTick();   // 관여 시작 → 업데이트 주기 승격(engaged, 예 100ms).
         m_state = EMonsterState::Chase;
+    }
 }
 
 void MonsterFsmAI::updateChase(Monster& monster, int64 deltaMs)
 {
-    StageObject* pTarget = monster.GetTarget();
+    StageObject* pTarget = monster.GetCombat().GetTarget();
     if (pTarget == nullptr)
     {
         monster.StopMoving();
@@ -86,8 +92,8 @@ void MonsterFsmAI::updateChase(Monster& monster, int64 deltaMs)
 
     // 공격 가능 위치 판정 (근접/원거리 구분).
     const bool inAttackBand = monster.IsRanged()
-        ? (dist <= monster.GetAttackRange() && dist >= monster.GetDesiredRange() * k_rangedBandRatio)
-        : (dist <= monster.GetAttackRange());
+        ? (dist <= monster.GetCombat().GetMaxAttackRange() && dist >= monster.GetDesiredRange() * k_rangedBandRatio)
+        : (dist <= monster.GetCombat().GetMaxAttackRange());
     if (inAttackBand)
     {
         monster.StopMoving();
@@ -125,7 +131,7 @@ void MonsterFsmAI::updateChase(Monster& monster, int64 deltaMs)
 
     const float slotAngle = (k_twoPi / ringSlotCount) * ringSlotIndex
         + (angleJitter - 0.5f) * 2.0f * k_attackSlotAngleJitter;
-    const float slotRadius = monster.GetAttackRange() * ringRatio
+    const float slotRadius = monster.GetCombat().GetMaxAttackRange() * ringRatio
         + (radiusJitter - 0.5f) * 2.0f * k_attackSlotRadiusJitter;
 
     float destX = pTarget->GetPosX() + std::cos(slotAngle) * slotRadius;
@@ -155,7 +161,7 @@ void MonsterFsmAI::updateChase(Monster& monster, int64 deltaMs)
 
 void MonsterFsmAI::updateAttack(Monster& monster, int64 /*deltaMs*/)
 {
-    StageObject* pTarget = monster.GetTarget();
+    StageObject* pTarget = monster.GetCombat().GetTarget();
     if (pTarget == nullptr)
     {
         m_state = EMonsterState::Return;
@@ -170,7 +176,7 @@ void MonsterFsmAI::updateAttack(Monster& monster, int64 /*deltaMs*/)
     // 히스테리시스: Chase→Attack 진입은 attackRange 이내(updateChase)지만, Attack→Chase 이탈은
     // attackRange + 여유(k_attackLeaveMargin) 초과일 때만. 경계에서 두 상태를 오가며 생기는
     // 미세 떨림(재배치 반복)을 막는다.
-    bool needReposition = (dist > monster.GetAttackRange() + k_attackLeaveMargin);
+    bool needReposition = (dist > monster.GetCombat().GetMaxAttackRange() + k_attackLeaveMargin);
     if (monster.IsRanged() && dist < monster.GetDesiredRange() * k_rangedBandRatio)
         needReposition = true;
 
@@ -182,35 +188,12 @@ void MonsterFsmAI::updateAttack(Monster& monster, int64 /*deltaMs*/)
 
     monster.FaceTarget(pTarget);
 
-    // 사용 가능한 스킬 선택 → 시전(Casting) 진입.
-    const int32 idx = monster.SelectReadySkill(dist);
+    // 사용 가능한 스킬 선택 → 시전 시작. 윈드업/발동/회복/통보는 Monster(몸체)가 단일 지점에서 처리한다.
+    // 시전이 시작되면 다음 tick 부터 monster.IsCastBusy() 가 true 라 Update 가 일찍 반환(커밋 유지).
+    const int32 idx = monster.GetCombat().SelectReadySkill(dist);
     if (idx >= 0)
-    {
-        m_castingSkillIndex = idx;
-        m_castRemainingMs   = monster.GetSkill(idx).castTimeMs;
-        m_state = EMonsterState::Casting;
-        // TODO(통신): 스킬 시전 시작을 주변 유저에게 통보(스킬 Ntf)하여 클라가 모션 재생.
-    }
+        (void)monster.GetCombat().TryBeginCast(idx, pTarget);
     // 쓸 스킬이 없으면 Attack 유지 (쿨다운 회복 대기).
-}
-
-void MonsterFsmAI::updateCasting(Monster& monster, int64 deltaMs)
-{
-    // 선딜 진행. 이 동안 이동/다른 행동 없이 잠금.
-    m_castRemainingMs -= deltaMs;
-    if (m_castRemainingMs > 0)
-        return;
-
-    // 시전 완료 → 스킬 발동 + 쿨다운 시작.
-    StageObject* pTarget = monster.GetTarget();
-    if (m_castingSkillIndex >= 0)
-    {
-        monster.ExecuteSkill(m_castingSkillIndex, pTarget);
-        monster.StartSkillCooldown(m_castingSkillIndex);
-    }
-    m_castingSkillIndex = -1;
-
-    m_state = (pTarget == nullptr) ? EMonsterState::Return : EMonsterState::Attack;
 }
 
 void MonsterFsmAI::updateReturn(Monster& monster, int64 deltaMs)
@@ -222,7 +205,8 @@ void MonsterFsmAI::updateReturn(Monster& monster, int64 deltaMs)
         monster.SnapToSpawn();
         monster.FillHp();
         monster.FillMp();
-        monster.ClearTarget();
+        monster.GetCombat().ClearTarget();
+        monster.SetIdleTick();   // 비관여 복귀 → 업데이트 주기 강등(idle, 500ms).
         m_state = EMonsterState::Idle;
         return;
     }
@@ -234,8 +218,8 @@ void MonsterFsmAI::updateReturn(Monster& monster, int64 deltaMs)
 void MonsterFsmAI::enterDead(Monster& monster)
 {
     monster.StopMoving();
-    monster.ClearTarget();
-    m_castingSkillIndex = -1;
+    monster.GetCombat().ClearTarget();
+    monster.GetCombat().CancelCast();   // 시전 중이었다면 취소(환불 없음).
     m_state = EMonsterState::Dead;
     // TODO(전투/스폰): 사망 처리(드롭/경험치/디스폰/리스폰)는 Stage 가 updateMonsters 루프 밖에서 수행.
 }

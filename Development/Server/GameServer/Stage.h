@@ -35,6 +35,7 @@ struct EffectShape;
 struct EffectParams;
 class AreaEffect;
 class ProjectileGroup;
+class MonsterProjectile;
 
 
 // StageGridParams: Stage 공간 정보 + NavMesh 매핑.
@@ -197,6 +198,11 @@ public:
                                     const Vector3& origin, const Vector3& dir, uint32 seed,
                                     float moveDistance);
 
+    // 능력 시전 "시작" 통보(AbilityCastNtf)를 시전자 주변 AOI 에 broadcast 한다. Monster::TryBeginCast 가 Windup 진입 시 호출.
+    // 클라는 caster 를 origin/dir 로 회전 고정 + skill_key 로 윈드업 모션/텔레그래프를 windupMs 동안 재생한다. (몬스터/NPC/엘리트 공용)
+    void      BroadcastAbilityCastNtf(const ActorObject& caster, int32 skillKey, int64 targetObjectId,
+                                      const Vector3& origin, const Vector3& dir, int32 windupMs);
+
     // objectId 로 StageObject 를 조회한다 (통합 컨테이너 m_objects 기준). 없으면 nullptr.
     // 비소유 raw 포인터 — 컨텐츠 스레드에서 해당 tick 내 사용 (몬스터 AI 의 타겟 해소 등).
     StageObject* FindObject(int64 objectId);
@@ -212,9 +218,14 @@ public:
     // (투사체=ProjectileGroup 은 별도 경로. 이 함수는 Area 효과 전용.)
     void SpawnSkillAreaEffect(const EffectParams& params);
 
+    // 서버 권위 몬스터 투사체 하나를 월드에 시작시킨다 (매 tick 서버가 전진+충돌 판정).
+    // Monster::ExecuteSkill 이 ContactHit 능력 발동 시 호출. (플레이어 투사체와 달리 클라 hit 보고 없음.)
+    void SpawnMonsterProjectile(const EffectParams& params);
+
     // 효과(스킬)에 의한 대미지를 target 에 적용하고, 주변 AOI 에 SkillDamageNtf 를 broadcast 한다. AreaEffect 등이 호출.
     // isDuplicate: 중복타격으로 감소된 대미지인지 (표시용 flag). 사망 처리(디스폰)는 후속.
-    void ApplyEffectDamage(ActorObject& target, double damage, int64 killerObjectId, bool isDuplicate = false);
+    // sourceSkillKey: 대미지를 낸 능력의 GameData_Skill.Key (클라 피격 연출 분기용. 없으면 0).
+    void ApplyEffectDamage(ActorObject& target, double damage, int64 killerObjectId, bool isDuplicate = false, int32 sourceSkillKey = 0);
 
     // 오브젝트 사망을 주변 AOI 유저들에게 통보(ObjectDeathNtf). 클라 사망 연출용.
     // 디스폰(시체 제거)은 corpse 시간 경과 후 DespawnMonster(ObjectVisibilityNtf despawn)로 별도 처리된다.
@@ -472,6 +483,9 @@ private:
     // 진행 중인 투사체 그룹들 (effectId → 그룹). 클라 hit 보고가 effectId 로 그룹을 지목한다.
     // updateSkillEffects 에서 만료된 그룹을 제거한다.
     std::unordered_map<int64, std::unique_ptr<ProjectileGroup>> m_skillProjectileGroups;
+
+    // 진행 중인 서버 권위 몬스터 투사체들. updateSkillEffects 에서 매 tick 전진+충돌 + 만료 sweep.
+    std::vector<std::unique_ptr<MonsterProjectile>> m_monsterProjectiles;
 };
 
 using StagePtr  = std::shared_ptr<Stage>;

@@ -5,28 +5,13 @@
 #include "BasicStatComponent.h"
 #include "IMonsterAI.h"
 #include "WaypointMover.h"
+#include "GameServerDefine.h"   // k_monsterUpdateIntervalMs (idle 업데이트 주기)
 
 #include "Enum/GameEnum_Stat.h"
 #include "Generated/GameData_Monster.h"
+#include "MonsterCombatComponent.h"      // 전투(타겟팅 + 스킬 + 캐스트) 컴포넌트
 
-#include <vector>
 #include <memory>
-
-// ─────────────────────────────────────────────────────────────
-// MonsterSkill : 몬스터가 사용하는 스킬 1개의 런타임 정보
-// ─────────────────────────────────────────────────────────────
-// 스킬은 "행위 주체(Monster)"가 보유하는 데이터이다 (두뇌 종류와 무관).
-// TODO(데이터): 현재는 Monster 생성자에서 하드코딩한다.
-//   GameData_Monster 에 스킬 컬럼(스킬ID/사거리/쿨다운/선딜)이 추가되면 거기서 읽어 채운다.
-struct MonsterSkill
-{
-    int32  skillId             = 0;      // 스킬 식별자 (향후 스킬 데이터 키)
-    float  range               = 0.0f;   // 사용 가능 사거리 (이 거리 이내 타겟)
-    int64  cooldownMs          = 0;      // 쿨다운 (ms)
-    int64  castTimeMs          = 0;      // 선딜/시전 시간 (ms). 0 이면 즉시 발동.
-    int64  remainingCooldownMs = 0;      // 남은 쿨다운 (ms, 런타임)
-    double damage              = 0.0;    // 적중 시 대미지 (서버 권위). v1: 종류 데이터의 Str 기반.
-};
 
 // ─────────────────────────────────────────────────────────────
 // Monster 클래스 (행위 주체 + 공유 행동 레이어)
@@ -100,14 +85,6 @@ public:
     // 넘으면 true 를 리턴한다(=디스폰 타이밍). Stage::updateMonsters 가 사망한 몬스터에게만 매 tick 호출한다.
     bool AdvanceCorpseTimer(int64 deltaMs);
 
-    // ── 타겟 ──
-    // 주변 sector 에서 어그로 범위 내 가장 가까운 유저를 찾아 현재 타겟으로 설정 (없으면 해제).
-    void         AcquireTarget();
-    // 현재 타겟을 Stage 에서 해소. 사라졌거나 없으면 nullptr.
-    StageObject* GetTarget() const;
-    bool         HasTarget() const { return m_targetObjectId != 0; }
-    void         ClearTarget() { m_targetObjectId = 0; }
-
     // ── 회전 ──
     void FaceTarget(const StageObject* pTarget);
 
@@ -115,8 +92,16 @@ public:
     bool  IsRanged()       const { return m_desiredRange > 0.0f; }
     float GetAggroRange()  const { return m_aggroRange; }
     float GetLeashRange()  const { return m_leashRange; }
-    float GetAttackRange() const { return m_attackRange; }
     float GetDesiredRange()const { return m_desiredRange; }
+
+    // ── 전투(스킬 + 캐스트). 두뇌는 이 컴포넌트를 통해 스킬 선택/시전/사거리 조회한다. ──
+    MonsterCombatComponent&       GetCombat()       { return m_combat; }
+    const MonsterCombatComponent& GetCombat() const { return m_combat; }
+
+    // ── 적응형 업데이트 주기 (두뇌가 상태 전이 시 호출) ──
+    // 관여(Chase/전투) 시 engaged(데이터, 예 100ms)로, 비관여(Idle) 시 idle(500ms)로.
+    void SetEngagedTick() { SetUpdateIntervalMs(m_engagedUpdateIntervalMs); }
+    void SetIdleTick()    { SetUpdateIntervalMs(k_monsterUpdateIntervalMs); }
 
     // ── 스폰지점 / 복귀 ──
     float GetSpawnX() const { return m_spawnX; }
@@ -131,23 +116,10 @@ public:
     // 스폰지점으로 위치를 즉시 스냅 + sector 갱신.
     void SnapToSpawn();
 
-    // ── 스킬 ──
-    int32               GetSkillCount() const { return static_cast<int32>(m_skills.size()); }
-    const MonsterSkill& GetSkill(int32 index) const { return m_skills[index]; }
-    // 사용 가능한(쿨다운 끝 + 사거리 내) 스킬 중 우선순위(목록 순서) 최상의 인덱스. 없으면 -1.
-    int32 SelectReadySkill(float distToTarget) const;
-    // 해당 스킬의 쿨다운을 시작(remaining = cooldown).
-    void  StartSkillCooldown(int32 index);
-    // 스킬 발동. TODO(전투): 데미지/투사체 등 실제 효과 (현재 스텁).
-    void  ExecuteSkill(int32 index, StageObject* pTarget);
-
 private:
     // Initialize 에서 호출. 종류 데이터의 기본스탯을 m_statComponent 에 적용한다.
     // 종류 데이터가 없으면 false (초기화 실패로 이어짐).
     bool applyBaseStats();
-
-    // 매 tick housekeeping: 스킬 쿨다운 진행.
-    void tickSkillCooldowns(int64 deltaMs);
 
 private:
     // 몬스터 종류 데이터 (소유권 없음, 게임데이터는 로드 후 불변).
@@ -159,9 +131,6 @@ private:
     // 교체 가능한 두뇌. SpawnMonster 등이 SetAI 로 주입.
     std::unique_ptr<IMonsterAI> m_ai;
 
-    // 현재 타겟 (objectId). 0 = 없음. 매 tick GetTarget 으로 해소(despawn 안전).
-    int64 m_targetObjectId = 0;
-
     // 스폰 지점(복귀 기준점). 첫 Update 에서 현재 위치로 1회 캡처.
     bool  m_spawnPointSet = false;
     float m_spawnX = 0.0f;
@@ -171,17 +140,15 @@ private:
     // 사망 후 시체 유지 경과시간(ms). MarkDead 이후 Stage::updateMonsters 가 매 tick 누적한다.
     int64 m_corpseElapsedMs = 0;
 
-    // ── AI 설정값 ─────────────────────────────────────────────
-    // TODO(데이터): GameData_Monster 컬럼으로 이동. 지금은 근접 몹 기준 기본값 하드코딩.
-    //   원거리 몹: m_desiredRange > 0 + m_attackRange 를 길게. (데이터로 세팅)
+    // ── AI 설정값 (Initialize 에서 GameData_MonsterAI(AIKey) 로 로드. 데이터 없으면 아래 기본값.) ──
     float m_aggroRange   = 10.0f;   // 이 거리 내 유저 감지 → 추격
     float m_leashRange   = 20.0f;   // 스폰에서 이 거리 초과 → 복귀
-    float m_attackRange  = 2.0f;    // 이 거리 내 → 공격 가능 (근접 기본값)
-    float m_desiredRange = 0.0f;    // 원거리 유지 거리. 0 이면 근접.
-    float m_moveSpeed    = 4.0f;    // 유닛/초. TODO(데이터/스탯): 종류 데이터의 이동속도로.
+    float m_desiredRange = 0.0f;    // 원거리 유지 거리(카이팅). 0 이면 근접. (공격 사거리는 GetMaxAttackRange)
+    int64 m_engagedUpdateIntervalMs = 100;   // 타겟 관여 중 업데이트 주기(ms). idle 은 k_monsterUpdateIntervalMs.
+    // 이동속도는 MoveSpdTotal 스탯에서 읽는다(GetStatTotal(EStatGroup::MoveSpd)). 버프 자동 반영.
 
-    // ── 스킬 ──────────────────────────────────────────────────
-    std::vector<MonsterSkill> m_skills;
+    // ── 전투(스킬 + 캐스트 생애주기) 컴포넌트. owner = this. ──
+    MonsterCombatComponent m_combat{this};
 
     // ── 이동 ──────────────────────────────
     // 경로(waypoint) 기반 이동은 공유 컴포넌트가 담당(Character 와 동일 로직).
