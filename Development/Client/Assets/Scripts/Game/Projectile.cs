@@ -23,6 +23,9 @@ namespace Client.Game
         private int m_onHitSkillKey;           // OnHit 폭발 스킬 키 (0=없음). 종료 위치에 폭발 비주얼 표시.
         private bool m_ignoreMonsters;         // true = 몬스터 충돌 무시(몬스터 시전 투사체. 비주얼 전용 + 시전자 자가충돌 방지).
 
+        // 몬스터 시전 투사체가 "플레이어에 닿았다"고 보는 X-Z 반경. 플레이어엔 콜라이더가 없어 거리로 판정(비주얼 종료용).
+        private const float k_monsterHitRadius = 0.7f;
+
         // SkillSystem 이 생성 직후 1회 호출.
         // ignoreMonsters: 몬스터가 쏜 투사체(타겟=플레이어)면 true. OnTriggerEnter 가 몬스터(시전자 포함)에 반응하지 않게 한다.
         public void Launch(SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int onHitSkillKey, bool ignoreMonsters = false)
@@ -50,8 +53,24 @@ namespace Client.Game
             transform.position += m_dir * step;
             m_traveled += step;
 
+            // 몬스터 시전 투사체: 근처 플레이어에 닿으면 그 자리에서 비주얼 종료(서버가 대미지 권위, 몬스터는 무시).
+            if (m_ignoreMonsters && StageManager.Instance != null
+                && StageManager.Instance.FindCharacterInRadiusXZ(transform.position, k_monsterHitRadius) != null)
+            {
+                endVisualAt(transform.position);
+                return;
+            }
+
             if (m_traveled >= m_maxRange)
                 endAtMaxRange();
+        }
+
+        // 비주얼 종료(그룹 보고 없음). 몬스터 투사체가 플레이어에 닿았을 때.
+        private void endVisualAt(Vector3 p)
+        {
+            m_ended = true;
+            SkillSystem.Instance?.SpawnHitExplosionVisual(m_onHitSkillKey, p, m_dir);
+            Destroy(gameObject);
         }
 
         private void OnTriggerEnter(Collider other)

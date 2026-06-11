@@ -711,6 +711,18 @@ namespace Client.Game
             Vector3 head = target.transform.position + Vector3.up * 1.5f;
             DamageText.Spawn(head, ntf.Damage, ntf.IsDuplicate);
 
+            // 본인(LocalPlayer)이 맞았으면 피격 피드백: 공격자 방향 표식 + 카메라 셰이크(타격감).
+            // attacker_object_id/source_skill_key 는 서버가 채워 보낸다(SkillDamageNtf 확장).
+            if (target == StageManager.Instance.LocalPlayer && ntf.AttackerObjectId != 0)
+            {
+                ActorObject attacker = StageManager.Instance.FindActor(ntf.AttackerObjectId);
+                if (attacker != null)
+                {
+                    HitDirectionIndicator.Spawn(target.transform.position, attacker.transform.position);
+                    Camera.main?.GetComponent<CameraFollow>()?.AddShake(0.15f);
+                }
+            }
+
             // 사망 연출/디스폰은 이 패킷이 아니라 ObjectDeathNtf(사망) + ObjectVisibilityNtf의 Despawn(제거)이 처리한다.
         }
     }

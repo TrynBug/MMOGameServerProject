@@ -120,6 +120,31 @@ namespace Client.Game
                 desiredPos,
                 ref m_velocity,
                 m_smoothTime);
+
+            applyShake();   // 피격 등으로 등록된 흔들림을 최종 위치에 더한다 (타격감).
+        }
+
+        // ── 카메라 흔들림 (타격감) ──
+        // 피격 시 SkillSystem 이 AddShake 로 등록. LateUpdate 최종 위치에 화면평면(카메라 로컬 X/Y) 랜덤 오프셋을 더하고 시간 감쇠.
+        [SerializeField] private float m_shakeDecay = 1.0f;   // 초당 감쇠량(유닛/초)
+        private float m_shakeMagnitude;
+
+        public void AddShake(float magnitude)
+        {
+            if (magnitude > m_shakeMagnitude)   // 더 강한 흔들림으로만 갱신(겹쳐도 과하지 않게)
+                m_shakeMagnitude = magnitude;
+        }
+
+        private void applyShake()
+        {
+            if (m_shakeMagnitude <= 0.0001f)
+            {
+                m_shakeMagnitude = 0f;
+                return;
+            }
+            Vector2 r = Random.insideUnitCircle * m_shakeMagnitude;
+            transform.position += transform.right * r.x + transform.up * r.y;   // 카메라 로컬 평면 = 화면 흔들림
+            m_shakeMagnitude = Mathf.MoveTowards(m_shakeMagnitude, 0f, m_shakeDecay * Time.deltaTime);
         }
 
         // 휠 델타를 읽어 목표 distance 를 갱신.

@@ -177,6 +177,27 @@ namespace Client.Game
         // 현재 스폰된 몬스터 목록 (오토타게팅용 읽기 전용 뷰).
         public IReadOnlyDictionary<long, MonsterObject> Monsters => m_monsters;
 
+        // pos 의 X-Z 반경 내 가장 가까운 캐릭터(플레이어)를 찾는다. 없으면 null.
+        // 몬스터 투사체가 "플레이어에 닿으면" 비주얼을 종료하는 데 쓴다(플레이어엔 콜라이더가 없어 거리로 판정).
+        public PlayerCharacter FindCharacterInRadiusXZ(Vector3 pos, float radius)
+        {
+            float bestSq = radius * radius;
+            PlayerCharacter best = null;
+            foreach (PlayerCharacter c in m_characters.Values)
+            {
+                if (c == null)
+                    continue;
+                Vector3 d = c.transform.position - pos;
+                float dsq = d.x * d.x + d.z * d.z;   // X-Z 평면 거리
+                if (dsq <= bestSq)
+                {
+                    bestSq = dsq;
+                    best = c;
+                }
+            }
+            return best;
+        }
+
         // ─── 패킷 핸들러 ────────────────────────────────────────────────
 
         // 스테이지 이동 요청 결과. 성공이면 로딩 시작 (2단계 입장).
