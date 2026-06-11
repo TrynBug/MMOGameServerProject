@@ -104,8 +104,8 @@ if (...)
   something...
 }
 
-# 한줄이 길때 줄바꿈은 웬만하면 하지 않는다.
-아래 정도의 길이는 그냥 한줄로 적음
+# 한줄이 150줄 이하일 때는 줄바꿈을 하지 않는다.
+150자 정도의 길이는 줄바꿈을 하지 않고 그냥 한줄로 적는다.
 bool RegistryServer::validateRegistration(int32 serverId, ServerType type, const std::string& ip, uint16 port, std::string& outErrorMsg)
 
 # 여러개의 변수나 함수를 선언할 때, 중간에 공백을 넣어서 줄을 맞추지 않아도 됨
@@ -120,4 +120,17 @@ int32 serverId = req.server_id();
 ServerType type = static_cast<ServerType>(req.server_type());
 std::string ip = req.ip();
 uint16 port = static_cast<uint16>(req.port());
+
+
+# 1개의 코드블록이 끝나고, 그 뒤로 코드가 계속 이어진다면 코드블록이 끝난 다음 줄바꿈을 추가한다.
+예시)
+std::vector<int32> toRemove;
+for (const auto& [buffKey, buff] : m_buffs)
+{
+	if (buff.pData->RemoveOnStageChange)
+		toRemove.push_back(buffKey);
+}
+// for문이 끝났고 아래에서 코드가 계속 이어지기 때문에 여기에 줄바꿈을 추가한다.
+for (int32 key : toRemove)
+	RemoveBuff(key);
 
