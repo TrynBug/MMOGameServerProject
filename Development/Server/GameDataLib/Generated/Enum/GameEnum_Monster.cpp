@@ -49,3 +49,24 @@ std::string MonsterAITypeToString(EMonsterAIType v)
     }
 }
 
+ESpawnActivation StringToSpawnActivation(const std::string& v)
+{
+    if (v == "None") return ESpawnActivation::None;
+    if (v == "Always") return ESpawnActivation::Always;
+    if (v == "PlayerProximity") return ESpawnActivation::PlayerProximity;
+    if (v == "Manual") return ESpawnActivation::Manual;
+    return ESpawnActivation::None;
+}
+
+std::string SpawnActivationToString(ESpawnActivation v)
+{
+    switch (v)
+    {
+    case ESpawnActivation::None: return "None";
+    case ESpawnActivation::Always: return "Always";
+    case ESpawnActivation::PlayerProximity: return "PlayerProximity";
+    case ESpawnActivation::Manual: return "Manual";
+    default: return "None";
+    }
+}
+

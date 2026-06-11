@@ -32,3 +32,16 @@ enum class EMonsterAIType : int
 EMonsterAIType StringToMonsterAIType(const std::string& v);
 std::string MonsterAITypeToString(EMonsterAIType v);
 
+/* 스폰 활성화 모드 */
+enum class ESpawnActivation : int
+{
+    None                 = 0,
+    Always               = 1,  // 항상    // 항상 밀도 유지
+    PlayerProximity      = 2,  // 근접 활성    // 플레이어 근접 시만
+    Manual               = 3,  // 수동    // Stage 스크립트에서 ActivateSpawner 등으로 활성화시킴
+    Max                 
+};
+
+ESpawnActivation StringToSpawnActivation(const std::string& v);
+std::string SpawnActivationToString(ESpawnActivation v);
+

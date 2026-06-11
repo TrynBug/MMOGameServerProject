@@ -24,4 +24,14 @@ namespace GameData
         BehaviourTree        = 2,  // 행동 트리    // 엘리트 몬스터, 보스용
         Max                 
     }
+
+    /* 스폰 활성화 모드 */
+    public enum ESpawnActivation
+    {
+        None                 = 0,
+        Always               = 1,  // 항상    // 항상 밀도 유지
+        PlayerProximity      = 2,  // 근접 활성    // 플레이어 근접 시만
+        Manual               = 3,  // 수동    // Stage 스크립트에서 ActivateSpawner 등으로 활성화시킴
+        Max                 
+    }
 }

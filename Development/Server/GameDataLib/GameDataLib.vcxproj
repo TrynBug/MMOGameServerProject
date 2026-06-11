@@ -155,6 +155,8 @@
     <ClCompile Include="Generated\GameDataBase_Monster.cpp" />
     <ClCompile Include="Generated\GameDataBase_MonsterAI.cpp" />
     <ClCompile Include="Generated\GameDataBase_Skill.cpp" />
+    <ClCompile Include="Generated\GameDataBase_Spawner.cpp" />
+    <ClCompile Include="Generated\GameDataBase_SpawnGroup.cpp" />
     <ClCompile Include="Generated\GameDataBase_Stage.cpp" />
     <ClCompile Include="Generated\GameDataBase_StageStartPosition.cpp" />
     <ClCompile Include="Generated\GameDataBase_Stat.cpp" />
@@ -163,6 +165,8 @@
     <ClCompile Include="Generated\GameData_Monster.cpp" />
     <ClCompile Include="Generated\GameData_MonsterAI.cpp" />
     <ClCompile Include="Generated\GameData_Skill.cpp" />
+    <ClCompile Include="Generated\GameData_Spawner.cpp" />
+    <ClCompile Include="Generated\GameData_SpawnGroup.cpp" />
     <ClCompile Include="Generated\GameData_Stage.cpp" />
     <ClCompile Include="Generated\GameData_StageStartPosition.cpp" />
     <ClCompile Include="Generated\GameData_Stat.cpp" />
@@ -183,6 +187,8 @@
     <ClInclude Include="Generated\GameDataBase_Monster.h" />
     <ClInclude Include="Generated\GameDataBase_MonsterAI.h" />
     <ClInclude Include="Generated\GameDataBase_Skill.h" />
+    <ClInclude Include="Generated\GameDataBase_Spawner.h" />
+    <ClInclude Include="Generated\GameDataBase_SpawnGroup.h" />
     <ClInclude Include="Generated\GameDataBase_Stage.h" />
     <ClInclude Include="Generated\GameDataBase_StageStartPosition.h" />
     <ClInclude Include="Generated\GameDataBase_Stat.h" />
@@ -191,6 +197,8 @@
     <ClInclude Include="Generated\GameData_Monster.h" />
     <ClInclude Include="Generated\GameData_MonsterAI.h" />
     <ClInclude Include="Generated\GameData_Skill.h" />
+    <ClInclude Include="Generated\GameData_Spawner.h" />
+    <ClInclude Include="Generated\GameData_SpawnGroup.h" />
     <ClInclude Include="Generated\GameData_Stage.h" />
     <ClInclude Include="Generated\GameData_StageStartPosition.h" />
     <ClInclude Include="Generated\GameData_Stat.h" />

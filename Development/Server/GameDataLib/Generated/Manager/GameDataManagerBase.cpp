@@ -9,6 +9,8 @@
 #include "../GameData_Monster.h"
 #include "../GameData_MonsterAI.h"
 #include "../GameData_Skill.h"
+#include "../GameData_Spawner.h"
+#include "../GameData_SpawnGroup.h"
 #include "../GameData_Stage.h"
 #include "../GameData_StageStartPosition.h"
 #include "../GameData_Stat.h"
@@ -20,6 +22,8 @@ bool GameDataManagerBase::createAllGameDataTables()
 	if (!createGameDataTable<GameDataTable_Monster>()) return false;
 	if (!createGameDataTable<GameDataTable_MonsterAI>()) return false;
 	if (!createGameDataTable<GameDataTable_Skill>()) return false;
+	if (!createGameDataTable<GameDataTable_Spawner>()) return false;
+	if (!createGameDataTable<GameDataTable_SpawnGroup>()) return false;
 	if (!createGameDataTable<GameDataTable_Stage>()) return false;
 	if (!createGameDataTable<GameDataTable_StageStartPosition>()) return false;
 	if (!createGameDataTable<GameDataTable_Stat>()) return false;

@@ -28,6 +28,14 @@ namespace GameData
             if (!table_Skill.LoadData(csvPath))
                 return false;
 
+            var table_Spawner = new GameDataTable_Spawner();
+            if (!table_Spawner.LoadData(csvPath))
+                return false;
+
+            var table_SpawnGroup = new GameDataTable_SpawnGroup();
+            if (!table_SpawnGroup.LoadData(csvPath))
+                return false;
+
             var table_Stage = new GameDataTable_Stage();
             if (!table_Stage.LoadData(csvPath))
                 return false;
