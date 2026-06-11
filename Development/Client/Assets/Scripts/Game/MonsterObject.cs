@@ -106,6 +106,18 @@ namespace Client.Game
             m_actorAnimator.SetMoving(m_remoteMoving);
         }
 
+        // ─── 공격 시전 ────────────────────────────────────────────────────
+
+        // 서버 AbilityCastNtf 수신 시 호출(SkillSystem). 시전 방향으로 즉시 회전 + 윈드업 모션 재생.
+        // 텔레그래프(바닥 예고)는 SkillSystem 이 별도로 spawn 한다(월드 고정 오브젝트라 몬스터에 붙이지 않음).
+        public void PlayAbilityCast(Vector3 dir)
+        {
+            if (dir.sqrMagnitude > 0.0001f)
+                transform.rotation = Quaternion.LookRotation(new Vector3(dir.x, 0f, dir.z));
+
+            m_actorAnimator?.PlaySkill();
+        }
+
         // ─── 사망 처리 ────────────────────────────────────────────────────
 
         // 사망 처리: 사망 애니메이션. 이미 사망 상태면 멱등.

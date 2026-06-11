@@ -72,6 +72,7 @@ namespace Client.Game
 
             PacketDispatcher.Instance.Register<SkillCastNtf>(GamePacketId.SkillCastNtf, onSkillCastNtf);
             PacketDispatcher.Instance.Register<SkillDamageNtf>(GamePacketId.SkillDamageNtf, onSkillDamageNtf);
+            PacketDispatcher.Instance.Register<AbilityCastNtf>(GamePacketId.AbilityCastNtf, onAbilityCastNtf);
 
             Debug.Log("[SkillSystem] Ready.");
         }
@@ -491,6 +492,31 @@ namespace Client.Game
             spawnRemoteVisual(ntf);
         }
 
+        // ─── AbilityCastNtf (몬스터/NPC 시전 "시작") ──────────────────
+        // 플레이어 SkillCastNtf 가 "발동(효과 재현)"인 것과 달리, 이건 "시작(예고)"이다.
+        // 시전자 회전+윈드업 모션 + 바닥 텔레그래프를 windup_ms 동안 재생한다.
+        // 실제 대미지/효과는 뒤따르는 SkillDamageNtf (+투사체는 후속 SkillCastNtf)가 권위.
+        private void onAbilityCastNtf(AbilityCastNtf ntf)
+        {
+            Vector3 dir = new Vector3(ntf.DirX, 0f, ntf.DirZ);
+
+            // 시전자(몬스터/NPC) 윈드업 모션 + 회전.
+            ActorObject caster = StageManager.Instance != null ? StageManager.Instance.FindActor(ntf.CasterObjectId) : null;
+            if (caster is MonsterObject monster)
+                monster.PlayAbilityCast(dir);
+
+            // 바닥 텔레그래프(예고). 데이터 모양/크기로 windup_ms 동안 채운다.
+            if (ntf.WindupMs > 0)
+            {
+                GameData_Skill skill = GameDataTable_Skill.FindData(ntf.SkillKey);
+                if (skill != null)
+                {
+                    Vector3 origin = new Vector3(ntf.OriginX, ntf.OriginY, ntf.OriginZ);
+                    MonsterTelegraph.Spawn(skill, origin, dir, ntf.WindupMs);
+                }
+            }
+        }
+
         private void bindEffectId(int skillKey, long effectId)
         {
             if (effectId == 0)
@@ -519,7 +545,9 @@ namespace Client.Game
             // 서버는 entry 발동(=CastDelay 경과) 시점에 CastNtf 를 보내므로 원격은 즉시 재현한다.
             if (skill.EffectDamage == ESkillEffectDamage.ContactHit)
             {
-                spawnFan(group: null, skill, origin, dir);   // group=null → 비주얼 전용.
+                // 몬스터가 쏜 투사체면 몬스터 충돌 무시(시전자 자가충돌 방지 + 서버 권위 판정).
+                bool casterIsMonster = StageManager.Instance?.FindActor(ntf.CasterObjectId) is MonsterObject;
+                spawnFan(group: null, skill, origin, dir, ignoreMonsters: casterIsMonster);   // group=null → 비주얼 전용.
             }
             else if (skill.EffectDamage == ESkillEffectDamage.Area)
             {
@@ -543,7 +571,7 @@ namespace Client.Game
         }
 
         // ─── 투사체 발사 (로컬/원격 공용) ────────────────────────────
-        private void spawnFan(SkillProjectileGroup group, GameData_Skill skill, Vector3 origin, Vector3 dir)
+        private void spawnFan(SkillProjectileGroup group, GameData_Skill skill, Vector3 origin, Vector3 dir, bool ignoreMonsters = false)
         {
             // 투사체 prefab 을 1회 로드 (실패 시 ResourceManager 가 에러 로그 1회). 폴백 없음 — 데이터가 맞아야 동작.
             GameObject prefab = Managers.Managers.Resource.Load<GameObject>(skill.ProjectilePrefabPath);
@@ -558,12 +586,12 @@ namespace Client.Game
 
             Vector3 startPos = origin + Vector3.up * m_projectileHeight;   // 비주얼 높이 (XZ 판정엔 영향 없음).
             for (int i = 0; i < dirs.Count; ++i)
-                spawnOneProjectile(prefab, group, i, startPos, dirs[i], (float)skill.ProjectileSpeed, (float)skill.MaxRange, skill.OnHitSkillKey);
+                spawnOneProjectile(prefab, group, i, startPos, dirs[i], (float)skill.ProjectileSpeed, (float)skill.MaxRange, skill.OnHitSkillKey, ignoreMonsters);
 
             group?.MarkLaunched(dirs.Count);
         }
 
-        private void spawnOneProjectile(GameObject prefab, SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int onHitSkillKey)
+        private void spawnOneProjectile(GameObject prefab, SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int onHitSkillKey, bool ignoreMonsters = false)
         {
             GameObject go = Instantiate(prefab);
             go.name = "Projectile";
@@ -589,7 +617,7 @@ namespace Client.Game
             }
 
             Projectile proj = go.AddComponent<Projectile>();
-            proj.Launch(group, index, startPos, dir, speed, maxRange, onHitSkillKey);
+            proj.Launch(group, index, startPos, dir, speed, maxRange, onHitSkillKey, ignoreMonsters);
         }
 
         // 투사체가 끝난 위치에 OnHit 폭발(예: 파이어볼 폭발 1002)의 비주얼을 띄운다. Projectile 이 종료 시 호출.

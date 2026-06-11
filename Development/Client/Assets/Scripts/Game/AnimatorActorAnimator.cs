@@ -15,6 +15,7 @@ namespace Client.Game
         // Animator 파라미터 hash. 문자열 lookup 을 피한다.
         private static readonly int s_paramIsMoving = Animator.StringToHash("IsMoving");
         private static readonly int s_paramDead     = Animator.StringToHash("Dead");
+        private static readonly int s_paramSkill    = Animator.StringToHash("Skill");
 
         private Animator m_animator;
 
@@ -63,6 +64,18 @@ namespace Client.Game
                 return;
 
             m_animator.Play(s_paramDead, 0, 1.0f);
+        }
+
+        // 시전(윈드업) 연출 재생. Animator 에 "Skill" 트리거 파라미터가 있을 때만 발동한다.
+        // 아트가 아직 시전 클립/트리거를 안 붙인 prefab 이면 조용히 무시한다(애니 없이 동작).
+        public void PlaySkill()
+        {
+            if (m_animator == null)
+                return;
+            if (!hasParameter(s_paramSkill))
+                return;
+
+            m_animator.SetTrigger(s_paramSkill);
         }
 
         // Animator 에 해당 hash 의 파라미터가 존재하는지. 없는 파라미터에 SetTrigger 하면 에러 로그가 나므로 선체크한다.

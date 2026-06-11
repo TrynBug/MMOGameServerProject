@@ -24,9 +24,11 @@ namespace Client.Game
         // 구현체가 사망 상태가 없으면 조용히 무시한다.
         void SetDeadPose();
 
-        // (추후) 스킬 시전/피격/사망 등 one-shot 은 해당 기능이 실제로 들어올 때 추가한다.
-        //   void PlaySkill(int skillId);
+        // 공격/스킬 시전(윈드업) 1회 재생. 몬스터/NPC 가 AbilityCastNtf 를 받은 시점에 호출한다.
+        // 구현체가 Animator 에 시전 트리거가 없으면 조용히 무시한다.
+        void PlaySkill();
+
+        // (추후) 피격(one-shot) 은 해당 기능이 실제로 들어올 때 추가한다.
         //   void PlayHit();
-        //   void PlayDead();
     }
 }
