@@ -15,4 +15,13 @@ namespace GameData
         Boss                 = 5,  // 보스
         Max                 
     }
+
+    /* 몬스터 AI 종류 */
+    public enum EMonsterAIType
+    {
+        None                 = 0,
+        FSM                  = 1,  // 유한상태기계    // 일반몬스터용
+        BehaviourTree        = 2,  // 행동 트리    // 엘리트 몬스터, 보스용
+        Max                 
+    }
 }

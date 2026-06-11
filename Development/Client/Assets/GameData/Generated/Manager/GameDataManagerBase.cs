@@ -20,6 +20,10 @@ namespace GameData
             if (!table_Monster.LoadData(csvPath))
                 return false;
 
+            var table_MonsterAI = new GameDataTable_MonsterAI();
+            if (!table_MonsterAI.LoadData(csvPath))
+                return false;
+
             var table_Skill = new GameDataTable_Skill();
             if (!table_Skill.LoadData(csvPath))
                 return false;

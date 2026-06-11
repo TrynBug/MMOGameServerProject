@@ -30,3 +30,22 @@ std::string MonsterGradeToString(EMonsterGrade v)
     }
 }
 
+EMonsterAIType StringToMonsterAIType(const std::string& v)
+{
+    if (v == "None") return EMonsterAIType::None;
+    if (v == "FSM") return EMonsterAIType::FSM;
+    if (v == "BehaviourTree") return EMonsterAIType::BehaviourTree;
+    return EMonsterAIType::None;
+}
+
+std::string MonsterAITypeToString(EMonsterAIType v)
+{
+    switch (v)
+    {
+    case EMonsterAIType::None: return "None";
+    case EMonsterAIType::FSM: return "FSM";
+    case EMonsterAIType::BehaviourTree: return "BehaviourTree";
+    default: return "None";
+    }
+}
+
