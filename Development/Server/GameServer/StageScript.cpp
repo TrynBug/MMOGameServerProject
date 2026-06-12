@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "StageScript.h"
 #include "Stage.h"
+#include "StageLayout.h"
 #include "Monster.h"
 #include "MonsterSpawner.h"
 #include "Generated/GameData_Monster.h"
@@ -196,6 +197,56 @@ bool StageScript::Load(Stage& stage, const std::vector<std::string>& scriptNames
     {
         Monster* p = stagePtr->SpawnMonster(monsterKey, x, y, z, 0.f);
         return p ? p->GetObjectId() : 0;
+    });
+
+    // 배치된 SpawnPoint(에디터) Key 기준 스폰. count 마리. 스폰 성공 수 반환.
+    m_pImpl->lua.set_function("SpawnMonsterAt", [self](int32 spawnPointKey, int32 monsterKey, int count) -> int
+    {
+        const StageLayout* layout = self->m_pStage->m_pLayout.get();
+        const StageLayout::SpawnPoint* sp = layout ? layout->GetSpawnPoint(spawnPointKey) : nullptr;
+        if (!sp)
+        {
+            LOG_WRITE(LogLevel::Warn, std::format("SpawnMonsterAt: spawnPoint not found. key={}", spawnPointKey));
+            return 0;
+        }
+        int spawned = 0;
+        for (int i = 0; i < count; ++i)
+            if (self->m_pStage->SpawnMonster(monsterKey, sp->posX, sp->posY, sp->posZ, sp->yaw))
+                ++spawned;
+        return spawned;
+    });
+
+    // 배치 오브젝트 조회. 없으면 nil.
+    //   GetSpawnPoint(key)   -> { x, y, z, yaw }
+    //   GetWaypointPath(key) -> { {x,y,z}, {x,y,z}, ... }  (1-base 배열)
+    m_pImpl->lua.set_function("GetSpawnPoint", [self](int32 key) -> sol::object
+    {
+        sol::state& lua = self->m_pImpl->lua;
+        const StageLayout* layout = self->m_pStage->m_pLayout.get();
+        const StageLayout::SpawnPoint* sp = layout ? layout->GetSpawnPoint(key) : nullptr;
+        if (!sp)
+            return sol::make_object(lua, sol::lua_nil);
+        sol::table t = lua.create_table();
+        t["x"] = sp->posX; t["y"] = sp->posY; t["z"] = sp->posZ; t["yaw"] = sp->yaw;
+        return sol::make_object(lua, t);
+    });
+
+    m_pImpl->lua.set_function("GetWaypointPath", [self](int32 key) -> sol::object
+    {
+        sol::state& lua = self->m_pImpl->lua;
+        const StageLayout* layout = self->m_pStage->m_pLayout.get();
+        const StageLayout::Waypoint* wp = layout ? layout->GetWaypoint(key) : nullptr;
+        if (!wp)
+            return sol::make_object(lua, sol::lua_nil);
+        sol::table arr = lua.create_table();
+        int idx = 1;
+        for (const auto& pt : wp->points)
+        {
+            sol::table p = lua.create_table();
+            p["x"] = pt[0]; p["y"] = pt[1]; p["z"] = pt[2];
+            arr[idx++] = p;
+        }
+        return sol::make_object(lua, arr);
     });
 
     // 스포너 on/off (Manual 존 구동 등). MonsterSpawner 가 밀도/리스폰/팩 처리.
