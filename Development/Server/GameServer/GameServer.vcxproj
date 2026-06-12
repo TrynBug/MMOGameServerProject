@@ -106,6 +106,7 @@
     <ClInclude Include="Stage.h" />
     <ClInclude Include="StageNavMesh.h" />
     <ClInclude Include="StageLayout.h" />
+    <ClInclude Include="StageAssetManager.h" />
     <ClInclude Include="MonsterSpawner.h" />
     <ClInclude Include="StageScript.h" />
     <ClInclude Include="StageObject.h" />
@@ -146,6 +147,7 @@
     <ClCompile Include="StageSkill.cpp" />
     <ClCompile Include="StageNavMesh.cpp" />
     <ClCompile Include="StageLayout.cpp" />
+    <ClCompile Include="StageAssetManager.cpp" />
     <ClCompile Include="MonsterSpawner.cpp" />
     <ClCompile Include="StageScript.cpp" />
     <ClCompile Include="StageObject.cpp" />

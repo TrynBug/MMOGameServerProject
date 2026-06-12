@@ -496,9 +496,9 @@ private:
     std::unique_ptr<StageNavMesh> m_pStageNavMesh;
 
     // ── 배치데이터 + 몬스터 스폰 ───────────────────────────────
-    // 레이아웃(에디터 export) + 스포너 관리자. OnStart 에서 로드, OnUpdate 에서 tick.
-    // 완전타입 의존 회피 위해 unique_ptr 보관 (소멸자는 Stage.cpp).
-    std::unique_ptr<StageLayout>    m_pLayout;
+    // 레이아웃: StageAssetManager 가 소유하는 공유 불변 데이터를 참조만 한다(인스턴스마다 파싱 안 함).
+    // 스포너 관리자는 인스턴스별 런타임 상태라 소유. OnStart 에서 셋업, OnUpdate 에서 tick.
+    const StageLayout*              m_pLayout = nullptr;
     std::unique_ptr<MonsterSpawner> m_pSpawner;
 
     // Stage 로직 스크립트(Lua). 스크립트 파일이 있는 Stage 만 생성된다(없으면 nullptr).

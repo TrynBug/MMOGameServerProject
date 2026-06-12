@@ -8,6 +8,7 @@
 #include "User.h"
 #include "StageManager.h"
 #include "Map/NavMeshManager.h"
+#include "StageAssetManager.h"
 #include "ThreadSafeUnorderedMap.h"
 #include "PacketSender.h"
 #include "CheatManager.h"
@@ -50,6 +51,9 @@ public:
     // NavMesh 데이터에 접근. Stage 가 자신의 NavMesh 를 설정할 때 사용.
     NavMeshManager&       GetNavMeshManager()       { return m_navMeshManager; }
     const NavMeshManager& GetNavMeshManager() const { return m_navMeshManager; }
+
+    StageAssetManager&       GetStageAssetManager()       { return m_stageAssetManager; }
+    const StageAssetManager& GetStageAssetManager() const { return m_stageAssetManager; }
 
     // StageManager 접근. Stage 가 이동 대상 Stage 를 해석(FindStagesByDataKey)할 때 사용.
     StageManager&       GetStageManager()       { return m_stageManager; }
@@ -129,6 +133,7 @@ private:
 
     // NavMesh 데이터 관리, 길찾기 기능 제공
     NavMeshManager m_navMeshManager;
+    StageAssetManager m_stageAssetManager;
 
     // 모든 Stage(SystemStage / Town / Field / Dungeon)를 관리한다.
     // 생성, 조회, 컨텐츠 스레드 배정, GameServer 주입을 캡슐화.

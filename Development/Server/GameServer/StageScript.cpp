@@ -2,6 +2,8 @@
 #include "StageScript.h"
 #include "Stage.h"
 #include "StageLayout.h"
+#include "StageAssetManager.h"
+#include "GameServer.h"
 #include "Monster.h"
 #include "MonsterSpawner.h"
 #include "Generated/GameData_Monster.h"
@@ -16,7 +18,6 @@
 #pragma pop_macro("min")
 #pragma pop_macro("max")
 
-#include <filesystem>
 #include <algorithm>
 #include <unordered_set>
 
@@ -208,7 +209,7 @@ bool StageScript::Load(Stage& stage, const std::vector<std::string>& scriptNames
     // 배치된 SpawnPoint(에디터) Key 기준 스폰. count 마리. 스폰 성공 수 반환.
     m_pImpl->lua.set_function("SpawnMonsterAt", [self](int32 spawnPointKey, int32 monsterKey, int count) -> int
     {
-        const StageLayout* layout = self->m_pStage->m_pLayout.get();
+        const StageLayout* layout = self->m_pStage->m_pLayout;
         const StageLayout::SpawnPoint* sp = layout ? layout->GetSpawnPoint(spawnPointKey) : nullptr;
         if (!sp)
         {
@@ -228,7 +229,7 @@ bool StageScript::Load(Stage& stage, const std::vector<std::string>& scriptNames
     m_pImpl->lua.set_function("GetSpawnPoint", [self](int32 key) -> sol::object
     {
         sol::state& lua = self->m_pImpl->lua;
-        const StageLayout* layout = self->m_pStage->m_pLayout.get();
+        const StageLayout* layout = self->m_pStage->m_pLayout;
         const StageLayout::SpawnPoint* sp = layout ? layout->GetSpawnPoint(key) : nullptr;
         if (!sp)
             return sol::make_object(lua, sol::lua_nil);
@@ -240,7 +241,7 @@ bool StageScript::Load(Stage& stage, const std::vector<std::string>& scriptNames
     m_pImpl->lua.set_function("GetWaypointPath", [self](int32 key) -> sol::object
     {
         sol::state& lua = self->m_pImpl->lua;
-        const StageLayout* layout = self->m_pStage->m_pLayout.get();
+        const StageLayout* layout = self->m_pStage->m_pLayout;
         const StageLayout::Waypoint* wp = layout ? layout->GetWaypoint(key) : nullptr;
         if (!wp)
             return sol::make_object(lua, sol::lua_nil);
@@ -293,24 +294,26 @@ bool StageScript::Load(Stage& stage, const std::vector<std::string>& scriptNames
         self->m_pImpl->spawnerWatch.erase(spawnerKey);
     });
 
-    const std::filesystem::path dir =
-        std::filesystem::current_path().parent_path() / "Map" / "StageScript";
+    // 스크립트는 StageAssetManager 가 시작 시 컴파일해둔 "바이트코드"를 로드만 한다(파싱 생략).
+    // 파일 존재/컴파일 검증은 이미 시작 시 끝났으므로 여기선 바이트코드 조회만.
+    const StageAssetManager& assets = GameServer::Instance().GetStageAssetManager();
 
     for (const auto& name : scriptNames)
     {
-        const std::filesystem::path path = dir / (name + ".lua");
-        if (!std::filesystem::exists(path))
+        const std::string* bytecode = assets.FindScriptBytecode(name);
+        if (!bytecode)
         {
-            LOG_WRITE(LogLevel::Warn, std::format("StageScript file missing. name={} path={}", name, path.string()));
+            // LoadAll 검증을 통과했다면 도달 불가. 방어적 로그.
+            LOG_WRITE(LogLevel::Error, std::format("StageScript bytecode not found. name={}", name));
             continue;
         }
 
-        // 1) 파일을 청크로 로드 (문법 검사).
-        sol::load_result chunk = m_pImpl->lua.load_file(path.string());
+        // 1) 공유 바이트코드를 이 lua_State 에 로드 (binary 모드 = 파싱 없이 청크 복원).
+        sol::load_result chunk = m_pImpl->lua.load(*bytecode, name, sol::load_mode::binary);
         if (!chunk.valid())
         {
             sol::error e = chunk;
-            LOG_WRITE(LogLevel::Error, std::format("StageScript compile failed. name={} err={}", name, e.what()));
+            LOG_WRITE(LogLevel::Error, std::format("StageScript bytecode load failed. name={} err={}", name, e.what()));
             continue;
         }
 

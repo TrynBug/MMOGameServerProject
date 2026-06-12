@@ -365,12 +365,13 @@ void Stage::OnStart()
 {
     LOG_WRITE(LogLevel::Info, std::format("stageId={} stageType={}", m_stageId, static_cast<int>(m_stageType)));
 
-    // 배치데이터(에디터 export) 로드 + 몬스터 스포너 초기화. 실제 채움은 OnUpdate 의 Update 에서.
-    m_pLayout  = std::make_unique<StageLayout>();
-    m_pLayout->Load(GetStageDataKey());
+    // 배치데이터: StageAssetManager 의 공유 불변 레이아웃 참조(인스턴스마다 파싱하지 않음).
+    m_pLayout = GameServer::Instance().GetStageAssetManager().FindLayout(GetStageDataKey());
 
+    // 몬스터 스포너 초기화(인스턴스별). 실제 채움은 OnUpdate 의 Update 에서.
     m_pSpawner = std::make_unique<MonsterSpawner>();
-    m_pSpawner->Load(*this, *m_pLayout);
+    if (m_pLayout)
+        m_pSpawner->Load(*this, *m_pLayout);
 
     // Stage 로직 스크립트 로드 (GameData_Stage.ScriptName1~3, 빈 슬롯 제외).
     // 파일 경로는 StageScript 가 Map/StageScript/<이름>.lua 로 해석한다.

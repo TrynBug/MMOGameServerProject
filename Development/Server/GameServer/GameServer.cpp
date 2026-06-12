@@ -96,6 +96,14 @@ bool GameServer::OnInitialize()
         return false;
     }
 
+    // StageAssetManager 초기화 (모든 Stage 의 레이아웃 + 스크립트 바이트코드 선로드/검증).
+    // 명시된 스크립트 파일 누락/컴파일 실패 시 fail-fast.
+    if (!m_stageAssetManager.LoadAll())
+    {
+        LOG_WRITE(LogLevel::Error, "failed to initialize StageAssetManager (missing/invalid stage script or layout).");
+        return false;
+    }
+
     // ── StageManager 초기화 + 고정 Stage 생성 ──────────────────
     // StageManager가 Stage 생성 + SetGameServer + AssignContents까지 처리.
     if (GetContentsThreadCount() <= 0)

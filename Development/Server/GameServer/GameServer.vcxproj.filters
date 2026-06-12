@@ -90,6 +90,9 @@
     <ClCompile Include="StageLayout.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="StageAssetManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="MonsterSpawner.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -186,6 +189,9 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="StageLayout.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="StageAssetManager.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="MonsterSpawner.h">
