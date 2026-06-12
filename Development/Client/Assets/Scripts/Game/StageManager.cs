@@ -67,6 +67,7 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<BuffNtf>(GamePacketId.BuffNtf, onBuffNtf);
             PacketDispatcher.Instance.Register<BuffRemoveNtf>(GamePacketId.BuffRemoveNtf, onBuffRemoveNtf);
             PacketDispatcher.Instance.Register<ObjectDeathNtf>(GamePacketId.ObjectDeathNtf, onObjectDeathNtf);
+            PacketDispatcher.Instance.Register<StageNoticeNtf>(GamePacketId.StageNoticeNtf, onStageNoticeNtf);
 
             Debug.Log("[StageManager] Ready.");
         }
@@ -326,6 +327,13 @@ namespace Client.Game
 
             actor.OnDeath();
             Debug.Log($"[StageManager] ObjectDeathNtf: ObjectId={ntf.ObjectId} killer={ntf.KillerObjectId}");
+        }
+
+        // 서버 Stage 스크립트의 Notice() 가 보낸 화면 공지 배너.
+        // 표시는 UI_StageNotice 가 전담(지연 생성). duration_ms=0 이면 기본 표시시간.
+        private void onStageNoticeNtf(StageNoticeNtf ntf)
+        {
+            UI_StageNotice.Notify(ntf.Message, ntf.DurationMs);
         }
 
         // 서버 AOI 스냅샷 수신. 원격 액터(타 캐릭터/몬스터)는 보간 버퍼에 쌓고,
