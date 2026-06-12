@@ -56,3 +56,13 @@ message StageLoadCompleteRes {
     float my_yaw   = 7;     // degree
     float my_pos_z = 8;     // 평면 깊이축
 }
+
+// ──────────────────────────────────────────────
+// Stage 공지 배너 (서버 -> 클라)
+// ──────────────────────────────────────────────
+// Stage 로직 스크립트의 Notice() 가 발생시킨다. 클라는 화면 공지 배너를 표시한다.
+// Stage 내 대상 유저들에게 전송된다(웨이브 시작/클리어 등 안내용).
+message StageNoticeNtf {
+    string message     = 1;   // 표시할 문구
+    int32  duration_ms = 2;   // 표시 시간(ms). 0 = 클라 기본값.
+}
