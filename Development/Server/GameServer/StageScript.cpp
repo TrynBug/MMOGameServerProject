@@ -138,6 +138,12 @@ bool StageScript::Load(Stage& stage, const std::vector<std::string>& scriptNames
         LOG_WRITE(LogLevel::Info, std::format("[Lua] {}", msg));
     });
 
+    // 화면 공지 배너: Stage 내 전체 유저에게 StageNoticeNtf 송신. durationMs 생략 시 0(클라 기본).
+    m_pImpl->lua.set_function("Notice", [self](const std::string& message, sol::optional<int> durationMs)
+    {
+        self->m_pStage->BroadcastStageNoticeNtf(message, durationMs.value_or(0));
+    });
+
     // 타이머: 주기 호출. 컨텐츠 스레드(Update)에서 누적시간으로 만기 판정. timerId 반환.
     m_pImpl->lua.set_function("RegisterTimer", [self](int64 periodMs, sol::protected_function fn) -> int
     {

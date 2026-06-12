@@ -98,6 +98,9 @@ public:
     // 오브젝트 사망 알림 전송 (ObjectDeathNtf). Stage 가 사망한 대상 주변 AOI 유저들에게 broadcast. 클라 사망 연출용.
     void SendObjectDeathNtf(int64 userId, int64 objectId, int64 killerObjectId);
 
+    // Stage 공지 배너 전송 (StageNoticeNtf). Stage 로직 스크립트의 Notice() 가 발생. 클라는 화면 배너 표시.
+    void SendStageNoticeNtf(int64 userId, const std::string& message, int32 durationMs);
+
 private:
     serverbase::ServerBase&                                   m_server;
     SharedThreadSafeUnorderedMap<int64, UserPtr>&             m_safeUsers;

@@ -213,3 +213,12 @@ void PacketSender::SendObjectDeathNtf(int64 userId, int64 objectId, int64 killer
 
     SendToUser(userId, Common::GAME_PACKET_ID_OBJECT_DEATH_NTF, ntf);
 }
+
+void PacketSender::SendStageNoticeNtf(int64 userId, const std::string& message, int32 durationMs)
+{
+    GamePacket::StageNoticeNtf ntf;
+    ntf.set_message(message);
+    ntf.set_duration_ms(durationMs);
+
+    SendToUser(userId, Common::GAME_PACKET_ID_STAGE_NOTICE_NTF, ntf);
+}

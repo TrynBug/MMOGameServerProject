@@ -205,6 +205,13 @@ StageObject* Stage::FindObject(int64 objectId)
     return it->second.get();
 }
 
+void Stage::BroadcastStageNoticeNtf(const std::string& message, int32 durationMs)
+{
+    PacketSender& sender = GameServer::Instance().GetPacketSender();
+    for (const auto& [userId, spUser] : m_users)
+        sender.SendStageNoticeNtf(userId, message, durationMs);
+}
+
 void Stage::updateMonsters(int64 deltaMs)
 {
     // m_monsterObjects 에는 Monster 만 등록된다 (SpawnMonster). FSM 1 tick 진행.

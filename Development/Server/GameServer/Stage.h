@@ -220,6 +220,9 @@ public:
     void      BroadcastAbilityCastNtf(const ActorObject& caster, int32 skillKey, int64 targetObjectId,
                                       const Vector3& origin, const Vector3& dir, int32 windupMs);
 
+    // Stage 공지 배너를 Stage 내 "전체" 유저에게 송신 (스크립트 Notice()). AOI 가 아니라 스테이지 전역.
+    void      BroadcastStageNoticeNtf(const std::string& message, int32 durationMs);
+
     // objectId 로 StageObject 를 조회한다 (통합 컨테이너 m_objects 기준). 없으면 nullptr.
     // 비소유 raw 포인터 — 컨텐츠 스레드에서 해당 tick 내 사용 (몬스터 AI 의 타겟 해소 등).
     StageObject* FindObject(int64 objectId);
