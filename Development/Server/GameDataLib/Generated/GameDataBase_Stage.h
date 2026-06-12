@@ -22,6 +22,21 @@ struct GameDataBase_Stage : public GameData
     EStageType           StageType            = EStageType::None;
     std::string          NavMeshFileName      = "";
     float                sectorSize           = 0.0f;
+    std::string          ScriptName1          = "";
+    std::string          ScriptName2          = "";
+    std::string          ScriptName3          = "";
+
+    int32_t GetScriptNameCount() const { return 3; }
+    std::string GetScriptName(int32_t index) const
+    {
+        switch (index)
+        {
+        case 0: return ScriptName1;
+        case 1: return ScriptName2;
+        case 2: return ScriptName3;
+        default: return "";
+        }
+    }
 };
 
 

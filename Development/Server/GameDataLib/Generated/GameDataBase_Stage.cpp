@@ -29,6 +29,9 @@ bool GameDataTableBase_Stage::makeGameData(const std::string& line)
     std::getline(ss, field, ','); pData->StageType = static_cast<EStageType>(std::stoi(field));
     std::getline(ss, field, ','); pData->NavMeshFileName = field;
     std::getline(ss, field, ','); pData->sectorSize = std::stof(field);
+    std::getline(ss, field, ','); pData->ScriptName1 = field;
+    std::getline(ss, field, ','); pData->ScriptName2 = field;
+    std::getline(ss, field, ','); pData->ScriptName3 = field;
 
     if (pData->Key <= 0)
     {
