@@ -7,6 +7,7 @@
 #include "StageNavMesh.h"
 #include "StageLayout.h"
 #include "MonsterSpawner.h"
+#include "StageScript.h"
 #include "Skill/EffectShape.h"
 #include "Skill/EffectParams.h"
 #include "Skill/AreaEffect.h"
@@ -18,6 +19,7 @@
 #include "Enum/GameEnum_Common.h"
 
 #include <cmath>
+#include <filesystem>
 
 namespace
 {
@@ -363,6 +365,18 @@ void Stage::OnStart()
 
     m_pSpawner = std::make_unique<MonsterSpawner>();
     m_pSpawner->Load(*this, *m_pLayout);
+
+    // Stage 로직 스크립트 로드 (부트스트랩: Map/StageScript/<stageDataKey>.lua 가 있으면 로드).
+    // (추후 GameData_Stage.ScriptName1~3 데이터로 다중 스크립트 지정.)
+    const std::string scriptName = std::to_string(GetStageDataKey());
+    const std::filesystem::path scriptPath =
+        std::filesystem::current_path().parent_path() / "Map" / "StageScript" / (scriptName + ".lua");
+    if (std::filesystem::exists(scriptPath))
+    {
+        m_pScript = std::make_unique<StageScript>();
+        m_pScript->Load(*this, { scriptName });
+        m_pScript->CallOnStageStart();
+    }
 }
 
 void Stage::OnUpdate(int64 deltaMs)
@@ -386,6 +400,10 @@ void Stage::OnUpdate(int64 deltaMs)
     // 4.5 몬스터 스포너 (밀도 유지/리스폰/활성화). 데이터 구동 스폰.
     if (m_pSpawner)
         m_pSpawner->Update(deltaMs);
+
+    // 4.6 Stage 스크립트 (타이머 만기 → Lua 콜백).
+    if (m_pScript)
+        m_pScript->Update(deltaMs);
 
     // 5. 파생 클래스 로직
     OnStageUpdate(deltaMs);
@@ -676,6 +694,9 @@ void Stage::OnUserEnter(const UserPtr& spUser)
     // 수신 시 spawnPendingCharacter가 스폰한다. SystemStage는 캐릭터가 없으므로 여기서 끝.
     LOG_WRITE(LogLevel::Info, std::format("stageId={} userId={} stageState={} totalUsers={}",
         m_stageId, userId, static_cast<int32>(spUser->GetStageState()), m_users.size()));
+
+    if (m_pScript)
+        m_pScript->CallOnPlayerEnter(userId);
 }
 
 void Stage::spawnPendingCharacter(const UserPtr& spUser)
@@ -838,6 +859,9 @@ void Stage::OnUserLeave(int64 userId)
 
     LOG_WRITE(LogLevel::Info, std::format("stageId={} userId={} totalUsers={} totalObjects={}",
         m_stageId, userId, m_users.size(), m_objects.size()));
+
+    if (m_pScript)
+        m_pScript->CallOnPlayerLeave(userId);
 
     // 주변 sector의 다른 캐릭터들에게 despawn broadcast.
     if (leavingObjectId != 0)

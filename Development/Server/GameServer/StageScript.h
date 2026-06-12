@@ -1,0 +1,57 @@
+#pragma once
+
+#include "pch.h"
+
+#include <memory>
+#include <vector>
+#include <string>
+
+class Stage;
+
+// ─────────────────────────────────────────────────────────────
+// StageScript
+// ─────────────────────────────────────────────────────────────
+//
+// Stage 당 1개의 Lua VM + 여러 스크립트(환경별 격리). 기획자가 작성한 Stage 로직을 로드/실행한다.
+//
+// 스레드: Stage 당 lua_State 1개 = 컨텐츠 스레드 1개 → 락 없음.
+// 안전: 모든 Lua 진입은 pcall 격리 + lua_sethook 인스트럭션 상한(무한루프 차단).
+//
+// 구현은 pimpl 로 sol/Lua 타입을 헤더에서 완전히 숨긴다(무거운 sol 헤더 전파 방지 +
+// sol::environment 가 타입 별칭이라 전방선언 불가한 문제 회피).
+//
+// P1(현재): VM + 다중 스크립트 환경 + 생애주기 콜백 멀티캐스트 + 가드 + 관측용 Log API.
+//           (타이머/코루틴/이벤트영역/스폰 API 는 후속 단계.)
+// 자세한 설계: Stage스크립트.md 참조.
+class StageScript
+{
+public:
+    StageScript();
+    ~StageScript();
+
+    StageScript(const StageScript&) = delete;
+    StageScript& operator=(const StageScript&) = delete;
+
+    // 각 스크립트를 개별 환경(_ENV)으로 로드한다. scriptNames = Map/StageScript/<name>.lua (확장자 제외).
+    // 전역(_G)은 공유하되 콜백/지역상태는 환경에 격리된다(스크립트 간 충돌 없음).
+    bool Load(Stage& stage, const std::vector<std::string>& scriptNames);
+
+    // 생애주기 콜백 — 정의한 모든 스크립트에 멀티캐스트 (전부 pcall 격리 + 인스트럭션 가드).
+    void CallOnStageStart();
+    void CallOnPlayerEnter(int64 userId);
+    void CallOnPlayerLeave(int64 userId);
+
+    // 몬스터 사망 시 Stage 가 호출. monsterKey 가 watch 등록된 경우에만 OnMonsterDead 멀티캐스트(대량몹 부하 방지).
+    void CallOnMonsterDead(int64 objectId, int32 monsterKey, int64 killerObjectId);
+
+    // 매 tick(컨텐츠 스레드) 호출. 등록된 타이머의 만기를 누적시간으로 판정해 콜백을 호출한다.
+    void Update(int64 deltaMs);
+
+private:
+    // 코루틴 시퀀스를 1회 재개하고 다음 대기/종료 상태를 반영한다 (index = m_pImpl->sequences).
+    void advanceSequence(size_t index);
+
+    struct Impl;                       // .cpp 에서 정의 (sol/Lua 은닉)
+    std::unique_ptr<Impl> m_pImpl;
+    Stage* m_pStage = nullptr;
+};

@@ -93,6 +93,9 @@
     <ClCompile Include="MonsterSpawner.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="StageScript.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="MonsterFsmAI.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -186,6 +189,9 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="MonsterSpawner.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="StageScript.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="IMonsterAI.h">

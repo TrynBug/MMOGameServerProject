@@ -1,7 +1,11 @@
 #include "pch.h"
 #include "Stage.h"
 #include "ActorObject.h"
+#include "Monster.h"
+#include "StageScript.h"
 #include "GameServer.h"
+#include "Enum/GameEnum_Common.h"
+#include "Generated/GameData_Monster.h"
 #include "Skill/EffectShape.h"
 #include "Skill/EffectParams.h"
 #include "Skill/AreaEffect.h"
@@ -216,7 +220,16 @@ void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerOb
     // 새로 사망했으면 별도 사망 통보 (대미지 외 사인도 있을 수 있어 SkillDamageNtf 와 분리).
     // 시체는 일정 시간(corpse) 유지 후 Stage::updateMonsters 가 디스폰한다.
     if (justDied)
+    {
         BroadcastObjectDeathNtf(target, killerObjectId);
+
+        // 몬스터 사망이면 스크립트 콜백 (watch 필터는 StageScript 내부). 대량몹 부하 방지를 위해 watch 등록분만 Lua 진입.
+        if (m_pScript && target.GetObjectType() == EObjectType::Monster)
+        {
+            const Monster& monster = static_cast<const Monster&>(target);
+            m_pScript->CallOnMonsterDead(target.GetObjectId(), monster.GetMonsterData()->Key, killerObjectId);
+        }
+    }
 }
 
 // 사망한 대상 주변 AOI 유저들에게 사망을 통보(ObjectDeathNtf). 클라 사망 연출용.

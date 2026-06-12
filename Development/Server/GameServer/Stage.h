@@ -23,6 +23,9 @@ class StageNavMesh;
 class StageLayout;
 class MonsterSpawner;
 
+// Stage 로직 Lua 스크립트 실행기. unique_ptr 보관(소멸자는 .cpp).
+class StageScript;
+
 // Character forward declaration (StageMsg_UserEnter 등에서 사용).
 class Character;
 using CharacterPtr = std::shared_ptr<Character>;
@@ -120,6 +123,8 @@ class Stage : public serverbase::Contents
 {
     // MonsterSpawner 가 SpawnMonster/DespawnMonster(protected) 를 직접 호출한다 (Stage 가 소유, 단일 스레드).
     friend class MonsterSpawner;
+    // StageScript(Lua) 가 스폰/스포너/조회 API 를 위해 Stage 내부에 접근한다 (Stage 가 소유, 단일 스레드).
+    friend class StageScript;
 
 public:
     // 명시적 grid 값으로 생성.
@@ -492,6 +497,9 @@ private:
     // 완전타입 의존 회피 위해 unique_ptr 보관 (소멸자는 Stage.cpp).
     std::unique_ptr<StageLayout>    m_pLayout;
     std::unique_ptr<MonsterSpawner> m_pSpawner;
+
+    // Stage 로직 스크립트(Lua). 스크립트 파일이 있는 Stage 만 생성된다(없으면 nullptr).
+    std::unique_ptr<StageScript>    m_pScript;
 
     // ── 스킬 효과 ──────────────────────────────
     // 진행 중인 범위 효과(AreaEffect)들. updateSkillEffects 에서 tick + 만료 sweep.
