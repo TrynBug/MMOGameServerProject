@@ -227,7 +227,8 @@ void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerOb
         if (m_pScript && target.GetObjectType() == EObjectType::Monster)
         {
             const Monster& monster = static_cast<const Monster&>(target);
-            m_pScript->CallOnMonsterDead(target.GetObjectId(), monster.GetMonsterData()->Key, killerObjectId);
+            m_pScript->CallOnMonsterDead(target.GetObjectId(), monster.GetMonsterData()->Key,
+                                         monster.GetSpawnerKey(), killerObjectId);
         }
     }
 }

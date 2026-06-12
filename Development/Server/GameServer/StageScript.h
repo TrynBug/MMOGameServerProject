@@ -41,8 +41,11 @@ public:
     void CallOnPlayerEnter(int64 userId);
     void CallOnPlayerLeave(int64 userId);
 
-    // 몬스터 사망 시 Stage 가 호출. monsterKey 가 watch 등록된 경우에만 OnMonsterDead 멀티캐스트(대량몹 부하 방지).
-    void CallOnMonsterDead(int64 objectId, int32 monsterKey, int64 killerObjectId);
+    // 몬스터 사망 시 Stage 가 호출. (watch 등록분만 Lua 진입 — 대량몹 부하 방지.)
+    //   · monsterKey 가 WatchMonsterDeath 등록 → OnMonsterDead 멀티캐스트
+    //   · spawnerKey(!=0) 가 WatchSpawnerDeath 등록 → OnSpawnerMonsterDead 멀티캐스트
+    //   · monsterKey 사망 대기 시퀀스(WaitForMonsterDead) 재개
+    void CallOnMonsterDead(int64 objectId, int32 monsterKey, int32 spawnerKey, int64 killerObjectId);
 
     // 매 tick(컨텐츠 스레드) 호출. 등록된 타이머의 만기를 누적시간으로 판정해 콜백을 호출한다.
     void Update(int64 deltaMs);
@@ -50,6 +53,10 @@ public:
 private:
     // 코루틴 시퀀스를 1회 재개하고 다음 대기/종료 상태를 반영한다 (index = m_pImpl->sequences).
     void advanceSequence(size_t index);
+
+    // 조건 대기(WaitForCount/WaitForSpawnerClear) 폴링용. m_pStage 의 몬스터 컨테이너를 센다(시체 제외).
+    int aliveMonsterCount() const;
+    int spawnerAliveCount(int32 spawnerKey) const;
 
     struct Impl;                       // .cpp 에서 정의 (sol/Lua 은닉)
     std::unique_ptr<Impl> m_pImpl;

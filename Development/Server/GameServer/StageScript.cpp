@@ -36,13 +36,15 @@ struct StageScript::Impl
     // 진행 중인 시퀀스(코루틴). Wait(ms)/WaitForMonsterDead(key) 로 중단했다가 스케줄러가 재개한다.
     struct Sequence
     {
-        enum class WaitKind { None, Time, Death };
+        enum class WaitKind { None, Time, Death, Count, SpawnerClear };
 
         sol::thread    runner;          // 코루틴 전용 lua_State 스택(독립 실행)
         sol::coroutine co;              // 실행 중인 코루틴
         WaitKind       waitKind = WaitKind::None;
-        int64          waitRemainingMs = 0;   // Time 대기 잔여(ms)
-        int32          waitDeathKey    = 0;    // Death 대기 대상 monsterKey
+        int64          waitRemainingMs   = 0;   // Time 대기 잔여(ms)
+        int32          waitDeathKey      = 0;    // Death 대기 대상 monsterKey
+        int            waitCountThreshold = 0;   // Count 대기: 생존수 <= 이 값이면 재개
+        int32          waitSpawnerKey    = 0;    // SpawnerClear 대기: 이 스포너 생존 0이면 재개
         bool           done = false;
     };
 
@@ -50,7 +52,8 @@ struct StageScript::Impl
     std::vector<sol::environment> scripts;   // 스크립트별 환경 (environment 는 가벼운 참조형 → 값 보관)
     std::vector<Timer>            timers;
     std::vector<Sequence>         sequences;
-    std::unordered_set<int32>     deathWatch;   // OnMonsterDead 발동 대상 monsterKey (Q4: 대량몹 부하 방지)
+    std::unordered_set<int32>     deathWatch;     // OnMonsterDead 발동 대상 monsterKey (Q4a)
+    std::unordered_set<int32>     spawnerWatch;   // OnSpawnerMonsterDead 발동 대상 spawnerKey (Q4b)
     int                           nextTimerId = 1;
 };
 
@@ -70,9 +73,9 @@ namespace
         lua_sethook(lua.lua_state(), instructionGuardHook, LUA_MASKCOUNT, k_instructionBudget);
     }
 
-    // 코루틴 1회 재개. yield 형식은 (kind, arg): kind "death" → outDeath=true(arg=monsterKey),
-    // 그 외 → time(arg=대기 ms). 종료/에러면 done=true. Impl 타입 의존 없이 raw 인자만 받는다(헤더 노출 없음).
-    void resumeCo(lua_State* threadState, sol::coroutine& co, bool& outDeath, int64& outArg, bool& done)
+    // yield 형식 (kind, arg) → outKind 코드: 0=time(ms), 1=death(key), 2=count(n), 3=spawnerclear(key).
+    // 종료/에러면 done=true. Impl 타입 의존 없이 raw 인자만 받는다(헤더 노출 없음).
+    void resumeCo(lua_State* threadState, sol::coroutine& co, int& outKind, int64& outArg, bool& done)
     {
         lua_sethook(threadState, instructionGuardHook, LUA_MASKCOUNT, k_instructionBudget);
 
@@ -94,8 +97,11 @@ namespace
                 if (a)
                     arg = *a;
             }
-            outDeath = (kind == "death");
-            outArg   = arg;
+            if      (kind == "death")        outKind = 1;
+            else if (kind == "count")        outKind = 2;
+            else if (kind == "spawnerclear") outKind = 3;
+            else                             outKind = 0;
+            outArg = arg;
         }
         else
         {
@@ -162,7 +168,9 @@ bool StageScript::Load(Stage& stage, const std::vector<std::string>& scriptNames
     //   WaitForMonsterDead(k) = key=k 몬스터가 죽을 때까지 중단.
     m_pImpl->lua.safe_script(
         "function Wait(ms) coroutine.yield('time', ms) end\n"
-        "function WaitForMonsterDead(key) coroutine.yield('death', key) end");
+        "function WaitForMonsterDead(key) coroutine.yield('death', key) end\n"
+        "function WaitForCount(n) coroutine.yield('count', n) end\n"
+        "function WaitForSpawnerClear(key) coroutine.yield('spawnerclear', key) end");
 
     // 시퀀스 시작: fn 을 코루틴으로 실행. 첫 yield 까지 즉시 실행하고, 이후 스케줄러가 재개한다.
     m_pImpl->lua.set_function("StartSequence", [self](sol::protected_function fn)
@@ -203,13 +211,9 @@ bool StageScript::Load(Stage& stage, const std::vector<std::string>& scriptNames
     });
 
     // 생존 몬스터 수 (웨이브 클리어 판정 등). 시체(IsDead)는 제외.
-    m_pImpl->lua.set_function("GetAliveMonsterCount", [stagePtr]() -> int
+    m_pImpl->lua.set_function("GetAliveMonsterCount", [self]() -> int
     {
-        int n = 0;
-        for (const auto& [objId, spObj] : stagePtr->m_monsterObjects)
-            if (!static_cast<Monster*>(spObj.get())->IsDead())
-                ++n;
-        return n;
+        return self->aliveMonsterCount();
     });
 
     // 사망 watch 등록/해제 (등록된 monsterKey 만 OnMonsterDead 발동 — 대량몹 부하 방지).
@@ -220,6 +224,16 @@ bool StageScript::Load(Stage& stage, const std::vector<std::string>& scriptNames
     m_pImpl->lua.set_function("UnwatchMonsterDeath", [self](int32 monsterKey)
     {
         self->m_pImpl->deathWatch.erase(monsterKey);
+    });
+
+    // 스포너별 사망 watch: 그 스포너가 만든 몹이 죽으면 OnSpawnerMonsterDead 발동 (Q4b).
+    m_pImpl->lua.set_function("WatchSpawnerDeath", [self](int32 spawnerKey)
+    {
+        self->m_pImpl->spawnerWatch.insert(spawnerKey);
+    });
+    m_pImpl->lua.set_function("UnwatchSpawnerDeath", [self](int32 spawnerKey)
+    {
+        self->m_pImpl->spawnerWatch.erase(spawnerKey);
     });
 
     const std::filesystem::path dir =
@@ -301,19 +315,34 @@ void StageScript::Update(int64 deltaMs)
     timers.erase(std::remove_if(timers.begin(), timers.end(),
         [](const Impl::Timer& t) { return t.cancelled; }), timers.end());
 
-    // ── 시퀀스(코루틴) 시간 대기 재개 ── (Death 대기는 CallOnMonsterDead 가 재개)
+    // ── 시퀀스(코루틴) 시간/조건 대기 재개 ── (Death 대기는 CallOnMonsterDead 가 재개)
+    using WaitKind = Impl::Sequence::WaitKind;
     auto& seqs = m_pImpl->sequences;
     const size_t seqCount = seqs.size();   // 재개 중 새 시퀀스가 추가되어도 이번 패스는 기존 것만.
     for (size_t i = 0; i < seqCount; ++i)
     {
-        if (seqs[i].done || seqs[i].waitKind != Impl::Sequence::WaitKind::Time)
+        if (seqs[i].done)
             continue;
 
-        seqs[i].waitRemainingMs -= deltaMs;
-        if (seqs[i].waitRemainingMs > 0)
-            continue;
+        bool ready = false;
+        switch (seqs[i].waitKind)
+        {
+        case WaitKind::Time:
+            seqs[i].waitRemainingMs -= deltaMs;
+            ready = (seqs[i].waitRemainingMs <= 0);
+            break;
+        case WaitKind::Count:
+            ready = (aliveMonsterCount() <= seqs[i].waitCountThreshold);
+            break;
+        case WaitKind::SpawnerClear:
+            ready = (spawnerAliveCount(seqs[i].waitSpawnerKey) == 0);
+            break;
+        default:   // None / Death: 여기서 재개 안 함
+            break;
+        }
 
-        advanceSequence(i);
+        if (ready)
+            advanceSequence(i);
     }
 
     // 종료된 시퀀스 정리.
@@ -321,19 +350,41 @@ void StageScript::Update(int64 deltaMs)
         [](const Impl::Sequence& s) { return s.done; }), seqs.end());
 }
 
-// 코루틴을 1회 재개하고, 다음 대기 상태(Time/Death) 또는 종료를 시퀀스에 반영한다.
+int StageScript::aliveMonsterCount() const
+{
+    int n = 0;
+    for (const auto& [objId, spObj] : m_pStage->m_monsterObjects)
+        if (!static_cast<Monster*>(spObj.get())->IsDead())
+            ++n;
+    return n;
+}
+
+int StageScript::spawnerAliveCount(int32 spawnerKey) const
+{
+    int n = 0;
+    for (const auto& [objId, spObj] : m_pStage->m_monsterObjects)
+    {
+        Monster* p = static_cast<Monster*>(spObj.get());
+        if (!p->IsDead() && p->GetSpawnerKey() == spawnerKey)
+            ++n;
+    }
+    return n;
+}
+
+// 코루틴을 1회 재개하고, 다음 대기 상태(Time/Death/Count/SpawnerClear) 또는 종료를 시퀀스에 반영한다.
 void StageScript::advanceSequence(size_t index)
 {
+    using WaitKind = Impl::Sequence::WaitKind;
     auto& seqs = m_pImpl->sequences;
 
     // 재개 중 새 시퀀스 추가로 vector 가 재할당될 수 있으니, 핸들은 호출 전에 복사하고 결과는 재인덱싱하여 기록.
     lua_State*     ts = seqs[index].runner.thread_state();
     sol::coroutine co = seqs[index].co;
 
-    bool  death = false;
-    int64 arg   = 0;
-    bool  done  = false;
-    resumeCo(ts, co, death, arg, done);
+    int   kind = 0;
+    int64 arg  = 0;
+    bool  done = false;
+    resumeCo(ts, co, kind, arg, done);
 
     Impl::Sequence& s = seqs[index];   // 재할당 대비 재인덱싱
     if (done)
@@ -341,17 +392,12 @@ void StageScript::advanceSequence(size_t index)
         s.done = true;
         return;
     }
-    if (death)
+    switch (kind)
     {
-        s.waitKind     = Impl::Sequence::WaitKind::Death;
-        s.waitDeathKey = static_cast<int32>(arg);
-        s.waitRemainingMs = 0;
-    }
-    else
-    {
-        s.waitKind        = Impl::Sequence::WaitKind::Time;
-        s.waitRemainingMs = arg;
-        s.waitDeathKey    = 0;
+    case 1:  s.waitKind = WaitKind::Death;        s.waitDeathKey       = static_cast<int32>(arg); break;
+    case 2:  s.waitKind = WaitKind::Count;        s.waitCountThreshold = static_cast<int>(arg);   break;
+    case 3:  s.waitKind = WaitKind::SpawnerClear; s.waitSpawnerKey     = static_cast<int32>(arg); break;
+    default: s.waitKind = WaitKind::Time;         s.waitRemainingMs    = arg;                     break;
     }
 }
 
@@ -409,7 +455,7 @@ void StageScript::CallOnPlayerLeave(int64 userId)
     }
 }
 
-void StageScript::CallOnMonsterDead(int64 objectId, int32 monsterKey, int64 killerObjectId)
+void StageScript::CallOnMonsterDead(int64 objectId, int32 monsterKey, int32 spawnerKey, int64 killerObjectId)
 {
     // 1) 이 key 의 사망을 기다리던 시퀀스(WaitForMonsterDead) 재개. (watch 와 무관 — 시퀀스가 자기 대기를 설정.)
     {
@@ -428,22 +474,41 @@ void StageScript::CallOnMonsterDead(int64 objectId, int32 monsterKey, int64 kill
             [](const Impl::Sequence& s) { return s.done; }), seqs.end());
     }
 
-    // 2) watch 등록된 monsterKey 만 OnMonsterDead 콜백 (미등록 잡몹 대량사망은 해시 조회 1회로 끝).
-    if (m_pImpl->deathWatch.find(monsterKey) == m_pImpl->deathWatch.end())
-        return;
-
-    for (auto& env : m_pImpl->scripts)
+    // 2) watch 등록된 monsterKey 만 OnMonsterDead 콜백.
+    if (m_pImpl->deathWatch.find(monsterKey) != m_pImpl->deathWatch.end())
     {
-        sol::protected_function fn = env["OnMonsterDead"];
-        if (!fn.valid())
-            continue;
-
-        armGuard(m_pImpl->lua);
-        sol::protected_function_result r = fn(objectId, monsterKey, killerObjectId);
-        if (!r.valid())
+        for (auto& env : m_pImpl->scripts)
         {
-            sol::error e = r;
-            LOG_WRITE(LogLevel::Error, std::format("OnMonsterDead error: {}", e.what()));
+            sol::protected_function fn = env["OnMonsterDead"];
+            if (!fn.valid())
+                continue;
+
+            armGuard(m_pImpl->lua);
+            sol::protected_function_result r = fn(objectId, monsterKey, killerObjectId);
+            if (!r.valid())
+            {
+                sol::error e = r;
+                LOG_WRITE(LogLevel::Error, std::format("OnMonsterDead error: {}", e.what()));
+            }
+        }
+    }
+
+    // 3) watch 등록된 spawnerKey 의 몹이 죽으면 OnSpawnerMonsterDead 콜백 (Q4b).
+    if (spawnerKey != 0 && m_pImpl->spawnerWatch.find(spawnerKey) != m_pImpl->spawnerWatch.end())
+    {
+        for (auto& env : m_pImpl->scripts)
+        {
+            sol::protected_function fn = env["OnSpawnerMonsterDead"];
+            if (!fn.valid())
+                continue;
+
+            armGuard(m_pImpl->lua);
+            sol::protected_function_result r = fn(spawnerKey, objectId, monsterKey);
+            if (!r.valid())
+            {
+                sol::error e = r;
+                LOG_WRITE(LogLevel::Error, std::format("OnSpawnerMonsterDead error: {}", e.what()));
+            }
         }
     }
 }

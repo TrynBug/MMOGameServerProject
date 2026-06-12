@@ -56,6 +56,11 @@ public:
     // ── 종류 데이터 / 스탯 ─────────────────────────────────────
     const GameData_Monster* GetMonsterData() const { return m_pMonsterData; }
 
+    // 이 몬스터를 생성한 스포너 Key (0 = 스포너 무관, 예: 스크립트 직접 스폰).
+    // MonsterSpawner 가 스폰 시 태깅. 스포너별 사망 콜백(OnSpawnerMonsterDead) 용.
+    int32 GetSpawnerKey() const { return m_spawnerKey; }
+    void  SetSpawnerKey(int32 spawnerKey) { m_spawnerKey = spawnerKey; }
+
     BasicStatComponent&       GetStat()       { return m_statComponent; }
     const BasicStatComponent& GetStat() const { return m_statComponent; }
 
@@ -124,6 +129,9 @@ private:
 private:
     // 몬스터 종류 데이터 (소유권 없음, 게임데이터는 로드 후 불변).
     const GameData_Monster* m_pMonsterData = nullptr;
+
+    // 이 몬스터를 생성한 스포너 Key (0 = 무관). MonsterSpawner 가 스폰 시 태깅.
+    int32 m_spawnerKey = 0;
 
     // 경량 스탯 컴포넌트. 생성자에서 종류 데이터의 기본스탯을 적용한다.
     BasicStatComponent m_statComponent;

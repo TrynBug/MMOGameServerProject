@@ -19,7 +19,6 @@
 #include "Enum/GameEnum_Common.h"
 
 #include <cmath>
-#include <filesystem>
 
 namespace
 {
@@ -366,15 +365,19 @@ void Stage::OnStart()
     m_pSpawner = std::make_unique<MonsterSpawner>();
     m_pSpawner->Load(*this, *m_pLayout);
 
-    // Stage 로직 스크립트 로드 (부트스트랩: Map/StageScript/<stageDataKey>.lua 가 있으면 로드).
-    // (추후 GameData_Stage.ScriptName1~3 데이터로 다중 스크립트 지정.)
-    const std::string scriptName = std::to_string(GetStageDataKey());
-    const std::filesystem::path scriptPath =
-        std::filesystem::current_path().parent_path() / "Map" / "StageScript" / (scriptName + ".lua");
-    if (std::filesystem::exists(scriptPath))
+    // Stage 로직 스크립트 로드 (GameData_Stage.ScriptName1~3, 빈 슬롯 제외).
+    // 파일 경로는 StageScript 가 Map/StageScript/<이름>.lua 로 해석한다.
+    std::vector<std::string> scriptNames;
+    for (int32 i = 0; i < m_pStageData->GetScriptNameCount(); ++i)
+    {
+        std::string name = m_pStageData->GetScriptName(i);
+        if (!name.empty())
+            scriptNames.push_back(std::move(name));
+    }
+    if (!scriptNames.empty())
     {
         m_pScript = std::make_unique<StageScript>();
-        m_pScript->Load(*this, { scriptName });
+        m_pScript->Load(*this, scriptNames);
         m_pScript->CallOnStageStart();
     }
 }

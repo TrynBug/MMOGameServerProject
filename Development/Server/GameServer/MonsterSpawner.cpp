@@ -212,7 +212,10 @@ void MonsterSpawner::fillPack(ActiveSpawner& s, Pack& pack)
             // SpawnMonster 가 NavMesh 스냅 + 월드경계 검증 + 거부처리를 담당(좌표만 넘긴다).
             Monster* pMonster = m_pStage->SpawnMonster(monsterKey, px, leaderY, pz, 0.f);
             if (pMonster)
+            {
+                pMonster->SetSpawnerKey(s.data->Key);   // 스포너별 사망 콜백(OnSpawnerMonsterDead) 용 태깅
                 pack.memberIds.push_back(pMonster->GetObjectId());
+            }
         }
     }
 }
