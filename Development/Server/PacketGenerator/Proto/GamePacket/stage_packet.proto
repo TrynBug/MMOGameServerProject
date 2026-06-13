@@ -66,3 +66,23 @@ message StageNoticeNtf {
     string message     = 1;   // 표시할 문구
     int32  duration_ms = 2;   // 표시 시간(ms). 0 = 클라 기본값.
 }
+
+// ──────────────────────────────────────────────
+// 이벤트영역 진입/이탈 선보고 (클라 -> 서버)
+// ──────────────────────────────────────────────
+// 클라가 자기 캐릭터의 이벤트영역 진입/이탈을 먼저 감지해 보고하고, 서버는 권위 위치로
+// 검증한 뒤에만 트리거(OnEnterEventArea/OnExitEventArea)를 발동한다. (Stage스크립트.md §8)
+// pos_x/y/z 는 클라가 보고 시점에 본 자기 위치(참고용). 서버는 자신의 권위 위치로 재검증한다.
+message EventAreaEnterReq {
+    int32 event_key = 1;   // 진입한 이벤트영역 Key (레이아웃 배치)
+    float pos_x     = 2;
+    float pos_y     = 3;
+    float pos_z     = 4;
+}
+
+message EventAreaExitReq {
+    int32 event_key = 1;   // 이탈한 이벤트영역 Key
+    float pos_x     = 2;
+    float pos_y     = 3;
+    float pos_z     = 4;
+}

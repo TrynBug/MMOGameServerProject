@@ -54,6 +54,14 @@ extern "C" {
 extern const ::google::protobuf::internal::DescriptorTable descriptor_table_GamePacket_2fstage_5fpacket_2eproto;
 }  // extern "C"
 namespace GamePacket {
+class EventAreaEnterReq;
+struct EventAreaEnterReqDefaultTypeInternal;
+extern EventAreaEnterReqDefaultTypeInternal _EventAreaEnterReq_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull EventAreaEnterReq_class_data_;
+class EventAreaExitReq;
+struct EventAreaExitReqDefaultTypeInternal;
+extern EventAreaExitReqDefaultTypeInternal _EventAreaExitReq_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull EventAreaExitReq_class_data_;
 class StageLoadCompleteReq;
 struct StageLoadCompleteReqDefaultTypeInternal;
 extern StageLoadCompleteReqDefaultTypeInternal _StageLoadCompleteReq_default_instance_;
@@ -1138,6 +1146,458 @@ class StageLoadCompleteReq final : public ::google::protobuf::internal::ZeroFiel
 };
 
 extern const ::google::protobuf::internal::ClassDataFull StageLoadCompleteReq_class_data_;
+// -------------------------------------------------------------------
+
+class EventAreaExitReq final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.EventAreaExitReq) */ {
+ public:
+  inline EventAreaExitReq() : EventAreaExitReq(nullptr) {}
+  ~EventAreaExitReq() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(EventAreaExitReq* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(EventAreaExitReq));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR EventAreaExitReq(::google::protobuf::internal::ConstantInitialized);
+
+  inline EventAreaExitReq(const EventAreaExitReq& from) : EventAreaExitReq(nullptr, from) {}
+  inline EventAreaExitReq(EventAreaExitReq&& from) noexcept
+      : EventAreaExitReq(nullptr, ::std::move(from)) {}
+  inline EventAreaExitReq& operator=(const EventAreaExitReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline EventAreaExitReq& operator=(EventAreaExitReq&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const EventAreaExitReq& default_instance() {
+    return *reinterpret_cast<const EventAreaExitReq*>(
+        &_EventAreaExitReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 6;
+  friend void swap(EventAreaExitReq& a, EventAreaExitReq& b) { a.Swap(&b); }
+  inline void Swap(EventAreaExitReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(EventAreaExitReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  EventAreaExitReq* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<EventAreaExitReq>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const EventAreaExitReq& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const EventAreaExitReq& from) { EventAreaExitReq::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(EventAreaExitReq* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.EventAreaExitReq"; }
+
+  explicit EventAreaExitReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  EventAreaExitReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const EventAreaExitReq& from);
+  EventAreaExitReq(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, EventAreaExitReq&& from) noexcept
+      : EventAreaExitReq(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kEventKeyFieldNumber = 1,
+    kPosXFieldNumber = 2,
+    kPosYFieldNumber = 3,
+    kPosZFieldNumber = 4,
+  };
+  // int32 event_key = 1;
+  void clear_event_key() ;
+  ::int32_t event_key() const;
+  void set_event_key(::int32_t value);
+
+  private:
+  ::int32_t _internal_event_key() const;
+  void _internal_set_event_key(::int32_t value);
+
+  public:
+  // float pos_x = 2;
+  void clear_pos_x() ;
+  float pos_x() const;
+  void set_pos_x(float value);
+
+  private:
+  float _internal_pos_x() const;
+  void _internal_set_pos_x(float value);
+
+  public:
+  // float pos_y = 3;
+  void clear_pos_y() ;
+  float pos_y() const;
+  void set_pos_y(float value);
+
+  private:
+  float _internal_pos_y() const;
+  void _internal_set_pos_y(float value);
+
+  public:
+  // float pos_z = 4;
+  void clear_pos_z() ;
+  float pos_z() const;
+  void set_pos_z(float value);
+
+  private:
+  float _internal_pos_z() const;
+  void _internal_set_pos_z(float value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.EventAreaExitReq)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const EventAreaExitReq& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int32_t event_key_;
+    float pos_x_;
+    float pos_y_;
+    float pos_z_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fstage_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull EventAreaExitReq_class_data_;
+// -------------------------------------------------------------------
+
+class EventAreaEnterReq final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.EventAreaEnterReq) */ {
+ public:
+  inline EventAreaEnterReq() : EventAreaEnterReq(nullptr) {}
+  ~EventAreaEnterReq() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(EventAreaEnterReq* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(EventAreaEnterReq));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR EventAreaEnterReq(::google::protobuf::internal::ConstantInitialized);
+
+  inline EventAreaEnterReq(const EventAreaEnterReq& from) : EventAreaEnterReq(nullptr, from) {}
+  inline EventAreaEnterReq(EventAreaEnterReq&& from) noexcept
+      : EventAreaEnterReq(nullptr, ::std::move(from)) {}
+  inline EventAreaEnterReq& operator=(const EventAreaEnterReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline EventAreaEnterReq& operator=(EventAreaEnterReq&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const EventAreaEnterReq& default_instance() {
+    return *reinterpret_cast<const EventAreaEnterReq*>(
+        &_EventAreaEnterReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 5;
+  friend void swap(EventAreaEnterReq& a, EventAreaEnterReq& b) { a.Swap(&b); }
+  inline void Swap(EventAreaEnterReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(EventAreaEnterReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  EventAreaEnterReq* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<EventAreaEnterReq>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const EventAreaEnterReq& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const EventAreaEnterReq& from) { EventAreaEnterReq::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(EventAreaEnterReq* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.EventAreaEnterReq"; }
+
+  explicit EventAreaEnterReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  EventAreaEnterReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const EventAreaEnterReq& from);
+  EventAreaEnterReq(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, EventAreaEnterReq&& from) noexcept
+      : EventAreaEnterReq(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kEventKeyFieldNumber = 1,
+    kPosXFieldNumber = 2,
+    kPosYFieldNumber = 3,
+    kPosZFieldNumber = 4,
+  };
+  // int32 event_key = 1;
+  void clear_event_key() ;
+  ::int32_t event_key() const;
+  void set_event_key(::int32_t value);
+
+  private:
+  ::int32_t _internal_event_key() const;
+  void _internal_set_event_key(::int32_t value);
+
+  public:
+  // float pos_x = 2;
+  void clear_pos_x() ;
+  float pos_x() const;
+  void set_pos_x(float value);
+
+  private:
+  float _internal_pos_x() const;
+  void _internal_set_pos_x(float value);
+
+  public:
+  // float pos_y = 3;
+  void clear_pos_y() ;
+  float pos_y() const;
+  void set_pos_y(float value);
+
+  private:
+  float _internal_pos_y() const;
+  void _internal_set_pos_y(float value);
+
+  public:
+  // float pos_z = 4;
+  void clear_pos_z() ;
+  float pos_z() const;
+  void set_pos_z(float value);
+
+  private:
+  float _internal_pos_z() const;
+  void _internal_set_pos_z(float value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.EventAreaEnterReq)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const EventAreaEnterReq& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int32_t event_key_;
+    float pos_x_;
+    float pos_y_;
+    float pos_z_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fstage_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull EventAreaEnterReq_class_data_;
 
 // ===================================================================
 
@@ -1689,6 +2149,214 @@ inline ::int32_t StageNoticeNtf::_internal_duration_ms() const {
 inline void StageNoticeNtf::_internal_set_duration_ms(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.duration_ms_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// EventAreaEnterReq
+
+// int32 event_key = 1;
+inline void EventAreaEnterReq::clear_event_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.event_key_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::int32_t EventAreaEnterReq::event_key() const {
+  // @@protoc_insertion_point(field_get:GamePacket.EventAreaEnterReq.event_key)
+  return _internal_event_key();
+}
+inline void EventAreaEnterReq::set_event_key(::int32_t value) {
+  _internal_set_event_key(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_set:GamePacket.EventAreaEnterReq.event_key)
+}
+inline ::int32_t EventAreaEnterReq::_internal_event_key() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.event_key_;
+}
+inline void EventAreaEnterReq::_internal_set_event_key(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.event_key_ = value;
+}
+
+// float pos_x = 2;
+inline void EventAreaEnterReq::clear_pos_x() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_x_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline float EventAreaEnterReq::pos_x() const {
+  // @@protoc_insertion_point(field_get:GamePacket.EventAreaEnterReq.pos_x)
+  return _internal_pos_x();
+}
+inline void EventAreaEnterReq::set_pos_x(float value) {
+  _internal_set_pos_x(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:GamePacket.EventAreaEnterReq.pos_x)
+}
+inline float EventAreaEnterReq::_internal_pos_x() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_x_;
+}
+inline void EventAreaEnterReq::_internal_set_pos_x(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_x_ = value;
+}
+
+// float pos_y = 3;
+inline void EventAreaEnterReq::clear_pos_y() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_y_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline float EventAreaEnterReq::pos_y() const {
+  // @@protoc_insertion_point(field_get:GamePacket.EventAreaEnterReq.pos_y)
+  return _internal_pos_y();
+}
+inline void EventAreaEnterReq::set_pos_y(float value) {
+  _internal_set_pos_y(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:GamePacket.EventAreaEnterReq.pos_y)
+}
+inline float EventAreaEnterReq::_internal_pos_y() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_y_;
+}
+inline void EventAreaEnterReq::_internal_set_pos_y(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_y_ = value;
+}
+
+// float pos_z = 4;
+inline void EventAreaEnterReq::clear_pos_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline float EventAreaEnterReq::pos_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.EventAreaEnterReq.pos_z)
+  return _internal_pos_z();
+}
+inline void EventAreaEnterReq::set_pos_z(float value) {
+  _internal_set_pos_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:GamePacket.EventAreaEnterReq.pos_z)
+}
+inline float EventAreaEnterReq::_internal_pos_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_z_;
+}
+inline void EventAreaEnterReq::_internal_set_pos_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// EventAreaExitReq
+
+// int32 event_key = 1;
+inline void EventAreaExitReq::clear_event_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.event_key_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::int32_t EventAreaExitReq::event_key() const {
+  // @@protoc_insertion_point(field_get:GamePacket.EventAreaExitReq.event_key)
+  return _internal_event_key();
+}
+inline void EventAreaExitReq::set_event_key(::int32_t value) {
+  _internal_set_event_key(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_set:GamePacket.EventAreaExitReq.event_key)
+}
+inline ::int32_t EventAreaExitReq::_internal_event_key() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.event_key_;
+}
+inline void EventAreaExitReq::_internal_set_event_key(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.event_key_ = value;
+}
+
+// float pos_x = 2;
+inline void EventAreaExitReq::clear_pos_x() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_x_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline float EventAreaExitReq::pos_x() const {
+  // @@protoc_insertion_point(field_get:GamePacket.EventAreaExitReq.pos_x)
+  return _internal_pos_x();
+}
+inline void EventAreaExitReq::set_pos_x(float value) {
+  _internal_set_pos_x(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:GamePacket.EventAreaExitReq.pos_x)
+}
+inline float EventAreaExitReq::_internal_pos_x() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_x_;
+}
+inline void EventAreaExitReq::_internal_set_pos_x(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_x_ = value;
+}
+
+// float pos_y = 3;
+inline void EventAreaExitReq::clear_pos_y() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_y_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline float EventAreaExitReq::pos_y() const {
+  // @@protoc_insertion_point(field_get:GamePacket.EventAreaExitReq.pos_y)
+  return _internal_pos_y();
+}
+inline void EventAreaExitReq::set_pos_y(float value) {
+  _internal_set_pos_y(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:GamePacket.EventAreaExitReq.pos_y)
+}
+inline float EventAreaExitReq::_internal_pos_y() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_y_;
+}
+inline void EventAreaExitReq::_internal_set_pos_y(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_y_ = value;
+}
+
+// float pos_z = 4;
+inline void EventAreaExitReq::clear_pos_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline float EventAreaExitReq::pos_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.EventAreaExitReq.pos_z)
+  return _internal_pos_z();
+}
+inline void EventAreaExitReq::set_pos_z(float value) {
+  _internal_set_pos_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:GamePacket.EventAreaExitReq.pos_z)
+}
+inline float EventAreaExitReq::_internal_pos_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_z_;
+}
+inline void EventAreaExitReq::_internal_set_pos_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = value;
 }
 
 #ifdef __GNUC__

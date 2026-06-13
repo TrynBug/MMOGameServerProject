@@ -50,6 +50,8 @@ enum GamePacketId {
     GAME_PACKET_ID_STAGE_LOAD_COMPLETE_REQ = 4009; // 클라 -> 서버: 맵 로딩 완료 보고 (서버는 이때 스폰)
     GAME_PACKET_ID_STAGE_LOAD_COMPLETE_RES = 4010; // 서버 -> 클라: 입장 처리 완료 + 캐릭터 스폰 확정 (위치/방향 포함)
     GAME_PACKET_ID_STAGE_NOTICE_NTF        = 4011; // 서버 -> 클라: Stage 공지 배너 (스크립트 Notice())
+    GAME_PACKET_ID_EVENT_AREA_ENTER_REQ    = 4012; // 클라 -> 서버: 이벤트영역 진입 선보고 (서버가 권위 위치로 검증 후 트리거)
+    GAME_PACKET_ID_EVENT_AREA_EXIT_REQ     = 4013; // 클라 -> 서버: 이벤트영역 이탈 선보고
 
     // 5000~5999: 던전
     GAME_PACKET_ID_PUBLIC_DUNGEON_LIST_REQ  = 5001;   // 클라 -> 서버: 공용던전 목록 요청
