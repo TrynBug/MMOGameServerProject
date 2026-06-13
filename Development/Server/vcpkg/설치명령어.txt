@@ -7,20 +7,24 @@ vcpkg install protobuf --overlay-triplets=D:/project/MMOGameServerProject/Develo
 # 설치한 라이브러리 목록
 vcpkg list --x-install-root=D:/project/MMOGameServerProject/Development/Server/vcpkg
 
-abseil:x64-windows                                20260107.1#2        Abseil is an open-source collection of C++ libra...
-abseil:x64-windows-static-md-2022                 20260107.1#2        Abseil is an open-source collection of C++ libra...
-fmt:x64-windows-static-md-2022                    12.1.0              {fmt} is an open-source formatting library provi...
-protobuf:x64-windows                              6.33.4#2            Google's language-neutral, platform-neutral, ext...
-protobuf:x64-windows-static-md-2022               6.33.4#2            Google's language-neutral, platform-neutral, ext...
-spdlog:x64-windows-static-md-2022                 1.17.0              Very fast, header-only/compiled, C++ logging lib...
-spdlog[fmt]:x64-windows-static-md-2022                                Use fmt library
-spdlog[tz-offset]:x64-windows-static-md-2022                          Omit %z timezone offset (use on platforms withou...
-utf8-range:x64-windows                            6.33.4              Fast UTF-8 validation with Range algorithm (NEON...
-utf8-range:x64-windows-static-md-2022             6.33.4              Fast UTF-8 validation with Range algorithm (NEON...
+abseil:x64-windows                                20260107.1#2 
+abseil:x64-windows-static-md-2022                 20260107.1#2  
+fmt:x64-windows-static-md-2022                    12.1.0  
+protobuf:x64-windows                              6.33.4#2  
+protobuf:x64-windows-static-md-2022               6.33.4#2   
+spdlog:x64-windows-static-md-2022                 1.17.0    
+spdlog[fmt]:x64-windows-static-md-2022                                
+spdlog[tz-offset]:x64-windows-static-md-2022                          
+utf8-range:x64-windows                            6.33.4              
+utf8-range:x64-windows-static-md-2022             6.33.4              
 vcpkg-cmake-config:x64-windows                    2024-05-23
 vcpkg-cmake:x64-windows                           2024-04-23
+sol2:x64-windows-static-md-2022                   3.5.0#1
+lua:x64-windows-static-md-2022                    5.4.7#1
 
 
 # 설치한 라이브러리 이름
 protobuf
 spdlog
+lua
+sol2
