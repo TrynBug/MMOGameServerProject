@@ -69,6 +69,9 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<ObjectDeathNtf>(GamePacketId.ObjectDeathNtf, onObjectDeathNtf);
             PacketDispatcher.Instance.Register<StageNoticeNtf>(GamePacketId.StageNoticeNtf, onStageNoticeNtf);
 
+            // 이벤트영역 진입/이탈 감지기(로컬 플레이어 위치로 매 프레임 판정 → Req 송신).
+            gameObject.AddComponent<EventAreaDetector>();
+
             Debug.Log("[StageManager] Ready.");
         }
 
