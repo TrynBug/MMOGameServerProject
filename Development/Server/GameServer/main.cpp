@@ -49,7 +49,6 @@ int main()
 
     // 컨텐츠 스레드
     // ini의 NumContentsThreads가 0이면 CPU 코어 수 - 1로 자동 설정
-    // (서버구조개요.md 의도: 오픈필드 전용 스레드 1개 + 일반 컨텐츠 스레드 여러 개)
     config.numContentsThreads = configParser.GetInt32("Contents", "NumContentsThreads", 0);
     if (config.numContentsThreads <= 0)
     {

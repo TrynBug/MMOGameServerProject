@@ -225,7 +225,7 @@ void MonsterCombatComponent::onCastStrike()
 
 void MonsterCombatComponent::CancelCast()
 {
-    // 자원 환불 없음 (스킬.md 규칙). 사망/CC 시 호출.
+    // 자원 환불 없음. 사망/CC 시 호출.
     m_castPhase       = EMonsterCastPhase::None;
     m_castSkillIndex  = -1;
     m_castRemainingMs = 0;

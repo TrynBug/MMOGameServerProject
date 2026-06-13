@@ -26,6 +26,9 @@ class MonsterSpawner;
 // Stage 로직 Lua 스크립트 실행기. unique_ptr 보관(소멸자는 .cpp).
 class StageScript;
 
+// 이벤트영역(StageObject 파생). shared_ptr 보관이라 헤더에서는 전방선언만.
+class EventArea;
+
 // Character forward declaration (StageMsg_UserEnter 등에서 사용).
 class Character;
 using CharacterPtr = std::shared_ptr<Character>;
@@ -386,6 +389,14 @@ protected:
     // name 으로 치트 핸들러를 찾아 실행하고 CheatRes 로 결과 메시지를 회신한다 (StageCheat.cpp / Stage.cpp).
     void handleCheatReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
 
+    // 이벤트영역 진입/이탈 선보고(클라 -> 서버). 권위 위치로 검증 후 스크립트 콜백 발동.
+    // 단, secure 영역은 이 보고를 무시하고 pollSecureEventAreas 가 매 tick 권위 위치로 직접 판정한다.
+    void handleEventAreaEnterReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+    void handleEventAreaExitReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+
+    // secure 이벤트영역을 매 tick 서버 권위 위치로 폴링해 진입/이탈 콜백을 발동(OnUpdate 4.7).
+    void pollSecureEventAreas();
+
     // ── 유저 컨테이너 접근 ──
     const std::unordered_map<int64, UserPtr>& GetUsers() const { return m_users; }
 
@@ -503,6 +514,11 @@ private:
 
     // Stage 로직 스크립트(Lua). 스크립트 파일이 있는 Stage 만 생성된다(없으면 nullptr).
     std::unique_ptr<StageScript>    m_pScript;
+
+    // 이벤트영역(인스턴스별). eventKey -> EventArea 객체(지오메트리 + occupant 상태 보유).
+    // OnStart 에서 레이아웃 배치데이터로 생성. AOI 통보 안 함 — sector/m_objects 에 등록하지 않는다.
+    // 진입/이탈 핸들러가 권위 위치를 객체의 Contains 로 검증하고 occupant 를 추적한다(§8 클라 선판정).
+    std::unordered_map<int32, std::shared_ptr<EventArea>> m_eventAreas;
 
     // ── 스킬 효과 ──────────────────────────────
     // 진행 중인 범위 효과(AreaEffect)들. updateSkillEffects 에서 tick + 만료 sweep.

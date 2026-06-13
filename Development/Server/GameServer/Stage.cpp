@@ -8,6 +8,7 @@
 #include "StageLayout.h"
 #include "MonsterSpawner.h"
 #include "StageScript.h"
+#include "EventArea.h"
 #include "Skill/EffectShape.h"
 #include "Skill/EffectParams.h"
 #include "Skill/AreaEffect.h"
@@ -373,6 +374,24 @@ void Stage::OnStart()
     if (m_pLayout)
         m_pSpawner->Load(*this, *m_pLayout);
 
+    // 이벤트영역 객체 생성(인스턴스별). 레이아웃 배치데이터마다 EventArea(StageObject 파생)를 만든다.
+    // objectId 는 내부 핸들(네트워크 비노출). AOI 통보 안 함 — sector/m_objects 에 등록하지 않는다.
+    if (m_pLayout)
+    {
+        for (const auto& placement : m_pLayout->GetEventAreas())
+        {
+            const int64 objectId = GameServer::Instance().GenerateObjectId();
+            auto spEventArea = std::make_shared<EventArea>();
+            if (!spEventArea->Initialize(objectId, placement))
+            {
+                LOG_WRITE(LogLevel::Error, std::format("EventArea Initialize failed. stageId={} eventKey={}", m_stageId, placement.key));
+                continue;
+            }
+            spEventArea->SetStage(this);
+            m_eventAreas.emplace(placement.key, std::move(spEventArea));
+        }
+    }
+
     // Stage 로직 스크립트 로드 (GameData_Stage.ScriptName1~3, 빈 슬롯 제외).
     // 파일 경로는 StageScript 가 Map/StageScript/<이름>.lua 로 해석한다.
     std::vector<std::string> scriptNames;
@@ -415,6 +434,10 @@ void Stage::OnUpdate(int64 deltaMs)
     // 4.6 Stage 스크립트 (타이머 만기 → Lua 콜백).
     if (m_pScript)
         m_pScript->Update(deltaMs);
+
+    // 4.7 secure 이벤트영역 폴링 (클라 미신뢰 영역만 — 서버가 권위 위치로 직접 진입/이탈 판정).
+    if (!m_eventAreas.empty())
+        pollSecureEventAreas();
 
     // 5. 파생 클래스 로직
     OnStageUpdate(deltaMs);
@@ -874,6 +897,11 @@ void Stage::OnUserLeave(int64 userId)
     if (m_pScript)
         m_pScript->CallOnPlayerLeave(userId);
 
+    // 이벤트영역 occupant 에서 제거 — 영역 안에 있던 채로 떠나도 stale 항목이 남지 않게.
+    // (남으면 같은 유저 재입장 시 진입 보고가 중복방지에 걸려 콜백이 안 뜸.)
+    for (auto& [eventKey, spEventArea] : m_eventAreas)
+        spEventArea->RemoveOccupant(userId);
+
     // 주변 sector의 다른 캐릭터들에게 despawn broadcast.
     if (leavingObjectId != 0)
     {
@@ -922,6 +950,8 @@ const Stage::UserPacketHandlerMap& Stage::getUserPacketHandlerMap() const
         { Common::GAME_PACKET_ID_SKILL_PROJECTILE_HIT_REQ, &Stage::handleSkillProjectileHitReq },
         { Common::GAME_PACKET_ID_STAGE_MOVE_REQ,           &Stage::handleStageMoveReq },
         { Common::GAME_PACKET_ID_STAGE_LOAD_COMPLETE_REQ,  &Stage::handleStageLoadCompleteReq },
+        { Common::GAME_PACKET_ID_EVENT_AREA_ENTER_REQ,     &Stage::handleEventAreaEnterReq },
+        { Common::GAME_PACKET_ID_EVENT_AREA_EXIT_REQ,      &Stage::handleEventAreaExitReq },
 #ifdef _DEBUG
         { Common::GAME_PACKET_ID_CHEAT_REQ,                &Stage::handleCheatReq },
 #endif
@@ -1153,6 +1183,139 @@ void Stage::handleSkillProjectileHitReq(const UserPtr& spUser, const netlib::Pac
         OnSkillProjectileHit(item.effect_id(), item.projectile_index(), item.target_object_id(),
                              item.exploded_at_max_range(), item.exploded_on_terrain(),
                              item.hit_x(), item.hit_z());
+    }
+}
+
+void Stage::handleEventAreaEnterReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+{
+    GamePacket::EventAreaEnterReq req;
+    if (!deserializeUserPacket(spUser, spPacket, req))
+        return;
+
+    const int64 userId   = spUser->GetUserId();
+    const int32 eventKey = req.event_key();
+
+    // 1) 유효 영역인지(레이아웃에 정의 + OnStart 에서 생성된 키).
+    auto it = m_eventAreas.find(eventKey);
+    if (it == m_eventAreas.end())
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("EventAreaEnterReq unknown key. stageId={} userId={} eventKey={}",
+            m_stageId, userId, eventKey));
+        return;
+    }
+    EventArea& area = *it->second;
+
+    // secure 영역은 클라 보고를 무시한다 — 서버가 매 tick 권위 위치로 직접 폴링한다(pollSecureEventAreas).
+    if (area.IsSecure())
+        return;
+
+    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+    if (!spCharacter || spCharacter->GetStage() != this)
+        return;
+
+    // 2) 검증 — 클라는 예측 이동이라 서버의 권위 위치는 latency 만큼 뒤처진다.
+    //    권위 위치를 직접 영역과 비교하면 그 lag 만큼 거의 항상 빗나가므로(=mismatch 경고 폭주),
+    //    영역 판정은 클라가 보고한 위치로 하고, 권위 위치와의 괴리는 "이동속도×lag시간"으로만 제한한다(거짓 보고 방지).
+    const float rx = req.pos_x();
+    const float ry = req.pos_y();
+    const float rz = req.pos_z();
+
+    constexpr float kReportedBoundaryTol = 0.5f;   // 보고 위치의 경계 지터 허용(m).
+    constexpr float kLagSeconds          = 0.5f;   // 권위 위치가 보고보다 뒤처질 수 있는 시간(예측 이동 lag).
+    constexpr float kAntiCheatMargin     = 1.0f;   // 위에 더하는 고정 여유(m).
+
+    // (a) 보고 위치가 영역 안인가 — 클라가 감지한 진입점.
+    if (!area.Contains(rx, rz, kReportedBoundaryTol))
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("EventAreaEnterReq reported pos not in area. stageId={} userId={} eventKey={}",
+            m_stageId, userId, eventKey));
+        return;
+    }
+
+    // (b) 보고 위치가 권위 위치에서 "이동속도×lag + 여유" 이내인가 — 멀리 떨어진 영역을 거짓 보고하는 것 방지.
+    const float moveSpeed = static_cast<float>(spCharacter->GetStat().Get(EStat::MoveSpdTotal));
+    const float maxGap    = moveSpeed * kLagSeconds + kAntiCheatMargin;
+    const float gdx = rx - spCharacter->GetPosX();
+    const float gdz = rz - spCharacter->GetPosZ();
+    if (gdx * gdx + gdz * gdz > maxGap * maxGap)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("EventAreaEnterReq reported pos too far from authoritative. stageId={} userId={} eventKey={} maxGap={:.1f}",
+            m_stageId, userId, eventKey, maxGap));
+        return;
+    }
+
+    // 3) 중복 진입 방지 — 이미 안에 있으면 콜백 재발동 안 함(클라 Enter 재전송도 여기서 흡수).
+    if (!area.AddOccupant(userId))
+        return;
+
+    // 4) 스크립트 트리거. loc 은 영역 안으로 검증된 보고 위치를 넘긴다.
+    if (m_pScript)
+        m_pScript->CallOnEnterEventArea(eventKey, userId, rx, ry, rz);
+}
+
+void Stage::handleEventAreaExitReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+{
+    GamePacket::EventAreaExitReq req;
+    if (!deserializeUserPacket(spUser, spPacket, req))
+        return;
+
+    const int64 userId   = spUser->GetUserId();
+    const int32 eventKey = req.event_key();
+
+    auto it = m_eventAreas.find(eventKey);
+    if (it == m_eventAreas.end())
+        return;
+
+    // secure 영역은 클라 보고를 무시한다 — 폴링이 권위(pollSecureEventAreas).
+    if (it->second->IsSecure())
+        return;
+
+    // 안에 있던 유저만 이탈 처리(중복/허위 이탈 무시). 이탈은 관대하게 — 위치 재검증 생략.
+    if (!it->second->RemoveOccupant(userId))
+        return;
+
+    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+    const float px = spCharacter ? spCharacter->GetPosX() : req.pos_x();
+    const float py = spCharacter ? spCharacter->GetPosY() : req.pos_y();
+    const float pz = spCharacter ? spCharacter->GetPosZ() : req.pos_z();
+
+    if (m_pScript)
+        m_pScript->CallOnExitEventArea(eventKey, userId, px, py, pz);
+}
+
+// secure 영역만 서버가 권위 위치로 직접 폴링한다(클라 보고 미신뢰 — 안티익스플로잇 게이트 등).
+// secure 영역은 소수라 영역수×유저수 비용은 작다. 비-secure 영역은 클라 보고로 구동(폴링 안 함).
+void Stage::pollSecureEventAreas()
+{
+    for (auto& [eventKey, spArea] : m_eventAreas)
+    {
+        EventArea& area = *spArea;
+        if (!area.IsSecure())
+            continue;
+
+        for (auto& [userId, spUser] : m_users)
+        {
+            CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+            if (!spCharacter || spCharacter->GetStage() != this)
+                continue;
+
+            const float px = spCharacter->GetPosX();
+            const float pz = spCharacter->GetPosZ();
+            const bool inside = area.Contains(px, pz, 0.f);   // 권위 위치 직접 — secure 는 서버가 진실
+
+            if (inside)
+            {
+                // 신규 진입이면(AddOccupant==true) 콜백.
+                if (area.AddOccupant(userId) && m_pScript)
+                    m_pScript->CallOnEnterEventArea(eventKey, userId, px, spCharacter->GetPosY(), pz);
+            }
+            else
+            {
+                // 안에 있다가 나갔으면(RemoveOccupant==true) 콜백.
+                if (area.RemoveOccupant(userId) && m_pScript)
+                    m_pScript->CallOnExitEventArea(eventKey, userId, px, spCharacter->GetPosY(), pz);
+            }
+        }
     }
 }
 

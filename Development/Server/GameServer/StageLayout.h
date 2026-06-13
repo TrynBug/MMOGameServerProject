@@ -13,8 +13,8 @@
 // 배치데이터(Map/StageLayout/<stageDataKey>.json)를 로드한다.
 // 스크립트/스포너는 좌표를 손입력하지 않고 이 배치를 Key 로 참조한다.
 //
-// v1: Spawner(key+pos+radius) + SpawnPoint(key+pos+yaw) + Waypoint(key+points) 로드.
-//     (EventArea 등은 후속 단계에서 확장.)
+// v1: Spawner(key+pos+radius) + SpawnPoint(key+pos+yaw) + Waypoint(key+points)
+//     + EventArea(key+shape+center+크기) 로드.
 //
 // 스레드: Stage 당 1개, 컨텐츠 스레드 전용(락 없음).
 class StageLayout
@@ -44,19 +44,37 @@ public:
         std::vector<std::array<float, 3>> points;   // (x, y, z) 순서
     };
 
+    // 이벤트영역 배치데이터(에디터 export). 런타임 상태/판정은 EventArea(StageObject 파생)가 갖는다.
+    // 모양 판정은 평면(X-Z)으로만 한다(쿼터뷰·NavMesh 게임이라 높이 무시).
+    struct EventArea
+    {
+        int32 key    = 0;
+        int32 shape  = 0;     // 0 = Sphere(원), 1 = Box(AABB)
+        float cx     = 0.f;   // center
+        float cy     = 0.f;
+        float cz     = 0.f;
+        float radius = 0.f;   // Sphere 반경
+        float sizeX  = 0.f;   // Box 전체 크기(extent)
+        float sizeZ  = 0.f;
+        bool  secure = false; // true = 클라 미신뢰. 서버가 매 tick 권위 위치로 직접 폴링.
+    };
+
     // stageDataKey 의 레이아웃 파일을 로드한다.
     // 파일이 없으면 빈 레이아웃으로 두고 true 를 반환한다(레이아웃 없는 Stage 는 정상).
     // 파일이 있으나 파싱 실패하면 false.
     bool Load(int32 stageDataKey);
 
-    const std::vector<SpawnerPlacement>& GetSpawners() const { return m_spawners; }
+    const std::vector<SpawnerPlacement>& GetSpawners()   const { return m_spawners; }
+    const std::vector<EventArea>&        GetEventAreas() const { return m_eventAreas; }
 
     // Key 로 조회. 없으면 nullptr.
     const SpawnPoint* GetSpawnPoint(int32 key) const;
     const Waypoint*   GetWaypoint(int32 key) const;
+    const EventArea*  GetEventArea(int32 key) const;
 
 private:
     std::vector<SpawnerPlacement> m_spawners;
     std::vector<SpawnPoint>       m_spawnPoints;
     std::vector<Waypoint>         m_waypoints;
+    std::vector<EventArea>        m_eventAreas;
 };

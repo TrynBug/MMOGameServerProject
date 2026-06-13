@@ -66,6 +66,30 @@ bool StageLayout::Load(int32 stageDataKey)
                 m_waypoints.push_back(std::move(wp));
             }
         }
+
+        if (j.contains("eventAreas"))
+        {
+            for (const auto& e : j["eventAreas"])
+            {
+                EventArea ea;
+                ea.key = e.at("key").get<int32>();
+                const std::string shape = e.value("shape", std::string("Sphere"));
+                ea.shape = (shape == "Box") ? 1 : 0;
+                const auto& center = e.at("center");
+                ea.cx = center.at(0).get<float>();
+                ea.cy = center.at(1).get<float>();
+                ea.cz = center.at(2).get<float>();
+                ea.radius = e.value("radius", 0.0f);
+                if (e.contains("size"))   // Box 전체 크기 [x, y, z] (평면 판정엔 x, z 만 사용)
+                {
+                    const auto& size = e.at("size");
+                    ea.sizeX = size.at(0).get<float>();
+                    ea.sizeZ = size.at(2).get<float>();
+                }
+                ea.secure = e.value("secure", false);
+                m_eventAreas.push_back(ea);
+            }
+        }
     }
     catch (const std::exception& e)
     {
@@ -73,8 +97,8 @@ bool StageLayout::Load(int32 stageDataKey)
         return false;
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("StageLayout loaded. stageDataKey={} spawners={} spawnPoints={} waypoints={}",
-        stageDataKey, m_spawners.size(), m_spawnPoints.size(), m_waypoints.size()));
+    LOG_WRITE(LogLevel::Info, std::format("StageLayout loaded. stageDataKey={} spawners={} spawnPoints={} waypoints={} eventAreas={}",
+        stageDataKey, m_spawners.size(), m_spawnPoints.size(), m_waypoints.size(), m_eventAreas.size()));
     return true;
 }
 
@@ -91,5 +115,13 @@ const StageLayout::Waypoint* StageLayout::GetWaypoint(int32 key) const
     for (const auto& wp : m_waypoints)
         if (wp.key == key)
             return &wp;
+    return nullptr;
+}
+
+const StageLayout::EventArea* StageLayout::GetEventArea(int32 key) const
+{
+    for (const auto& ea : m_eventAreas)
+        if (ea.key == key)
+            return &ea;
     return nullptr;
 }

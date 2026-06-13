@@ -33,6 +33,9 @@
     <ClCompile Include="StageObject.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="EventArea.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="ActorObject.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -141,6 +144,9 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="StageObject.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="EventArea.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="ActorObject.h">

@@ -23,7 +23,6 @@ enum class EUserStageState
 };
 
 // 유저(클라이언트) 1명을 나타내는 클래스
-// 서버구조개요.md의 '유저 클래스' 절 참조.
 //
 // - 1개 Stage 객체에 소유된다 (Stage가 shared_ptr로 보유).
 // - 단일 컨텐츠 스레드(소유 Stage의 스레드)에서만 업데이트되므로 내부는 single-thread로 작성.

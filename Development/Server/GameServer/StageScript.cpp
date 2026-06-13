@@ -256,6 +256,23 @@ bool StageScript::Load(Stage& stage, const std::vector<std::string>& scriptNames
         return sol::make_object(lua, arr);
     });
 
+    // 이벤트영역 정보 조회. 없으면 nil.
+    //   GetEventArea(key) -> { x, y, z(중심), shape(0=Sphere/1=Box), radius, sizeX, sizeZ }
+    m_pImpl->lua.set_function("GetEventArea", [self](int32 key) -> sol::object
+    {
+        sol::state& lua = self->m_pImpl->lua;
+        const StageLayout* layout = self->m_pStage->m_pLayout;
+        const StageLayout::EventArea* ea = layout ? layout->GetEventArea(key) : nullptr;
+        if (!ea)
+            return sol::make_object(lua, sol::lua_nil);
+        sol::table t = lua.create_table();
+        t["x"] = ea->cx; t["y"] = ea->cy; t["z"] = ea->cz;
+        t["shape"] = ea->shape;
+        t["radius"] = ea->radius;
+        t["sizeX"] = ea->sizeX; t["sizeZ"] = ea->sizeZ;
+        return sol::make_object(lua, t);
+    });
+
     // 스포너 on/off (Manual 존 구동 등). MonsterSpawner 가 밀도/리스폰/팩 처리.
     m_pImpl->lua.set_function("ActivateSpawner", [stagePtr](int32 spawnerKey)
     {
@@ -511,6 +528,42 @@ void StageScript::CallOnPlayerLeave(int64 userId)
         {
             sol::error e = r;
             LOG_WRITE(LogLevel::Error, std::format("OnPlayerLeave error: {}", e.what()));
+        }
+    }
+}
+
+void StageScript::CallOnEnterEventArea(int32 eventKey, int64 userId, float x, float y, float z)
+{
+    for (auto& env : m_pImpl->scripts)
+    {
+        sol::protected_function fn = env["OnEnterEventArea"];
+        if (!fn.valid())
+            continue;
+
+        armGuard(m_pImpl->lua);
+        sol::protected_function_result r = fn(eventKey, userId, x, y, z);
+        if (!r.valid())
+        {
+            sol::error e = r;
+            LOG_WRITE(LogLevel::Error, std::format("OnEnterEventArea error: {}", e.what()));
+        }
+    }
+}
+
+void StageScript::CallOnExitEventArea(int32 eventKey, int64 userId, float x, float y, float z)
+{
+    for (auto& env : m_pImpl->scripts)
+    {
+        sol::protected_function fn = env["OnExitEventArea"];
+        if (!fn.valid())
+            continue;
+
+        armGuard(m_pImpl->lua);
+        sol::protected_function_result r = fn(eventKey, userId, x, y, z);
+        if (!r.valid())
+        {
+            sol::error e = r;
+            LOG_WRITE(LogLevel::Error, std::format("OnExitEventArea error: {}", e.what()));
         }
     }
 }
