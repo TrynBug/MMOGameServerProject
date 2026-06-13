@@ -145,6 +145,11 @@ public class AIEditorBridge
                 HandleBuildNavMesh(GetArg(args, 0));
                 break;
 
+            // StageLayout export (Spawner/SpawnPoint/EventArea/Waypoint 마커 -> 서버 json)
+            case "EXPORT_STAGELAYOUT":
+                HandleExportStageLayout(GetArg(args, 0));
+                break;
+
             // 콘솔/정보
             case "GET_CONSOLE_LOGS":
                 HandleGetConsoleLogs();
@@ -691,6 +696,54 @@ public class AIEditorBridge
         if (!string.IsNullOrEmpty(serverPath))
             sb.AppendLine($"Server: {serverPath}");
         WriteResult(success, sb.ToString());
+    }
+
+    // StageLayoutExportMenu.ExportScene 을 리플렉션으로 호출 (BUILD_NAVMESH 와 동일 패턴).
+    private static void HandleExportStageLayout(string sceneName)
+    {
+        if (string.IsNullOrEmpty(sceneName))
+            sceneName = SceneManager.GetActiveScene().name;
+
+        if (string.IsNullOrEmpty(sceneName))
+        {
+            WriteResult(false, "EXPORT_STAGELAYOUT: 활성 씬이 저장되지 않았거나 sceneName 인자가 비어있습니다.");
+            return;
+        }
+
+        Type menuType = Type.GetType("Client.EditorTools.StageLayoutExportMenu, Assembly-CSharp-Editor");
+        if (menuType == null)
+        {
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                menuType = asm.GetType("Client.EditorTools.StageLayoutExportMenu");
+                if (menuType != null) break;
+            }
+        }
+
+        if (menuType == null)
+        {
+            WriteResult(false, "EXPORT_STAGELAYOUT: StageLayoutExportMenu 타입을 찾을 수 없습니다.");
+            return;
+        }
+
+        var exportMethod = menuType.GetMethod("ExportScene", BindingFlags.Static | BindingFlags.Public);
+        if (exportMethod == null)
+        {
+            WriteResult(false, "EXPORT_STAGELAYOUT: StageLayoutExportMenu.ExportScene 메서드를 찾을 수 없습니다.");
+            return;
+        }
+
+        object resultObj = exportMethod.Invoke(null, new object[] { sceneName });
+        if (resultObj == null)
+        {
+            WriteResult(false, "EXPORT_STAGELAYOUT: ExportScene 이 null 을 반환했습니다.");
+            return;
+        }
+
+        Type resultType = resultObj.GetType();
+        bool success = (bool)(resultType.GetField("success")?.GetValue(resultObj) ?? false);
+        string message = resultType.GetField("message")?.GetValue(resultObj) as string ?? "";
+        WriteResult(success, message);
     }
 
     private static void HandleProjectInfo()
