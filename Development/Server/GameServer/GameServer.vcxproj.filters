@@ -13,67 +13,118 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="소스 파일\Map">
-      <UniqueIdentifier>{0bfea7d2-f2ea-4b32-8576-6fb50cf152ab}</UniqueIdentifier>
+    <Filter Include="소스 파일\StageObjects">
+      <UniqueIdentifier>{6173640f-0611-4e51-b2c8-d9ab79e4cd36}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Skill">
+    <Filter Include="소스 파일\Stages">
+      <UniqueIdentifier>{5e2a693d-6f43-433e-bf42-50de158da08f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Skills">
       <UniqueIdentifier>{a3e1c2d4-5b6f-4a7c-9d8e-1f2a3b4c5d6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Managers">
+      <UniqueIdentifier>{8c653779-5c2e-4d31-9a5b-c10f21bf719c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Components">
+      <UniqueIdentifier>{685a254d-e5b3-4e40-b5d0-7425c55f026b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Stage.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="StageSkill.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Components\BasicStatComponent.cpp">
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
-    <ClCompile Include="StageObject.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Components\BuffComponent.cpp">
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
-    <ClCompile Include="EventArea.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Components\CharacterStatComponent.cpp">
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
-    <ClCompile Include="ActorObject.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Components\MonsterCombatComponent.cpp">
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
-    <ClCompile Include="Sector.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Components\MonsterFsmAI.cpp">
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
-    <ClCompile Include="SystemStage.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Components\StatComponentBase.cpp">
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
-    <ClCompile Include="Town.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Managers\CheatManager.cpp">
+      <Filter>소스 파일\Managers</Filter>
     </ClCompile>
-    <ClCompile Include="Field.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Managers\NavMeshManager.cpp">
+      <Filter>소스 파일\Managers</Filter>
     </ClCompile>
-    <ClCompile Include="User.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Managers\StageAssetManager.cpp">
+      <Filter>소스 파일\Managers</Filter>
     </ClCompile>
-    <ClCompile Include="Character.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Managers\StageManager.cpp">
+      <Filter>소스 파일\Managers</Filter>
     </ClCompile>
-    <ClCompile Include="Monster.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Components\SkillComponent.cpp">
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
-    <ClCompile Include="WaypointMover.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Skills\AreaEffect.cpp">
+      <Filter>소스 파일\Skills</Filter>
     </ClCompile>
-    <ClCompile Include="CharacterStatComponent.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Skills\ProjectileGroup.cpp">
+      <Filter>소스 파일\Skills</Filter>
     </ClCompile>
-    <ClCompile Include="StatComponentBase.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Skills\SkillBake.cpp">
+      <Filter>소스 파일\Skills</Filter>
     </ClCompile>
-    <ClCompile Include="BasicStatComponent.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="StageObjects\ActorObject.cpp">
+      <Filter>소스 파일\StageObjects</Filter>
     </ClCompile>
-    <ClCompile Include="StageManager.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="StageObjects\Character.cpp">
+      <Filter>소스 파일\StageObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="StageObjects\EventArea.cpp">
+      <Filter>소스 파일\StageObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="StageObjects\Monster.cpp">
+      <Filter>소스 파일\StageObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="StageObjects\StageObject.cpp">
+      <Filter>소스 파일\StageObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="Stages\Field.cpp">
+      <Filter>소스 파일\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="Stages\Sector.cpp">
+      <Filter>소스 파일\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="Stages\Stage.cpp">
+      <Filter>소스 파일\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="Stages\StageLayout.cpp">
+      <Filter>소스 파일\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="Stages\StageNavMesh.cpp">
+      <Filter>소스 파일\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="Stages\StageScript.cpp">
+      <Filter>소스 파일\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="Stages\SystemStage.cpp">
+      <Filter>소스 파일\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="Stages\Town.cpp">
+      <Filter>소스 파일\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="Stages\StageSkill.cpp">
+      <Filter>소스 파일\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="StageObjects\MonsterSpawner.cpp">
+      <Filter>소스 파일\StageObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="StageObjects\WaypointMover.cpp">
+      <Filter>소스 파일\StageObjects</Filter>
     </ClCompile>
     <ClCompile Include="GameServer.cpp">
       <Filter>소스 파일</Filter>
@@ -81,53 +132,110 @@
     <ClCompile Include="PacketSender.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Map\NavMeshManager.cpp">
-      <Filter>소스 파일\Map</Filter>
-    </ClCompile>
-    <ClCompile Include="StageNavMesh.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="StageLayout.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="StageAssetManager.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MonsterSpawner.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="StageScript.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MonsterFsmAI.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Skill\AreaEffect.cpp">
-      <Filter>소스 파일\Skill</Filter>
-    </ClCompile>
-    <ClCompile Include="Skill\ProjectileGroup.cpp">
-      <Filter>소스 파일\Skill</Filter>
-    </ClCompile>
-    <ClCompile Include="Skill\SkillBake.cpp">
-      <Filter>소스 파일\Skill</Filter>
-    </ClCompile>
-    <ClCompile Include="SkillComponent.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="BuffComponent.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="CheatManager.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MonsterCombatComponent.cpp">
+    <ClCompile Include="User.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Components\BasicStatComponent.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\BuffComponent.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\CharacterStatComponent.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\IMonsterAI.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\MonsterCombatComponent.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\MonsterFsmAI.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\StatComponentBase.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Managers\CheatManager.h">
+      <Filter>소스 파일\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Managers\NavMeshManager.h">
+      <Filter>소스 파일\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Managers\StageAssetManager.h">
+      <Filter>소스 파일\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Managers\StageManager.h">
+      <Filter>소스 파일\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\SkillComponent.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\AreaEffect.h">
+      <Filter>소스 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\EffectParams.h">
+      <Filter>소스 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\EffectShape.h">
+      <Filter>소스 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\MonsterProjectile.h">
+      <Filter>소스 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\ProjectileGroup.h">
+      <Filter>소스 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\SkillBake.h">
+      <Filter>소스 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="StageObjects\ActorObject.h">
+      <Filter>소스 파일\StageObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="StageObjects\Character.h">
+      <Filter>소스 파일\StageObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="StageObjects\EventArea.h">
+      <Filter>소스 파일\StageObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="StageObjects\Monster.h">
+      <Filter>소스 파일\StageObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="StageObjects\StageObject.h">
+      <Filter>소스 파일\StageObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="Stages\Field.h">
+      <Filter>소스 파일\Stages</Filter>
+    </ClInclude>
+    <ClInclude Include="Stages\Sector.h">
+      <Filter>소스 파일\Stages</Filter>
+    </ClInclude>
+    <ClInclude Include="Stages\Stage.h">
+      <Filter>소스 파일\Stages</Filter>
+    </ClInclude>
+    <ClInclude Include="Stages\StageLayout.h">
+      <Filter>소스 파일\Stages</Filter>
+    </ClInclude>
+    <ClInclude Include="Stages\StageNavMesh.h">
+      <Filter>소스 파일\Stages</Filter>
+    </ClInclude>
+    <ClInclude Include="Stages\StageScript.h">
+      <Filter>소스 파일\Stages</Filter>
+    </ClInclude>
+    <ClInclude Include="Stages\SystemStage.h">
+      <Filter>소스 파일\Stages</Filter>
+    </ClInclude>
+    <ClInclude Include="Stages\Town.h">
+      <Filter>소스 파일\Stages</Filter>
+    </ClInclude>
+    <ClInclude Include="StageObjects\MonsterSpawner.h">
+      <Filter>소스 파일\StageObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="StageObjects\WaypointMover.h">
+      <Filter>소스 파일\StageObjects</Filter>
+    </ClInclude>
     <ClInclude Include="GameServer.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
@@ -137,110 +245,14 @@
     <ClInclude Include="pch.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="GameServerDefine.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Stage.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="StageObject.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="EventArea.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ActorObject.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Sector.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemStage.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Town.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Field.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
     <ClInclude Include="User.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Character.h">
+    <ClInclude Include="Components\BuffInstance.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="GameServerDefine.h">
       <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Monster.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="WaypointMover.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="CharacterStatComponent.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="StatComponentBase.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="BasicStatComponent.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="StageManager.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Map\NavMeshManager.h">
-      <Filter>소스 파일\Map</Filter>
-    </ClInclude>
-    <ClInclude Include="StageNavMesh.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="StageLayout.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="StageAssetManager.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MonsterSpawner.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="StageScript.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="IMonsterAI.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MonsterFsmAI.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Skill\EffectShape.h">
-      <Filter>소스 파일\Skill</Filter>
-    </ClInclude>
-    <ClInclude Include="Skill\EffectParams.h">
-      <Filter>소스 파일\Skill</Filter>
-    </ClInclude>
-    <ClInclude Include="Skill\AreaEffect.h">
-      <Filter>소스 파일\Skill</Filter>
-    </ClInclude>
-    <ClInclude Include="Skill\ProjectileGroup.h">
-      <Filter>소스 파일\Skill</Filter>
-    </ClInclude>
-    <ClInclude Include="Skill\SkillBake.h">
-      <Filter>소스 파일\Skill</Filter>
-    </ClInclude>
-    <ClInclude Include="SkillComponent.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="BuffInstance.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="BuffComponent.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="CheatManager.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MonsterCombatComponent.h">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

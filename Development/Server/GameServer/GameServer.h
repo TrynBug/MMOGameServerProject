@@ -3,15 +3,15 @@
 #include "pch.h"
 #include <cassert>
 #include "GameServerDefine.h"
-#include "SystemStage.h"
-#include "Town.h"
+#include "Stages/SystemStage.h"
+#include "Stages/Town.h"
 #include "User.h"
-#include "StageManager.h"
-#include "Map/NavMeshManager.h"
-#include "StageAssetManager.h"
+#include "Managers/StageManager.h"
+#include "Managers/NavMeshManager.h"
+#include "Managers/StageAssetManager.h"
 #include "ThreadSafeUnorderedMap.h"
 #include "PacketSender.h"
-#include "CheatManager.h"
+#include "Managers/CheatManager.h"
 
 // GameServer는 게임로직(Stage, 유저, 전투, 스킬 등)을 처리하는 서버이다.
 // - 클라이언트와 직접 연결되지 않는다. 게이트웨이서버를 통해 클라이언트와 통신한다.

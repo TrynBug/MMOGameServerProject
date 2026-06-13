@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "PacketSender.h"
-#include "Character.h"
+#include "StageObjects/Character.h"
 
 // ─────────────────────────────────────────────────────────────
 // PacketSender 의 패킷별 송신 구현.

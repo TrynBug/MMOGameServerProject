@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "GameServer.h"
-#include "Character.h"
+#include "StageObjects/Character.h"
 
 namespace
 {
