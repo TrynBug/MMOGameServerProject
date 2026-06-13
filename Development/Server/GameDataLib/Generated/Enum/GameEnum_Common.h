@@ -35,6 +35,7 @@ enum class EObjectType : int
     Monster              = 2,  // 몬스터
     Prop                 = 3,  // 프랍
     Drop                 = 4,  // 드롭아이템
+    EventArea            = 5,  // 이벤트영역
     Max                 
 };
 

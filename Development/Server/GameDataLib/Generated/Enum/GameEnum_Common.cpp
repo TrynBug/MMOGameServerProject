@@ -50,6 +50,7 @@ EObjectType StringToObjectType(const std::string& v)
     if (v == "Monster") return EObjectType::Monster;
     if (v == "Prop") return EObjectType::Prop;
     if (v == "Drop") return EObjectType::Drop;
+    if (v == "EventArea") return EObjectType::EventArea;
     return EObjectType::None;
 }
 
@@ -62,6 +63,7 @@ std::string ObjectTypeToString(EObjectType v)
     case EObjectType::Monster: return "Monster";
     case EObjectType::Prop: return "Prop";
     case EObjectType::Drop: return "Drop";
+    case EObjectType::EventArea: return "EventArea";
     default: return "None";
     }
 }
