@@ -34,7 +34,7 @@ namespace Client.Game
             // 스테이지가 바뀌면 마커를 다시 수집하고 상태를 초기화한다(이전 스테이지 상태 무효).
             if (sm.CurrentStageId != m_scannedStageId)
             {
-                m_markers = UnityEngine.Object.FindObjectsByType<EventAreaMarker>(FindObjectsSortMode.None);
+                m_markers = UnityEngine.Object.FindObjectsByType<EventAreaMarker>(FindObjectsInactive.Exclude);
                 m_enterSentAt.Clear();
                 m_scannedStageId = sm.CurrentStageId;
             }
