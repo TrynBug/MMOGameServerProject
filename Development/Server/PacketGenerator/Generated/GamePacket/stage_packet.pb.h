@@ -62,6 +62,10 @@ class EventAreaExitReq;
 struct EventAreaExitReqDefaultTypeInternal;
 extern EventAreaExitReqDefaultTypeInternal _EventAreaExitReq_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull EventAreaExitReq_class_data_;
+class ObjectInteractReq;
+struct ObjectInteractReqDefaultTypeInternal;
+extern ObjectInteractReqDefaultTypeInternal _ObjectInteractReq_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ObjectInteractReq_class_data_;
 class StageLoadCompleteReq;
 struct StageLoadCompleteReqDefaultTypeInternal;
 extern StageLoadCompleteReqDefaultTypeInternal _StageLoadCompleteReq_default_instance_;
@@ -1146,6 +1150,232 @@ class StageLoadCompleteReq final : public ::google::protobuf::internal::ZeroFiel
 };
 
 extern const ::google::protobuf::internal::ClassDataFull StageLoadCompleteReq_class_data_;
+// -------------------------------------------------------------------
+
+class ObjectInteractReq final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.ObjectInteractReq) */ {
+ public:
+  inline ObjectInteractReq() : ObjectInteractReq(nullptr) {}
+  ~ObjectInteractReq() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ObjectInteractReq* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ObjectInteractReq));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ObjectInteractReq(::google::protobuf::internal::ConstantInitialized);
+
+  inline ObjectInteractReq(const ObjectInteractReq& from) : ObjectInteractReq(nullptr, from) {}
+  inline ObjectInteractReq(ObjectInteractReq&& from) noexcept
+      : ObjectInteractReq(nullptr, ::std::move(from)) {}
+  inline ObjectInteractReq& operator=(const ObjectInteractReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ObjectInteractReq& operator=(ObjectInteractReq&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ObjectInteractReq& default_instance() {
+    return *reinterpret_cast<const ObjectInteractReq*>(
+        &_ObjectInteractReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 7;
+  friend void swap(ObjectInteractReq& a, ObjectInteractReq& b) { a.Swap(&b); }
+  inline void Swap(ObjectInteractReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ObjectInteractReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ObjectInteractReq* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ObjectInteractReq>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ObjectInteractReq& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ObjectInteractReq& from) { ObjectInteractReq::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ObjectInteractReq* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.ObjectInteractReq"; }
+
+  explicit ObjectInteractReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ObjectInteractReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ObjectInteractReq& from);
+  ObjectInteractReq(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ObjectInteractReq&& from) noexcept
+      : ObjectInteractReq(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kPropKeyFieldNumber = 1,
+    kPosXFieldNumber = 2,
+    kPosYFieldNumber = 3,
+    kPosZFieldNumber = 4,
+  };
+  // int32 prop_key = 1;
+  void clear_prop_key() ;
+  ::int32_t prop_key() const;
+  void set_prop_key(::int32_t value);
+
+  private:
+  ::int32_t _internal_prop_key() const;
+  void _internal_set_prop_key(::int32_t value);
+
+  public:
+  // float pos_x = 2;
+  void clear_pos_x() ;
+  float pos_x() const;
+  void set_pos_x(float value);
+
+  private:
+  float _internal_pos_x() const;
+  void _internal_set_pos_x(float value);
+
+  public:
+  // float pos_y = 3;
+  void clear_pos_y() ;
+  float pos_y() const;
+  void set_pos_y(float value);
+
+  private:
+  float _internal_pos_y() const;
+  void _internal_set_pos_y(float value);
+
+  public:
+  // float pos_z = 4;
+  void clear_pos_z() ;
+  float pos_z() const;
+  void set_pos_z(float value);
+
+  private:
+  float _internal_pos_z() const;
+  void _internal_set_pos_z(float value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.ObjectInteractReq)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ObjectInteractReq& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int32_t prop_key_;
+    float pos_x_;
+    float pos_y_;
+    float pos_z_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fstage_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ObjectInteractReq_class_data_;
 // -------------------------------------------------------------------
 
 class EventAreaExitReq final : public ::google::protobuf::Message
@@ -2355,6 +2585,110 @@ inline float EventAreaExitReq::_internal_pos_z() const {
   return _impl_.pos_z_;
 }
 inline void EventAreaExitReq::_internal_set_pos_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ObjectInteractReq
+
+// int32 prop_key = 1;
+inline void ObjectInteractReq::clear_prop_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.prop_key_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::int32_t ObjectInteractReq::prop_key() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectInteractReq.prop_key)
+  return _internal_prop_key();
+}
+inline void ObjectInteractReq::set_prop_key(::int32_t value) {
+  _internal_set_prop_key(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_set:GamePacket.ObjectInteractReq.prop_key)
+}
+inline ::int32_t ObjectInteractReq::_internal_prop_key() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.prop_key_;
+}
+inline void ObjectInteractReq::_internal_set_prop_key(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.prop_key_ = value;
+}
+
+// float pos_x = 2;
+inline void ObjectInteractReq::clear_pos_x() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_x_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline float ObjectInteractReq::pos_x() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectInteractReq.pos_x)
+  return _internal_pos_x();
+}
+inline void ObjectInteractReq::set_pos_x(float value) {
+  _internal_set_pos_x(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:GamePacket.ObjectInteractReq.pos_x)
+}
+inline float ObjectInteractReq::_internal_pos_x() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_x_;
+}
+inline void ObjectInteractReq::_internal_set_pos_x(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_x_ = value;
+}
+
+// float pos_y = 3;
+inline void ObjectInteractReq::clear_pos_y() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_y_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline float ObjectInteractReq::pos_y() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectInteractReq.pos_y)
+  return _internal_pos_y();
+}
+inline void ObjectInteractReq::set_pos_y(float value) {
+  _internal_set_pos_y(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:GamePacket.ObjectInteractReq.pos_y)
+}
+inline float ObjectInteractReq::_internal_pos_y() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_y_;
+}
+inline void ObjectInteractReq::_internal_set_pos_y(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_y_ = value;
+}
+
+// float pos_z = 4;
+inline void ObjectInteractReq::clear_pos_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline float ObjectInteractReq::pos_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectInteractReq.pos_z)
+  return _internal_pos_z();
+}
+inline void ObjectInteractReq::set_pos_z(float value) {
+  _internal_set_pos_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:GamePacket.ObjectInteractReq.pos_z)
+}
+inline float ObjectInteractReq::_internal_pos_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_z_;
+}
+inline void ObjectInteractReq::_internal_set_pos_z(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_z_ = value;
 }

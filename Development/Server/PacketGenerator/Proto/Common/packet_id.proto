@@ -52,6 +52,7 @@ enum GamePacketId {
     GAME_PACKET_ID_STAGE_NOTICE_NTF        = 4011; // 서버 -> 클라: Stage 공지 배너 (스크립트 Notice())
     GAME_PACKET_ID_EVENT_AREA_ENTER_REQ    = 4012; // 클라 -> 서버: 이벤트영역 진입 선보고 (서버가 권위 위치로 검증 후 트리거)
     GAME_PACKET_ID_EVENT_AREA_EXIT_REQ     = 4013; // 클라 -> 서버: 이벤트영역 이탈 선보고
+    GAME_PACKET_ID_OBJECT_INTERACT_REQ     = 4014; // 클라 -> 서버: 오브젝트(prop) 상호작용 요청 (근접+키, 서버가 위치 검증 후 OnObjectInteract)
 
     // 5000~5999: 던전
     GAME_PACKET_ID_PUBLIC_DUNGEON_LIST_REQ  = 5001;   // 클라 -> 서버: 공용던전 목록 요청

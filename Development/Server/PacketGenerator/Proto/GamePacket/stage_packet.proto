@@ -86,3 +86,16 @@ message EventAreaExitReq {
     float pos_y     = 3;
     float pos_z     = 4;
 }
+
+// ──────────────────────────────────────────────
+// 오브젝트(prop) 상호작용 요청 (클라 -> 서버)
+// ──────────────────────────────────────────────
+// 클라가 prop(문/레버/NPC) 근처에서 상호작용 키를 누르면 보고한다. 서버는 권위 위치가
+// 해당 marker 의 상호작용 범위 안인지 검증한 뒤 스크립트 OnObjectInteract 를 발동한다.
+// 상태 동기화 없음(fire-and-forget) — 결과 연출은 스크립트가 Notice 등으로 처리.
+message ObjectInteractReq {
+    int32 prop_key = 1;   // 상호작용한 prop(배치 오브젝트) Key
+    float pos_x    = 2;   // 클라 보고 위치(검증용)
+    float pos_y    = 3;
+    float pos_z    = 4;
+}
