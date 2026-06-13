@@ -95,6 +95,22 @@ bool StageLayout::Load(const std::string& stageLayoutFileName)
                 m_eventAreas.push_back(ea);
             }
         }
+
+        if (j.contains("props"))
+        {
+            for (const auto& p : j["props"])
+            {
+                Prop pr;
+                pr.key  = p.at("key").get<int32>();
+                pr.type = p.value("type", 0);
+                const auto& pos = p.at("pos");
+                pr.x = pos.at(0).get<float>();
+                pr.y = pos.at(1).get<float>();
+                pr.z = pos.at(2).get<float>();
+                pr.range = p.value("range", 2.0f);
+                m_props.push_back(pr);
+            }
+        }
     }
     catch (const std::exception& e)
     {
@@ -102,8 +118,8 @@ bool StageLayout::Load(const std::string& stageLayoutFileName)
         return false;
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("StageLayout loaded. file={} spawners={} spawnPoints={} waypoints={} eventAreas={}",
-        stageLayoutFileName, m_spawners.size(), m_spawnPoints.size(), m_waypoints.size(), m_eventAreas.size()));
+    LOG_WRITE(LogLevel::Info, std::format("StageLayout loaded. file={} spawners={} spawnPoints={} waypoints={} eventAreas={} props={}",
+        stageLayoutFileName, m_spawners.size(), m_spawnPoints.size(), m_waypoints.size(), m_eventAreas.size(), m_props.size()));
     return true;
 }
 
@@ -128,5 +144,13 @@ const StageLayout::EventArea* StageLayout::GetEventArea(int32 key) const
     for (const auto& ea : m_eventAreas)
         if (ea.key == key)
             return &ea;
+    return nullptr;
+}
+
+const StageLayout::Prop* StageLayout::GetProp(int32 key) const
+{
+    for (const auto& pr : m_props)
+        if (pr.key == key)
+            return &pr;
     return nullptr;
 }

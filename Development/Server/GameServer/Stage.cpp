@@ -952,6 +952,7 @@ const Stage::UserPacketHandlerMap& Stage::getUserPacketHandlerMap() const
         { Common::GAME_PACKET_ID_STAGE_LOAD_COMPLETE_REQ,  &Stage::handleStageLoadCompleteReq },
         { Common::GAME_PACKET_ID_EVENT_AREA_ENTER_REQ,     &Stage::handleEventAreaEnterReq },
         { Common::GAME_PACKET_ID_EVENT_AREA_EXIT_REQ,      &Stage::handleEventAreaExitReq },
+        { Common::GAME_PACKET_ID_OBJECT_INTERACT_REQ,      &Stage::handleObjectInteractReq },
 #ifdef _DEBUG
         { Common::GAME_PACKET_ID_CHEAT_REQ,                &Stage::handleCheatReq },
 #endif
@@ -1317,6 +1318,64 @@ void Stage::pollSecureEventAreas()
             }
         }
     }
+}
+
+void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+{
+    GamePacket::ObjectInteractReq req;
+    if (!deserializeUserPacket(spUser, spPacket, req))
+        return;
+
+    const int64 userId  = spUser->GetUserId();
+    const int32 propKey = req.prop_key();
+
+    // 1) 유효 prop 인지(레이아웃에 정의).
+    const StageLayout::Prop* pProp = m_pLayout ? m_pLayout->GetProp(propKey) : nullptr;
+    if (!pProp)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq unknown prop. stageId={} userId={} propKey={}",
+            m_stageId, userId, propKey));
+        return;
+    }
+
+    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+    if (!spCharacter || spCharacter->GetStage() != this)
+        return;
+
+    // 2) 검증 (EventArea 와 동일 결) — 보고 위치가 마커 상호작용 범위 안인지 + 권위 위치와의 괴리 제한.
+    const float rx = req.pos_x();
+    const float rz = req.pos_z();
+
+    constexpr float kBoundaryTol     = 0.5f;   // 범위 경계 지터 여유(m).
+    constexpr float kLagSeconds      = 0.5f;   // 권위 위치가 보고보다 뒤처질 수 있는 시간(예측 이동 lag).
+    constexpr float kAntiCheatMargin = 1.0f;
+
+    // (a) 보고 위치가 prop 상호작용 range 안인가(평면).
+    const float mdx = rx - pProp->x;
+    const float mdz = rz - pProp->z;
+    const float reach = pProp->range + kBoundaryTol;
+    if (mdx * mdx + mdz * mdz > reach * reach)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq out of range. stageId={} userId={} propKey={}",
+            m_stageId, userId, propKey));
+        return;
+    }
+
+    // (b) 보고 위치가 권위 위치에서 "이동속도×lag + 여유" 이내인가(거짓 보고 방지).
+    const float moveSpeed = static_cast<float>(spCharacter->GetStat().Get(EStat::MoveSpdTotal));
+    const float maxGap    = moveSpeed * kLagSeconds + kAntiCheatMargin;
+    const float gdx = rx - spCharacter->GetPosX();
+    const float gdz = rz - spCharacter->GetPosZ();
+    if (gdx * gdx + gdz * gdz > maxGap * maxGap)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq reported pos too far from authoritative. stageId={} userId={} propKey={}",
+            m_stageId, userId, propKey));
+        return;
+    }
+
+    // 3) 스크립트 트리거 (fire-and-forget — prop 상태/Ntf 없음. 연출은 스크립트가 Notice 등으로).
+    if (m_pScript)
+        m_pScript->CallOnObjectInteract(propKey, userId);
 }
 
 void Stage::processUserPackets()

@@ -60,6 +60,18 @@ public:
         bool  secure = false; // true = 클라 미신뢰. 서버가 매 tick 권위 위치로 직접 폴링.
     };
 
+    // 상호작용 오브젝트(문/레버/NPC 등) 배치 데이터. 클라가 prop 근처에서 상호작용 시 서버가
+    // 권위 위치 ↔ 이 위치의 거리(range 내)를 검증한 뒤 OnObjectInteract 발동(Stage스크립트.md §6·§7.3).
+    struct Prop
+    {
+        int32 key   = 0;
+        int32 type  = 0;     // 용도 구분(0=기본/문/레버/NPC… 스크립트가 해석). v1은 참고값.
+        float x     = 0.f;
+        float y     = 0.f;
+        float z     = 0.f;
+        float range = 2.f;   // 상호작용 허용 반경(m, 평면). 서버 검증 기준.
+    };
+
     // stageLayoutFileName 의 레이아웃 파일(<stageLayoutFileName>.json)을 로드한다.
     // 이름이 비면 빈 레이아웃으로 두고 true(레이아웃 없는 Stage 는 정상).
     // 이름이 명시됐는데 파일이 없거나 파싱 실패하면 false (fail-fast).
@@ -72,10 +84,12 @@ public:
     const SpawnPoint* GetSpawnPoint(int32 key) const;
     const Waypoint*   GetWaypoint(int32 key) const;
     const EventArea*  GetEventArea(int32 key) const;
+    const Prop*       GetProp(int32 key) const;
 
 private:
     std::vector<SpawnerPlacement> m_spawners;
     std::vector<SpawnPoint>       m_spawnPoints;
     std::vector<Waypoint>         m_waypoints;
     std::vector<EventArea>        m_eventAreas;
+    std::vector<Prop>             m_props;
 };

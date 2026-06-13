@@ -273,6 +273,22 @@ bool StageScript::Load(Stage& stage, const std::vector<std::string>& scriptNames
         return sol::make_object(lua, t);
     });
 
+    // 상호작용 prop(문/레버/NPC) 정보 조회. 없으면 nil.
+    //   GetProp(key) -> { x, y, z, type, range }
+    m_pImpl->lua.set_function("GetProp", [self](int32 key) -> sol::object
+    {
+        sol::state& lua = self->m_pImpl->lua;
+        const StageLayout* layout = self->m_pStage->m_pLayout;
+        const StageLayout::Prop* pr = layout ? layout->GetProp(key) : nullptr;
+        if (!pr)
+            return sol::make_object(lua, sol::lua_nil);
+        sol::table t = lua.create_table();
+        t["x"] = pr->x; t["y"] = pr->y; t["z"] = pr->z;
+        t["type"] = pr->type;
+        t["range"] = pr->range;
+        return sol::make_object(lua, t);
+    });
+
     // 스포너 on/off (Manual 존 구동 등). MonsterSpawner 가 밀도/리스폰/팩 처리.
     m_pImpl->lua.set_function("ActivateSpawner", [stagePtr](int32 spawnerKey)
     {
@@ -564,6 +580,24 @@ void StageScript::CallOnExitEventArea(int32 eventKey, int64 userId, float x, flo
         {
             sol::error e = r;
             LOG_WRITE(LogLevel::Error, std::format("OnExitEventArea error: {}", e.what()));
+        }
+    }
+}
+
+void StageScript::CallOnObjectInteract(int32 propKey, int64 userId)
+{
+    for (auto& env : m_pImpl->scripts)
+    {
+        sol::protected_function fn = env["OnObjectInteract"];
+        if (!fn.valid())
+            continue;
+
+        armGuard(m_pImpl->lua);
+        sol::protected_function_result r = fn(propKey, userId);
+        if (!r.valid())
+        {
+            sol::error e = r;
+            LOG_WRITE(LogLevel::Error, std::format("OnObjectInteract error: {}", e.what()));
         }
     }
 }

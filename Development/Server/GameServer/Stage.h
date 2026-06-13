@@ -397,6 +397,9 @@ protected:
     // secure 이벤트영역을 매 tick 서버 권위 위치로 폴링해 진입/이탈 콜백을 발동(OnUpdate 4.7).
     void pollSecureEventAreas();
 
+    // 오브젝트(prop) 상호작용 요청(클라 -> 서버). 권위 위치가 marker 범위 안인지 검증 후 OnObjectInteract 발동.
+    void handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+
     // ── 유저 컨테이너 접근 ──
     const std::unordered_map<int64, UserPtr>& GetUsers() const { return m_users; }
 
