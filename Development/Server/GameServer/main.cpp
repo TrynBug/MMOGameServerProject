@@ -16,9 +16,7 @@ BOOL WINAPI consoleCtrlHandler(DWORD ctrlType)
 
 int main()
 {
-    // 콘솔 출력/입력 코드페이지를 UTF-8 로. 로그/Lua 문자열이 UTF-8 이라, 이게 없으면
-    // exe 를 콘솔에서 직접 실행할 때 콘솔이 시스템 로캘(CP949 등)로 해석해 한글이 깨진다.
-    // (VS 디버그는 출력 경로가 달라 설정 없이도 보였던 것.)
+    // 콘솔 출력/입력 코드페이지를 UTF-8 로
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
 

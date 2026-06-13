@@ -8,15 +8,7 @@
 #include "StageObjects/MonsterSpawner.h"
 #include "Generated/GameData_Monster.h"
 
-// 이 프로젝트는 NOMINMAX 를 정의하지 않아 Windows.h 의 min/max 매크로가 살아있다.
-// sol2 헤더는 std::min/std::max 를 쓰므로 충돌한다. sol include 구간만 매크로를 잠시 끈다(전역 설정 불변).
-#pragma push_macro("min")
-#pragma push_macro("max")
-#undef min
-#undef max
 #include <sol/sol.hpp>
-#pragma pop_macro("min")
-#pragma pop_macro("max")
 
 #include <algorithm>
 #include <unordered_set>

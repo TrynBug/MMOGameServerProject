@@ -18,6 +18,10 @@ BOOL WINAPI consoleCtrlHandler(DWORD ctrlType)
 
 int main()
 {
+    // 콘솔 출력/입력 코드페이지를 UTF-8 로
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+
     // Gateway 서버 config 로드
     serverbase::ConfigParser configParser;
     configParser.Load("GatewayServer.ini");

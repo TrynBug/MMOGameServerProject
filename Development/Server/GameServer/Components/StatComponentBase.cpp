@@ -85,7 +85,7 @@ void StatComponentBase::changeStat(EStat stat, double value, bool bAdd)
 
     // 곱연산/점감곱연산 raw 는 ×0 미만으로 가면 이후 역연산 분모가 무너지므로 하한 clamp.
     if (pData->StatOp == EStatOp::Amp || pData->StatOp == EStatOp::Reduce)
-        newRaw = (std::max)(newRaw, pData->MinApplyValue);
+        newRaw = std::max(newRaw, pData->MinApplyValue);
 
     setRaw(stat, newRaw);
 

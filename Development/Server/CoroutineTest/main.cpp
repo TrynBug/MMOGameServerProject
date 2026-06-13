@@ -14,6 +14,7 @@
 //   예시 6. executor를 통한 resume 스레드 제어
 
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <windows.h>
 
 #include <atomic>
