@@ -40,6 +40,7 @@ namespace Client.Managers
         public event Action OnInventory;
         public event Action OnCharacterMenu;
         public event Action OnMenu;
+        public event Action OnInteract;   // prop 상호작용 키(F). 근처 prop 과 상호작용.
 
         // ─── 폴링 방식 상태 ─────────────────────────────────────────────
         // 마우스 위치는 매 프레임 읽어야 하니 이벤트보다 폴링이 자연스러움.
@@ -98,6 +99,7 @@ namespace Client.Managers
             m_gameInput.Gameplay.Inventory.performed     += _ => OnInventory?.Invoke();
             m_gameInput.Gameplay.CharacterMenu.performed += _ => OnCharacterMenu?.Invoke();
             m_gameInput.Gameplay.Menu.performed          += _ => OnMenu?.Invoke();
+            m_gameInput.Gameplay.Interact.performed      += _ => OnInteract?.Invoke();
 
             // 시작은 Gameplay 액션맵부터
             m_gameInput.Gameplay.Enable();
@@ -144,6 +146,7 @@ namespace Client.Managers
             OnInventory = null;
             OnCharacterMenu = null;
             OnMenu = null;
+            OnInteract = null;
         }
 
         public void Dispose()
