@@ -15,6 +15,7 @@ namespace GameData
         public EStageType           StageType            = EStageType.None;
         public string               StagePrefabPath      = "";
         public string               NavMeshFileName      = "";
+        public string               StageLayoutFileName  = "";
         public float                sectorSize           = 0f;
     }
 
@@ -43,7 +44,8 @@ namespace GameData
             data.StageType = (EStageType)int.Parse(fields[2]);
             data.StagePrefabPath = fields[3];
             data.NavMeshFileName = fields[4];
-            data.sectorSize = float.Parse(fields[5]);
+            data.StageLayoutFileName = fields[5];
+            data.sectorSize = float.Parse(fields[6]);
 
             if (data.Key <= 0)
                 return false;
