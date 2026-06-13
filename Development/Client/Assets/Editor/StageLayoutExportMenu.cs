@@ -57,8 +57,9 @@ namespace Client.EditorTools
             SpawnPointMarker[] spawnPoints = Object.FindObjectsByType<SpawnPointMarker>(FindObjectsInactive.Exclude);
             EventAreaMarker[]  eventAreas  = Object.FindObjectsByType<EventAreaMarker>(FindObjectsInactive.Exclude);
             WaypointMarker[]   waypoints   = Object.FindObjectsByType<WaypointMarker>(FindObjectsInactive.Exclude);
+            PropMarker[]       props       = Object.FindObjectsByType<PropMarker>(FindObjectsInactive.Exclude);
 
-            string json = BuildJson(spawners, spawnPoints, eventAreas, waypoints);
+            string json = BuildJson(spawners, spawnPoints, eventAreas, waypoints, props);
 
             string serverDir = Path.GetFullPath(Path.Combine(Application.dataPath, ServerOutputDir));
             Directory.CreateDirectory(serverDir);
@@ -77,7 +78,7 @@ namespace Client.EditorTools
 
             string msg = $"export 완료: {sceneName}.json\n" +
                          $"spawners={spawners.Length}, spawnPoints={spawnPoints.Length}, " +
-                         $"eventAreas={eventAreas.Length}, waypoints={waypoints.Length}\n{path}";
+                         $"eventAreas={eventAreas.Length}, waypoints={waypoints.Length}, props={props.Length}\n{path}";
             Debug.Log($"[StageLayoutExport] {msg}");
             return new ExportResult { success = true, message = msg, path = path };
         }
@@ -85,7 +86,8 @@ namespace Client.EditorTools
         // ── JSON 빌드 (서버 StageLayout 파서 포맷에 맞춰 핸드빌드) ─────────────────
 
         private static string BuildJson(SpawnerMarker[] spawners, SpawnPointMarker[] spawnPoints,
-                                        EventAreaMarker[] eventAreas, WaypointMarker[] waypoints)
+                                        EventAreaMarker[] eventAreas, WaypointMarker[] waypoints,
+                                        PropMarker[] props)
         {
             var sb = new StringBuilder();
             sb.Append("{\n");
@@ -142,7 +144,17 @@ namespace Client.EditorTools
                 }
                 sb.Append("] }");
             }
-            sb.Append(waypoints.Length > 0 ? "\n  ]\n" : "]\n");
+            sb.Append(waypoints.Length > 0 ? "\n  ],\n" : "],\n");
+
+            // props (상호작용 오브젝트 — 문/레버/NPC)
+            sb.Append("  \"props\": [");
+            for (int i = 0; i < props.Length; ++i)
+            {
+                PropMarker p = props[i];
+                sb.Append(i == 0 ? "\n" : ",\n");
+                sb.Append($"    {{ \"key\": {p.Key}, \"type\": {p.Type}, \"pos\": {Vec3(p.transform.position)}, \"range\": {F(p.InteractRange)} }}");
+            }
+            sb.Append(props.Length > 0 ? "\n  ]\n" : "]\n");
 
             sb.Append("}\n");
             return sb.ToString();
