@@ -30,9 +30,12 @@ bool StageAssetManager::LoadAll()
 
     for (const auto& [stageDataKey, pStageData] : GameDataTable_Stage::GetDataMap())
     {
-        // 1) 레이아웃 — stageDataKey 별 1개. 파일 없으면 빈 레이아웃(에러 아님).
+        // 1) 레이아웃 — 파일명은 GameData_Stage.StageLayoutFileName 기준(예: Town.json).
+        //    이름이 비면 빈 레이아웃(정상). 이름이 명시됐는데 파일이 없거나 파싱 실패면 시작 실패(스크립트와 동일 fail-fast).
+        //    m_layouts 는 stageDataKey 키 유지(인스턴스 공유). 같은 StageLayoutFileName 을 쓰는 Stage 는 같은 파일을 읽는다.
         StageLayout layout;
-        layout.Load(stageDataKey);
+        if (!layout.Load(pStageData->StageLayoutFileName))
+            ok = false;
         m_layouts.emplace(stageDataKey, std::move(layout));
 
         // 2) 명시된 스크립트(ScriptName#) — 이름별 1회 컴파일. 누락/실패면 시작 실패.

@@ -4,13 +4,14 @@
 
 #include <vector>
 #include <array>
+#include <string>
 
 // ─────────────────────────────────────────────────────────────
 // StageLayout
 // ─────────────────────────────────────────────────────────────
 //
 // 유니티 에디터에서 Stage 위에 배치한 오브젝트(스포너/스폰지점/경로 등)를 export 한
-// 배치데이터(Map/StageLayout/<stageDataKey>.json)를 로드한다.
+// 배치데이터(Map/StageLayout/<StageLayoutFileName>.json — GameData_Stage.StageLayoutFileName, 예: Town.json)를 로드한다.
 // 스크립트/스포너는 좌표를 손입력하지 않고 이 배치를 Key 로 참조한다.
 //
 // v1: Spawner(key+pos+radius) + SpawnPoint(key+pos+yaw) + Waypoint(key+points)
@@ -59,10 +60,10 @@ public:
         bool  secure = false; // true = 클라 미신뢰. 서버가 매 tick 권위 위치로 직접 폴링.
     };
 
-    // stageDataKey 의 레이아웃 파일을 로드한다.
-    // 파일이 없으면 빈 레이아웃으로 두고 true 를 반환한다(레이아웃 없는 Stage 는 정상).
-    // 파일이 있으나 파싱 실패하면 false.
-    bool Load(int32 stageDataKey);
+    // stageLayoutFileName 의 레이아웃 파일(<stageLayoutFileName>.json)을 로드한다.
+    // 이름이 비면 빈 레이아웃으로 두고 true(레이아웃 없는 Stage 는 정상).
+    // 이름이 명시됐는데 파일이 없거나 파싱 실패하면 false (fail-fast).
+    bool Load(const std::string& stageLayoutFileName);
 
     const std::vector<SpawnerPlacement>& GetSpawners()   const { return m_spawners; }
     const std::vector<EventArea>&        GetEventAreas() const { return m_eventAreas; }

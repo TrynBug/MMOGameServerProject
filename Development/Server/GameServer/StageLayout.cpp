@@ -6,17 +6,22 @@
 #include <filesystem>
 #include <fstream>
 
-bool StageLayout::Load(int32 stageDataKey)
+bool StageLayout::Load(const std::string& stageLayoutFileName)
 {
+    // 레이아웃 파일명은 GameData_Stage.StageLayoutFileName 기준(예: Town.json). NavMesh 파일명과 동일하게 쓰는 컨벤션.
+    // 같은 StageLayoutFileName 을 공유하는 Stage 들은 같은 레이아웃을 쓴다.
+    if (stageLayoutFileName.empty())
+        return true;   // 레이아웃 없는 Stage(SystemStage 등) — 빈 레이아웃.
+
     // 런타임 작업 디렉터리(exe 위치 = OUTPUT/<Config>) 기준. NavMesh 가 Map/NavMesh 인 것과 동형.
     const std::filesystem::path path =
-        std::filesystem::current_path().parent_path() / "Map" / "StageLayout" / (std::to_string(stageDataKey) + ".json");
+        std::filesystem::current_path().parent_path() / "Map" / "StageLayout" / (stageLayoutFileName + ".json");
 
     if (!std::filesystem::exists(path))
     {
-        // 레이아웃 없는 Stage 는 정상(스포너 0개). 에러 아님.
-        LOG_WRITE(LogLevel::Info, std::format("StageLayout none. stageDataKey={} path={}", stageDataKey, path.string()));
-        return true;
+        // 파일명이 명시됐는데(StageLayoutFileName 비어있지 않음) 실제 파일이 없으면 시작 실패(스크립트와 동일 fail-fast).
+        LOG_WRITE(LogLevel::Error, std::format("StageLayout file not found. file={} path={}", stageLayoutFileName, path.string()));
+        return false;
     }
 
     try
@@ -93,12 +98,12 @@ bool StageLayout::Load(int32 stageDataKey)
     }
     catch (const std::exception& e)
     {
-        LOG_WRITE(LogLevel::Error, std::format("StageLayout parse failed. stageDataKey={} err={}", stageDataKey, e.what()));
+        LOG_WRITE(LogLevel::Error, std::format("StageLayout parse failed. file={} err={}", stageLayoutFileName, e.what()));
         return false;
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("StageLayout loaded. stageDataKey={} spawners={} spawnPoints={} waypoints={} eventAreas={}",
-        stageDataKey, m_spawners.size(), m_spawnPoints.size(), m_waypoints.size(), m_eventAreas.size()));
+    LOG_WRITE(LogLevel::Info, std::format("StageLayout loaded. file={} spawners={} spawnPoints={} waypoints={} eventAreas={}",
+        stageLayoutFileName, m_spawners.size(), m_spawnPoints.size(), m_waypoints.size(), m_eventAreas.size()));
     return true;
 }
 

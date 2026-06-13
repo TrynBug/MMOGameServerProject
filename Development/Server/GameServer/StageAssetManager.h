@@ -17,7 +17,8 @@
 //     단, lua_State(VM) 자체는 스레드 안전·인스턴스별 상태 때문에 공유 불가 → Stage 마다 1개.
 //
 // 검증(fail-fast): GameData_Stage.ScriptName# 에 명시된 .lua 파일이 없거나 컴파일 실패하면 LoadAll 이 false.
-//                  (레이아웃 파일은 없어도 빈 레이아웃으로 허용 — 본래 비어있는 Stage 존재.)
+//                  레이아웃도 동일 — StageLayoutFileName 이 명시됐는데 .json 이 없거나 파싱 실패하면 false.
+//                  (StageLayoutFileName 이 비어있으면 레이아웃 없는 Stage 로 정상 허용.)
 //
 // 스레드: 시작 시 1회 로드 후 불변. 멀티 컨텐츠 스레드가 락 없이 동시 읽기 안전(NavMesh/GameData 와 동일).
 class StageAssetManager
