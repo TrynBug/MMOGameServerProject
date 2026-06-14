@@ -711,6 +711,14 @@ namespace Client.Game
             Vector3 head = target.transform.position + Vector3.up * 1.5f;
             DamageText.Spawn(head, ntf.Damage, ntf.IsDuplicate);
 
+            // 피격 대상이 몬스터면 타격감 juice(클라 전용, 서버 무관) — 적중 프레임에 hitstop + 스케일팝 동시 발화.
+            // 중복타격(감쇠)은 더 짧게. 가해자(플레이어)는 얼리지 않으므로 몬스터 대상에만 적용한다.
+            if (target is MonsterObject hitMonster)
+            {
+                HitStop.Trigger(hitMonster, ntf.IsDuplicate ? 50f : 100f);
+                ScalePop.Play(hitMonster);
+            }
+
             // 본인(LocalPlayer)이 맞았으면 피격 피드백: 공격자 방향 표식 + 카메라 셰이크(타격감).
             // attacker_object_id/source_skill_key 는 서버가 채워 보낸다(SkillDamageNtf 확장).
             if (target == StageManager.Instance.LocalPlayer && ntf.AttackerObjectId != 0)
