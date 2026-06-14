@@ -41,6 +41,11 @@ bool Monster::Initialize(int64 objectId, const GameData_Monster* pMonsterData)
     if (!applyBaseStats())
         return false;
 
+    // 현재 HP/MP 를 최대치로 초기화 (스폰 시 풀피).
+    // applyBaseStats() 이후여야 HpTotal/MpTotal 이 계산되어 있어 최대치가 정해진다.
+    FillHp();
+    FillMp();
+
     // AI 프로파일 로드 (GameData_MonsterAI, AIKey 참조). 없으면 멤버 기본값 유지.
     if (const GameData_MonsterAI* pAI = GameDataTable_MonsterAI::FindData(m_pMonsterData->AIKey))
     {
