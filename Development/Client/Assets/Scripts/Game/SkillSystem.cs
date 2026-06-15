@@ -223,6 +223,10 @@ namespace Client.Game
             // 액션락 설정 (다음 시전까지 잠금).
             m_actionLockUntil = Time.time + skill.ActionLockMs / 1000f;
 
+            // 시전음 (클라 전용). 데이터 SfxCast 경로 prefix 의 변형을 라운드로빈+피치로 재생.
+            SfxPlayer.Play(skill.SfxCast, caster.transform.position);
+            m_skillUseTime[skillKey] = Time.time;   // 스킬 사용 시각 기록 (SfxHitIgnoreMs: 사용 직후 적중음 억제용).
+
             // 서버에 시전 요청 즉시 송신 (서버는 자기 CastDelay 후 entry 발동).
             sendCastReq(skill, origin, dir, targetId, targetPos);
 
@@ -581,17 +585,20 @@ namespace Client.Game
                 return;
             }
 
+            // 발사음 (클라 전용). 로컬·원격 캐스터 공용(spawnFan 이 둘 다 경유).
+            SfxPlayer.Play(skill.SfxShoot, origin);
+
             int count = Mathf.Max(1, (int)skill.ProjectileCount);
             List<Vector3> dirs = computeFanDirs(dir, count, (float)skill.FanAngleDeg);
 
             Vector3 startPos = origin + Vector3.up * m_projectileHeight;   // 비주얼 높이 (XZ 판정엔 영향 없음).
             for (int i = 0; i < dirs.Count; ++i)
-                spawnOneProjectile(prefab, group, i, startPos, dirs[i], (float)skill.ProjectileSpeed, (float)skill.MaxRange, skill.OnHitSkillKey, ignoreMonsters);
+                spawnOneProjectile(prefab, group, i, startPos, dirs[i], (float)skill.ProjectileSpeed, (float)skill.MaxRange, skill.Key, skill.OnHitSkillKey, ignoreMonsters);
 
             group?.MarkLaunched(dirs.Count);
         }
 
-        private void spawnOneProjectile(GameObject prefab, SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int onHitSkillKey, bool ignoreMonsters = false)
+        private void spawnOneProjectile(GameObject prefab, SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int sourceSkillKey, int onHitSkillKey, bool ignoreMonsters = false)
         {
             GameObject go = Instantiate(prefab);
             go.name = "Projectile";
@@ -617,19 +624,59 @@ namespace Client.Game
             }
 
             Projectile proj = go.AddComponent<Projectile>();
-            proj.Launch(group, index, startPos, dir, speed, maxRange, onHitSkillKey, ignoreMonsters);
+            proj.Launch(group, index, startPos, dir, speed, maxRange, sourceSkillKey, onHitSkillKey, ignoreMonsters);
         }
 
-        // 투사체가 끝난 위치에 OnHit 폭발(예: 파이어볼 폭발 1002)의 비주얼을 띄운다. Projectile 이 종료 시 호출.
-        // 폭발 적중/대미지는 서버가 판정해 SkillDamageNtf 로 통보 — 여기서는 비주얼만 (시전 클라/원격 공용).
-        public void SpawnHitExplosionVisual(int explosionSkillKey, Vector3 pos, Vector3 dir)
+        // 투사체 종료(hit) 위치에서 적중음(클라 0지연) + OnHit 폭발 비주얼을 낸다. Projectile 이 종료 시 호출(시전 클라/원격 공용).
+        // 폭발 적중/대미지는 서버가 판정해 SkillDamageNtf 로 통보 — 여기서는 비주얼/사운드만.
+        public void SpawnHitExplosionVisual(int sourceSkillKey, int explosionSkillKey, Vector3 pos, Vector3 dir)
         {
+            // 적중음 (클라 전용). 투사체 hit 은 클라가 판정하므로 서버 SkillDamageNtf 를 기다리지 않고
+            // hit 판정 순간에 0지연으로 source 스킬(투사체 본체)의 SfxHit 을 재생한다. (onSkillDamageNtf 에선 중복 재생 안 함.)
+            // 단, 스킬 사용 직후 SfxHitIgnoreMs 동안은 억제한다(선행음과 겹침 방지).
+            GameData_Skill source = GameDataTable_Skill.FindData(sourceSkillKey);
+            if (source != null && !isHitSfxSuppressed(source))
+                SfxPlayer.Play(source.SfxHit, pos);
+
+            // OnHit 폭발 비주얼 (있으면).
             if (explosionSkillKey == 0)
                 return;
             GameData_Skill explosion = GameDataTable_Skill.FindData(explosionSkillKey);
             if (explosion == null)
                 return;
             spawnAreaVisual(explosion, pos, dir);
+        }
+
+        // 스킬 사용(시전) 시각(skillKey → Time.time). SfxHitIgnoreMs 에 사용.
+        private readonly Dictionary<int, float> m_skillUseTime = new Dictionary<int, float>();
+
+        // 스킬 사용 직후 SfxHitIgnoreMs 동안은 그 스킬의 적중음을 재생하지 않는다.
+        // (즉발 틱 장판 등에서 시전음/발사음과 첫 적중음이 겹치는 것 방지.)
+        private bool isHitSfxSuppressed(GameData_Skill skill)
+        {
+            if (skill.SfxHitIgnoreMs <= 0)
+                return false;
+            if (!m_skillUseTime.TryGetValue(skill.Key, out float useTime))
+                return false;
+            return (Time.time - useTime) * 1000f < skill.SfxHitIgnoreMs;
+        }
+
+        // 클라가 hit 을 직접 판정·재생하는 스킬인가? (투사체 직격=ContactHit, 그 투사체의 OnHit 폭발=아래 set)
+        // 이런 스킬의 적중음은 SpawnHitExplosionVisual 에서 0지연으로 재생하므로 SkillDamageNtf 에선 재생하지 않는다.
+        private HashSet<int> m_onHitSkillKeys;
+        private bool isClientPredictedHit(GameData_Skill skill)
+        {
+            if (skill.EffectDamage == ESkillEffectDamage.ContactHit)
+                return true;
+
+            if (m_onHitSkillKeys == null)
+            {
+                m_onHitSkillKeys = new HashSet<int>();
+                foreach (GameData_Skill s in GameDataTable_Skill.GetDataMap().Values)
+                    if (s.OnHitSkillKey != 0)
+                        m_onHitSkillKeys.Add(s.OnHitSkillKey);
+            }
+            return m_onHitSkillKeys.Contains(skill.Key);
         }
 
         // 서버 SkillComponent::computeFanDirs 와 동일한 공식/순서 (projectile_index 정합).
@@ -710,6 +757,13 @@ namespace Client.Game
 
             Vector3 head = target.transform.position + Vector3.up * 1.5f;
             DamageText.Spawn(head, ntf.Damage, ntf.IsDuplicate);
+
+            // 적중음 (클라 전용). 단, 투사체/폭발은 클라가 hit 을 판정해 SpawnHitExplosionVisual 에서 이미 재생하므로
+            // 여기서는 서버 권위 적중(장판·즉발 등 클라 예측이 없는 스킬)만 재생한다.
+            // 또한 스킬 사용 직후 SfxHitIgnoreMs 동안은 적중음을 억제한다(선행음과 겹침 방지).
+            GameData_Skill srcSkill = GameDataTable_Skill.FindData(ntf.SourceSkillKey);
+            if (srcSkill != null && !isClientPredictedHit(srcSkill) && !isHitSfxSuppressed(srcSkill))
+                SfxPlayer.Play(srcSkill.SfxHit, target.transform.position);
 
             // 피격 대상이 몬스터면 타격감 juice(클라 전용, 서버 무관) — 적중 프레임에 flash + hitstop + 스케일팝 동시 발화.
             // 중복타격(감쇠)은 더 짧게. 가해자(플레이어)는 얼리지 않으므로 몬스터 대상에만 적용한다.
