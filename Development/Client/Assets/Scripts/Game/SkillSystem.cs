@@ -262,6 +262,8 @@ namespace Client.Game
             if (skill.CastDelayMs > 0)
                 yield return new WaitForSeconds(skill.CastDelayMs / 1000f);
 
+            // 발동음 (클라 전용). 시전 발동(CastDelay 경과) 순간 SfxShoot 재생.
+            SfxPlayer.Play(skill.SfxShoot, origin);
             spawnFan(group, skill, origin, dir);
         }
 
@@ -271,6 +273,8 @@ namespace Client.Game
             if (skill.CastDelayMs > 0)
                 yield return new WaitForSeconds(skill.CastDelayMs / 1000f);
 
+            // 발동음 (클라 전용). 시전 발동(CastDelay 경과) 순간 SfxShoot 재생. (entry 1회 — 체인 페이즈는 제외.)
+            SfxPlayer.Play(skill.SfxShoot, origin);
             spawnAreaChainPhase(skill, origin, dir);
         }
 
@@ -399,6 +403,9 @@ namespace Client.Game
         // NextSkillKey 가 있으면(글라이드) 이동 종료 후 다음(충격파) 페이즈 비주얼을 재생한다.
         private void predictSkillMovement(PlayerCharacter caster, GameData_Skill skill, Vector3 origin, Vector3 dir, Vector3 aim)
         {
+            // 발동음 (클라 전용). 이동기 발동 순간 SfxShoot 재생.
+            SfxPlayer.Play(skill.SfxShoot, origin);
+
             float distance;
             if (skill.MoveDurationMs > 0)
             {
@@ -546,6 +553,9 @@ namespace Client.Game
             Vector3 dir = new Vector3(ntf.DirX, 0f, ntf.DirZ);
             dir = (dir.sqrMagnitude > 0.0001f) ? dir.normalized : Vector3.forward;
 
+            // 발동음 (클라 전용). 원격 캐스터의 발동(서버 CastNtf=CastDelay 경과) 순간 SfxShoot 재생. 모든 타입 공용·entry 1회.
+            SfxPlayer.Play(skill.SfxShoot, origin);
+
             // 서버는 entry 발동(=CastDelay 경과) 시점에 CastNtf 를 보내므로 원격은 즉시 재현한다.
             if (skill.EffectDamage == ESkillEffectDamage.ContactHit)
             {
@@ -584,9 +594,6 @@ namespace Client.Game
                 group?.MarkLaunched(0);   // 그룹이 정리될 수 있도록 0발로 마감.
                 return;
             }
-
-            // 발사음 (클라 전용). 로컬·원격 캐스터 공용(spawnFan 이 둘 다 경유).
-            SfxPlayer.Play(skill.SfxShoot, origin);
 
             int count = Mathf.Max(1, (int)skill.ProjectileCount);
             List<Vector3> dirs = computeFanDirs(dir, count, (float)skill.FanAngleDeg);
