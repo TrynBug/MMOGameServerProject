@@ -48,6 +48,32 @@ namespace Client.Game
             s_inst.play(path, pos);
         }
 
+        // path 의 클립을 durationSec 동안 루프 재생 후 정지한다(지속음 — 예: 운석 낙하).
+        // 전용 AudioSource 를 하나 만들어 재생하고 durationSec 후 컴포넌트째 제거(=정지)한다. one-shot 풀과 분리.
+        public static void PlayLoop(string path, Vector3 pos, float durationSec)
+        {
+            if (string.IsNullOrEmpty(path) || durationSec <= 0f)
+                return;
+            ensureInstance();
+            s_inst.playLoop(path, pos, durationSec);
+        }
+
+        private void playLoop(string path, Vector3 pos, float durationSec)
+        {
+            AudioClip clip = getClip(path);
+            if (clip == null)
+                return;
+
+            AudioSource src = gameObject.AddComponent<AudioSource>();
+            src.playOnAwake = false;
+            src.spatialBlend = 0f;   // 2D (v1)
+            src.loop = true;
+            src.clip = clip;
+            src.volume = k_volume;
+            src.Play();
+            Destroy(src, durationSec);   // durationSec 후 컴포넌트 제거 → 재생 정지
+        }
+
         private static void ensureInstance()
         {
             if (s_inst != null)

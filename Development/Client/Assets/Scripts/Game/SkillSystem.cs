@@ -32,7 +32,7 @@ namespace Client.Game
 
         // M1(범위 스킬): OnSkill2 = 얼음지대(1003), OnSkill3 = 전격방출(1008).
         [SerializeField] private int m_skill2Key = 1003;
-        [SerializeField] private int m_skill3Key = 1008;
+        [SerializeField] private int m_skill3Key = 1010;
 
         // M2(이동 스킬): OnSkill4 = 글라이드(1004). 순간이동(1009) 테스트는 슬롯 키를 인스펙터에서 교체.
         [SerializeField] private int m_skill4Key = 1004;
@@ -227,6 +227,9 @@ namespace Client.Game
             SfxPlayer.Play(skill.SfxCast, caster.transform.position);
             m_skillUseTime[skillKey] = Time.time;   // 스킬 사용 시각 기록 (SfxHitIgnoreMs: 사용 직후 적중음 억제용).
 
+            // 위치표시(telegraph) VFX (클라 전용). 착탄 origin 에 표시, 임팩트(CastDelay+FirstTickDelay)까지 유지 후 제거.
+            spawnTelegraph(skill, origin, (skill.CastDelayMs + skill.FirstTickDelayMs) / 1000f);
+
             // 서버에 시전 요청 즉시 송신 (서버는 자기 CastDelay 후 entry 발동).
             sendCastReq(skill, origin, dir, targetId, targetPos);
 
@@ -275,7 +278,33 @@ namespace Client.Game
 
             // 발동음 (클라 전용). 시전 발동(CastDelay 경과) 순간 SfxShoot 재생. (entry 1회 — 체인 페이즈는 제외.)
             SfxPlayer.Play(skill.SfxShoot, origin);
+            // 지속음 (클라 전용). 운석 낙하 등 — entry 페이즈 지속시간 동안 루프 후 정지(임팩트 시).
+            SfxPlayer.PlayLoop(skill.SfxLoop, origin, areaPhaseDurationSec(skill));
             spawnAreaChainPhase(skill, origin, dir);
+        }
+
+        // 위치표시(telegraph) VFX 를 origin 에 스폰하고 lifetimeSec 후 자동 제거한다. TelegraphPrefabPath 가 있는 스킬만.
+        private void spawnTelegraph(GameData_Skill skill, Vector3 origin, float lifetimeSec)
+        {
+            if (string.IsNullOrEmpty(skill.TelegraphPrefabPath) || lifetimeSec <= 0f)
+                return;
+
+            GameObject prefab = Managers.Managers.Resource.Load<GameObject>(skill.TelegraphPrefabPath);
+            if (prefab == null)
+                return;
+
+            GameObject go = Instantiate(prefab);
+            go.name = "Telegraph_" + skill.Name;
+            go.transform.position = origin;
+
+            // 임팩트 반경(Radius)에 맞춰 Circle 스케일 (area 비주얼과 동일 규약).
+            AreaVfx vfx = go.GetComponent<AreaVfx>();
+            float baseD = (vfx != null && vfx.baseDiameter > 0f) ? vfx.baseDiameter : 1f;
+            float scale = ((float)skill.Radius * 2f) / baseD;
+            Vector3 sc = go.transform.localScale;
+            go.transform.localScale = new Vector3(scale, scale, scale);
+
+            Destroy(go, lifetimeSec);   // lifetimeSec(≈임팩트) 후 제거
         }
 
         // 범위(Area) 스킬을 origin 에 표시한다 (로컬 예측/원격 재현 공용).
@@ -335,7 +364,7 @@ namespace Client.Game
                 float baseD = (vfx != null && vfx.baseDiameter > 0f) ? vfx.baseDiameter : 1f;
                 float scale = ((float)skill.Radius * 2f) / baseD;
                 Vector3 s = go.transform.localScale;
-                go.transform.localScale = new Vector3(scale, s.y, scale);
+                go.transform.localScale = new Vector3(scale, scale, scale);
             }
 
             // 표시 시간: 지속형(periodic)은 LifetimeMs, 단발(instant)은 FirstTickDelay(낙하 등 리드업) + 고정 표시.
@@ -556,6 +585,9 @@ namespace Client.Game
             // 발동음 (클라 전용). 원격 캐스터의 발동(서버 CastNtf=CastDelay 경과) 순간 SfxShoot 재생. 모든 타입 공용·entry 1회.
             SfxPlayer.Play(skill.SfxShoot, origin);
 
+            // 위치표시(telegraph) VFX (클라 전용). 원격은 발동(CastNtf)부터 임팩트(FirstTickDelay)까지.
+            spawnTelegraph(skill, origin, skill.FirstTickDelayMs / 1000f);
+
             // 서버는 entry 발동(=CastDelay 경과) 시점에 CastNtf 를 보내므로 원격은 즉시 재현한다.
             if (skill.EffectDamage == ESkillEffectDamage.ContactHit)
             {
@@ -565,6 +597,8 @@ namespace Client.Game
             }
             else if (skill.EffectDamage == ESkillEffectDamage.Area)
             {
+                // 지속음 (클라 전용). 원격 entry 페이즈 지속시간 동안 루프.
+                SfxPlayer.PlayLoop(skill.SfxLoop, origin, areaPhaseDurationSec(skill));
                 spawnAreaChainPhase(skill, origin, dir);
             }
             // 이동 스킬: 원격 캐스터를 서버가 실제 사용한 거리(move_distance)로 동일하게 이동시킨다.
