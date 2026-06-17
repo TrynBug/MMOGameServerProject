@@ -41,10 +41,17 @@ public:
     PacketSender& operator=(const PacketSender&) = delete;
 
     // ── 공통 송신 ──────────────────────────────────────────────
-    // message 를 직렬화해 GameToGatewayPacketNtf 로 래핑하여 해당 유저가 접속한 게이트웨이로 전송한다.
-    // 모든 Send***Ntf 가 이 함수를 거친다. (정의는 헤더 하단 — 템플릿)
+    // message 를 직렬화해 클라용 패킷으로 만들고, 수신자 userId 를 sidecar 로 붙여 해당 유저가
+    // 접속한 게이트웨이로 전송한다. (게이트웨이가 sidecar 를 떼고 클라에 전달)
+    // 모든 단일 대상 Send***Ntf 가 이 함수를 거친다. (정의는 헤더 하단 — 템플릿)
     template <typename TMessage>
     void SendToUser(int64 userId, int32 packetType, const TMessage& message);
+
+    // 같은 message 를 여러 유저에게 전송한다(브로드캐스트). payload 를 1회만 직렬화하고,
+    // 대상 유저를 게이트웨이별로 묶어 게이트웨이당 패킷 1개(수신자 userId 목록 sidecar)로 보낸다.
+    // AOI 브로드캐스트(스킬/사망/스폰 등 동일 payload→다수)는 이 함수를 사용한다.
+    template <typename TMessage>
+    void SendToUsers(const std::vector<int64>& userIds, int32 packetType, const TMessage& message);
 
     // ── 패킷별 편의 함수 ───────────────────────────────────────
     // Stage 로딩 완료 결과 + 캐릭터 스폰 확정 전송 (StageLoadCompleteRes).
@@ -77,29 +84,36 @@ public:
 
     // 버프 뱃지 알림 전송 (BuffNtf / BuffRemoveNtf). UI 뱃지 데이터(키/스택/남은시간)만 담는다.
     // remainTimeMs: -1 이면 영구(클라에서 카운트다운 표시 안 함).
-    void SendBuffNtf(int64 userId, int64 objectId, int32 buffKey, int32 stackCount, int32 remainTimeMs);
-    void SendBuffRemoveNtf(int64 userId, int64 objectId, int32 buffKey);
+    void SendBuffNtf(const std::vector<int64>& userIds, int64 objectId, int32 buffKey, int32 stackCount, int32 remainTimeMs);
+    void SendBuffRemoveNtf(const std::vector<int64>& userIds, int64 objectId, int32 buffKey);
 
     // 스킬 대미지 알림 전송 (SkillDamageNtf). Stage 가 대미지 적용 시점에 대상 주변 AOI 유저들에게 broadcast.
     // attackerObjectId/sourceSkillKey 는 클라 방향 피격표식·연출 분기용 (없으면 0).
-    void SendSkillDamageNtf(int64 userId, int64 targetObjectId, double damage, bool isDuplicate, double remainingHp,
+    void SendSkillDamageNtf(const std::vector<int64>& userIds, int64 targetObjectId, double damage, bool isDuplicate, double remainingHp,
                             int64 attackerObjectId = 0, int32 sourceSkillKey = 0);
 
     // 스킬 시전 알림 전송 (SkillCastNtf). Stage 가 시전자 주변 AOI 유저들에게 broadcast. 클라 비주얼 재현용.
-    void SendSkillCastNtf(int64 userId, int64 casterObjectId, int32 skillKey, int64 effectId,
+    void SendSkillCastNtf(const std::vector<int64>& userIds, int64 casterObjectId, int32 skillKey, int64 effectId,
                           float originX, float originY, float originZ, float dirX, float dirZ, uint32 seed,
                           float moveDistance);
 
     // 능력 시전 "시작" 알림 전송 (AbilityCastNtf). Stage 가 시전자 주변 AOI 유저들에게 broadcast.
     // 클라가 윈드업 모션 + 텔레그래프를 재생한다 (몬스터/NPC/엘리트 공용).
-    void SendAbilityCastNtf(int64 userId, int64 casterObjectId, int32 skillKey, int64 targetObjectId,
+    void SendAbilityCastNtf(const std::vector<int64>& userIds, int64 casterObjectId, int32 skillKey, int64 targetObjectId,
                             float originX, float originY, float originZ, float dirX, float dirZ, int32 windupMs);
 
     // 오브젝트 사망 알림 전송 (ObjectDeathNtf). Stage 가 사망한 대상 주변 AOI 유저들에게 broadcast. 클라 사망 연출용.
-    void SendObjectDeathNtf(int64 userId, int64 objectId, int64 killerObjectId);
+    void SendObjectDeathNtf(const std::vector<int64>& userIds, int64 objectId, int64 killerObjectId);
 
     // Stage 공지 배너 전송 (StageNoticeNtf). Stage 로직 스크립트의 Notice() 가 발생. 클라는 화면 배너 표시.
-    void SendStageNoticeNtf(int64 userId, const std::string& message, int32 durationMs);
+    void SendStageNoticeNtf(const std::vector<int64>& userIds, const std::string& message, int32 durationMs);
+
+private:
+    // 직렬화된 payload 를 클라용 패킷 [Header(packetType)][payload] 로 만들고, 수신자 userId 목록을
+    // sidecar 로 붙여 게이트웨이 세션으로 전송한다. userId 수가 많아 패킷 최대크기(uint16)를 넘으면
+    // 여러 패킷으로 분할한다. (SendToUser=1명, SendToUsers=N명이 공통으로 사용)
+    void sendClientPacketViaGateway(const netlib::ISessionPtr& spGatewaySession, int32 packetType,
+                                    const std::string& payload, const int64* userIds, int32 userIdCount);
 
 private:
     serverbase::ServerBase&                                   m_server;
@@ -133,7 +147,7 @@ void PacketSender::SendToUser(int64 userId, int32 packetType, const TMessage& me
         packetlog::LogPacket("S->C", userId, static_cast<uint16>(packetType),
                              logMode == EPacketLogMode::Detail ? &message : nullptr);
 
-    // 내부 패킷 바디(클라용)를 먼저 직렬화한다.
+    // 클라용 패킷 바디를 직렬화한다.
     std::string payload;
     if (!message.SerializeToString(&payload))
     {
@@ -141,18 +155,50 @@ void PacketSender::SendToUser(int64 userId, int32 packetType, const TMessage& me
         return;
     }
 
-    // GameToGatewayPacketNtf로 감싸서 게이트웨이로 전송.
-    ServerPacket::GameToGatewayPacketNtf ntf;
-    ntf.set_user_id(userId);
-    ntf.set_packet_type(packetType);
-    ntf.set_payload(std::move(payload));
+    // userId 1개를 sidecar 로 붙여 게이트웨이로 전송한다.
+    sendClientPacketViaGateway(spGatewaySession, packetType, payload, &userId, 1);
+}
 
-    auto spPacket = m_server.SerializePacket(Common::SERVER_PACKET_ID_GAME_TO_GATEWAY_PACKET_NTF, ntf);
-    if (!spPacket)
+template <typename TMessage>
+void PacketSender::SendToUsers(const std::vector<int64>& userIds, int32 packetType, const TMessage& message)
+{
+    if (userIds.empty())
+        return;
+
+    // payload 는 1회만 직렬화한다.
+    std::string payload;
+    if (!message.SerializeToString(&payload))
     {
-        LOG_WRITE(LogLevel::Error, std::format("failed to serialize GameToGatewayPacketNtf. userId={} packetType={}", userId, packetType));
+        LOG_WRITE(LogLevel::Error, std::format("failed to serialize payload. packetType={}", packetType));
         return;
     }
 
-    spGatewaySession->Send(spPacket);
+    // 대상 유저를 게이트웨이별로 묶는다. (한 Stage 의 유저가 서로 다른 게이트웨이를 경유할 수 있음)
+    std::unordered_map<int32, std::vector<int64>> idsByGateway;
+    for (int64 userId : userIds)
+    {
+        UserPtr spUser;
+        if (!m_safeUsers.Find(userId, spUser) || !spUser)
+            continue;
+
+        // [치트] 송신 패킷 로깅.
+        if (const EPacketLogMode logMode = packetlog::EffectiveMode(*spUser); logMode != EPacketLogMode::None)
+            packetlog::LogPacket("S->C", userId, static_cast<uint16>(packetType),
+                                 logMode == EPacketLogMode::Detail ? &message : nullptr);
+
+        idsByGateway[spUser->GetGatewayId()].push_back(userId);
+    }
+
+    // 게이트웨이당 패킷 1개로 전송한다.
+    for (auto& [gatewayId, ids] : idsByGateway)
+    {
+        netlib::ISessionPtr spGatewaySession;
+        if (!m_safeGatewaySessions.Find(gatewayId, spGatewaySession) || !spGatewaySession)
+        {
+            LOG_WRITE(LogLevel::Warn, std::format("gateway session not found. gatewayId={} packetType={}", gatewayId, packetType));
+            continue;
+        }
+
+        sendClientPacketViaGateway(spGatewaySession, packetType, payload, ids.data(), static_cast<int32>(ids.size()));
+    }
 }

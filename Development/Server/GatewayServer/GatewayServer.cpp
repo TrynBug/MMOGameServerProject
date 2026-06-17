@@ -18,13 +18,9 @@ bool GatewayServer::OnInitialize()
     });
 
     // 게임서버 패킷 디스패처 등록
+    // (클라 전달용 패킷은 sidecar 로 식별하여 handleGameServerPacket 에서 직접 처리하므로 디스패처에 등록하지 않는다.)
     m_gameServerDispatcher.Register<ServerPacket::ServerHandshakeReq>(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_REQ,
         [this](auto& spGameSession, auto& msg) { handleGameServerHandshakeReq(spGameSession, msg); });
-    m_gameServerDispatcher.Register<ServerPacket::GameToGatewayPacketNtf>(Common::SERVER_PACKET_ID_GAME_TO_GATEWAY_PACKET_NTF,
-        [this](auto& spGameSession, auto& msg) { handleGameToGatewayPacket(spGameSession, msg); });
-
-    m_gameServerDispatcher.Register<ServerPacket::GameToGatewayBroadcastNtf>(Common::SERVER_PACKET_ID_GAME_TO_GATEWAY_BROADCAST_NTF,
-        [this](auto& spGameSession, auto& msg) { handleGameToGatewayBroadcast(spGameSession, msg); });
 
     m_gameServerDispatcher.Register<ServerPacket::UserMoveToGameServerReq>(Common::SERVER_PACKET_ID_USER_MOVE_TO_GAME_SERVER_REQ,
         [this](auto& spGameSession, auto& msg) { handleUserMoveToGameServer(spGameSession, msg); });
@@ -416,7 +412,45 @@ void GatewayServer::handleLoginDuplicateNtf(const netlib::ISessionPtr& /*spLogin
 // 게임서버 패킷 핸들러
 void GatewayServer::handleGameServerPacket(const netlib::ISessionPtr& spGameSession, netlib::PacketPtr spPacket)
 {
+    // sidecar 가 있으면 클라 전달용 패킷이다. (게임서버가 수신자 userId 목록을 sidecar 로 붙여서 보냄)
+    // 그 외는 서버간 통신 패킷이므로 디스패처로 처리.
+    if (spPacket->HasSidecar())
+    {
+        forwardClientPacket(std::move(spPacket));
+        return;
+    }
+
     m_gameServerDispatcher.Dispatch(spGameSession, spPacket);
+}
+
+// 게임서버가 보낸 클라 전달용 패킷을 대상 유저(들)에게 전달한다.
+// sidecar 에 수신자 userId 목록(int64 배열)이 들어있다. sidecar 를 떼어내 깨끗한 클라 패킷으로 만든 뒤,
+// 같은 버퍼를 대상 유저들에게 전송한다(브로드캐스트 시 버퍼 1개 공유).
+void GatewayServer::forwardClientPacket(netlib::PacketPtr spPacket)
+{
+    const int32 sidecarSize = spPacket->GetSidecarSize();
+    const int32 count = sidecarSize / static_cast<int32>(sizeof(int64));
+    if (count <= 0)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("forwardClientPacket: invalid sidecar size={}", sidecarSize));
+        return;
+    }
+
+    // userId 목록을 미리 복사한다 (StripSidecar 후 sidecar 영역이 사라지므로).
+    std::vector<int64> userIds(count);
+    std::memcpy(userIds.data(), spPacket->GetSidecarData(), static_cast<size_t>(count) * sizeof(int64));
+
+    // sidecar 제거 → [PacketHeader][payload] 로 복원 (클라는 sidecar 를 모른다).
+    spPacket->StripSidecar();
+
+    for (int64 userId : userIds)
+    {
+        GatewayUserPtr spUser;
+        if (!m_safeUsers.Find(userId, spUser) || !spUser->spClientSession)
+            continue;
+
+        spUser->spClientSession->Send(spPacket);
+    }
 }
 
 // 게임서버의 handshake req 처리
@@ -455,52 +489,6 @@ void GatewayServer::handleGameServerHandshakeReq(const netlib::ISessionPtr& spGa
     spGameSession->Send(spPacket);
 
     LOG_WRITE(LogLevel::Info, std::format("game server handshake complete. gameServerId={}", gameServerId));
-}
-
-void GatewayServer::handleGameToGatewayPacket(const netlib::ISessionPtr& /*spGameSession*/, const ServerPacket::GameToGatewayPacketNtf& msg)
-{
-    int64 userId = msg.user_id();
-
-    GatewayUserPtr spUser;
-    if (!m_safeUsers.Find(userId, spUser) || !spUser->spClientSession)
-        return;
-
-    const std::string& payload = msg.payload();
-    const int32 totalSize = static_cast<int32>(sizeof(netlib::PacketHeader) + payload.size());
-
-    auto spPacket = GetIoContext().GetPacketPool().Alloc(totalSize);
-    if (!spPacket)
-        return;
-
-    spPacket->SetHeader(static_cast<uint16>(totalSize), static_cast<uint16>(msg.packet_type()), netlib::PacketFlags::None);
-    std::memcpy(spPacket->GetPayload(), payload.data(), payload.size());
-
-    spUser->spClientSession->Send(spPacket);
-}
-
-void GatewayServer::handleGameToGatewayBroadcast(const netlib::ISessionPtr& /*spGameSession*/, const ServerPacket::GameToGatewayBroadcastNtf& msg)
-{
-    const std::string& payload = msg.payload();
-    const int32 totalSize = static_cast<int32>(sizeof(netlib::PacketHeader) + payload.size());
-
-    auto spPacket = GetIoContext().GetPacketPool().Alloc(totalSize);
-    if (!spPacket)
-        return;
-
-    spPacket->SetHeader(static_cast<uint16>(totalSize), static_cast<uint16>(msg.packet_type()), netlib::PacketFlags::None);
-    std::memcpy(spPacket->GetPayload(), payload.data(), payload.size());
-
-    m_safeUsers.ForEach([&](const int64& userId, const GatewayUserPtr& spUser)
-    {
-        for (int i = 0; i < msg.user_ids_size(); ++i)
-        {
-            if (msg.user_ids(i) == userId && spUser->spClientSession)
-            {
-                spUser->spClientSession->Send(spPacket);
-                break;
-            }
-        }
-    });
 }
 
 void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spGameSession*/, const ServerPacket::UserMoveToGameServerReq& msg)

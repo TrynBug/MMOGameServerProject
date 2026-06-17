@@ -208,9 +208,12 @@ StageObject* Stage::FindObject(int64 objectId)
 
 void Stage::BroadcastStageNoticeNtf(const std::string& message, int32 durationMs)
 {
-    PacketSender& sender = GameServer::Instance().GetPacketSender();
+    std::vector<int64> userIds;
+    userIds.reserve(m_users.size());
     for (const auto& [userId, spUser] : m_users)
-        sender.SendStageNoticeNtf(userId, message, durationMs);
+        userIds.push_back(userId);
+
+    GameServer::Instance().GetPacketSender().SendStageNoticeNtf(userIds, message, durationMs);
 }
 
 void Stage::updateMonsters(int64 deltaMs)
@@ -1681,26 +1684,20 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
 // Sends to every user in the actor's AOI; the owner is included if they are a user in their own sector.
 void Stage::BroadcastBuffNtf(const ActorObject& actor, int32 buffKey, int32 stackCount, int32 remainMs)
 {
-    GameServer& server = GameServer::Instance();
-
-    const int64 objectId = actor.GetObjectId();
+    std::vector<int64> userIds;
     ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
-        [&](int64 userId)
-        {
-            server.GetPacketSender().SendBuffNtf(userId, objectId, buffKey, stackCount, remainMs);
-        });
+        [&](int64 userId) { userIds.push_back(userId); });
+
+    GameServer::Instance().GetPacketSender().SendBuffNtf(userIds, actor.GetObjectId(), buffKey, stackCount, remainMs);
 }
 
 void Stage::BroadcastBuffRemoveNtf(const ActorObject& actor, int32 buffKey)
 {
-    GameServer& server = GameServer::Instance();
-
-    const int64 objectId = actor.GetObjectId();
+    std::vector<int64> userIds;
     ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
-        [&](int64 userId)
-        {
-            server.GetPacketSender().SendBuffRemoveNtf(userId, objectId, buffKey);
-        });
+        [&](int64 userId) { userIds.push_back(userId); });
+
+    GameServer::Instance().GetPacketSender().SendBuffRemoveNtf(userIds, actor.GetObjectId(), buffKey);
 }
 
 

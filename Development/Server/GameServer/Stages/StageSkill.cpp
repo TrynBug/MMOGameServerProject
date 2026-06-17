@@ -208,14 +208,13 @@ void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerOb
 
     GameServer& server = GameServer::Instance();
 
-    const int64 targetObjectId = target.GetObjectId();
+    // killerObjectId = 공격자. 클라가 방향 피격표식/연출 분기에 attacker/sourceSkillKey 사용.
+    std::vector<int64> userIds;
     ForEachUserInAoi(target.GetCurSectorX(), target.GetCurSectorZ(),
-        [&](int64 userId)
-        {
-            // killerObjectId = 공격자. 클라가 방향 피격표식/연출 분기에 attacker/sourceSkillKey 사용.
-            server.GetPacketSender().SendSkillDamageNtf(userId, targetObjectId, damage, isDuplicate, remainingHp,
-                                                        killerObjectId, sourceSkillKey);
-        });
+        [&](int64 userId) { userIds.push_back(userId); });
+
+    server.GetPacketSender().SendSkillDamageNtf(userIds, target.GetObjectId(), damage, isDuplicate, remainingHp,
+                                                killerObjectId, sourceSkillKey);
 
     // 새로 사망했으면 별도 사망 통보 (대미지 외 사인도 있을 수 있어 SkillDamageNtf 와 분리).
     // 시체는 일정 시간(corpse) 유지 후 Stage::updateMonsters 가 디스폰한다.
@@ -236,14 +235,11 @@ void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerOb
 // 사망한 대상 주변 AOI 유저들에게 사망을 통보(ObjectDeathNtf). 클라 사망 연출용.
 void Stage::BroadcastObjectDeathNtf(const ActorObject& actor, int64 killerObjectId)
 {
-    GameServer& server = GameServer::Instance();
-
-    const int64 objectId = actor.GetObjectId();
+    std::vector<int64> userIds;
     ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
-        [&](int64 userId)
-        {
-            server.GetPacketSender().SendObjectDeathNtf(userId, objectId, killerObjectId);
-        });
+        [&](int64 userId) { userIds.push_back(userId); });
+
+    GameServer::Instance().GetPacketSender().SendObjectDeathNtf(userIds, actor.GetObjectId(), killerObjectId);
 }
 
 // SkillComponent 가 bake 한 EffectParams + 부채꼴 방향으로 투사체 그룹을 생성/등록하고, 발급된 effectId 를 리턴한다.
@@ -341,28 +337,22 @@ void Stage::BroadcastSkillCastNtf(const ActorObject& caster, int32 skillKey, int
                                   const Vector3& origin, const Vector3& dir, uint32 seed,
                                   float moveDistance)
 {
-    GameServer& server = GameServer::Instance();
-
-    const int64 casterObjectId = caster.GetObjectId();
+    std::vector<int64> userIds;
     ForEachUserInAoi(caster.GetCurSectorX(), caster.GetCurSectorZ(),
-        [&](int64 userId)
-        {
-            server.GetPacketSender().SendSkillCastNtf(userId, casterObjectId, skillKey, effectId,
-                                      origin.x, origin.y, origin.z, dir.x, dir.z, seed, moveDistance);
-        });
+        [&](int64 userId) { userIds.push_back(userId); });
+
+    GameServer::Instance().GetPacketSender().SendSkillCastNtf(userIds, caster.GetObjectId(), skillKey, effectId,
+                              origin.x, origin.y, origin.z, dir.x, dir.z, seed, moveDistance);
 }
 
 // 능력 시전 "시작" 통보를 시전자 주변 AOI 유저들에게 broadcast. (몬스터/NPC/엘리트 공용)
 void Stage::BroadcastAbilityCastNtf(const ActorObject& caster, int32 skillKey, int64 targetObjectId,
                                     const Vector3& origin, const Vector3& dir, int32 windupMs)
 {
-    GameServer& server = GameServer::Instance();
-
-    const int64 casterObjectId = caster.GetObjectId();
+    std::vector<int64> userIds;
     ForEachUserInAoi(caster.GetCurSectorX(), caster.GetCurSectorZ(),
-        [&](int64 userId)
-        {
-            server.GetPacketSender().SendAbilityCastNtf(userId, casterObjectId, skillKey, targetObjectId,
-                                      origin.x, origin.y, origin.z, dir.x, dir.z, windupMs);
-        });
+        [&](int64 userId) { userIds.push_back(userId); });
+
+    GameServer::Instance().GetPacketSender().SendAbilityCastNtf(userIds, caster.GetObjectId(), skillKey, targetObjectId,
+                              origin.x, origin.y, origin.z, dir.x, dir.z, windupMs);
 }
