@@ -62,6 +62,13 @@ public:
     // 주의: 호출 후 GetPayload()/GetPayloadSize()는 자동으로 사이드카 이후를 가리킨다.
     bool SetSidecar(const void* data, int32 size);
 
+    // 사이드카 제거.
+    // - payload를 SidecarHeader + 사이드카 데이터 크기만큼 앞으로 시프트한다(memmove).
+    // - flags의 Sidecar 비트를 clear하고, header.size를 갱신한다.
+    // - 버퍼구조가 [PacketHeader][payload] 로 복원된다.
+    // - 사이드카가 없으면 false 반환.
+    bool StripSidecar();
+
     // 초기화
     void Reset();
 

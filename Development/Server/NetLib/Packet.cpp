@@ -172,6 +172,32 @@ bool Packet::SetSidecar(const void* data, int32 size)
     return true;
 }
 
+bool Packet::StripSidecar()
+{
+    if (!HasSidecar())
+        return false;
+
+    // flags 변경 전에 payload 위치/크기를 먼저 구한다 (둘 다 HasSidecar 의존).
+    uint8* payloadCurrent = GetPayload();
+    const int32 payloadSize = GetPayloadSize();
+
+    // payload를 PacketHeader 바로 뒤로 당긴다. (구간이 겹쳐도 memmove는 안전)
+    uint8* payloadNew = m_buffer + sizeof(PacketHeader);
+    if (payloadSize > 0)
+    {
+        std::memmove(payloadNew, payloadCurrent, payloadSize);
+    }
+
+    // 헤더 flags 및 size 갱신
+    PacketHeader* header = GetHeader();
+    header->flags &= ~PacketFlags::Sidecar;
+    header->size = static_cast<uint16>(sizeof(PacketHeader) + payloadSize);
+
+    m_offset = static_cast<int32>(sizeof(PacketHeader)) + payloadSize;
+
+    return true;
+}
+
 void Packet::Reset()
 {
     std::memset(m_buffer, 0, sizeof(PacketHeader));
