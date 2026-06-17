@@ -8,16 +8,6 @@
 namespace netlib
 {
 
-namespace
-{
-// 현재 스레드가 사용할 freelist 샤드 인덱스. 스레드별로 고정(thread_local 캐시).
-size_t poolShardIndex()
-{
-    thread_local const size_t idx = std::hash<std::thread::id>{}(std::this_thread::get_id()) % kPacketPoolShardCount;
-    return idx;
-}
-}
-
 PacketPool::PacketPool()
 {
 }
@@ -54,6 +44,15 @@ void PacketPool::Initialize(int32 initPacketSize, int32 maxPacketSize)
 }
 
 
+// 현재 스레드가 사용할 freelist 샤드 인덱스. 스레드별로 고정(thread_local 캐시).
+// thread id 해시는 충돌 가능성이 있어, 단조 증가 m_nextShard 로 스레드를 라운드로빈 배정한다.
+// (풀을 처음 쓰는 시점에 다음 번호를 한 번 받아 % K 로 고정 → ≤ K 스레드까지 서로 다른 shard 보장)
+size_t PacketPool::poolShardIndex()
+{
+    thread_local const size_t idx = m_nextShard.fetch_add(1, std::memory_order_relaxed) % kPacketPoolShardCount;
+    return idx;
+}
+
 // size에 맞는 패킷버퍼 할당. 주의할 점: size는 header크기 + payload크기 를 입력해야 한다.
 PacketPtr PacketPool::Alloc(int32 size)
 {
@@ -76,12 +75,21 @@ PacketPtr PacketPool::Alloc(int32 size)
         {
             pPacket = shard.freeList.back();
             shard.freeList.pop_back();
+            ++shard.servedAlloc;   // [통계] 이 shard 가 Alloc 을 충족
+        }
+        else
+        {
+            ++shard.emptyProbe;    // [통계] 빈 shard 를 probe (스캔 비용 지표)
         }
     }
 
     if (pPacket == nullptr)
     {
         pPacket = new Packet(bucket->capacity);
+
+        // [통계] home shard(base) 에 new 발생 기록
+        std::lock_guard<std::mutex> lock(bucket->shards[base].mtx);
+        ++bucket->shards[base].created;
     }
     else
     {
@@ -129,6 +137,38 @@ void PacketPool::returnToPool(Packet* pPacket, Bucket* pBucket, size_t shardInde
     FreeShard& shard = pBucket->shards[shardIndex];
     std::lock_guard<std::mutex> lock(shard.mtx);
     shard.freeList.push_back(pPacket);
+    ++shard.returned;   // [통계] 이 shard 로 반납됨
+}
+
+// 버킷별 통계 스냅샷. 각 shard 를 잠깐 잠그며 카운터·보유수를 수집한다(진단용).
+std::vector<PacketPool::BucketStats> PacketPool::GetStats() const
+{
+    std::vector<BucketStats> out;
+    out.reserve(m_buckets.size());
+
+    for (Bucket* pBucket : m_buckets)
+    {
+        BucketStats s;
+        s.capacity = pBucket->capacity;
+
+        for (size_t i = 0; i < kPacketPoolShardCount; ++i)
+        {
+            FreeShard& shard = pBucket->shards[i];
+            std::lock_guard<std::mutex> lock(shard.mtx);
+
+            const int32 held = static_cast<int32>(shard.freeList.size());
+            s.shardHeld[i]   = held;
+            s.held          += held;
+            s.allocCount    += shard.servedAlloc + shard.created;
+            s.freeCount     += shard.returned;
+            s.newCount      += shard.created;
+            s.scanMissCount += shard.emptyProbe;
+        }
+
+        out.push_back(s);
+    }
+
+    return out;
 }
 
 // 모든 버킷, 패킷 파괴
