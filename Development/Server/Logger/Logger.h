@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <string>
 #include <format>
 #include <source_location>
@@ -35,6 +36,9 @@ public:
     // 로그 write
     static void LogWrite(const LogLevel logLevel, const std::string& msg, const std::source_location loc = std::source_location::current());
 
+    // 이 레벨이 현재 출력 대상인지. LOG_WRITE 매크로가 msg(std::format) 평가 전에 검사하는 용도.
+    static bool ShouldLog(LogLevel level) { return level >= sm_logLevel.load(std::memory_order_relaxed); }
+
     // 로그레벨 변경
     static void SetLevel(LogLevel level);
 
@@ -47,9 +51,10 @@ public:
 
 private:
     static inline bool sm_bInitialized = false;
-	static inline LogLevel sm_logLevel = LogLevel::Debug;
+	static inline std::atomic<LogLevel> sm_logLevel = LogLevel::Debug;
 };
 
 
 // 로그기록 매크로
-#define LOG_WRITE(logLevel, msg) Logger::LogWrite(logLevel, msg)
+// 레벨 필터를 먼저 검사하여, 출력되지 않을 로그는 msg(std::format) 자체를 평가하지 않는다(핫패스 비용 회피).
+#define LOG_WRITE(logLevel, msg) do { if (Logger::ShouldLog(logLevel)) Logger::LogWrite(logLevel, msg); } while(0)

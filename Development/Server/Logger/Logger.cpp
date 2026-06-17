@@ -74,7 +74,7 @@ void Logger::Initialize(const std::string& logDir,
     // 매 10초마다 flush 하도록 설정
     spdlog::flush_every(std::chrono::seconds(10));
 
-    sm_logLevel = level;
+    sm_logLevel.store(level, std::memory_order_relaxed);
     sm_bInitialized = true;
 }
 
@@ -99,7 +99,7 @@ void Logger::LogWrite(const LogLevel logLevel, const std::string& msg, const std
 
 void Logger::SetLevel(LogLevel level)
 {
-    sm_logLevel = level;
+    sm_logLevel.store(level, std::memory_order_relaxed);
     spdlog::set_level(toSpdlogLevel(level));
 }
 
