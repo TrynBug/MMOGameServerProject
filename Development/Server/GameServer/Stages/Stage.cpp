@@ -208,12 +208,12 @@ StageObject* Stage::FindObject(int64 objectId)
 
 void Stage::BroadcastStageNoticeNtf(const std::string& message, int32 durationMs)
 {
-    std::vector<int64> userIds;
-    userIds.reserve(m_users.size());
+    m_aoiUserScratch.clear();
+    m_aoiUserScratch.reserve(m_users.size());
     for (const auto& [userId, spUser] : m_users)
-        userIds.push_back(userId);
+        m_aoiUserScratch.push_back(userId);
 
-    GameServer::Instance().GetPacketSender().SendStageNoticeNtf(userIds, message, durationMs);
+    GameServer::Instance().GetPacketSender().SendStageNoticeNtf(m_aoiUserScratch, message, durationMs);
 }
 
 void Stage::updateMonsters(int64 deltaMs)
@@ -1684,20 +1684,20 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
 // Sends to every user in the actor's AOI; the owner is included if they are a user in their own sector.
 void Stage::BroadcastBuffNtf(const ActorObject& actor, int32 buffKey, int32 stackCount, int32 remainMs)
 {
-    std::vector<int64> userIds;
+    m_aoiUserScratch.clear();
     ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
-        [&](int64 userId) { userIds.push_back(userId); });
+        [&](int64 userId) { m_aoiUserScratch.push_back(userId); });
 
-    GameServer::Instance().GetPacketSender().SendBuffNtf(userIds, actor.GetObjectId(), buffKey, stackCount, remainMs);
+    GameServer::Instance().GetPacketSender().SendBuffNtf(m_aoiUserScratch, actor.GetObjectId(), buffKey, stackCount, remainMs);
 }
 
 void Stage::BroadcastBuffRemoveNtf(const ActorObject& actor, int32 buffKey)
 {
-    std::vector<int64> userIds;
+    m_aoiUserScratch.clear();
     ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
-        [&](int64 userId) { userIds.push_back(userId); });
+        [&](int64 userId) { m_aoiUserScratch.push_back(userId); });
 
-    GameServer::Instance().GetPacketSender().SendBuffRemoveNtf(userIds, actor.GetObjectId(), buffKey);
+    GameServer::Instance().GetPacketSender().SendBuffRemoveNtf(m_aoiUserScratch, actor.GetObjectId(), buffKey);
 }
 
 

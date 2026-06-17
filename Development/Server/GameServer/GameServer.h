@@ -159,7 +159,7 @@ private:
     // IOCP Worker가 게이트웨이로부터 패킷을 받았을 때 어떤 유저인지 찾는 용도.
     // Stage가 유저를 소유하므로 여기에 들어있는 shared_ptr는 유저 lifetime의
     // 또 다른 소유자가 된다. Stage에서 제거되어도 여기서 제거되어야 객체가 사라진다.
-    SharedThreadSafeUnorderedMap<int64, UserPtr> m_safeUsers;
+    ShardedThreadSafeUnorderedMap<int64, UserPtr> m_safeUsers;
 
     // ── 패킷 송신 (PacketSender) ─────────────────────────────────
     // 클라이언트로 나가는 Ntf 송신 전담. m_server(=*this) + 위 두 맵(유저/게이트웨이세션)을 참조로 받는다.

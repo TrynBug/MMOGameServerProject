@@ -495,6 +495,10 @@ private:
     // Stage가 유저를 소유 (shared_ptr).
     std::unordered_map<int64, UserPtr> m_users;
 
+    // AOI 브로드캐스트 시 수신자 userId 를 모으는 재사용 버퍼 (컨텐츠 스레드 전용, 호출마다 clear).
+    // 매 브로드캐스트마다 vector 를 새로 만들지 않기 위함. 브로드캐스트는 tick 내에서 순차 호출되어 재진입 없음.
+    std::vector<int64> m_aoiUserScratch;
+
     // ── StageObject 통합 + 타입별 소유 컨테이너 ──
     // 모든 StageObject의 lifetime은 m_objects가 관리(shared_ptr).
     // 타입별 맵(m_userObjects 등)은 같은 shared_ptr을 빠른 조회용으로 보관.
