@@ -125,6 +125,7 @@ struct OVERLAPPED_EX
 	- send 요청은 1개 시점에 반드시 1개만 존재하도록 합니다.
 	- send 성공 완료통지를 받으면 현재 send를 진행중인게 아니라면 m_sendQueue 를 조사하여 남은 패킷을 다시 최대 50개까지 꺼내서 다시 send 합니다.
 	- OVERLAPPED_EX 구조체를 사용하기 때문에 IO 도중에 Session객체가 제거되지 않습니다.
+	- Send는 같은 PacketPtr 하나를 여러 세션에 Send해도 안전하며(읽기만 함), 브로드캐스트 시 버퍼 1개를 공유합니다.
 	
 # 패킷 헤더
 ```cpp
@@ -159,11 +160,15 @@ struct SidecarHeader
 #pragma pack(pop)
 ```
 
-- Sidecar 헤더는 패킷 payload 데이터는 그대로 유지하면서 패킷에 추가적인 정보를 넣을 때 사용합니다. Sidecar 헤더는 게이트웨이서버가 클라이언트의 패킷을 게임서버로 relay할 때, 클라이언트 UserId를 원본 클라패킷에 집어넣기 위해서 개발되었습다.
-- 사용법: PacketHeader의 flags에 PacketFlags::Sidecar를 세팅합니다. 그런다음 payload 데이터를 memmove로 뒤로 밀고 그 사이에 SidecarHeader와 데이터(UserId 등)를 memcpy로 집어넣습니다. 이렇게 되면 패킷버퍼의 바이트구조는 `[PacketHeader][SidecarHeader][Sidecar 데이터(size)][payload]` 가 됩니다.
-- 패킷을 받는 쪽에서는 flags & PacketFlags::Sidecar 를 통해 패킷에 Sidecar 데이터가 있는것을 체크하고, Sidecar 데이터가 있다면 적절히 꺼내서 사용하면 됩니다.
-- 패킷에 Sidecar 데이터를 넣거나 읽는 기능은 Packet 클래스가 제공합니다.
-- Sidecar는 NetLib의 네트워크 기능에 영향을 미치지 않습니다. 패킷에 Sidecar 데이터가 있으면 단지 패킷의 size가 증가하고 payload 위치가 뒤로 밀릴 뿐입니다. Sidecar를 넣거나 읽는 것은 사용자의 영역입니다. NetLib는 오직 패킷의 size와 payload만 신경씁니다.
+- Sidecar 헤더는 패킷 payload 데이터는 그대로 유지하면서 패킷에 추가적인 라우팅 정보를 넣을 때 사용합니다. 게이트웨이↔게임서버 양방향에 모두 쓰입니다.
+	- **인바운드(클라→게임)**: 게이트웨이가 원본 클라 패킷에 보낸 유저의 UserId(int64 1개)를 sidecar로 끼워 게임서버로 relay.
+	- **아웃바운드(게임→클라)**: 게임서버가 클라용 패킷에 수신자 UserId 목록(int64 N개)을 sidecar로 붙여 게이트웨이로 전송 → 게이트웨이가 sidecar를 떼고 대상 클라들에게 전달. (별도 래핑 패킷 없이 직접 전달 — 유니캐스트 N=1, 브로드캐스트 N>1 동일 경로)
+- 사용법: PacketHeader의 flags에 PacketFlags::Sidecar를 세팅하고, payload를 memmove로 뒤로 밀어 그 사이에 SidecarHeader와 데이터를 넣습니다. 바이트구조는 `[PacketHeader][SidecarHeader][Sidecar 데이터(size)][payload]` 가 됩니다.
+- 패킷을 받는 쪽은 flags & PacketFlags::Sidecar 로 존재 여부를 확인하고 꺼내 씁니다. Sidecar를 넣거나 읽는 기능은 Packet 클래스가 제공합니다.
+	- `SetSidecar(data, size)`: payload 뒤에 sidecar를 삽입(payload가 이미 있으면 memmove 발생).
+	- `StripSidecar()`: sidecar를 제거해 `[PacketHeader][payload]`로 복원(게이트웨이가 클라에 전달하기 전 사용).
+	- `FinalizePacketSize(payloadSize)`: 패킷을 새로 만들 때 sidecar를 **먼저** 깔고(빈 payload라 memmove 없음) payload를 직접 직렬화한 뒤 호출하여 size를 확정. 아웃바운드 빌드 경로의 memmove를 없애는 용도.
+- Sidecar는 NetLib의 네트워크 기능에 영향을 미치지 않습니다. 패킷의 size가 늘고 payload 위치가 뒤로 밀릴 뿐이며, NetLib는 오직 패킷의 size와 payload만 신경씁니다.
 
 # 패킷 pool
 IoContext는 패킷(패킷버퍼) pool을 제공합니다. 패킷할당 함수의 리턴 타입은 shared_ptr<Packet> 입니다.  
@@ -171,6 +176,13 @@ IoContext는 패킷(패킷버퍼) pool을 제공합니다. 패킷할당 함수�
 그리고 사용자(서버)는 수신된 데이터를 전달받을 때 shared_ptr<Packet> 형태의 패킷을 전달받아 직접 역직렬화 하여 사용합니다.  
 
 참고로 직렬화/역직렬화 할때는 PacketGenerator 라이브러리의 직렬화/역직렬화 기능을 사용합니다.  
+
+## 버킷 샤딩 (락 경합 완화)
+- 각 버킷(크기 클래스)의 freeList는 단일 mutex가 아니라 `kPacketPoolShardCount`개의 샤드(각자 mutex + freeList)로 분할됩니다. 스레드는 라운드로빈으로 배정된 자기 샤드를 우선 사용해 mutex 캐시라인 경합을 분산합니다.
+	- 스레드별 샤드 인덱스는 멤버 atomic `m_nextShard`를 1씩 증가시켜 배정(thread_local 캐시). ≤ 샤드 수 만큼의 스레드는 서로 다른 샤드를 보장.
+	- **Alloc**: 자기 샤드부터 시도하고 비어있으면 다른 샤드를 순회(다른 스레드가 반납한 패킷 회수), 모두 비면 new.
+	- **반납(free)**: free하는 스레드가 아니라 **alloc했던 스레드의 home 샤드**로 되돌립니다. 그래야 그 스레드의 다음 Alloc이 자기 샤드에서 바로 hit하여 cross-shard 스캔이 드물어집니다. (deleter에 alloc 시점 home 샤드 인덱스를 캡처)
+- **통계**: `GetStats()`가 버킷별 스냅샷(`BucketStats`)을 반환합니다. capacity, allocCount, freeCount, newCount(pool miss), scanMissCount(스캔 중 빈 샤드 probe 수), held(현재 보유 수), shardHeld[](샤드별 보유 분포). 카운터는 모두 각 샤드 락 안에서만 갱신되어 추가 atomic·공유 캐시라인이 없습니다.
 
 # 패킷 암호화
 - 암호화는 넣어야 하는데 아직 개발되지는 않았습니다. (암호화 알고리즘 후보: ChaCha20)
