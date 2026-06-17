@@ -118,6 +118,11 @@ int32 NetClient::GetMaxPacketSize() const
     return m_ioContext->GetConfig().maxPacketSize;
 }
 
+void NetClient::ScheduleAt(std::chrono::steady_clock::time_point deliverAt, std::function<void()> fn)
+{
+    m_ioContext->ScheduleAt(deliverAt, std::move(fn));
+}
+
 void NetClient::OnSessionDisconnected(std::shared_ptr<ISession> spSession)
 {
     if (m_eventHandler != nullptr)

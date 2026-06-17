@@ -27,6 +27,10 @@ public:
     // 사용자 정의 데이터 슬롯. 라이브러리는 이 값을 읽거나 해석하지 않는다.
     virtual void                  SetUserData(std::shared_ptr<void> spData) = 0;
     virtual std::shared_ptr<void> GetUserData() const                       = 0;
+
+    // 이 세션의 수신/송신을 일부러 지연시킨다(네트워크 지연 시뮬레이션). 0 = 지연 없음.
+    // 수신: OnRecv 호출을 recvMs 만큼 지연. 송신: Send 를 sendMs 만큼 지연. 런타임 변경 가능.
+    virtual void SetSimulatedDelay(int32 recvMs, int32 sendMs) = 0;
 };
 
 using ISessionPtr  = std::shared_ptr<ISession>;

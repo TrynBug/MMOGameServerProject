@@ -25,6 +25,9 @@ bool GatewayServer::OnInitialize()
     m_gameServerDispatcher.Register<ServerPacket::UserMoveToGameServerReq>(Common::SERVER_PACKET_ID_USER_MOVE_TO_GAME_SERVER_REQ,
         [this](auto& spGameSession, auto& msg) { handleUserMoveToGameServer(spGameSession, msg); });
 
+    m_gameServerDispatcher.Register<ServerPacket::SetClientLatencyReq>(Common::SERVER_PACKET_ID_SET_CLIENT_LATENCY_REQ,
+        [this](auto& spGameSession, auto& msg) { handleSetClientLatency(spGameSession, msg); });
+
     m_gameServerDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spGameSession, const netlib::PacketPtr& spPacket)
     {
         LOG_WRITE(LogLevel::Warn, std::format("unknown game server packetId={}, sessionId={}", spPacket->GetHeader()->type, spGameSession->GetId()));
@@ -538,6 +541,23 @@ void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spGa
     auto spReroutePacket = SerializePacket(Common::SERVER_PACKET_ID_USER_REROUTE_NTF, rerouteNtf);
     if (spReroutePacket)
         spTargetSession->Send(spReroutePacket);
+}
+
+// 게임서버의 netdelay 치트에 의한 클라 연결 지연 설정 (개발용)
+void GatewayServer::handleSetClientLatency(const netlib::ISessionPtr& /*spGameSession*/, const ServerPacket::SetClientLatencyReq& msg)
+{
+    const int64 userId = msg.user_id();
+
+    GatewayUserPtr spUser;
+    if (!m_safeUsers.Find(userId, spUser) || !spUser->spClientSession)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("SetClientLatency: user not found. userId={}", userId));
+        return;
+    }
+
+    spUser->spClientSession->SetSimulatedDelay(msg.recv_delay_ms(), msg.send_delay_ms());
+    LOG_WRITE(LogLevel::Info, std::format("client latency set. userId={} recvMs={} sendMs={}",
+        userId, msg.recv_delay_ms(), msg.send_delay_ms()));
 }
 
 

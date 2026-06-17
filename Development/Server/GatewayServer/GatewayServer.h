@@ -49,6 +49,7 @@ private:
     void handleGameServerPacket      (const netlib::ISessionPtr& spGameSession, const netlib::PacketPtr& spPacket);
     void handleGameServerHandshakeReq(const netlib::ISessionPtr& spGameSession, const ServerPacket::ServerHandshakeReq& msg);
     void handleUserMoveToGameServer  (const netlib::ISessionPtr& spGameSession, const ServerPacket::UserMoveToGameServerReq&   msg);
+    void handleSetClientLatency      (const netlib::ISessionPtr& spGameSession, const ServerPacket::SetClientLatencyReq&       msg);
 
     // 게임서버가 보낸 클라 전달용 패킷(sidecar 에 수신자 userId 목록)을 대상 유저(들)에게 전달한다.
     void forwardClientPacket(const netlib::PacketPtr& spPacket);

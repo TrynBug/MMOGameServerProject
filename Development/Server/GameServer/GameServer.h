@@ -64,6 +64,9 @@ public:
     CheatManager&       GetCheatManager()       { return m_cheatManager; }
     const CheatManager& GetCheatManager() const { return m_cheatManager; }
 
+    // 특정 게이트웨이로 서버패킷 전송. 해당 게이트웨이 세션이 없으면 false. (netdelay 치트 등 내부 제어용)
+    bool SendToGateway(int32 gatewayId, const netlib::PacketPtr& spPacket);
+
 protected:
     // ServerBase 훅
     bool OnInitialize()                              override;

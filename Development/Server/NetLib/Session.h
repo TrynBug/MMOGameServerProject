@@ -8,6 +8,7 @@
 
 #include <winsock2.h>
 #include <atomic>
+#include <chrono>
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -60,12 +61,27 @@ public:
 
     void        CloseSocket();
 
+    /* 네트워크 지연 시뮬레이션 */
+    // 네트워크 지연 시뮬레이션 설정. 런타임 변경 가능. (테스트 전용)
+    void SetSimulatedDelay(int32 recvMs, int32 sendMs) override;
+
 private:
     /* Network */
     void        parseReceivedPackets();
     bool        postRecv();
     bool        postSend();
     void        trySendNext();
+
+    // sendQueue 에 패킷을 넣고, send 진행중이 아니면 송신을 시작한다. (Send 의 실제 송신 부분)
+    void        enqueueAndKickSend(const PacketPtr& spPacket);
+
+    /* 네트워크 지연 시뮬레이션 */
+    // 송신/수신을 순서 보존하며 지연 후 처리하도록 스케줄한다. (네트워크 지연 파이프 활성 상태에서만 호출)
+    void        scheduleDelayedSend(const PacketPtr& spPacket);
+    void        scheduleDelayedRecv(const PacketPtr& spPacket);
+    // 스케줄러 스레드가 deliver 시각에 호출. 실제 송신/수신 후 pending 감소 + 네트워크 지연 파이프 비면 비활성화.
+    void        releaseDelayedSend(const PacketPtr& spPacket);
+    void        releaseDelayedRecv(const PacketPtr& spPacket);
 
 private:
     INetBase*                     m_pNetBase   = nullptr;     // 세션이 속한 Network 객체
@@ -90,6 +106,25 @@ private:
     std::atomic<bool>             m_bClosed    { false };   // 소켓닫힘 여부
 
     std::shared_ptr<void>         m_spUserData;             // 사용자 정의 데이터 슬롯
+
+    /* 네트워크 지연 시뮬레이션 */
+    // 네트워크 지연 시뮬레이션 (ms, 0 = 지연 없음). m_delayStateMutex 보호 하에서만 접근.
+    std::atomic<int32>            m_recvDelayMs{ 0 };
+    std::atomic<int32>            m_sendDelayMs{ 0 };
+
+    // 지연 파이프 활성 여부. Send/recv 핫패스는 이 atomic 1개만 보고 fast/slow 를 가른다(평상시 false → lock 없음).
+    // true = 지연이 켜져 있거나 아직 방출 안 된 지연 패킷이 남아있음.
+    std::atomic<bool>             m_sendDelayActive{ false };
+    std::atomic<bool>             m_recvDelayActive{ false };
+
+    // 지연 시뮬레이션 순서 보존 상태 (m_delayStateMutex 보호).
+    // cursor: 마지막으로 스케줄된 deliver 시각(단조). pending: 아직 방출되지 않은 지연 패킷 수.
+    // pending>0 이면 지연이 0 으로 바뀌어도 fast path 를 타지 않고 파이프에 줄세워 순서를 보존한다.
+    std::mutex                            m_delayStateMutex;
+    std::chrono::steady_clock::time_point m_recvDeliverCursor{};
+    std::chrono::steady_clock::time_point m_sendDeliverCursor{};
+    int32                                 m_pendingDelayedRecvs = 0;
+    int32                                 m_pendingDelayedSends = 0;
 };
 
 using SessionPtr = std::shared_ptr<Session>;

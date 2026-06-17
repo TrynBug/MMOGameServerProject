@@ -282,6 +282,17 @@ void GameServer::disconnectFromGateway(int32 gatewayId)
     LOG_WRITE(LogLevel::Info, std::format("disconnected from gateway {}", gatewayId));
 }
 
+// 특정 게이트웨이로 서버패킷 전송. 세션 없으면 false.
+bool GameServer::SendToGateway(int32 gatewayId, const netlib::PacketPtr& spPacket)
+{
+    netlib::ISessionPtr spSession;
+    if (!m_safeGatewaySessions.Find(gatewayId, spSession) || !spSession)
+        return false;
+
+    spSession->Send(spPacket);
+    return true;
+}
+
 void GameServer::sendGameServerHandshakeReq(const netlib::ISessionPtr& spGatewaySession)
 {
     // 이 세션이 어떤 게이트웨이의 넷클라이언트의 세션인지 조회한다.

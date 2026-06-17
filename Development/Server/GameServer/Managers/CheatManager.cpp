@@ -2,6 +2,9 @@
 #include "Managers/CheatManager.h"
 #include "Stages/Stage.h"
 #include "User.h"
+#include "GameServer.h"
+
+#include <cstdlib>
 
 CheatManager::CheatManager()
 {
@@ -11,6 +14,7 @@ CheatManager::CheatManager()
         { "god",  &CheatManager::cheatGod  },
         { "packet",       &CheatManager::cheatPacket },
         { "packetdetail", &CheatManager::cheatPacketDetail },
+        { "netdelay",     &CheatManager::cheatNetDelay },
     };
 }
 
@@ -68,6 +72,35 @@ CheatResult CheatManager::cheatPacketDetail(Stage& /*stage*/, const UserPtr& spU
 {
     const bool all = (!args.empty() && args[0] == "all");
     return togglePacketLog(spUser, all, EPacketLogMode::Detail, "packetdetail");
+}
+
+// netdelay <recvMs> [sendMs]: 이 클라 연결에 인위적 네트워크 지연을 설정한다(개발용).
+// 게임서버가 SetClientLatencyReq 를 해당 유저의 게이트웨이로 보내고, 게이트웨이가 클라 Session 에 적용한다.
+// sendMs 생략 시 recvMs 와 동일. 0 0 이면 지연 해제.
+CheatResult CheatManager::cheatNetDelay(Stage& /*stage*/, const UserPtr& spUser,
+                                          const std::vector<std::string>& args)
+{
+    if (!spUser)
+        return { false, "no user context" };
+    if (args.empty())
+        return { false, "usage: netdelay <recvMs> [sendMs]" };
+
+    const int32 recvMs = std::atoi(args[0].c_str());
+    const int32 sendMs = (args.size() >= 2) ? std::atoi(args[1].c_str()) : recvMs;
+    if (recvMs < 0 || sendMs < 0)
+        return { false, "delay must be >= 0" };
+
+    ServerPacket::SetClientLatencyReq req;
+    req.set_user_id(spUser->GetUserId());
+    req.set_recv_delay_ms(recvMs);
+    req.set_send_delay_ms(sendMs);
+
+    GameServer& server = GameServer::Instance();
+    auto spPacket = server.SerializePacket(Common::SERVER_PACKET_ID_SET_CLIENT_LATENCY_REQ, req);
+    if (!spPacket || !server.SendToGateway(spUser->GetGatewayId(), spPacket))
+        return { false, "failed to send latency request to gateway" };
+
+    return { true, std::format("net delay set: recv={}ms send={}ms", recvMs, sendMs) };
 }
 
 // 공통 토글: 현재 모드가 level 이면 끄고(None), 아니면 level 로 켠다.

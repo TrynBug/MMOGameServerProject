@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "Session.h"
 #include "INetBase.h"
 #include "INetEventHandler.h"
@@ -40,6 +40,64 @@ void Session::Send(const PacketPtr& spPacket)
         return;
     }
 
+    // 네트워크 딜레이 파이프가 비활성이면 곧장 송신
+    if (!m_sendDelayActive.load(std::memory_order_relaxed))
+    {
+        enqueueAndKickSend(spPacket);
+        return;
+    }
+
+    // 네트워크 딜레이 시뮬레이션 사용중에만 진입
+    scheduleDelayedSend(spPacket);
+}
+
+// 송신 지연 파이프에 줄세운다. deliverAt 은 세션 단조 — 직전 deliver 보다 앞당겨지지 않으므로
+// 지연이 0 으로 바뀌어도 이미 대기중인 패킷보다 먼저 나가지 않는다(순서 보존).
+void Session::scheduleDelayedSend(const PacketPtr& spPacket)
+{
+    std::function<void()>                 fn;
+    std::chrono::steady_clock::time_point deliverAt;
+    {
+        std::lock_guard<std::mutex> lock(m_delayStateMutex);
+
+        const int32 sendDelayMs = m_sendDelayMs.load(std::memory_order_relaxed);
+        if (sendDelayMs > 0 || m_pendingDelayedSends > 0)
+        {
+            const auto now    = std::chrono::steady_clock::now();
+            const auto target = now + std::chrono::milliseconds(sendDelayMs);
+            deliverAt = (target > m_sendDeliverCursor) ? target : m_sendDeliverCursor;
+            m_sendDeliverCursor = deliverAt;
+            ++m_pendingDelayedSends;
+            m_sendDelayActive.store(true, std::memory_order_relaxed);
+
+            auto self = shared_from_this();
+            PacketPtr pkt = spPacket;
+            fn = [self, pkt]() { self->releaseDelayedSend(pkt); };
+        }
+        // else: 락 잡는 사이 파이프가 비고 지연도 0 이 됨 → 아래에서 즉시 송신.
+    }
+
+    if (fn)
+        m_pNetBase->ScheduleAt(deliverAt, std::move(fn));
+    else
+        enqueueAndKickSend(spPacket);
+}
+
+// 스케줄러 스레드가 deliver 시각에 호출. 실제 송신 후 pending 감소, 파이프가 비면 비활성화.
+void Session::releaseDelayedSend(const PacketPtr& spPacket)
+{
+    if (m_bConnected.load())
+        enqueueAndKickSend(spPacket);
+
+    std::lock_guard<std::mutex> lock(m_delayStateMutex);
+    --m_pendingDelayedSends;
+    if (m_pendingDelayedSends == 0 && m_sendDelayMs.load(std::memory_order_relaxed) <= 0)
+        m_sendDelayActive.store(false, std::memory_order_relaxed);   // 파이프 비었고 지연 0 → fast path 복귀
+}
+
+// sendQueue 에 패킷을 넣고, send 진행중이 아니면 송신을 시작한다.
+void Session::enqueueAndKickSend(const PacketPtr& spPacket)
+{
     {
         // SendQueue에 패킷을 넣는다.
         std::lock_guard<std::mutex> lock(m_sendMutex);
@@ -249,12 +307,73 @@ void Session::parseReceivedPackets()
         // 수신버퍼의 데이터를 꺼내서 패킷버퍼에 담는다.
         m_recvBuf.Dequeue(reinterpret_cast<char*>(spPacket->GetRawBuffer()), header.size);
 
-        // 사용자에게 패킷 전달
+        // 사용자에게 패킷 전달.
         if (handler != nullptr)
         {
-            handler->OnRecv(shared_from_this(), spPacket);
+            // 빠른 경로(평상시): 지연 파이프가 비활성이면 atomic 1개만 보고 곧장 전달.
+            if (!m_recvDelayActive.load(std::memory_order_relaxed))
+                handler->OnRecv(shared_from_this(), spPacket);
+            else
+                scheduleDelayedRecv(spPacket);   // 느린 경로(지연 시뮬레이션 사용중에만)
         }
     }
+}
+
+void Session::SetSimulatedDelay(int32 recvMs, int32 sendMs)
+{
+    std::lock_guard<std::mutex> lock(m_delayStateMutex);
+
+    m_recvDelayMs.store(recvMs, std::memory_order_relaxed);
+    m_sendDelayMs.store(sendMs, std::memory_order_relaxed);
+
+    // 지연을 켜면 즉시 파이프 활성. 끄면 대기중 패킷이 모두 빠질 때까지는 활성 유지(순서 보존).
+    m_sendDelayActive.store(sendMs > 0 || m_pendingDelayedSends > 0, std::memory_order_relaxed);
+    m_recvDelayActive.store(recvMs > 0 || m_pendingDelayedRecvs > 0, std::memory_order_relaxed);
+}
+
+// 수신 지연 파이프에 줄세운다. (송신과 동일하게 세션 단조 deliverAt 으로 순서 보존)
+void Session::scheduleDelayedRecv(const PacketPtr& spPacket)
+{
+    std::function<void()>                 fn;
+    std::chrono::steady_clock::time_point deliverAt;
+    {
+        std::lock_guard<std::mutex> lock(m_delayStateMutex);
+
+        const int32 recvDelayMs = m_recvDelayMs.load(std::memory_order_relaxed);
+        if (recvDelayMs > 0 || m_pendingDelayedRecvs > 0)
+        {
+            const auto now    = std::chrono::steady_clock::now();
+            const auto target = now + std::chrono::milliseconds(recvDelayMs);
+            deliverAt = (target > m_recvDeliverCursor) ? target : m_recvDeliverCursor;
+            m_recvDeliverCursor = deliverAt;
+            ++m_pendingDelayedRecvs;
+            m_recvDelayActive.store(true, std::memory_order_relaxed);
+
+            auto self = shared_from_this();
+            PacketPtr pkt = spPacket;
+            fn = [self, pkt]() { self->releaseDelayedRecv(pkt); };
+        }
+    }
+
+    if (fn)
+        m_pNetBase->ScheduleAt(deliverAt, std::move(fn));
+    else if (INetEventHandler* h = m_pNetBase->GetEventHandler())
+        h->OnRecv(shared_from_this(), spPacket);
+}
+
+// 스케줄러 스레드가 deliver 시각에 호출. 실제 수신 전달 후 pending 감소, 파이프가 비면 비활성화.
+void Session::releaseDelayedRecv(const PacketPtr& spPacket)
+{
+    if (m_bConnected.load())
+    {
+        if (INetEventHandler* h = m_pNetBase->GetEventHandler())
+            h->OnRecv(shared_from_this(), spPacket);
+    }
+
+    std::lock_guard<std::mutex> lock(m_delayStateMutex);
+    --m_pendingDelayedRecvs;
+    if (m_pendingDelayedRecvs == 0 && m_recvDelayMs.load(std::memory_order_relaxed) <= 0)
+        m_recvDelayActive.store(false, std::memory_order_relaxed);
 }
 
 // send 대기중인 패킷을 전송한다.

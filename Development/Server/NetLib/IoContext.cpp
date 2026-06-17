@@ -73,6 +73,9 @@ bool IoContext::Initialize(const IoContextConfig& config)
         m_workerThreads.emplace_back(&IoContext::workerThreadProc, this);
     }
 
+    // 지연 스케줄러 스레드 시작
+    m_delayThread = std::thread(&IoContext::delaySchedulerProc, this);
+
     return true;
 }
 
@@ -102,6 +105,13 @@ void IoContext::Shutdown()
         }
     }
     m_workerThreads.clear();
+
+    // 지연 스케줄러 스레드 종료 대기 (m_bRunning 은 위에서 이미 false)
+    m_delayCv.notify_all();
+    if (m_delayThread.joinable())
+    {
+        m_delayThread.join();
+    }
 
     if (m_hIocp != nullptr)
     {
@@ -134,6 +144,46 @@ void IoContext::PostMsg(std::function<void()> fn)
     auto* pPost = new POST_OVERLAPPED();
     pPost->fn = std::move(fn);
     ::PostQueuedCompletionStatus(m_hIocp, 0, 0, reinterpret_cast<OVERLAPPED*>(pPost));
+}
+
+// deliverAt(절대 시각)에 fn 을 실행하도록 예약한다.
+void IoContext::ScheduleAt(std::chrono::steady_clock::time_point deliverAt, std::function<void()> fn)
+{
+    {
+        std::lock_guard<std::mutex> lock(m_delayMutex);
+        m_delayQueue.push(DelayItem{ deliverAt, m_delaySeq++, std::move(fn) });
+    }
+    m_delayCv.notify_one();
+}
+
+// 지연 스케줄러 스레드: deliverAt 가 이른 항목부터 직렬로 실행한다(순서 보존).
+void IoContext::delaySchedulerProc()
+{
+    std::unique_lock<std::mutex> lock(m_delayMutex);
+    while (m_bRunning.load())
+    {
+        if (m_delayQueue.empty())
+        {
+            m_delayCv.wait(lock);
+            continue;
+        }
+
+        const auto deliverAt = m_delayQueue.top().deliverAt;
+        if (std::chrono::steady_clock::now() < deliverAt)
+        {
+            m_delayCv.wait_until(lock, deliverAt);
+            continue;   // 깨어나면 다시 평가 (큐 변경/시각 도달)
+        }
+
+        // due: top 을 꺼내 lock 밖에서 실행. 단일 스레드라 직렬 실행 → 세션 순서 보존.
+        DelayItem item = std::move(const_cast<DelayItem&>(m_delayQueue.top()));
+        m_delayQueue.pop();
+
+        lock.unlock();
+        if (item.fn)
+            item.fn();
+        lock.lock();
+    }
 }
 
 // worker 스레드

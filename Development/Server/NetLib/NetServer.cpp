@@ -163,6 +163,11 @@ int32 NetServer::GetMaxPacketSize() const
     return m_pIoContext->GetConfig().maxPacketSize;
 }
 
+void NetServer::ScheduleAt(std::chrono::steady_clock::time_point deliverAt, std::function<void()> fn)
+{
+    m_pIoContext->ScheduleAt(deliverAt, std::move(fn));
+}
+
 // 세션 연결끊김 콜백
 void NetServer::OnSessionDisconnected(std::shared_ptr<ISession> spSession)
 {

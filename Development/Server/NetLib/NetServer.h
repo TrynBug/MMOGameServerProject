@@ -54,6 +54,7 @@ public:
     PacketPool&       GetPacketPool()                override;
     int32             GetMaxPacketSize() const       override;
     void              OnSessionDisconnected(std::shared_ptr<ISession> spSession) override;
+    void              ScheduleAt(std::chrono::steady_clock::time_point deliverAt, std::function<void()> fn) override;
 
 private:
     void  acceptThreadProc();

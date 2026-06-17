@@ -64,6 +64,7 @@ public:
     PacketPool&       GetPacketPool()                override;
     int32             GetMaxPacketSize() const       override;
     void              OnSessionDisconnected(std::shared_ptr<ISession> spSession) override;
+    void              ScheduleAt(std::chrono::steady_clock::time_point deliverAt, std::function<void()> fn) override;
 
 private:
     // 실제 ConnectEx 시작. 새 Session 객체를 만들어 m_session에 세팅.
