@@ -228,6 +228,8 @@ DB.Browser.for.SQLite-v3.13.1-win64/
 **/Client/Assets/StreamingAssets/NavMesh
 **/Client/Assets/Editor/ai_command_result.txt
 
+**/Client/Assets/Resources/Sounds
+
 # ==========================================
 # 6. Common
 # ==========================================
