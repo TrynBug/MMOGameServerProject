@@ -437,7 +437,9 @@ void GatewayServer::forwardClientPacket(const netlib::PacketPtr& spPacket)
     }
 
     // userId 목록을 미리 복사한다 (StripSidecar 후 sidecar 영역이 사라지므로).
-    std::vector<int64> userIds(count);
+    // thread_local 재사용 버퍼 — 게이트웨이 IOCP 워커가 전달 패킷마다 vector 를 새로 만들지 않게 한다.
+    thread_local std::vector<int64> userIds;
+    userIds.resize(count);
     std::memcpy(userIds.data(), spPacket->GetSidecarData(), static_cast<size_t>(count) * sizeof(int64));
 
     // sidecar 제거 → [PacketHeader][payload] 로 복원 (클라는 sidecar 를 모른다).

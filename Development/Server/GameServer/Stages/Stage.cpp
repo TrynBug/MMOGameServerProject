@@ -1476,7 +1476,9 @@ void Stage::buildAndSendSnapshots()
         if (centerX < 0 || centerZ < 0)
             continue;   // 섹터 미소속(맵 밖)이면 스킵.
 
-        GamePacket::SnapshotNtf ntf;
+        // 재사용 메시지. Clear() 는 repeated 필드 capacity 를 유지해 add_states() 재할당을 막는다.
+        GamePacket::SnapshotNtf& ntf = m_snapshotScratch;
+        ntf.Clear();
         ntf.set_server_tick_seq(m_serverTickSeq);
         ntf.set_ack_input_seq(pMe->GetLastInputSeq());   // 본인 마지막 처리 입력 seq (클라 화해용).
 
