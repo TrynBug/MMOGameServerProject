@@ -92,7 +92,7 @@ private:
     void sendPollReq();
     void sendHeartbeatRes(int64 timestampMs);
     void sendUserCountReport();
-    void sendPacket(netlib::PacketPtr spPacket);  // 현재 세션으로 패킷 전송
+    void sendPacket(const netlib::PacketPtr& spPacket);  // 현재 세션으로 패킷 전송
 
     void handleRegisterRes (const netlib::Packet& packet);
     void handleServerInfoNtf(const netlib::Packet& packet);

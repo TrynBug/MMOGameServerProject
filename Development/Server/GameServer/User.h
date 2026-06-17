@@ -79,7 +79,7 @@ public:
 
     // ── 클라 패킷 큐 ────────────────────────────────────────────
     // IOCP Worker가 push (thread-safe)
-    void EnqueuePacket(netlib::PacketPtr spPacket);
+    void EnqueuePacket(const netlib::PacketPtr& spPacket);
 
     // 컨텐츠 스레드가 한 번에 모든 패킷을 꺼낸다 (thread-safe, swap 방식)
     // outPackets에 채워 넣음. 호출 후 내부 큐는 비어있음.

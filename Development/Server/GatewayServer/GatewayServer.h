@@ -43,10 +43,10 @@ private:
     // ── 클라이언트 패킷 핸들러 ───────────────────────────────────────────
     void handleAuthReq    (const netlib::ISessionPtr& spClientSession, const GamePacket::GatewayAuthReq& msg);
     void handleLogoutReq  (const netlib::ISessionPtr& spClientSession);
-    void relayToGameServer(const netlib::ISessionPtr& spClientSession, netlib::PacketPtr spPacket);
+    void relayToGameServer(const netlib::ISessionPtr& spClientSession, const netlib::PacketPtr& spPacket);
 
     // ── 게임서버 패킷 핸들러 ─────────────────────────────────────────────
-    void handleGameServerPacket      (const netlib::ISessionPtr& spGameSession, netlib::PacketPtr spPacket);
+    void handleGameServerPacket      (const netlib::ISessionPtr& spGameSession, const netlib::PacketPtr& spPacket);
     void handleGameServerHandshakeReq(const netlib::ISessionPtr& spGameSession, const ServerPacket::ServerHandshakeReq& msg);
     void handleUserMoveToGameServer  (const netlib::ISessionPtr& spGameSession, const ServerPacket::UserMoveToGameServerReq&   msg);
 
@@ -55,7 +55,7 @@ private:
 
     // ── 로그인서버 패킷 핸들러 ───────────────────────────────────────────
     void handleLoginServerHandshakeReq(const netlib::ISessionPtr& spLoginSession, const ServerPacket::ServerHandshakeReq& msg);
-    void handleLoginServerPacket(const netlib::ISessionPtr& spLoginSession, netlib::PacketPtr spPacket);
+    void handleLoginServerPacket(const netlib::ISessionPtr& spLoginSession, const netlib::PacketPtr& spPacket);
     void handleLoginAuthTokenNtf(const netlib::ISessionPtr& spLoginSession, const ServerPacket::LoginAuthTokenNtf& msg);
     void handleLoginDuplicateNtf(const netlib::ISessionPtr& spLoginSession, const ServerPacket::LoginDuplicateNtf& msg);
 
@@ -81,7 +81,7 @@ private:
     std::optional<ServerInfo> selectGameServer(int64 userId) const;
 
     // 게임서버로 서버간 패킷 전달
-    void sendToGameServer(int32 gameServerId, netlib::PacketPtr spPacket);
+    void sendToGameServer(int32 gameServerId, const netlib::PacketPtr& spPacket);
 
     // 유저에게 강제 종료 알림 전송 후 Disconnect
     void forceDisconnectUser(int64 userId, const std::string& reason);

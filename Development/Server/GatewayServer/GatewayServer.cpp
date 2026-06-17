@@ -330,7 +330,7 @@ void GatewayServer::handleLogoutReq(const netlib::ISessionPtr& spClientSession)
     spClientSession->Disconnect();
 }
 
-void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spClientSession, netlib::PacketPtr spPacket)
+void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spClientSession, const netlib::PacketPtr& spPacket)
 {
     SessionMetaInfo* pMeta = getSessionMeta(spClientSession);
     if (!pMeta || pMeta->userId == 0 || pMeta->routedGameServerId == 0)
@@ -353,7 +353,7 @@ void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spClientSession
 
 
 // 로그인서버 패킷 핸들러
-void GatewayServer::handleLoginServerPacket(const netlib::ISessionPtr& spLoginSession, netlib::PacketPtr spPacket)
+void GatewayServer::handleLoginServerPacket(const netlib::ISessionPtr& spLoginSession, const netlib::PacketPtr& spPacket)
 {
     // 공용 핸드셰이크는 ServerBase가 직접 처리하므로
     // 이 지점에 온 패킷은 핸드셰이크 완료 후의 일반 패킷이다.
@@ -410,7 +410,7 @@ void GatewayServer::handleLoginDuplicateNtf(const netlib::ISessionPtr& /*spLogin
 
 
 // 게임서버 패킷 핸들러
-void GatewayServer::handleGameServerPacket(const netlib::ISessionPtr& spGameSession, netlib::PacketPtr spPacket)
+void GatewayServer::handleGameServerPacket(const netlib::ISessionPtr& spGameSession, const netlib::PacketPtr& spPacket)
 {
     // sidecar 가 있으면 클라 전달용 패킷이다. (게임서버가 수신자 userId 목록을 sidecar 로 붙여서 보냄)
     // 그 외는 서버간 통신 패킷이므로 디스패처로 처리.
@@ -634,7 +634,7 @@ std::optional<ServerInfo> GatewayServer::selectGameServer(int64 userId) const
 
 
 // 게임서버로 서버간 패킷 전달
-void GatewayServer::sendToGameServer(int32 gameServerId, netlib::PacketPtr spPacket)
+void GatewayServer::sendToGameServer(int32 gameServerId, const netlib::PacketPtr& spPacket)
 {
     netlib::ISessionPtr spSession;
     if (!m_safeGameServerSessions.Find(gameServerId, spSession))

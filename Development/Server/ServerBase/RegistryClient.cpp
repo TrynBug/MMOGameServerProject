@@ -162,7 +162,7 @@ void RegistryClient::OnLog(netlib::LogLevel netLogLevel, const netlib::ISessionP
 }
 
 // Send
-void RegistryClient::sendPacket(netlib::PacketPtr spPacket)
+void RegistryClient::sendPacket(const netlib::PacketPtr& spPacket)
 {
     std::lock_guard<std::mutex> lock(m_sessionMutex);
     if (m_spSession)

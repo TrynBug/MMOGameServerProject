@@ -8,13 +8,13 @@ User::User(int64 userId, int32 gatewayId, const std::string& clientIp)
 {
 }
 
-void User::EnqueuePacket(netlib::PacketPtr spPacket)
+void User::EnqueuePacket(const netlib::PacketPtr& spPacket)
 {
     if (!spPacket)
         return;
 
     std::lock_guard<std::mutex> lock(m_packetQueueMutex);
-    m_packetQueue.push_back(std::move(spPacket));
+    m_packetQueue.push_back(spPacket);
 }
 
 void User::DrainPackets(std::vector<netlib::PacketPtr>& outPackets)
