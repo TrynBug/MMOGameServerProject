@@ -17,7 +17,7 @@ class ISession
 public:
     virtual ~ISession() = default;
 
-    virtual void        Send(PacketPtr& spPacket)    = 0;
+    virtual void        Send(const PacketPtr& spPacket) = 0;
     virtual void        Disconnect()                = 0;
     virtual int64       GetId()       const         = 0;
     virtual std::string GetIP()       const         = 0;

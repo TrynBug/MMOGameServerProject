@@ -226,18 +226,23 @@ void PacketSender::sendClientPacketViaGateway(const netlib::ISessionPtr& spGatew
             return;
         }
 
-        // payload 를 패킷 버퍼에 직접 직렬화한다. 이 시점엔 sidecar 가 없어 GetPayload() 는 PacketHeader 바로 뒤를 가리킨다. 그다음 SetHeader → SetSidecar 순.
-        if (payloadSize > 0 && !packet::ProtoSerializer::Serialize(message, spPacket->GetPayload(), payloadSize))
-        {
-            LOG_WRITE(LogLevel::Error, std::format("serialize failed. packetType={} payloadSize={}", packetType, payloadSize));
-            return;
-        }
-        spPacket->SetHeader(static_cast<uint16>(headerSize + payloadSize), static_cast<uint16>(packetType), netlib::PacketFlags::None);
+        // sidecar 를 먼저 깐다. 이 시점 payload 가 0바이트라 SetSidecar 내부 memmove 가 스킵된다.
+        // SetSidecar 가 header.size 를 읽으므로, 먼저 빈 payload 상태(size=headerSize)의 헤더를 세팅한다.
+        spPacket->SetHeader(static_cast<uint16>(headerSize), static_cast<uint16>(packetType), netlib::PacketFlags::None);
         if (!spPacket->SetSidecar(userIds + offset, sidecarBytes))
         {
             LOG_WRITE(LogLevel::Error, std::format("SetSidecar failed. packetType={} count={}", packetType, count));
             return;
         }
+
+        // payload 를 sidecar 이후 위치(GetPayload())에 직접 직렬화하고, payload 크기만큼 header.size 를 확정한다.
+        // (payload→sidecar 순서가 아니므로 memmove 가 없다.)
+        if (payloadSize > 0 && !packet::ProtoSerializer::Serialize(message, spPacket->GetPayload(), payloadSize))
+        {
+            LOG_WRITE(LogLevel::Error, std::format("serialize failed. packetType={} payloadSize={}", packetType, payloadSize));
+            return;
+        }
+        spPacket->FinalizePacketSize(payloadSize);
 
         spGatewaySession->Send(spPacket);
     }

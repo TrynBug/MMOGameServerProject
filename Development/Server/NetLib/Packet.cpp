@@ -198,6 +198,14 @@ bool Packet::StripSidecar()
     return true;
 }
 
+void Packet::FinalizePacketSize(int32 payloadSize)
+{
+    // 현재 header.size 는 [PacketHeader](+sidecar) 까지만 반영된 상태. 직접 쓴 payload 만큼 더한다.
+    PacketHeader* header = GetHeader();
+    header->size = static_cast<uint16>(header->size + payloadSize);
+    m_offset = header->size;
+}
+
 void Packet::Reset()
 {
     std::memset(m_buffer, 0, sizeof(PacketHeader));

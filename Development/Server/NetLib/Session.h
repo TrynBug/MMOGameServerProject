@@ -29,7 +29,7 @@ public:
     ~Session() override;
 
     /* ISession */
-    void        Send(PacketPtr& spPacket) override;  // thread-safe 한 Send 함수
+    void        Send(const PacketPtr& spPacket) override;  // thread-safe 한 Send 함수
     void        Disconnect() override;
     int64       GetId()       const override { return m_sessionId; }
     std::string GetIP()       const override { return m_ip; }

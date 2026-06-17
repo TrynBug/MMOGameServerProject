@@ -416,7 +416,7 @@ void GatewayServer::handleGameServerPacket(const netlib::ISessionPtr& spGameSess
     // 그 외는 서버간 통신 패킷이므로 디스패처로 처리.
     if (spPacket->HasSidecar())
     {
-        forwardClientPacket(std::move(spPacket));
+        forwardClientPacket(spPacket);
         return;
     }
 
@@ -426,7 +426,7 @@ void GatewayServer::handleGameServerPacket(const netlib::ISessionPtr& spGameSess
 // 게임서버가 보낸 클라 전달용 패킷을 대상 유저(들)에게 전달한다.
 // sidecar 에 수신자 userId 목록(int64 배열)이 들어있다. sidecar 를 떼어내 깨끗한 클라 패킷으로 만든 뒤,
 // 같은 버퍼를 대상 유저들에게 전송한다(브로드캐스트 시 버퍼 1개 공유).
-void GatewayServer::forwardClientPacket(netlib::PacketPtr spPacket)
+void GatewayServer::forwardClientPacket(const netlib::PacketPtr& spPacket)
 {
     const int32 sidecarSize = spPacket->GetSidecarSize();
     const int32 count = sidecarSize / static_cast<int32>(sizeof(int64));

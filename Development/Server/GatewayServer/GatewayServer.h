@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include "ThreadSafeUnorderedMap.h"
+#include "ShardedThreadSafeUnorderedMap.h"
 #include "GatewayServerDefine.h"
 #include "GatewayUser.h"
 
@@ -50,7 +51,7 @@ private:
     void handleUserMoveToGameServer  (const netlib::ISessionPtr& spGameSession, const ServerPacket::UserMoveToGameServerReq&   msg);
 
     // 게임서버가 보낸 클라 전달용 패킷(sidecar 에 수신자 userId 목록)을 대상 유저(들)에게 전달한다.
-    void forwardClientPacket(netlib::PacketPtr spPacket);
+    void forwardClientPacket(const netlib::PacketPtr& spPacket);
 
     // ── 로그인서버 패킷 핸들러 ───────────────────────────────────────────
     void handleLoginServerHandshakeReq(const netlib::ISessionPtr& spLoginSession, const ServerPacket::ServerHandshakeReq& msg);
@@ -87,7 +88,7 @@ private:
 
 private:
     SharedThreadSafeUnorderedMap<int64, AuthTokenEntry>      m_safeAuthTokens;       // key=userId
-    SharedThreadSafeUnorderedMap<int64, GatewayUserPtr>      m_safeUsers;             // key=userId
+    ShardedThreadSafeUnorderedMap<int64, GatewayUserPtr>     m_safeUsers;             // key=userId
     SharedThreadSafeUnorderedMap<int64, PrevGameServerEntry> m_safePrevGameServer;    // key=userId
 
     static constexpr int64 k_prevGameServerTtlMs = 5 * 60 * 1000;   // 5분

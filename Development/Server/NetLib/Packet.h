@@ -69,6 +69,11 @@ public:
     // - 사이드카가 없으면 false 반환.
     bool StripSidecar();
 
+    // 패킷을 만들 때 sidecar 를 먼저 깔고(SetSidecar, 빈 payload라 memmove 없음) payload 를
+    // GetPayload() 위치에 직접 쓴 다음, payload 크기만큼 header.size 와 m_offset 을 확정한다.
+    // (payload→sidecar 순서일 때 발생하는 memmove 를 피하기 위한 용도.)
+    void FinalizePacketSize(int32 payloadSize);
+
     // 초기화
     void Reset();
 

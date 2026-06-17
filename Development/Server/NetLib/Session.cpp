@@ -33,7 +33,7 @@ Session::~Session()
 }
 
 // thread-safe 한 Send 함수
-void Session::Send(PacketPtr& spPacket)
+void Session::Send(const PacketPtr& spPacket)
 {
     if (!spPacket || !m_bConnected.load())
     {
