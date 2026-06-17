@@ -277,13 +277,14 @@ bool Session::postSend()
             if (m_sendQueue.empty())
                 break;
 
-            PacketPtr spPacket = m_sendQueue.front();
+            PacketPtr& spFront = m_sendQueue.front();
+
+            WSABufs[i].buf = reinterpret_cast<CHAR*>(spFront->GetRawBuffer());
+            WSABufs[i].len = static_cast<ULONG>(spFront->GetTotalSize());
+
+            // 큐의 shared_ptr를 곧장 move하여 보관(패킷이 send중 소멸 방지). 복사 refcount 증감을 피함.
+            m_sendingPackets.push_back(std::move(spFront));
             m_sendQueue.pop();
-
-            WSABufs[i].buf = reinterpret_cast<CHAR*>(spPacket->GetRawBuffer());
-            WSABufs[i].len = static_cast<ULONG>(spPacket->GetTotalSize());
-
-            m_sendingPackets.push_back(spPacket);  // 패킷 객체가 사라지는것을 방지하기위해 저장해둠
         }
     }
 
