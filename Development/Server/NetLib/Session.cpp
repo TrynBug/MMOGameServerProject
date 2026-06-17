@@ -40,7 +40,6 @@ void Session::Send(const PacketPtr& spPacket)
         return;
     }
 
-    // 네트워크 딜레이 파이프가 비활성이면 곧장 송신
     if (!m_sendDelayActive.load(std::memory_order_relaxed))
     {
         enqueueAndKickSend(spPacket);
@@ -310,11 +309,15 @@ void Session::parseReceivedPackets()
         // 사용자에게 패킷 전달.
         if (handler != nullptr)
         {
-            // 빠른 경로(평상시): 지연 파이프가 비활성이면 atomic 1개만 보고 곧장 전달.
             if (!m_recvDelayActive.load(std::memory_order_relaxed))
+            {
                 handler->OnRecv(shared_from_this(), spPacket);
+            }
             else
-                scheduleDelayedRecv(spPacket);   // 느린 경로(지연 시뮬레이션 사용중에만)
+            {
+                // 네트워크 지연 시뮬레이션 중에는 이 경로로 들어간다.
+                scheduleDelayedRecv(spPacket);
+            }
         }
     }
 }
