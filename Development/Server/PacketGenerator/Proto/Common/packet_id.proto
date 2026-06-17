@@ -107,6 +107,7 @@ enum ServerPacketId {
     // 1200~1299: 게임서버 간 유저 이동 (게임서버 <-> 게이트웨이)
     SERVER_PACKET_ID_USER_MOVE_TO_GAME_SERVER_REQ = 1201;        // 게임서버 -> 게이트웨이: 다른 게임서버로 유저 이동 요청
     SERVER_PACKET_ID_USER_MOVE_TO_GAME_SERVER_FAIL_NTF = 1202;   // 게이트웨이 -> 게임서버: 유저 이동 실패 알림
+    SERVER_PACKET_ID_SET_CLIENT_LATENCY_REQ = 1203;             // 게임서버 -> 게이트웨이: 클라 연결 지연 시뮬레이션 설정 (개발용)
 
     // 2000~2999: 로그인 서버 관련
     SERVER_PACKET_ID_LOGIN_AUTH_TOKEN_NTF = 2001;          // 로그인서버 -> 게이트웨이: 인증 토큰 사전 전달

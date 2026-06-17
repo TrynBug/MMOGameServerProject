@@ -21,3 +21,16 @@ message UserMoveToGameServerFailNtf {
     int64 user_id = 1;
     string reason = 2;
 }
+
+// ──────────────────────────────────────────────
+// 네트워크 지연 시뮬레이션 (개발/테스트용)
+// ──────────────────────────────────────────────
+
+// 특정 유저의 클라 연결에 인위적 지연을 설정 (게임서버 -> 게이트웨이)
+// 게임서버의 netdelay 치트가 발동하면 해당 유저가 접속한 게이트웨이로 전송한다.
+// 게이트웨이는 그 유저의 클라 Session 에 SetSimulatedDelay 를 적용한다. (0 = 지연 없음)
+message SetClientLatencyReq {
+    int64 user_id = 1;
+    int32 recv_delay_ms = 2;   // 클라->서버 수신 지연
+    int32 send_delay_ms = 3;   // 서버->클라 송신 지연
+}
