@@ -8,6 +8,16 @@
 namespace netlib
 {
 
+namespace
+{
+// 현재 스레드가 사용할 freelist 샤드 인덱스. 스레드별로 고정(thread_local 캐시).
+size_t poolShardIndex()
+{
+    thread_local const size_t idx = std::hash<std::thread::id>{}(std::this_thread::get_id()) % kPacketPoolShardCount;
+    return idx;
+}
+}
+
 PacketPool::PacketPool()
 {
 }
@@ -55,13 +65,17 @@ PacketPtr PacketPool::Alloc(int32 size)
         return nullptr;
     }
 
+    // 자기 샤드부터 시도하고, 비어있으면 다른 샤드를 순회한다(다른 스레드가 반납한 패킷 회수). 모두 비면 new.
     Packet* pPacket = nullptr;
+    const size_t base = poolShardIndex();
+    for (size_t i = 0; i < kPacketPoolShardCount && pPacket == nullptr; ++i)
     {
-        std::lock_guard<std::mutex> lock(bucket->mtx);
-        if (!bucket->freeList.empty())
+        FreeShard& shard = bucket->shards[(base + i) % kPacketPoolShardCount];
+        std::lock_guard<std::mutex> lock(shard.mtx);
+        if (!shard.freeList.empty())
         {
-            pPacket = bucket->freeList.back();
-            bucket->freeList.pop_back();
+            pPacket = shard.freeList.back();
+            shard.freeList.pop_back();
         }
     }
 
@@ -74,11 +88,12 @@ PacketPtr PacketPool::Alloc(int32 size)
         pPacket->Reset();
     }
 
-    // custom deleter: PacketPool에 반납
+    // custom deleter: alloc 한 스레드의 home shard(base)로 반납한다.
+    // 이렇게 하면 이 스레드의 다음 Alloc 이 자기 shard 에서 바로 hit 하여 cross-shard 스캔이 드물어진다.
     PacketPool* self = this;
-    return PacketPtr(pPacket, [self, bucket](Packet* p)
+    return PacketPtr(pPacket, [self, bucket, base](Packet* p)
     {
-        self->returnToPool(p, bucket);
+        self->returnToPool(p, bucket, base);
     });
 }
 
@@ -96,8 +111,8 @@ PacketPool::Bucket* PacketPool::findBucketFor(int32 size)
     return nullptr;
 }
 
-// custom deleter: Packet을 PacketPool에 반납
-void PacketPool::returnToPool(Packet* pPacket, Bucket* pBucket)
+// custom deleter: Packet을 alloc 했던 스레드의 home shard로 반납
+void PacketPool::returnToPool(Packet* pPacket, Bucket* pBucket, size_t shardIndex)
 {
     if (pPacket == nullptr)
     {
@@ -111,11 +126,12 @@ void PacketPool::returnToPool(Packet* pPacket, Bucket* pBucket)
         return;
     }
 
-    std::lock_guard<std::mutex> lock(pBucket->mtx);
-    pBucket->freeList.push_back(pPacket);
+    FreeShard& shard = pBucket->shards[shardIndex];
+    std::lock_guard<std::mutex> lock(shard.mtx);
+    shard.freeList.push_back(pPacket);
 }
 
-// 모든 버핏, 패킷 파괴
+// 모든 버킷, 패킷 파괴
 void PacketPool::shutdown()
 {
     if (!m_bInitialized.exchange(false))
@@ -125,13 +141,14 @@ void PacketPool::shutdown()
 
     for (Bucket* pBucket : m_buckets)
     {
+        for (FreeShard& shard : pBucket->shards)
         {
-            std::lock_guard<std::mutex> lock(pBucket->mtx);
-            for (Packet* pPacket : pBucket->freeList)
+            std::lock_guard<std::mutex> lock(shard.mtx);
+            for (Packet* pPacket : shard.freeList)
             {
                 delete pPacket;
             }
-            pBucket->freeList.clear();
+            shard.freeList.clear();
         }
 
         delete pBucket;

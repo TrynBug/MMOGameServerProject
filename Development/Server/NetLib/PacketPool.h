@@ -3,6 +3,7 @@
 #include "Types.h"
 #include "Packet.h"
 
+#include <array>
 #include <atomic>
 #include <memory>
 #include <mutex>
@@ -10,6 +11,9 @@
 
 namespace netlib
 {
+
+// 버킷당 freelist 샤드 수. alloc/free 스레드가 해시로 서로 다른 샤드를 잡아 mutex 경합을 분산한다.
+inline constexpr size_t kPacketPoolShardCount = 8;
 
 // 패킷버퍼 풀
 // 
@@ -37,18 +41,24 @@ public:
     PacketPtr Alloc() { return Alloc(m_initPacketSize); }
 
 private:
-    struct Bucket
+    // 버킷 내 freelist 1개 샤드 (각자 mutex). 스레드 해시로 분산 접근.
+    struct FreeShard
     {
-        int32                 capacity = 0;    // 이 버킷이 가지는 Packet의 버퍼크기
         std::mutex            mtx;
         std::vector<Packet*>  freeList;        // 재사용 대기중인 패킷 포인터
+    };
+
+    struct Bucket
+    {
+        int32                                       capacity = 0;    // 이 버킷이 가지는 Packet의 버퍼크기
+        std::array<FreeShard, kPacketPoolShardCount> shards;          // freelist 를 샤드로 분할
     };
 
     // 크기에 맞는 버킷을 찾는다. 못 찾으면 nullptr.
     Bucket* findBucketFor(int32 size);
 
-    // shared_ptr<Packet>의 커스텀 deleter. Packet을 버킷 freeList로 돌려보냄.
-    void returnToPool(Packet* pkt, Bucket* bucket);
+    // shared_ptr<Packet>의 커스텀 deleter. Packet을 alloc 했던 스레드의 home shard(shardIndex)로 돌려보냄.
+    void returnToPool(Packet* pkt, Bucket* bucket, size_t shardIndex);
 
     void shutdown();
 
