@@ -17,8 +17,10 @@ namespace Client.Network
         // 서버 tick 간격(ms). 서버 Stage tick(k_updateTickUnitMs) 과 반드시 일치해야 한다.
         public const double ServerTickIntervalMs = 50.0;
 
-        // 보간 지연(ms). 이만큼 과거를 그린다. 움직이는 객체는 20Hz 로 오므로 2 tick(100ms)면 충분.
-        public const double InterpDelayMs = 100.0;
+        // 보간 지연(ms). 이만큼 과거를 그린다. 캐릭터는 20Hz(50ms), 몬스터는 LOD 로 10Hz(100ms)로 오므로,
+        // 10Hz 샘플(100ms 간격)도 항상 두 점으로 감싸 보간하려면 1.5 간격 이상 필요 → 150ms.
+        // (원격 액터만 영향. 본인 예측/화해는 무관. 원격 50ms 더 과거에 그려지나 시각상 무시 가능.)
+        public const double InterpDelayMs = 150.0;
 
         // 추정 목표와 차이가 이보다 크면(스테이지 이동/장시간 정지 후 등) 부드럽게가 아니라 즉시 정렬.
         private const double k_resyncThresholdMs = 500.0;
