@@ -30,6 +30,8 @@ enum GamePacketId {
     // 1003: 과거 MOVE_NTF 자리. SNAPSHOT_NTF(1005) 스냅샷 스트리밍으로 대체되어 제거됨.
     GAME_PACKET_ID_MOVE_POS_CORRECT_NTF = 1004;   // 서버 -> 클라: 위치 보정 (클라 위치와 서버 위치가 너무 어깄났을 때)
     GAME_PACKET_ID_SNAPSHOT_NTF         = 1005;   // 서버 -> 클라: AOI 객체 상태 스냅샷 스트림 (매 tick 주기 송신. 이동 복제의 중심)
+    GAME_PACKET_ID_TIME_SYNC_NTF        = 1006;   // 서버 -> 클라: NetClock 시각 동기 (저빈도 주기 push). SnapshotNtf 와 독립.
+    GAME_PACKET_ID_MONSTER_MOVE_BATCH_NTF = 1007; // 서버 -> 클라: 몬스터 이동/정지 변화 묶음 (경로 의도 복제. 변화 시점에만).
 
     // 2000~2999: 아이템
     GAME_PACKET_ID_ITEM_USE_REQ = 2001;   // 클라 -> 서버: 아이템 사용 요청

@@ -68,3 +68,43 @@ message SnapshotNtf {
     uint32 ack_input_seq   = 2;          // 이 유저의 마지막 처리된 MoveIntentReq.input_seq (클라 화해용)
     repeated ActorStateInfo states = 3;  // AOI 내 보이는 오브젝트들의 현재 상태
 }
+
+// ──────────────────────────────────────────────
+// 시각 동기 (서버 -> 클라, 저빈도 주기 송신)
+// ──────────────────────────────────────────────
+// NetClock 재생 시계의 권위 앵커. server_tick_seq × 50ms = 서버시각.
+// SnapshotNtf 와 독립적으로 stage 내 전 유저에게 저빈도(2Hz)로 broadcast 한다.
+// → SnapshotNtf 가 0건이어도(혼자 유휴 등) 클라 시계가 굶지 않는다.
+message TimeSyncNtf {
+    uint32 server_tick_seq = 1;          // 현재 서버 tick (클라 NetClock 앵커)
+}
+
+// ──────────────────────────────────────────────
+// 몬스터 이동 복제 (서버 -> 클라, 상태변화 시점에만 송신)
+// ──────────────────────────────────────────────
+// 몬스터는 매 tick 위치 스트리밍(SnapshotNtf) 대신, 경로(waypoint)+속도+시작tick 을 변화 시점에만
+// 보내고 클라가 추측항법으로 재생한다. waypoints[0]=권위 시작위치 → 매 이벤트가 위치 재정렬(키프레임) 겸함.
+// 클라 재생은 NetClock.ServerNowMs("현재" 타임라인)로 한다(start_tick 이 emit=현재 tick 이므로).
+
+// 몬스터 경로 이동 1건.
+message MonsterMoveEntry {
+    int64  object_id  = 1;
+    uint32 start_tick = 2;            // 이동 시작 시점 server_tick_seq (클라: ×50ms)
+    float  move_speed = 3;            // 유닛/초
+    repeated float waypoints = 4;     // x,y,z 트리플 평탄 배열. [0]=현재 권위 위치, 이후 경로점.
+}
+
+// 몬스터 정지 1건.
+message MonsterStopEntry {
+    int64 object_id = 1;
+    float pos_x = 2; float pos_y = 3; float pos_z = 4;   // 권위 최종 위치
+    float yaw   = 5;                                     // degree
+    bool  teleport = 6;                                  // true = 불연속 점프(SnapToSpawn 등) → 클라 하드스냅
+}
+
+// 한 tick, 한 유저 AOI 의 몬스터 이동/정지 변화 묶음 (변화가 있을 때만 송신).
+message MonsterMoveBatchNtf {
+    uint32 server_tick_seq = 1;
+    repeated MonsterMoveEntry moves = 2;
+    repeated MonsterStopEntry stops = 3;
+}
