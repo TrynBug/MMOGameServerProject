@@ -135,10 +135,13 @@ for (const auto& [buffKey, buff] : m_buffs)
 for (int32 key : toRemove)
 	RemoveBuff(key);
 
-# 함수를 작성할 때 본문이 2줄 이상이라면 반드시 cpp 파일에 본문을 작성합니다.
+# 함수 작성할때 규칙
+## 함수를 작성할 때 본문이 2줄 이상이라면 반드시 cpp 파일에 본문을 작성합니다.
 // 이렇게 본문이 2줄 이상 넘어가면 반드시 cpp 파일에 본문을 작성합니다.
 void Session::SetSimulatedDelay(int32 recvMs, int32 sendMs)
 {
 	m_recvDelayMs.store(recvMs, std::memory_order_relaxed);
 	m_sendDelayMs.store(sendMs, std::memory_order_relaxed);
 }
+
+## .h 파일의 함수 선언 순서와 .cpp 파일의 함수 구현 순서는 일치하게 작성합니다.
