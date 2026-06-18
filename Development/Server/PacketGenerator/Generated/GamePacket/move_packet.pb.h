@@ -950,11 +950,9 @@ class ActorStateInfo final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kObjectIdFieldNumber = 1,
-    kPosXFieldNumber = 2,
-    kPosYFieldNumber = 3,
-    kPosZFieldNumber = 4,
-    kYawFieldNumber = 5,
-    kFlagsFieldNumber = 6,
+    kQposXzFieldNumber = 2,
+    kQposYYawFieldNumber = 3,
+    kFlagsFieldNumber = 4,
   };
   // int64 object_id = 1;
   void clear_object_id() ;
@@ -966,47 +964,27 @@ class ActorStateInfo final : public ::google::protobuf::Message
   void _internal_set_object_id(::int64_t value);
 
   public:
-  // float pos_x = 2;
-  void clear_pos_x() ;
-  float pos_x() const;
-  void set_pos_x(float value);
+  // fixed32 qpos_xz = 2;
+  void clear_qpos_xz() ;
+  ::uint32_t qpos_xz() const;
+  void set_qpos_xz(::uint32_t value);
 
   private:
-  float _internal_pos_x() const;
-  void _internal_set_pos_x(float value);
+  ::uint32_t _internal_qpos_xz() const;
+  void _internal_set_qpos_xz(::uint32_t value);
 
   public:
-  // float pos_y = 3;
-  void clear_pos_y() ;
-  float pos_y() const;
-  void set_pos_y(float value);
+  // fixed32 qpos_y_yaw = 3;
+  void clear_qpos_y_yaw() ;
+  ::uint32_t qpos_y_yaw() const;
+  void set_qpos_y_yaw(::uint32_t value);
 
   private:
-  float _internal_pos_y() const;
-  void _internal_set_pos_y(float value);
+  ::uint32_t _internal_qpos_y_yaw() const;
+  void _internal_set_qpos_y_yaw(::uint32_t value);
 
   public:
-  // float pos_z = 4;
-  void clear_pos_z() ;
-  float pos_z() const;
-  void set_pos_z(float value);
-
-  private:
-  float _internal_pos_z() const;
-  void _internal_set_pos_z(float value);
-
-  public:
-  // float yaw = 5;
-  void clear_yaw() ;
-  float yaw() const;
-  void set_yaw(float value);
-
-  private:
-  float _internal_yaw() const;
-  void _internal_set_yaw(float value);
-
-  public:
-  // uint32 flags = 6;
+  // uint32 flags = 4;
   void clear_flags() ;
   ::uint32_t flags() const;
   void set_flags(::uint32_t value);
@@ -1020,7 +998,7 @@ class ActorStateInfo final : public ::google::protobuf::Message
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 6,
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
                                    0, 0,
                                    2>
       _table_;
@@ -1043,10 +1021,8 @@ class ActorStateInfo final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::int64_t object_id_;
-    float pos_x_;
-    float pos_y_;
-    float pos_z_;
-    float yaw_;
+    ::uint32_t qpos_xz_;
+    ::uint32_t qpos_y_yaw_;
     ::uint32_t flags_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -1601,112 +1577,62 @@ inline void ActorStateInfo::_internal_set_object_id(::int64_t value) {
   _impl_.object_id_ = value;
 }
 
-// float pos_x = 2;
-inline void ActorStateInfo::clear_pos_x() {
+// fixed32 qpos_xz = 2;
+inline void ActorStateInfo::clear_qpos_xz() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_x_ = 0;
+  _impl_.qpos_xz_ = 0u;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000002U);
 }
-inline float ActorStateInfo::pos_x() const {
-  // @@protoc_insertion_point(field_get:GamePacket.ActorStateInfo.pos_x)
-  return _internal_pos_x();
+inline ::uint32_t ActorStateInfo::qpos_xz() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ActorStateInfo.qpos_xz)
+  return _internal_qpos_xz();
 }
-inline void ActorStateInfo::set_pos_x(float value) {
-  _internal_set_pos_x(value);
+inline void ActorStateInfo::set_qpos_xz(::uint32_t value) {
+  _internal_set_qpos_xz(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000002U);
-  // @@protoc_insertion_point(field_set:GamePacket.ActorStateInfo.pos_x)
+  // @@protoc_insertion_point(field_set:GamePacket.ActorStateInfo.qpos_xz)
 }
-inline float ActorStateInfo::_internal_pos_x() const {
+inline ::uint32_t ActorStateInfo::_internal_qpos_xz() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.pos_x_;
+  return _impl_.qpos_xz_;
 }
-inline void ActorStateInfo::_internal_set_pos_x(float value) {
+inline void ActorStateInfo::_internal_set_qpos_xz(::uint32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_x_ = value;
+  _impl_.qpos_xz_ = value;
 }
 
-// float pos_y = 3;
-inline void ActorStateInfo::clear_pos_y() {
+// fixed32 qpos_y_yaw = 3;
+inline void ActorStateInfo::clear_qpos_y_yaw() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_y_ = 0;
+  _impl_.qpos_y_yaw_ = 0u;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000004U);
 }
-inline float ActorStateInfo::pos_y() const {
-  // @@protoc_insertion_point(field_get:GamePacket.ActorStateInfo.pos_y)
-  return _internal_pos_y();
+inline ::uint32_t ActorStateInfo::qpos_y_yaw() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ActorStateInfo.qpos_y_yaw)
+  return _internal_qpos_y_yaw();
 }
-inline void ActorStateInfo::set_pos_y(float value) {
-  _internal_set_pos_y(value);
+inline void ActorStateInfo::set_qpos_y_yaw(::uint32_t value) {
+  _internal_set_qpos_y_yaw(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000004U);
-  // @@protoc_insertion_point(field_set:GamePacket.ActorStateInfo.pos_y)
+  // @@protoc_insertion_point(field_set:GamePacket.ActorStateInfo.qpos_y_yaw)
 }
-inline float ActorStateInfo::_internal_pos_y() const {
+inline ::uint32_t ActorStateInfo::_internal_qpos_y_yaw() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.pos_y_;
+  return _impl_.qpos_y_yaw_;
 }
-inline void ActorStateInfo::_internal_set_pos_y(float value) {
+inline void ActorStateInfo::_internal_set_qpos_y_yaw(::uint32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_y_ = value;
+  _impl_.qpos_y_yaw_ = value;
 }
 
-// float pos_z = 4;
-inline void ActorStateInfo::clear_pos_z() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_z_ = 0;
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00000008U);
-}
-inline float ActorStateInfo::pos_z() const {
-  // @@protoc_insertion_point(field_get:GamePacket.ActorStateInfo.pos_z)
-  return _internal_pos_z();
-}
-inline void ActorStateInfo::set_pos_z(float value) {
-  _internal_set_pos_z(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
-  // @@protoc_insertion_point(field_set:GamePacket.ActorStateInfo.pos_z)
-}
-inline float ActorStateInfo::_internal_pos_z() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.pos_z_;
-}
-inline void ActorStateInfo::_internal_set_pos_z(float value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.pos_z_ = value;
-}
-
-// float yaw = 5;
-inline void ActorStateInfo::clear_yaw() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.yaw_ = 0;
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00000010U);
-}
-inline float ActorStateInfo::yaw() const {
-  // @@protoc_insertion_point(field_get:GamePacket.ActorStateInfo.yaw)
-  return _internal_yaw();
-}
-inline void ActorStateInfo::set_yaw(float value) {
-  _internal_set_yaw(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
-  // @@protoc_insertion_point(field_set:GamePacket.ActorStateInfo.yaw)
-}
-inline float ActorStateInfo::_internal_yaw() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.yaw_;
-}
-inline void ActorStateInfo::_internal_set_yaw(float value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.yaw_ = value;
-}
-
-// uint32 flags = 6;
+// uint32 flags = 4;
 inline void ActorStateInfo::clear_flags() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.flags_ = 0u;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000020U);
+                  0x00000008U);
 }
 inline ::uint32_t ActorStateInfo::flags() const {
   // @@protoc_insertion_point(field_get:GamePacket.ActorStateInfo.flags)
@@ -1714,7 +1640,7 @@ inline ::uint32_t ActorStateInfo::flags() const {
 }
 inline void ActorStateInfo::set_flags(::uint32_t value) {
   _internal_set_flags(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   // @@protoc_insertion_point(field_set:GamePacket.ActorStateInfo.flags)
 }
 inline ::uint32_t ActorStateInfo::_internal_flags() const {

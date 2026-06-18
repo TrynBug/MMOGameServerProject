@@ -55,6 +55,13 @@ message StageLoadCompleteRes {
     float my_pos_y = 6;     // 높이
     float my_yaw   = 7;     // degree
     float my_pos_z = 8;     // 평면 깊이축
+
+    // 이 Stage 의 월드 X/Z 경계(navmesh 메타). 클라가 SnapshotNtf.ActorStateInfo 의
+    // 양자화 위치를 해제할 때 X/Z 디코드 범위로 쓴다(서버 인코드와 동일 범위 → 클립 없음, 정밀도 최적).
+    float world_min_x = 9;
+    float world_min_z = 10;
+    float world_max_x = 11;
+    float world_max_z = 12;
 }
 
 // ──────────────────────────────────────────────

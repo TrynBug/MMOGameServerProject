@@ -30,20 +30,20 @@ namespace GamePacket {
             "b3ZlSW50ZW50Eg4KBmRlc3RfeBgEIAEoAhIOCgZkZXN0X3kYBSABKAISDgoG",
             "ZGVzdF96GAYgASgCEgsKA3lhdxgHIAEoAiJNChFNb3ZlUG9zQ29ycmVjdE50",
             "ZhINCgVwb3NfeBgBIAEoAhINCgVwb3NfeRgCIAEoAhINCgVwb3NfehgDIAEo",
-            "AhILCgN5YXcYBCABKAIibAoOQWN0b3JTdGF0ZUluZm8SEQoJb2JqZWN0X2lk",
-            "GAEgASgDEg0KBXBvc194GAIgASgCEg0KBXBvc195GAMgASgCEg0KBXBvc196",
-            "GAQgASgCEgsKA3lhdxgFIAEoAhINCgVmbGFncxgGIAEoDSJpCgtTbmFwc2hv",
-            "dE50ZhIXCg9zZXJ2ZXJfdGlja19zZXEYASABKA0SFQoNYWNrX2lucHV0X3Nl",
-            "cRgCIAEoDRIqCgZzdGF0ZXMYAyADKAsyGi5HYW1lUGFja2V0LkFjdG9yU3Rh",
-            "dGVJbmZvIiYKC1RpbWVTeW5jTnRmEhcKD3NlcnZlcl90aWNrX3NlcRgBIAEo",
-            "DSpNCgtFTW92ZUludGVudBIUChBNT1ZFX0lOVEVOVF9OT05FEAASEgoOTU9W",
-            "RV9JTlRFTlRfVE8QARIUChBNT1ZFX0lOVEVOVF9TVE9QEAJiBnByb3RvMw=="));
+            "AhILCgN5YXcYBCABKAIiVwoOQWN0b3JTdGF0ZUluZm8SEQoJb2JqZWN0X2lk",
+            "GAEgASgDEg8KB3Fwb3NfeHoYAiABKAcSEgoKcXBvc195X3lhdxgDIAEoBxIN",
+            "CgVmbGFncxgEIAEoDSJpCgtTbmFwc2hvdE50ZhIXCg9zZXJ2ZXJfdGlja19z",
+            "ZXEYASABKA0SFQoNYWNrX2lucHV0X3NlcRgCIAEoDRIqCgZzdGF0ZXMYAyAD",
+            "KAsyGi5HYW1lUGFja2V0LkFjdG9yU3RhdGVJbmZvIiYKC1RpbWVTeW5jTnRm",
+            "EhcKD3NlcnZlcl90aWNrX3NlcRgBIAEoDSpNCgtFTW92ZUludGVudBIUChBN",
+            "T1ZFX0lOVEVOVF9OT05FEAASEgoOTU9WRV9JTlRFTlRfVE8QARIUChBNT1ZF",
+            "X0lOVEVOVF9TVE9QEAJiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::GamePacket.EMoveIntent), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.MoveIntentReq), global::GamePacket.MoveIntentReq.Parser, new[]{ "InputSeq", "ClientTimeMs", "Intent", "DestX", "DestY", "DestZ", "Yaw" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.MovePosCorrectNtf), global::GamePacket.MovePosCorrectNtf.Parser, new[]{ "PosX", "PosY", "PosZ", "Yaw" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ActorStateInfo), global::GamePacket.ActorStateInfo.Parser, new[]{ "ObjectId", "PosX", "PosY", "PosZ", "Yaw", "Flags" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ActorStateInfo), global::GamePacket.ActorStateInfo.Parser, new[]{ "ObjectId", "QposXz", "QposYYaw", "Flags" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.SnapshotNtf), global::GamePacket.SnapshotNtf.Parser, new[]{ "ServerTickSeq", "AckInputSeq", "States" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.TimeSyncNtf), global::GamePacket.TimeSyncNtf.Parser, new[]{ "ServerTickSeq" }, null, null, null, null)
           }));
@@ -828,6 +828,13 @@ namespace GamePacket {
 
   /// <summary>
   /// 오브젝트 1개의 현재 상태 (캐릭터/몬스터 공용. object_id 로 식별).
+  /// 고빈도 패킷이라 위치/yaw 를 16bit 양자화해 fixed32 2개에 담는다(float 4개=20B → 10B).
+  /// ★양자화 계약(서버 인코드 / 클라 디코드가 반드시 일치)★
+  ///   X,Z : [-2048, 2048] 구간 16bit  (정밀도 ~6.25cm). 범위 밖은 클램프.
+  ///   Y   : [-512, 512]   구간 16bit  (정밀도 ~1.6cm).
+  ///   yaw : [0, 360)      구간 16bit.
+  ///   원격 액터는 보간되고 화해 데드존(0.3u)이 양자화 오차(&lt;0.07u)를 흡수하므로 시각/판정 영향 없음.
+  ///   spawn/위치보정(CharacterSpawnInfo/MonsterSpawnInfo/MovePosCorrectNtf)은 full float 유지(저빈도·정밀).
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ActorStateInfo : pb::IMessage<ActorStateInfo>
@@ -865,10 +872,8 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public ActorStateInfo(ActorStateInfo other) : this() {
       objectId_ = other.objectId_;
-      posX_ = other.posX_;
-      posY_ = other.posY_;
-      posZ_ = other.posZ_;
-      yaw_ = other.yaw_;
+      qposXz_ = other.qposXz_;
+      qposYYaw_ = other.qposYYaw_;
       flags_ = other.flags_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -891,65 +896,38 @@ namespace GamePacket {
       }
     }
 
-    /// <summary>Field number for the "pos_x" field.</summary>
-    public const int PosXFieldNumber = 2;
-    private float posX_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float PosX {
-      get { return posX_; }
-      set {
-        posX_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "pos_y" field.</summary>
-    public const int PosYFieldNumber = 3;
-    private float posY_;
+    /// <summary>Field number for the "qpos_xz" field.</summary>
+    public const int QposXzFieldNumber = 2;
+    private uint qposXz_;
     /// <summary>
-    /// 높이
+    /// (qx&lt;&lt;16)|qz  : X,Z 16bit 양자화
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float PosY {
-      get { return posY_; }
+    public uint QposXz {
+      get { return qposXz_; }
       set {
-        posY_ = value;
+        qposXz_ = value;
       }
     }
 
-    /// <summary>Field number for the "pos_z" field.</summary>
-    public const int PosZFieldNumber = 4;
-    private float posZ_;
+    /// <summary>Field number for the "qpos_y_yaw" field.</summary>
+    public const int QposYYawFieldNumber = 3;
+    private uint qposYYaw_;
     /// <summary>
-    /// 평면 깊이축
+    /// (qy&lt;&lt;16)|qyaw: Y 16bit, yaw 16bit
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float PosZ {
-      get { return posZ_; }
+    public uint QposYYaw {
+      get { return qposYYaw_; }
       set {
-        posZ_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "yaw" field.</summary>
-    public const int YawFieldNumber = 5;
-    private float yaw_;
-    /// <summary>
-    /// degree
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float Yaw {
-      get { return yaw_; }
-      set {
-        yaw_ = value;
+        qposYYaw_ = value;
       }
     }
 
     /// <summary>Field number for the "flags" field.</summary>
-    public const int FlagsFieldNumber = 6;
+    public const int FlagsFieldNumber = 4;
     private uint flags_;
     /// <summary>
     /// bit0=isMoving, bit1=isDead (애니메이션/보간 힌트)
@@ -979,10 +957,8 @@ namespace GamePacket {
         return true;
       }
       if (ObjectId != other.ObjectId) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosX, other.PosX)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Yaw, other.Yaw)) return false;
+      if (QposXz != other.QposXz) return false;
+      if (QposYYaw != other.QposYYaw) return false;
       if (Flags != other.Flags) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -992,10 +968,8 @@ namespace GamePacket {
     public override int GetHashCode() {
       int hash = 1;
       if (ObjectId != 0L) hash ^= ObjectId.GetHashCode();
-      if (PosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosX);
-      if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
-      if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
-      if (Yaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Yaw);
+      if (QposXz != 0) hash ^= QposXz.GetHashCode();
+      if (QposYYaw != 0) hash ^= QposYYaw.GetHashCode();
       if (Flags != 0) hash ^= Flags.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -1019,24 +993,16 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(ObjectId);
       }
-      if (PosX != 0F) {
+      if (QposXz != 0) {
         output.WriteRawTag(21);
-        output.WriteFloat(PosX);
+        output.WriteFixed32(QposXz);
       }
-      if (PosY != 0F) {
+      if (QposYYaw != 0) {
         output.WriteRawTag(29);
-        output.WriteFloat(PosY);
-      }
-      if (PosZ != 0F) {
-        output.WriteRawTag(37);
-        output.WriteFloat(PosZ);
-      }
-      if (Yaw != 0F) {
-        output.WriteRawTag(45);
-        output.WriteFloat(Yaw);
+        output.WriteFixed32(QposYYaw);
       }
       if (Flags != 0) {
-        output.WriteRawTag(48);
+        output.WriteRawTag(32);
         output.WriteUInt32(Flags);
       }
       if (_unknownFields != null) {
@@ -1053,24 +1019,16 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(ObjectId);
       }
-      if (PosX != 0F) {
+      if (QposXz != 0) {
         output.WriteRawTag(21);
-        output.WriteFloat(PosX);
+        output.WriteFixed32(QposXz);
       }
-      if (PosY != 0F) {
+      if (QposYYaw != 0) {
         output.WriteRawTag(29);
-        output.WriteFloat(PosY);
-      }
-      if (PosZ != 0F) {
-        output.WriteRawTag(37);
-        output.WriteFloat(PosZ);
-      }
-      if (Yaw != 0F) {
-        output.WriteRawTag(45);
-        output.WriteFloat(Yaw);
+        output.WriteFixed32(QposYYaw);
       }
       if (Flags != 0) {
-        output.WriteRawTag(48);
+        output.WriteRawTag(32);
         output.WriteUInt32(Flags);
       }
       if (_unknownFields != null) {
@@ -1086,16 +1044,10 @@ namespace GamePacket {
       if (ObjectId != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(ObjectId);
       }
-      if (PosX != 0F) {
+      if (QposXz != 0) {
         size += 1 + 4;
       }
-      if (PosY != 0F) {
-        size += 1 + 4;
-      }
-      if (PosZ != 0F) {
-        size += 1 + 4;
-      }
-      if (Yaw != 0F) {
+      if (QposYYaw != 0) {
         size += 1 + 4;
       }
       if (Flags != 0) {
@@ -1116,17 +1068,11 @@ namespace GamePacket {
       if (other.ObjectId != 0L) {
         ObjectId = other.ObjectId;
       }
-      if (other.PosX != 0F) {
-        PosX = other.PosX;
+      if (other.QposXz != 0) {
+        QposXz = other.QposXz;
       }
-      if (other.PosY != 0F) {
-        PosY = other.PosY;
-      }
-      if (other.PosZ != 0F) {
-        PosZ = other.PosZ;
-      }
-      if (other.Yaw != 0F) {
-        Yaw = other.Yaw;
+      if (other.QposYYaw != 0) {
+        QposYYaw = other.QposYYaw;
       }
       if (other.Flags != 0) {
         Flags = other.Flags;
@@ -1155,22 +1101,14 @@ namespace GamePacket {
             break;
           }
           case 21: {
-            PosX = input.ReadFloat();
+            QposXz = input.ReadFixed32();
             break;
           }
           case 29: {
-            PosY = input.ReadFloat();
+            QposYYaw = input.ReadFixed32();
             break;
           }
-          case 37: {
-            PosZ = input.ReadFloat();
-            break;
-          }
-          case 45: {
-            Yaw = input.ReadFloat();
-            break;
-          }
-          case 48: {
+          case 32: {
             Flags = input.ReadUInt32();
             break;
           }
@@ -1198,22 +1136,14 @@ namespace GamePacket {
             break;
           }
           case 21: {
-            PosX = input.ReadFloat();
+            QposXz = input.ReadFixed32();
             break;
           }
           case 29: {
-            PosY = input.ReadFloat();
+            QposYYaw = input.ReadFixed32();
             break;
           }
-          case 37: {
-            PosZ = input.ReadFloat();
-            break;
-          }
-          case 45: {
-            Yaw = input.ReadFloat();
-            break;
-          }
-          case 48: {
+          case 32: {
             Flags = input.ReadUInt32();
             break;
           }

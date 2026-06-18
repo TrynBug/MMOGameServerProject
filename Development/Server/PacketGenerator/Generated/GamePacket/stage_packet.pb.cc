@@ -122,7 +122,11 @@ inline constexpr StageLoadCompleteRes::Impl_::Impl_(
         my_pos_x_{0},
         my_pos_y_{0},
         my_yaw_{0},
-        my_pos_z_{0} {}
+        my_pos_z_{0},
+        world_min_x_{0},
+        world_min_z_{0},
+        world_max_x_{0},
+        world_max_z_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR StageLoadCompleteRes::StageLoadCompleteRes(::_pbi::ConstantInitialized)
@@ -274,7 +278,7 @@ const ::uint32_t
         0x000, // bitmap
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_._has_bits_),
-        11, // hasbit index offset
+        15, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.result_code_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.error_msg_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.stage_id_),
@@ -283,6 +287,10 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.my_pos_y_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.my_yaw_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.my_pos_z_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.world_min_x_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.world_min_z_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.world_max_x_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::StageLoadCompleteRes, _impl_.world_max_z_),
         1,
         0,
         3,
@@ -291,6 +299,10 @@ const ::uint32_t
         5,
         6,
         7,
+        8,
+        9,
+        10,
+        11,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::StageNoticeNtf, _impl_._has_bits_),
         5, // hasbit index offset
@@ -339,10 +351,10 @@ static const ::_pbi::MigrationSchema
         {9, sizeof(::GamePacket::StageMoveRes)},
         {18, sizeof(::GamePacket::StageLoadCompleteReq)},
         {19, sizeof(::GamePacket::StageLoadCompleteRes)},
-        {38, sizeof(::GamePacket::StageNoticeNtf)},
-        {45, sizeof(::GamePacket::EventAreaEnterReq)},
-        {56, sizeof(::GamePacket::EventAreaExitReq)},
-        {67, sizeof(::GamePacket::ObjectInteractReq)},
+        {46, sizeof(::GamePacket::StageNoticeNtf)},
+        {53, sizeof(::GamePacket::EventAreaEnterReq)},
+        {64, sizeof(::GamePacket::EventAreaExitReq)},
+        {75, sizeof(::GamePacket::ObjectInteractReq)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::GamePacket::_StageMoveReq_default_instance_._instance,
@@ -362,25 +374,27 @@ const char descriptor_table_protodef_GamePacket_2fstage_5fpacket_2eproto[] ABSL_
     "get_game_server_id\030\003 \001(\005\"U\n\014StageMoveRes"
     "\022\023\n\013result_code\030\001 \001(\005\022\021\n\terror_msg\030\002 \001(\t"
     "\022\035\n\025target_stage_data_key\030\003 \001(\005\"\026\n\024Stage"
-    "LoadCompleteReq\"\256\001\n\024StageLoadCompleteRes"
+    "LoadCompleteReq\"\202\002\n\024StageLoadCompleteRes"
     "\022\023\n\013result_code\030\001 \001(\005\022\021\n\terror_msg\030\002 \001(\t"
     "\022\020\n\010stage_id\030\003 \001(\003\022\026\n\016stage_data_key\030\004 \001"
     "(\005\022\020\n\010my_pos_x\030\005 \001(\002\022\020\n\010my_pos_y\030\006 \001(\002\022\016"
-    "\n\006my_yaw\030\007 \001(\002\022\020\n\010my_pos_z\030\010 \001(\002\"6\n\016Stag"
-    "eNoticeNtf\022\017\n\007message\030\001 \001(\t\022\023\n\013duration_"
-    "ms\030\002 \001(\005\"S\n\021EventAreaEnterReq\022\021\n\tevent_k"
-    "ey\030\001 \001(\005\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y\030\003 \001(\002\022\r"
-    "\n\005pos_z\030\004 \001(\002\"R\n\020EventAreaExitReq\022\021\n\teve"
+    "\n\006my_yaw\030\007 \001(\002\022\020\n\010my_pos_z\030\010 \001(\002\022\023\n\013worl"
+    "d_min_x\030\t \001(\002\022\023\n\013world_min_z\030\n \001(\002\022\023\n\013wo"
+    "rld_max_x\030\013 \001(\002\022\023\n\013world_max_z\030\014 \001(\002\"6\n\016"
+    "StageNoticeNtf\022\017\n\007message\030\001 \001(\t\022\023\n\013durat"
+    "ion_ms\030\002 \001(\005\"S\n\021EventAreaEnterReq\022\021\n\teve"
     "nt_key\030\001 \001(\005\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y\030\003 \001"
-    "(\002\022\r\n\005pos_z\030\004 \001(\002\"R\n\021ObjectInteractReq\022\020"
-    "\n\010prop_key\030\001 \001(\005\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y"
-    "\030\003 \001(\002\022\r\n\005pos_z\030\004 \001(\002b\006proto3"
+    "(\002\022\r\n\005pos_z\030\004 \001(\002\"R\n\020EventAreaExitReq\022\021\n"
+    "\tevent_key\030\001 \001(\005\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y"
+    "\030\003 \001(\002\022\r\n\005pos_z\030\004 \001(\002\"R\n\021ObjectInteractR"
+    "eq\022\020\n\010prop_key\030\001 \001(\005\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005p"
+    "os_y\030\003 \001(\002\022\r\n\005pos_z\030\004 \001(\002b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fstage_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fstage_5fpacket_2eproto = {
     false,
     false,
-    749,
+    833,
     descriptor_table_protodef_GamePacket_2fstage_5fpacket_2eproto,
     "GamePacket/stage_packet.proto",
     &descriptor_table_GamePacket_2fstage_5fpacket_2eproto_once,
@@ -1225,9 +1239,9 @@ StageLoadCompleteRes::StageLoadCompleteRes(
                offsetof(Impl_, result_code_),
            reinterpret_cast<const char*>(&from._impl_) +
                offsetof(Impl_, result_code_),
-           offsetof(Impl_, my_pos_z_) -
+           offsetof(Impl_, world_max_z_) -
                offsetof(Impl_, result_code_) +
-               sizeof(Impl_::my_pos_z_));
+               sizeof(Impl_::world_max_z_));
 
   // @@protoc_insertion_point(copy_constructor:GamePacket.StageLoadCompleteRes)
 }
@@ -1242,9 +1256,9 @@ inline void StageLoadCompleteRes::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE are
   ::memset(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, result_code_),
            0,
-           offsetof(Impl_, my_pos_z_) -
+           offsetof(Impl_, world_max_z_) -
                offsetof(Impl_, result_code_) +
-               sizeof(Impl_::my_pos_z_));
+               sizeof(Impl_::world_max_z_));
 }
 StageLoadCompleteRes::~StageLoadCompleteRes() {
   // @@protoc_insertion_point(destructor:GamePacket.StageLoadCompleteRes)
@@ -1304,16 +1318,16 @@ StageLoadCompleteRes::GetClassData() const {
   return StageLoadCompleteRes_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 8, 0, 57, 2>
+const ::_pbi::TcParseTable<4, 12, 0, 57, 2>
 StageLoadCompleteRes::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_._has_bits_),
     0, // no _extensions_
-    8, 56,  // max_field_number, fast_idx_mask
+    12, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967040,  // skipmap
+    4294963200,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    8,  // num_field_entries
+    12,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     StageLoadCompleteRes_class_data_.base(),
@@ -1323,10 +1337,7 @@ StageLoadCompleteRes::_table_ = {
     ::_pbi::TcParser::GetTable<::GamePacket::StageLoadCompleteRes>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // float my_pos_z = 8;
-    {::_pbi::TcParser::FastF32S1,
-     {69, 7, 0,
-      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_pos_z_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // int32 result_code = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(StageLoadCompleteRes, _impl_.result_code_), 1>(),
      {8, 1, 0,
@@ -1355,6 +1366,29 @@ StageLoadCompleteRes::_table_ = {
     {::_pbi::TcParser::FastF32S1,
      {61, 6, 0,
       PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_yaw_)}},
+    // float my_pos_z = 8;
+    {::_pbi::TcParser::FastF32S1,
+     {69, 7, 0,
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_pos_z_)}},
+    // float world_min_x = 9;
+    {::_pbi::TcParser::FastF32S1,
+     {77, 8, 0,
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.world_min_x_)}},
+    // float world_min_z = 10;
+    {::_pbi::TcParser::FastF32S1,
+     {85, 9, 0,
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.world_min_z_)}},
+    // float world_max_x = 11;
+    {::_pbi::TcParser::FastF32S1,
+     {93, 10, 0,
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.world_max_x_)}},
+    // float world_max_z = 12;
+    {::_pbi::TcParser::FastF32S1,
+     {101, 11, 0,
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.world_max_z_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -1374,6 +1408,14 @@ StageLoadCompleteRes::_table_ = {
     {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_yaw_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
     // float my_pos_z = 8;
     {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_pos_z_), _Internal::kHasBitsOffset + 7, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float world_min_x = 9;
+    {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.world_min_x_), _Internal::kHasBitsOffset + 8, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float world_min_z = 10;
+    {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.world_min_z_), _Internal::kHasBitsOffset + 9, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float world_max_x = 11;
+    {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.world_max_x_), _Internal::kHasBitsOffset + 10, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float world_max_z = 12;
+    {PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.world_max_z_), _Internal::kHasBitsOffset + 11, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
   }},
   // no aux_entries
   {{
@@ -1397,6 +1439,11 @@ PROTOBUF_NOINLINE void StageLoadCompleteRes::Clear() {
     ::memset(&_impl_.result_code_, 0, static_cast<::size_t>(
         reinterpret_cast<char*>(&_impl_.my_pos_z_) -
         reinterpret_cast<char*>(&_impl_.result_code_)) + sizeof(_impl_.my_pos_z_));
+  }
+  if (BatchCheckHasBit(cached_has_bits, 0x00000f00U)) {
+    ::memset(&_impl_.world_min_x_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.world_max_z_) -
+        reinterpret_cast<char*>(&_impl_.world_min_x_)) + sizeof(_impl_.world_max_z_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -1494,6 +1541,42 @@ PROTOBUF_NOINLINE void StageLoadCompleteRes::Clear() {
     }
   }
 
+  // float world_min_x = 9;
+  if (CheckHasBit(cached_has_bits, 0x00000100U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_world_min_x()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          9, this_._internal_world_min_x(), target);
+    }
+  }
+
+  // float world_min_z = 10;
+  if (CheckHasBit(cached_has_bits, 0x00000200U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_world_min_z()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          10, this_._internal_world_min_z(), target);
+    }
+  }
+
+  // float world_max_x = 11;
+  if (CheckHasBit(cached_has_bits, 0x00000400U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_world_max_x()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          11, this_._internal_world_max_x(), target);
+    }
+  }
+
+  // float world_max_z = 12;
+  if (CheckHasBit(cached_has_bits, 0x00000800U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_world_max_z()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          12, this_._internal_world_max_z(), target);
+    }
+  }
+
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -1573,6 +1656,32 @@ PROTOBUF_NOINLINE void StageLoadCompleteRes::Clear() {
       }
     }
   }
+  if (BatchCheckHasBit(cached_has_bits, 0x00000f00U)) {
+    // float world_min_x = 9;
+    if (CheckHasBit(cached_has_bits, 0x00000100U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_world_min_x()) != 0) {
+        total_size += 5;
+      }
+    }
+    // float world_min_z = 10;
+    if (CheckHasBit(cached_has_bits, 0x00000200U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_world_min_z()) != 0) {
+        total_size += 5;
+      }
+    }
+    // float world_max_x = 11;
+    if (CheckHasBit(cached_has_bits, 0x00000400U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_world_max_x()) != 0) {
+        total_size += 5;
+      }
+    }
+    // float world_max_z = 12;
+    if (CheckHasBit(cached_has_bits, 0x00000800U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_world_max_z()) != 0) {
+        total_size += 5;
+      }
+    }
+  }
   return this_.MaybeComputeUnknownFieldsSize(total_size,
                                              &this_._impl_._cached_size_);
 }
@@ -1637,6 +1746,28 @@ void StageLoadCompleteRes::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
   }
+  if (BatchCheckHasBit(cached_has_bits, 0x00000f00U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000100U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_world_min_x()) != 0) {
+        _this->_impl_.world_min_x_ = from._impl_.world_min_x_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000200U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_world_min_z()) != 0) {
+        _this->_impl_.world_min_z_ = from._impl_.world_min_z_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000400U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_world_max_x()) != 0) {
+        _this->_impl_.world_max_x_ = from._impl_.world_max_x_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000800U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_world_max_z()) != 0) {
+        _this->_impl_.world_max_z_ = from._impl_.world_max_z_;
+      }
+    }
+  }
   _this->_impl_._has_bits_[0] |= cached_has_bits;
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
@@ -1658,8 +1789,8 @@ void StageLoadCompleteRes::InternalSwap(StageLoadCompleteRes* PROTOBUF_RESTRICT 
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.error_msg_, &other->_impl_.error_msg_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.my_pos_z_)
-      + sizeof(StageLoadCompleteRes::_impl_.my_pos_z_)
+      PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.world_max_z_)
+      + sizeof(StageLoadCompleteRes::_impl_.world_max_z_)
       - PROTOBUF_FIELD_OFFSET(StageLoadCompleteRes, _impl_.result_code_)>(
           reinterpret_cast<char*>(&_impl_.result_code_),
           reinterpret_cast<char*>(&other->_impl_.result_code_));

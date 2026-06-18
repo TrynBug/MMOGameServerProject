@@ -114,10 +114,8 @@ inline constexpr ActorStateInfo::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
         object_id_{::int64_t{0}},
-        pos_x_{0},
-        pos_y_{0},
-        pos_z_{0},
-        yaw_{0},
+        qpos_xz_{0u},
+        qpos_y_yaw_{0u},
         flags_{0u} {}
 
 template <typename>
@@ -204,19 +202,15 @@ const ::uint32_t
         3,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::ActorStateInfo, _impl_._has_bits_),
-        9, // hasbit index offset
+        7, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GamePacket::ActorStateInfo, _impl_.object_id_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::ActorStateInfo, _impl_.pos_x_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::ActorStateInfo, _impl_.pos_y_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::ActorStateInfo, _impl_.pos_z_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::ActorStateInfo, _impl_.yaw_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ActorStateInfo, _impl_.qpos_xz_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ActorStateInfo, _impl_.qpos_y_yaw_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::ActorStateInfo, _impl_.flags_),
         0,
         1,
         2,
         3,
-        4,
-        5,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::SnapshotNtf, _impl_._has_bits_),
         6, // hasbit index offset
@@ -238,8 +232,8 @@ static const ::_pbi::MigrationSchema
         {0, sizeof(::GamePacket::MoveIntentReq)},
         {17, sizeof(::GamePacket::MovePosCorrectNtf)},
         {28, sizeof(::GamePacket::ActorStateInfo)},
-        {43, sizeof(::GamePacket::SnapshotNtf)},
-        {52, sizeof(::GamePacket::TimeSyncNtf)},
+        {39, sizeof(::GamePacket::SnapshotNtf)},
+        {48, sizeof(::GamePacket::TimeSyncNtf)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::GamePacket::_MoveIntentReq_default_instance_._instance,
@@ -257,21 +251,21 @@ const char descriptor_table_protodef_GamePacket_2fmove_5fpacket_2eproto[] ABSL_A
     "\022\016\n\006dest_y\030\005 \001(\002\022\016\n\006dest_z\030\006 \001(\002\022\013\n\003yaw\030"
     "\007 \001(\002\"M\n\021MovePosCorrectNtf\022\r\n\005pos_x\030\001 \001("
     "\002\022\r\n\005pos_y\030\002 \001(\002\022\r\n\005pos_z\030\003 \001(\002\022\013\n\003yaw\030\004"
-    " \001(\002\"l\n\016ActorStateInfo\022\021\n\tobject_id\030\001 \001("
-    "\003\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y\030\003 \001(\002\022\r\n\005pos_z"
-    "\030\004 \001(\002\022\013\n\003yaw\030\005 \001(\002\022\r\n\005flags\030\006 \001(\r\"i\n\013Sn"
-    "apshotNtf\022\027\n\017server_tick_seq\030\001 \001(\r\022\025\n\rac"
-    "k_input_seq\030\002 \001(\r\022*\n\006states\030\003 \003(\0132\032.Game"
-    "Packet.ActorStateInfo\"&\n\013TimeSyncNtf\022\027\n\017"
-    "server_tick_seq\030\001 \001(\r*M\n\013EMoveIntent\022\024\n\020"
-    "MOVE_INTENT_NONE\020\000\022\022\n\016MOVE_INTENT_TO\020\001\022\024"
-    "\n\020MOVE_INTENT_STOP\020\002b\006proto3"
+    " \001(\002\"W\n\016ActorStateInfo\022\021\n\tobject_id\030\001 \001("
+    "\003\022\017\n\007qpos_xz\030\002 \001(\007\022\022\n\nqpos_y_yaw\030\003 \001(\007\022\r"
+    "\n\005flags\030\004 \001(\r\"i\n\013SnapshotNtf\022\027\n\017server_t"
+    "ick_seq\030\001 \001(\r\022\025\n\rack_input_seq\030\002 \001(\r\022*\n\006"
+    "states\030\003 \003(\0132\032.GamePacket.ActorStateInfo"
+    "\"&\n\013TimeSyncNtf\022\027\n\017server_tick_seq\030\001 \001(\r"
+    "*M\n\013EMoveIntent\022\024\n\020MOVE_INTENT_NONE\020\000\022\022\n"
+    "\016MOVE_INTENT_TO\020\001\022\024\n\020MOVE_INTENT_STOP\020\002b"
+    "\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fmove_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fmove_5fpacket_2eproto = {
     false,
     false,
-    628,
+    607,
     descriptor_table_protodef_GamePacket_2fmove_5fpacket_2eproto,
     "GamePacket/move_packet.proto",
     &descriptor_table_GamePacket_2fmove_5fpacket_2eproto_once,
@@ -1160,16 +1154,16 @@ ActorStateInfo::GetClassData() const {
   return ActorStateInfo_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 6, 0, 0, 2>
+const ::_pbi::TcParseTable<2, 4, 0, 0, 2>
 ActorStateInfo::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_._has_bits_),
     0, // no _extensions_
-    6, 56,  // max_field_number, fast_idx_mask
+    4, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967232,  // skipmap
+    4294967280,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    6,  // num_field_entries
+    4,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     ActorStateInfo_class_data_.base(),
@@ -1179,47 +1173,33 @@ ActorStateInfo::_table_ = {
     ::_pbi::TcParser::GetTable<::GamePacket::ActorStateInfo>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
+    // uint32 flags = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ActorStateInfo, _impl_.flags_), 3>(),
+     {32, 3, 0,
+      PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.flags_)}},
     // int64 object_id = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(ActorStateInfo, _impl_.object_id_), 0>(),
      {8, 0, 0,
       PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.object_id_)}},
-    // float pos_x = 2;
+    // fixed32 qpos_xz = 2;
     {::_pbi::TcParser::FastF32S1,
      {21, 1, 0,
-      PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.pos_x_)}},
-    // float pos_y = 3;
+      PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.qpos_xz_)}},
+    // fixed32 qpos_y_yaw = 3;
     {::_pbi::TcParser::FastF32S1,
      {29, 2, 0,
-      PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.pos_y_)}},
-    // float pos_z = 4;
-    {::_pbi::TcParser::FastF32S1,
-     {37, 3, 0,
-      PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.pos_z_)}},
-    // float yaw = 5;
-    {::_pbi::TcParser::FastF32S1,
-     {45, 4, 0,
-      PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.yaw_)}},
-    // uint32 flags = 6;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ActorStateInfo, _impl_.flags_), 5>(),
-     {48, 5, 0,
-      PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.flags_)}},
-    {::_pbi::TcParser::MiniParse, {}},
+      PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.qpos_y_yaw_)}},
   }}, {{
     65535, 65535
   }}, {{
     // int64 object_id = 1;
     {PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.object_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
-    // float pos_x = 2;
-    {PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.pos_x_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float pos_y = 3;
-    {PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.pos_y_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float pos_z = 4;
-    {PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.pos_z_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // float yaw = 5;
-    {PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.yaw_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // uint32 flags = 6;
-    {PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.flags_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kUInt32)},
+    // fixed32 qpos_xz = 2;
+    {PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.qpos_xz_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kFixed32)},
+    // fixed32 qpos_y_yaw = 3;
+    {PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.qpos_y_yaw_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kFixed32)},
+    // uint32 flags = 4;
+    {PROTOBUF_FIELD_OFFSET(ActorStateInfo, _impl_.flags_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kUInt32)},
   }},
   // no aux_entries
   {{
@@ -1233,7 +1213,7 @@ PROTOBUF_NOINLINE void ActorStateInfo::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
     ::memset(&_impl_.object_id_, 0, static_cast<::size_t>(
         reinterpret_cast<char*>(&_impl_.flags_) -
         reinterpret_cast<char*>(&_impl_.object_id_)) + sizeof(_impl_.flags_));
@@ -1270,48 +1250,30 @@ PROTOBUF_NOINLINE void ActorStateInfo::Clear() {
     }
   }
 
-  // float pos_x = 2;
+  // fixed32 qpos_xz = 2;
   if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_pos_x()) != 0) {
+    if (this_._internal_qpos_xz() != 0) {
       target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          2, this_._internal_pos_x(), target);
+      target = ::_pbi::WireFormatLite::WriteFixed32ToArray(
+          2, this_._internal_qpos_xz(), target);
     }
   }
 
-  // float pos_y = 3;
+  // fixed32 qpos_y_yaw = 3;
   if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_pos_y()) != 0) {
+    if (this_._internal_qpos_y_yaw() != 0) {
       target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          3, this_._internal_pos_y(), target);
+      target = ::_pbi::WireFormatLite::WriteFixed32ToArray(
+          3, this_._internal_qpos_y_yaw(), target);
     }
   }
 
-  // float pos_z = 4;
+  // uint32 flags = 4;
   if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_pos_z()) != 0) {
-      target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          4, this_._internal_pos_z(), target);
-    }
-  }
-
-  // float yaw = 5;
-  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_yaw()) != 0) {
-      target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          5, this_._internal_yaw(), target);
-    }
-  }
-
-  // uint32 flags = 6;
-  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
     if (this_._internal_flags() != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
-          6, this_._internal_flags(), target);
+          4, this_._internal_flags(), target);
     }
   }
 
@@ -1340,7 +1302,7 @@ PROTOBUF_NOINLINE void ActorStateInfo::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
     // int64 object_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (this_._internal_object_id() != 0) {
@@ -1348,32 +1310,20 @@ PROTOBUF_NOINLINE void ActorStateInfo::Clear() {
             this_._internal_object_id());
       }
     }
-    // float pos_x = 2;
+    // fixed32 qpos_xz = 2;
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_pos_x()) != 0) {
+      if (this_._internal_qpos_xz() != 0) {
         total_size += 5;
       }
     }
-    // float pos_y = 3;
+    // fixed32 qpos_y_yaw = 3;
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_pos_y()) != 0) {
+      if (this_._internal_qpos_y_yaw() != 0) {
         total_size += 5;
       }
     }
-    // float pos_z = 4;
+    // uint32 flags = 4;
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_pos_z()) != 0) {
-        total_size += 5;
-      }
-    }
-    // float yaw = 5;
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_yaw()) != 0) {
-        total_size += 5;
-      }
-    }
-    // uint32 flags = 6;
-    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
       if (this_._internal_flags() != 0) {
         total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
             this_._internal_flags());
@@ -1398,33 +1348,23 @@ void ActorStateInfo::MergeImpl(::google::protobuf::MessageLite& to_msg,
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (from._internal_object_id() != 0) {
         _this->_impl_.object_id_ = from._impl_.object_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_pos_x()) != 0) {
-        _this->_impl_.pos_x_ = from._impl_.pos_x_;
+      if (from._internal_qpos_xz() != 0) {
+        _this->_impl_.qpos_xz_ = from._impl_.qpos_xz_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_pos_y()) != 0) {
-        _this->_impl_.pos_y_ = from._impl_.pos_y_;
+      if (from._internal_qpos_y_yaw() != 0) {
+        _this->_impl_.qpos_y_yaw_ = from._impl_.qpos_y_yaw_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_pos_z()) != 0) {
-        _this->_impl_.pos_z_ = from._impl_.pos_z_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_yaw()) != 0) {
-        _this->_impl_.yaw_ = from._impl_.yaw_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
       if (from._internal_flags() != 0) {
         _this->_impl_.flags_ = from._impl_.flags_;
       }

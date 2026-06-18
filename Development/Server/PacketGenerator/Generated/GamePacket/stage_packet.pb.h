@@ -889,6 +889,10 @@ class StageLoadCompleteRes final : public ::google::protobuf::Message
     kMyPosYFieldNumber = 6,
     kMyYawFieldNumber = 7,
     kMyPosZFieldNumber = 8,
+    kWorldMinXFieldNumber = 9,
+    kWorldMinZFieldNumber = 10,
+    kWorldMaxXFieldNumber = 11,
+    kWorldMaxZFieldNumber = 12,
   };
   // string error_msg = 2;
   void clear_error_msg() ;
@@ -975,11 +979,51 @@ class StageLoadCompleteRes final : public ::google::protobuf::Message
   void _internal_set_my_pos_z(float value);
 
   public:
+  // float world_min_x = 9;
+  void clear_world_min_x() ;
+  float world_min_x() const;
+  void set_world_min_x(float value);
+
+  private:
+  float _internal_world_min_x() const;
+  void _internal_set_world_min_x(float value);
+
+  public:
+  // float world_min_z = 10;
+  void clear_world_min_z() ;
+  float world_min_z() const;
+  void set_world_min_z(float value);
+
+  private:
+  float _internal_world_min_z() const;
+  void _internal_set_world_min_z(float value);
+
+  public:
+  // float world_max_x = 11;
+  void clear_world_max_x() ;
+  float world_max_x() const;
+  void set_world_max_x(float value);
+
+  private:
+  float _internal_world_max_x() const;
+  void _internal_set_world_max_x(float value);
+
+  public:
+  // float world_max_z = 12;
+  void clear_world_max_z() ;
+  float world_max_z() const;
+  void set_world_max_z(float value);
+
+  private:
+  float _internal_world_max_z() const;
+  void _internal_set_world_max_z(float value);
+
+  public:
   // @@protoc_insertion_point(class_scope:GamePacket.StageLoadCompleteRes)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 8,
+  static const ::google::protobuf::internal::TcParseTable<4, 12,
                                    0, 57,
                                    2>
       _table_;
@@ -1009,6 +1053,10 @@ class StageLoadCompleteRes final : public ::google::protobuf::Message
     float my_pos_y_;
     float my_yaw_;
     float my_pos_z_;
+    float world_min_x_;
+    float world_min_z_;
+    float world_max_x_;
+    float world_max_z_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -2285,6 +2333,106 @@ inline float StageLoadCompleteRes::_internal_my_pos_z() const {
 inline void StageLoadCompleteRes::_internal_set_my_pos_z(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.my_pos_z_ = value;
+}
+
+// float world_min_x = 9;
+inline void StageLoadCompleteRes::clear_world_min_x() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.world_min_x_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000100U);
+}
+inline float StageLoadCompleteRes::world_min_x() const {
+  // @@protoc_insertion_point(field_get:GamePacket.StageLoadCompleteRes.world_min_x)
+  return _internal_world_min_x();
+}
+inline void StageLoadCompleteRes::set_world_min_x(float value) {
+  _internal_set_world_min_x(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000100U);
+  // @@protoc_insertion_point(field_set:GamePacket.StageLoadCompleteRes.world_min_x)
+}
+inline float StageLoadCompleteRes::_internal_world_min_x() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.world_min_x_;
+}
+inline void StageLoadCompleteRes::_internal_set_world_min_x(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.world_min_x_ = value;
+}
+
+// float world_min_z = 10;
+inline void StageLoadCompleteRes::clear_world_min_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.world_min_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000200U);
+}
+inline float StageLoadCompleteRes::world_min_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.StageLoadCompleteRes.world_min_z)
+  return _internal_world_min_z();
+}
+inline void StageLoadCompleteRes::set_world_min_z(float value) {
+  _internal_set_world_min_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000200U);
+  // @@protoc_insertion_point(field_set:GamePacket.StageLoadCompleteRes.world_min_z)
+}
+inline float StageLoadCompleteRes::_internal_world_min_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.world_min_z_;
+}
+inline void StageLoadCompleteRes::_internal_set_world_min_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.world_min_z_ = value;
+}
+
+// float world_max_x = 11;
+inline void StageLoadCompleteRes::clear_world_max_x() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.world_max_x_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000400U);
+}
+inline float StageLoadCompleteRes::world_max_x() const {
+  // @@protoc_insertion_point(field_get:GamePacket.StageLoadCompleteRes.world_max_x)
+  return _internal_world_max_x();
+}
+inline void StageLoadCompleteRes::set_world_max_x(float value) {
+  _internal_set_world_max_x(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000400U);
+  // @@protoc_insertion_point(field_set:GamePacket.StageLoadCompleteRes.world_max_x)
+}
+inline float StageLoadCompleteRes::_internal_world_max_x() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.world_max_x_;
+}
+inline void StageLoadCompleteRes::_internal_set_world_max_x(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.world_max_x_ = value;
+}
+
+// float world_max_z = 12;
+inline void StageLoadCompleteRes::clear_world_max_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.world_max_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000800U);
+}
+inline float StageLoadCompleteRes::world_max_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.StageLoadCompleteRes.world_max_z)
+  return _internal_world_max_z();
+}
+inline void StageLoadCompleteRes::set_world_max_z(float value) {
+  _internal_set_world_max_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000800U);
+  // @@protoc_insertion_point(field_set:GamePacket.StageLoadCompleteRes.world_max_z)
+}
+inline float StageLoadCompleteRes::_internal_world_max_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.world_max_z_;
+}
+inline void StageLoadCompleteRes::_internal_set_world_max_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.world_max_z_ = value;
 }
 
 // -------------------------------------------------------------------

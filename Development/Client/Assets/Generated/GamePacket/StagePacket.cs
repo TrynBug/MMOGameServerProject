@@ -29,25 +29,27 @@ namespace GamePacket {
             "EhUKDXBvc2l0aW9uX3R5cGUYAiABKAUSHQoVdGFyZ2V0X2dhbWVfc2VydmVy",
             "X2lkGAMgASgFIlUKDFN0YWdlTW92ZVJlcxITCgtyZXN1bHRfY29kZRgBIAEo",
             "BRIRCgllcnJvcl9tc2cYAiABKAkSHQoVdGFyZ2V0X3N0YWdlX2RhdGFfa2V5",
-            "GAMgASgFIhYKFFN0YWdlTG9hZENvbXBsZXRlUmVxIq4BChRTdGFnZUxvYWRD",
+            "GAMgASgFIhYKFFN0YWdlTG9hZENvbXBsZXRlUmVxIoICChRTdGFnZUxvYWRD",
             "b21wbGV0ZVJlcxITCgtyZXN1bHRfY29kZRgBIAEoBRIRCgllcnJvcl9tc2cY",
             "AiABKAkSEAoIc3RhZ2VfaWQYAyABKAMSFgoOc3RhZ2VfZGF0YV9rZXkYBCAB",
             "KAUSEAoIbXlfcG9zX3gYBSABKAISEAoIbXlfcG9zX3kYBiABKAISDgoGbXlf",
-            "eWF3GAcgASgCEhAKCG15X3Bvc196GAggASgCIjYKDlN0YWdlTm90aWNlTnRm",
-            "Eg8KB21lc3NhZ2UYASABKAkSEwoLZHVyYXRpb25fbXMYAiABKAUiUwoRRXZl",
-            "bnRBcmVhRW50ZXJSZXESEQoJZXZlbnRfa2V5GAEgASgFEg0KBXBvc194GAIg",
-            "ASgCEg0KBXBvc195GAMgASgCEg0KBXBvc196GAQgASgCIlIKEEV2ZW50QXJl",
-            "YUV4aXRSZXESEQoJZXZlbnRfa2V5GAEgASgFEg0KBXBvc194GAIgASgCEg0K",
-            "BXBvc195GAMgASgCEg0KBXBvc196GAQgASgCIlIKEU9iamVjdEludGVyYWN0",
-            "UmVxEhAKCHByb3Bfa2V5GAEgASgFEg0KBXBvc194GAIgASgCEg0KBXBvc195",
-            "GAMgASgCEg0KBXBvc196GAQgASgCYgZwcm90bzM="));
+            "eWF3GAcgASgCEhAKCG15X3Bvc196GAggASgCEhMKC3dvcmxkX21pbl94GAkg",
+            "ASgCEhMKC3dvcmxkX21pbl96GAogASgCEhMKC3dvcmxkX21heF94GAsgASgC",
+            "EhMKC3dvcmxkX21heF96GAwgASgCIjYKDlN0YWdlTm90aWNlTnRmEg8KB21l",
+            "c3NhZ2UYASABKAkSEwoLZHVyYXRpb25fbXMYAiABKAUiUwoRRXZlbnRBcmVh",
+            "RW50ZXJSZXESEQoJZXZlbnRfa2V5GAEgASgFEg0KBXBvc194GAIgASgCEg0K",
+            "BXBvc195GAMgASgCEg0KBXBvc196GAQgASgCIlIKEEV2ZW50QXJlYUV4aXRS",
+            "ZXESEQoJZXZlbnRfa2V5GAEgASgFEg0KBXBvc194GAIgASgCEg0KBXBvc195",
+            "GAMgASgCEg0KBXBvc196GAQgASgCIlIKEU9iamVjdEludGVyYWN0UmVxEhAK",
+            "CHByb3Bfa2V5GAEgASgFEg0KBXBvc194GAIgASgCEg0KBXBvc195GAMgASgC",
+            "Eg0KBXBvc196GAQgASgCYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageMoveReq), global::GamePacket.StageMoveReq.Parser, new[]{ "TargetStageDataKey", "PositionType", "TargetGameServerId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageMoveRes), global::GamePacket.StageMoveRes.Parser, new[]{ "ResultCode", "ErrorMsg", "TargetStageDataKey" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageLoadCompleteReq), global::GamePacket.StageLoadCompleteReq.Parser, null, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageLoadCompleteRes), global::GamePacket.StageLoadCompleteRes.Parser, new[]{ "ResultCode", "ErrorMsg", "StageId", "StageDataKey", "MyPosX", "MyPosY", "MyYaw", "MyPosZ" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageLoadCompleteRes), global::GamePacket.StageLoadCompleteRes.Parser, new[]{ "ResultCode", "ErrorMsg", "StageId", "StageDataKey", "MyPosX", "MyPosY", "MyYaw", "MyPosZ", "WorldMinX", "WorldMinZ", "WorldMaxX", "WorldMaxZ" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageNoticeNtf), global::GamePacket.StageNoticeNtf.Parser, new[]{ "Message", "DurationMs" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.EventAreaEnterReq), global::GamePacket.EventAreaEnterReq.Parser, new[]{ "EventKey", "PosX", "PosY", "PosZ" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.EventAreaExitReq), global::GamePacket.EventAreaExitReq.Parser, new[]{ "EventKey", "PosX", "PosY", "PosZ" }, null, null, null, null),
@@ -847,6 +849,10 @@ namespace GamePacket {
       myPosY_ = other.myPosY_;
       myYaw_ = other.myYaw_;
       myPosZ_ = other.myPosZ_;
+      worldMinX_ = other.worldMinX_;
+      worldMinZ_ = other.worldMinZ_;
+      worldMaxX_ = other.worldMaxX_;
+      worldMaxZ_ = other.worldMaxZ_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -976,6 +982,58 @@ namespace GamePacket {
       }
     }
 
+    /// <summary>Field number for the "world_min_x" field.</summary>
+    public const int WorldMinXFieldNumber = 9;
+    private float worldMinX_;
+    /// <summary>
+    /// 이 Stage 의 월드 X/Z 경계(navmesh 메타). 클라가 SnapshotNtf.ActorStateInfo 의
+    /// 양자화 위치를 해제할 때 X/Z 디코드 범위로 쓴다(서버 인코드와 동일 범위 → 클립 없음, 정밀도 최적).
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float WorldMinX {
+      get { return worldMinX_; }
+      set {
+        worldMinX_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "world_min_z" field.</summary>
+    public const int WorldMinZFieldNumber = 10;
+    private float worldMinZ_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float WorldMinZ {
+      get { return worldMinZ_; }
+      set {
+        worldMinZ_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "world_max_x" field.</summary>
+    public const int WorldMaxXFieldNumber = 11;
+    private float worldMaxX_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float WorldMaxX {
+      get { return worldMaxX_; }
+      set {
+        worldMaxX_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "world_max_z" field.</summary>
+    public const int WorldMaxZFieldNumber = 12;
+    private float worldMaxZ_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float WorldMaxZ {
+      get { return worldMaxZ_; }
+      set {
+        worldMaxZ_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -999,6 +1057,10 @@ namespace GamePacket {
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosY, other.MyPosY)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyYaw, other.MyYaw)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MyPosZ, other.MyPosZ)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(WorldMinX, other.WorldMinX)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(WorldMinZ, other.WorldMinZ)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(WorldMaxX, other.WorldMaxX)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(WorldMaxZ, other.WorldMaxZ)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1014,6 +1076,10 @@ namespace GamePacket {
       if (MyPosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosY);
       if (MyYaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyYaw);
       if (MyPosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MyPosZ);
+      if (WorldMinX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(WorldMinX);
+      if (WorldMinZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(WorldMinZ);
+      if (WorldMaxX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(WorldMaxX);
+      if (WorldMaxZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(WorldMaxZ);
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1064,6 +1130,22 @@ namespace GamePacket {
         output.WriteRawTag(69);
         output.WriteFloat(MyPosZ);
       }
+      if (WorldMinX != 0F) {
+        output.WriteRawTag(77);
+        output.WriteFloat(WorldMinX);
+      }
+      if (WorldMinZ != 0F) {
+        output.WriteRawTag(85);
+        output.WriteFloat(WorldMinZ);
+      }
+      if (WorldMaxX != 0F) {
+        output.WriteRawTag(93);
+        output.WriteFloat(WorldMaxX);
+      }
+      if (WorldMaxZ != 0F) {
+        output.WriteRawTag(101);
+        output.WriteFloat(WorldMaxZ);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1106,6 +1188,22 @@ namespace GamePacket {
         output.WriteRawTag(69);
         output.WriteFloat(MyPosZ);
       }
+      if (WorldMinX != 0F) {
+        output.WriteRawTag(77);
+        output.WriteFloat(WorldMinX);
+      }
+      if (WorldMinZ != 0F) {
+        output.WriteRawTag(85);
+        output.WriteFloat(WorldMinZ);
+      }
+      if (WorldMaxX != 0F) {
+        output.WriteRawTag(93);
+        output.WriteFloat(WorldMaxX);
+      }
+      if (WorldMaxZ != 0F) {
+        output.WriteRawTag(101);
+        output.WriteFloat(WorldMaxZ);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1138,6 +1236,18 @@ namespace GamePacket {
         size += 1 + 4;
       }
       if (MyPosZ != 0F) {
+        size += 1 + 4;
+      }
+      if (WorldMinX != 0F) {
+        size += 1 + 4;
+      }
+      if (WorldMinZ != 0F) {
+        size += 1 + 4;
+      }
+      if (WorldMaxX != 0F) {
+        size += 1 + 4;
+      }
+      if (WorldMaxZ != 0F) {
         size += 1 + 4;
       }
       if (_unknownFields != null) {
@@ -1175,6 +1285,18 @@ namespace GamePacket {
       }
       if (other.MyPosZ != 0F) {
         MyPosZ = other.MyPosZ;
+      }
+      if (other.WorldMinX != 0F) {
+        WorldMinX = other.WorldMinX;
+      }
+      if (other.WorldMinZ != 0F) {
+        WorldMinZ = other.WorldMinZ;
+      }
+      if (other.WorldMaxX != 0F) {
+        WorldMaxX = other.WorldMaxX;
+      }
+      if (other.WorldMaxZ != 0F) {
+        WorldMaxZ = other.WorldMaxZ;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1227,6 +1349,22 @@ namespace GamePacket {
             MyPosZ = input.ReadFloat();
             break;
           }
+          case 77: {
+            WorldMinX = input.ReadFloat();
+            break;
+          }
+          case 85: {
+            WorldMinZ = input.ReadFloat();
+            break;
+          }
+          case 93: {
+            WorldMaxX = input.ReadFloat();
+            break;
+          }
+          case 101: {
+            WorldMaxZ = input.ReadFloat();
+            break;
+          }
         }
       }
     #endif
@@ -1276,6 +1414,22 @@ namespace GamePacket {
           }
           case 69: {
             MyPosZ = input.ReadFloat();
+            break;
+          }
+          case 77: {
+            WorldMinX = input.ReadFloat();
+            break;
+          }
+          case 85: {
+            WorldMinZ = input.ReadFloat();
+            break;
+          }
+          case 93: {
+            WorldMaxX = input.ReadFloat();
+            break;
+          }
+          case 101: {
+            WorldMaxZ = input.ReadFloat();
             break;
           }
         }
