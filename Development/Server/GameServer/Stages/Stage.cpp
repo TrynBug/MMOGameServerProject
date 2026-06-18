@@ -449,8 +449,14 @@ void Stage::OnUpdate(int64 deltaMs)
     // 6. 진행 중인 스킬 효과(AreaEffect) tick + 만료 처리
     updateSkillEffects(deltaMs);
 
+    // 6.4 NetClock 시각 동기 (저빈도). SnapshotNtf 와 독립적으로 클라 재생 시계를 앵커링.
+    buildAndSendTimeSync();
+
     // 6.5 AOI 스냅샷 스트리밍 (이동 복제). 이번 tick 시뮬레이션 결과(위치)를 주변 유저에게 송신.
     buildAndSendSnapshots();
+
+    // 6.6 몬스터 이동 복제 (경로 의도). k_useMonsterPathReplication 일 때만 동작(아니면 즉시 return).
+    buildAndSendMonsterMoves();
 
 #ifdef _DEBUG
     // 6.6 [디버그 UI] 구독 중인 유저에게 디버그 패킷 주기 push (개발용).
@@ -822,6 +828,7 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     spawnsForMe.reserve(16);
     std::vector<GamePacket::MonsterSpawnInfo> monsterSpawnsForMe;
     monsterSpawnsForMe.reserve(16);
+    std::vector<const Monster*> movingMonstersForMe;   // 경로 복제 모드: 진입 즉시 재정렬 Move 대상.
 
     // 다른 캐릭터에게 전송할 용도의 "내 spawn 1개".
     std::vector<GamePacket::CharacterSpawnInfo> singleSpawn = { myInfo };
@@ -845,7 +852,10 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
             // 주변 몬스터도 나에게 spawn 통보. (몬스터는 관찰자가 아니므로 받기만 한다.)
             for (const auto& [monsterObjId, pMonsterObj] : pSector->GetMonsters())
             {
-                monsterSpawnsForMe.push_back(makeMonsterSpawnInfo(*static_cast<Monster*>(pMonsterObj)));
+                const Monster* pMon = static_cast<const Monster*>(pMonsterObj);
+                monsterSpawnsForMe.push_back(makeMonsterSpawnInfo(*pMon));
+                if (k_useMonsterPathReplication && pMon->IsMoving())   // 진입 stall 제거용 재정렬 Move 대상.
+                    movingMonstersForMe.push_back(pMon);
             }
         });
 
@@ -857,7 +867,17 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
         spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), spCharacter->GetYaw());
 
     server.GetPacketSender().SendObjectVisibilityNtf(userId, spawnsForMe, {}, monsterSpawnsForMe);
-    
+
+    // 경로 복제 모드: 입장 시 보이는 이동 중 몬스터들에게 현재 이동상태(재정렬 Move)를 1회 송신(진입 stall 제거, §3.4).
+    if (!movingMonstersForMe.empty())
+    {
+        GamePacket::MonsterMoveBatchNtf entryMoveNtf;
+        entryMoveNtf.set_server_tick_seq(m_serverTickSeq);
+        for (const Monster* pMon : movingMonstersForMe)
+            appendMonsterMoveAnchor(entryMoveNtf, *pMon);
+        server.GetPacketSender().SendMonsterMoveBatchNtf(userId, entryMoveNtf);
+    }
+
 
     // 스폰 완료 후 서브클래스 훅 (기본 no-op). 캐릭터가 Stage에 등록되고 통보까지 끝난 뒤 호출.
     // 예: 입장 버프 부여, 이벤트 트리거.
@@ -1462,6 +1482,25 @@ void Stage::updateCharacters(int64 deltaMs)
 // 여기서는 위치/yaw/flags(transform)만 운반한다.
 // 클라: 원격 액터는 스냅샷 사이를 보간, 본인 캐릭터(object_id 일치)는 화해에 사용한다.
 // 가변 송신율: 변화 있는 객체만 매 tick, 유휴 객체는 heartbeat 주기로 포함. 헤더는 매 tick 항상 송신.
+void Stage::buildAndSendTimeSync()
+{
+    // 저빈도 주기에만 송신. NetClock 은 로컬시간으로 자체 전진하므로 2Hz 앵커로 충분하다.
+    if ((m_serverTickSeq % k_timeSyncPeriodTicks) != 0 || m_users.empty())
+        return;
+
+    // stage 내 소속이 확정된 유저만 수집(buildAndSendSnapshots 와 동일한 소속 가드).
+    m_timeSyncUserScratch.clear();
+    for (auto& [userId, spUser] : m_users)
+    {
+        Character* pMe = spUser->GetCurrentCharacter().get();
+        if (pMe && pMe->GetStage() == this)
+            m_timeSyncUserScratch.push_back(userId);
+    }
+
+    if (!m_timeSyncUserScratch.empty())
+        GameServer::Instance().GetPacketSender().SendTimeSyncNtf(m_timeSyncUserScratch, m_serverTickSeq);
+}
+
 void Stage::buildAndSendSnapshots()
 {
     // pass 1: 오브젝트별로 이번 tick 송신 여부(due)를 한 번 계산한다(여러 관찰자에게 일관).
@@ -1507,21 +1546,25 @@ void Stage::buildAndSendSnapshots()
                     if (pChar->IsDead())   flags |= 0x2u;
                     pState->set_flags(flags);
                 }
-                for (const auto& [objId, pObj] : pSector->GetMonsters())
+                // 경로 의도 복제 모드면 몬스터는 SnapshotNtf 가 아니라 MonsterMoveBatchNtf 로 보낸다.
+                if (!k_useMonsterPathReplication)
                 {
-                    if (!pObj->IsSnapshotDue())
-                        continue;   // 이번 tick 변화 없음(유휴) → 스킵.
-                    const Monster* pMon = static_cast<const Monster*>(pObj);
-                    GamePacket::ActorStateInfo* pState = ntf.add_states();
-                    pState->set_object_id(pMon->GetObjectId());
-                    pState->set_pos_x(pMon->GetPosX());
-                    pState->set_pos_y(pMon->GetPosY());
-                    pState->set_pos_z(pMon->GetPosZ());
-                    pState->set_yaw(pMon->GetYaw());
-                    uint32 flags = 0;
-                    if (pMon->IsMoving()) flags |= 0x1u;
-                    if (pMon->IsDead())   flags |= 0x2u;
-                    pState->set_flags(flags);
+                    for (const auto& [objId, pObj] : pSector->GetMonsters())
+                    {
+                        if (!pObj->IsSnapshotDue())
+                            continue;   // 이번 tick 변화 없음(유휴) → 스킵.
+                        const Monster* pMon = static_cast<const Monster*>(pObj);
+                        GamePacket::ActorStateInfo* pState = ntf.add_states();
+                        pState->set_object_id(pMon->GetObjectId());
+                        pState->set_pos_x(pMon->GetPosX());
+                        pState->set_pos_y(pMon->GetPosY());
+                        pState->set_pos_z(pMon->GetPosZ());
+                        pState->set_yaw(pMon->GetYaw());
+                        uint32 flags = 0;
+                        if (pMon->IsMoving()) flags |= 0x1u;
+                        if (pMon->IsDead())   flags |= 0x2u;
+                        pState->set_flags(flags);
+                    }
                 }
             });
 
@@ -1530,6 +1573,93 @@ void Stage::buildAndSendSnapshots()
         if (ntf.states_size() > 0)
             GameServer::Instance().GetPacketSender().SendSnapshotNtf(userId, ntf);
     }
+}
+
+void Stage::buildAndSendMonsterMoves()
+{
+    if (!k_useMonsterPathReplication)
+        return;
+
+    // pass1: 몬스터별 이동복제 이벤트를 판정한다(tick당 1회, 여러 관찰자에게 일관).
+    for (auto& [objId, spObj] : m_monsterObjects)
+        static_cast<Monster*>(spObj.get())->EvaluateMoveRepl(m_serverTickSeq, k_monsterMoveKeyframeTicks);
+
+    // pass2: 각 유저 AOI 안의 "이번 tick 변화있는" 몬스터 entry 만 모아 MonsterMoveBatchNtf 1개로 unicast.
+    for (auto& [userId, spUser] : m_users)
+    {
+        Character* pMe = spUser->GetCurrentCharacter().get();
+        if (!pMe || pMe->GetStage() != this)
+            continue;
+
+        const int32 centerX = pMe->GetCurSectorX();
+        const int32 centerZ = pMe->GetCurSectorZ();
+        if (centerX < 0 || centerZ < 0)
+            continue;
+
+        GamePacket::MonsterMoveBatchNtf& ntf = m_monsterMoveScratch;
+        ntf.Clear();
+        ntf.set_server_tick_seq(m_serverTickSeq);
+
+        ForEachAdjacentSector(centerX, centerZ, k_aoiRange,
+            [&](Sector* pSector)
+            {
+                for (const auto& [objId, pObj] : pSector->GetMonsters())
+                {
+                    const Monster* pMon = static_cast<const Monster*>(pObj);
+                    switch (pMon->GetMoveReplThisTick())
+                    {
+                    case Monster::EMoveRepl::Move:
+                    {
+                        GamePacket::MonsterMoveEntry* e = ntf.add_moves();
+                        e->set_object_id(pMon->GetObjectId());
+                        e->set_start_tick(pMon->GetMoveReplStartTick());
+                        e->set_move_speed(static_cast<float>(pMon->GetStatTotal(EStatGroup::MoveSpd)));
+                        // waypoints[0] = 현재 권위 위치(키프레임 재정렬), 이후 = 남은 경로.
+                        e->add_waypoints(pMon->GetPosX());
+                        e->add_waypoints(pMon->GetPosY());
+                        e->add_waypoints(pMon->GetPosZ());
+                        for (float f : pMon->GetRemainingWaypoints())
+                            e->add_waypoints(f);
+                        break;
+                    }
+                    case Monster::EMoveRepl::Stop:
+                    {
+                        GamePacket::MonsterStopEntry* e = ntf.add_stops();
+                        e->set_object_id(pMon->GetObjectId());
+                        e->set_pos_x(pMon->GetPosX());
+                        e->set_pos_y(pMon->GetPosY());
+                        e->set_pos_z(pMon->GetPosZ());
+                        e->set_yaw(pMon->GetYaw());
+                        e->set_teleport(pMon->GetMoveReplTeleport());
+                        break;
+                    }
+                    default:
+                        break;
+                    }
+                }
+            });
+
+        if (ntf.moves_size() > 0 || ntf.stops_size() > 0)
+            GameServer::Instance().GetPacketSender().SendMonsterMoveBatchNtf(userId, ntf);
+    }
+
+    // pass3: 이번 tick pending 판정을 클리어.
+    for (auto& [objId, spObj] : m_monsterObjects)
+        static_cast<Monster*>(spObj.get())->ClearMoveReplThisTick();
+}
+
+void Stage::appendMonsterMoveAnchor(GamePacket::MonsterMoveBatchNtf& ntf, const Monster& monster)
+{
+    GamePacket::MonsterMoveEntry* e = ntf.add_moves();
+    e->set_object_id(monster.GetObjectId());
+    e->set_start_tick(m_serverTickSeq);   // 진입 시점 재정렬 anchor (클라는 ServerNow 로 즉시 재생).
+    e->set_move_speed(static_cast<float>(monster.GetStatTotal(EStatGroup::MoveSpd)));
+    // waypoints[0] = 현재 권위 위치, 이후 = 남은 경로.
+    e->add_waypoints(monster.GetPosX());
+    e->add_waypoints(monster.GetPosY());
+    e->add_waypoints(monster.GetPosZ());
+    for (float f : monster.GetRemainingWaypoints())
+        e->add_waypoints(f);
 }
 
 #ifdef _DEBUG
@@ -1630,6 +1760,7 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
     newlyVisibleSpawnsForMe.reserve(8);
     std::vector<GamePacket::MonsterSpawnInfo> newlyVisibleMonstersForMe;
     newlyVisibleMonstersForMe.reserve(8);
+    std::vector<const Monster*> newlyVisibleMovingMonsters;   // 경로 복제 모드: 진입 즉시 재정렬 Move 대상.
     std::vector<GamePacket::CharacterSpawnInfo> singleSpawnOfMe = { myInfo };
 
     ForEachAdjacentSector(newSectorX, newSectorZ, k_aoiRange,
@@ -1656,13 +1787,26 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
             // 새로 보이는 sector의 몬스터들도 나에게 spawn. (몬스터는 받기만 한다.)
             for (const auto& [monsterObjId, pMonsterObj] : pSector->GetMonsters())
             {
-                newlyVisibleMonstersForMe.push_back(makeMonsterSpawnInfo(*static_cast<Monster*>(pMonsterObj)));
+                const Monster* pMon = static_cast<const Monster*>(pMonsterObj);
+                newlyVisibleMonstersForMe.push_back(makeMonsterSpawnInfo(*pMon));
+                if (k_useMonsterPathReplication && pMon->IsMoving())   // 진입 stall 제거용 재정렬 Move 대상.
+                    newlyVisibleMovingMonsters.push_back(pMon);
             }
         });
 
     if (!newlyVisibleSpawnsForMe.empty() || !newlyVisibleMonstersForMe.empty())
     {
         server.GetPacketSender().SendObjectVisibilityNtf(myUserId, newlyVisibleSpawnsForMe, {}, newlyVisibleMonstersForMe);
+    }
+
+    // 경로 복제 모드: 새로 보이는 이동 중 몬스터들에게 spawn 직후 현재 이동상태(재정렬 Move)를 1회 송신(§3.4).
+    if (!newlyVisibleMovingMonsters.empty())
+    {
+        GamePacket::MonsterMoveBatchNtf entryMoveNtf;
+        entryMoveNtf.set_server_tick_seq(m_serverTickSeq);
+        for (const Monster* pMon : newlyVisibleMovingMonsters)
+            appendMonsterMoveAnchor(entryMoveNtf, *pMon);
+        server.GetPacketSender().SendMonsterMoveBatchNtf(myUserId, entryMoveNtf);
     }
 
     // ── oldAOI 순회 ──
@@ -1723,8 +1867,17 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
     };
 
     // ── newAOI − oldAOI: 새로 이 몬스터를 보게 된 유저들에게 spawn ──
-    // (spawn 직후 위치는 다음 tick 의 SnapshotNtf 가 갱신한다. 이동 중이어도 곧 따라온다.)
+    // 스냅샷 모드: spawn 직후 위치는 다음 tick SnapshotNtf 가 갱신.
+    // 경로 복제 모드: 이동 중이면 spawn 직후 현재 이동상태(재정렬 Move)를 1회 주어 진입 stall 제거(§3.4).
     const std::vector<GamePacket::MonsterSpawnInfo> singleMonster = { makeMonsterSpawnInfo(monster) };
+
+    GamePacket::MonsterMoveBatchNtf entryMoveNtf;
+    const bool sendEntryMove = k_useMonsterPathReplication && monster.IsMoving();
+    if (sendEntryMove)
+    {
+        entryMoveNtf.set_server_tick_seq(m_serverTickSeq);
+        appendMonsterMoveAnchor(entryMoveNtf, monster);
+    }
 
     ForEachAdjacentSector(newSectorX, newSectorZ, k_aoiRange,
         [&](Sector* pSector)
@@ -1738,6 +1891,8 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
                 Character* pOtherChar = static_cast<Character*>(pOtherObj);
                 const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
                 server.GetPacketSender().SendObjectVisibilityNtf(otherUserId, {}, {}, singleMonster);
+                if (sendEntryMove)   // spawn 직후(TCP 순서 보장) 현재 이동상태 전송.
+                    server.GetPacketSender().SendMonsterMoveBatchNtf(otherUserId, entryMoveNtf);
             }
         });
 

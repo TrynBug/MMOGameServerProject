@@ -143,6 +143,16 @@ bool WaypointMover::Update(StageObject& obj, int64 deltaMs, float moveSpeed)
     return false;
 }
 
+std::span<const float> WaypointMover::GetRemainingWaypoints() const
+{
+    if (!m_isMoving)
+        return {};
+    const int32 start = m_curWaypointIdx * 3;
+    if (start < 0 || start >= static_cast<int32>(m_waypoints.size()))
+        return {};
+    return std::span<const float>(m_waypoints.data() + start, m_waypoints.size() - static_cast<size_t>(start));
+}
+
 void WaypointMover::faceWaypoint(StageObject& obj)
 {
     const float wx = m_waypoints[m_curWaypointIdx * 3 + 0];

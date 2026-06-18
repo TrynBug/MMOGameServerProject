@@ -177,6 +177,7 @@ void Monster::MoveTo(float destX, float destY, float destZ, int64 deltaMs)
         m_pathTargetX  = destX;
         m_pathTargetZ  = destZ;
         m_hasPathTarget = true;
+        m_pathChangedThisTick = true;   // 이동 복제: 새 경로 → 이번 tick Move 이벤트 발행 트리거.
     }
 
     // 이동속도는 MoveSpdTotal 스탯에서 (버프/디버프 자동 반영).
@@ -193,6 +194,73 @@ void Monster::SnapToSpawn()
     SetPos(m_spawnX, m_spawnY, m_spawnZ);
     if (Stage* pStage = GetStage())
         pStage->UpdateObjectSector(this);
+    m_replTeleport = true;   // 이동 복제: 불연속 점프 → 이번 tick Stop(teleport=true) 발행 트리거.
+}
+
+// ─────────────────────────────────────────────────────────────
+// 이동 복제 판정 (경로 의도 복제) — buildAndSendMonsterMoves pass1 에서 tick당 1회 호출.
+// ─────────────────────────────────────────────────────────────
+Monster::EMoveRepl Monster::EvaluateMoveRepl(uint32 curTick, uint32 keyframeTicks)
+{
+    m_replTeleportThisTick = false;
+
+    // 1) 텔레포트(SnapToSpawn) → Stop(teleport=true). 위치는 이미 스폰점으로 스냅됨.
+    if (m_replTeleport)
+    {
+        m_replTeleport        = false;
+        m_replWasMoving       = false;
+        m_lastReplYaw         = GetYaw();
+        m_replTeleportThisTick = true;
+        m_replKindThisTick    = EMoveRepl::Stop;
+        return m_replKindThisTick;
+    }
+
+    const bool movingNow = m_mover.IsMoving();
+
+    // 2) 이동 중: repath / 첫 출발 / 키프레임 주기 도달 시 Move 발행.
+    if (movingNow)
+    {
+        const bool keyframeDue = (curTick - m_lastMoveKeyframeTick) >= keyframeTicks;
+        if (m_pathChangedThisTick || !m_replWasMoving || keyframeDue)
+        {
+            m_pathChangedThisTick  = false;
+            m_replWasMoving        = true;
+            m_lastMoveKeyframeTick = curTick;
+            m_replStartTick        = curTick;   // anchor = emit(현재) tick. 클라는 ServerNow 로 재생.
+            m_lastReplYaw          = GetYaw();
+            m_replKindThisTick     = EMoveRepl::Move;
+            return m_replKindThisTick;
+        }
+        m_pathChangedThisTick = false;
+        m_replKindThisTick = EMoveRepl::None;
+        return m_replKindThisTick;
+    }
+
+    // 3) 정지 상태
+    m_pathChangedThisTick = false;
+
+    // 3a) 직전엔 이동중이었으면(StopMoving/자동도착 공통) → Stop(최종 권위 위치).
+    if (m_replWasMoving)
+    {
+        m_replWasMoving    = false;
+        m_lastReplYaw      = GetYaw();
+        m_replKindThisTick = EMoveRepl::Stop;
+        return m_replKindThisTick;
+    }
+
+    // 3b) 정지 중 facing(yaw) 변화가 임계 초과 → Stop 재발행(위치 동일, 회전만 갱신).
+    float yawDiff = GetYaw() - m_lastReplYaw;
+    while (yawDiff > 180.0f)  yawDiff -= 360.0f;
+    while (yawDiff < -180.0f) yawDiff += 360.0f;
+    if (std::fabs(yawDiff) > k_monsterFaceReplYawDeg)
+    {
+        m_lastReplYaw      = GetYaw();
+        m_replKindThisTick = EMoveRepl::Stop;
+        return m_replKindThisTick;
+    }
+
+    m_replKindThisTick = EMoveRepl::None;
+    return m_replKindThisTick;
 }
 
 void Monster::StopMoving()

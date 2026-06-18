@@ -425,6 +425,18 @@ private:
     // 클라는 원격 액터를 이 스냅샷들로 보간하고, 본인 캐릭터는 화해에 사용한다.
     void buildAndSendSnapshots();
 
+    // 저빈도(k_timeSyncPeriodTicks)로 stage 내 전 유저에게 TimeSyncNtf 를 broadcast 한다.
+    // 클라 NetClock 재생 시계의 권위 앵커. SnapshotNtf 와 독립이라 SnapshotNtf 가 0건이어도 시계가 굶지 않는다.
+    void buildAndSendTimeSync();
+
+    // 몬스터 이동 복제(경로 의도). k_useMonsterPathReplication 일 때만 동작.
+    // pass1 각 몬스터 EvaluateMoveRepl(tick당 1회) → pass2 유저 AOI 의 변화분만 MonsterMoveBatchNtf 로 묶어 송신 → pass3 클리어.
+    void buildAndSendMonsterMoves();
+
+    // 이동 중인 몬스터를 "현재 tick anchor + 현재위치 + 남은경로" Move entry 1건으로 ntf 에 추가한다.
+    // AOI 신규 진입자에게 spawn 직후 현재 이동상태를 즉시 주어 stall(다음 키프레임까지 멈춤)을 없앤다.
+    void appendMonsterMoveAnchor(GamePacket::MonsterMoveBatchNtf& ntf, const Monster& monster);
+
 #ifdef _DEBUG
     // [디버그 UI] 구독 중인 유저에게 디버그 패킷을 주기적으로 push (개발용).
     // dbgstat 구독자에게 DebugStatNtf, dbgmon 구독자에게 DebugMonsterPositionsNtf 를 보낸다.
@@ -509,6 +521,12 @@ private:
     // 스냅샷 송신용 재사용 메시지 (컨텐츠 스레드 전용). 매 tick·매 유저마다 Clear() 후 재사용한다.
     // protobuf Clear() 는 repeated 필드 capacity 를 유지하므로 add_states() 의 재할당을 막는다.
     GamePacket::SnapshotNtf m_snapshotScratch;
+
+    // TimeSyncNtf 수신자 수집용 재사용 버퍼 (컨텐츠 스레드 전용). 매 송신마다 clear() 후 재사용.
+    std::vector<int64> m_timeSyncUserScratch;
+
+    // 몬스터 이동 복제 송신용 재사용 메시지 (컨텐츠 스레드 전용). 매 유저마다 Clear() 후 재사용.
+    GamePacket::MonsterMoveBatchNtf m_monsterMoveScratch;
 
     // ── StageObject 통합 + 타입별 소유 컨테이너 ──
     // 모든 StageObject의 lifetime은 m_objects가 관리(shared_ptr).

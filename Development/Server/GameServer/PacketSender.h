@@ -80,6 +80,14 @@ public:
     // 고빈도 패킷이라 로그를 남기지 않는다.
     void SendSnapshotNtf(int64 userId, const GamePacket::SnapshotNtf& ntf);
 
+    // NetClock 시각 동기 전송 (TimeSyncNtf). Stage 가 저빈도(2Hz)로 stage 내 전 유저에게 broadcast.
+    // SnapshotNtf 와 독립적으로 클라 재생 시계를 앵커링한다. payload 극소 + 저빈도라 로그 생략.
+    void SendTimeSyncNtf(std::span<const int64> userIds, uint32 serverTickSeq);
+
+    // 몬스터 이동/정지 변화 묶음 전송 (MonsterMoveBatchNtf). Stage 가 유저별 AOI 변화분을 모아 unicast.
+    // 변화 시점에만 나가므로 SnapshotNtf 보다 저빈도. ntf 는 Stage 가 채워 전달한다.
+    void SendMonsterMoveBatchNtf(int64 userId, const GamePacket::MonsterMoveBatchNtf& ntf);
+
     // 스탯 스냅샷 전송 (StatUpdateNtf). character 의 0 아닌 스탯만 담아 본인에게 unicast.
     void SendStatUpdateNtf(int64 userId, const Character& character);
 

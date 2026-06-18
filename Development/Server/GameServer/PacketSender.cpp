@@ -96,6 +96,20 @@ void PacketSender::SendSnapshotNtf(int64 userId, const GamePacket::SnapshotNtf& 
     SendToUser(userId, Common::GAME_PACKET_ID_SNAPSHOT_NTF, ntf);
 }
 
+void PacketSender::SendTimeSyncNtf(std::span<const int64> userIds, uint32 serverTickSeq)
+{
+    // 저빈도 시각 앵커. 동일 payload 를 1회만 직렬화해 게이트웨이별로 묶어 broadcast 한다. 로그 생략.
+    GamePacket::TimeSyncNtf ntf;
+    ntf.set_server_tick_seq(serverTickSeq);
+    SendToUsers(userIds, Common::GAME_PACKET_ID_TIME_SYNC_NTF, ntf);
+}
+
+void PacketSender::SendMonsterMoveBatchNtf(int64 userId, const GamePacket::MonsterMoveBatchNtf& ntf)
+{
+    // 변화 시점에만 나가는 이동 복제 묶음. ntf 는 Stage 가 AOI 순회로 채워 전달한다.
+    SendToUser(userId, Common::GAME_PACKET_ID_MONSTER_MOVE_BATCH_NTF, ntf);
+}
+
 void PacketSender::SendStatUpdateNtf(int64 userId, const Character& character)
 {
     GamePacket::StatUpdateNtf ntf;
