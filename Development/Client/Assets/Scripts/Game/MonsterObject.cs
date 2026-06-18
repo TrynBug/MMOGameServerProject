@@ -7,9 +7,9 @@ namespace Client.Game
     // 1마리 몬스터를 표현하는 컴포넌트.
     // 서버의 ObjectVisibilityNtf(monster_spawns) 수신 시 StageManager 가 동적으로 생성한다.
     //
-    // ── 이동 (서버 권위, 원격 보간) ──
-    // 서버가 SnapshotNtf 로 권위 위치를 매 tick 스트리밍한다. 몬스터는 항상 원격이므로
-    // navmesh 재현 없이 스냅샷 사이를 보간(SnapshotInterpolator)해서 그린다. (PlayerCharacter 의 원격 처리와 동일.)
+    // ── 이동 (서버 권위, 원격 재생) ──
+    // 몬스터는 항상 원격이므로 navmesh 재현 없이 IRemoteMotionDriver 로 재생한다(PlayerCharacter 의 원격 처리와 동일).
+    // 현재 구현체는 SnapshotNtf 스트림을 보간하는 SnapshotInterpolator. 재생 루프는 드라이버 종류에 무관하다.
     //
     // 애니메이션은 IActorAnimator 를 통해 idle/move 를 재생한다(스냅샷의 이동 플래그 기반).
     // HP/스탯/버프는 ActorObject 에서 상속한다. 현재 HP 는 SkillDamageNtf 의 remaining_hp 로 갱신되고,
@@ -26,9 +26,13 @@ namespace Client.Game
         // 몬스터 등급 (노말~보스). 오토타게팅의 "최고 등급" 모드가 읽는다. 스폰 시 게임데이터에서 채운다.
         public EMonsterGrade Grade { get; private set; } = EMonsterGrade.Normal;
 
-        // ── 원격 보간 ──────────────────────────────────────────────
-        // 몬스터는 항상 원격이다. 서버 SnapshotNtf 위치를 보간 버퍼로 따라간다.
-        private readonly SnapshotInterpolator m_interp = new SnapshotInterpolator();
+        // ── 원격 모션 드라이버 ──────────────────────────────────────
+        // 몬스터는 항상 원격이다. 재생은 IRemoteMotionDriver 너머로만 한다(updateMotion).
+        // 어느 구현체를 쓰는지는 서버가 보내는 패킷으로 자동 결정된다:
+        //   - SnapshotNtf 수신 → 스냅샷 보간(SnapshotInterpolator)
+        //   - MonsterMoveBatchNtf 수신 → 경로추종(WaypointFollowerDriver)
+        // (몬스터 1마리는 서버 설정상 둘 중 하나만 받는다. 첫 패킷이 모드를 확정.)
+        private IRemoteMotionDriver m_motion = new SnapshotInterpolator();
         private bool m_remoteMoving;
 
         // 공통 애니메이터. idle/move 등 의미론적 상태를 Animator 파라미터로 변환한다.
@@ -72,24 +76,44 @@ namespace Client.Game
 
         // ─── 서버 스냅샷 처리 ─────────────────────────────────────────────
 
-        // 서버 SnapshotNtf 수신 시 호출(StageManager). 보간 버퍼에 쌓는다.
+        // 서버 SnapshotNtf 수신 시 호출(StageManager). 스냅샷 보간 모드 드라이버에 먹인다.
         public void OnSnapshot(double serverTimeMs, Vector3 pos, float yaw, bool moving)
         {
-            m_interp.Push(serverTimeMs, pos, yaw, moving);
+            if (m_motion is ISnapshotMotionDriver snap)
+                snap.OnSnapshot(serverTimeMs, pos, yaw, moving);
+        }
+
+        // 서버 MonsterMoveBatchNtf 의 move/stop entry 수신 시 호출(StageManager). 경로추종 모드.
+        public void OnMonsterMove(uint startTick, float moveSpeed, System.Collections.Generic.IList<float> waypoints)
+        {
+            ensureFollower().OnMonsterMove(startTick, moveSpeed, waypoints);
+        }
+
+        public void OnMonsterStop(Vector3 pos, float yaw, bool teleport)
+        {
+            ensureFollower().OnMonsterStop(pos, yaw, teleport);
+        }
+
+        // 경로추종 드라이버로 전환(최초 1회). 이미 경로추종이면 그대로 반환.
+        private WaypointFollowerDriver ensureFollower()
+        {
+            if (m_motion is WaypointFollowerDriver follower)
+                return follower;
+            WaypointFollowerDriver created = new WaypointFollowerDriver();
+            m_motion = created;
+            return created;
         }
 
         private void Update()
         {
-            updateRemoteInterpolation();
+            updateMotion();
             updateAnimator();
         }
 
-        // 1프레임 보간. NetClock 렌더 시각의 위치/회전을 적용한다.
-        private void updateRemoteInterpolation()
+        // 1프레임 재생. 드라이버가 자체 타임라인에서 뽑은 위치/회전을 적용한다(클럭 선택은 드라이버 소유).
+        private void updateMotion()
         {
-            if (!NetClock.IsReady)
-                return;
-            if (m_interp.Sample(NetClock.RenderTimeMs, out Vector3 pos, out float yaw, out bool moving))
+            if (m_motion.Sample(out Vector3 pos, out float yaw, out bool moving))
             {
                 transform.position = pos;
                 transform.rotation = Quaternion.Euler(0f, yaw, 0f);

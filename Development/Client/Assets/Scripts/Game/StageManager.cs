@@ -61,6 +61,8 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<StageMoveRes>(GamePacketId.StageMoveRes, onStageMoveRes);
             PacketDispatcher.Instance.Register<ObjectVisibilityNtf>(GamePacketId.ObjectVisibilityNtf, onObjectVisibilityNtf);
             PacketDispatcher.Instance.Register<SnapshotNtf>(GamePacketId.SnapshotNtf, onSnapshotNtf);
+            PacketDispatcher.Instance.Register<TimeSyncNtf>(GamePacketId.TimeSyncNtf, onTimeSyncNtf);
+            PacketDispatcher.Instance.Register<MonsterMoveBatchNtf>(GamePacketId.MonsterMoveBatchNtf, onMonsterMoveBatchNtf);
             PacketDispatcher.Instance.Register<MovePosCorrectNtf>(GamePacketId.MovePosCorrectNtf, onMovePosCorrectNtf);
             PacketDispatcher.Instance.Register<StatUpdateNtf>(GamePacketId.StatUpdateNtf, onStatUpdateNtf);
             PacketDispatcher.Instance.Register<HpMpNtf>(GamePacketId.HpMpNtf, onHpMpNtf);
@@ -347,6 +349,8 @@ namespace Client.Game
         // spawn 전인 object_id 의 상태는 조용히 버린다(다음 ObjectVisibilityNtf 후 따라온다).
         private void onSnapshotNtf(SnapshotNtf ntf)
         {
+            // 시각 앵커의 권위 소스는 TimeSyncNtf(저빈도). 여기선 스냅샷이 흐를 때 더 잦은 앵커를 공짜로 추가한다
+            // (NetClock 의 단조 가드로 중복/역순 호출은 안전). SnapshotNtf 가 0건이어도 시계는 TimeSyncNtf 로 유지된다.
             NetClock.OnServerTick(ntf.ServerTickSeq);
             double serverMs = ntf.ServerTickSeq * NetClock.ServerTickIntervalMs;
 
@@ -368,6 +372,32 @@ namespace Client.Game
                     character.OnSnapshot(serverMs, pos, s.Yaw, moving);
                 else if (m_monsters.TryGetValue(s.ObjectId, out MonsterObject monster) && monster != null)
                     monster.OnSnapshot(serverMs, pos, s.Yaw, moving);
+            }
+        }
+
+        // NetClock 시각 앵커(권위 소스). SnapshotNtf 와 무관하게 저빈도로 항상 도착하므로,
+        // 혼자 유휴(스냅샷 0건) 상태에서도 재생 시계가 초기화/전진한다.
+        private void onTimeSyncNtf(TimeSyncNtf ntf)
+        {
+            NetClock.OnServerTick(ntf.ServerTickSeq);
+        }
+
+        // 몬스터 이동 복제(경로 의도) 수신. move/stop entry 를 해당 MonsterObject 의 경로추종 드라이버로 분배.
+        // spawn 전 object_id 는 조용히 버린다(다음 ObjectVisibilityNtf 후 따라온다).
+        private void onMonsterMoveBatchNtf(MonsterMoveBatchNtf ntf)
+        {
+            // 기회주의적 시각 앵커(권위 소스는 TimeSyncNtf, NetClock 단조 가드로 안전).
+            NetClock.OnServerTick(ntf.ServerTickSeq);
+
+            foreach (MonsterMoveEntry m in ntf.Moves)
+            {
+                if (m_monsters.TryGetValue(m.ObjectId, out MonsterObject monster) && monster != null)
+                    monster.OnMonsterMove(m.StartTick, m.MoveSpeed, m.Waypoints);
+            }
+            foreach (MonsterStopEntry s in ntf.Stops)
+            {
+                if (m_monsters.TryGetValue(s.ObjectId, out MonsterObject monster) && monster != null)
+                    monster.OnMonsterStop(new Vector3(s.PosX, s.PosY, s.PosZ), s.Yaw, s.Teleport);
             }
         }
 

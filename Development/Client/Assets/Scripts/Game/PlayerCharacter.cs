@@ -35,10 +35,10 @@ namespace Client.Game
         public bool IsMoving => IsLocalPlayer ? m_mover.IsMoving : m_remoteMoving;
         public bool IsSkillMoving => m_mover != null && m_mover.IsSkillMoving;
 
-        // ── 원격 캐릭터 보간 ─────────────────────────────────────────
-        // 타 유저(IsLocalPlayer=false)는 navmesh 재현 대신 서버 SnapshotNtf 를 보간한다.
-        // 본인(LocalPlayer)은 예측이 우선이라 이 버퍼를 쓰지 않는다(자기 위치는 화해로 보정).
-        private readonly SnapshotInterpolator m_interp = new SnapshotInterpolator();
+        // ── 원격 캐릭터 모션 드라이버 ─────────────────────────────────
+        // 타 유저(IsLocalPlayer=false)는 navmesh 재현 대신 IRemoteMotionDriver 로 재생한다(현재: 스냅샷 보간).
+        // 본인(LocalPlayer)은 예측이 우선이라 이 드라이버를 쓰지 않는다(자기 위치는 화해로 보정).
+        private readonly ISnapshotMotionDriver m_motion = new SnapshotInterpolator();
         private bool m_remoteMoving;
 
         // ─── Animator ────────────────────────────────────────────────
@@ -166,15 +166,13 @@ namespace Client.Game
         {
             if (IsLocalPlayer)
                 return;
-            m_interp.Push(serverTimeMs, pos, yaw, moving);
+            m_motion.OnSnapshot(serverTimeMs, pos, yaw, moving);
         }
 
-        // 원격 캐릭터 1프레임 보간. NetClock 렌더 시각의 위치/회전을 적용한다.
+        // 원격 캐릭터 1프레임 재생. 드라이버가 자체 타임라인에서 뽑은 위치/회전을 적용한다.
         private void updateRemoteInterpolation()
         {
-            if (!NetClock.IsReady)
-                return;
-            if (m_interp.Sample(NetClock.RenderTimeMs, out Vector3 pos, out float yaw, out bool moving))
+            if (m_motion.Sample(out Vector3 pos, out float yaw, out bool moving))
             {
                 transform.position = pos;
                 transform.rotation = Quaternion.Euler(0f, yaw, 0f);

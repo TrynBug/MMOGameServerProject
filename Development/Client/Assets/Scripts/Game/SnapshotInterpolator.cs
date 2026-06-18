@@ -4,7 +4,7 @@ using Client.Network;
 
 namespace Client.Game
 {
-    // 원격 액터(타 캐릭터/몬스터) 위치 보간 버퍼.
+    // 원격 액터(타 캐릭터/몬스터) 위치 보간 버퍼. IRemoteMotionDriver 의 스냅샷 보간 구현체.
     //
     // 서버 SnapshotNtf 로 들어온 (서버시각, 위치, yaw, 이동중) 샘플을 시계열로 쌓아두고,
     // NetClock.RenderTimeMs(= 최신 서버시각 - 보간지연) 시점을 감싸는 두 샘플 사이를 선형 보간한다.
@@ -12,7 +12,10 @@ namespace Client.Game
     //
     // 서버 스냅샷 위치는 항상 navmesh 위의 유효한 점이므로, 충분히 잦은 샘플(20Hz) 사이의
     // 직선 보간은 사실상 지형 위를 따라간다.
-    public class SnapshotInterpolator
+    //
+    // ★타임라인 소유★: 이 드라이버는 "과거 재생"(NetClock.RenderTimeMs, 보간지연 100ms)을 쓴다.
+    // 호출자(MonsterObject/PlayerCharacter)는 Sample() 결과만 쓰고 이 시각 선택을 알지 못한다.
+    public class SnapshotInterpolator : ISnapshotMotionDriver
     {
         private struct Entry
         {
@@ -40,8 +43,8 @@ namespace Client.Game
 
         public bool HasData => m_buffer.Count > 0;
 
-        // 새 스냅샷 샘플 추가. 과거(또는 동일) 시각의 중복/역순 샘플은 버린다.
-        public void Push(double serverTimeMs, Vector3 pos, float yaw, bool moving)
+        // 새 스냅샷 샘플 추가(ISnapshotMotionDriver). 과거(또는 동일) 시각의 중복/역순 샘플은 버린다.
+        public void OnSnapshot(double serverTimeMs, Vector3 pos, float yaw, bool moving)
         {
             int n = m_buffer.Count;
             if (n > 0)
@@ -70,10 +73,22 @@ namespace Client.Game
             m_buffer.Add(new Entry { TimeMs = serverTimeMs, Pos = pos, Yaw = yaw, Moving = moving });
         }
 
+        // IRemoteMotionDriver. 이 드라이버의 타임라인(과거 재생: NetClock.RenderTimeMs)에서 표본을 뽑는다.
+        // NetClock 미준비/버퍼 없음이면 false → 호출자는 현재 transform 유지.
+        public bool Sample(out Vector3 pos, out float yaw, out bool moving)
+        {
+            pos = Vector3.zero;
+            yaw = 0f;
+            moving = false;
+            if (!NetClock.IsReady)
+                return false;
+            return sampleAt(NetClock.RenderTimeMs, out pos, out yaw, out moving);
+        }
+
         // renderMs 시점의 보간 결과. 데이터가 없으면 false.
         //  - renderMs 가 버퍼 앞/뒤를 벗어나면 양 끝값으로 클램프(hold).
         //  - 보간에 더 이상 필요 없는 과거 샘플은 정리한다.
-        public bool Sample(double renderMs, out Vector3 pos, out float yaw, out bool moving)
+        private bool sampleAt(double renderMs, out Vector3 pos, out float yaw, out bool moving)
         {
             pos = Vector3.zero;
             yaw = 0f;

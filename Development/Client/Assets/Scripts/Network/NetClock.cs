@@ -29,6 +29,12 @@ namespace Client.Network
         private static double s_playbackMs;        // 현재 재생 시각 (RenderTimeMs)
 
         public static double RenderTimeMs => s_playbackMs;
+
+        // 추정 "현재" 서버시각 (보간지연 0). 경로 복제 재생용 — 경로 이벤트의 anchor(start_tick)가
+        // emit 시점=현재 tick 이므로, 같은 "현재" 타임라인으로 재생해야 elapsed = ServerNow − anchor ≥ 0.
+        // RenderTimeMs(과거 −100ms 보간)와 달리 InterpDelay 만큼 미래다. 동일 스무딩을 공유한다.
+        public static double ServerNowMs => s_playbackMs + InterpDelayMs;
+
         public static bool   IsReady      => s_initialized;
 
         private static double NowMs => (double)Time.unscaledTime * 1000.0;
