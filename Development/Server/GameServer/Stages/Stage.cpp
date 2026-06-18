@@ -24,6 +24,37 @@
 
 namespace
 {
+    // ── ActorStateInfo 위치/yaw 양자화 (SnapshotNtf 대역폭 절감) ──
+    // 계약은 move_packet.proto ActorStateInfo 주석 참조. 클라 디코드와 반드시 일치해야 한다.
+    // X,Z 범위는 per-stage 월드 경계(navmesh 메타, StageLoadCompleteRes 로 클라에 전달)를 쓴다 →
+    // 맵에 딱 맞아 정밀도 최적 + 클립 없음. Y 는 per-stage 경계가 없어 고정 범위(평면 게임이라 변동 작음).
+    constexpr double kQuantYMin = -512.0, kQuantYMax = 512.0;   // Y 16bit 고정 범위 (~1.6cm)
+
+    // v 를 [mn,mx] 구간 16bit(0~65535)로 양자화. 범위 밖은 클램프(경계 약간 초과 시 무해, <1px 오차).
+    uint16 quantizeUnit(double v, double mn, double mx)
+    {
+        double t = (mx > mn) ? (v - mn) / (mx - mn) : 0.0;
+        if (t < 0.0) t = 0.0;
+        else if (t > 1.0) t = 1.0;
+        return static_cast<uint16>(t * 65535.0 + 0.5);
+    }
+
+    // X 는 [minX,maxX], Z 는 [minZ,maxZ] 로 각각 양자화(축별 범위 → 정밀도 최적).
+    uint32 packQPosXZ(float x, float z, double minX, double maxX, double minZ, double maxZ)
+    {
+        return (static_cast<uint32>(quantizeUnit(x, minX, maxX)) << 16)
+             |  static_cast<uint32>(quantizeUnit(z, minZ, maxZ));
+    }
+
+    uint32 packQPosYYaw(float y, float yaw)
+    {
+        double yawN = std::fmod(static_cast<double>(yaw), 360.0);
+        if (yawN < 0.0) yawN += 360.0;
+        const uint16 qy   = quantizeUnit(y, kQuantYMin, kQuantYMax);
+        const uint16 qyaw = static_cast<uint16>(yawN / 360.0 * 65535.0 + 0.5);
+        return (static_cast<uint32>(qy) << 16) | static_cast<uint32>(qyaw);
+    }
+
     // Character 정보를 CharacterSpawnInfo (패킷) 형식으로 채웁니다.
     // 좌표계: Unity 와 동일 (X, Y, Z). Y가 높이, X-Z 가 평면.
     GamePacket::CharacterSpawnInfo makeCharacterSpawnInfo(const Character& character)
@@ -857,7 +888,9 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     // 그래야 뒤이어 오는 ObjectVisibilityNtf 의 자기 자신 항목을 식별해 스킵할 수 있다.
     // (순서가 반대면 클라가 자기 캐릭터를 원격 캐릭터로 잘못 스폰 → 키 충돌.)
     server.GetPacketSender().SendStageLoadCompleteRes(userId, EResultCode::Success, GetStageId(), GetStageDataKey(),
-        spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), spCharacter->GetYaw());
+        spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), spCharacter->GetYaw(),
+        static_cast<float>(GetWorldMinX()), static_cast<float>(GetWorldMinZ()),
+        static_cast<float>(GetWorldMaxX()), static_cast<float>(GetWorldMaxZ()));
 
     server.GetPacketSender().SendObjectVisibilityNtf(userId, spawnsForMe, {}, monsterSpawnsForMe);
 
@@ -1486,6 +1519,10 @@ void Stage::buildAndSendTimeSync()
 
 void Stage::buildAndSendSnapshots()
 {
+    // 위치 양자화에 쓸 이 stage 의 월드 X/Z 경계(클라에는 StageLoadCompleteRes 로 전달된 값과 동일).
+    const double wMinX = GetWorldMinX(), wMaxX = GetWorldMaxX();
+    const double wMinZ = GetWorldMinZ(), wMaxZ = GetWorldMaxZ();
+
     // pass 1: 오브젝트별로 이번 tick 송신 여부(due)를 한 번 계산한다(여러 관찰자에게 일관).
     //   due = 위치/회전 변화 OR heartbeat. 위치 변화 기준이라 이동·대시·넉백·정지 최종위치가 자동 포함된다.
     for (auto& [objId, spObject] : m_objects)
@@ -1520,10 +1557,8 @@ void Stage::buildAndSendSnapshots()
                     const Character* pChar = static_cast<const Character*>(pObj);
                     GamePacket::ActorStateInfo* pState = ntf.add_states();
                     pState->set_object_id(pChar->GetObjectId());
-                    pState->set_pos_x(pChar->GetPosX());
-                    pState->set_pos_y(pChar->GetPosY());
-                    pState->set_pos_z(pChar->GetPosZ());
-                    pState->set_yaw(pChar->GetYaw());
+                    pState->set_qpos_xz(packQPosXZ(pChar->GetPosX(), pChar->GetPosZ(), wMinX, wMaxX, wMinZ, wMaxZ));
+                    pState->set_qpos_y_yaw(packQPosYYaw(pChar->GetPosY(), pChar->GetYaw()));
                     uint32 flags = 0;
                     if (pChar->IsMoving()) flags |= 0x1u;
                     if (pChar->IsDead())   flags |= 0x2u;
@@ -1536,10 +1571,8 @@ void Stage::buildAndSendSnapshots()
                     const Monster* pMon = static_cast<const Monster*>(pObj);
                     GamePacket::ActorStateInfo* pState = ntf.add_states();
                     pState->set_object_id(pMon->GetObjectId());
-                    pState->set_pos_x(pMon->GetPosX());
-                    pState->set_pos_y(pMon->GetPosY());
-                    pState->set_pos_z(pMon->GetPosZ());
-                    pState->set_yaw(pMon->GetYaw());
+                    pState->set_qpos_xz(packQPosXZ(pMon->GetPosX(), pMon->GetPosZ(), wMinX, wMaxX, wMinZ, wMaxZ));
+                    pState->set_qpos_y_yaw(packQPosYYaw(pMon->GetPosY(), pMon->GetYaw()));
                     uint32 flags = 0;
                     if (pMon->IsMoving()) flags |= 0x1u;
                     if (pMon->IsDead())   flags |= 0x2u;

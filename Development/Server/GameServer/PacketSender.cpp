@@ -2,13 +2,87 @@
 #include "PacketSender.h"
 #include "StageObjects/Character.h"
 
+#ifdef _DEBUG
+#include <unordered_map>
+#include <mutex>
+#include <chrono>
+#include <vector>
+#include <algorithm>
+#include <utility>
+
+// [개발 계측] 패킷 타입별 송신량(클라 수신 기준 header+payload × 수신자수) 집계 + 주기 자동 덤프.
+// 대역폭 최적화(예: ActorStateInfo 양자화, 송신율 조정) 전후 비교용. 2초마다 [PacketStats] 로그로 덤프.
+namespace packetstats
+{
+    namespace
+    {
+        struct Entry { uint64 count = 0; uint64 bytes = 0; };
+
+        std::mutex                            g_mutex;
+        std::unordered_map<int32, Entry>      g_byType;
+        std::chrono::steady_clock::time_point g_windowStart = std::chrono::steady_clock::now();
+        constexpr int64                       k_dumpPeriodMs = 2000;   // 2초마다 자동 덤프.
+
+        // g_mutex 보유 상태에서 호출. 누적값을 바이트 내림차순으로 로그 + 리셋 + window 갱신.
+        void dumpLocked(std::chrono::steady_clock::time_point now)
+        {
+            const double elapsedSec =
+                std::chrono::duration_cast<std::chrono::milliseconds>(now - g_windowStart).count() / 1000.0;
+            if (elapsedSec <= 0.0)
+                return;
+
+            std::vector<std::pair<int32, Entry>> rows(g_byType.begin(), g_byType.end());
+            std::sort(rows.begin(), rows.end(),
+                      [](const auto& a, const auto& b) { return a.second.bytes > b.second.bytes; });
+
+            uint64 totalBytes = 0;
+            uint64 totalCount = 0;
+            std::string body;
+            for (const auto& [type, e] : rows)
+            {
+                totalBytes += e.bytes;
+                totalCount += e.count;
+                const char* name = Common::GamePacketId_IsValid(type)
+                    ? Common::GamePacketId_Name(static_cast<Common::GamePacketId>(type)).c_str()
+                    : "UNKNOWN";
+                body += std::format("\n  {:<42} {:>8} pkt {:>12} B  {:>10.1f} B/s",
+                                    name, e.count, e.bytes, static_cast<double>(e.bytes) / elapsedSec);
+            }
+
+            LOG_WRITE(LogLevel::Info, std::format("[PacketStats] window={:.1f}s  total={} pkt {} B ({:.1f} B/s){}",
+                                                  elapsedSec, totalCount, totalBytes,
+                                                  static_cast<double>(totalBytes) / elapsedSec, body));
+
+            g_byType.clear();
+            g_windowStart = now;
+        }
+    }
+
+    void Record(int32 packetType, int32 bytesPerRecipient, int32 recipientCount)
+    {
+        if (recipientCount <= 0)
+            return;
+
+        std::lock_guard<std::mutex> lock(g_mutex);
+        Entry& e = g_byType[packetType];
+        e.count += static_cast<uint64>(recipientCount);
+        e.bytes += static_cast<uint64>(bytesPerRecipient) * static_cast<uint64>(recipientCount);
+
+        const auto now = std::chrono::steady_clock::now();
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - g_windowStart).count() >= k_dumpPeriodMs)
+            dumpLocked(now);
+    }
+}
+#endif
+
 // ─────────────────────────────────────────────────────────────
 // PacketSender 의 패킷별 송신 구현.
 // 모든 함수는 SendToUser(공통 배관, PacketSender.h 템플릿)를 통해 게이트웨이로 전송한다.
 // ─────────────────────────────────────────────────────────────
 
 void PacketSender::SendStageLoadCompleteRes(int64 userId, EResultCode resultCode, int64 stageId, int32 stageDataKey,
-                                            float myPosX, float myPosY, float myPosZ, float myYaw)
+                                            float myPosX, float myPosY, float myPosZ, float myYaw,
+                                            float worldMinX, float worldMinZ, float worldMaxX, float worldMaxZ)
 {
     GamePacket::StageLoadCompleteRes res;
     res.set_result_code(static_cast<int32>(resultCode));
@@ -19,6 +93,10 @@ void PacketSender::SendStageLoadCompleteRes(int64 userId, EResultCode resultCode
     res.set_my_pos_y(myPosY);
     res.set_my_pos_z(myPosZ);
     res.set_my_yaw(myYaw);
+    res.set_world_min_x(worldMinX);
+    res.set_world_min_z(worldMinZ);
+    res.set_world_max_x(worldMaxX);
+    res.set_world_max_z(worldMaxZ);
 
     SendToUser(userId, Common::GAME_PACKET_ID_STAGE_LOAD_COMPLETE_RES, res);
 
@@ -102,12 +180,6 @@ void PacketSender::SendTimeSyncNtf(std::span<const int64> userIds, uint32 server
     GamePacket::TimeSyncNtf ntf;
     ntf.set_server_tick_seq(serverTickSeq);
     SendToUsers(userIds, Common::GAME_PACKET_ID_TIME_SYNC_NTF, ntf);
-}
-
-void PacketSender::SendMonsterMoveBatchNtf(int64 userId, const GamePacket::MonsterMoveBatchNtf& ntf)
-{
-    // 변화 시점에만 나가는 이동 복제 묶음. ntf 는 Stage 가 AOI 순회로 채워 전달한다.
-    SendToUser(userId, Common::GAME_PACKET_ID_MONSTER_MOVE_BATCH_NTF, ntf);
 }
 
 void PacketSender::SendStatUpdateNtf(int64 userId, const Character& character)

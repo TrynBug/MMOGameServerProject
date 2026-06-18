@@ -13,6 +13,13 @@
 // 전방선언 (SendStatUpdateNtf 의 const Character& 파라미터. 완전타입은 PacketSender.cpp 에서 include.)
 class Character;
 
+#ifdef _DEBUG
+// [개발 계측] 패킷 타입별 송신량 집계 + 주기(2s) 자동 덤프. 모든 S->C 패킷이 거치는 단일 지점
+// (sendClientPacketViaGateway)에서 Record 를 호출한다. bytes 는 "클라 수신 기준"(header+payload)에
+// 수신자 수를 곱한 값(게이트웨이가 sidecar 를 떼고 전달하므로). 구현/상태는 PacketSender.cpp.
+namespace packetstats { void Record(int32 packetType, int32 bytesPerRecipient, int32 recipientCount); }
+#endif
+
 // ─────────────────────────────────────────────────────────────
 // PacketSender
 // ─────────────────────────────────────────────────────────────
@@ -62,7 +69,8 @@ public:
     // 클라의 StageLoadCompleteReq에 대한 응답. 서버가 결정한 spawn 위치/회전을 포함한다.
     // 다른 주변 오브젝트 정보는 ObjectVisibilityNtf로 별도 전송.
     void SendStageLoadCompleteRes(int64 userId, EResultCode resultCode, int64 stageId, int32 stageDataKey,
-                                  float myPosX, float myPosY, float myPosZ, float myYaw);
+                                  float myPosX, float myPosY, float myPosZ, float myYaw,
+                                  float worldMinX, float worldMinZ, float worldMaxX, float worldMaxZ);
 
     // Stage 이동 요청 결과 전송 (StageMoveRes). 성공 = 클라는 로딩 시작.
     void SendStageMoveRes(int64 userId, EResultCode resultCode, const std::string& errorMsg, int32 targetStageDataKey);
@@ -83,10 +91,6 @@ public:
     // NetClock 시각 동기 전송 (TimeSyncNtf). Stage 가 저빈도(2Hz)로 stage 내 전 유저에게 broadcast.
     // SnapshotNtf 와 독립적으로 클라 재생 시계를 앵커링한다. payload 극소 + 저빈도라 로그 생략.
     void SendTimeSyncNtf(std::span<const int64> userIds, uint32 serverTickSeq);
-
-    // 몬스터 이동/정지 변화 묶음 전송 (MonsterMoveBatchNtf). Stage 가 유저별 AOI 변화분을 모아 unicast.
-    // 변화 시점에만 나가므로 SnapshotNtf 보다 저빈도. ntf 는 Stage 가 채워 전달한다.
-    void SendMonsterMoveBatchNtf(int64 userId, const GamePacket::MonsterMoveBatchNtf& ntf);
 
     // 스탯 스냅샷 전송 (StatUpdateNtf). character 의 0 아닌 스탯만 담아 본인에게 unicast.
     void SendStatUpdateNtf(int64 userId, const Character& character);
@@ -214,6 +218,11 @@ void PacketSender::sendClientPacketViaGateway(const netlib::ISessionPtr& spGatew
     const int32 headerSize  = static_cast<int32>(sizeof(netlib::PacketHeader));
     const int32 sidecarHdr  = static_cast<int32>(sizeof(netlib::SidecarHeader));
     const int32 payloadSize = packet::ProtoSerializer::GetPayloadSize(message);
+
+#ifdef _DEBUG
+    // [개발 계측] 클라 수신 기준(header+payload) × 수신자 수. 타입별 송신량 집계.
+    packetstats::Record(packetType, headerSize + payloadSize, userIdCount);
+#endif
 
     // payload 가 고정이므로 한 패킷에 담을 수 있는 userId 개수를 미리 계산한다.
     const int32 maxSidecarBytes = 0xFFFF - headerSize - payloadSize - sidecarHdr;
