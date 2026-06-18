@@ -62,7 +62,6 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<ObjectVisibilityNtf>(GamePacketId.ObjectVisibilityNtf, onObjectVisibilityNtf);
             PacketDispatcher.Instance.Register<SnapshotNtf>(GamePacketId.SnapshotNtf, onSnapshotNtf);
             PacketDispatcher.Instance.Register<TimeSyncNtf>(GamePacketId.TimeSyncNtf, onTimeSyncNtf);
-            PacketDispatcher.Instance.Register<MonsterMoveBatchNtf>(GamePacketId.MonsterMoveBatchNtf, onMonsterMoveBatchNtf);
             PacketDispatcher.Instance.Register<MovePosCorrectNtf>(GamePacketId.MovePosCorrectNtf, onMovePosCorrectNtf);
             PacketDispatcher.Instance.Register<StatUpdateNtf>(GamePacketId.StatUpdateNtf, onStatUpdateNtf);
             PacketDispatcher.Instance.Register<HpMpNtf>(GamePacketId.HpMpNtf, onHpMpNtf);
@@ -380,25 +379,6 @@ namespace Client.Game
         private void onTimeSyncNtf(TimeSyncNtf ntf)
         {
             NetClock.OnServerTick(ntf.ServerTickSeq);
-        }
-
-        // 몬스터 이동 복제(경로 의도) 수신. move/stop entry 를 해당 MonsterObject 의 경로추종 드라이버로 분배.
-        // spawn 전 object_id 는 조용히 버린다(다음 ObjectVisibilityNtf 후 따라온다).
-        private void onMonsterMoveBatchNtf(MonsterMoveBatchNtf ntf)
-        {
-            // 기회주의적 시각 앵커(권위 소스는 TimeSyncNtf, NetClock 단조 가드로 안전).
-            NetClock.OnServerTick(ntf.ServerTickSeq);
-
-            foreach (MonsterMoveEntry m in ntf.Moves)
-            {
-                if (m_monsters.TryGetValue(m.ObjectId, out MonsterObject monster) && monster != null)
-                    monster.OnMonsterMove(m.StartTick, m.MoveSpeed, m.Waypoints);
-            }
-            foreach (MonsterStopEntry s in ntf.Stops)
-            {
-                if (m_monsters.TryGetValue(s.ObjectId, out MonsterObject monster) && monster != null)
-                    monster.OnMonsterStop(new Vector3(s.PosX, s.PosY, s.PosZ), s.Yaw, s.Teleport);
-            }
         }
 
         // 원격 보간 재생 시계를 매 프레임 전진시킨다.

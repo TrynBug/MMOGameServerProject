@@ -28,11 +28,8 @@ namespace Client.Game
 
         // ── 원격 모션 드라이버 ──────────────────────────────────────
         // 몬스터는 항상 원격이다. 재생은 IRemoteMotionDriver 너머로만 한다(updateMotion).
-        // 어느 구현체를 쓰는지는 서버가 보내는 패킷으로 자동 결정된다:
-        //   - SnapshotNtf 수신 → 스냅샷 보간(SnapshotInterpolator)
-        //   - MonsterMoveBatchNtf 수신 → 경로추종(WaypointFollowerDriver)
-        // (몬스터 1마리는 서버 설정상 둘 중 하나만 받는다. 첫 패킷이 모드를 확정.)
-        private IRemoteMotionDriver m_motion = new SnapshotInterpolator();
+        // 현재 구현체는 스냅샷 보간(SnapshotInterpolator). 재생 루프는 드라이버 종류에 무관하다.
+        private readonly ISnapshotMotionDriver m_motion = new SnapshotInterpolator();
         private bool m_remoteMoving;
 
         // 공통 애니메이터. idle/move 등 의미론적 상태를 Animator 파라미터로 변환한다.
@@ -76,32 +73,10 @@ namespace Client.Game
 
         // ─── 서버 스냅샷 처리 ─────────────────────────────────────────────
 
-        // 서버 SnapshotNtf 수신 시 호출(StageManager). 스냅샷 보간 모드 드라이버에 먹인다.
+        // 서버 SnapshotNtf 수신 시 호출(StageManager). 모션 드라이버에 스냅샷을 먹인다.
         public void OnSnapshot(double serverTimeMs, Vector3 pos, float yaw, bool moving)
         {
-            if (m_motion is ISnapshotMotionDriver snap)
-                snap.OnSnapshot(serverTimeMs, pos, yaw, moving);
-        }
-
-        // 서버 MonsterMoveBatchNtf 의 move/stop entry 수신 시 호출(StageManager). 경로추종 모드.
-        public void OnMonsterMove(uint startTick, float moveSpeed, System.Collections.Generic.IList<float> waypoints)
-        {
-            ensureFollower().OnMonsterMove(startTick, moveSpeed, waypoints);
-        }
-
-        public void OnMonsterStop(Vector3 pos, float yaw, bool teleport)
-        {
-            ensureFollower().OnMonsterStop(pos, yaw, teleport);
-        }
-
-        // 경로추종 드라이버로 전환(최초 1회). 이미 경로추종이면 그대로 반환.
-        private WaypointFollowerDriver ensureFollower()
-        {
-            if (m_motion is WaypointFollowerDriver follower)
-                return follower;
-            WaypointFollowerDriver created = new WaypointFollowerDriver();
-            m_motion = created;
-            return created;
+            m_motion.OnSnapshot(serverTimeMs, pos, yaw, moving);
         }
 
         private void Update()

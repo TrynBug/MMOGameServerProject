@@ -5,15 +5,14 @@ namespace Client.Game
     // 원격 액터(타 유저/몬스터)의 위치를 매 프레임 "재생(표시)"하는 드라이버의 계약.
     //
     // ★핵심 설계★: 재생 루프(MonsterObject/PlayerCharacter)를 "어떤 데이터로 어떤 타임라인에서
-    // 재생하는가"와 분리한다. 구현체가 자신의 타임라인을 소유한다 — 즉 NetClock 의 어느 시각을
-    // 읽을지(과거 RenderTimeMs 보간 vs 현재 ServerNowMs 경로예측)를 드라이버가 결정한다.
-    // 호출자는 Sample() 결과만 transform 에 적용할 뿐, 클럭/보간/예측을 알지 못한다.
+    // 재생하는가"와 분리한다. 구현체가 자신의 타임라인(NetClock 의 어느 시각을 읽을지)을 소유한다.
+    // 호출자는 Sample() 결과만 transform 에 적용할 뿐, 클럭/보간/예측 방식을 알지 못한다.
     //
-    // 입력(서버 패킷)의 형태는 구현체마다 다르므로(스냅샷 스트림 vs 경로 이벤트) 이 인터페이스에
-    // 넣지 않는다. 입력은 구현체별 하위 인터페이스(ISnapshotMotionDriver 등)가 정의한다.
+    // 입력(서버 패킷)의 형태는 구현체마다 다를 수 있으므로 이 인터페이스에 넣지 않는다.
+    // 스냅샷 스트림 입력은 하위 인터페이스 ISnapshotMotionDriver 가 정의한다(현 유일 구현).
     //
-    // Phase 2(경로 복제)에서 MonsterObject 의 드라이버 필드만 경로추종 구현체로 교체하면,
-    // 재생 루프(this.Sample 호출부)는 한 줄도 바뀌지 않는다.
+    // 효과: 원격 재생 방식을 바꾸고 싶을 때 MonsterObject/PlayerCharacter 의 드라이버 필드만
+    // 다른 구현체로 교체하면 재생 루프(this.Sample 호출부)는 그대로 둘 수 있다.
     public interface IRemoteMotionDriver
     {
         // 이번 프레임에 표시할 위치/회전(yaw)/이동상태를 계산한다. 자체 타임라인(NetClock)을 읽는다.
