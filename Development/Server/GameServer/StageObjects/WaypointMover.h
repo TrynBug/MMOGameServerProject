@@ -3,7 +3,6 @@
 #include "pch.h"
 
 #include <vector>
-#include <span>
 
 // 전방선언
 class StageObject;
@@ -35,10 +34,6 @@ public:
     // 1 tick 전진. moveSpeed(유닛/초)는 호출자가 넘긴다(Character=스탯, Monster=고정값).
     // 최종 목적지에 도달해 이번 tick 에 정지했으면 true.
     bool Update(StageObject& obj, int64 deltaMs, float moveSpeed);
-
-    // 현재 향해가는 waypoint(m_curWaypointIdx)부터 끝까지의 (x,y,z) 트리플 평탄 뷰.
-    // 이동 복제(MonsterMoveEntry.waypoints)에서 [현재 권위 위치] 다음에 이어 붙인다. 정지 중이면 빈 span.
-    std::span<const float> GetRemainingWaypoints() const;
 
 private:
     // 현재 waypoint 를 향해 yaw 갱신 (X-Z 평면, Unity 호환 degree).

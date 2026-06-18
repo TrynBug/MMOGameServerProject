@@ -68,13 +68,6 @@ constexpr uint32 k_snapshotIdleHeartbeatTicks = 20;   // 유휴 오브젝트 갱
 // NetClock 은 로컬시간으로 자체 전진하므로 저빈도로 충분하다(2Hz = 10 tick).
 constexpr uint32 k_timeSyncPeriodTicks = 10;   // 시각 동기 송신 주기(tick). 10 = 0.5초(2Hz).
 
-// ── 몬스터 이동 복제 (경로 의도 복제, Phase 2) ────────────────────
-// true 면 몬스터를 SnapshotNtf 에서 빼고 MonsterMoveBatchNtf(경로+속도+시작tick)로 복제한다.
-// A/B 비교용 컴파일 스위치. false 면 기존 스냅샷 스트리밍 방식 그대로(무변경).
-constexpr bool   k_useMonsterPathReplication = false;
-constexpr uint32 k_monsterMoveKeyframeTicks  = 20;    // 이동 중 드리프트 보정 키프레임 주기(tick). 20=1s.
-constexpr float  k_monsterFaceReplYawDeg     = 8.0f;  // 정지 중 facing(yaw) 복제 임계(도). 초과 시 Stop 재발행.
-
 
 // 내부서버 세션 추가 데이터
 struct InternalSessionMeta

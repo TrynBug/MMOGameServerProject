@@ -86,24 +86,6 @@ public:
     // destX/Z 로 이동(throttled repath 포함) + sector 갱신. 매 tick 호출.
     void MoveTo(float destX, float destY, float destZ, int64 deltaMs);
 
-    // ── 이동 복제 (경로 의도 복제, Phase 2) ──────────────────────
-    // 이번 tick 의 복제 이벤트 종류.
-    enum class EMoveRepl : uint8_t { None, Move, Stop };
-
-    // 매 tick 1회(Stage::buildAndSendMonsterMoves pass1) 호출. 현재 이동상태/플래그를 보고
-    // 이번 tick 복제 이벤트(None/Move/Stop)를 판정해 내부에 기록하고 반환한다. 부작용 있음(상태 전이).
-    EMoveRepl EvaluateMoveRepl(uint32 curTick, uint32 keyframeTicks);
-
-    // pass2 가 읽는 이번 tick 판정 결과(EvaluateMoveRepl 이 채움).
-    EMoveRepl GetMoveReplThisTick()    const { return m_replKindThisTick; }
-    bool      GetMoveReplTeleport()    const { return m_replTeleportThisTick; }   // Stop 일 때 의미
-    uint32    GetMoveReplStartTick()   const { return m_replStartTick; }          // Move 일 때 의미
-    // Move entry 의 waypoints: [현재 권위 위치] 다음에 이어 붙일 남은 경로.
-    std::span<const float> GetRemainingWaypoints() const { return m_mover.GetRemainingWaypoints(); }
-
-    // pass3: tick-pending 클리어.
-    void ClearMoveReplThisTick() { m_replKindThisTick = EMoveRepl::None; m_replTeleportThisTick = false; }
-
     // 사망 후 시체(corpse) 경과시간을 deltaMs 만큼 누적하고, 유지시간(k_corpseDurationMs)을
     // 넘으면 true 를 리턴한다(=디스폰 타이밍). Stage::updateMonsters 가 사망한 몬스터에게만 매 tick 호출한다.
     bool AdvanceCorpseTimer(int64 deltaMs);
@@ -183,17 +165,6 @@ private:
     bool  m_hasPathTarget = false;
     float m_pathTargetX = 0.0f;
     float m_pathTargetZ = 0.0f;
-
-    // ── 이동 복제 상태 (경로 의도 복제) ──────────────────────────
-    bool      m_pathChangedThisTick   = false;            // 이번 tick repath 발생 (MoveTo 가 set)
-    bool      m_replTeleport          = false;            // 이번 tick 텔레포트 (SnapToSpawn 가 set)
-    bool      m_replWasMoving         = false;            // 직전 복제 시점의 이동중 여부
-    uint32    m_lastMoveKeyframeTick  = 0;                // 마지막 Move 이벤트 송신 tick (드리프트 키프레임)
-    float     m_lastReplYaw           = 0.0f;             // 마지막 복제 yaw (정지 중 facing 변화 감지)
-    // 이번 tick 판정 결과(EvaluateMoveRepl 이 채우고 pass2 가 읽음, pass3 가 클리어).
-    EMoveRepl m_replKindThisTick      = EMoveRepl::None;
-    bool      m_replTeleportThisTick  = false;
-    uint32    m_replStartTick         = 0;
 };
 
 using MonsterPtr  = std::shared_ptr<Monster>;
