@@ -1525,8 +1525,12 @@ void Stage::buildAndSendSnapshots()
 
     // pass 1: 오브젝트별로 이번 tick 송신 여부(due)를 한 번 계산한다(여러 관찰자에게 일관).
     //   due = 위치/회전 변화 OR heartbeat. 위치 변화 기준이라 이동·대시·넉백·정지 최종위치가 자동 포함된다.
+    //   몬스터는 위치 cadence 를 10Hz 로 throttle(LOD, 대역폭 절감). 캐릭터는 매 tick(20Hz).
     for (auto& [objId, spObject] : m_objects)
-        spObject->EvaluateSnapshotDue(m_serverTickSeq, k_snapshotIdleHeartbeatTicks);
+    {
+        const uint32 minInterval = (spObject->GetObjectType() == EObjectType::Monster) ? k_monsterSnapshotIntervalTicks : 1u;
+        spObject->EvaluateSnapshotDue(m_serverTickSeq, k_snapshotIdleHeartbeatTicks, minInterval);
+    }
 
     // pass 2: 각 유저에게 자기 AOI 안의 due 오브젝트를 모아 송신한다.
     // 헤더(tick_seq/ack)는 due 가 없어도 매 tick 항상 보낸다 — 클라 보간 시계를 굶기지 않기 위함.

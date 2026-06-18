@@ -63,6 +63,11 @@ constexpr int64 k_monsterUpdateIntervalMs   = 500;   // 몬스터 idle 기본 �
 // (헤더는 매 tick 항상 전송하여 클라 보간 시계를 굶기지 않는다 — 목록만 가변.)
 constexpr uint32 k_snapshotIdleHeartbeatTicks = 20;   // 유휴 오브젝트 갱신 주기(tick). 20 = 1초.
 
+// 몬스터 위치 스냅샷 cadence(tick). 캐릭터는 매 tick(1=20Hz), 몬스터는 LOD 로 이 주기(2=100ms,10Hz).
+// 이동↔정지 전환과 heartbeat 은 이 throttle 을 우회해 즉시/주기대로 송신된다(정지 누락 방지).
+// 클라 보간이 10Hz 에서도 매끄러우려면 NetClock.InterpDelayMs 가 충분해야 한다(현재 150ms).
+constexpr uint32 k_monsterSnapshotIntervalTicks = 2;
+
 // ── NetClock 시각 동기 ────────────────────────────────────────────
 // 서버가 클라 NetClock 앵커(TimeSyncNtf)를 보내는 주기(tick). SnapshotNtf 와 독립.
 // NetClock 은 로컬시간으로 자체 전진하므로 저빈도로 충분하다(2Hz = 10 tick).

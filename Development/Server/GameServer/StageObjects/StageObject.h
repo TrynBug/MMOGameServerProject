@@ -104,7 +104,10 @@ public:
     // 이번 tick 에 이 오브젝트를 스냅샷에 포함할지(due) 평가하고, due 면 마지막 송신 상태를 갱신한다.
     // due = 위치/회전이 의미있게 바뀜(이동·대시·넉백·정지 최종위치 모두 포함) OR heartbeat 주기 도달(유휴 갱신).
     // Stage::buildAndSendSnapshots 가 pass1 에서 매 tick 호출하고, pass2 에서 IsSnapshotDue() 로 읽는다.
-    bool EvaluateSnapshotDue(uint32 currentTickSeq, uint32 heartbeatTicks)
+    // minMoveIntervalTicks: 위치/회전 변화에 의한 송신을 이 주기로 throttle(LOD). 1=매 tick.
+    //   몬스터는 k_monsterSnapshotIntervalTicks(2,10Hz)로 대역폭 절감. 캐릭터는 1(20Hz).
+    //   ★이동↔정지 전환과 heartbeat 은 throttle 을 우회해 즉시/주기대로 보낸다(정지 누락 → "제자리 달리기" 방지).
+    bool EvaluateSnapshotDue(uint32 currentTickSeq, uint32 heartbeatTicks, uint32 minMoveIntervalTicks = 1)
     {
         constexpr float kPosEpsSq  = 0.0001f;   // (0.01u)^2
         constexpr float kYawEpsDeg = 1.0f;
@@ -114,15 +117,18 @@ public:
         float yawDiff = m_yaw - m_lastSentYaw;
         if (yawDiff < 0.0f) yawDiff = -yawDiff;
 
-        // 이동 플래그 전환(이동↔정지)도 due 사유. 같은 자리에서 멈추면(StopAt(현재위치))
-        // 위치 변화가 없어 누락되던 정지 스냅샷을 즉시 보내 클라가 1초(heartbeat) 동안
-        // 제자리 달리기 후 뒤로 튕기는 현상을 막는다.
         const bool moving = IsMoving();
 
-        const bool changed   = (dx * dx + dz * dz) > kPosEpsSq
-                            || yawDiff > kYawEpsDeg
-                            || moving != m_lastSentMoving;
-        const bool heartbeat = (currentTickSeq - m_lastSentTickSeq) >= heartbeatTicks;
+        const uint32 ticksSinceSent = currentTickSeq - m_lastSentTickSeq;
+
+        // 이동 플래그 전환(이동↔정지)은 즉시 due — throttle 우회. 같은 자리에서 멈추면(StopAt(현재위치))
+        // 위치 변화가 없어 누락되던 정지 스냅샷을 즉시 보내 클라가 heartbeat 동안 제자리 달리기 후 튕기는 현상 방지.
+        const bool flagTransition = (moving != m_lastSentMoving);
+        // 위치/회전 변화는 minMoveIntervalTicks 주기로만 보낸다(몬스터 10Hz LOD).
+        const bool movedOrTurned  = (dx * dx + dz * dz) > kPosEpsSq || yawDiff > kYawEpsDeg;
+
+        const bool changed   = flagTransition || (movedOrTurned && ticksSinceSent >= minMoveIntervalTicks);
+        const bool heartbeat = ticksSinceSent >= heartbeatTicks;
         m_snapshotDue = changed || heartbeat;
 
         if (m_snapshotDue)
