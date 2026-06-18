@@ -71,6 +71,14 @@ private:
     // netdelay <recvMs> [sendMs]: 이 클라 연결에 인위적 네트워크 지연 설정(개발용). 게이트웨이로 전파.
     CheatResult cheatNetDelay    (Stage& stage, const UserPtr& spUser, const std::vector<std::string>& args);
 
+#ifdef _DEBUG
+    // [디버그 UI] 구독 토글. 상태는 호출 유저(User)에 보관되고, Stage 디버그 tick 이 읽어 push 한다.
+    // dbgstat <objectId>: 선택 오브젝트 전체 스탯 구독 (인자 없거나 0 이면 해제).
+    CheatResult cheatDbgStat     (Stage& stage, const UserPtr& spUser, const std::vector<std::string>& args);
+    // dbgmon [on|off]: 내 주변 섹터 몬스터 위치 구독 (인자 없으면 토글).
+    CheatResult cheatDbgMon      (Stage& stage, const UserPtr& spUser, const std::vector<std::string>& args);
+#endif
+
     // packet/packetdetail 공통 토글. all=true 면 글로벌, 아니면 호출 유저. level = 토글 대상(Name/Detail).
     CheatResult togglePacketLog(const UserPtr& spUser, bool all, EPacketLogMode level, const char* label);
 

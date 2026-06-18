@@ -77,6 +77,15 @@ public:
     EPacketLogMode     GetCheatPacketLogMode() const             { return m_cheatPacketLogMode; }
     void               SetCheatPacketLogMode(EPacketLogMode mode) { m_cheatPacketLogMode = mode; }
 
+    // ── [디버그] 디버그 UI 구독 상태 (개발용, _DEBUG 한정) ─────────
+    // 디버그 치트(dbgstat/dbgmon)가 설정하고, Stage::sendDebugSubscriptions 가 읽어 주기 push 한다.
+#ifdef _DEBUG
+    int64 GetDebugStatTarget() const         { return m_debugStatTarget; }   // 0 = 미구독
+    void  SetDebugStatTarget(int64 objectId) { m_debugStatTarget = objectId; }
+    bool  IsDebugMonsterPos() const          { return m_debugMonsterPos; }
+    void  SetDebugMonsterPos(bool on)        { m_debugMonsterPos = on; }
+#endif
+
     // ── 클라 패킷 큐 ────────────────────────────────────────────
     // IOCP Worker가 push (thread-safe)
     void EnqueuePacket(const netlib::PacketPtr& spPacket);
@@ -104,6 +113,12 @@ private:
 
     // [치트] per-client 패킷 로깅 모드. 기본 None.
     EPacketLogMode m_cheatPacketLogMode = EPacketLogMode::None;
+
+    // [디버그] 디버그 UI 구독 상태 (개발용, _DEBUG 한정).
+#ifdef _DEBUG
+    int64 m_debugStatTarget = 0;       // DebugStatNtf 대상 objectId. 0 = 미구독.
+    bool  m_debugMonsterPos = false;   // DebugMonsterPositionsNtf 구독 여부.
+#endif
 
     // ── 클라 패킷 큐 ────────────────────────────────────────────
     std::mutex                       m_packetQueueMutex;

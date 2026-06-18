@@ -425,6 +425,13 @@ private:
     // 클라는 원격 액터를 이 스냅샷들로 보간하고, 본인 캐릭터는 화해에 사용한다.
     void buildAndSendSnapshots();
 
+#ifdef _DEBUG
+    // [디버그 UI] 구독 중인 유저에게 디버그 패킷을 주기적으로 push (개발용).
+    // dbgstat 구독자에게 DebugStatNtf, dbgmon 구독자에게 DebugMonsterPositionsNtf 를 보낸다.
+    // OnUpdate 끝에서 호출되며, 디버그 tick 주기로만 실제 전송한다.
+    void sendDebugSubscriptions();
+#endif
+
     // effectId 로 진행 중인 투사체 그룹을 찾는다. 없으면 nullptr.
     ProjectileGroup* findSkillProjectileGroup(int64 effectId);
 

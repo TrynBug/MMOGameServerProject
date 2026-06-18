@@ -39,6 +39,7 @@
 #include "Generated/GamePacket/skill_packet.pb.h"
 #include "Generated/GamePacket/ability_packet.pb.h"
 #include "Generated/GamePacket/cheat_packet.pb.h"
+#include "Generated/GamePacket/debug_packet.pb.h"
 #include "Generated/ServerPacket/gateway_user_packet.pb.h"
 #include "Generated/ServerPacket/gateway_game_packet.pb.h"
 

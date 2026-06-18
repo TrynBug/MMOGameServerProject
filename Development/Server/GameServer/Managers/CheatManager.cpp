@@ -15,6 +15,10 @@ CheatManager::CheatManager()
         { "packet",       &CheatManager::cheatPacket },
         { "packetdetail", &CheatManager::cheatPacketDetail },
         { "netdelay",     &CheatManager::cheatNetDelay },
+#ifdef _DEBUG
+        { "dbgstat",      &CheatManager::cheatDbgStat },
+        { "dbgmon",       &CheatManager::cheatDbgMon  },
+#endif
     };
 }
 
@@ -121,3 +125,48 @@ CheatResult CheatManager::togglePacketLog(const UserPtr& spUser, bool all, EPack
     spUser->SetCheatPacketLogMode(next);
     return { true, std::format("{}: {} (this client)", label, (next == EPacketLogMode::None) ? "off" : "on") };
 }
+
+#ifdef _DEBUG
+// dbgstat <objectId>: 디버그 UI 의 스탯 보기 구독을 설정한다.
+// 인자가 없거나 0 이면 해제. objectId 가 이 Stage 에 없으면 실패.
+// 구독 상태는 호출 유저에 보관되고, Stage::sendDebugSubscriptions 가 주기적으로 DebugStatNtf 를 보낸다.
+CheatResult CheatManager::cheatDbgStat(Stage& stage, const UserPtr& spUser, const std::vector<std::string>& args)
+{
+    if (!spUser)
+        return { false, "no user context" };
+
+    if (args.empty())
+    {
+        spUser->SetDebugStatTarget(0);
+        return { true, "dbgstat off" };
+    }
+
+    const int64 objectId = std::atoll(args[0].c_str());
+    if (objectId == 0)
+    {
+        spUser->SetDebugStatTarget(0);
+        return { true, "dbgstat off" };
+    }
+    if (stage.FindObject(objectId) == nullptr)
+        return { false, std::format("object not found in this stage: {}", objectId) };
+
+    spUser->SetDebugStatTarget(objectId);
+    return { true, std::format("dbgstat -> {}", objectId) };
+}
+
+// dbgmon [on|off]: 내 주변 섹터 몬스터 위치 구독 토글. 인자 없으면 현재값 토글.
+CheatResult CheatManager::cheatDbgMon(Stage& /*stage*/, const UserPtr& spUser, const std::vector<std::string>& args)
+{
+    if (!spUser)
+        return { false, "no user context" };
+
+    bool on;
+    if (args.empty())
+        on = !spUser->IsDebugMonsterPos();
+    else
+        on = (args[0] == "on" || args[0] == "1" || args[0] == "true");
+
+    spUser->SetDebugMonsterPos(on);
+    return { true, std::string("dbgmon ") + (on ? "on" : "off") };
+}
+#endif // _DEBUG

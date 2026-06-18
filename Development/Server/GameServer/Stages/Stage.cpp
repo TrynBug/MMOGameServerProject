@@ -4,6 +4,7 @@
 #include "StageObjects/Monster.h"
 #include "Components/MonsterFsmAI.h"
 #include "GameServer.h"
+#include "Components/StatComponentBase.h"
 #include "Stages/StageNavMesh.h"
 #include "Stages/StageLayout.h"
 #include "StageObjects/MonsterSpawner.h"
@@ -450,6 +451,11 @@ void Stage::OnUpdate(int64 deltaMs)
 
     // 6.5 AOI 스냅샷 스트리밍 (이동 복제). 이번 tick 시뮬레이션 결과(위치)를 주변 유저에게 송신.
     buildAndSendSnapshots();
+
+#ifdef _DEBUG
+    // 6.6 [디버그 UI] 구독 중인 유저에게 디버그 패킷 주기 push (개발용).
+    sendDebugSubscriptions();
+#endif
 }
 
 void Stage::OnStop()
@@ -1525,6 +1531,78 @@ void Stage::buildAndSendSnapshots()
             GameServer::Instance().GetPacketSender().SendSnapshotNtf(userId, ntf);
     }
 }
+
+#ifdef _DEBUG
+// [디버그 UI] 구독 중인 유저에게 디버그 패킷을 주기적으로 push (개발용).
+// 디버그는 실시간성이 덜 중요하므로 매 tick 이 아니라 일정 주기(약 250ms)로만 보낸다.
+void Stage::sendDebugSubscriptions()
+{
+    // 서버 tick(50ms) 기준 2 tick = 100ms 마다 1회 전송.
+    constexpr uint32 kDebugPushPeriodTicks = 2;
+    if ((m_serverTickSeq % kDebugPushPeriodTicks) != 0)
+        return;
+
+    PacketSender& sender = GameServer::Instance().GetPacketSender();
+
+    for (const auto& [userId, spUser] : m_users)
+    {
+        // ① dbgstat: 선택 오브젝트의 (0 아닌) 전체 스탯 스냅샷.
+        const int64 statTarget = spUser->GetDebugStatTarget();
+        if (statTarget != 0)
+        {
+            if (ActorObject* pActor = dynamic_cast<ActorObject*>(FindObject(statTarget)))
+            {
+                GamePacket::DebugStatNtf ntf;
+                ntf.set_object_id(statTarget);
+                if (StatComponentBase* pStat = pActor->GetStatComponent())
+                {
+                    pStat->ForEachNonZeroStat([&](EStat stat, double value)
+                    {
+                        GamePacket::DebugStatEntry* pEntry = ntf.add_entries();
+                        pEntry->set_stat(static_cast<int32>(stat));
+                        pEntry->set_value(value);
+                    });
+                }
+                sender.SendToUser(userId, Common::GAME_PACKET_ID_DEBUG_STAT_NTF, ntf);
+            }
+            // 대상이 사라졌으면(디스폰 등) 조용히 스킵한다. 클라가 다시 dbgstat 로 갱신.
+        }
+
+        // ② dbgmon: 내 캐릭터 주변 섹터(AOI)의 몬스터 서버 좌표.
+        //    sector 컨테이너에서 직접 수집 → 가시성 파이프라인과 무관한 "서버 진실".
+        if (spUser->IsDebugMonsterPos())
+        {
+            const CharacterPtr spChar = spUser->GetCurrentCharacter();
+            if (spChar && spChar->GetCurSectorX() >= 0)
+            {
+                GamePacket::DebugMonsterPositionsNtf ntf;
+                ntf.set_server_tick_seq(m_serverTickSeq);
+
+                ForEachAdjacentSector(spChar->GetCurSectorX(), spChar->GetCurSectorZ(), k_aoiRange,
+                    [&](Sector* pSector)
+                    {
+                        for (const auto& [objId, pObj] : pSector->GetMonsters())
+                        {
+                            const Monster* pMon = static_cast<const Monster*>(pObj);
+                            GamePacket::DebugMonsterPos* pPos = ntf.add_monsters();
+                            pPos->set_object_id(pMon->GetObjectId());
+                            pPos->set_pos_x(pMon->GetPosX());
+                            pPos->set_pos_y(pMon->GetPosY());
+                            pPos->set_pos_z(pMon->GetPosZ());
+                            pPos->set_yaw(pMon->GetYaw());
+                            uint32 flags = 0;
+                            if (pMon->IsMoving()) flags |= 0x1u;
+                            if (pMon->IsDead())   flags |= 0x2u;
+                            pPos->set_flags(flags);
+                        }
+                    });
+
+                sender.SendToUser(userId, Common::GAME_PACKET_ID_DEBUG_MONSTER_POSITIONS_NTF, ntf);
+            }
+        }
+    }
+}
+#endif // _DEBUG
 
 void Stage::updateVisibilityOnSectorChange(Character& character,
                                            int32 oldSectorX, int32 oldSectorZ,
