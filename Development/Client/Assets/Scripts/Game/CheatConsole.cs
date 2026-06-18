@@ -187,8 +187,8 @@ namespace Client.Game
                 return;
             }
 
-            float width = Mathf.Min(Screen.width - 20f, 760f);
-            float x = 10f;
+            float x = 24f;
+            float width = Mathf.Min(Screen.width - x - 20f, 760f);
             float y = 10f;
 
             // 입력 줄.
