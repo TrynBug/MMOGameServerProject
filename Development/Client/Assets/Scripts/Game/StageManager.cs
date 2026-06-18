@@ -239,6 +239,12 @@ namespace Client.Game
                 return;
             }
 
+            // SnapshotNtf 위치 양자화 해제용 월드 X/Z 경계 저장 (서버 인코드와 동일 범위 → 정확 복원).
+            m_worldMinX = res.WorldMinX;
+            m_worldMinZ = res.WorldMinZ;
+            m_worldMaxX = res.WorldMaxX;
+            m_worldMaxZ = res.WorldMaxZ;
+
             // NavMesh 안전망. 정상 흐름이면 BeginStageLoad 에서 이미 로드됨 (no-op).
             loadNavMeshForStage(res.StageDataKey);
 
@@ -357,20 +363,21 @@ namespace Client.Game
 
             foreach (ActorStateInfo s in ntf.States)
             {
-                Vector3 pos = new Vector3(s.PosX, s.PosY, s.PosZ);
+                // 양자화 해제 (계약은 move_packet.proto ActorStateInfo 주석 / 서버 인코드와 일치).
+                DecodeActorState(s, out Vector3 pos, out float yaw);
 
                 if (LocalPlayer != null && s.ObjectId == myObjectId)
                 {
-                    LocalPlayer.ReconcileTo(pos, s.Yaw, ntf.AckInputSeq);   // 본인: 예측↔서버 화해 (Phase 3)
+                    LocalPlayer.ReconcileTo(pos, yaw, ntf.AckInputSeq);   // 본인: 예측↔서버 화해 (Phase 3)
                     continue;
                 }
 
                 bool moving = (s.Flags & 0x1u) != 0;
 
                 if (m_characters.TryGetValue(s.ObjectId, out PlayerCharacter character) && character != null)
-                    character.OnSnapshot(serverMs, pos, s.Yaw, moving);
+                    character.OnSnapshot(serverMs, pos, yaw, moving);
                 else if (m_monsters.TryGetValue(s.ObjectId, out MonsterObject monster) && monster != null)
-                    monster.OnSnapshot(serverMs, pos, s.Yaw, moving);
+                    monster.OnSnapshot(serverMs, pos, yaw, moving);
             }
         }
 
@@ -379,6 +386,29 @@ namespace Client.Game
         private void onTimeSyncNtf(TimeSyncNtf ntf)
         {
             NetClock.OnServerTick(ntf.ServerTickSeq);
+        }
+
+        // ── ActorStateInfo 양자화 해제 (계약은 move_packet.proto / 서버 인코드와 반드시 일치) ──
+        // X/Z 범위는 StageLoadCompleteRes 로 받은 이 stage 의 월드 경계(서버 인코드와 동일). Y 는 고정 범위.
+        private float m_worldMinX = -2048f, m_worldMinZ = -2048f;   // StageLoadCompleteRes 수신 전 안전 기본값.
+        private float m_worldMaxX =  2048f, m_worldMaxZ =  2048f;
+        private const float k_quantYMin = -512f, k_quantYMax = 512f;   // Y 16bit 고정 범위 (~1.6cm)
+
+        private static float dequantUnit(ushort q, float mn, float mx)
+        {
+            return mn + (q / 65535f) * (mx - mn);
+        }
+
+        // qpos_xz / qpos_y_yaw 두 fixed32 에서 위치(Vector3)와 yaw(degree)를 복원한다.
+        private void DecodeActorState(ActorStateInfo s, out Vector3 pos, out float yaw)
+        {
+            uint xz   = s.QposXz;
+            uint yyaw = s.QposYYaw;
+            float x = dequantUnit((ushort)(xz   >> 16),    m_worldMinX, m_worldMaxX);
+            float z = dequantUnit((ushort)(xz   & 0xFFFF), m_worldMinZ, m_worldMaxZ);
+            float y = dequantUnit((ushort)(yyaw >> 16),    k_quantYMin, k_quantYMax);
+            yaw = ((ushort)(yyaw & 0xFFFF) / 65535f) * 360f;
+            pos = new Vector3(x, y, z);
         }
 
         // 원격 보간 재생 시계를 매 프레임 전진시킨다.
