@@ -85,6 +85,10 @@ enum GamePacketId {
     // 9000~9999: 치트 (개발용. 서버는 _DEBUG 빌드에서만 처리)
     GAME_PACKET_ID_CHEAT_REQ = 9001;   // 클라 -> 서버: 치트 실행 요청 (name + args)
     GAME_PACKET_ID_CHEAT_RES = 9002;   // 서버 -> 클라: 치트 실행 결과 (success + message)
+
+    // 9100~9199: 디버그 UI (개발용. 서버는 _DEBUG 빌드에서만 처리. 구독은 치트(dbgstat/dbgmon)로 토글)
+    GAME_PACKET_ID_DEBUG_STAT_NTF              = 9101;   // 서버 -> 클라: 선택 오브젝트의 (0 아닌) 전체 스탯 스냅샷 (구독 중 주기 push)
+    GAME_PACKET_ID_DEBUG_MONSTER_POSITIONS_NTF = 9102;   // 서버 -> 클라: 내 캐릭터 주변 섹터(AOI)의 몬스터 서버 좌표 (구독 중 주기 push)
 }
 
 // 서버 <-> 서버 패킷 ID

@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package GamePacket;
+
+// ──────────────────────────────────────────────
+// 디버그 UI 패킷 (개발용)
+// ──────────────────────────────────────────────
+//
+// 클라 디버그 HUD(DebugHud) 가, 정상 플레이 중에는 받지 않는 서버측 정보를
+// 보고 싶을 때 구독한다. 구독 토글은 별도 요청 패킷 없이 기존 치트 경로를 쓴다:
+//   - dbgstat <objectId> : DebugStatNtf 구독 (해당 오브젝트 전체 스탯)
+//   - dbgmon  [on|off]   : DebugMonsterPositionsNtf 구독 (내 주변 섹터 몬스터 위치)
+// 서버는 _DEBUG 빌드에서만 이 치트/구독을 처리한다(치트 핸들러가 _DEBUG 한정).
+//
+// 구독 중인 동안 서버가 디버그 tick(약 250ms)마다 아래 NTF 를 push 한다.
+//
+// 주의: AOI 내 오브젝트의 "합성 최종 스탯/버프 뱃지/위치"는 클라가 이미
+//       StatUpdateNtf/BuffNtf/SnapshotNtf 로 받아 보관 중이다. 이 패킷들은
+//       그것만으로는 알 수 없는 정보(선택 대상 전체 스탯, 가시성 파이프라인과
+//       무관한 서버 권위 몬스터 위치)만 추가로 나른다.
+
+// 스탯 1개 항목. stat 은 GameData 의 EStat enum 값(GameEnum_Stat).
+message DebugStatEntry {
+    int32  stat  = 1;
+    double value = 2;
+}
+
+// 선택 오브젝트의 스탯 스냅샷 (서버 -> 클라).
+// StatUpdateNtf 와 달리 본인 외 임의의 오브젝트(다른 캐릭터/몬스터)도 대상이 될 수 있다.
+// 0 아닌 스탯(raw + 합성 Total 항목 모두 EStat 으로 표현됨)을 담는다.
+// 클라는 EStat 전체를 순회하며 미수신 항목은 0 으로 표시한다.
+message DebugStatNtf {
+    int64 object_id = 1;
+    repeated DebugStatEntry entries = 2;
+}
+
+// 몬스터 1마리의 서버 권위 위치 (디버그).
+// 좌표계: Unity 와 동일. Y=높이, X-Z 평면, yaw=degree.
+message DebugMonsterPos {
+    int64  object_id = 1;
+    float  pos_x = 2;
+    float  pos_y = 3;
+    float  pos_z = 4;
+    float  yaw   = 5;
+    uint32 flags = 6;   // SnapshotNtf.ActorStateInfo 와 동일 의미. bit0=isMoving, bit1=isDead.
+}
+
+// 내 캐릭터 주변 섹터(AOI 범위)의 몬스터 서버 좌표 목록 (서버 -> 클라).
+// 서버의 sector 컨테이너에서 직접 수집하므로, 가시성 파이프라인(ObjectVisibilityNtf)과
+// 무관하게 "서버가 이 섹터들에 실제로 들고 있는" 몬스터를 보여준다.
+// → 클라가 들고 있는 몬스터 집합과 대조하면 스폰/가시성 버그를 잡을 수 있다.
+message DebugMonsterPositionsNtf {
+    uint32 server_tick_seq = 1;   // SnapshotNtf 와 같은 tick 기준 (오차 비교용)
+    repeated DebugMonsterPos monsters = 2;
+}

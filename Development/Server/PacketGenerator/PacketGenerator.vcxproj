@@ -28,6 +28,7 @@
     <ClCompile Include="Generated\GamePacket\character_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\chat_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\cheat_packet.pb.cc" />
+    <ClCompile Include="Generated\GamePacket\debug_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\dungeon_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\item_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\login_packet.pb.cc" />
@@ -60,6 +61,7 @@
     <ClInclude Include="Generated\GamePacket\character_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\chat_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\cheat_packet.pb.h" />
+    <ClInclude Include="Generated\GamePacket\debug_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\dungeon_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\item_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\login_packet.pb.h" />
