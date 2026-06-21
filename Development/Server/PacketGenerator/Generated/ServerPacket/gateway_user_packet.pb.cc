@@ -34,7 +34,10 @@ inline constexpr GatewayUserRerouteNtf::Impl_::Impl_(
             ::_pbi::ConstantInitialized()),
         user_id_{::int64_t{0}},
         gateway_id_{0},
-        target_stage_id_{0} {}
+        target_stage_id_{0},
+        character_id_{::int64_t{0}},
+        target_stage_data_key_{0},
+        position_type_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR GatewayUserRerouteNtf::GatewayUserRerouteNtf(::_pbi::ConstantInitialized)
@@ -133,15 +136,21 @@ const ::uint32_t
         0,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayUserRerouteNtf, _impl_._has_bits_),
-        7, // hasbit index offset
+        10, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayUserRerouteNtf, _impl_.user_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayUserRerouteNtf, _impl_.gateway_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayUserRerouteNtf, _impl_.target_stage_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayUserRerouteNtf, _impl_.client_ip_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayUserRerouteNtf, _impl_.character_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayUserRerouteNtf, _impl_.target_stage_data_key_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::GatewayUserRerouteNtf, _impl_.position_type_),
         1,
         2,
         3,
         0,
+        4,
+        5,
+        6,
 };
 
 static const ::_pbi::MigrationSchema
@@ -161,16 +170,18 @@ const char descriptor_table_protodef_ServerPacket_2fgateway_5fuser_5fpacket_2epr
     "\022\014ServerPacket\"M\n\023GatewayUserEnterNtf\022\017\n"
     "\007user_id\030\001 \001(\003\022\022\n\ngateway_id\030\002 \001(\005\022\021\n\tcl"
     "ient_ip\030\003 \001(\t\"+\n\030GatewayUserDisconnectNt"
-    "f\022\017\n\007user_id\030\001 \001(\003\"h\n\025GatewayUserReroute"
-    "Ntf\022\017\n\007user_id\030\001 \001(\003\022\022\n\ngateway_id\030\002 \001(\005"
-    "\022\027\n\017target_stage_id\030\003 \001(\005\022\021\n\tclient_ip\030\004"
-    " \001(\tb\006proto3"
+    "f\022\017\n\007user_id\030\001 \001(\003\"\264\001\n\025GatewayUserRerout"
+    "eNtf\022\017\n\007user_id\030\001 \001(\003\022\022\n\ngateway_id\030\002 \001("
+    "\005\022\027\n\017target_stage_id\030\003 \001(\005\022\021\n\tclient_ip\030"
+    "\004 \001(\t\022\024\n\014character_id\030\005 \001(\003\022\035\n\025target_st"
+    "age_data_key\030\006 \001(\005\022\025\n\rposition_type\030\007 \001("
+    "\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_ServerPacket_2fgateway_5fuser_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2fgateway_5fuser_5fpacket_2eproto = {
     false,
     false,
-    292,
+    369,
     descriptor_table_protodef_ServerPacket_2fgateway_5fuser_5fpacket_2eproto,
     "ServerPacket/gateway_user_packet.proto",
     &descriptor_table_ServerPacket_2fgateway_5fuser_5fpacket_2eproto_once,
@@ -833,9 +844,9 @@ GatewayUserRerouteNtf::GatewayUserRerouteNtf(
                offsetof(Impl_, user_id_),
            reinterpret_cast<const char*>(&from._impl_) +
                offsetof(Impl_, user_id_),
-           offsetof(Impl_, target_stage_id_) -
+           offsetof(Impl_, position_type_) -
                offsetof(Impl_, user_id_) +
-               sizeof(Impl_::target_stage_id_));
+               sizeof(Impl_::position_type_));
 
   // @@protoc_insertion_point(copy_constructor:ServerPacket.GatewayUserRerouteNtf)
 }
@@ -850,9 +861,9 @@ inline void GatewayUserRerouteNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE ar
   ::memset(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, user_id_),
            0,
-           offsetof(Impl_, target_stage_id_) -
+           offsetof(Impl_, position_type_) -
                offsetof(Impl_, user_id_) +
-               sizeof(Impl_::target_stage_id_));
+               sizeof(Impl_::position_type_));
 }
 GatewayUserRerouteNtf::~GatewayUserRerouteNtf() {
   // @@protoc_insertion_point(destructor:ServerPacket.GatewayUserRerouteNtf)
@@ -912,16 +923,16 @@ GatewayUserRerouteNtf::GetClassData() const {
   return GatewayUserRerouteNtf_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 4, 0, 52, 2>
+const ::_pbi::TcParseTable<3, 7, 0, 52, 2>
 GatewayUserRerouteNtf::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_._has_bits_),
     0, // no _extensions_
-    4, 24,  // max_field_number, fast_idx_mask
+    7, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967280,  // skipmap
+    4294967168,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    4,  // num_field_entries
+    7,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     GatewayUserRerouteNtf_class_data_.base(),
@@ -931,10 +942,7 @@ GatewayUserRerouteNtf::_table_ = {
     ::_pbi::TcParser::GetTable<::ServerPacket::GatewayUserRerouteNtf>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // string client_ip = 4;
-    {::_pbi::TcParser::FastUS1,
-     {34, 0, 0,
-      PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.client_ip_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // int64 user_id = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(GatewayUserRerouteNtf, _impl_.user_id_), 1>(),
      {8, 1, 0,
@@ -947,6 +955,22 @@ GatewayUserRerouteNtf::_table_ = {
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(GatewayUserRerouteNtf, _impl_.target_stage_id_), 3>(),
      {24, 3, 0,
       PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.target_stage_id_)}},
+    // string client_ip = 4;
+    {::_pbi::TcParser::FastUS1,
+     {34, 0, 0,
+      PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.client_ip_)}},
+    // int64 character_id = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(GatewayUserRerouteNtf, _impl_.character_id_), 4>(),
+     {40, 4, 0,
+      PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.character_id_)}},
+    // int32 target_stage_data_key = 6;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(GatewayUserRerouteNtf, _impl_.target_stage_data_key_), 5>(),
+     {48, 5, 0,
+      PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.target_stage_data_key_)}},
+    // int32 position_type = 7;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(GatewayUserRerouteNtf, _impl_.position_type_), 6>(),
+     {56, 6, 0,
+      PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.position_type_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -958,6 +982,12 @@ GatewayUserRerouteNtf::_table_ = {
     {PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.target_stage_id_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // string client_ip = 4;
     {PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.client_ip_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int64 character_id = 5;
+    {PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.character_id_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int32 target_stage_data_key = 6;
+    {PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.target_stage_data_key_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int32 position_type = 7;
+    {PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.position_type_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
@@ -977,10 +1007,10 @@ PROTOBUF_NOINLINE void GatewayUserRerouteNtf::Clear() {
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
     _impl_.client_ip_.ClearNonDefaultToEmpty();
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x0000000eU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007eU)) {
     ::memset(&_impl_.user_id_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.target_stage_id_) -
-        reinterpret_cast<char*>(&_impl_.user_id_)) + sizeof(_impl_.target_stage_id_));
+        reinterpret_cast<char*>(&_impl_.position_type_) -
+        reinterpret_cast<char*>(&_impl_.user_id_)) + sizeof(_impl_.position_type_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -1042,6 +1072,33 @@ PROTOBUF_NOINLINE void GatewayUserRerouteNtf::Clear() {
     }
   }
 
+  // int64 character_id = 5;
+  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (this_._internal_character_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<5>(
+              stream, this_._internal_character_id(), target);
+    }
+  }
+
+  // int32 target_stage_data_key = 6;
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (this_._internal_target_stage_data_key() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<6>(
+              stream, this_._internal_target_stage_data_key(), target);
+    }
+  }
+
+  // int32 position_type = 7;
+  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+    if (this_._internal_position_type() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<7>(
+              stream, this_._internal_position_type(), target);
+    }
+  }
+
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -1067,7 +1124,7 @@ PROTOBUF_NOINLINE void GatewayUserRerouteNtf::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
     // string client_ip = 4;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (!this_._internal_client_ip().empty()) {
@@ -1096,6 +1153,27 @@ PROTOBUF_NOINLINE void GatewayUserRerouteNtf::Clear() {
             this_._internal_target_stage_id());
       }
     }
+    // int64 character_id = 5;
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (this_._internal_character_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_character_id());
+      }
+    }
+    // int32 target_stage_data_key = 6;
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (this_._internal_target_stage_data_key() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_target_stage_data_key());
+      }
+    }
+    // int32 position_type = 7;
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (this_._internal_position_type() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_position_type());
+      }
+    }
   }
   return this_.MaybeComputeUnknownFieldsSize(total_size,
                                              &this_._impl_._cached_size_);
@@ -1115,7 +1193,7 @@ void GatewayUserRerouteNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (!from._internal_client_ip().empty()) {
         _this->_internal_set_client_ip(from._internal_client_ip());
@@ -1140,6 +1218,21 @@ void GatewayUserRerouteNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
         _this->_impl_.target_stage_id_ = from._impl_.target_stage_id_;
       }
     }
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (from._internal_character_id() != 0) {
+        _this->_impl_.character_id_ = from._impl_.character_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (from._internal_target_stage_data_key() != 0) {
+        _this->_impl_.target_stage_data_key_ = from._impl_.target_stage_data_key_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (from._internal_position_type() != 0) {
+        _this->_impl_.position_type_ = from._impl_.position_type_;
+      }
+    }
   }
   _this->_impl_._has_bits_[0] |= cached_has_bits;
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
@@ -1162,8 +1255,8 @@ void GatewayUserRerouteNtf::InternalSwap(GatewayUserRerouteNtf* PROTOBUF_RESTRIC
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.client_ip_, &other->_impl_.client_ip_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.target_stage_id_)
-      + sizeof(GatewayUserRerouteNtf::_impl_.target_stage_id_)
+      PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.position_type_)
+      + sizeof(GatewayUserRerouteNtf::_impl_.position_type_)
       - PROTOBUF_FIELD_OFFSET(GatewayUserRerouteNtf, _impl_.user_id_)>(
           reinterpret_cast<char*>(&_impl_.user_id_),
           reinterpret_cast<char*>(&other->_impl_.user_id_));

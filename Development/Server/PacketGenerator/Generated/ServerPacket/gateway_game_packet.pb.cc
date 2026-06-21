@@ -31,7 +31,10 @@ inline constexpr UserMoveToGameServerReq::Impl_::Impl_(
       : _cached_size_{0},
         user_id_{::int64_t{0}},
         target_game_server_id_{0},
-        target_stage_id_{0} {}
+        target_stage_id_{0},
+        character_id_{::int64_t{0}},
+        target_stage_data_key_{0},
+        position_type_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR UserMoveToGameServerReq::UserMoveToGameServerReq(::_pbi::ConstantInitialized)
@@ -117,13 +120,19 @@ const ::uint32_t
         protodesc_cold) = {
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerReq, _impl_._has_bits_),
-        6, // hasbit index offset
+        9, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerReq, _impl_.user_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerReq, _impl_.target_game_server_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerReq, _impl_.target_stage_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerReq, _impl_.character_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerReq, _impl_.target_stage_data_key_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerReq, _impl_.position_type_),
         0,
         1,
         2,
+        3,
+        4,
+        5,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerFailNtf, _impl_._has_bits_),
         5, // hasbit index offset
@@ -145,8 +154,8 @@ const ::uint32_t
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, sizeof(::ServerPacket::UserMoveToGameServerReq)},
-        {9, sizeof(::ServerPacket::UserMoveToGameServerFailNtf)},
-        {16, sizeof(::ServerPacket::SetClientLatencyReq)},
+        {15, sizeof(::ServerPacket::UserMoveToGameServerFailNtf)},
+        {22, sizeof(::ServerPacket::SetClientLatencyReq)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::ServerPacket::_UserMoveToGameServerReq_default_instance_._instance,
@@ -156,19 +165,21 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_ServerPacket_2fgateway_5fgame_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n&ServerPacket/gateway_game_packet.proto"
-    "\022\014ServerPacket\"b\n\027UserMoveToGameServerRe"
-    "q\022\017\n\007user_id\030\001 \001(\003\022\035\n\025target_game_server"
-    "_id\030\002 \001(\005\022\027\n\017target_stage_id\030\003 \001(\005\">\n\033Us"
-    "erMoveToGameServerFailNtf\022\017\n\007user_id\030\001 \001"
-    "(\003\022\016\n\006reason\030\002 \001(\t\"T\n\023SetClientLatencyRe"
-    "q\022\017\n\007user_id\030\001 \001(\003\022\025\n\rrecv_delay_ms\030\002 \001("
-    "\005\022\025\n\rsend_delay_ms\030\003 \001(\005b\006proto3"
+    "\022\014ServerPacket\"\256\001\n\027UserMoveToGameServerR"
+    "eq\022\017\n\007user_id\030\001 \001(\003\022\035\n\025target_game_serve"
+    "r_id\030\002 \001(\005\022\027\n\017target_stage_id\030\003 \001(\005\022\024\n\014c"
+    "haracter_id\030\004 \001(\003\022\035\n\025target_stage_data_k"
+    "ey\030\005 \001(\005\022\025\n\rposition_type\030\006 \001(\005\">\n\033UserM"
+    "oveToGameServerFailNtf\022\017\n\007user_id\030\001 \001(\003\022"
+    "\016\n\006reason\030\002 \001(\t\"T\n\023SetClientLatencyReq\022\017"
+    "\n\007user_id\030\001 \001(\003\022\025\n\rrecv_delay_ms\030\002 \001(\005\022\025"
+    "\n\rsend_delay_ms\030\003 \001(\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto = {
     false,
     false,
-    312,
+    389,
     descriptor_table_protodef_ServerPacket_2fgateway_5fgame_5fpacket_2eproto,
     "ServerPacket/gateway_game_packet.proto",
     &descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto_once,
@@ -222,9 +233,9 @@ inline void UserMoveToGameServerReq::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE 
   ::memset(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, user_id_),
            0,
-           offsetof(Impl_, target_stage_id_) -
+           offsetof(Impl_, position_type_) -
                offsetof(Impl_, user_id_) +
-               sizeof(Impl_::target_stage_id_));
+               sizeof(Impl_::position_type_));
 }
 UserMoveToGameServerReq::~UserMoveToGameServerReq() {
   // @@protoc_insertion_point(destructor:ServerPacket.UserMoveToGameServerReq)
@@ -283,16 +294,16 @@ UserMoveToGameServerReq::GetClassData() const {
   return UserMoveToGameServerReq_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 0, 0, 2>
+const ::_pbi::TcParseTable<3, 6, 0, 0, 2>
 UserMoveToGameServerReq::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_._has_bits_),
     0, // no _extensions_
-    3, 24,  // max_field_number, fast_idx_mask
+    6, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967288,  // skipmap
+    4294967232,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
+    6,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     UserMoveToGameServerReq_class_data_.base(),
@@ -315,6 +326,19 @@ UserMoveToGameServerReq::_table_ = {
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(UserMoveToGameServerReq, _impl_.target_stage_id_), 2>(),
      {24, 2, 0,
       PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.target_stage_id_)}},
+    // int64 character_id = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(UserMoveToGameServerReq, _impl_.character_id_), 3>(),
+     {32, 3, 0,
+      PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.character_id_)}},
+    // int32 target_stage_data_key = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(UserMoveToGameServerReq, _impl_.target_stage_data_key_), 4>(),
+     {40, 4, 0,
+      PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.target_stage_data_key_)}},
+    // int32 position_type = 6;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(UserMoveToGameServerReq, _impl_.position_type_), 5>(),
+     {48, 5, 0,
+      PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.position_type_)}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -324,6 +348,12 @@ UserMoveToGameServerReq::_table_ = {
     {PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.target_game_server_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // int32 target_stage_id = 3;
     {PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.target_stage_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int64 character_id = 4;
+    {PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.character_id_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int32 target_stage_data_key = 5;
+    {PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.target_stage_data_key_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int32 position_type = 6;
+    {PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.position_type_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
@@ -337,10 +367,10 @@ PROTOBUF_NOINLINE void UserMoveToGameServerReq::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
     ::memset(&_impl_.user_id_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.target_stage_id_) -
-        reinterpret_cast<char*>(&_impl_.user_id_)) + sizeof(_impl_.target_stage_id_));
+        reinterpret_cast<char*>(&_impl_.position_type_) -
+        reinterpret_cast<char*>(&_impl_.user_id_)) + sizeof(_impl_.position_type_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -392,6 +422,33 @@ PROTOBUF_NOINLINE void UserMoveToGameServerReq::Clear() {
     }
   }
 
+  // int64 character_id = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (this_._internal_character_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<4>(
+              stream, this_._internal_character_id(), target);
+    }
+  }
+
+  // int32 target_stage_data_key = 5;
+  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (this_._internal_target_stage_data_key() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<5>(
+              stream, this_._internal_target_stage_data_key(), target);
+    }
+  }
+
+  // int32 position_type = 6;
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (this_._internal_position_type() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<6>(
+              stream, this_._internal_position_type(), target);
+    }
+  }
+
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -417,7 +474,7 @@ PROTOBUF_NOINLINE void UserMoveToGameServerReq::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
     // int64 user_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (this_._internal_user_id() != 0) {
@@ -439,6 +496,27 @@ PROTOBUF_NOINLINE void UserMoveToGameServerReq::Clear() {
             this_._internal_target_stage_id());
       }
     }
+    // int64 character_id = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (this_._internal_character_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_character_id());
+      }
+    }
+    // int32 target_stage_data_key = 5;
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (this_._internal_target_stage_data_key() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_target_stage_data_key());
+      }
+    }
+    // int32 position_type = 6;
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (this_._internal_position_type() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_position_type());
+      }
+    }
   }
   return this_.MaybeComputeUnknownFieldsSize(total_size,
                                              &this_._impl_._cached_size_);
@@ -458,7 +536,7 @@ void UserMoveToGameServerReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (from._internal_user_id() != 0) {
         _this->_impl_.user_id_ = from._impl_.user_id_;
@@ -472,6 +550,21 @@ void UserMoveToGameServerReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
       if (from._internal_target_stage_id() != 0) {
         _this->_impl_.target_stage_id_ = from._impl_.target_stage_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (from._internal_character_id() != 0) {
+        _this->_impl_.character_id_ = from._impl_.character_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (from._internal_target_stage_data_key() != 0) {
+        _this->_impl_.target_stage_data_key_ = from._impl_.target_stage_data_key_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (from._internal_position_type() != 0) {
+        _this->_impl_.position_type_ = from._impl_.position_type_;
       }
     }
   }
@@ -493,8 +586,8 @@ void UserMoveToGameServerReq::InternalSwap(UserMoveToGameServerReq* PROTOBUF_RES
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.target_stage_id_)
-      + sizeof(UserMoveToGameServerReq::_impl_.target_stage_id_)
+      PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.position_type_)
+      + sizeof(UserMoveToGameServerReq::_impl_.position_type_)
       - PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.user_id_)>(
           reinterpret_cast<char*>(&_impl_.user_id_),
           reinterpret_cast<char*>(&other->_impl_.user_id_));

@@ -20,6 +20,9 @@ message GatewayUserDisconnectNtf {
 message GatewayUserRerouteNtf {
     int64 user_id        = 1;
     int32 gateway_id     = 2;
-    int32 target_stage_id = 3;
+    int32 target_stage_id = 3;            // (크로스서버 이동에선 미사용)
     string client_ip     = 4;
+    int64 character_id   = 5;             // 이동할 캐릭터 (목적지 서버가 DB 로드에 사용)
+    int32 target_stage_data_key = 6;      // 목적지 Stage 데이터 키
+    int32 position_type  = 7;             // EStagePositionType (도착 위치 타입)
 }

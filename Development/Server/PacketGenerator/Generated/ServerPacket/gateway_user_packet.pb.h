@@ -224,6 +224,9 @@ class GatewayUserRerouteNtf final : public ::google::protobuf::Message
     kUserIdFieldNumber = 1,
     kGatewayIdFieldNumber = 2,
     kTargetStageIdFieldNumber = 3,
+    kCharacterIdFieldNumber = 5,
+    kTargetStageDataKeyFieldNumber = 6,
+    kPositionTypeFieldNumber = 7,
   };
   // string client_ip = 4;
   void clear_client_ip() ;
@@ -270,11 +273,41 @@ class GatewayUserRerouteNtf final : public ::google::protobuf::Message
   void _internal_set_target_stage_id(::int32_t value);
 
   public:
+  // int64 character_id = 5;
+  void clear_character_id() ;
+  ::int64_t character_id() const;
+  void set_character_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_character_id() const;
+  void _internal_set_character_id(::int64_t value);
+
+  public:
+  // int32 target_stage_data_key = 6;
+  void clear_target_stage_data_key() ;
+  ::int32_t target_stage_data_key() const;
+  void set_target_stage_data_key(::int32_t value);
+
+  private:
+  ::int32_t _internal_target_stage_data_key() const;
+  void _internal_set_target_stage_data_key(::int32_t value);
+
+  public:
+  // int32 position_type = 7;
+  void clear_position_type() ;
+  ::int32_t position_type() const;
+  void set_position_type(::int32_t value);
+
+  private:
+  ::int32_t _internal_position_type() const;
+  void _internal_set_position_type(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:ServerPacket.GatewayUserRerouteNtf)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 4,
+  static const ::google::protobuf::internal::TcParseTable<3, 7,
                                    0, 52,
                                    2>
       _table_;
@@ -300,6 +333,9 @@ class GatewayUserRerouteNtf final : public ::google::protobuf::Message
     ::int64_t user_id_;
     ::int32_t gateway_id_;
     ::int32_t target_stage_id_;
+    ::int64_t character_id_;
+    ::int32_t target_stage_data_key_;
+    ::int32_t position_type_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -1019,6 +1055,81 @@ inline void GatewayUserRerouteNtf::set_allocated_client_ip(::std::string* PROTOB
     _impl_.client_ip_.Set("", GetArena());
   }
   // @@protoc_insertion_point(field_set_allocated:ServerPacket.GatewayUserRerouteNtf.client_ip)
+}
+
+// int64 character_id = 5;
+inline void GatewayUserRerouteNtf::clear_character_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.character_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000010U);
+}
+inline ::int64_t GatewayUserRerouteNtf::character_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.GatewayUserRerouteNtf.character_id)
+  return _internal_character_id();
+}
+inline void GatewayUserRerouteNtf::set_character_id(::int64_t value) {
+  _internal_set_character_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
+  // @@protoc_insertion_point(field_set:ServerPacket.GatewayUserRerouteNtf.character_id)
+}
+inline ::int64_t GatewayUserRerouteNtf::_internal_character_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.character_id_;
+}
+inline void GatewayUserRerouteNtf::_internal_set_character_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.character_id_ = value;
+}
+
+// int32 target_stage_data_key = 6;
+inline void GatewayUserRerouteNtf::clear_target_stage_data_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.target_stage_data_key_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000020U);
+}
+inline ::int32_t GatewayUserRerouteNtf::target_stage_data_key() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.GatewayUserRerouteNtf.target_stage_data_key)
+  return _internal_target_stage_data_key();
+}
+inline void GatewayUserRerouteNtf::set_target_stage_data_key(::int32_t value) {
+  _internal_set_target_stage_data_key(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
+  // @@protoc_insertion_point(field_set:ServerPacket.GatewayUserRerouteNtf.target_stage_data_key)
+}
+inline ::int32_t GatewayUserRerouteNtf::_internal_target_stage_data_key() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.target_stage_data_key_;
+}
+inline void GatewayUserRerouteNtf::_internal_set_target_stage_data_key(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.target_stage_data_key_ = value;
+}
+
+// int32 position_type = 7;
+inline void GatewayUserRerouteNtf::clear_position_type() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.position_type_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000040U);
+}
+inline ::int32_t GatewayUserRerouteNtf::position_type() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.GatewayUserRerouteNtf.position_type)
+  return _internal_position_type();
+}
+inline void GatewayUserRerouteNtf::set_position_type(::int32_t value) {
+  _internal_set_position_type(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
+  // @@protoc_insertion_point(field_set:ServerPacket.GatewayUserRerouteNtf.position_type)
+}
+inline ::int32_t GatewayUserRerouteNtf::_internal_position_type() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.position_type_;
+}
+inline void GatewayUserRerouteNtf::_internal_set_position_type(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.position_type_ = value;
 }
 
 #ifdef __GNUC__

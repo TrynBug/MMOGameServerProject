@@ -12,7 +12,10 @@ package ServerPacket;
 message UserMoveToGameServerReq {
     int64 user_id = 1;
     int32 target_game_server_id = 2;
-    int32 target_stage_id = 3;
+    int32 target_stage_id = 3;            // (크로스서버 이동에선 미사용. 런타임 stageId 는 서버마다 다름)
+    int64 character_id = 4;               // 이동할 캐릭터 (목적지 서버가 DB 로드에 사용)
+    int32 target_stage_data_key = 5;      // 목적지 Stage 데이터 키
+    int32 position_type = 6;              // EStagePositionType (도착 위치 타입)
 }
 
 // 유저 이동 실패 응답 (게이트웨이 -> 게임서버)
