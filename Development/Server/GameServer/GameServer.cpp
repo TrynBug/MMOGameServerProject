@@ -714,7 +714,7 @@ void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSess
 
 // 캐릭터의 런타임 상태를 proto에 동기화한 뒤 JSON으로 직렬화하여 DB에 저장(UPDATE)한다.
 // user_id/character_id 는 캐릭터 proto에서 얻는다. 직렬화 실패/DB 실패 시 false(사유는 내부 로그).
-db::AwaitableCoTask<bool> GameServer::saveCharacterToDB(CharacterPtr spCharacter)
+db::AwaitableCoTask<bool> GameServer::saveCharacterToDB(CharacterPtr spCharacter, db::IResumeExecutor* pResumeExecutor)
 {
     // 런타임 좌표/yaw 등을 proto에 반영한 뒤 직렬화.
     spCharacter->SyncRuntimeToProto();
@@ -732,7 +732,7 @@ db::AwaitableCoTask<bool> GameServer::saveCharacterToDB(CharacterPtr spCharacter
     db::DBResult result = co_await m_dbQueue.ExecuteAsync(
         "UPDATE Characters SET data = ? WHERE user_id = ? AND character_id = ?",
         { dataJson, userId, characterId },
-        GetCoroutineResumeExecutor()
+        pResumeExecutor
     );
 
     if (!result.success)
@@ -746,7 +746,9 @@ db::AwaitableCoTask<bool> GameServer::saveCharacterToDB(CharacterPtr spCharacter
 }
 
 // 출발 서버: 크로스서버 이동 개시. 호출 시점에 캐릭터는 이미 현재 Stage에서 빠진(OnUserLeave) 상태여야 한다.
-db::DetachedCoTask GameServer::BeginCrossServerMove(int64 userId, int32 targetGameServerId, int32 targetStageDataKey, int32 positionType)
+// pResumeExecutor: DB await 후속작업을 재개할 executor(호출한 Stage의 컨텐츠 스레드). 이후 코드가 그 스레드에서 실행된다.
+db::DetachedCoTask GameServer::BeginCrossServerMove(int64 userId, int32 targetGameServerId, int32 targetStageDataKey, int32 positionType,
+                                                    db::IResumeExecutor* pResumeExecutor)
 {
     UserPtr spUser;
     if (!m_safeUsers.Find(userId, spUser) || !spUser)
@@ -765,7 +767,8 @@ db::DetachedCoTask GameServer::BeginCrossServerMove(int64 userId, int32 targetGa
     const int64 characterId = spCharacter->GetProto().character_id();
 
     // ── 1) 캐릭터를 DB에 저장 (saveCharacterToDB 공통 사용) ──
-    if (!co_await saveCharacterToDB(spCharacter))
+    // 후속작업이 호출한 Stage의 컨텐츠 스레드에서 재개되도록 그 Stage의 executor를 넘긴다.
+    if (!co_await saveCharacterToDB(spCharacter, pResumeExecutor))
     {
         // TODO(crossserver): 저장 실패 시 현재 Stage 재입장으로 롤백. v1은 실패 응답만 보낸다(유저는 무소속 상태로 남음).
         m_packetSender.SendStageMoveRes(userId, EResultCode::Fail, "server error: db save", targetStageDataKey);

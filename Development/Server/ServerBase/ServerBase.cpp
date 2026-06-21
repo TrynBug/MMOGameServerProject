@@ -386,4 +386,11 @@ void ServerBase::RemoveContents(int32 threadIndex, ContentsPtr spContents)
     m_contentsThreads[threadIndex]->RemoveContents(std::move(spContents));
 }
 
+db::IResumeExecutor* ServerBase::GetContentsThreadExecutor(int32 threadIndex)
+{
+    if (threadIndex < 0 || threadIndex >= static_cast<int32>(m_contentsThreads.size()))
+        return nullptr;
+    return m_contentsThreads[threadIndex]->GetResumeExecutor();
+}
+
 } // namespace serverbase

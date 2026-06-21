@@ -109,6 +109,11 @@ public:
 
     int32 GetContentsThreadCount() const { return static_cast<int32>(m_contentsThreads.size()); }
 
+    // 컨텐츠 스레드의 코루틴 resume executor 를 반환한다.
+    // 해당 컨텐츠 스레드에서 시작한 DB 코루틴의 후속작업을 그 스레드에서 재개시키고 싶을 때
+    // ExecuteAsync 의 executor 인자로 넘긴다. 범위 밖 인덱스면 nullptr.
+    db::IResumeExecutor* GetContentsThreadExecutor(int32 threadIndex);
+
     // ── Getters ───────────────────────────────────────────────────
     int32      GetServerId()    const { return m_serverId; }
     ServerType GetServerType()  const { return m_config.serverType; }

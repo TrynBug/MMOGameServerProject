@@ -75,7 +75,10 @@ public:
     //   2) 게이트웨이에 UserMoveToGameServerReq 전송 (게이트웨이가 목적지 서버로 재라우팅)
     //   3) 출발 서버의 글로벌 유저맵에서 제거 (이후 클라 패킷은 목적지 서버가 받음)
     // 캐릭터는 이 호출 전에 Stage::OnUserLeave 로 현재 Stage에서 이미 빠진 상태여야 한다.
-    db::DetachedCoTask BeginCrossServerMove(int64 userId, int32 targetGameServerId, int32 targetStageDataKey, int32 positionType);
+    // pResumeExecutor: DB await 후속작업을 재개할 executor. 호출한 Stage의 GetResumeExecutor() 를 넘기면
+    //   후속작업이 그 Stage의 컨텐츠 스레드에서 실행된다(단일 스레드 불변식 유지).
+    db::DetachedCoTask BeginCrossServerMove(int64 userId, int32 targetGameServerId, int32 targetStageDataKey, int32 positionType,
+                                            db::IResumeExecutor* pResumeExecutor);
 
 protected:
     // ServerBase 훅
@@ -151,7 +154,8 @@ private:
     db::AwaitableCoTask<CharacterPtr> loadCharacterForUser(int64 userId, int64 characterId, UserPtr spUser);
 
     // 캐릭터의 런타임 상태를 proto에 동기화(SyncRuntimeToProto)한 뒤 JSON 직렬화하여 DB에 저장(UPDATE)한다.
-    db::AwaitableCoTask<bool> saveCharacterToDB(CharacterPtr spCharacter);
+    // pResumeExecutor: DB await 후속작업을 재개할 executor(호출 문맥의 스레드 선택). Stage에서 호출 시 그 Stage의 executor.
+    db::AwaitableCoTask<bool> saveCharacterToDB(CharacterPtr spCharacter, db::IResumeExecutor* pResumeExecutor);
 
 private:
     // 전역 단일 인스턴스 포인터. 생성자에서 1회 세팅, 소멸자에서 해제. Instance() 가 역참조한다.

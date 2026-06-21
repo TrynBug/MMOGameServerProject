@@ -39,6 +39,9 @@ class Monster;
 // ActorObject forward declaration (BroadcastBuff* takes const ActorObject&). Full type in Stage.cpp.
 class ActorObject;
 
+// 코루틴 resume executor 전방선언 (포인터 멤버/접근자에만 사용).
+namespace db { class IResumeExecutor; }
+
 // 스킬/효과 시스템 타입 전방선언. 완전 정의는 Stage.cpp 에서 include.
 // (EffectShape/EffectParams/AreaEffect/ProjectileGroup = Skill/. Vector3 는 위에서 include 함.)
 struct EffectShape;
@@ -147,6 +150,11 @@ public:
     EStageType GetStageType() const { return m_stageType; }
     int32 	   GetStageDataKey() const { return m_pStageData->Key; }
 	const GameData_Stage* pGetStageData() const { return m_pStageData; }
+
+    // 이 Stage가 배정된 컨텐츠 스레드의 resume executor (StageManager가 등록 시 주입, 소유하지 않음).
+    // Stage에서 시작한 DB 코루틴의 후속작업을 이 Stage의 스레드에서 재개시키기 위해 ExecuteAsync에 넘긴다.
+    void                 SetResumeExecutor(db::IResumeExecutor* p) { m_pResumeExecutor = p; }
+    db::IResumeExecutor* GetResumeExecutor() const { return m_pResumeExecutor; }
 
     // ── 맵/섹터 정보 조회 (X-Z 평면) ──
     double GetWorldMinX()    const { return m_worldMinX; }
@@ -473,6 +481,9 @@ private:
     int64      m_stageId   = 0;
     EStageType m_stageType = EStageType::None;
 	const GameData_Stage* m_pStageData = nullptr;   // 현재 Stage의 데이터. 반드시 null이 아님.
+
+    // 배정된 컨텐츠 스레드의 resume executor (StageManager가 등록 시 주입). 소유하지 않음(스레드는 ServerBase 소유).
+    db::IResumeExecutor* m_pResumeExecutor = nullptr;
 
     // Stage 단조 증가 시계 (ms). OnUpdate 마다 deltaMs 누적. 스킬 효과/투사체 타이밍 기준.
     int64      m_stageClockMs = 0;

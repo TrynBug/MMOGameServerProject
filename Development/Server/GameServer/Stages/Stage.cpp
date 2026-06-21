@@ -1108,7 +1108,9 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
         OnUserLeave(userId);
 
         // 캐릭터 DB 저장 → 게이트웨이 통보 → 출발 서버에서 유저 제거 (코루틴).
-        server.BeginCrossServerMove(userId, req.target_game_server_id(), req.target_stage_data_key(), req.position_type());
+        // 이 Stage의 resume executor를 넘겨, DB await 후속작업이 이 Stage의 컨텐츠 스레드에서 재개되게 한다.
+        server.BeginCrossServerMove(userId, req.target_game_server_id(), req.target_stage_data_key(), req.position_type(),
+            GetResumeExecutor());
 
         LOG_WRITE(LogLevel::Info, std::format("cross-server moving. userId={} from stageId={} to gameServerId={} (stageKey={}) positionType={}",
             userId, m_stageId, req.target_game_server_id(), req.target_stage_data_key(), static_cast<int32>(positionType)));

@@ -46,6 +46,18 @@ int32 ContentsThread::GetContentsCount() const
     return static_cast<int32>(m_contents.size());
 }
 
+void ContentsThread::Post(std::function<void()> fn)
+{
+    std::lock_guard<std::mutex> lock(m_taskMutex);
+    m_tasks.push_back(std::move(fn));
+}
+
+// executor 컴포넌트는 소유 ContentsThread의 태스크 큐로 위임한다(여기서 ContentsThread 완전타입 사용).
+void ContentsThreadResumeExecutor::Post(std::function<void()> fn)
+{
+    m_owner.Post(std::move(fn));
+}
+
 void ContentsThread::threadProc()
 {
     using Clock = std::chrono::steady_clock;
@@ -91,6 +103,26 @@ void ContentsThread::threadProc()
                 }
 
                 m_pendingRemove.clear();
+            }
+        }
+
+        // 큐잉된 태스크(코루틴 resume 등) 실행
+        {
+            std::vector<std::function<void()>> tasks;
+            {
+                std::lock_guard<std::mutex> taskLock(m_taskMutex);
+                tasks.swap(m_tasks);
+            }
+            for (std::function<void()>& task : tasks)
+            {
+                try
+                {
+                    task();
+                }
+                catch (const std::exception& e)
+                {
+                    LOG_WRITE(LogLevel::Error, std::format("ContentsThread::task exception: {}", e.what()));
+                }
             }
         }
 

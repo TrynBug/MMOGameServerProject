@@ -56,7 +56,8 @@ SystemStagePtr StageManager::CreateSystemStage(int64 stageId, int32 stageDataKey
     }
 
     SystemStagePtr spStage = std::make_shared<SystemStage>(stageId, stageDataKey);
-    registerStage(stageId, stageDataKey, spStage);
+    if (!registerStage(stageId, stageDataKey, spStage))
+        return nullptr;
     m_spSystemStage = spStage;
 
     LOG_WRITE(LogLevel::Info, std::format("stageId={}", stageId));
@@ -73,7 +74,8 @@ TownPtr StageManager::CreateTown(int64 stageId, int32 stageDataKey)
 
     TownPtr spStage = std::make_shared<Town>(stageId, stageDataKey, params);
     spStage->SetNavMesh(pNavMesh);
-    registerStage(stageId, stageDataKey, spStage);
+    if (!registerStage(stageId, stageDataKey, spStage))
+        return nullptr;
     m_spTown = spStage;
 
     LOG_WRITE(LogLevel::Info, std::format("stageId={} stageDataKey={}", stageId, stageDataKey));
@@ -90,7 +92,8 @@ FieldPtr StageManager::CreateField(int64 stageId, int32 stageDataKey)
 
     FieldPtr spStage = std::make_shared<Field>(stageId, stageDataKey, params);
     spStage->SetNavMesh(pNavMesh);
-    registerStage(stageId, stageDataKey, spStage);
+    if (!registerStage(stageId, stageDataKey, spStage))
+        return nullptr;
 
     LOG_WRITE(LogLevel::Info, std::format("stageId={} stageDataKey={}", stageId, stageDataKey));
 
@@ -154,10 +157,24 @@ bool StageManager::prepareNavStage(int64 stageId, int32 stageDataKey, const char
     return true;
 }
 
-void StageManager::registerStage(int64 stageId, int32 stageDataKey, const StagePtr& spStage)
+bool StageManager::registerStage(int64 stageId, int32 stageDataKey, const StagePtr& spStage)
 {
     const int32 threadIdx = computeStageThreadIndex(stageId);
+
+    // 배정 스레드의 resume executor를 먼저 확보. null이면 잘못된 스레드 인덱스이므로
+    // 어떤 등록도 하지 않고 실패 처리한다(부분 등록 방지).
+    db::IResumeExecutor* pResumeExecutor = GameServer::Instance().GetContentsThreadExecutor(threadIdx);
+    if (!pResumeExecutor)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("registerStage - no resume executor for threadIdx={}. stageId={} stageDataKey={}",
+            threadIdx, stageId, stageDataKey));
+        return false;
+    }
+
     GameServer::Instance().AssignContents(threadIdx, spStage);
+
+    // 이 Stage에서 시작하는 DB 코루틴의 후속작업이 배정된 컨텐츠 스레드에서 재개되도록 resume executor 주입.
+    spStage->SetResumeExecutor(pResumeExecutor);
 
     // 등록은 m_safeStages 먼저, 인덱스 나중 (조회 측은 인덱스 miss만 발생).
     m_safeStages.Insert(stageId, spStage);
@@ -165,6 +182,7 @@ void StageManager::registerStage(int64 stageId, int32 stageDataKey, const StageP
         std::lock_guard<std::mutex> lock(m_dataKeyIndexMutex);
         m_stageIdsByDataKey[stageDataKey].push_back(stageId);
     }
+    return true;
 }
 
 StagePtr StageManager::Find(int64 stageId) const

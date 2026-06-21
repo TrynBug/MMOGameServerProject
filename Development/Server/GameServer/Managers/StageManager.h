@@ -64,9 +64,10 @@ private:
     // stageId를 컨텐츠 스레드 인덱스로 매핑.
     int32 computeStageThreadIndex(int64 stageId) const;
 
-    // 공용 등록 경로: 컨텐츠 스레드 배정 + m_safeStages + dataKey 인덱스.
+    // 공용 등록 경로: 컨텐츠 스레드 배정 + resume executor 주입 + m_safeStages + dataKey 인덱스.
     // 모든 Create* 가 이 함수를 거친다 (인덱스 누락 방지).
-    void registerStage(int64 stageId, int32 stageDataKey, const StagePtr& spStage);
+    // 배정 스레드의 resume executor를 얻지 못하면(잘못된 스레드 인덱스) 등록하지 않고 false 를 리턴한다.
+    bool registerStage(int64 stageId, int32 stageDataKey, const StagePtr& spStage);
 
     // NavMesh 기반 Stage(Town/Field)의 공통 준비:
     // GameData 조회 → 중복 stageId 검사 → params 구성 + NavMesh 메타로 bounds 덮어쓰기.
