@@ -197,10 +197,27 @@ namespace Client.Game
             if (!IsLocalPlayer)
                 return;
 
-            // 큰 desync(또는 히스토리 미커버) 면 reconciler 가 true 를 돌려준다 → authPos 로 즉시 스냅.
-            if (m_reconciler.Reconcile(transform, snapServerMs, authPos, ackSeq,
-                                       m_mover.IsMoving, m_mover.IsSkillMoving, GetMoveSpeed()))
-                SetPosition(authPos, authYaw);
+            PlayerReconciler.ReconcileResult r = m_reconciler.Reconcile(
+                transform, snapServerMs, authPos, ackSeq,
+                m_mover.IsMoving, m_mover.IsSkillMoving, GetMoveSpeed());
+
+            switch (r)
+            {
+                case PlayerReconciler.ReconcileResult.Snap:
+                    // 의도 없는 미커버(접속/스테이지이동 등) → 권위로 즉시 스냅.
+                    SetPosition(authPos, authYaw);
+                    break;
+
+                case PlayerReconciler.ReconcileResult.Reconstruct:
+                    // 넉백/블링크거부/강제이동 desync → 권위 authPos 에서 내 최신 의도를 RTT 재실행해 현재 재구성.
+                    m_mover.ReconstructFrom(authPos, authYaw,
+                                            m_reconciler.LatestDest, m_reconciler.LatestIsStop,
+                                            m_reconciler.RttMs / 1000f, GetMoveSpeed());
+                    m_reconciler.Clear();   // 점프했으므로 예측 히스토리/잔오차 리셋(최신 의도 seq 는 유지).
+                    break;
+
+                // None: 소프트(동기화/게이트/데드존). ApplyBleed 가 잔오차 처리.
+            }
         }
 
         // ─── 이동 (위임) ─────────────────────────────────────────────────

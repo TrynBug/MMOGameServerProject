@@ -16,14 +16,25 @@ namespace Client.Game
     //
     // PlayerCharacter 가 소유하고 위임한다:
     //   - 매 프레임(예측 이동 후)  → RecordPrediction(추정서버시각, 현재위치)
-    //   - 스냅샷(본인) 수신 시       → Reconcile(T_snap, authPos)
+    //   - 스냅샷(본인) 수신 시       → Reconcile(T_snap, authPos) → 결과(None/Snap/Reconstruct)
     //   - 매 프레임                  → ApplyBleed
     //   - 텔포/스폰/하드스냅 후       → Clear
     //
-    // Phase 2(미구현): 하드보정 시 커맨드 타임라인 리플레이로 현재 재구성(NotifyInputSent 가 그 입력 기록).
+    // Phase 2: 큰 desync(넉백/블링크거부/강제이동 어긋남)는 권위 위치 authPos 에서 **내 최신 의도를 RTT 만큼
+    // 재실행(replay)** 해 현재를 재구성한다(Reconstruct). authPos 는 이미 넉백/거부 등 서버 권위 변위를 반영하므로,
+    // 거기서 내 이동 의도를 이어 붙이면 "권위 변위 + 내 조작 연속성"이 자연스럽게 합쳐진다. 구코드의 RTT 직선
+    // 외삽과 달리 navmesh 경로를 따라 재실행(LocalPlayerMover.ReconstructFrom)한다.
     public class PlayerReconciler
     {
-        private const float  k_reconcileHardSnap   = 3.0f;    // 이 초과 오차는 명백한 desync(텔레포트/넉백/거부) → 즉시 스냅
+        // 화해 결과. PlayerCharacter 가 이에 따라 스냅/재구성을 수행한다.
+        public enum ReconcileResult
+        {
+            None,         // 보정 없음(동기화됨 / 게이트 닫힘 / 소프트 데드존). 소프트 오차는 m_posError+ApplyBleed.
+            Snap,         // 권위로 즉시 스냅(접속/스테이지이동 등 의도 없는 미커버 상황).
+            Reconstruct,  // 권위 위치에서 내 의도를 RTT 재실행해 현재 재구성(넉백/거부/강제이동 desync).
+        }
+
+        private const float  k_reconcileHardSnap   = 3.0f;    // 이 초과 오차는 명백한 desync(텔레포트/넉백/거부) → 재구성/스냅
         private const float  k_reconcileDeadzone   = 0.2f;    // 이동 중 데드존. 시간정렬이라 작아도 됨(오차≈양자화).
         private const float  k_stopDeadzoneFactor  = 0.12f;   // 정지 데드존 = max(k_reconcileDeadzone, moveSpeed*이값). 환원불가 예측선행(~1틱)+양자화 흡수.
         private const float  k_posErrorBleedPerSec = 6f;      // 위치 오차를 매 프레임 풀어내는 속도(1/s). 클수록 빨리 보정.
@@ -32,8 +43,21 @@ namespace Client.Game
         // 서버 기준으로 당겨야 할 잔여 위치 오차. 매 프레임 조금씩 적용해 소진(스냅샷율과 무관, 부드러움).
         private Vector3 m_posError;
 
-        // 마지막으로 송신한 이동 의도 seq(게이팅용). ack 가 이걸 따라잡아야(서버가 최신 의도 반영) 소프트 보정.
-        private uint m_latestInputSeq;
+        // 마지막으로 송신한 이동 의도(게이팅 + 재구성 타겟). ack 가 seq 를 따라잡아야 소프트 보정.
+        private uint    m_latestInputSeq;
+        private Vector3 m_latestDest;
+        private bool    m_latestIsStop = true;
+
+        // RTT 추정(ms, EMA). 재구성 시 authPos 를 "내가 그동안 갈 거리"만큼 앞으로 재실행하는 데 쓴다.
+        // (소프트 보정은 시간정렬이라 RTT 불필요 — 오직 하드 재구성의 elapsed 추정용.)
+        private float m_rttMs;
+        private readonly Dictionary<uint, float> m_inputSendMs = new Dictionary<uint, float>(16);
+        private readonly List<uint> m_pruneScratch = new List<uint>(16);
+
+        // 재구성에 필요한 값(PlayerCharacter 가 Reconstruct 결과일 때 읽음).
+        public Vector3 LatestDest   => m_latestDest;
+        public bool    LatestIsStop => m_latestIsStop;
+        public float   RttMs        => m_rttMs;
 
         // 예측 위치 히스토리: 추정 서버시각으로 스탬프된 (시각, 위치). 시각 오름차순.
         private struct PredSample { public double serverMs; public Vector3 pos; }
@@ -68,29 +92,34 @@ namespace Client.Game
         // 본인 캐릭터 화해. 서버 SnapshotNtf 의 본인 항목으로 호출된다.
         //   snapServerMs = authPos 의 서버시각(= server_tick_seq * 50ms)
         //   authPos      = 그 시점의 서버 권위 위치
-        // T_snap 시점의 예측 위치(predThen)와 비교해 오차를 m_posError 에 적립한다.
-        // 큰 desync(또는 히스토리 미커버)면 true 반환 → 호출자가 authPos 로 즉시 스냅(SetPosition).
-        public bool Reconcile(Transform tf, double snapServerMs, Vector3 authPos, uint ackSeq,
-                              bool moving, bool skillMoving, float moveSpeed)
+        // 반환:
+        //   None        = 소프트(동기화/게이트/데드존). 잔오차는 m_posError → ApplyBleed.
+        //   Snap        = 권위로 즉시 스냅(의도 없는 미커버 상황).
+        //   Reconstruct = 권위에서 내 의도를 RTT 재실행해 현재 재구성(넉백/거부/강제이동 desync). 호출자가 ReconstructFrom.
+        public ReconcileResult Reconcile(Transform tf, double snapServerMs, Vector3 authPos, uint ackSeq,
+                                         bool moving, bool skillMoving, float moveSpeed)
         {
+            // ack 된 입력의 송신시각으로 RTT EMA 갱신(재구성 elapsed 추정용). 소프트 경로엔 안 쓴다.
+            updateRtt(ackSeq);
+
             if (skillMoving)
-                return false;   // 스킬 강제이동은 서버와 동일 공식 → 보정 생략.
+                return ReconcileResult.None;   // 스킬 강제이동은 서버와 동일 공식 → 보정 생략.
 
             if (!trySampleAt(snapServerMs, out Vector3 predThen))
             {
-                // 히스토리가 이 시각을 못 덮음(접속/스테이지 이동/텔포 직후) → 권위로 스냅.
+                // 히스토리가 이 시각을 못 덮음(접속/스테이지 이동 등, 의도 없음) → 권위로 스냅.
                 m_posError = Vector3.zero;
-                return true;
+                return ReconcileResult.Snap;
             }
 
             Vector3 err = authPos - predThen;   // ★시간정렬 순수 예측오차(RTT 외삽 불필요)
             float dist = err.magnitude;
 
-            // 큰 desync(텔레포트/넉백/거부)는 게이트와 무관하게 무조건 즉시 스냅.
+            // 큰 desync(넉백/블링크거부/강제이동 어긋남)는 게이트와 무관하게 권위에서 재구성.
             if (dist > k_reconcileHardSnap)
             {
                 m_posError = Vector3.zero;
-                return true;
+                return ReconcileResult.Reconstruct;
             }
 
             // 게이팅: 서버가 아직 우리의 최신 의도를 반영 못 했으면(ack < 최신 seq = 입력 in-flight) 소프트 보정 생략.
@@ -98,7 +127,7 @@ namespace Client.Game
             // 반영되지 않아 오차처럼 보이므로, 보정하면 "제자리 stall + 밀림" 트랜지언트가 생긴다. 예측을 신뢰한다.
             // 잔여 m_posError 는 ApplyBleed 가 자연 소진(여기서 건드리지 않음).
             if (ackSeq < m_latestInputSeq)
-                return false;
+                return ReconcileResult.None;
 
             // 데드존: 이동 중엔 작게(시간정렬이 선행을 상쇄). 정지 중엔 속도 비례로 크게 — 멈춘 객체는
             // 예측 선행(~1틱)을 화해로 없앨 수 없고(클라 프레임정밀 정지 vs 서버 틱정밀 정지), 이를 보정하면
@@ -108,7 +137,23 @@ namespace Client.Game
                 : Mathf.Max(k_reconcileDeadzone, moveSpeed * k_stopDeadzoneFactor);
 
             m_posError = (dist > deadzone) ? err : Vector3.zero;
-            return false;
+            return ReconcileResult.None;
+        }
+
+        // ack 된 입력의 송신시각과 현재의 차이로 RTT EMA 갱신.
+        private void updateRtt(uint ackSeq)
+        {
+            if (!m_inputSendMs.TryGetValue(ackSeq, out float sentMs))
+                return;
+            float sample = Time.unscaledTime * 1000f - sentMs;
+            m_rttMs = (m_rttMs <= 0f) ? sample : Mathf.Lerp(m_rttMs, sample, 0.1f);
+
+            // ackSeq 이하 송신 기록 제거(누수 방지).
+            m_pruneScratch.Clear();
+            foreach (var kv in m_inputSendMs)
+                if (kv.Key <= ackSeq) m_pruneScratch.Add(kv.Key);
+            for (int i = 0; i < m_pruneScratch.Count; i++)
+                m_inputSendMs.Remove(m_pruneScratch[i]);
         }
 
         // 히스토리에서 serverMs 시점의 예측 위치를 선형보간으로 뽑는다.
@@ -157,20 +202,23 @@ namespace Client.Game
             m_posError -= step;
         }
 
-        // 텔포/스폰/하드스냅 후 호출. stale 히스토리와의 비교를 막기 위해 전부 리셋.
+        // 텔포/스폰/하드스냅(재구성 포함) 후 호출. stale 히스토리와의 비교를 막기 위해 전부 리셋.
+        // 단 m_latestInputSeq/dest/isStop 은 유지한다 — 재구성 직후에도 현재 의도는 유효(게이트가 다시 닫혀
+        // 예측을 신뢰하게 하려면 최신 seq 가 보존돼야 한다).
         public void Clear()
         {
             m_history.Clear();
             m_posError = Vector3.zero;
-            m_latestInputSeq = 0;
         }
 
         // PlayerMoveController 가 MoveIntentReq 송신 직후 호출.
-        // 최신 송신 seq 를 기록해 게이팅에 쓴다(ack 가 이걸 따라잡아야 소프트 보정).
-        // (Phase 2 에선 여기서 커맨드 히스토리 seq/추정서버시각/dest/isStop 도 함께 적재한다.)
+        // 최신 의도(seq/dest/isStop)를 기록: seq 는 게이팅, dest/isStop 은 하드 재구성 타겟. 송신시각은 RTT 측정용.
         public void NotifyInputSent(uint seq, Vector3 dest, bool isStop)
         {
             m_latestInputSeq = seq;
+            m_latestDest     = dest;
+            m_latestIsStop   = isStop;
+            m_inputSendMs[seq] = Time.unscaledTime * 1000f;
         }
     }
 }

@@ -187,9 +187,16 @@ namespace Client.Game
                 return;
             }
 
-            // NavMesh waypoint 따라가기. 서버 시뮬레이션과 동일하게, 이번 프레임 이동량(remain)을
-            // while 루프로 소모하여 한 프레임에 여러 waypoint 를 이어서 통과한다.
+            // NavMesh waypoint 따라가기. 이번 프레임 이동량(remain)을 경로 따라 소모.
             float remain = moveSpeed * Time.deltaTime;
+            advanceAlongPath(remain);
+        }
+
+        // m_path 를 따라 거리 remain 만큼 전진(거리 파라미터, 시간 무관). 한 호출에 여러 waypoint 통과 가능.
+        // 서버 WaypointMover::Update 와 동일 규칙(중간 스냅+자투리 소모, 최종 스냅+정지). 진행방향 회전 포함.
+        // Tick(라이브 예측)과 ReconstructFrom(하드보정 재실행)이 공유 — 같은 기하라 재실행이 예측과 일치한다.
+        private void advanceAlongPath(float remain)
+        {
             Vector3 lastDir = Vector3.zero;
 
             while (remain > 0f)
@@ -228,7 +235,7 @@ namespace Client.Game
 
                 if (dist <= remain)
                 {
-                    // 이번 프레임에 이 waypoint 도달. 정확히 스냅하고 자투리(remain)로 다음 구간 계속.
+                    // 이 waypoint 도달. 정확히 스냅하고 자투리(remain)로 다음 구간 계속.
                     m_tf.position = target;
                     remain -= dist;
                     if (isLastWaypoint)
@@ -242,7 +249,7 @@ namespace Client.Game
                     continue;
                 }
 
-                // 이번 프레임엔 도달 못 함. 방향으로 remain 만큼 전진하고 종료.
+                // 도달 못 함. 방향으로 remain 만큼 전진하고 종료.
                 m_tf.position = cur + dir * remain;
                 remain = 0f;
             }
@@ -250,6 +257,55 @@ namespace Client.Game
             // 진행 방향을 바라보기 (수평면에서만 회전, y축 회전만). 부드럽게 보간.
             if (lastDir.sqrMagnitude > 0f)
                 rotateTowardsDirection(lastDir);
+        }
+
+        // 하드 보정 재구성(Phase 2). 서버 권위 위치(anchorPos = 넉백/블링크거부/강제이동 등 권위 변위 반영)에서
+        // 내 최신 이동 의도(dest)를 elapsedSec(≈RTT) 만큼 navmesh 경로 따라 재실행해, "권위 변위 + 내 조작 연속성"
+        // 이 합쳐진 현재 위치를 만든다. 재실행 후 mover 는 그 위치에서 dest 로 계속 이동하는 라이브 상태가 된다.
+        //   isStop=true 또는 elapsedSec<=0 : 재실행 없이 anchor 에 정지(블링크거부로 정지 등).
+        public void ReconstructFrom(Vector3 anchorPos, float anchorYaw, Vector3 dest, bool isStop, float elapsedSec, float moveSpeed)
+        {
+            // 1) 현재 예측/스킬이동 상태 폐기하고 권위 anchor 로 점프.
+            m_skillMoving = false;
+            m_hasMoveDest = false;
+            m_path.Clear();
+            m_pathIndex = 0;
+            m_tf.position = anchorPos;
+            m_tf.rotation = Quaternion.Euler(0f, anchorYaw, 0f);
+
+            if (isStop || elapsedSec <= 0f)
+                return;   // 정지 의도/경과없음 → anchor 에 그대로.
+
+            // 2) anchor 에서 현재 의도 dest 로 경로 생성(라이브 SetDestination 과 동일 처리).
+            SetDestination(dest);
+            if (!m_hasMoveDest)
+                return;   // 경로 못 만듦 → anchor 유지.
+
+            // 3) 경과시간만큼(거리 = moveSpeed*elapsed) 경로 따라 재실행.
+            float remain = moveSpeed * elapsedSec;
+            if (m_path.Count == 0)
+            {
+                // navmesh 미로드 직선 폴백: dest 방향으로 remain 만큼(클램프).
+                Vector3 cur = m_tf.position;
+                Vector3 diff = m_moveDest - cur;
+                diff.y = 0f;
+                float d = diff.magnitude;
+                if (d <= remain)
+                {
+                    m_tf.position = new Vector3(m_moveDest.x, cur.y, m_moveDest.z);
+                    m_hasMoveDest = false;
+                }
+                else
+                {
+                    Vector3 dir = diff / d;
+                    m_tf.position = cur + dir * remain;
+                    rotateTowardsDirection(dir);
+                }
+            }
+            else
+            {
+                advanceAlongPath(remain);
+            }
         }
 
         // 강제이동 1 프레임 전진. ease-out(f=1-(1-t)^2), 종료 시 끝점 스냅.
