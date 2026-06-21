@@ -68,6 +68,9 @@ int main()
     // 서버 시작
     GameServer server;
 
+    // GameDB 경로
+    server.SetGameDBPath(configParser.GetString("Database", "GameDBPath", ""));
+
     SetConsoleCtrlHandler(consoleCtrlHandler, TRUE);
 
     if (!server.Initialize(config))

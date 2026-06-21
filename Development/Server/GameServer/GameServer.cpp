@@ -2,11 +2,6 @@
 #include "GameServer.h"
 #include "StageObjects/Character.h"
 
-namespace
-{
-    constexpr const char* k_gameDBPath = "GameDB.db";
-}
-
 // ── [치트] 패킷 로깅 헬퍼 정의 (선언은 GameServerDefine.h) ──────────────
 namespace packetlog
 {
@@ -57,6 +52,9 @@ bool GameServer::OnInitialize()
 
     m_gatewayDispatcher.Register<ServerPacket::GatewayUserDisconnectNtf>(Common::SERVER_PACKET_ID_USER_DISCONNECT_NTF,
         [this](auto& spSession, auto& msg) { handleGatewayUserDisconnect(spSession, msg); });
+
+    m_gatewayDispatcher.Register<ServerPacket::GatewayUserRerouteNtf>(Common::SERVER_PACKET_ID_USER_REROUTE_NTF,
+        [this](auto& spSession, auto& msg) { handleGatewayUserReroute(spSession, msg); });
 
     m_gatewayDispatcher.Register<ServerPacket::ServerHandshakeRes>(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_RES,
         [this](auto& spSession, auto& msg) { handleGatewayHandshakeRes(spSession, msg); });
@@ -143,9 +141,18 @@ bool GameServer::OnInitialize()
     }
 
     // ── GameDB 열기 ────────────────────────────────────────────
-    if (!m_dbQueue.Open(k_gameDBPath, 1))
+    // 경로가 비어있으면 sqlite3_open 은 성공하지만 "버려지는 임시 DB"를 연다(연결 종료 시 삭제).
+    // 그러면 영속성/공유가 깨진 채 무증상으로 동작하므로, 빈 경로는 설정 누락으로 보고 fail-fast 한다.
+    // (GameDB 경로는 GameServer.ini 의 [Database]GameDBPath 로 반드시 지정해야 한다. 기본값 없음.)
+    if (m_gameDBPath.empty())
     {
-        LOG_WRITE(LogLevel::Error, std::format("failed to open GameDB at {}", k_gameDBPath));
+        LOG_WRITE(LogLevel::Error, "GameDBPath is empty. Set [Database]GameDBPath in GameServer.ini.");
+        return false;
+    }
+
+    if (!m_dbQueue.Open(m_gameDBPath, 1))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("failed to open GameDB at {}", m_gameDBPath));
         return false;
     }
 
@@ -529,61 +536,67 @@ void GameServer::sendCharacterCreateRes(int64 userId, EResultCode resultCode, co
     m_packetSender.SendToUser(userId, Common::GAME_PACKET_ID_CHARACTER_CREATE_RES, res);
 }
 
-// 클라이언트 캐릭터 선택 요청 처리 → 코루틴
-// 1) DB에서 (user_id, character_id) 로 캐릭터 조회
-// 2) 없는 캐릭터면 CharacterSelectRes(Fail) 전송 후 종료
-// 3) owner_user_id 검증 (DB 쇄괴 방어)
-// 4) User 조회 + 상태 검증, Character 객체 생성
-// 5) CharacterSelectRes(전체 데이터) 송신 → 클라가 데이터모델 보관 + 로딩 시작
-// 6) 2단계 입장(Moving) 시작: SystemStage 제거 + Town 입장
-//    → 클라 StageLoadCompleteReq → Town이 spawn + StageLoadCompleteRes 전송
-db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePacket::CharacterSelectReq req)
+// (user_id, character_id)로 DB에서 캐릭터 row를 읽어 JSON 파싱 후 Character 객체를 생성하여 User에 소유 연결한다.
+// User가 강한 소유자(shared_ptr), Character→User는 약참조(weak_ptr).
+// 조회 실패/없음/파싱 실패/소유자 불일치/Initialize 실패 시 nullptr(사유는 내부 로그).
+// 호출자(캐릭터 선택 / 크로스서버 이동 입장)는 각자 프로토콜에 맞는 실패 응답을 처리한다.
+db::AwaitableCoTask<CharacterPtr> GameServer::loadCharacterForUser(int64 userId, int64 characterId, UserPtr spUser)
 {
-    const int64 characterId = req.character_id();
-    LOG_WRITE(LogLevel::Info, std::format("CharacterSelectReq received. userId={} characterId={}", userId, characterId));
-
-    // ── 1) DB에서 해당 캐릭터 조회 ─────────────────────────────
+    // ── DB에서 캐릭터 조회 ──
     db::DBResult result = co_await m_dbQueue.ExecuteAsync(
         "SELECT data FROM Characters WHERE user_id = ? AND character_id = ?",
         { userId, characterId },
         GetCoroutineResumeExecutor()
     );
 
-    if (!result.success)
+    if (!result.success || result.IsEmpty())
     {
-        LOG_WRITE(LogLevel::Error, std::format("CharacterSelect DB select failed. userId={} err={}", userId, result.errorMsg));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: db select", nullptr, 0);
-        co_return;
+        LOG_WRITE(LogLevel::Warn, std::format("loadCharacter - select failed/empty. userId={} characterId={} success={}",
+            userId, characterId, result.success));
+        co_return nullptr;
     }
 
-    // ── 2) 없는 캐릭터 ─────────────────────────────────────────────
-    if (result.IsEmpty())
+    // ── JSON 파싱 ──
+    DataStructures::Character protoData;
+    if (!packet::ProtoJsonSerializer::FromJson(result.GetString(0, "data"), protoData))
     {
-        LOG_WRITE(LogLevel::Warn, std::format("CharacterSelect - character not found. userId={} characterId={}", userId, characterId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "character not found", nullptr, 0);
-        co_return;
+        LOG_WRITE(LogLevel::Error, std::format("loadCharacter - parse failed. userId={} characterId={}", userId, characterId));
+        co_return nullptr;
     }
 
-    DataStructures::Character character;
-    const std::string dataJson = result.GetString(0, "data");
-    if (!packet::ProtoJsonSerializer::FromJson(dataJson, character))
+    // owner_user_id 검증 (PK가 (user_id, character_id) 이므로 통상 통과. DB 손상 방어).
+    if (protoData.owner_user_id() != userId)
     {
-        LOG_WRITE(LogLevel::Error, std::format("CharacterSelect - failed to parse character JSON. userId={} characterId={}",
-            userId, characterId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: parse", nullptr, 0);
-        co_return;
+        LOG_WRITE(LogLevel::Error, std::format("loadCharacter - owner mismatch. userId={} owner={} characterId={}",
+            userId, protoData.owner_user_id(), characterId));
+        co_return nullptr;
     }
 
-    // ── 3) owner_user_id 검증 (PK가 (user_id, character_id) 이므로 이론상 통과해야 함, 안전장치) ──────────────────
-    if (character.owner_user_id() != userId)
+    // ── Character 객체 생성 + User 소유 연결 ──
+    CharacterPtr spCharacter = std::make_shared<Character>();
+    if (!spCharacter->Initialize(protoData))
     {
-        LOG_WRITE(LogLevel::Error, std::format("CharacterSelect - owner mismatch. userId={} characterOwner={} characterId={}",
-            userId, character.owner_user_id(), characterId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "not character owner", nullptr, 0);
-        co_return;
+        LOG_WRITE(LogLevel::Error, std::format("loadCharacter - Initialize failed. userId={} characterId={}", userId, characterId));
+        co_return nullptr;
     }
+    spCharacter->SetUser(spUser);              // Character -> User weak_ptr
+    spUser->SetCurrentCharacter(spCharacter);  // User -> Character shared_ptr (소유)
 
-    // ── 4) User 조회 + 상태 검증 ─────────────────────────────────────────
+    co_return spCharacter;
+}
+
+// 클라이언트 캐릭터 선택 요청 처리 → 코루틴
+// 1) User 조회 + 상태 검증 (None 상태만 허용, DB 조회 전에 값싼 검증 먼저)
+// 2) DB에서 캐릭터 로드 + Character 객체 생성 (loadCharacterForUser 공통 사용)
+// 3) CharacterSelectRes(전체 데이터) 송신 → 클라가 데이터모델 보관 + 로딩 시작
+// 4) 2단계 입장(Moving) 시작: SystemStage 제거 + Town 입장
+//    → 클라 StageLoadCompleteReq → Town이 spawn + StageLoadCompleteRes 전송
+db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePacket::CharacterSelectReq req)
+{
+    const int64 characterId = req.character_id();
+    LOG_WRITE(LogLevel::Info, std::format("CharacterSelectReq received. userId={} characterId={}", userId, characterId));
+
+    // ── 1) User 조회 + 상태 검증 (DB 조회 전에 값싼 검증 먼저) ──
     UserPtr spUser;
     if (!m_safeUsers.Find(userId, spUser) || !spUser)
     {
@@ -600,18 +613,17 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 userId, GamePac
         co_return;
     }
 
-    // Character 객체 생성. User가 강한 소유자가 된다 (선택~로그아웃까지 유지).
-    // Stage는 스폰되어 있는 동안만 같은 캐릭터를 컨테이너에 함께 보관한다.
-    CharacterPtr spCharacter = std::make_shared<Character>();
-    if (!spCharacter->Initialize(character))
+    // ── 2) DB에서 캐릭터 로드 + Character 객체 생성 (loadCharacterForUser 공통 사용) ──
+    // User가 강한 소유자가 된다 (선택~로그아웃까지 유지). Stage는 스폰되어 있는 동안만 함께 보관.
+    CharacterPtr spCharacter = co_await loadCharacterForUser(userId, characterId, spUser);
+    if (!spCharacter)
     {
-        LOG_WRITE(LogLevel::Error, std::format("CharacterSelect - Character Initialize failed. userId={} characterId={}", userId, characterId));
-        sendCharacterSelectRes(userId, EResultCode::Fail, "server error: character init", nullptr, 0);
+        sendCharacterSelectRes(userId, EResultCode::Fail, "character load failed", nullptr, 0);
         co_return;
     }
-    spCharacter->SetUser(spUser);              // Character -> User weak_ptr
-    spUser->SetCurrentCharacter(spCharacter);  // User -> Character shared_ptr (소유)
 
+    // 클라 응답(CharacterSelectRes)/로깅에 실을 캐릭터 데이터는 생성된 객체에서 되찾는다.
+    const DataStructures::Character& character = spCharacter->GetProto();
     LOG_WRITE(LogLevel::Info, std::format("character selected. userId={} characterId={} name='{}'",
         userId, character.character_id(), character.name()));
 
@@ -682,6 +694,163 @@ void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSess
     {
         LOG_WRITE(LogLevel::Warn, std::format("user disconnect - unknown stageId. userId={} stageId={}", userId, currentStageId));
     }
+}
+
+// ──────────────────────────────────────────────────────────────
+// 크로스서버 이동 (DB 경유)
+// ──────────────────────────────────────────────────────────────
+//
+// 흐름:
+//   출발 서버 A: Stage::handleStageMoveReq(크로스서버 분기) → OnUserLeave → BeginCrossServerMove
+//                → 캐릭터 DB 저장 → 게이트웨이에 UserMoveToGameServerReq → A에서 유저 제거
+//   게이트웨이:  routedGameServerId = B 로 변경 → B에 GatewayUserRerouteNtf
+//   목적지 서버 B: handleGatewayUserReroute → DB 로드 → User/Character 생성 → 대상 Stage 입장(Moving)
+//                → 클라에 StageMoveRes(성공)
+//   클라:        StageMoveRes(성공) → 맵 로딩 → StageLoadCompleteReq(게이트웨이가 B로 라우팅)
+//                → B의 Stage가 스폰 + StageLoadCompleteRes (로컬 이동과 동일)
+//
+// HP/MP/버프/쿨다운 등 휘발성 상태는 현재 Character proto에 저장되지 않으므로 이동 시 직업기본 최대치로
+// 리셋된다(캐릭터 재선택과 동일). v1 한정. 보존하려면 proto에 필드를 추가해야 한다.
+
+// 캐릭터의 런타임 상태를 proto에 동기화한 뒤 JSON으로 직렬화하여 DB에 저장(UPDATE)한다.
+// user_id/character_id 는 캐릭터 proto에서 얻는다. 직렬화 실패/DB 실패 시 false(사유는 내부 로그).
+db::AwaitableCoTask<bool> GameServer::saveCharacterToDB(CharacterPtr spCharacter)
+{
+    // 런타임 좌표/yaw 등을 proto에 반영한 뒤 직렬화.
+    spCharacter->SyncRuntimeToProto();
+    const DataStructures::Character& proto = spCharacter->GetProto();
+    const int64 userId      = proto.owner_user_id();
+    const int64 characterId = proto.character_id();
+
+    std::string dataJson;
+    if (!packet::ProtoJsonSerializer::ToJson(proto, dataJson))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("saveCharacter - serialize failed. userId={} characterId={}", userId, characterId));
+        co_return false;
+    }
+
+    db::DBResult result = co_await m_dbQueue.ExecuteAsync(
+        "UPDATE Characters SET data = ? WHERE user_id = ? AND character_id = ?",
+        { dataJson, userId, characterId },
+        GetCoroutineResumeExecutor()
+    );
+
+    if (!result.success)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("saveCharacter - DB update failed. userId={} characterId={} err={}",
+            userId, characterId, result.errorMsg));
+        co_return false;
+    }
+
+    co_return true;
+}
+
+// 출발 서버: 크로스서버 이동 개시. 호출 시점에 캐릭터는 이미 현재 Stage에서 빠진(OnUserLeave) 상태여야 한다.
+db::DetachedCoTask GameServer::BeginCrossServerMove(int64 userId, int32 targetGameServerId, int32 targetStageDataKey, int32 positionType)
+{
+    UserPtr spUser;
+    if (!m_safeUsers.Find(userId, spUser) || !spUser)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("CrossServerMove - user not found. userId={}", userId));
+        co_return;
+    }
+
+    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+    if (!spCharacter)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("CrossServerMove - no character. userId={}", userId));
+        co_return;
+    }
+
+    const int64 characterId = spCharacter->GetProto().character_id();
+
+    // ── 1) 캐릭터를 DB에 저장 (saveCharacterToDB 공통 사용) ──
+    if (!co_await saveCharacterToDB(spCharacter))
+    {
+        // TODO(crossserver): 저장 실패 시 현재 Stage 재입장으로 롤백. v1은 실패 응답만 보낸다(유저는 무소속 상태로 남음).
+        m_packetSender.SendStageMoveRes(userId, EResultCode::Fail, "server error: db save", targetStageDataKey);
+        co_return;
+    }
+
+    // ── 2) 게이트웨이에 이동 요청 (게이트웨이가 목적지 게임서버로 재라우팅) ──
+    ServerPacket::UserMoveToGameServerReq req;
+    req.set_user_id(userId);
+    req.set_target_game_server_id(targetGameServerId);
+    req.set_character_id(characterId);
+    req.set_target_stage_data_key(targetStageDataKey);
+    req.set_position_type(positionType);
+
+    netlib::PacketPtr spPacket = SerializePacket(Common::SERVER_PACKET_ID_USER_MOVE_TO_GAME_SERVER_REQ, req);
+    if (!spPacket || !SendToGateway(spUser->GetGatewayId(), spPacket))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("CrossServerMove - send to gateway failed. userId={} gatewayId={}", userId, spUser->GetGatewayId()));
+        m_packetSender.SendStageMoveRes(userId, EResultCode::Fail, "server error: gateway route", targetStageDataKey);
+        co_return;
+    }
+
+    // ── 3) 출발 서버에서 유저 제거. 이후 이 유저의 클라 패킷은 게이트웨이가 목적지 서버로 라우팅한다. ──
+    UserPtr removed;
+    m_safeUsers.EraseAndGet(userId, removed);   // 글로벌 맵에서 제거 → User/Character 파괴
+
+    LOG_WRITE(LogLevel::Info, std::format("CrossServerMove - handed off. userId={} characterId={} -> gameServerId={} stageKey={}",
+        userId, characterId, targetGameServerId, targetStageDataKey));
+}
+
+// 목적지 서버: 게이트웨이가 재라우팅한 유저를 받아 DB에서 캐릭터를 로드하고 대상 Stage에 입장시킨다.
+db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*spSession*/, ServerPacket::GatewayUserRerouteNtf msg)
+{
+    const int64       userId             = msg.user_id();
+    const int32       gatewayId          = msg.gateway_id();
+    const std::string clientIp           = msg.client_ip();
+    const int64       characterId        = msg.character_id();
+    const int32       targetStageDataKey = msg.target_stage_data_key();
+    const auto        positionType       = static_cast<EStagePositionType>(msg.position_type());
+
+    LOG_WRITE(LogLevel::Info, std::format("GatewayUserRerouteNtf received. userId={} characterId={} stageKey={} gatewayId={}",
+        userId, characterId, targetStageDataKey, gatewayId));
+
+    if (m_safeUsers.Contains(userId))
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("reroute - user already exists. userId={}", userId));
+        co_return;
+    }
+
+    // ── 1) User 생성 + DB에서 캐릭터 로드 + Character 객체 생성 (loadCharacterForUser 공통 사용) ──
+    // StageMoveRes 송신은 유저가 글로벌맵(m_safeUsers)에 있어야 게이트웨이를 찾으므로,
+    // 실패 시에도 응답을 먼저 보낸 다음 유저를 제거한다.
+    UserPtr spUser = std::make_shared<User>(userId, gatewayId, clientIp);
+    m_safeUsers.Insert(userId, spUser);
+
+    CharacterPtr spCharacter = co_await loadCharacterForUser(userId, characterId, spUser);
+    if (!spCharacter)
+    {
+        m_packetSender.SendStageMoveRes(userId, EResultCode::Fail, "character load failed", targetStageDataKey);
+        UserPtr removed; m_safeUsers.EraseAndGet(userId, removed);
+        co_return;
+    }
+
+    // ── 2) 대상 Stage 해석 (정적 스테이지는 dataKey당 정확히 1개) ──
+    std::vector<StagePtr> targets = m_stageManager.FindStagesByDataKey(targetStageDataKey);
+    if (targets.size() != 1)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("reroute - target stage resolve failed. userId={} stageKey={} count={}",
+            userId, targetStageDataKey, targets.size()));
+        m_packetSender.SendStageMoveRes(userId, EResultCode::Fail, "target stage not found", targetStageDataKey);
+        UserPtr removed; m_safeUsers.EraseAndGet(userId, removed);
+        co_return;
+    }
+    StagePtr spTarget = targets[0];
+
+    // ── 3) 2단계 입장 시작 (로컬 이동과 동일). 도착 위치타입 보관 + Moving 전환 → 유저만 입장 ──
+    spUser->SetPendingPositionType(positionType);
+    spUser->SetStageState(EUserStageState::Moving);
+    spTarget->EnqueueMessage(StageMsg_UserEnter{spUser});
+
+    // ── 4) 클라에 StageMoveRes(성공) → 클라가 맵 로딩 시작 → StageLoadCompleteReq → 대상 Stage가 스폰 ──
+    m_packetSender.SendStageMoveRes(userId, EResultCode::Success, "", targetStageDataKey);
+
+    LOG_WRITE(LogLevel::Info, std::format("reroute - user entering target stage. userId={} stageId={} stageKey={}",
+        userId, spTarget->GetStageId(), targetStageDataKey));
 }
 
 // 게이트웨이서버로부터 HandshakeRes를 받음

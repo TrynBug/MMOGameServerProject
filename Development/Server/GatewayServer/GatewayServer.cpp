@@ -537,6 +537,10 @@ void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spGa
     rerouteNtf.set_gateway_id(GetServerId());
     rerouteNtf.set_target_stage_id(targetStageId);
     rerouteNtf.set_client_ip(spUser->clientIp);
+    // 크로스서버 이동에 필요한 캐릭터/목적지 정보를 그대로 전달 (게이트웨이는 라우팅만 하고 내용은 해석하지 않음).
+    rerouteNtf.set_character_id(msg.character_id());
+    rerouteNtf.set_target_stage_data_key(msg.target_stage_data_key());
+    rerouteNtf.set_position_type(msg.position_type());
 
     auto spReroutePacket = SerializePacket(Common::SERVER_PACKET_ID_USER_REROUTE_NTF, rerouteNtf);
     if (spReroutePacket)

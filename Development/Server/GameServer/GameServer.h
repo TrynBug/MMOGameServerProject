@@ -67,6 +67,16 @@ public:
     // 특정 게이트웨이로 서버패킷 전송. 해당 게이트웨이 세션이 없으면 false. (netdelay 치트 등 내부 제어용)
     bool SendToGateway(int32 gatewayId, const netlib::PacketPtr& spPacket);
 
+    // GameDB 파일 경로 설정
+    void SetGameDBPath(const std::string& path) { m_gameDBPath = path; }
+
+    // 크로스서버 이동 개시 (출발 서버). Stage::handleStageMoveReq 의 크로스서버 분기가 호출한다.
+    //   1) 현재 캐릭터를 DB에 저장(UPDATE)
+    //   2) 게이트웨이에 UserMoveToGameServerReq 전송 (게이트웨이가 목적지 서버로 재라우팅)
+    //   3) 출발 서버의 글로벌 유저맵에서 제거 (이후 클라 패킷은 목적지 서버가 받음)
+    // 캐릭터는 이 호출 전에 Stage::OnUserLeave 로 현재 Stage에서 이미 빠진 상태여야 한다.
+    db::DetachedCoTask BeginCrossServerMove(int64 userId, int32 targetGameServerId, int32 targetStageDataKey, int32 positionType);
+
 protected:
     // ServerBase 훅
     bool OnInitialize()                              override;
@@ -101,6 +111,12 @@ private:
     // handleGatewayUserEnter는 DB 조회를 위해 코루틴으로 작성한다.
     db::DetachedCoTask handleGatewayUserEnter(netlib::ISessionPtr spSession, ServerPacket::GatewayUserEnterNtf msg);
     void handleGatewayUserDisconnect(const netlib::ISessionPtr& spSession, const ServerPacket::GatewayUserDisconnectNtf& msg);
+
+    // 크로스서버 이동 수신 (목적지 서버). 게이트웨이가 보낸 GatewayUserRerouteNtf 처리.
+    //   1) DB에서 캐릭터 로드 → User/Character 생성 (캐릭터 선택과 동일 골격)
+    //   2) 대상 Stage에 유저 입장(Moving) + 클라에 StageMoveRes(성공) 송신
+    //      → 이후 클라의 StageLoadCompleteReq 를 대상 Stage가 받아 스폰한다.
+    db::DetachedCoTask handleGatewayUserReroute(netlib::ISessionPtr spSession, ServerPacket::GatewayUserRerouteNtf msg);
     void handleGatewayHandshakeRes(const netlib::ISessionPtr& spSession, const ServerPacket::ServerHandshakeRes& msg);
 
     // 게이트웨이로부터 받은 클라 패킷 (사이드카 있음) 처리.
@@ -129,6 +145,13 @@ private:
     // 스폰 좌표는 이 패킷에 싣지 않는다. 로딩 완료 후 StageLoadCompleteRes가 좌표의 단일 출처.
     void sendCharacterSelectRes(int64 userId, EResultCode resultCode, const std::string& errorMsg,
                                 const DataStructures::Character* pCharacter, int32 stageDataKey);
+
+    // (user_id, character_id)로 DB에서 캐릭터 row를 읽어 JSON 파싱 후 Character 객체를 생성하고
+    // User에 소유 연결한다(User→Character 강참조, Character→User 약참조).
+    db::AwaitableCoTask<CharacterPtr> loadCharacterForUser(int64 userId, int64 characterId, UserPtr spUser);
+
+    // 캐릭터의 런타임 상태를 proto에 동기화(SyncRuntimeToProto)한 뒤 JSON 직렬화하여 DB에 저장(UPDATE)한다.
+    db::AwaitableCoTask<bool> saveCharacterToDB(CharacterPtr spCharacter);
 
 private:
     // 전역 단일 인스턴스 포인터. 생성자에서 1회 세팅, 소멸자에서 해제. Instance() 가 역참조한다.
@@ -171,5 +194,6 @@ private:
 
     // ── GameDB ────────────────────────────────────────────────────
     // 코루틴으로 co_await ExecuteAsync() 사용.
+    std::string      m_gameDBPath = "";
     db::AsyncDBQueue m_dbQueue;
 };

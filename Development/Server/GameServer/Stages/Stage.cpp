@@ -1076,13 +1076,6 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
     };
 
     // ── 검증 ─────────────────────────────────────────────
-    // 크로스서버 이동은 Phase 2.
-    if (req.target_game_server_id() != 0 && req.target_game_server_id() != server.GetServerId())
-    {
-        sendFail("cross-server move not supported yet");
-        return;
-    }
-
     // 전환 중 중복 요청 거부.
     if (spUser->GetStageState() != EUserStageState::InStage)
     {
@@ -1101,6 +1094,24 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
     if (positionType <= EStagePositionType::None || positionType >= EStagePositionType::Max)
     {
         sendFail("invalid position type");
+        return;
+    }
+
+    // ── 크로스서버 이동 분기 ──────────────────────────────
+    // target_game_server_id 가 0(또는 자기 자신)이 아니면 다른 게임서버로의 이동이다.
+    // 대상 Stage는 다른 서버에 있어 여기서 검증할 수 없으므로(목적지 서버가 검증), DB 저장 후
+    // 게이트웨이 재라우팅으로 핸드오프한다. 성공 응답(StageMoveRes)은 목적지 서버가 보낸다.
+    if (req.target_game_server_id() != 0 && req.target_game_server_id() != server.GetServerId())
+    {
+        // 현재 Stage에서 퇴장(AOI despawn). 캐릭터는 User가 계속 소유하므로 파괴되지 않는다.
+        spUser->SetStageState(EUserStageState::Moving);
+        OnUserLeave(userId);
+
+        // 캐릭터 DB 저장 → 게이트웨이 통보 → 출발 서버에서 유저 제거 (코루틴).
+        server.BeginCrossServerMove(userId, req.target_game_server_id(), req.target_stage_data_key(), req.position_type());
+
+        LOG_WRITE(LogLevel::Info, std::format("cross-server moving. userId={} from stageId={} to gameServerId={} (stageKey={}) positionType={}",
+            userId, m_stageId, req.target_game_server_id(), req.target_stage_data_key(), static_cast<int32>(positionType)));
         return;
     }
 

@@ -25,6 +25,10 @@ bool DBConnection::Open(const std::string& filePath)
     // WAL 모드 활성화 (동시읽기 성능 향상, 쓰기 충돌 감소)
     sqlite3_exec(m_pDb, "PRAGMA journal_mode=WAL;", nullptr, nullptr, nullptr);
 
+    // 잠금 대기 시간. 여러 게임서버가 같은 GameDB를 공유(크로스서버 이동 DB 경유)할 때
+    // 동시 쓰기로 SQLITE_BUSY가 즉시 실패하지 않도록 일정 시간 재시도하게 한다.
+    sqlite3_busy_timeout(m_pDb, 3000);
+
     // Foreign key 제약 활성화
     sqlite3_exec(m_pDb, "PRAGMA foreign_keys=ON;", nullptr, nullptr, nullptr);
 
