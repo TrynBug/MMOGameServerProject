@@ -158,6 +158,8 @@ namespace Client.Game
             transform.position = pos;
             transform.rotation = Quaternion.Euler(0f, dirY, 0f);
             m_mover.CancelForTeleport();
+            // 텔포/스폰/하드스냅 후엔 예측 히스토리/잔차를 초기화(이 시점 이전 stale 비교 방지).
+            m_reconciler?.Clear();
         }
 
         // 서버 SnapshotNtf 수신 시 호출(StageManager). 원격 캐릭터만 보간 버퍼에 쌓는다.
@@ -187,15 +189,16 @@ namespace Client.Game
         }
 
         // 본인 캐릭터 화해. 서버 SnapshotNtf 의 본인 항목으로 StageManager 가 호출한다.
-        //   ackSeq  = 서버가 마지막으로 처리한 입력 seq
-        //   authPos = 그 시점(≈RTT 과거)의 서버 권위 위치
-        public void ReconcileTo(Vector3 authPos, float authYaw, uint ackSeq)
+        //   snapServerMs = authPos 의 서버시각(= server_tick_seq * 50ms). 시간정렬 비교 기준.
+        //   ackSeq       = 서버가 마지막으로 처리한 입력 seq (Phase 2 커맨드 리플레이용, Phase 1 미사용).
+        //   authPos      = 그 서버시각 시점의 권위 위치.
+        public void ReconcileTo(Vector3 authPos, float authYaw, double snapServerMs, uint ackSeq)
         {
             if (!IsLocalPlayer)
                 return;
 
-            // 큰 desync 면 reconciler 가 true 를 돌려준다 → authPos 로 즉시 스냅.
-            if (m_reconciler.Reconcile(transform, authPos, ackSeq,
+            // 큰 desync(또는 히스토리 미커버) 면 reconciler 가 true 를 돌려준다 → authPos 로 즉시 스냅.
+            if (m_reconciler.Reconcile(transform, snapServerMs, authPos, ackSeq,
                                        m_mover.IsMoving, m_mover.IsSkillMoving, GetMoveSpeed()))
                 SetPosition(authPos, authYaw);
         }
@@ -244,6 +247,11 @@ namespace Client.Game
             // 서버 권위와의 위치 오차를 매 프레임 부드럽게 보정(이동 중/정지 모두). 동기화돼 있으면 오차≈0.
             if (!m_mover.IsSkillMoving)
                 m_reconciler.ApplyBleed(transform);
+
+            // 시간정렬 화해용: 최종 렌더 위치를 추정 서버시각으로 스탬프해 히스토리에 기록.
+            // 스킬 강제이동 중에도 기록해 히스토리에 구멍을 내지 않는다(화해는 skillMoving 가드로 별도 생략).
+            if (NetClock.IsReady)
+                m_reconciler.RecordPrediction(NetClock.EstServerNowMs(), transform.position);
 
             // Animator 갱신은 정지 전환(true -> false)도 잡아야 하므로 매 프레임 호출.
             updateAnimator();

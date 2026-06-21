@@ -368,7 +368,7 @@ namespace Client.Game
 
                 if (LocalPlayer != null && s.ObjectId == myObjectId)
                 {
-                    LocalPlayer.ReconcileTo(pos, yaw, ntf.AckInputSeq);   // 본인: 예측↔서버 화해 (Phase 3)
+                    LocalPlayer.ReconcileTo(pos, yaw, serverMs, ntf.AckInputSeq);   // 본인: 예측↔서버 화해 (시간정렬)
                     continue;
                 }
 

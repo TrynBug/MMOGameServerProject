@@ -35,6 +35,17 @@ namespace Client.Network
 
         private static double NowMs => (double)Time.unscaledTime * 1000.0;
 
+        // 추정 현재 서버시각(ms) = 마지막 앵커 서버시각 + 그 이후 로컬 경과시간.
+        // RenderTimeMs(=과거 재생시각, 보간지연 적용)와 달리 "지금 서버 tick" 추정치다.
+        // 본인 화해(PlayerReconciler)가 예측 위치를 이 시각으로 스탬프해, 권위 스냅샷의 server_tick_seq
+        // 와 같은 시간축에서 오차를 측정한다(시간정렬 비교). 미초기화 시 0.
+        public static double EstServerNowMs()
+        {
+            if (!s_initialized)
+                return 0.0;
+            return s_latestServerMs + (NowMs - s_localAtLatestMs);
+        }
+
         // SnapshotNtf 수신 시 호출. 최신 서버시각과 수신 로컬시각을 갱신한다.
         public static void OnServerTick(uint serverTickSeq)
         {
