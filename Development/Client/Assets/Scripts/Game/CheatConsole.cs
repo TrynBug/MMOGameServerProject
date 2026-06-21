@@ -88,12 +88,13 @@ namespace Client.Game
             };
 
             // 스테이지 이동: 기존 클라 경로(StageManager.RequestStageMove)를 그대로 사용.
-            // usage: stage <stageDataKey>
+            // usage: stage <stageDataKey> [serverId]
+            //   serverId 생략/0 → 같은 게임서버 내 이동. 0이 아니면 해당 게임서버로 크로스서버 이동.
             m_clientCheats["stage"] = args =>
             {
                 if (args.Length < 1)
                 {
-                    Log("usage: stage <stageDataKey>");
+                    Log("usage: stage <stageDataKey> [serverId]");
                     return;
                 }
                 if (!int.TryParse(args[0], out int stageDataKey))
@@ -101,13 +102,20 @@ namespace Client.Game
                     Log("invalid stageDataKey: " + args[0]);
                     return;
                 }
+                // 두 번째 인자(서버ID)는 선택. 있으면 파싱, 없으면 0(같은 서버).
+                int targetGameServerId = 0;
+                if (args.Length >= 2 && !int.TryParse(args[1], out targetGameServerId))
+                {
+                    Log("invalid serverId: " + args[1]);
+                    return;
+                }
                 if (StageManager.Instance == null)
                 {
                     Log("StageManager not ready.");
                     return;
                 }
-                StageManager.Instance.RequestStageMove(stageDataKey, EStagePositionType.Default);
-                Log($"[client] stage move -> {stageDataKey}");
+                StageManager.Instance.RequestStageMove(stageDataKey, EStagePositionType.Default, targetGameServerId);
+                Log($"[client] stage move -> stage={stageDataKey} server={targetGameServerId}");
             };
         }
 
