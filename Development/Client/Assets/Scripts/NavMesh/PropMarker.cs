@@ -8,7 +8,7 @@ namespace Client.Game
     // 겸용: (1) export 가 읽어 서버 레이아웃 json 의 `markers` 로 출력, (2) 런타임에 PropInteractor 가 근접 판정에 사용.
     // (NavMeshSource·다른 배치 마커와 같은 "씬 오토링 마커" 부류라 NavMesh 어셈블리에 둔다.)
     //
-    // 상호작용은 fire-and-forget — 서버가 위치 검증 후 Lua OnObjectInteract(Key, userId) 를 발동한다(상태/동기화 없음).
+    // 상호작용은 fire-and-forget — 서버가 위치 검증 후 Lua OnObjectInteract(Key, accountId) 를 발동한다(상태/동기화 없음).
     public class PropMarker : MonoBehaviour
     {
         public int   Key;

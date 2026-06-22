@@ -140,7 +140,7 @@ namespace Client.Game
         private long localPlayerId()
         {
             StageManager sm = StageManager.Instance;
-            return (sm != null && sm.LocalPlayer != null) ? sm.LocalPlayer.UserId : 0;
+            return (sm != null && sm.LocalPlayer != null) ? sm.LocalPlayer.AccountId : 0;
         }
 
         // ─── UI (IMGUI) ──────────────────────────────────────────────

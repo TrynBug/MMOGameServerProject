@@ -162,9 +162,9 @@ namespace Client.Game
                     return;
                 }
 
-                Debug.Log($"[LoginScene] LoginRes OK. userId={loginRes.UserId}, gateway={loginRes.GatewayIp}:{loginRes.GatewayPort}");
+                Debug.Log($"[LoginScene] LoginRes OK. accountId={loginRes.AccountId}, gateway={loginRes.GatewayIp}:{loginRes.GatewayPort}");
 
-                long userId = loginRes.UserId;
+                long accountId = loginRes.AccountId;
                 ulong authToken = loginRes.AuthToken;
                 string gatewayIp = loginRes.GatewayIp;
                 int gatewayPort = loginRes.GatewayPort;
@@ -191,7 +191,7 @@ namespace Client.Game
                 m_tcsCharacterList = newTcs<CharacterListNtf>();
                 GatewayAuthReq authReq = new GatewayAuthReq
                 {
-                    UserId = userId,
+                    AccountId = accountId,
                     AuthToken = authToken
                 };
                 m_net.Send(GamePacketId.GatewayAuthReq, authReq);
@@ -215,7 +215,7 @@ namespace Client.Game
                 }
 
                 // 캐시에 저장
-                CharacterDataCache.Instance.SetUserId(userId);
+                CharacterDataCache.Instance.SetAccountId(accountId);
                 CharacterDataCache.Instance.SetCharacters(charList.Characters);
 
                 Debug.Log($"[LoginScene] CharacterListNtf received. count={charList.Characters.Count}");

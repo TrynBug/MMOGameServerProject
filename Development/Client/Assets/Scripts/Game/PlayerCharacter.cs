@@ -16,7 +16,7 @@ namespace Client.Game
     public class PlayerCharacter : ActorObject
     {
         // 캐릭터 식별자
-        public long UserId { get; private set; }
+        public long AccountId { get; private set; }
         public string CharacterName { get; private set; }
 
         // 내 캐릭터 여부 (다른 유저와 구분하기 위해)
@@ -138,9 +138,9 @@ namespace Client.Game
         }
 
         // StageManager가 캐릭터 생성 직후 1회 호출
-        public void Initialize(long userId, string name, bool isLocalPlayer, Vector3 pos, float dirY)
+        public void Initialize(long accountId, string name, bool isLocalPlayer, Vector3 pos, float dirY)
         {
-            UserId = userId;
+            AccountId = accountId;
             CharacterName = name;
             IsLocalPlayer = isLocalPlayer;
 
@@ -149,7 +149,7 @@ namespace Client.Game
             transform.rotation = Quaternion.Euler(0f, dirY, 0f);
 
             // GameObject 이름을 식별 가능하게
-            gameObject.name = $"Player_{userId}_{name}{(isLocalPlayer ? "_LOCAL" : "")}";
+            gameObject.name = $"Player_{accountId}_{name}{(isLocalPlayer ? "_LOCAL" : "")}";
         }
 
         // 서버에서 위치 강제 동기화(스폰/텔레포트/화해 하드스냅) 시 호출. 즉시 적용 + 이동 취소.

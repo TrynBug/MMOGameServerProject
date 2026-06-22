@@ -22,7 +22,7 @@ namespace Client.Game
         private CharacterDataCache() { }
 
         // 로그인 응답에서 받은 정보
-        public long UserId { get; private set; }
+        public long AccountId { get; private set; }
 
         // 게임서버가 보내준 캐릭터 목록 (0개 이상). 선택 화면용 요약 목록.
         public IReadOnlyList<Character> Characters { get; private set; } = new List<Character>();
@@ -34,9 +34,9 @@ namespace Client.Game
         // 최초 입장할 Stage 데이터 Key (CharacterSelectRes 의 stage_data_key).
         public int SelectedStageDataKey { get; private set; }
 
-        public void SetUserId(long userId)
+        public void SetAccountId(long accountId)
         {
-            UserId = userId;
+            AccountId = accountId;
         }
 
         public void SetCharacters(IList<Character> characters)
@@ -54,7 +54,7 @@ namespace Client.Game
 
         public void Clear()
         {
-            UserId = 0;
+            AccountId = 0;
             Characters = new List<Character>();
             LocalCharacter = null;
             SelectedStageDataKey = 0;
