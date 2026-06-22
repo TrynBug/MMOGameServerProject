@@ -1185,14 +1185,13 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
     // 게이트웨이 재라우팅으로 핸드오프한다. 성공 응답(StageMoveRes)은 목적지 서버가 보낸다.
     if (req.target_game_server_id() != 0 && req.target_game_server_id() != server.GetServerId())
     {
-        // 현재 Stage에서 퇴장(AOI despawn). 캐릭터는 User가 계속 소유하므로 파괴되지 않는다.
+        // 유저는 아직 이 Stage에 남겨둔다. 저장+게이트웨이 통보가 모두 성공한 뒤에야
+        // BeginCrossServerMove가 이 Stage에서 퇴장시킨다. 실패 시 유저가 떠난 적이 없어 InStage 복귀로 롤백된다.
         spUser->SetStageState(EUserStageState::Moving);
-        OnUserLeave(userId);
 
-        // 캐릭터 DB 저장 → 게이트웨이 통보 → 출발 서버에서 유저 제거 (코루틴).
-        // 이 Stage의 resume executor를 넘겨, DB await 후속작업이 이 Stage의 컨텐츠 스레드에서 재개되게 한다.
-        server.BeginCrossServerMove(userId, req.target_game_server_id(), req.target_stage_data_key(), req.position_type(),
-            GetResumeExecutor());
+        // 캐릭터 DB 저장 → (성공 시) 게이트웨이 통보 + 이 Stage 퇴장 + 글로벌맵 제거 (코루틴).
+        // 이 Stage를 넘겨, DB await 후속작업이 이 Stage의 컨텐츠 스레드에서 재개되고 퇴장도 이 Stage로 enqueue된다.
+        server.BeginCrossServerMove(userId, req.target_game_server_id(), req.target_stage_data_key(), req.position_type(), this);
 
         LOG_WRITE(LogLevel::Info, std::format("cross-server moving. userId={} from stageId={} to gameServerId={} (stageKey={}) positionType={}",
             userId, m_stageId, req.target_game_server_id(), req.target_stage_data_key(), static_cast<int32>(positionType)));

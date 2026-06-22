@@ -72,13 +72,18 @@ public:
 
     // 크로스서버 이동 개시 (출발 서버). Stage::handleStageMoveReq 의 크로스서버 분기가 호출한다.
     //   1) 현재 캐릭터를 DB에 저장(UPDATE)
-    //   2) 게이트웨이에 UserMoveToGameServerReq 전송 (게이트웨이가 목적지 서버로 재라우팅)
-    //   3) 출발 서버의 글로벌 유저맵에서 제거 (이후 클라 패킷은 목적지 서버가 받음)
-    // 캐릭터는 이 호출 전에 Stage::OnUserLeave 로 현재 Stage에서 이미 빠진 상태여야 한다.
-    // pResumeExecutor: DB await 후속작업을 재개할 executor. 호출한 Stage의 GetResumeExecutor() 를 넘기면
-    //   후속작업이 그 Stage의 컨텐츠 스레드에서 실행된다(단일 스레드 불변식 유지).
+    //   2) (성공 시) 게이트웨이에 UserMoveToGameServerReq 전송 (게이트웨이가 목적지 서버로 재라우팅)
+    //   3) (성공 시) 출발 Stage에서 퇴장(UserLeave 메시지) + 글로벌 유저맵에서 제거
+    // 호출 시점에 유저는 아직 출발 Stage에 남아있다("유저는 반드시 Stage에 속한다" 불변식 유지). 퇴장은
+    //   저장+게이트웨이 통보가 모두 성공한 뒤에만 일어난다. 실패 시 유저가 떠난 적 없어 InStage 복귀로 롤백된다(무소속 유저 없음).
+    // pSourceStage: 출발 Stage. DB await 후속작업이 이 Stage의 컨텐츠 스레드에서 재개되고, 퇴장도 이 Stage로 enqueue된다.
     db::DetachedCoTask BeginCrossServerMove(int64 userId, int32 targetGameServerId, int32 targetStageDataKey, int32 positionType,
-                                            db::IResumeExecutor* pResumeExecutor);
+                                            Stage* pSourceStage);
+
+    // [개발/테스트] Stage에서 시작하는 코루틴 절차 검증용 (치트 savechar 가 호출).
+    // AsyncPin 획득 → saveCharacterToDB(캐릭터를 DB에 UPDATE)를 Stage의 resume executor로 co_await
+    //   → 후속작업이 같은 Stage 스레드에서 재개되는지 + 핀 카운터 증감을 로그([savechar])로 확인한다.
+    db::DetachedCoTask SaveCharacterFromStage(Stage* pStage, CharacterPtr spChar);
 
 protected:
     // ServerBase 훅

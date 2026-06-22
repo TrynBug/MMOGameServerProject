@@ -71,6 +71,10 @@ private:
     // netdelay <recvMs> [sendMs]: 이 클라 연결에 인위적 네트워크 지연 설정(개발용). 게이트웨이로 전파.
     CheatResult cheatNetDelay    (Stage& stage, const UserPtr& spUser, const std::vector<std::string>& args);
 
+    // savechar: [개발] Stage에서 코루틴을 띄워 캐릭터 현재 상태를 DB에 저장하고, 후속작업이 같은 Stage
+    // 스레드에서 재개되는지 + AsyncPin 카운터 동작을 로그([savechar])로 검증한다. 인자 없음.
+    CheatResult cheatSaveChar    (Stage& stage, const UserPtr& spUser, const std::vector<std::string>& args);
+
 #ifdef _DEBUG
     // [디버그 UI] 구독 토글. 상태는 호출 유저(User)에 보관되고, Stage 디버그 tick 이 읽어 push 한다.
     // dbgstat <objectId>: 선택 오브젝트 전체 스탯 구독 (인자 없거나 0 이면 해제).

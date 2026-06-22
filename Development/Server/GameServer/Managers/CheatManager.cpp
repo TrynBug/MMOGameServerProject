@@ -15,6 +15,7 @@ CheatManager::CheatManager()
         { "packet",       &CheatManager::cheatPacket },
         { "packetdetail", &CheatManager::cheatPacketDetail },
         { "netdelay",     &CheatManager::cheatNetDelay },
+        { "savechar",     &CheatManager::cheatSaveChar },
 #ifdef _DEBUG
         { "dbgstat",      &CheatManager::cheatDbgStat },
         { "dbgmon",       &CheatManager::cheatDbgMon  },
@@ -105,6 +106,24 @@ CheatResult CheatManager::cheatNetDelay(Stage& /*stage*/, const UserPtr& spUser,
         return { false, "failed to send latency request to gateway" };
 
     return { true, std::format("net delay set: recv={}ms send={}ms", recvMs, sendMs) };
+}
+
+// savechar: Stage에서 코루틴을 띄워 캐릭터 현재 상태를 DB에 저장하고, 후속작업이 같은 Stage 스레드에서
+// 재개되는지 + AsyncPin 동작을 검증(개발용).
+// 핸들러는 요청 유저의 Stage 컨텐츠 스레드에서 호출되므로, 여기서 시작한 코루틴은 그 Stage 스레드에서 시작된다.
+// 결과는 서버 로그의 [savechar] 줄로 확인한다(코루틴은 fire-and-forget).
+CheatResult CheatManager::cheatSaveChar(Stage& stage, const UserPtr& spUser,
+                                        const std::vector<std::string>& /*args*/)
+{
+    if (!spUser)
+        return { false, "no user context" };
+
+    CharacterPtr spChar = spUser->GetCurrentCharacter();
+    if (!spChar)
+        return { false, "no character (select a character first)" };
+
+    GameServer::Instance().SaveCharacterFromStage(&stage, spChar);
+    return { true, "savechar launched. check server logs for [savechar] lines." };
 }
 
 // 공통 토글: 현재 모드가 level 이면 끄고(None), 아니면 level 로 켠다.

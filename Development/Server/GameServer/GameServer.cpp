@@ -701,8 +701,9 @@ void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSess
 // ──────────────────────────────────────────────────────────────
 //
 // 흐름:
-//   출발 서버 A: Stage::handleStageMoveReq(크로스서버 분기) → OnUserLeave → BeginCrossServerMove
-//                → 캐릭터 DB 저장 → 게이트웨이에 UserMoveToGameServerReq → A에서 유저 제거
+//   출발 서버 A: Stage::handleStageMoveReq(크로스서버 분기, 유저는 Stage에 남겨둠) → BeginCrossServerMove
+//                → 캐릭터 DB 저장 → (성공) 게이트웨이에 UserMoveToGameServerReq → A의 Stage에서 퇴장 + A에서 유저 제거
+//                → (실패) InStage 복귀 + StageMoveRes(실패). 유저가 Stage를 떠난 적 없어 무소속 유저가 안 생긴다.
 //   게이트웨이:  routedGameServerId = B 로 변경 → B에 GatewayUserRerouteNtf
 //   목적지 서버 B: handleGatewayUserReroute → DB 로드 → User/Character 생성 → 대상 Stage 입장(Moving)
 //                → 클라에 StageMoveRes(성공)
@@ -745,10 +746,9 @@ db::AwaitableCoTask<bool> GameServer::saveCharacterToDB(CharacterPtr spCharacter
     co_return true;
 }
 
-// 출발 서버: 크로스서버 이동 개시. 호출 시점에 캐릭터는 이미 현재 Stage에서 빠진(OnUserLeave) 상태여야 한다.
-// pResumeExecutor: DB await 후속작업을 재개할 executor(호출한 Stage의 컨텐츠 스레드). 이후 코드가 그 스레드에서 실행된다.
-db::DetachedCoTask GameServer::BeginCrossServerMove(int64 userId, int32 targetGameServerId, int32 targetStageDataKey, int32 positionType,
-                                                    db::IResumeExecutor* pResumeExecutor)
+// 출발 서버: 크로스서버 이동 개시. 호출 시점에 유저는 아직 출발 Stage에 남아있다.
+// pSourceStage: 출발 Stage. DB await 후속작업이 이 Stage의 컨텐츠 스레드에서 재개되고, 성공 시 퇴장도 이 Stage로 enqueue된다.
+db::DetachedCoTask GameServer::BeginCrossServerMove(int64 userId, int32 targetGameServerId, int32 targetStageDataKey, int32 positionType, Stage* pSourceStage)
 {
     UserPtr spUser;
     if (!m_safeUsers.Find(userId, spUser) || !spUser)
@@ -767,10 +767,11 @@ db::DetachedCoTask GameServer::BeginCrossServerMove(int64 userId, int32 targetGa
     const int64 characterId = spCharacter->GetProto().character_id();
 
     // ── 1) 캐릭터를 DB에 저장 (saveCharacterToDB 공통 사용) ──
-    // 후속작업이 호출한 Stage의 컨텐츠 스레드에서 재개되도록 그 Stage의 executor를 넘긴다.
-    if (!co_await saveCharacterToDB(spCharacter, pResumeExecutor))
+    // 유저는 아직 출발 Stage에 남아있다. 후속작업이 출발 Stage의 컨텐츠 스레드에서 재개되도록 그 executor를 넘긴다.
+    // 실패하면 유저가 Stage를 떠난 적이 없으므로 InStage 복귀로 롤백한다(무소속 유저 없음).
+    if (!co_await saveCharacterToDB(spCharacter, pSourceStage->GetResumeExecutor()))
     {
-        // TODO(crossserver): 저장 실패 시 현재 Stage 재입장으로 롤백. v1은 실패 응답만 보낸다(유저는 무소속 상태로 남음).
+        spUser->SetStageState(EUserStageState::InStage);
         m_packetSender.SendStageMoveRes(userId, EResultCode::Fail, "server error: db save", targetStageDataKey);
         co_return;
     }
@@ -787,13 +788,17 @@ db::DetachedCoTask GameServer::BeginCrossServerMove(int64 userId, int32 targetGa
     if (!spPacket || !SendToGateway(spUser->GetGatewayId(), spPacket))
     {
         LOG_WRITE(LogLevel::Error, std::format("CrossServerMove - send to gateway failed. userId={} gatewayId={}", userId, spUser->GetGatewayId()));
+        spUser->SetStageState(EUserStageState::InStage);   // 아직 출발 Stage에 그대로 → 롤백
         m_packetSender.SendStageMoveRes(userId, EResultCode::Fail, "server error: gateway route", targetStageDataKey);
         co_return;
     }
 
-    // ── 3) 출발 서버에서 유저 제거. 이후 이 유저의 클라 패킷은 게이트웨이가 목적지 서버로 라우팅한다. ──
+    // ── 3) 확정(point of no return). 이제 출발 Stage에서 퇴장 + 글로벌맵 제거. ──
+    // 퇴장은 출발 Stage 스레드에서 처리되도록 메시지로 큐잉(다음 tick에 OnUserLeave → AOI despawn).
+    // 글로벌맵에서 빼도 출발 Stage의 m_users가 다음 tick까지 캐릭터를 살려둔다.
+    pSourceStage->EnqueueMessage(StageMsg_UserLeave{ userId });
     UserPtr removed;
-    m_safeUsers.EraseAndGet(userId, removed);   // 글로벌 맵에서 제거 → User/Character 파괴
+    m_safeUsers.EraseAndGet(userId, removed);   // 글로벌 맵에서 제거
 
     LOG_WRITE(LogLevel::Info, std::format("CrossServerMove - handed off. userId={} characterId={} -> gameServerId={} stageKey={}",
         userId, characterId, targetGameServerId, targetStageDataKey));
@@ -854,6 +859,39 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
 
     LOG_WRITE(LogLevel::Info, std::format("reroute - user entering target stage. userId={} stageId={} stageKey={}",
         userId, spTarget->GetStageId(), targetStageDataKey));
+}
+
+// [개발/테스트] Stage에서 시작하는 코루틴 절차 검증용 (치트 savechar).
+// 캐릭터 현재 상태를 DB에 저장(saveCharacterToDB)하면서, 후속작업이 같은 Stage 스레드에서 재개되는지 +
+// AsyncPin 카운터 증감을 로그로 확인한다.
+// 기대 로그: start(stageBusy=true,charPending=true) → resumed(sameAsLaunch=true,saved=true) → pin released(둘 다 false).
+// sameAsLaunch=true 가 "후속작업이 IOCP가 아니라 같은 Stage 스레드에서 재개됨"을 증명한다.
+db::DetachedCoTask GameServer::SaveCharacterFromStage(Stage* pStage, CharacterPtr spChar)
+{
+    const size_t launchTid    = std::hash<std::thread::id>{}(std::this_thread::get_id());
+    const int64  characterId  = spChar->GetProto().character_id();
+
+    {
+        // 코루틴 prologue(첫 co_await 이전, Stage 스레드)에서 핀 획득 → 카운터 ++.
+        AsyncPin pin = pStage->PinForAsync(spChar);
+
+        LOG_WRITE(LogLevel::Info, std::format(
+            "[savechar] start. thread={} stageId={} characterId={} stageBusy={} charPending={}",
+            launchTid, pStage->GetStageId(), characterId, pStage->HasInFlightAsync(), spChar->HasPendingAsync()));
+
+        // 실제 저장 코루틴 사용. Stage의 resume executor를 넘겨 후속작업이 이 Stage 스레드에서 재개되게 한다.
+        // (GetCoroutineResumeExecutor였다면 IOCP에서 재개되어 thread가 달라진다.)
+        const bool saved = co_await saveCharacterToDB(spChar, pStage->GetResumeExecutor());
+
+        const size_t resumeTid = std::hash<std::thread::id>{}(std::this_thread::get_id());
+        LOG_WRITE(LogLevel::Info, std::format(
+            "[savechar] resumed. resumeThread={} sameAsLaunch={} saved={} stageBusy={} charPending={}",
+            resumeTid, (resumeTid == launchTid), saved, pStage->HasInFlightAsync(), spChar->HasPendingAsync()));
+    }   // AsyncPin 소멸(Stage 스레드) → 카운터 --.
+
+    LOG_WRITE(LogLevel::Info, std::format(
+        "[savechar] pin released. stageBusy={} charPending={}",
+        pStage->HasInFlightAsync(), spChar->HasPendingAsync()));
 }
 
 // 게이트웨이서버로부터 HandshakeRes를 받음
