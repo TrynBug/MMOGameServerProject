@@ -88,21 +88,30 @@ void ContentsThread::threadProc()
                 m_pendingAdd.clear();
             }
 
-            // 제거 대기중인 컨텐츠 제거
+            // 제거 대기중인 컨텐츠 제거.
+            // 단, IsBusy()(진행 중인 비동기 후속작업 등)인 컨텐츠는 이번 tick엔 제거하지 않고 보류한다.
+            // 보류 중에도 Update와 태스크 큐 drain은 계속되어 in-flight가 0으로 수렴 → 다음 tick에 제거된다.
             if (!m_pendingRemove.empty())
             {
                 std::lock_guard<std::mutex> contentsLock(m_contentsMutex);
+                std::vector<ContentsPtr> stillBusy;
                 for (ContentsPtr& spContents : m_pendingRemove)
                 {
                     auto iter = std::find(m_contents.begin(), m_contents.end(), spContents);
-                    if (iter != m_contents.end())
+                    if (iter == m_contents.end())
+                        continue;   // 이미 없음
+
+                    if ((*iter)->IsBusy())
                     {
-                        (*iter)->Stop();
-                        m_contents.erase(iter);
+                        stillBusy.push_back(spContents);   // 보류 → 다음 tick 재시도
+                        continue;
                     }
+
+                    (*iter)->Stop();
+                    m_contents.erase(iter);
                 }
 
-                m_pendingRemove.clear();
+                m_pendingRemove = std::move(stillBusy);
             }
         }
 

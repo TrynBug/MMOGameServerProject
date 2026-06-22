@@ -42,6 +42,30 @@ class ActorObject;
 // 코루틴 resume executor 전방선언 (포인터 멤버/접근자에만 사용).
 namespace db { class IResumeExecutor; }
 
+class Stage;
+
+// 코루틴 후속작업 동안 Stage와 (선택적으로) Character를 고정하는 RAII 핀.
+//   - 생성: 코루틴 prologue(첫 co_await 이전, Stage 스레드)에서 카운터 증가.
+//   - 소멸: 코루틴 프레임 종료(후속작업 완료, Stage 스레드)에서 카운터 감소.
+//   카운터 접근이 모두 Stage 스레드라 lock 불필요. move-only.
+//   사용: auto pin = pStage->PinForAsync(spChar); ... co_await ...;  (프레임 종료 시 자동 해제)
+//   효과: 핀이 살아있는 동안 Stage 파괴 보류, 해당 Character의 Stage 제거 보류 + 다른 Stage 이동 거부.
+class AsyncPin
+{
+public:
+    AsyncPin() = default;                          // 빈 핀(no-op)
+    AsyncPin(Stage* pStage, CharacterPtr spChar);  // 정의는 Stage.cpp (Stage/Character 완전타입 필요)
+    ~AsyncPin();
+    AsyncPin(AsyncPin&& other) noexcept;           // 소유권 이동(원본 무력화)
+    AsyncPin& operator=(AsyncPin&&) = delete;
+    AsyncPin(const AsyncPin&) = delete;
+    AsyncPin& operator=(const AsyncPin&) = delete;
+
+private:
+    Stage*       m_pStage = nullptr;
+    CharacterPtr m_spChar;
+};
+
 // 스킬/효과 시스템 타입 전방선언. 완전 정의는 Stage.cpp 에서 include.
 // (EffectShape/EffectParams/AreaEffect/ProjectileGroup = Skill/. Vector3 는 위에서 include 함.)
 struct EffectShape;
@@ -155,6 +179,20 @@ public:
     // Stage에서 시작한 DB 코루틴의 후속작업을 이 Stage의 스레드에서 재개시키기 위해 ExecuteAsync에 넘긴다.
     void                 SetResumeExecutor(db::IResumeExecutor* p) { m_pResumeExecutor = p; }
     db::IResumeExecutor* GetResumeExecutor() const { return m_pResumeExecutor; }
+
+    // 이 Stage에서 시작하는 코루틴 후속작업용 핀을 만든다. 코루틴 prologue(첫 co_await 이전)에서 잡는다.
+    // 핀이 살아있는 동안 이 Stage는 파괴되지 않고, spChar(있으면)는 Stage에서 제거/이동되지 않는다.
+    [[nodiscard]] AsyncPin PinForAsync(const CharacterPtr& spChar);
+
+    // 진행 중인 코루틴 후속작업(핀)이 하나라도 있는지. (Stage 파괴 게이트에서 사용)
+    bool HasInFlightAsync() const { return m_inFlightAsync > 0; }
+
+    // 진행 중인 코루틴 후속작업 수 증감. AsyncPin(RAII)이 호출한다(직접 호출 금지). Stage 스레드 전용.
+    void IncInFlightAsync() { ++m_inFlightAsync; }
+    void DecInFlightAsync() { --m_inFlightAsync; }
+
+    // serverbase::Contents 훅 override. 진행 중인 코루틴 후속작업이 있으면 ContentsThread가 제거를 미룬다.
+    bool IsBusy() const override { return HasInFlightAsync(); }
 
     // ── 맵/섹터 정보 조회 (X-Z 평면) ──
     double GetWorldMinX()    const { return m_worldMinX; }
@@ -477,6 +515,10 @@ private:
     // 객체를 현재 등록된 sector에서 제거. curSectorX/Y를 -1로 설정.
     void removeObjectFromSector(StageObject* pObject);
 
+    // 보류된 유저 퇴장 처리. 코루틴 후속작업(핀)이 걸려있어 미뤄둔 OnUserLeave를, 핀이 풀린 유저에 한해 실행.
+    // OnUpdate 시작부에서 매 tick 호출.
+    void processPendingLeaves();
+
 private:
     int64      m_stageId   = 0;
     EStageType m_stageType = EStageType::None;
@@ -484,6 +526,12 @@ private:
 
     // 배정된 컨텐츠 스레드의 resume executor (StageManager가 등록 시 주입). 소유하지 않음(스레드는 ServerBase 소유).
     db::IResumeExecutor* m_pResumeExecutor = nullptr;
+
+    // 진행 중인 코루틴 후속작업(핀) 수. AsyncPin이 Stage 스레드에서만 증감하므로 atomic/lock 불필요.
+    int m_inFlightAsync = 0;
+
+    // 코루틴 후속작업(핀) 때문에 제거를 미뤄둔 유저 ID 목록. processPendingLeaves가 핀 해제 후 처리.
+    std::vector<int64> m_pendingLeaves;
 
     // Stage 단조 증가 시계 (ms). OnUpdate 마다 deltaMs 누적. 스킬 효과/투사체 타이밍 기준.
     int64      m_stageClockMs = 0;

@@ -450,6 +450,9 @@ void Stage::OnUpdate(int64 deltaMs)
     m_stageClockMs += deltaMs;
     ++m_serverTickSeq;   // 스냅샷 스트리밍용 tick 번호 (클라 보간 시계 기준).
 
+    // 0.5 코루틴 후속작업(핀) 때문에 보류된 유저 퇴장을, 핀이 풀린 유저에 한해 처리.
+    processPendingLeaves();
+
     // 1. 시스템 메시지 처리 (유저 입장/퇴장 등)
     processSystemMessages();
 
@@ -900,6 +903,63 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     OnCharacterSpawned(spUser, spCharacter);
 }
 
+// ── AsyncPin (코루틴 후속작업 동안 Stage/Character 고정) ──────────────────────
+// 카운터 증감은 모두 Stage 스레드(코루틴 prologue/프레임 종료)에서 일어나므로 atomic/lock 불필요.
+AsyncPin::AsyncPin(Stage* pStage, CharacterPtr spChar)
+    : m_pStage(pStage), m_spChar(std::move(spChar))
+{
+    if (m_pStage)
+        m_pStage->IncInFlightAsync();
+    if (m_spChar)
+        m_spChar->IncPendingAsync();
+}
+
+AsyncPin::AsyncPin(AsyncPin&& other) noexcept
+    : m_pStage(other.m_pStage), m_spChar(std::move(other.m_spChar))
+{
+    other.m_pStage = nullptr;   // 원본 무력화 → 이중 감소 방지 (m_spChar는 move로 비워짐)
+}
+
+AsyncPin::~AsyncPin()
+{
+    if (m_pStage)
+        m_pStage->DecInFlightAsync();
+    if (m_spChar)
+        m_spChar->DecPendingAsync();
+}
+
+AsyncPin Stage::PinForAsync(const CharacterPtr& spChar)
+{
+    return AsyncPin{ this, spChar };
+}
+
+// 보류된 유저 퇴장 처리. 핀이 풀린 유저만 실제 OnUserLeave 실행. OnUpdate 시작부에서 매 tick 호출.
+void Stage::processPendingLeaves()
+{
+    if (m_pendingLeaves.empty())
+        return;
+
+    std::vector<int64> ready;
+    std::vector<int64> stillPending;
+    for (int64 userId : m_pendingLeaves)
+    {
+        auto iter = m_users.find(userId);
+        if (iter == m_users.end())
+            continue;   // 이미 사라짐 → 목록에서 빠짐
+
+        CharacterPtr spChar = iter->second ? iter->second->GetCurrentCharacter() : nullptr;
+        if (spChar && spChar->HasPendingAsync())
+            stillPending.push_back(userId);   // 아직 핀이 남음 → 다음 tick
+        else
+            ready.push_back(userId);
+    }
+    m_pendingLeaves.swap(stillPending);
+
+    // 핀이 풀렸으므로 OnUserLeave가 defer 분기에 다시 걸리지 않는다(정상 제거).
+    for (int64 userId : ready)
+        OnUserLeave(userId);
+}
+
 void Stage::OnUserLeave(int64 userId)
 {
     auto iter = m_users.find(userId);
@@ -907,6 +967,20 @@ void Stage::OnUserLeave(int64 userId)
     {
         LOG_WRITE(LogLevel::Warn, std::format("user not found. stageId={} userId={}", m_stageId, userId));
         return;
+    }
+
+    // 진행 중인 코루틴 후속작업(핀)이 있으면 제거를 보류한다(인벤토리 등 후속작업 보호).
+    // 핀이 풀린 뒤 processPendingLeaves가 재시도한다.
+    if (UserPtr spPinnedUser = iter->second)
+    {
+        CharacterPtr spPinnedChar = spPinnedUser->GetCurrentCharacter();
+        if (spPinnedChar && spPinnedChar->HasPendingAsync())
+        {
+            if (std::find(m_pendingLeaves.begin(), m_pendingLeaves.end(), userId) == m_pendingLeaves.end())
+                m_pendingLeaves.push_back(userId);
+            LOG_WRITE(LogLevel::Info, std::format("user leave deferred (async pending). stageId={} userId={}", m_stageId, userId));
+            return;
+        }
     }
 
     // User에 연결된 Character가 있으면 m_objects/m_userObjects에서 제거.
@@ -1087,6 +1161,14 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
     if (!spCharacter || spCharacter->GetStage() != this)
     {
         sendFail("no character in this stage");
+        return;
+    }
+
+    // 진행 중인 코루틴 후속작업(인벤토리 갱신 등)이 있으면 이동 거부.
+    // 그래야 그 후속작업이 같은 Stage 단일 스레드에서 완결된다. (async op은 짧으니 클라가 재시도)
+    if (spCharacter->HasPendingAsync())
+    {
+        sendFail("character busy (async in progress)");
         return;
     }
 

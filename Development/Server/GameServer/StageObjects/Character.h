@@ -91,9 +91,17 @@ public:
         return m_statComponent.Get(pInfo->total);
     }
 
-    // ── DB 저장 직전 동기화 ─────────────────────────────────────
+    // ── DB 저장 관련 ─────────────────────────────────────
     // 런타임 좌표/yaw를 m_protoData에 복사한다. DB 직렬화 직전에 호출.
     void SyncRuntimeToProto();
+
+    // 이 캐릭터에 대해 진행 중인 DB 코루틴 후속작업이 있는지 여부
+    // true 이면 이 캐릭터는 Stage에서 제거/다른 Stage로 이동되지 않아야 한다(DB에 업데이트 후 후속작업이 완료될 때까지 Stage에 남아있어야 하기 때문).
+    bool HasPendingAsync() const { return m_pendingAsync > 0; }
+
+    // 진행 중인 코루틴 후속작업 수 증감. AsyncPin(RAII)이 호출한다(직접 호출 금지). Stage 스레드 전용.
+    void IncPendingAsync() { ++m_pendingAsync; }
+    void DecPendingAsync() { --m_pendingAsync; }
 
     // ── 이동 ──────────────────────────────────────────────────────────
     // 좌표계: Unity 와 동일. Y는 높이, X-Z 가 평면. yaw는 Y축 회전, degree.
@@ -159,6 +167,11 @@ private:
 
     // 시전 액션락 잔여시간(ms). >0 이면 이동 입력 무시. Update 에서 deltaMs 만큼 감소.
     int64 m_actionLockRemainingMs = 0;
+
+    // ── DB 저장 관련 ─────────────────────────────────────
+
+    // 진행 중인 코루틴 후속작업 수. AsyncPin이 Stage 스레드에서만 증감하므로 atomic/lock 불필요.
+    int m_pendingAsync = 0;
 
     // ── 스킬 강제이동 상태 (5d) ─────────────────────────────────
     // 일반 이동(m_isMoving/waypoint)과 별개. m_skillMoving=true 동안 Update 가 ease-out 으로 전진.

@@ -29,6 +29,11 @@ public:
 
     bool IsRunning() const { return m_bRunning; }
 
+    // 지금 제거(Stop)해도 되는지 판정. 진행 중인 비동기 후속작업 등으로 미뤄야 하면 true.
+    // ContentsThread는 IsBusy()가 true인 컨텐츠의 제거를 미루고 다음 tick에 재시도한다(그동안 Update/태스크 drain 지속).
+    // 기본은 false(언제든 제거 가능). 필요한 파생(예: Stage)이 override 한다.
+    virtual bool IsBusy() const { return false; }
+
 protected:
     virtual void OnStart() {}
     virtual void OnUpdate(int64 deltaMs) = 0;
