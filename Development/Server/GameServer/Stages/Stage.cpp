@@ -62,7 +62,7 @@ namespace
         const DataStructures::Character& proto = character.GetProto();
         GamePacket::CharacterSpawnInfo info;
         info.set_object_id(character.GetObjectId());
-        info.set_owner_user_id(proto.owner_user_id());
+        info.set_owner_account_id(proto.owner_account_id());
         info.set_name(proto.name());
         info.set_job_id(proto.job_id());
         info.set_level(proto.level());
@@ -242,8 +242,8 @@ void Stage::BroadcastStageNoticeNtf(const std::string& message, int32 durationMs
 {
     m_aoiUserScratch.clear();
     m_aoiUserScratch.reserve(m_users.size());
-    for (const auto& [userId, spUser] : m_users)
-        m_aoiUserScratch.push_back(userId);
+    for (const auto& [accountId, spUser] : m_users)
+        m_aoiUserScratch.push_back(accountId);
 
     GameServer::Instance().GetPacketSender().SendStageNoticeNtf(m_aoiUserScratch, message, durationMs);
 }
@@ -580,9 +580,9 @@ Monster* Stage::SpawnMonster(int32 monsterKey, float posX, float posY, float pos
     // 주변 sector AOI 안의 유저들에게 spawn 통보. (몬스터는 관찰자가 아니므로 단방향.)
     const std::vector<GamePacket::MonsterSpawnInfo> singleMonster = { makeMonsterSpawnInfo(*spMonster) };
     ForEachUserInAoi(spMonster->GetCurSectorX(), spMonster->GetCurSectorZ(),
-        [&](int64 userId)
+        [&](int64 accountId)
         {
-            server.GetPacketSender().SendObjectVisibilityNtf(userId, {}, {}, singleMonster);
+            server.GetPacketSender().SendObjectVisibilityNtf(accountId, {}, {}, singleMonster);
         });
 
     return spMonster.get();
@@ -613,9 +613,9 @@ bool Stage::DespawnMonster(int64 objectId)
     // 주변 sector AOI 안의 유저들에게 despawn 통보.
     const std::vector<int64> despawnIds = { objectId };
     ForEachUserInAoi(sx, sz,
-        [&](int64 userId)
+        [&](int64 accountId)
         {
-            GameServer::Instance().GetPacketSender().SendObjectVisibilityNtf(userId, {}, despawnIds);
+            GameServer::Instance().GetPacketSender().SendObjectVisibilityNtf(accountId, {}, despawnIds);
         });
 
 
@@ -754,7 +754,7 @@ void Stage::processSystemMessages()
             }
             else if constexpr (std::is_same_v<T, StageMsg_UserLeave>)
             {
-                OnUserLeave(m.userId);
+                OnUserLeave(m.accountId);
             }
         }, msg);
     }
@@ -765,18 +765,18 @@ void Stage::OnUserEnter(const UserPtr& spUser)
     if (!spUser)
         return;
 
-    const int64 userId = spUser->GetUserId();
-    m_users[userId] = spUser;
+    const int64 accountId = spUser->GetAccountId();
+    m_users[accountId] = spUser;
     spUser->SetCurrentStageId(m_stageId);
 
     // 캐릭터 스폰은 별도 단계 (2단계 입장).
     // 유저가 Moving 상태로 pendingCharacter를 들고 있으면, 클라의 StageLoadCompleteReq
     // 수신 시 spawnPendingCharacter가 스폰한다. SystemStage는 캐릭터가 없으므로 여기서 끝.
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} userId={} stageState={} totalUsers={}",
-        m_stageId, userId, static_cast<int32>(spUser->GetStageState()), m_users.size()));
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} accountId={} stageState={} totalUsers={}",
+        m_stageId, accountId, static_cast<int32>(spUser->GetStageState()), m_users.size()));
 
     if (m_pScript)
-        m_pScript->CallOnPlayerEnter(userId);
+        m_pScript->CallOnPlayerEnter(accountId);
 }
 
 void Stage::spawnPendingCharacter(const UserPtr& spUser)
@@ -784,12 +784,12 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     if (!spUser)
         return;
 
-    const int64 userId = spUser->GetUserId();
+    const int64 accountId = spUser->GetAccountId();
 
     CharacterPtr spCharacter = spUser->GetCurrentCharacter();
     if (!spCharacter)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("no character. stageId={} userId={}", m_stageId, userId));
+        LOG_WRITE(LogLevel::Warn, std::format("no character. stageId={} accountId={}", m_stageId, accountId));
         return;
     }
 
@@ -843,8 +843,8 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     // 상태 전환 (캐릭터 소유는 이미 User가 갖고 있으므로 별도 설정 불필요).
     spUser->SetStageState(EUserStageState::InStage);
 
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} userId={} characterId={} sector=({},{}) totalUsers={} totalObjects={}",
-        m_stageId, userId, objectId,
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} accountId={} characterId={} sector=({},{}) totalUsers={} totalObjects={}",
+        m_stageId, accountId, objectId,
         spCharacter->GetCurSectorX(), spCharacter->GetCurSectorZ(),
         m_users.size(), m_objects.size()));
 
@@ -874,8 +874,8 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
                 // 다른 캐릭터에게 내 spawn 전송 (자기 자신은 제외).
                 if (otherObjId != objectId)
                 {
-                    const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                    server.GetPacketSender().SendObjectVisibilityNtf(otherUserId, singleSpawn, {});
+                    const int64 otherAccountId = pOtherChar->GetProto().owner_account_id();
+                    server.GetPacketSender().SendObjectVisibilityNtf(otherAccountId, singleSpawn, {});
                 }
             }
 
@@ -890,12 +890,12 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     // 2단계 입장에서 클라는 이 패킷 수신 시점에 보관 중인 LocalPlayer 를 활성화/배치한다.
     // 그래야 뒤이어 오는 ObjectVisibilityNtf 의 자기 자신 항목을 식별해 스킵할 수 있다.
     // (순서가 반대면 클라가 자기 캐릭터를 원격 캐릭터로 잘못 스폰 → 키 충돌.)
-    server.GetPacketSender().SendStageLoadCompleteRes(userId, EResultCode::Success, GetStageId(), GetStageDataKey(),
+    server.GetPacketSender().SendStageLoadCompleteRes(accountId, EResultCode::Success, GetStageId(), GetStageDataKey(),
         spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ(), spCharacter->GetYaw(),
         static_cast<float>(GetWorldMinX()), static_cast<float>(GetWorldMinZ()),
         static_cast<float>(GetWorldMaxX()), static_cast<float>(GetWorldMaxZ()));
 
-    server.GetPacketSender().SendObjectVisibilityNtf(userId, spawnsForMe, {}, monsterSpawnsForMe);
+    server.GetPacketSender().SendObjectVisibilityNtf(accountId, spawnsForMe, {}, monsterSpawnsForMe);
 
 
     // 스폰 완료 후 서브클래스 훅 (기본 no-op). 캐릭터가 Stage에 등록되고 통보까지 끝난 뒤 호출.
@@ -941,31 +941,31 @@ void Stage::processPendingLeaves()
 
     std::vector<int64> ready;
     std::vector<int64> stillPending;
-    for (int64 userId : m_pendingLeaves)
+    for (int64 accountId : m_pendingLeaves)
     {
-        auto iter = m_users.find(userId);
+        auto iter = m_users.find(accountId);
         if (iter == m_users.end())
             continue;   // 이미 사라짐 → 목록에서 빠짐
 
         CharacterPtr spChar = iter->second ? iter->second->GetCurrentCharacter() : nullptr;
         if (spChar && spChar->HasPendingAsync())
-            stillPending.push_back(userId);   // 아직 핀이 남음 → 다음 tick
+            stillPending.push_back(accountId);   // 아직 핀이 남음 → 다음 tick
         else
-            ready.push_back(userId);
+            ready.push_back(accountId);
     }
     m_pendingLeaves.swap(stillPending);
 
     // 핀이 풀렸으므로 OnUserLeave가 defer 분기에 다시 걸리지 않는다(정상 제거).
-    for (int64 userId : ready)
-        OnUserLeave(userId);
+    for (int64 accountId : ready)
+        OnUserLeave(accountId);
 }
 
-void Stage::OnUserLeave(int64 userId)
+void Stage::OnUserLeave(int64 accountId)
 {
-    auto iter = m_users.find(userId);
+    auto iter = m_users.find(accountId);
     if (iter == m_users.end())
     {
-        LOG_WRITE(LogLevel::Warn, std::format("user not found. stageId={} userId={}", m_stageId, userId));
+        LOG_WRITE(LogLevel::Warn, std::format("user not found. stageId={} accountId={}", m_stageId, accountId));
         return;
     }
 
@@ -976,9 +976,9 @@ void Stage::OnUserLeave(int64 userId)
         CharacterPtr spPinnedChar = spPinnedUser->GetCurrentCharacter();
         if (spPinnedChar && spPinnedChar->HasPendingAsync())
         {
-            if (std::find(m_pendingLeaves.begin(), m_pendingLeaves.end(), userId) == m_pendingLeaves.end())
-                m_pendingLeaves.push_back(userId);
-            LOG_WRITE(LogLevel::Info, std::format("user leave deferred (async pending). stageId={} userId={}", m_stageId, userId));
+            if (std::find(m_pendingLeaves.begin(), m_pendingLeaves.end(), accountId) == m_pendingLeaves.end())
+                m_pendingLeaves.push_back(accountId);
+            LOG_WRITE(LogLevel::Info, std::format("user leave deferred (async pending). stageId={} accountId={}", m_stageId, accountId));
             return;
         }
     }
@@ -1010,16 +1010,16 @@ void Stage::OnUserLeave(int64 userId)
 
     m_users.erase(iter);
 
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} userId={} totalUsers={} totalObjects={}",
-        m_stageId, userId, m_users.size(), m_objects.size()));
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} accountId={} totalUsers={} totalObjects={}",
+        m_stageId, accountId, m_users.size(), m_objects.size()));
 
     if (m_pScript)
-        m_pScript->CallOnPlayerLeave(userId);
+        m_pScript->CallOnPlayerLeave(accountId);
 
     // 이벤트영역 occupant 에서 제거 — 영역 안에 있던 채로 떠나도 stale 항목이 남지 않게.
     // (남으면 같은 유저 재입장 시 진입 보고가 중복방지에 걸려 콜백이 안 뜸.)
     for (auto& [eventKey, spEventArea] : m_eventAreas)
-        spEventArea->RemoveOccupant(userId);
+        spEventArea->RemoveOccupant(accountId);
 
     // 주변 sector의 다른 캐릭터들에게 despawn broadcast.
     if (leavingObjectId != 0)
@@ -1032,8 +1032,8 @@ void Stage::OnUserLeave(int64 userId)
                 for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
                 {
                     Character* pOtherChar = static_cast<Character*>(pOtherObj);
-                    const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                    GameServer::Instance().GetPacketSender().SendObjectVisibilityNtf(otherUserId, {}, despawnIds);
+                    const int64 otherAccountId = pOtherChar->GetProto().owner_account_id();
+                    GameServer::Instance().GetPacketSender().SendObjectVisibilityNtf(otherAccountId, {}, despawnIds);
                 }
             });
     }
@@ -1051,8 +1051,8 @@ void Stage::OnUserPacket(const UserPtr& spUser, const netlib::PacketPtr& spPacke
     if (iter == handlerMap.end())
     {
         // 등록되지 않은 패킷은 디버그 로그.
-        LOG_WRITE(LogLevel::Debug, std::format("unhandled. stageId={} userId={} packetType={} payloadSize={}",
-            m_stageId, spUser->GetUserId(),
+        LOG_WRITE(LogLevel::Debug, std::format("unhandled. stageId={} accountId={} packetType={} payloadSize={}",
+            m_stageId, spUser->GetAccountId(),
             packetType, spPacket->GetPayloadSize()));
         return;
     }
@@ -1085,15 +1085,15 @@ bool Stage::deserializeUserPacket(const UserPtr& spUser, const netlib::PacketPtr
 {
     if (!GameServer::Instance().DeserializePacket(*spPacket, outMsg))
     {
-        LOG_WRITE(LogLevel::Warn, std::format("failed to deserialize. stageId={} userId={} packetType={}",
-            m_stageId, spUser->GetUserId(), spPacket->GetHeader()->type));
+        LOG_WRITE(LogLevel::Warn, std::format("failed to deserialize. stageId={} accountId={} packetType={}",
+            m_stageId, spUser->GetAccountId(), spPacket->GetHeader()->type));
         return false;
     }
 
     // [치트] detail 모드: 수신 게임플레이 패킷을 이름+JSON 1줄로 출력.
     // (name 모드는 handleRelayedClientPacket 진입부가 담당하므로 여기선 detail 만.)
     if (packetlog::EffectiveMode(*spUser) == EPacketLogMode::Detail)
-        packetlog::LogPacket("C->S", spUser->GetUserId(), spPacket->GetHeader()->type, &outMsg);
+        packetlog::LogPacket("C->S", spUser->GetAccountId(), spPacket->GetHeader()->type, &outMsg);
 
     return true;
 }
@@ -1103,7 +1103,7 @@ void Stage::handleMoveIntentReq(const UserPtr& spUser, const netlib::PacketPtr& 
     CharacterPtr spCharacter = spUser->GetCurrentCharacter();
     if (!spCharacter || spCharacter->GetStage() != this)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("MoveIntentReq but no character or wrong stage. stageId={} userId={}", m_stageId, spUser->GetUserId()));
+        LOG_WRITE(LogLevel::Warn, std::format("MoveIntentReq but no character or wrong stage. stageId={} accountId={}", m_stageId, spUser->GetAccountId()));
         return;
     }
 
@@ -1140,13 +1140,13 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
 
     GameServer& server = GameServer::Instance();
 
-    const int64 userId = spUser->GetUserId();
+    const int64 accountId = spUser->GetAccountId();
 
     auto sendFail = [&](const std::string& reason)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("rejected. stageId={} userId={} targetKey={} reason={}",
-            m_stageId, userId, req.target_stage_data_key(), reason));
-        server.GetPacketSender().SendStageMoveRes(userId, EResultCode::Fail, reason, req.target_stage_data_key());
+        LOG_WRITE(LogLevel::Warn, std::format("rejected. stageId={} accountId={} targetKey={} reason={}",
+            m_stageId, accountId, req.target_stage_data_key(), reason));
+        server.GetPacketSender().SendStageMoveRes(accountId, EResultCode::Fail, reason, req.target_stage_data_key());
     };
 
     // ── 검증 ─────────────────────────────────────────────
@@ -1191,10 +1191,10 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
 
         // 캐릭터 DB 저장 → (성공 시) 게이트웨이 통보 + 이 Stage 퇴장 + 글로벌맵 제거 (코루틴).
         // 이 Stage를 넘겨, DB await 후속작업이 이 Stage의 컨텐츠 스레드에서 재개되고 퇴장도 이 Stage로 enqueue된다.
-        server.BeginCrossServerMove(userId, req.target_game_server_id(), req.target_stage_data_key(), req.position_type(), this);
+        server.BeginCrossServerMove(accountId, req.target_game_server_id(), req.target_stage_data_key(), req.position_type(), this);
 
-        LOG_WRITE(LogLevel::Info, std::format("cross-server moving. userId={} from stageId={} to gameServerId={} (stageKey={}) positionType={}",
-            userId, m_stageId, req.target_game_server_id(), req.target_stage_data_key(), static_cast<int32>(positionType)));
+        LOG_WRITE(LogLevel::Info, std::format("cross-server moving. accountId={} from stageId={} to gameServerId={} (stageKey={}) positionType={}",
+            accountId, m_stageId, req.target_game_server_id(), req.target_stage_data_key(), static_cast<int32>(positionType)));
         return;
     }
 
@@ -1242,16 +1242,16 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
 
     // 2) old Stage(=this)에서 퇴장: sector/컨테이너 제거 + AOI despawn + m_users 제거.
     //    캐릭터는 User가 계속 소유하므로 이 시점에 파괴되지 않는다.
-    OnUserLeave(userId);
+    OnUserLeave(accountId);
 
     // 3) target Stage에 유저만 입장 (이후 클라 패킷은 target이 drain).
     spTarget->EnqueueMessage(StageMsg_UserEnter{spUser});
 
     // 4) 성공 응답 → 클라는 로딩 시작, 완료 시 StageLoadCompleteReq.
-    server.GetPacketSender().SendStageMoveRes(userId, EResultCode::Success, "", req.target_stage_data_key());
+    server.GetPacketSender().SendStageMoveRes(accountId, EResultCode::Success, "", req.target_stage_data_key());
 
-    LOG_WRITE(LogLevel::Info, std::format("moving. userId={} from stageId={} to stageId={} (dataKey={}) positionType={}",
-        userId, m_stageId, spTarget->GetStageId(), req.target_stage_data_key(), static_cast<int32>(positionType)));
+    LOG_WRITE(LogLevel::Info, std::format("moving. accountId={} from stageId={} to stageId={} (dataKey={}) positionType={}",
+        accountId, m_stageId, spTarget->GetStageId(), req.target_stage_data_key(), static_cast<int32>(positionType)));
 }
 
 void Stage::handleStageLoadCompleteReq(const UserPtr& spUser, const netlib::PacketPtr& /*spPacket*/)
@@ -1259,8 +1259,8 @@ void Stage::handleStageLoadCompleteReq(const UserPtr& spUser, const netlib::Pack
     // Moving 상태의 유저만 유효 (이외는 잘못된/중복 보고 → 무시).
     if (spUser->GetStageState() != EUserStageState::Moving || !spUser->GetCurrentCharacter())
     {
-        LOG_WRITE(LogLevel::Warn, std::format("unexpected. stageId={} userId={} stageState={}",
-            m_stageId, spUser->GetUserId(), static_cast<int32>(spUser->GetStageState())));
+        LOG_WRITE(LogLevel::Warn, std::format("unexpected. stageId={} accountId={} stageState={}",
+            m_stageId, spUser->GetAccountId(), static_cast<int32>(spUser->GetStageState())));
         return;
     }
 
@@ -1283,10 +1283,10 @@ void Stage::handleCheatReq(const UserPtr& spUser, const netlib::PacketPtr& spPac
     GamePacket::CheatRes res;
     res.set_success(result.success);
     res.set_message(result.message);
-    GameServer::Instance().GetPacketSender().SendToUser(spUser->GetUserId(), Common::GAME_PACKET_ID_CHEAT_RES, res);
+    GameServer::Instance().GetPacketSender().SendToUser(spUser->GetAccountId(), Common::GAME_PACKET_ID_CHEAT_RES, res);
 
-    LOG_WRITE(LogLevel::Info, std::format("cheat. stageId={} userId={} name={} success={}",
-        m_stageId, spUser->GetUserId(), req.name(), result.success));
+    LOG_WRITE(LogLevel::Info, std::format("cheat. stageId={} accountId={} name={} success={}",
+        m_stageId, spUser->GetAccountId(), req.name(), result.success));
 }
 #endif // _DEBUG
 
@@ -1295,7 +1295,7 @@ void Stage::handleSkillCastReq(const UserPtr& spUser, const netlib::PacketPtr& s
     CharacterPtr spCharacter = spUser->GetCurrentCharacter();
     if (!spCharacter || spCharacter->GetStage() != this)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("SkillCastReq but no character or wrong stage. stageId={} userId={}", m_stageId, spUser->GetUserId()));
+        LOG_WRITE(LogLevel::Warn, std::format("SkillCastReq but no character or wrong stage. stageId={} accountId={}", m_stageId, spUser->GetAccountId()));
         return;
     }
 
@@ -1332,15 +1332,15 @@ void Stage::handleEventAreaEnterReq(const UserPtr& spUser, const netlib::PacketP
     if (!deserializeUserPacket(spUser, spPacket, req))
         return;
 
-    const int64 userId   = spUser->GetUserId();
+    const int64 accountId   = spUser->GetAccountId();
     const int32 eventKey = req.event_key();
 
     // 1) 유효 영역인지(레이아웃에 정의 + OnStart 에서 생성된 키).
     auto it = m_eventAreas.find(eventKey);
     if (it == m_eventAreas.end())
     {
-        LOG_WRITE(LogLevel::Warn, std::format("EventAreaEnterReq unknown key. stageId={} userId={} eventKey={}",
-            m_stageId, userId, eventKey));
+        LOG_WRITE(LogLevel::Warn, std::format("EventAreaEnterReq unknown key. stageId={} accountId={} eventKey={}",
+            m_stageId, accountId, eventKey));
         return;
     }
     EventArea& area = *it->second;
@@ -1367,8 +1367,8 @@ void Stage::handleEventAreaEnterReq(const UserPtr& spUser, const netlib::PacketP
     // (a) 보고 위치가 영역 안인가 — 클라가 감지한 진입점.
     if (!area.Contains(rx, rz, kReportedBoundaryTol))
     {
-        LOG_WRITE(LogLevel::Warn, std::format("EventAreaEnterReq reported pos not in area. stageId={} userId={} eventKey={}",
-            m_stageId, userId, eventKey));
+        LOG_WRITE(LogLevel::Warn, std::format("EventAreaEnterReq reported pos not in area. stageId={} accountId={} eventKey={}",
+            m_stageId, accountId, eventKey));
         return;
     }
 
@@ -1379,18 +1379,18 @@ void Stage::handleEventAreaEnterReq(const UserPtr& spUser, const netlib::PacketP
     const float gdz = rz - spCharacter->GetPosZ();
     if (gdx * gdx + gdz * gdz > maxGap * maxGap)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("EventAreaEnterReq reported pos too far from authoritative. stageId={} userId={} eventKey={} maxGap={:.1f}",
-            m_stageId, userId, eventKey, maxGap));
+        LOG_WRITE(LogLevel::Warn, std::format("EventAreaEnterReq reported pos too far from authoritative. stageId={} accountId={} eventKey={} maxGap={:.1f}",
+            m_stageId, accountId, eventKey, maxGap));
         return;
     }
 
     // 3) 중복 진입 방지 — 이미 안에 있으면 콜백 재발동 안 함(클라 Enter 재전송도 여기서 흡수).
-    if (!area.AddOccupant(userId))
+    if (!area.AddOccupant(accountId))
         return;
 
     // 4) 스크립트 트리거. loc 은 영역 안으로 검증된 보고 위치를 넘긴다.
     if (m_pScript)
-        m_pScript->CallOnEnterEventArea(eventKey, userId, rx, ry, rz);
+        m_pScript->CallOnEnterEventArea(eventKey, accountId, rx, ry, rz);
 }
 
 void Stage::handleEventAreaExitReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
@@ -1399,7 +1399,7 @@ void Stage::handleEventAreaExitReq(const UserPtr& spUser, const netlib::PacketPt
     if (!deserializeUserPacket(spUser, spPacket, req))
         return;
 
-    const int64 userId   = spUser->GetUserId();
+    const int64 accountId   = spUser->GetAccountId();
     const int32 eventKey = req.event_key();
 
     auto it = m_eventAreas.find(eventKey);
@@ -1411,7 +1411,7 @@ void Stage::handleEventAreaExitReq(const UserPtr& spUser, const netlib::PacketPt
         return;
 
     // 안에 있던 유저만 이탈 처리(중복/허위 이탈 무시). 이탈은 관대하게 — 위치 재검증 생략.
-    if (!it->second->RemoveOccupant(userId))
+    if (!it->second->RemoveOccupant(accountId))
         return;
 
     CharacterPtr spCharacter = spUser->GetCurrentCharacter();
@@ -1420,7 +1420,7 @@ void Stage::handleEventAreaExitReq(const UserPtr& spUser, const netlib::PacketPt
     const float pz = spCharacter ? spCharacter->GetPosZ() : req.pos_z();
 
     if (m_pScript)
-        m_pScript->CallOnExitEventArea(eventKey, userId, px, py, pz);
+        m_pScript->CallOnExitEventArea(eventKey, accountId, px, py, pz);
 }
 
 // secure 영역만 서버가 권위 위치로 직접 폴링한다(클라 보고 미신뢰 — 안티익스플로잇 게이트 등).
@@ -1433,7 +1433,7 @@ void Stage::pollSecureEventAreas()
         if (!area.IsSecure())
             continue;
 
-        for (auto& [userId, spUser] : m_users)
+        for (auto& [accountId, spUser] : m_users)
         {
             CharacterPtr spCharacter = spUser->GetCurrentCharacter();
             if (!spCharacter || spCharacter->GetStage() != this)
@@ -1446,14 +1446,14 @@ void Stage::pollSecureEventAreas()
             if (inside)
             {
                 // 신규 진입이면(AddOccupant==true) 콜백.
-                if (area.AddOccupant(userId) && m_pScript)
-                    m_pScript->CallOnEnterEventArea(eventKey, userId, px, spCharacter->GetPosY(), pz);
+                if (area.AddOccupant(accountId) && m_pScript)
+                    m_pScript->CallOnEnterEventArea(eventKey, accountId, px, spCharacter->GetPosY(), pz);
             }
             else
             {
                 // 안에 있다가 나갔으면(RemoveOccupant==true) 콜백.
-                if (area.RemoveOccupant(userId) && m_pScript)
-                    m_pScript->CallOnExitEventArea(eventKey, userId, px, spCharacter->GetPosY(), pz);
+                if (area.RemoveOccupant(accountId) && m_pScript)
+                    m_pScript->CallOnExitEventArea(eventKey, accountId, px, spCharacter->GetPosY(), pz);
             }
         }
     }
@@ -1465,15 +1465,15 @@ void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketP
     if (!deserializeUserPacket(spUser, spPacket, req))
         return;
 
-    const int64 userId  = spUser->GetUserId();
+    const int64 accountId  = spUser->GetAccountId();
     const int32 propKey = req.prop_key();
 
     // 1) 유효 prop 인지(레이아웃에 정의).
     const StageLayout::Prop* pProp = m_pLayout ? m_pLayout->GetProp(propKey) : nullptr;
     if (!pProp)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq unknown prop. stageId={} userId={} propKey={}",
-            m_stageId, userId, propKey));
+        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq unknown prop. stageId={} accountId={} propKey={}",
+            m_stageId, accountId, propKey));
         return;
     }
 
@@ -1495,8 +1495,8 @@ void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketP
     const float reach = pProp->range + kBoundaryTol;
     if (mdx * mdx + mdz * mdz > reach * reach)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq out of range. stageId={} userId={} propKey={}",
-            m_stageId, userId, propKey));
+        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq out of range. stageId={} accountId={} propKey={}",
+            m_stageId, accountId, propKey));
         return;
     }
 
@@ -1507,14 +1507,14 @@ void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketP
     const float gdz = rz - spCharacter->GetPosZ();
     if (gdx * gdx + gdz * gdz > maxGap * maxGap)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq reported pos too far from authoritative. stageId={} userId={} propKey={}",
-            m_stageId, userId, propKey));
+        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq reported pos too far from authoritative. stageId={} accountId={} propKey={}",
+            m_stageId, accountId, propKey));
         return;
     }
 
     // 3) 스크립트 트리거 (fire-and-forget — prop 상태/Ntf 없음. 연출은 스크립트가 Notice 등으로).
     if (m_pScript)
-        m_pScript->CallOnObjectInteract(propKey, userId);
+        m_pScript->CallOnObjectInteract(propKey, accountId);
 }
 
 void Stage::processUserPackets()
@@ -1526,7 +1526,7 @@ void Stage::processUserPackets()
     // OnUserLeave로 m_users를 변경할 수 있어 직접 순회하면 iterator가 무효화된다.
     std::vector<UserPtr> users;
     users.reserve(m_users.size());
-    for (auto& [userId, spUser] : m_users)
+    for (auto& [accountId, spUser] : m_users)
         users.push_back(spUser);
 
     std::vector<netlib::PacketPtr> packets;
@@ -1600,11 +1600,11 @@ void Stage::buildAndSendTimeSync()
 
     // stage 내 소속이 확정된 유저만 수집(buildAndSendSnapshots 와 동일한 소속 가드).
     m_timeSyncUserScratch.clear();
-    for (auto& [userId, spUser] : m_users)
+    for (auto& [accountId, spUser] : m_users)
     {
         Character* pMe = spUser->GetCurrentCharacter().get();
         if (pMe && pMe->GetStage() == this)
-            m_timeSyncUserScratch.push_back(userId);
+            m_timeSyncUserScratch.push_back(accountId);
     }
 
     if (!m_timeSyncUserScratch.empty())
@@ -1628,7 +1628,7 @@ void Stage::buildAndSendSnapshots()
 
     // pass 2: 각 유저에게 자기 AOI 안의 due 오브젝트를 모아 송신한다.
     // 헤더(tick_seq/ack)는 due 가 없어도 매 tick 항상 보낸다 — 클라 보간 시계를 굶기지 않기 위함.
-    for (auto& [userId, spUser] : m_users)
+    for (auto& [accountId, spUser] : m_users)
     {
         Character* pMe = spUser->GetCurrentCharacter().get();
         if (!pMe || pMe->GetStage() != this)
@@ -1681,7 +1681,7 @@ void Stage::buildAndSendSnapshots()
         // due 객체가 있을 때만 전송. 빈 스냅샷 keepalive 는 불필요 — NetClock 이 로컬 시간으로 자체 전진하고,
         // 유휴 객체도 heartbeat 로 ≥1Hz 는 보내므로 클라 시계가 굶지 않는다.
         if (ntf.states_size() > 0)
-            GameServer::Instance().GetPacketSender().SendSnapshotNtf(userId, ntf);
+            GameServer::Instance().GetPacketSender().SendSnapshotNtf(accountId, ntf);
     }
 }
 
@@ -1697,7 +1697,7 @@ void Stage::sendDebugSubscriptions()
 
     PacketSender& sender = GameServer::Instance().GetPacketSender();
 
-    for (const auto& [userId, spUser] : m_users)
+    for (const auto& [accountId, spUser] : m_users)
     {
         // ① dbgstat: 선택 오브젝트의 (0 아닌) 전체 스탯 스냅샷.
         const int64 statTarget = spUser->GetDebugStatTarget();
@@ -1716,7 +1716,7 @@ void Stage::sendDebugSubscriptions()
                         pEntry->set_value(value);
                     });
                 }
-                sender.SendToUser(userId, Common::GAME_PACKET_ID_DEBUG_STAT_NTF, ntf);
+                sender.SendToUser(accountId, Common::GAME_PACKET_ID_DEBUG_STAT_NTF, ntf);
             }
             // 대상이 사라졌으면(디스폰 등) 조용히 스킵한다. 클라가 다시 dbgstat 로 갱신.
         }
@@ -1750,7 +1750,7 @@ void Stage::sendDebugSubscriptions()
                         }
                     });
 
-                sender.SendToUser(userId, Common::GAME_PACKET_ID_DEBUG_MONSTER_POSITIONS_NTF, ntf);
+                sender.SendToUser(accountId, Common::GAME_PACKET_ID_DEBUG_MONSTER_POSITIONS_NTF, ntf);
             }
         }
     }
@@ -1764,7 +1764,7 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
     GameServer& server = GameServer::Instance();
 
     const int64 myObjectId = character.GetObjectId();
-    const int64 myUserId   = character.GetProto().owner_user_id();
+    const int64 myAccountId   = character.GetProto().owner_account_id();
     const GamePacket::CharacterSpawnInfo myInfo = makeCharacterSpawnInfo(character);
 
     // sector (x, z)가 (centerX, centerZ) 기준 k_aoiRange 범위 안에 있는지 검사.
@@ -1802,8 +1802,8 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
                 Character* pOtherChar = static_cast<Character*>(pOtherObj);
                 newlyVisibleSpawnsForMe.push_back(makeCharacterSpawnInfo(*pOtherChar));
 
-                const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                server.GetPacketSender().SendObjectVisibilityNtf(otherUserId, singleSpawnOfMe, {});
+                const int64 otherAccountId = pOtherChar->GetProto().owner_account_id();
+                server.GetPacketSender().SendObjectVisibilityNtf(otherAccountId, singleSpawnOfMe, {});
             }
 
             // 새로 보이는 sector의 몬스터들도 나에게 spawn. (몬스터는 받기만 한다.)
@@ -1815,7 +1815,7 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
 
     if (!newlyVisibleSpawnsForMe.empty() || !newlyVisibleMonstersForMe.empty())
     {
-        server.GetPacketSender().SendObjectVisibilityNtf(myUserId, newlyVisibleSpawnsForMe, {}, newlyVisibleMonstersForMe);
+        server.GetPacketSender().SendObjectVisibilityNtf(myAccountId, newlyVisibleSpawnsForMe, {}, newlyVisibleMonstersForMe);
     }
 
     // ── oldAOI 순회 ──
@@ -1841,8 +1841,8 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
                 Character* pOtherChar = static_cast<Character*>(pOtherObj);
                 despawnIdsForMe.push_back(otherObjId);
 
-                const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                server.GetPacketSender().SendObjectVisibilityNtf(otherUserId, {}, myDespawnId);
+                const int64 otherAccountId = pOtherChar->GetProto().owner_account_id();
+                server.GetPacketSender().SendObjectVisibilityNtf(otherAccountId, {}, myDespawnId);
             }
 
             // 더 이상 안 보이는 sector의 몬스터들은 나에게 despawn (despawn_ids 는 타입 무관).
@@ -1854,7 +1854,7 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
 
     if (!despawnIdsForMe.empty())
     {
-        server.GetPacketSender().SendObjectVisibilityNtf(myUserId, {}, despawnIdsForMe);
+        server.GetPacketSender().SendObjectVisibilityNtf(myAccountId, {}, despawnIdsForMe);
     }
 }
 
@@ -1889,8 +1889,8 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
             for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
             {
                 Character* pOtherChar = static_cast<Character*>(pOtherObj);
-                const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                server.GetPacketSender().SendObjectVisibilityNtf(otherUserId, {}, {}, singleMonster);
+                const int64 otherAccountId = pOtherChar->GetProto().owner_account_id();
+                server.GetPacketSender().SendObjectVisibilityNtf(otherAccountId, {}, {}, singleMonster);
             }
         });
 
@@ -1906,8 +1906,8 @@ void Stage::updateMonsterVisibilityOnSectorChange(Monster& monster,
             for (const auto& [otherObjId, pOtherObj] : pSector->GetUsers())
             {
                 Character* pOtherChar = static_cast<Character*>(pOtherObj);
-                const int64 otherUserId = pOtherChar->GetProto().owner_user_id();
-                server.GetPacketSender().SendObjectVisibilityNtf(otherUserId, {}, despawnId);
+                const int64 otherAccountId = pOtherChar->GetProto().owner_account_id();
+                server.GetPacketSender().SendObjectVisibilityNtf(otherAccountId, {}, despawnId);
             }
         });
 }
@@ -1919,7 +1919,7 @@ void Stage::BroadcastBuffNtf(const ActorObject& actor, int32 buffKey, int32 stac
 {
     m_aoiUserScratch.clear();
     ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
-        [&](int64 userId) { m_aoiUserScratch.push_back(userId); });
+        [&](int64 accountId) { m_aoiUserScratch.push_back(accountId); });
 
     GameServer::Instance().GetPacketSender().SendBuffNtf(m_aoiUserScratch, actor.GetObjectId(), buffKey, stackCount, remainMs);
 }
@@ -1928,7 +1928,7 @@ void Stage::BroadcastBuffRemoveNtf(const ActorObject& actor, int32 buffKey)
 {
     m_aoiUserScratch.clear();
     ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
-        [&](int64 userId) { m_aoiUserScratch.push_back(userId); });
+        [&](int64 accountId) { m_aoiUserScratch.push_back(accountId); });
 
     GameServer::Instance().GetPacketSender().SendBuffRemoveNtf(m_aoiUserScratch, actor.GetObjectId(), buffKey);
 }

@@ -35,9 +35,9 @@ public:
     // (px, pz)가 영역 안인지 평면 판정. tolerance 만큼 경계를 넓혀 허용오차를 준다.
     bool Contains(float px, float pz, float tolerance) const;
 
-    // occupant(현재 영역 안에 있는 userId) 관리 — 진입/이탈 중복방지·이탈판정용.
-    bool AddOccupant(int64 userId)    { return m_occupants.insert(userId).second; }   // 신규 진입이면 true
-    bool RemoveOccupant(int64 userId) { return m_occupants.erase(userId) != 0; }      // 안에 있었으면 true
+    // occupant(현재 영역 안에 있는 accountId) 관리 — 진입/이탈 중복방지·이탈판정용.
+    bool AddOccupant(int64 accountId)    { return m_occupants.insert(accountId).second; }   // 신규 진입이면 true
+    bool RemoveOccupant(int64 accountId) { return m_occupants.erase(accountId) != 0; }      // 안에 있었으면 true
     const std::unordered_set<int64>& GetOccupants() const { return m_occupants; }
 
 private:

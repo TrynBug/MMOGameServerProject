@@ -77,7 +77,7 @@ public:
     // 호출 시점에 유저는 아직 출발 Stage에 남아있다("유저는 반드시 Stage에 속한다" 불변식 유지). 퇴장은
     //   저장+게이트웨이 통보가 모두 성공한 뒤에만 일어난다. 실패 시 유저가 떠난 적 없어 InStage 복귀로 롤백된다(무소속 유저 없음).
     // pSourceStage: 출발 Stage. DB await 후속작업이 이 Stage의 컨텐츠 스레드에서 재개되고, 퇴장도 이 Stage로 enqueue된다.
-    db::DetachedCoTask BeginCrossServerMove(int64 userId, int32 targetGameServerId, int32 targetStageDataKey, int32 positionType,
+    db::DetachedCoTask BeginCrossServerMove(int64 accountId, int32 targetGameServerId, int32 targetStageDataKey, int32 positionType,
                                             Stage* pSourceStage);
 
     // [개발/테스트] Stage에서 시작하는 코루틴 절차 검증용 (치트 savechar 가 호출).
@@ -128,35 +128,35 @@ private:
     void handleGatewayHandshakeRes(const netlib::ISessionPtr& spSession, const ServerPacket::ServerHandshakeRes& msg);
 
     // 게이트웨이로부터 받은 클라 패킷 (사이드카 있음) 처리.
-    // 사이드카에서 userId 추출 후 해당 유저의 패킷 큐에 push.
+    // 사이드카에서 accountId 추출 후 해당 유저의 패킷 큐에 push.
     void handleRelayedClientPacket(const netlib::PacketPtr& spPacket);
 
     // 유저 입장 완료 알림 (GameEnterNtf) 전송. 현재 SystemStage 입장 단계 완료 시 전송.
-    void sendGameEnterNtf(int64 userId);
+    void sendGameEnterNtf(int64 accountId);
 
     // 캐릭터 목록 전송 (CharacterListNtf). 게임 입장 직후 자동 전송.
-    void sendCharacterListNtf(int64 userId, const std::vector<DataStructures::Character>& characters);
+    void sendCharacterListNtf(int64 accountId, const std::vector<DataStructures::Character>& characters);
 
     // 캐릭터 생성 요청 핸들러. DB INSERT 코루틴.
-    db::DetachedCoTask handleClientCharacterCreate(int64 userId, GamePacket::CharacterCreateReq req);
+    db::DetachedCoTask handleClientCharacterCreate(int64 accountId, GamePacket::CharacterCreateReq req);
 
     // 캐릭터 생성 결과 전송 (CharacterCreateRes).
     // 성공 시 pNewCharacter에 생성된 캐릭터, 실패 시 nullptr.
-    void sendCharacterCreateRes(int64 userId, EResultCode resultCode, const std::string& errorMsg, const DataStructures::Character* pNewCharacter);
+    void sendCharacterCreateRes(int64 accountId, EResultCode resultCode, const std::string& errorMsg, const DataStructures::Character* pNewCharacter);
 
     // 캐릭터 선택 요청 핸들러. DB SELECT 이후 SystemStage → Town 이동.
-    db::DetachedCoTask handleClientCharacterSelect(int64 userId, GamePacket::CharacterSelectReq req);
+    db::DetachedCoTask handleClientCharacterSelect(int64 accountId, GamePacket::CharacterSelectReq req);
 
     // 캐릭터 선택 결과 전송 (CharacterSelectRes). 성공/실패 모두 이 함수로 송신.
     //   - 성공: resultCode=Success, errorMsg="", pCharacter(전체 데이터)/stageDataKey 채움 (클라는 데이터모델 보관 후 로딩 시작)
     //   - 실패: resultCode=Fail,    errorMsg=사유, pCharacter=nullptr
     // 스폰 좌표는 이 패킷에 싣지 않는다. 로딩 완료 후 StageLoadCompleteRes가 좌표의 단일 출처.
-    void sendCharacterSelectRes(int64 userId, EResultCode resultCode, const std::string& errorMsg,
+    void sendCharacterSelectRes(int64 accountId, EResultCode resultCode, const std::string& errorMsg,
                                 const DataStructures::Character* pCharacter, int32 stageDataKey);
 
-    // (user_id, character_id)로 DB에서 캐릭터 row를 읽어 JSON 파싱 후 Character 객체를 생성하고
+    // (account_id, character_id)로 DB에서 캐릭터 row를 읽어 JSON 파싱 후 Character 객체를 생성하고
     // User에 소유 연결한다(User→Character 강참조, Character→User 약참조).
-    db::AwaitableCoTask<CharacterPtr> loadCharacterForUser(int64 userId, int64 characterId, UserPtr spUser);
+    db::AwaitableCoTask<CharacterPtr> loadCharacterForUser(int64 accountId, int64 characterId, UserPtr spUser);
 
     // 캐릭터의 런타임 상태를 proto에 동기화(SyncRuntimeToProto)한 뒤 JSON 직렬화하여 DB에 저장(UPDATE)한다.
     // pResumeExecutor: DB await 후속작업을 재개할 executor(호출 문맥의 스레드 선택). Stage에서 호출 시 그 Stage의 executor.
@@ -190,7 +190,7 @@ private:
     netlib::FuncEventHandler     m_gatewayEventHandler;
     serverbase::PacketDispatcher m_gatewayDispatcher;
 
-    // ── 글로벌 유저 맵 (key=userId, value=UserPtr) ────────────────
+    // ── 글로벌 유저 맵 (key=accountId, value=UserPtr) ────────────────
     // IOCP Worker가 게이트웨이로부터 패킷을 받았을 때 어떤 유저인지 찾는 용도.
     // Stage가 유저를 소유하므로 여기에 들어있는 shared_ptr는 유저 lifetime의
     // 또 다른 소유자가 된다. Stage에서 제거되어도 여기서 제거되어야 객체가 사라진다.

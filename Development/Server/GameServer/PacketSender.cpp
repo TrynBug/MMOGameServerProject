@@ -80,7 +80,7 @@ namespace packetstats
 // 모든 함수는 SendToUser(공통 배관, PacketSender.h 템플릿)를 통해 게이트웨이로 전송한다.
 // ─────────────────────────────────────────────────────────────
 
-void PacketSender::SendStageLoadCompleteRes(int64 userId, EResultCode resultCode, int64 stageId, int32 stageDataKey,
+void PacketSender::SendStageLoadCompleteRes(int64 accountId, EResultCode resultCode, int64 stageId, int32 stageDataKey,
                                             float myPosX, float myPosY, float myPosZ, float myYaw,
                                             float worldMinX, float worldMinZ, float worldMaxX, float worldMaxZ)
 {
@@ -98,37 +98,37 @@ void PacketSender::SendStageLoadCompleteRes(int64 userId, EResultCode resultCode
     res.set_world_max_x(worldMaxX);
     res.set_world_max_z(worldMaxZ);
 
-    SendToUser(userId, Common::GAME_PACKET_ID_STAGE_LOAD_COMPLETE_RES, res);
+    SendToUser(accountId, Common::GAME_PACKET_ID_STAGE_LOAD_COMPLETE_RES, res);
 
     // 스탯/HP 는 StageLoadCompleteRes 뒤에 보낸다.
     // 클라는 이 패킷 수신 시점에 LocalPlayer 를 활성화/배치하므로(2단계 입장),
     // 그 뒤에 도착해야 스탯 핸들러가 대상 캐릭터를 찾을 수 있다 (TCP 순서 보장).
     // 최대치(StatUpdateNtf)가 현재HP(HpMpNtf)보다 먼저 가야 클라 clamp 가 올바르다.
     UserPtr spUser;
-    if (m_safeUsers.Find(userId, spUser) && spUser)
+    if (m_safeUsers.Find(accountId, spUser) && spUser)
     {
         if (CharacterPtr spCharacter = spUser->GetCurrentCharacter())
         {
-            SendStatUpdateNtf(userId, *spCharacter);
-            SendHpMpNtf(userId, spCharacter->GetCurHp(), spCharacter->GetCurMp());
+            SendStatUpdateNtf(accountId, *spCharacter);
+            SendHpMpNtf(accountId, spCharacter->GetCurHp(), spCharacter->GetCurMp());
         }
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("StageLoadCompleteRes sent. userId={} stageId={} stageKey={} pos=({},{},{}) yaw={}",
-        userId, stageId, stageDataKey, myPosX, myPosY, myPosZ, myYaw));
+    LOG_WRITE(LogLevel::Info, std::format("StageLoadCompleteRes sent. accountId={} stageId={} stageKey={} pos=({},{},{}) yaw={}",
+        accountId, stageId, stageDataKey, myPosX, myPosY, myPosZ, myYaw));
 }
 
-void PacketSender::SendStageMoveRes(int64 userId, EResultCode resultCode, const std::string& errorMsg, int32 targetStageDataKey)
+void PacketSender::SendStageMoveRes(int64 accountId, EResultCode resultCode, const std::string& errorMsg, int32 targetStageDataKey)
 {
     GamePacket::StageMoveRes res;
     res.set_result_code(static_cast<int32>(resultCode));
     res.set_error_msg(errorMsg);
     res.set_target_stage_data_key(targetStageDataKey);
 
-    SendToUser(userId, Common::GAME_PACKET_ID_STAGE_MOVE_RES, res);
+    SendToUser(accountId, Common::GAME_PACKET_ID_STAGE_MOVE_RES, res);
 }
 
-void PacketSender::SendObjectVisibilityNtf(int64 userId,
+void PacketSender::SendObjectVisibilityNtf(int64 accountId,
                                            const std::vector<GamePacket::CharacterSpawnInfo>& characterSpawns,
                                            const std::vector<int64>& despawnIds,
                                            const std::vector<GamePacket::MonsterSpawnInfo>& monsterSpawns)
@@ -149,13 +149,13 @@ void PacketSender::SendObjectVisibilityNtf(int64 userId,
         ntf.add_despawn_ids(id);
     }
 
-    SendToUser(userId, Common::GAME_PACKET_ID_OBJECT_VISIBILITY_NTF, ntf);
+    SendToUser(accountId, Common::GAME_PACKET_ID_OBJECT_VISIBILITY_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("ObjectVisibilityNtf sent. userId={} characterSpawns={} monsterSpawns={} despawns={}",
-        userId, characterSpawns.size(), monsterSpawns.size(), despawnIds.size()));
+    LOG_WRITE(LogLevel::Info, std::format("ObjectVisibilityNtf sent. accountId={} characterSpawns={} monsterSpawns={} despawns={}",
+        accountId, characterSpawns.size(), monsterSpawns.size(), despawnIds.size()));
 }
 
-void PacketSender::SendMovePosCorrectNtf(int64 userId, float posX, float posY, float posZ, float yaw)
+void PacketSender::SendMovePosCorrectNtf(int64 accountId, float posX, float posY, float posZ, float yaw)
 {
     GamePacket::MovePosCorrectNtf ntf;
     ntf.set_pos_x(posX);
@@ -163,26 +163,26 @@ void PacketSender::SendMovePosCorrectNtf(int64 userId, float posX, float posY, f
     ntf.set_pos_z(posZ);
     ntf.set_yaw(yaw);
 
-    SendToUser(userId, Common::GAME_PACKET_ID_MOVE_POS_CORRECT_NTF, ntf);
+    SendToUser(accountId, Common::GAME_PACKET_ID_MOVE_POS_CORRECT_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("MovePosCorrectNtf sent. userId={} pos=({},{},{}) yaw={}", userId, posX, posY, posZ, yaw));
+    LOG_WRITE(LogLevel::Info, std::format("MovePosCorrectNtf sent. accountId={} pos=({},{},{}) yaw={}", accountId, posX, posY, posZ, yaw));
 }
 
-void PacketSender::SendSnapshotNtf(int64 userId, const GamePacket::SnapshotNtf& ntf)
+void PacketSender::SendSnapshotNtf(int64 accountId, const GamePacket::SnapshotNtf& ntf)
 {
     // 고빈도(매 tick) 패킷이라 로그를 남기지 않는다. ntf 는 Stage 가 AOI 순회로 채워 전달한다.
-    SendToUser(userId, Common::GAME_PACKET_ID_SNAPSHOT_NTF, ntf);
+    SendToUser(accountId, Common::GAME_PACKET_ID_SNAPSHOT_NTF, ntf);
 }
 
-void PacketSender::SendTimeSyncNtf(std::span<const int64> userIds, uint32 serverTickSeq)
+void PacketSender::SendTimeSyncNtf(std::span<const int64> accountIds, uint32 serverTickSeq)
 {
     // 저빈도 시각 앵커. 동일 payload 를 1회만 직렬화해 게이트웨이별로 묶어 broadcast 한다. 로그 생략.
     GamePacket::TimeSyncNtf ntf;
     ntf.set_server_tick_seq(serverTickSeq);
-    SendToUsers(userIds, Common::GAME_PACKET_ID_TIME_SYNC_NTF, ntf);
+    SendToUsers(accountIds, Common::GAME_PACKET_ID_TIME_SYNC_NTF, ntf);
 }
 
-void PacketSender::SendStatUpdateNtf(int64 userId, const Character& character)
+void PacketSender::SendStatUpdateNtf(int64 accountId, const Character& character)
 {
     GamePacket::StatUpdateNtf ntf;
     ntf.set_object_id(character.GetObjectId());
@@ -195,20 +195,20 @@ void PacketSender::SendStatUpdateNtf(int64 userId, const Character& character)
         pEntry->set_value(value);
     });
 
-    SendToUser(userId, Common::GAME_PACKET_ID_STAT_UPDATE_NTF, ntf);
+    SendToUser(accountId, Common::GAME_PACKET_ID_STAT_UPDATE_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("StatUpdateNtf sent. userId={} objectId={} count={}",
-        userId, character.GetObjectId(), ntf.entries_size()));
+    LOG_WRITE(LogLevel::Info, std::format("StatUpdateNtf sent. accountId={} objectId={} count={}",
+        accountId, character.GetObjectId(), ntf.entries_size()));
 }
 
-void PacketSender::SendHpMpNtf(int64 userId, double curHp, double curMp)
+void PacketSender::SendHpMpNtf(int64 accountId, double curHp, double curMp)
 {
     GamePacket::HpMpNtf ntf;
-    // objectId 는 현재 본인에게만 보내므로 userId 와 동일한 캐릭터 objectId 를 쓴다.
-    // (현재 character_id == objectId == userId 체계. 향후 구분되면 명시 전달로 변경.)
+    // objectId 는 현재 본인에게만 보내므로 accountId 와 동일한 캐릭터 objectId 를 쓴다.
+    // (현재 character_id == objectId == accountId 체계. 향후 구분되면 명시 전달로 변경.)
     UserPtr spUser;
-    int64 objectId = userId;
-    if (m_safeUsers.Find(userId, spUser) && spUser)
+    int64 objectId = accountId;
+    if (m_safeUsers.Find(accountId, spUser) && spUser)
     {
         if (CharacterPtr spCharacter = spUser->GetCurrentCharacter())
             objectId = spCharacter->GetObjectId();
@@ -218,10 +218,10 @@ void PacketSender::SendHpMpNtf(int64 userId, double curHp, double curMp)
     ntf.set_cur_hp(curHp);
     ntf.set_cur_mp(curMp);
 
-    SendToUser(userId, Common::GAME_PACKET_ID_HP_MP_NTF, ntf);
+    SendToUser(accountId, Common::GAME_PACKET_ID_HP_MP_NTF, ntf);
 }
 
-void PacketSender::SendBuffNtf(std::span<const int64> userIds, int64 objectId, int32 buffKey, int32 stackCount, int32 remainTimeMs)
+void PacketSender::SendBuffNtf(std::span<const int64> accountIds, int64 objectId, int32 buffKey, int32 stackCount, int32 remainTimeMs)
 {
     GamePacket::BuffNtf ntf;
     ntf.set_object_id(objectId);
@@ -229,19 +229,19 @@ void PacketSender::SendBuffNtf(std::span<const int64> userIds, int64 objectId, i
     ntf.set_stack_count(stackCount);
     ntf.set_remain_time_ms(remainTimeMs);
 
-    SendToUsers(userIds, Common::GAME_PACKET_ID_BUFF_NTF, ntf);
+    SendToUsers(accountIds, Common::GAME_PACKET_ID_BUFF_NTF, ntf);
 }
 
-void PacketSender::SendBuffRemoveNtf(std::span<const int64> userIds, int64 objectId, int32 buffKey)
+void PacketSender::SendBuffRemoveNtf(std::span<const int64> accountIds, int64 objectId, int32 buffKey)
 {
     GamePacket::BuffRemoveNtf ntf;
     ntf.set_object_id(objectId);
     ntf.set_buff_key(buffKey);
 
-    SendToUsers(userIds, Common::GAME_PACKET_ID_BUFF_REMOVE_NTF, ntf);
+    SendToUsers(accountIds, Common::GAME_PACKET_ID_BUFF_REMOVE_NTF, ntf);
 }
 
-void PacketSender::SendSkillDamageNtf(std::span<const int64> userIds, int64 targetObjectId, double damage, bool isDuplicate, double remainingHp,
+void PacketSender::SendSkillDamageNtf(std::span<const int64> accountIds, int64 targetObjectId, double damage, bool isDuplicate, double remainingHp,
                                       int64 attackerObjectId, int32 sourceSkillKey)
 {
     GamePacket::SkillDamageNtf ntf;
@@ -252,10 +252,10 @@ void PacketSender::SendSkillDamageNtf(std::span<const int64> userIds, int64 targ
     ntf.set_attacker_object_id(attackerObjectId);
     ntf.set_source_skill_key(sourceSkillKey);
 
-    SendToUsers(userIds, Common::GAME_PACKET_ID_SKILL_DAMAGE_NTF, ntf);
+    SendToUsers(accountIds, Common::GAME_PACKET_ID_SKILL_DAMAGE_NTF, ntf);
 }
 
-void PacketSender::SendAbilityCastNtf(std::span<const int64> userIds, int64 casterObjectId, int32 skillKey, int64 targetObjectId,
+void PacketSender::SendAbilityCastNtf(std::span<const int64> accountIds, int64 casterObjectId, int32 skillKey, int64 targetObjectId,
                                       float originX, float originY, float originZ, float dirX, float dirZ, int32 windupMs)
 {
     GamePacket::AbilityCastNtf ntf;
@@ -269,10 +269,10 @@ void PacketSender::SendAbilityCastNtf(std::span<const int64> userIds, int64 cast
     ntf.set_dir_z(dirZ);
     ntf.set_windup_ms(windupMs);
 
-    SendToUsers(userIds, Common::GAME_PACKET_ID_ABILITY_CAST_NTF, ntf);
+    SendToUsers(accountIds, Common::GAME_PACKET_ID_ABILITY_CAST_NTF, ntf);
 }
 
-void PacketSender::SendSkillCastNtf(std::span<const int64> userIds, int64 casterObjectId, int32 skillKey, int64 effectId,
+void PacketSender::SendSkillCastNtf(std::span<const int64> accountIds, int64 casterObjectId, int32 skillKey, int64 effectId,
                                     float originX, float originY, float originZ, float dirX, float dirZ, uint32 seed,
                                     float moveDistance)
 {
@@ -288,23 +288,23 @@ void PacketSender::SendSkillCastNtf(std::span<const int64> userIds, int64 caster
     ntf.set_seed(seed);
     ntf.set_move_distance(moveDistance);
 
-    SendToUsers(userIds, Common::GAME_PACKET_ID_SKILL_CAST_NTF, ntf);
+    SendToUsers(accountIds, Common::GAME_PACKET_ID_SKILL_CAST_NTF, ntf);
 }
 
-void PacketSender::SendObjectDeathNtf(std::span<const int64> userIds, int64 objectId, int64 killerObjectId)
+void PacketSender::SendObjectDeathNtf(std::span<const int64> accountIds, int64 objectId, int64 killerObjectId)
 {
     GamePacket::ObjectDeathNtf ntf;
     ntf.set_object_id(objectId);
     ntf.set_killer_object_id(killerObjectId);
 
-    SendToUsers(userIds, Common::GAME_PACKET_ID_OBJECT_DEATH_NTF, ntf);
+    SendToUsers(accountIds, Common::GAME_PACKET_ID_OBJECT_DEATH_NTF, ntf);
 }
 
-void PacketSender::SendStageNoticeNtf(std::span<const int64> userIds, const std::string& message, int32 durationMs)
+void PacketSender::SendStageNoticeNtf(std::span<const int64> accountIds, const std::string& message, int32 durationMs)
 {
     GamePacket::StageNoticeNtf ntf;
     ntf.set_message(message);
     ntf.set_duration_ms(durationMs);
 
-    SendToUsers(userIds, Common::GAME_PACKET_ID_STAGE_NOTICE_NTF, ntf);
+    SendToUsers(accountIds, Common::GAME_PACKET_ID_STAGE_NOTICE_NTF, ntf);
 }

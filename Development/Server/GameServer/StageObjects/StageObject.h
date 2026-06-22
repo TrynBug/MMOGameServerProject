@@ -42,9 +42,9 @@ public:
     int64       GetObjectId()   const { return m_objectId; }
     EObjectType GetObjectType() const { return m_objectType; }
 
-    // 이 오브젝트를 소유한 유저의 ID. 유저 객체(Character)만 의미있는 값을 돌려주고, 그 외(Monster/Prop 등)는 0.
+    // 이 오브젝트를 소유한 유저의 ID. 캐릭터 객체(Character)만 의미있는 값을 돌려주고, 그 외(Monster/Prop 등)는 0.
     // AOI 브로드캐스트(Stage::ForEachUserInAoi)에서 user 컨테이너 순회 시 사용.
-    virtual int64 GetOwnerUserId() const { return 0; }
+    virtual int64 GetOwnerAccountId() const { return 0; }
 
     float       GetPosX()       const { return m_posX; }
     float       GetPosY()       const { return m_posY; }   // 높이

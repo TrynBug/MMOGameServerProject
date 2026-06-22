@@ -99,5 +99,5 @@ namespace packetlog
     // 패킷 1건을 서버 로그에 1줄로 출력한다.
     //   pMsg != nullptr : 이름 + JSON(내용),  nullptr : 이름만.
     //   dir : "S->C" 또는 "C->S".
-    void LogPacket(const char* dir, int64 userId, uint16 packetType, const google::protobuf::Message* pMsg);
+    void LogPacket(const char* dir, int64 accountId, uint16 packetType, const google::protobuf::Message* pMsg);
 }

@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "User.h"
 
-User::User(int64 userId, int32 gatewayId, const std::string& clientIp)
-    : m_userId(userId)
+User::User(int64 accountId, int32 gatewayId, const std::string& clientIp)
+    : m_accountId(accountId)
     , m_gatewayId(gatewayId)
     , m_clientIp(clientIp)
 {

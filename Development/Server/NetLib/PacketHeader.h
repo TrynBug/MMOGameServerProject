@@ -32,7 +32,7 @@ namespace PacketFlags
 // flags & PacketFlags::Sidecar 일 때 패킷 바이트구조: [PacketHeader][SidecarHeader][Sidecar 데이터(size 바이트)][실제 payload]
 //
 // 용도: 패킷 payload 데이터는 그대로 유지하면서 패킷에 추가적인 정보를 넣을 때 사용한다.
-//       예를들면 게이트웨이서버에서 게임서버에 클라이언트 패킷을 중계할 때 사이드카를 사용하면 패킷에 UserId를 끼워넣을 수 있다.      
+//       예를들면 게이트웨이서버에서 게임서버에 클라이언트 패킷을 중계할 때 사이드카를 사용하면 패킷에 AccountId를 끼워넣을 수 있다.      
 #pragma pack(push, 1)
 struct SidecarHeader
 {

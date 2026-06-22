@@ -504,7 +504,7 @@ void StageScript::CallOnStageStart()
     }
 }
 
-void StageScript::CallOnPlayerEnter(int64 userId)
+void StageScript::CallOnPlayerEnter(int64 accountId)
 {
     for (auto& env : m_pImpl->scripts)
     {
@@ -513,7 +513,7 @@ void StageScript::CallOnPlayerEnter(int64 userId)
             continue;
 
         armGuard(m_pImpl->lua);
-        sol::protected_function_result r = fn(userId);
+        sol::protected_function_result r = fn(accountId);
         if (!r.valid())
         {
             sol::error e = r;
@@ -522,7 +522,7 @@ void StageScript::CallOnPlayerEnter(int64 userId)
     }
 }
 
-void StageScript::CallOnPlayerLeave(int64 userId)
+void StageScript::CallOnPlayerLeave(int64 accountId)
 {
     for (auto& env : m_pImpl->scripts)
     {
@@ -531,7 +531,7 @@ void StageScript::CallOnPlayerLeave(int64 userId)
             continue;
 
         armGuard(m_pImpl->lua);
-        sol::protected_function_result r = fn(userId);
+        sol::protected_function_result r = fn(accountId);
         if (!r.valid())
         {
             sol::error e = r;
@@ -540,7 +540,7 @@ void StageScript::CallOnPlayerLeave(int64 userId)
     }
 }
 
-void StageScript::CallOnEnterEventArea(int32 eventKey, int64 userId, float x, float y, float z)
+void StageScript::CallOnEnterEventArea(int32 eventKey, int64 accountId, float x, float y, float z)
 {
     for (auto& env : m_pImpl->scripts)
     {
@@ -549,7 +549,7 @@ void StageScript::CallOnEnterEventArea(int32 eventKey, int64 userId, float x, fl
             continue;
 
         armGuard(m_pImpl->lua);
-        sol::protected_function_result r = fn(eventKey, userId, x, y, z);
+        sol::protected_function_result r = fn(eventKey, accountId, x, y, z);
         if (!r.valid())
         {
             sol::error e = r;
@@ -558,7 +558,7 @@ void StageScript::CallOnEnterEventArea(int32 eventKey, int64 userId, float x, fl
     }
 }
 
-void StageScript::CallOnExitEventArea(int32 eventKey, int64 userId, float x, float y, float z)
+void StageScript::CallOnExitEventArea(int32 eventKey, int64 accountId, float x, float y, float z)
 {
     for (auto& env : m_pImpl->scripts)
     {
@@ -567,7 +567,7 @@ void StageScript::CallOnExitEventArea(int32 eventKey, int64 userId, float x, flo
             continue;
 
         armGuard(m_pImpl->lua);
-        sol::protected_function_result r = fn(eventKey, userId, x, y, z);
+        sol::protected_function_result r = fn(eventKey, accountId, x, y, z);
         if (!r.valid())
         {
             sol::error e = r;
@@ -576,7 +576,7 @@ void StageScript::CallOnExitEventArea(int32 eventKey, int64 userId, float x, flo
     }
 }
 
-void StageScript::CallOnObjectInteract(int32 propKey, int64 userId)
+void StageScript::CallOnObjectInteract(int32 propKey, int64 accountId)
 {
     for (auto& env : m_pImpl->scripts)
     {
@@ -585,7 +585,7 @@ void StageScript::CallOnObjectInteract(int32 propKey, int64 userId)
             continue;
 
         armGuard(m_pImpl->lua);
-        sol::protected_function_result r = fn(propKey, userId);
+        sol::protected_function_result r = fn(propKey, accountId);
         if (!r.valid())
         {
             sol::error e = r;

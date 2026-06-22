@@ -15,7 +15,7 @@ namespace netlib
 //   PacketFlags::Sidecar 비트가 켜져 있으면 메모리 레이아웃은 다음과 같다:
 //     [PacketHeader][SidecarHeader][사이드카 데이터][실제 payload]
 //   GetPayload()/GetPayloadSize()는 자동으로 사이드카 이후의 실제 payload를 반환한다.
-//   사이드카는 라우팅 정보(userId 등) 부가 데이터를 새 패킷 할당 없이 끼워넣는 용도.
+//   사이드카는 라우팅 정보(accountId 등) 부가 데이터를 새 패킷 할당 없이 끼워넣는 용도.
 class Packet
 {
 public:

@@ -96,7 +96,7 @@ CheatResult CheatManager::cheatNetDelay(Stage& /*stage*/, const UserPtr& spUser,
         return { false, "delay must be >= 0" };
 
     ServerPacket::SetClientLatencyReq req;
-    req.set_user_id(spUser->GetUserId());
+    req.set_account_id(spUser->GetAccountId());
     req.set_recv_delay_ms(recvMs);
     req.set_send_delay_ms(sendMs);
 

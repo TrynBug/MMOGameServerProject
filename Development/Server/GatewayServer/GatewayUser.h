@@ -6,12 +6,12 @@
 // 세션(TCP 소켓), 유저ID, 연결된 게임서버ID 등을 관리한다.
 struct GatewayUser
 {
-    int64               userId        = 0;
+    int64               accountId        = 0;
     int32               gameServerId  = 0;   // 현재 라우팅된 게임서버 ID (0 = 미배정)
     netlib::ISessionPtr spClientSession;
     std::string         clientIp;
 
-    bool IsValid() const { return spClientSession != nullptr && userId != 0; }
+    bool IsValid() const { return spClientSession != nullptr && accountId != 0; }
 };
 
 using GatewayUserPtr = std::shared_ptr<GatewayUser>;

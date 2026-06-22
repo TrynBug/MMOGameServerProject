@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "LoginServer.h"
 
-#include "Generated/DataStructures/user.pb.h"
+#include "Generated/DataStructures/account.pb.h"
 #include "ProtoJsonSerializer.h"
 
 bool LoginServer::OnInitialize()
@@ -154,33 +154,33 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
 
     // DB 비동기 조회. 완료될 때까지 suspend, 이후 IOCP Worker에서 코루틴 resume
     db::DBResult result = co_await m_dbQueue.ExecuteAsync(
-        "SELECT data FROM Users WHERE login_name = ? LIMIT 1",
+        "SELECT data FROM Accounts WHERE login_name = ? LIMIT 1",
         { loginId },
         GetCoroutineResumeExecutor()   // IOCP Worker 스레드에서 resume
     );
 
     if (!result.success || result.IsEmpty())
     {
-        LOG_WRITE(LogLevel::Info, std::format("login failed - user not found. loginId={}", loginId));
+        LOG_WRITE(LogLevel::Info, std::format("login failed - account not found. loginId={}", loginId));
         sendLoginFailed(spSession, "Invalid ID or password");
         co_return;
     }
 
     // 조회된 모든 캐릭터를 protobuf 메시지로 역직렬화하여 목록에 적재.
-    DataStructures::User user;
+    DataStructures::Account account;
     const std::string dataJson = result.GetString(0, "data");
-    if (!packet::ProtoJsonSerializer::FromJson(dataJson, user))
+    if (!packet::ProtoJsonSerializer::FromJson(dataJson, account))
     {
-        LOG_WRITE(LogLevel::Error, std::format("failed to parse user JSON. loginId={}", loginId));
+        LOG_WRITE(LogLevel::Error, std::format("failed to parse account JSON. loginId={}", loginId));
         co_return;
     }
 
 
-    int64 userId = user.user_id();
-    std::string passwordHash = user.login_password_hash();
+    int64 accountId = account.account_id();
+    std::string passwordHash = account.login_password_hash();
 
     // TODO: 실제 해시 검증으로 교체 (bcrypt 등)
-    if (password != user.login_password_hash())
+    if (password != account.login_password_hash())
     {
         LOG_WRITE(LogLevel::Info, std::format("login failed - wrong password. loginId={}", loginId));
         sendLoginFailed(spSession, "Invalid ID or password");
@@ -188,18 +188,18 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     }
 
     // 중복 로그인 처리
-    auto existingEntry = findLoginEntry(userId);
+    auto existingEntry = findLoginEntry(accountId);
     if (existingEntry.has_value())
     {
-        LOG_WRITE(LogLevel::Info, std::format("duplicate login detected. userId={} existing gatewayId={}", userId, existingEntry->gatewayServerId));
-        sendDuplicateLoginToGateway(existingEntry->gatewayServerId, userId);
+        LOG_WRITE(LogLevel::Info, std::format("duplicate login detected. accountId={} existing gatewayId={}", accountId, existingEntry->gatewayServerId));
+        sendDuplicateLoginToGateway(existingEntry->gatewayServerId, accountId);
     }
 
     // 게이트웨이 선택 (로드밸런싱)
-    auto gateway = selectGateway(userId);
+    auto gateway = selectGateway(accountId);
     if (!gateway.has_value())
     {
-        LOG_WRITE(LogLevel::Warn, std::format("no available gateway for userId={}", userId));
+        LOG_WRITE(LogLevel::Warn, std::format("no available gateway for accountId={}", accountId));
         sendLoginFailed(spSession, "Server is busy. Please try again later.");
         co_return;
     }
@@ -208,11 +208,11 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     uint64 authToken = generateAuthToken();
     int64 expireTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() + k_authTokenTtlMs;
 
-    sendAuthTokenToGateway(gateway->serverId, userId, authToken, expireTimeMs);
-    upsertLoginEntry(userId, gateway->serverId);
-    sendLoginSuccess(spSession, userId, authToken, *gateway);
+    sendAuthTokenToGateway(gateway->serverId, accountId, authToken, expireTimeMs);
+    upsertLoginEntry(accountId, gateway->serverId);
+    sendLoginSuccess(spSession, accountId, authToken, *gateway);
 
-    LOG_WRITE(LogLevel::Info, std::format("login success. userId={} gateway={}:{}", userId, gateway->ip, gateway->internalPort));
+    LOG_WRITE(LogLevel::Info, std::format("login success. accountId={} gateway={}:{}", accountId, gateway->ip, gateway->internalPort));
 }
 
 // 게이트웨이서버로부터 HandshakeRes를 받음
@@ -244,11 +244,11 @@ void LoginServer::handleGatewayHandshakeRes(const netlib::ISessionPtr& spSession
 }
 
 // 로그인 성공 응답
-void LoginServer::sendLoginSuccess(const netlib::ISessionPtr& spSession, int64 userId, uint64 authToken, const ServerInfo& gatewayInfo)
+void LoginServer::sendLoginSuccess(const netlib::ISessionPtr& spSession, int64 accountId, uint64 authToken, const ServerInfo& gatewayInfo)
 {
     GamePacket::LoginRes res;
     res.set_success(true);
-    res.set_user_id(userId);
+    res.set_account_id(accountId);
     res.set_auth_token(authToken);
     res.set_gateway_ip(gatewayInfo.ip);
     res.set_gateway_port(gatewayInfo.clientPort);
@@ -300,14 +300,14 @@ void LoginServer::disconnectFromGateway(int32 gatewayId)
     LOG_WRITE(LogLevel::Info, std::format("disconnected from gateway {}", gatewayId));
 }
 
-std::optional<ServerInfo> LoginServer::selectGateway(int64 userId) const
+std::optional<ServerInfo> LoginServer::selectGateway(int64 accountId) const
 {
     if (m_safeGatewayInfos.Empty())
         return std::nullopt;
 
     // 이전 접속 게이트웨이 우선 선택 (5분 TTL)
     PrevGatewayEntry prevEntry;
-    if (m_safePrevGatewayMap.Find(userId, prevEntry))
+    if (m_safePrevGatewayMap.Find(accountId, prevEntry))
     {
         if (std::chrono::steady_clock::now() < prevEntry.expireTime)
         {
@@ -336,7 +336,7 @@ std::optional<ServerInfo> LoginServer::selectGateway(int64 userId) const
     return best;
 }
 
-void LoginServer::sendAuthTokenToGateway(int32 gatewayId, int64 userId, uint64 authToken, int64 expireTimeMs)
+void LoginServer::sendAuthTokenToGateway(int32 gatewayId, int64 accountId, uint64 authToken, int64 expireTimeMs)
 {
     netlib::ISessionPtr spSession;
     if (!m_safeGatewaySessions.Find(gatewayId, spSession))
@@ -346,7 +346,7 @@ void LoginServer::sendAuthTokenToGateway(int32 gatewayId, int64 userId, uint64 a
     }
 
     ServerPacket::LoginAuthTokenNtf ntf;
-    ntf.set_user_id(userId);
+    ntf.set_account_id(accountId);
     ntf.set_auth_token(authToken);
     ntf.set_expire_time_ms(expireTimeMs);
 
@@ -355,14 +355,14 @@ void LoginServer::sendAuthTokenToGateway(int32 gatewayId, int64 userId, uint64 a
         spSession->Send(spPacket);
 }
 
-void LoginServer::sendDuplicateLoginToGateway(int32 gatewayId, int64 userId)
+void LoginServer::sendDuplicateLoginToGateway(int32 gatewayId, int64 accountId)
 {
     netlib::ISessionPtr spSession;
     if (!m_safeGatewaySessions.Find(gatewayId, spSession))
         return;
 
     ServerPacket::LoginDuplicateNtf ntf;
-    ntf.set_user_id(userId);
+    ntf.set_account_id(accountId);
 
     auto spPacket = SerializePacket(Common::SERVER_PACKET_ID_LOGIN_DUPLICATE_NTF, ntf);
     if (spPacket)
@@ -371,23 +371,23 @@ void LoginServer::sendDuplicateLoginToGateway(int32 gatewayId, int64 userId)
 
 
 // 로그인맵 업데이트
-void LoginServer::upsertLoginEntry(int64 userId, int32 gatewayServerId)
+void LoginServer::upsertLoginEntry(int64 accountId, int32 gatewayServerId)
 {
     auto now = std::chrono::steady_clock::now();
 
-    m_safeLoginMap.Insert(userId, { userId, gatewayServerId });
-    m_safePrevGatewayMap.Insert(userId, { gatewayServerId, now + std::chrono::milliseconds(k_prevGatewayTtlMs) });
+    m_safeLoginMap.Insert(accountId, { accountId, gatewayServerId });
+    m_safePrevGatewayMap.Insert(accountId, { gatewayServerId, now + std::chrono::milliseconds(k_prevGatewayTtlMs) });
 }
 
-void LoginServer::removeLoginEntry(int64 userId)
+void LoginServer::removeLoginEntry(int64 accountId)
 {
-    m_safeLoginMap.Erase(userId);
+    m_safeLoginMap.Erase(accountId);
 }
 
-std::optional<LoginServer::LoginEntry> LoginServer::findLoginEntry(int64 userId) const
+std::optional<LoginServer::LoginEntry> LoginServer::findLoginEntry(int64 accountId) const
 {
     LoginEntry entry;
-    if (!m_safeLoginMap.Find(userId, entry))
+    if (!m_safeLoginMap.Find(accountId, entry))
         return std::nullopt;
 
     return entry;
@@ -407,9 +407,9 @@ void LoginServer::cleanupExpiredPrevGateway()
 // 게이트웨이서버에서 유저 접속끊김 노티를 받음
 void LoginServer::handleUserDisconnectNtf(const netlib::ISessionPtr& /*spSession*/, const ServerPacket::UserDisconnectNtf& ntf)
 {
-    int64 userId = ntf.user_id();
-    removeLoginEntry(userId);
-    LOG_WRITE(LogLevel::Info, std::format("user disconnected, removed from loginMap. userId={}", userId));
+    int64 accountId = ntf.account_id();
+    removeLoginEntry(accountId);
+    LOG_WRITE(LogLevel::Info, std::format("user disconnected, removed from loginMap. accountId={}", accountId));
 }
 
 // 인증 토큰 생성

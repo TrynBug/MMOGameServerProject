@@ -114,7 +114,7 @@ struct StageMsg_UserEnter
 // 또는 다른 Stage로 이동할 때)
 struct StageMsg_UserLeave
 {
-    int64 userId = 0;
+    int64 accountId = 0;
 };
 
 // 모든 메시지 타입의 variant
@@ -334,7 +334,7 @@ public:
     }
 
     // (centerSectorX, centerSectorZ) 주변 AOI(k_aoiRange) 안의 모든 유저에 대해 콜백을 호출한다.
-    // 콜백 시그니처: void(int64 userId). center 가 -1(맵 밖)이면 아무것도 하지 않는다.
+    // 콜백 시그니처: void(int64 accountId). center 가 -1(맵 밖)이면 아무것도 하지 않는다.
     // "내 주변 유저 전체에게 패킷 전송" 브로드캐스트의 공통 골격. (ForEachAdjacentSector 와 동일 성능, std::function 없음)
     template <typename Func>
     void ForEachUserInAoi(int32 centerSectorX, int32 centerSectorZ, Func&& callback)
@@ -346,7 +346,7 @@ public:
             [&](Sector* pSector)
             {
                 for (const auto& [objId, pObj] : pSector->GetUsers())
-                    callback(pObj->GetOwnerUserId());
+                    callback(pObj->GetOwnerAccountId());
             });
     }
 
@@ -376,7 +376,7 @@ protected:
     // ── 시스템 메시지 처리 hooks (파생 클래스가 override 가능) ──
     // 기본 동작: 유저를 m_users에 추가/제거 (캐릭터 스폰은 spawnPendingCharacter 별도 단계).
     virtual void OnUserEnter(const UserPtr& spUser);
-    virtual void OnUserLeave(int64 userId);
+    virtual void OnUserLeave(int64 accountId);
 
     // 유저의 pendingCharacter를 이 Stage에 스폰한다 (StageLoadCompleteReq 수신 시 호출).
     // - pendingPositionType != None이면 StageStartPosition 데이터의 좌표로 배치 (NavMesh 스냅 보정),
@@ -565,7 +565,7 @@ private:
     // Stage가 유저를 소유 (shared_ptr).
     std::unordered_map<int64, UserPtr> m_users;
 
-    // AOI 브로드캐스트 시 수신자 userId 를 모으는 재사용 버퍼 (컨텐츠 스레드 전용, 호출마다 clear).
+    // AOI 브로드캐스트 시 수신자 accountId 를 모으는 재사용 버퍼 (컨텐츠 스레드 전용, 호출마다 clear).
     // 매 브로드캐스트마다 vector 를 새로 만들지 않기 위함. 브로드캐스트는 tick 내에서 순차 호출되어 재진입 없음.
     std::vector<int64> m_aoiUserScratch;
 

@@ -141,22 +141,22 @@ void GatewayServer::onClientDisconnect(const netlib::ISessionPtr& spSession)
     if (!pMeta)
         return;
 
-    int64 userId = pMeta->userId;
-    if (userId == 0)
+    int64 accountId = pMeta->accountId;
+    if (accountId == 0)
         return;
 
     GatewayUserPtr spUser;
-    m_safeUsers.EraseAndGet(userId, spUser);
+    m_safeUsers.EraseAndGet(accountId, spUser);
 
     if (!spUser)
         return;
 
-    LOG_WRITE(LogLevel::Info, std::format("client disconnected. userId={}", userId));
+    LOG_WRITE(LogLevel::Info, std::format("client disconnected. accountId={}", accountId));
 
     if (spUser->gameServerId != 0)
     {
         ServerPacket::GatewayUserDisconnectNtf ntf;
-        ntf.set_user_id(userId);
+        ntf.set_account_id(accountId);
 
         auto spPacket = SerializePacket(Common::SERVER_PACKET_ID_USER_DISCONNECT_NTF, ntf);
         if (spPacket)
@@ -253,8 +253,8 @@ void GatewayServer::onInternalDisconnect(const netlib::ISessionPtr& spSession)
                 return spUser->gameServerId == gameServerId;
             });
 
-        for (int64 userId : affectedUsers)
-            forceDisconnectUser(userId, "Game server disconnected");
+        for (int64 accountId : affectedUsers)
+            forceDisconnectUser(accountId, "Game server disconnected");
     }
     else if (pMeta->sessionType == ESessionType::LoginServer)
     {
@@ -268,58 +268,58 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
 {
     // 이미 인증된 세션이면 비정상 요청
     SessionMetaInfo* pMeta = getSessionMeta(spClientSession);
-    if (!pMeta || pMeta->userId != 0)
+    if (!pMeta || pMeta->accountId != 0)
     {
         LOG_WRITE(LogLevel::Warn, std::format("auth req on already authenticated session. sessionId={}", spClientSession->GetId()));
         spClientSession->Disconnect();
         return;
     }
 
-    int64 userId = msg.user_id();
+    int64 accountId = msg.account_id();
     uint64 authToken = msg.auth_token();
 
-    if (!consumeAuthToken(userId, authToken))
+    if (!consumeAuthToken(accountId, authToken))
     {
-        LOG_WRITE(LogLevel::Warn, std::format("auth failed. userId={}, sessionId={}", userId, spClientSession->GetId()));
+        LOG_WRITE(LogLevel::Warn, std::format("auth failed. accountId={}, sessionId={}", accountId, spClientSession->GetId()));
         spClientSession->Disconnect();
         return;
     }
 
     // 중복 접속 처리
     GatewayUserPtr spExisting;
-    if (m_safeUsers.Find(userId, spExisting))
+    if (m_safeUsers.Find(accountId, spExisting))
     {
-        LOG_WRITE(LogLevel::Info, std::format("duplicate connection. userId={} disconnecting old session.", userId));
+        LOG_WRITE(LogLevel::Info, std::format("duplicate connection. accountId={} disconnecting old session.", accountId));
         spExisting->spClientSession->Disconnect();
     }
 
     // 게임서버 선택 (로드밸런싱)
-    auto gameServer = selectGameServer(userId);
+    auto gameServer = selectGameServer(accountId);
     if (!gameServer.has_value())
     {
-        LOG_WRITE(LogLevel::Warn, std::format("no available game server for userId={}", userId));
+        LOG_WRITE(LogLevel::Warn, std::format("no available game server for accountId={}", accountId));
         spClientSession->Disconnect();
         return;
     }
 
     // 유저 객체 생성
     auto spUser = std::make_shared<GatewayUser>();
-    spUser->userId = userId;
+    spUser->accountId = accountId;
     spUser->gameServerId = gameServer->serverId;
     spUser->spClientSession = spClientSession;
 
-    m_safeUsers.Insert(userId, spUser);
+    m_safeUsers.Insert(accountId, spUser);
 
-    pMeta->userId = userId;
+    pMeta->accountId = accountId;
     pMeta->routedGameServerId = gameServer->serverId;
 
-    upsertPrevGameServer(userId, gameServer->serverId);
+    upsertPrevGameServer(accountId, gameServer->serverId);
 
-    LOG_WRITE(LogLevel::Info, std::format("client authenticated. userId={}, gameServerId={}", userId, gameServer->serverId));
+    LOG_WRITE(LogLevel::Info, std::format("client authenticated. accountId={}, gameServerId={}", accountId, gameServer->serverId));
 
     // 게임서버에 유저 입장 알림
     ServerPacket::GatewayUserEnterNtf ntf;
-    ntf.set_user_id(userId);
+    ntf.set_account_id(accountId);
     ntf.set_gateway_id(GetServerId());
     ntf.set_client_ip(spUser->clientIp);
 
@@ -336,18 +336,18 @@ void GatewayServer::handleLogoutReq(const netlib::ISessionPtr& spClientSession)
 void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spClientSession, const netlib::PacketPtr& spPacket)
 {
     SessionMetaInfo* pMeta = getSessionMeta(spClientSession);
-    if (!pMeta || pMeta->userId == 0 || pMeta->routedGameServerId == 0)
+    if (!pMeta || pMeta->accountId == 0 || pMeta->routedGameServerId == 0)
         return;
 
     netlib::ISessionPtr spGameSession;
     if (!m_safeGameServerSessions.Find(pMeta->routedGameServerId, spGameSession))
         return;
 
-    // 원본 클라 패킷에 userId를 Sidecar로 추가해서 그대로 게임서버로 전송한다.
-    int64 userId = pMeta->userId;
-    if (!spPacket->SetSidecar(&userId, sizeof(userId)))
+    // 원본 클라 패킷에 accountId를 Sidecar로 추가해서 그대로 게임서버로 전송한다.
+    int64 accountId = pMeta->accountId;
+    if (!spPacket->SetSidecar(&accountId, sizeof(accountId)))
     {
-        LOG_WRITE(LogLevel::Error, std::format("SetSidecar failed. userId={} packetType={}", userId, spPacket->GetHeader()->type));
+        LOG_WRITE(LogLevel::Error, std::format("SetSidecar failed. accountId={} packetType={}", accountId, spPacket->GetHeader()->type));
         return;
     }
 
@@ -400,22 +400,22 @@ void GatewayServer::handleLoginServerHandshakeReq(const netlib::ISessionPtr& spL
 
 void GatewayServer::handleLoginAuthTokenNtf(const netlib::ISessionPtr& /*spLoginSession*/, const ServerPacket::LoginAuthTokenNtf& msg)
 {
-    storeAuthToken(msg.user_id(), msg.auth_token(), msg.expire_time_ms());
-    LOG_WRITE(LogLevel::Info, std::format("auth token stored. userId={}", msg.user_id()));
+    storeAuthToken(msg.account_id(), msg.auth_token(), msg.expire_time_ms());
+    LOG_WRITE(LogLevel::Info, std::format("auth token stored. accountId={}", msg.account_id()));
 }
 
 void GatewayServer::handleLoginDuplicateNtf(const netlib::ISessionPtr& /*spLoginSession*/, const ServerPacket::LoginDuplicateNtf& msg)
 {
-    int64 userId = msg.user_id();
-    LOG_WRITE(LogLevel::Info, std::format("duplicate login notified. userId={}", userId));
-    forceDisconnectUser(userId, "Duplicate login");
+    int64 accountId = msg.account_id();
+    LOG_WRITE(LogLevel::Info, std::format("duplicate login notified. accountId={}", accountId));
+    forceDisconnectUser(accountId, "Duplicate login");
 }
 
 
 // 게임서버 패킷 핸들러
 void GatewayServer::handleGameServerPacket(const netlib::ISessionPtr& spGameSession, const netlib::PacketPtr& spPacket)
 {
-    // sidecar 가 있으면 클라 전달용 패킷이다. (게임서버가 수신자 userId 목록을 sidecar 로 붙여서 보냄)
+    // sidecar 가 있으면 클라 전달용 패킷이다. (게임서버가 수신자 accountId 목록을 sidecar 로 붙여서 보냄)
     // 그 외는 서버간 통신 패킷이므로 디스패처로 처리.
     if (spPacket->HasSidecar())
     {
@@ -427,7 +427,7 @@ void GatewayServer::handleGameServerPacket(const netlib::ISessionPtr& spGameSess
 }
 
 // 게임서버가 보낸 클라 전달용 패킷을 대상 유저(들)에게 전달한다.
-// sidecar 에 수신자 userId 목록(int64 배열)이 들어있다. sidecar 를 떼어내 깨끗한 클라 패킷으로 만든 뒤,
+// sidecar 에 수신자 accountId 목록(int64 배열)이 들어있다. sidecar 를 떼어내 깨끗한 클라 패킷으로 만든 뒤,
 // 같은 버퍼를 대상 유저들에게 전송한다(브로드캐스트 시 버퍼 1개 공유).
 void GatewayServer::forwardClientPacket(const netlib::PacketPtr& spPacket)
 {
@@ -439,19 +439,19 @@ void GatewayServer::forwardClientPacket(const netlib::PacketPtr& spPacket)
         return;
     }
 
-    // userId 목록을 미리 복사한다 (StripSidecar 후 sidecar 영역이 사라지므로).
+    // accountId 목록을 미리 복사한다 (StripSidecar 후 sidecar 영역이 사라지므로).
     // thread_local 재사용 버퍼 — 게이트웨이 IOCP 워커가 전달 패킷마다 vector 를 새로 만들지 않게 한다.
-    thread_local std::vector<int64> userIds;
-    userIds.resize(count);
-    std::memcpy(userIds.data(), spPacket->GetSidecarData(), static_cast<size_t>(count) * sizeof(int64));
+    thread_local std::vector<int64> accountIds;
+    accountIds.resize(count);
+    std::memcpy(accountIds.data(), spPacket->GetSidecarData(), static_cast<size_t>(count) * sizeof(int64));
 
     // sidecar 제거 → [PacketHeader][payload] 로 복원 (클라는 sidecar 를 모른다).
     spPacket->StripSidecar();
 
-    for (int64 userId : userIds)
+    for (int64 accountId : accountIds)
     {
         GatewayUserPtr spUser;
-        if (!m_safeUsers.Find(userId, spUser) || !spUser->spClientSession)
+        if (!m_safeUsers.Find(accountId, spUser) || !spUser->spClientSession)
             continue;
 
         spUser->spClientSession->Send(spPacket);
@@ -498,21 +498,21 @@ void GatewayServer::handleGameServerHandshakeReq(const netlib::ISessionPtr& spGa
 
 void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spGameSession*/, const ServerPacket::UserMoveToGameServerReq& msg)
 {
-    int64 userId             = msg.user_id();
+    int64 accountId             = msg.account_id();
     int32 targetGameServerId = msg.target_game_server_id();
     int32 targetStageId      = msg.target_stage_id();
 
     GatewayUserPtr spUser;
-    if (!m_safeUsers.Find(userId, spUser))
+    if (!m_safeUsers.Find(accountId, spUser))
         return;
 
     netlib::ISessionPtr spTargetSession;
     if (!m_safeGameServerSessions.Find(targetGameServerId, spTargetSession))
     {
-        LOG_WRITE(LogLevel::Warn, std::format("target game server not found. targetGameServerId={}, userId={}", targetGameServerId, userId));
+        LOG_WRITE(LogLevel::Warn, std::format("target game server not found. targetGameServerId={}, accountId={}", targetGameServerId, accountId));
 
         ServerPacket::UserMoveToGameServerFailNtf failNtf;
-        failNtf.set_user_id(userId);
+        failNtf.set_account_id(accountId);
         failNtf.set_reason("Target game server not found");
 
         auto spFailPacket = SerializePacket(Common::SERVER_PACKET_ID_USER_MOVE_TO_GAME_SERVER_FAIL_NTF, failNtf);
@@ -522,18 +522,18 @@ void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spGa
     }
 
     spUser->gameServerId = targetGameServerId;
-    m_safeUsers.Insert(userId, spUser);
+    m_safeUsers.Insert(accountId, spUser);
 
     SessionMetaInfo* pMeta = getSessionMeta(spUser->spClientSession);
     if (pMeta)
         pMeta->routedGameServerId = targetGameServerId;
 
-    upsertPrevGameServer(userId, targetGameServerId);
+    upsertPrevGameServer(accountId, targetGameServerId);
 
-    LOG_WRITE(LogLevel::Info, std::format("user rerouted. userId={} -> gameServerId={}", userId, targetGameServerId));
+    LOG_WRITE(LogLevel::Info, std::format("user rerouted. accountId={} -> gameServerId={}", accountId, targetGameServerId));
 
     ServerPacket::GatewayUserRerouteNtf rerouteNtf;
-    rerouteNtf.set_user_id(userId);
+    rerouteNtf.set_account_id(accountId);
     rerouteNtf.set_gateway_id(GetServerId());
     rerouteNtf.set_target_stage_id(targetStageId);
     rerouteNtf.set_client_ip(spUser->clientIp);
@@ -550,34 +550,34 @@ void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spGa
 // 게임서버의 netdelay 치트에 의한 클라 연결 지연 설정 (개발용)
 void GatewayServer::handleSetClientLatency(const netlib::ISessionPtr& /*spGameSession*/, const ServerPacket::SetClientLatencyReq& msg)
 {
-    const int64 userId = msg.user_id();
+    const int64 accountId = msg.account_id();
 
     GatewayUserPtr spUser;
-    if (!m_safeUsers.Find(userId, spUser) || !spUser->spClientSession)
+    if (!m_safeUsers.Find(accountId, spUser) || !spUser->spClientSession)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("SetClientLatency: user not found. userId={}", userId));
+        LOG_WRITE(LogLevel::Warn, std::format("SetClientLatency: user not found. accountId={}", accountId));
         return;
     }
 
     spUser->spClientSession->SetSimulatedDelay(msg.recv_delay_ms(), msg.send_delay_ms());
-    LOG_WRITE(LogLevel::Info, std::format("client latency set. userId={} recvMs={} sendMs={}",
-        userId, msg.recv_delay_ms(), msg.send_delay_ms()));
+    LOG_WRITE(LogLevel::Info, std::format("client latency set. accountId={} recvMs={} sendMs={}",
+        accountId, msg.recv_delay_ms(), msg.send_delay_ms()));
 }
 
 
 // 인증토큰 저장
-void GatewayServer::storeAuthToken(int64 userId, uint64 authToken, int64 expireTimeMs)
+void GatewayServer::storeAuthToken(int64 accountId, uint64 authToken, int64 expireTimeMs)
 {
-    m_safeAuthTokens.Insert(userId, { authToken, expireTimeMs });
+    m_safeAuthTokens.Insert(accountId, { authToken, expireTimeMs });
 }
 
 // 인증토큰 소모
-bool GatewayServer::consumeAuthToken(int64 userId, uint64 authToken)
+bool GatewayServer::consumeAuthToken(int64 accountId, uint64 authToken)
 {
     int64 nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     AuthTokenEntry entry;
-    if (!m_safeAuthTokens.EraseAndGet(userId, entry))
+    if (!m_safeAuthTokens.EraseAndGet(accountId, entry))
         return false;
 
     if (entry.authToken != authToken || nowMs > entry.expireTimeMs)
@@ -602,10 +602,10 @@ void GatewayServer::cleanupExpiredTokens()
 
 
 // 이전 접속 게임서버 업데이트
-void GatewayServer::upsertPrevGameServer(int64 userId, int32 gameServerId)
+void GatewayServer::upsertPrevGameServer(int64 accountId, int32 gameServerId)
 {
     auto expireTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(k_prevGameServerTtlMs);
-    m_safePrevGameServer.Insert(userId, { gameServerId, expireTime });
+    m_safePrevGameServer.Insert(accountId, { gameServerId, expireTime });
 }
 
 // 이전 접속 게임서버정보 만료된거 제거
@@ -622,14 +622,14 @@ void GatewayServer::cleanupExpiredPrevGameServer()
     m_safePrevGameServer.Erase(expiredKeys);
 }
 
-std::optional<ServerInfo> GatewayServer::selectGameServer(int64 userId) const
+std::optional<ServerInfo> GatewayServer::selectGameServer(int64 accountId) const
 {
     if (m_safeGameServerInfos.Empty())
         return std::nullopt;
 
     // 이전 접속 게임서버 우선 선택 (5분 TTL)
     PrevGameServerEntry prevEntry;
-    if (m_safePrevGameServer.Find(userId, prevEntry))
+    if (m_safePrevGameServer.Find(accountId, prevEntry))
     {
         if (std::chrono::steady_clock::now() < prevEntry.expireTime)
         {
@@ -670,13 +670,13 @@ void GatewayServer::sendToGameServer(int32 gameServerId, const netlib::PacketPtr
     spSession->Send(spPacket);
 }
 
-void GatewayServer::forceDisconnectUser(int64 userId, const std::string& reason)
+void GatewayServer::forceDisconnectUser(int64 accountId, const std::string& reason)
 {
     GatewayUserPtr spUser;
-    if (!m_safeUsers.Find(userId, spUser) || !spUser->spClientSession)
+    if (!m_safeUsers.Find(accountId, spUser) || !spUser->spClientSession)
         return;
 
-    LOG_WRITE(LogLevel::Info, std::format("force disconnecting userId={}, reason={}", userId, reason));
+    LOG_WRITE(LogLevel::Info, std::format("force disconnecting accountId={}, reason={}", accountId, reason));
 
     GamePacket::ForceDisconnectNtf ntf;
     ntf.set_reason_code(GamePacket::FORCE_DISCONNECT_REASON_SERVER_SHUTDOWN);

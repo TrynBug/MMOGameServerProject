@@ -41,14 +41,14 @@ enum class EUserStageState
 class User
 {
 public:
-    User(int64 userId, int32 gatewayId, const std::string& clientIp);
+    User(int64 accountId, int32 gatewayId, const std::string& clientIp);
     ~User() = default;
 
     User(const User&) = delete;
     User& operator=(const User&) = delete;
 
 public:
-    int64              GetUserId()    const { return m_userId; }
+    int64              GetAccountId()    const { return m_accountId; }
     int32              GetGatewayId() const { return m_gatewayId; }
     const std::string& GetClientIp()  const { return m_clientIp; }
 
@@ -95,7 +95,7 @@ public:
     void DrainPackets(std::vector<netlib::PacketPtr>& outPackets);
 
 private:
-    int64       m_userId         = 0;
+    int64       m_accountId         = 0;
     int32       m_gatewayId      = 0;
     std::string m_clientIp;
 

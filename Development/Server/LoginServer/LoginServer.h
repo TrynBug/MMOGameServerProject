@@ -42,7 +42,7 @@ private:
     void handleUserDisconnectNtf(const netlib::ISessionPtr& spSession, const ServerPacket::UserDisconnectNtf& msg);
 
     // 로그인 응답 전송
-    void sendLoginSuccess(const netlib::ISessionPtr& spSession, int64 userId, uint64 authToken, const ServerInfo& gatewayInfo);
+    void sendLoginSuccess(const netlib::ISessionPtr& spSession, int64 accountId, uint64 authToken, const ServerInfo& gatewayInfo);
     void sendLoginFailed(const netlib::ISessionPtr& spSession, const std::string& errorMsg);
 
     // 게이트웨이 서버 관리
@@ -50,13 +50,13 @@ private:
     void disconnectFromGateway(int32 gatewayId);
 
     // 게이트웨이서버 선택(로드밸런싱): 유저 수가 가장 적고 Running 상태인 게이트웨이 선택, 이전 접속 게이트웨이가 있으면 우선 선택
-    std::optional<ServerInfo> selectGateway(int64 userId) const;
+    std::optional<ServerInfo> selectGateway(int64 accountId) const;
 
     // 선택된 게이트웨이에 인증 토큰 전달
-    void sendAuthTokenToGateway(int32 gatewayId, int64 userId, uint64 authToken, int64 expireTimeMs);
+    void sendAuthTokenToGateway(int32 gatewayId, int64 accountId, uint64 authToken, int64 expireTimeMs);
 
     // 이미 로그인 중인 게이트웨이에 중복 로그인 알림
-    void sendDuplicateLoginToGateway(int32 gatewayId, int64 userId);
+    void sendDuplicateLoginToGateway(int32 gatewayId, int64 accountId);
 
     // 세션에서 InternalSessionMeta를 꺼낸다.
     static InternalSessionMeta* getInternalSessionMeta(const netlib::ISessionPtr& spSession);
@@ -64,7 +64,7 @@ private:
     // 로그인한 유저 정보
     struct LoginEntry
     {
-        int64 userId = 0;
+        int64 accountId = 0;
         int32 gatewayServerId = 0;  // 현재 접속 중인 게이트웨이 서버 ID
         // loginTime 없음 — loginMap은 유저 끊김 이벤트로만 제거되고 TTL로 만료되지 않음
     };
@@ -76,9 +76,9 @@ private:
         std::chrono::steady_clock::time_point expireTime;
     };
 
-    void upsertLoginEntry(int64 userId, int32 gatewayServerId);
-    void removeLoginEntry(int64 userId);
-    std::optional<LoginEntry> findLoginEntry(int64 userId) const;
+    void upsertLoginEntry(int64 accountId, int32 gatewayServerId);
+    void removeLoginEntry(int64 accountId);
+    std::optional<LoginEntry> findLoginEntry(int64 accountId) const;
 
     void cleanupExpiredPrevGateway(); // prevGatewayMap TTL 만료 항목 정리
 
@@ -86,9 +86,9 @@ private:
     uint64 generateAuthToken();
 
 private:
-    SharedThreadSafeUnorderedMap<int64, LoginEntry>       m_safeLoginMap;       // key=userId
+    SharedThreadSafeUnorderedMap<int64, LoginEntry>       m_safeLoginMap;       // key=accountId
 
-    SharedThreadSafeUnorderedMap<int64, PrevGatewayEntry>  m_safePrevGatewayMap; // key=userId
+    SharedThreadSafeUnorderedMap<int64, PrevGatewayEntry>  m_safePrevGatewayMap; // key=accountId
 
     static constexpr int64 k_authTokenTtlMs  = 5 * 60 * 1000;   // 인증토큰 유효시간 5분
     static constexpr int64 k_prevGatewayTtlMs = 5 * 60 * 1000;   // 이전 게이트웨이 캐시 유효시간 5분

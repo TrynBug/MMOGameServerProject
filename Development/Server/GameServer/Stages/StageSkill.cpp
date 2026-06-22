@@ -211,7 +211,7 @@ void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerOb
     // killerObjectId = 공격자. 클라가 방향 피격표식/연출 분기에 attacker/sourceSkillKey 사용.
     m_aoiUserScratch.clear();
     ForEachUserInAoi(target.GetCurSectorX(), target.GetCurSectorZ(),
-        [&](int64 userId) { m_aoiUserScratch.push_back(userId); });
+        [&](int64 accountId) { m_aoiUserScratch.push_back(accountId); });
 
     server.GetPacketSender().SendSkillDamageNtf(m_aoiUserScratch, target.GetObjectId(), damage, isDuplicate, remainingHp,
                                                 killerObjectId, sourceSkillKey);
@@ -237,7 +237,7 @@ void Stage::BroadcastObjectDeathNtf(const ActorObject& actor, int64 killerObject
 {
     m_aoiUserScratch.clear();
     ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
-        [&](int64 userId) { m_aoiUserScratch.push_back(userId); });
+        [&](int64 accountId) { m_aoiUserScratch.push_back(accountId); });
 
     GameServer::Instance().GetPacketSender().SendObjectDeathNtf(m_aoiUserScratch, actor.GetObjectId(), killerObjectId);
 }
@@ -339,7 +339,7 @@ void Stage::BroadcastSkillCastNtf(const ActorObject& caster, int32 skillKey, int
 {
     m_aoiUserScratch.clear();
     ForEachUserInAoi(caster.GetCurSectorX(), caster.GetCurSectorZ(),
-        [&](int64 userId) { m_aoiUserScratch.push_back(userId); });
+        [&](int64 accountId) { m_aoiUserScratch.push_back(accountId); });
 
     GameServer::Instance().GetPacketSender().SendSkillCastNtf(m_aoiUserScratch, caster.GetObjectId(), skillKey, effectId,
                               origin.x, origin.y, origin.z, dir.x, dir.z, seed, moveDistance);
@@ -351,7 +351,7 @@ void Stage::BroadcastAbilityCastNtf(const ActorObject& caster, int32 skillKey, i
 {
     m_aoiUserScratch.clear();
     ForEachUserInAoi(caster.GetCurSectorX(), caster.GetCurSectorZ(),
-        [&](int64 userId) { m_aoiUserScratch.push_back(userId); });
+        [&](int64 accountId) { m_aoiUserScratch.push_back(accountId); });
 
     GameServer::Instance().GetPacketSender().SendAbilityCastNtf(m_aoiUserScratch, caster.GetObjectId(), skillKey, targetObjectId,
                               origin.x, origin.y, origin.z, dir.x, dir.z, windupMs);

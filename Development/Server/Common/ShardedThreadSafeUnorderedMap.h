@@ -15,7 +15,7 @@
 // 단일 mutex 의 캐시라인 경합을 ShardCount 배로 분산한다.
 //
 // 단일 mutex 버전(ThreadSafeUnorderedMap) 대비 차이점:
-//   - 매 패킷마다 Find 가 호출되는 핫 맵(예: GameServer/GatewayServer 의 userId→User 맵)에서
+//   - 매 패킷마다 Find 가 호출되는 핫 맵(예: GameServer/GatewayServer 의 accountId→User 맵)에서
 //     락 경합을 줄이는 용도. 작은/저빈도 맵에는 ThreadSafeUnorderedMap 를 그대로 쓰면 된다.
 //   - ForEach/CollectKeys/Size/Empty 는 "전역 단일 스냅샷"이 아니라 "샤드별 스냅샷"이다
 //     (샤드를 하나씩 잠그며 순회). 호출 사이에 다른 샤드가 변경될 수 있다. 정리/순회 용도에는 충분.

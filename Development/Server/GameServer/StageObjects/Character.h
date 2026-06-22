@@ -59,8 +59,8 @@ public:
     // const 접근은 자유롭게.
     const DataStructures::Character& GetProto() const { return m_protoData; }
 
-    // StageObject hook: 이 캐릭터를 소유한 유저 ID. AOI 브로드캐스트(Stage::ForEachUserInAoi)가 사용.
-    int64 GetOwnerUserId() const override { return m_protoData.owner_user_id(); }
+    // StageObject hook: 이 캐릭터를 소유한 계정 ID. AOI 브로드캐스트(Stage::ForEachUserInAoi)가 사용.
+    int64 GetOwnerAccountId() const override { return m_protoData.owner_account_id(); }
 
     // 변경 가능 접근 (hp/level/exp 등을 직접 set 하기 위해).
     // 좌표/yaw는 직접 변경하지 말 것. SetPos/SetYaw 사용.

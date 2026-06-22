@@ -7,8 +7,8 @@
 #include "GatewayUser.h"
 
 // 게이트웨이서버는 클라이언트가 게임플레이를위해 통신하는 서버이다.
-// 클라이언트는 게이트웨이서버에 접속하여 통신하고, 게이트웨이서버는 클라이언트에게 받은 패킷을 게임서버에 전달한다(원본 패킷에 Sidecar로 userId를 삽입해서 전달함)
-// 그리고 게임서버에서 받은 클라 전달용 패킷(sidecar에 수신자 userId 목록)을 클라이언트에게 전달한다.
+// 클라이언트는 게이트웨이서버에 접속하여 통신하고, 게이트웨이서버는 클라이언트에게 받은 패킷을 게임서버에 전달한다(원본 패킷에 Sidecar로 accountId를 삽입해서 전달함)
+// 그리고 게임서버에서 받은 클라 전달용 패킷(sidecar에 수신자 accountId 목록)을 클라이언트에게 전달한다.
 // 클라이언트가 게이트웨이서버에 처음 접속할 때는 로그인서버에서 받은 인증토큰을 검증한다.
 // 클라이언트의 이전 접속 게임서버 정보를 관리하여, 클라이언트가 빠른시간내에 재접속 시 이전에 접속했던 게임서버로 접속하게 한다.
 // 게임서버 요청에 의한 유저 게임서버 간 이동 처리
@@ -51,7 +51,7 @@ private:
     void handleUserMoveToGameServer  (const netlib::ISessionPtr& spGameSession, const ServerPacket::UserMoveToGameServerReq&   msg);
     void handleSetClientLatency      (const netlib::ISessionPtr& spGameSession, const ServerPacket::SetClientLatencyReq&       msg);
 
-    // 게임서버가 보낸 클라 전달용 패킷(sidecar 에 수신자 userId 목록)을 대상 유저(들)에게 전달한다.
+    // 게임서버가 보낸 클라 전달용 패킷(sidecar 에 수신자 accountId 목록)을 대상 유저(들)에게 전달한다.
     void forwardClientPacket(const netlib::PacketPtr& spPacket);
 
     // ── 로그인서버 패킷 핸들러 ───────────────────────────────────────────
@@ -68,29 +68,29 @@ private:
     static InternalSessionMeta* getInternalSessionMeta(const netlib::ISessionPtr& spSession);
 
     // 로그인서버로부터 사전 전달받은 인증토큰 저장
-    void storeAuthToken(int64 userId, uint64 authToken, int64 expireTimeMs);
+    void storeAuthToken(int64 accountId, uint64 authToken, int64 expireTimeMs);
     // 토큰 검증. 성공 시 true 반환하고 내부 맵에서 제거
-    bool consumeAuthToken(int64 userId, uint64 authToken);
+    bool consumeAuthToken(int64 accountId, uint64 authToken);
     // 만료된 토큰 정리
     void cleanupExpiredTokens();
 
-    void upsertPrevGameServer(int64 userId, int32 gameServerId);
+    void upsertPrevGameServer(int64 accountId, int32 gameServerId);
     void cleanupExpiredPrevGameServer();
 
     // 클라가 연결될 게임서버 선택 (로드밸런싱)
     // 이전 접속 게임서버 정보가 있으면 우선 선택, 없으면 유저 수가 적은 서버 선택
-    std::optional<ServerInfo> selectGameServer(int64 userId) const;
+    std::optional<ServerInfo> selectGameServer(int64 accountId) const;
 
     // 게임서버로 서버간 패킷 전달
     void sendToGameServer(int32 gameServerId, const netlib::PacketPtr& spPacket);
 
     // 유저에게 강제 종료 알림 전송 후 Disconnect
-    void forceDisconnectUser(int64 userId, const std::string& reason);
+    void forceDisconnectUser(int64 accountId, const std::string& reason);
 
 private:
-    SharedThreadSafeUnorderedMap<int64, AuthTokenEntry>      m_safeAuthTokens;       // key=userId
-    ShardedThreadSafeUnorderedMap<int64, GatewayUserPtr>     m_safeUsers;             // key=userId
-    SharedThreadSafeUnorderedMap<int64, PrevGameServerEntry> m_safePrevGameServer;    // key=userId
+    SharedThreadSafeUnorderedMap<int64, AuthTokenEntry>      m_safeAuthTokens;       // key=accountId
+    ShardedThreadSafeUnorderedMap<int64, GatewayUserPtr>     m_safeUsers;             // key=accountId
+    SharedThreadSafeUnorderedMap<int64, PrevGameServerEntry> m_safePrevGameServer;    // key=accountId
 
     static constexpr int64 k_prevGameServerTtlMs = 5 * 60 * 1000;   // 5분
 
