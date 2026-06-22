@@ -25,20 +25,20 @@ namespace GamePacket {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Ch9HYW1lUGFja2V0L3Nlc3Npb25fcGFja2V0LnByb3RvEgpHYW1lUGFja2V0",
-            "IjUKDkdhdGV3YXlBdXRoUmVxEg8KB3VzZXJfaWQYASABKAMSEgoKYXV0aF90",
-            "b2tlbhgCIAEoBCIzCgxHYW1lRW50ZXJOdGYSEAoIc3RhZ2VfaWQYASABKAMS",
-            "EQoJc3RhZ2Vfa2V5GAIgASgFIg8KDUdhbWVMb2dvdXRSZXEiOgoSRm9yY2VE",
-            "aXNjb25uZWN0TnRmEhMKC3JlYXNvbl9jb2RlGAEgASgFEg8KB21lc3NhZ2UY",
-            "AiABKAkq4AEKFUZvcmNlRGlzY29ubmVjdFJlYXNvbhIgChxGT1JDRV9ESVND",
-            "T05ORUNUX1JFQVNPTl9OT05FEAASKwonRk9SQ0VfRElTQ09OTkVDVF9SRUFT",
-            "T05fRFVQTElDQVRFX0xPR0lOEAESKwonRk9SQ0VfRElTQ09OTkVDVF9SRUFT",
-            "T05fU0VSVkVSX1NIVVRET1dOEAISJwojRk9SQ0VfRElTQ09OTkVDVF9SRUFT",
-            "T05fQVVUSF9GQUlMRUQQAxIiCh5GT1JDRV9ESVNDT05ORUNUX1JFQVNPTl9L",
-            "SUNLRUQQBGIGcHJvdG8z"));
+            "IjgKDkdhdGV3YXlBdXRoUmVxEhIKCmFjY291bnRfaWQYASABKAMSEgoKYXV0",
+            "aF90b2tlbhgCIAEoBCIzCgxHYW1lRW50ZXJOdGYSEAoIc3RhZ2VfaWQYASAB",
+            "KAMSEQoJc3RhZ2Vfa2V5GAIgASgFIg8KDUdhbWVMb2dvdXRSZXEiOgoSRm9y",
+            "Y2VEaXNjb25uZWN0TnRmEhMKC3JlYXNvbl9jb2RlGAEgASgFEg8KB21lc3Nh",
+            "Z2UYAiABKAkq4AEKFUZvcmNlRGlzY29ubmVjdFJlYXNvbhIgChxGT1JDRV9E",
+            "SVNDT05ORUNUX1JFQVNPTl9OT05FEAASKwonRk9SQ0VfRElTQ09OTkVDVF9S",
+            "RUFTT05fRFVQTElDQVRFX0xPR0lOEAESKwonRk9SQ0VfRElTQ09OTkVDVF9S",
+            "RUFTT05fU0VSVkVSX1NIVVRET1dOEAISJwojRk9SQ0VfRElTQ09OTkVDVF9S",
+            "RUFTT05fQVVUSF9GQUlMRUQQAxIiCh5GT1JDRV9ESVNDT05ORUNUX1JFQVNP",
+            "Tl9LSUNLRUQQBGIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::GamePacket.ForceDisconnectReason), }, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.GatewayAuthReq), global::GamePacket.GatewayAuthReq.Parser, new[]{ "UserId", "AuthToken" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.GatewayAuthReq), global::GamePacket.GatewayAuthReq.Parser, new[]{ "AccountId", "AuthToken" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.GameEnterNtf), global::GamePacket.GameEnterNtf.Parser, new[]{ "StageId", "StageKey" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.GameLogoutReq), global::GamePacket.GameLogoutReq.Parser, null, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ForceDisconnectNtf), global::GamePacket.ForceDisconnectNtf.Parser, new[]{ "ReasonCode", "Message" }, null, null, null, null)
@@ -76,7 +76,7 @@ namespace GamePacket {
   #region Messages
   /// <summary>
   /// 게이트웨이 인증 요청 (클라 -> 게이트웨이)
-  /// 로그인서버로부터 받은 userId와 authToken을 게이트웨이에 전달하여 인증
+  /// 로그인서버로부터 받은 accountId와 authToken을 게이트웨이에 전달하여 인증
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class GatewayAuthReq : pb::IMessage<GatewayAuthReq>
@@ -113,7 +113,7 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public GatewayAuthReq(GatewayAuthReq other) : this() {
-      userId_ = other.userId_;
+      accountId_ = other.accountId_;
       authToken_ = other.authToken_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -124,15 +124,15 @@ namespace GamePacket {
       return new GatewayAuthReq(this);
     }
 
-    /// <summary>Field number for the "user_id" field.</summary>
-    public const int UserIdFieldNumber = 1;
-    private long userId_;
+    /// <summary>Field number for the "account_id" field.</summary>
+    public const int AccountIdFieldNumber = 1;
+    private long accountId_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long UserId {
-      get { return userId_; }
+    public long AccountId {
+      get { return accountId_; }
       set {
-        userId_ = value;
+        accountId_ = value;
       }
     }
 
@@ -163,7 +163,7 @@ namespace GamePacket {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (UserId != other.UserId) return false;
+      if (AccountId != other.AccountId) return false;
       if (AuthToken != other.AuthToken) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -172,7 +172,7 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
-      if (UserId != 0L) hash ^= UserId.GetHashCode();
+      if (AccountId != 0L) hash ^= AccountId.GetHashCode();
       if (AuthToken != 0UL) hash ^= AuthToken.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -192,9 +192,9 @@ namespace GamePacket {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (UserId != 0L) {
+      if (AccountId != 0L) {
         output.WriteRawTag(8);
-        output.WriteInt64(UserId);
+        output.WriteInt64(AccountId);
       }
       if (AuthToken != 0UL) {
         output.WriteRawTag(16);
@@ -210,9 +210,9 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (UserId != 0L) {
+      if (AccountId != 0L) {
         output.WriteRawTag(8);
-        output.WriteInt64(UserId);
+        output.WriteInt64(AccountId);
       }
       if (AuthToken != 0UL) {
         output.WriteRawTag(16);
@@ -228,8 +228,8 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
-      if (UserId != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(UserId);
+      if (AccountId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(AccountId);
       }
       if (AuthToken != 0UL) {
         size += 1 + pb::CodedOutputStream.ComputeUInt64Size(AuthToken);
@@ -246,8 +246,8 @@ namespace GamePacket {
       if (other == null) {
         return;
       }
-      if (other.UserId != 0L) {
-        UserId = other.UserId;
+      if (other.AccountId != 0L) {
+        AccountId = other.AccountId;
       }
       if (other.AuthToken != 0UL) {
         AuthToken = other.AuthToken;
@@ -272,7 +272,7 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            UserId = input.ReadInt64();
+            AccountId = input.ReadInt64();
             break;
           }
           case 16: {
@@ -299,7 +299,7 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 8: {
-            UserId = input.ReadInt64();
+            AccountId = input.ReadInt64();
             break;
           }
           case 16: {

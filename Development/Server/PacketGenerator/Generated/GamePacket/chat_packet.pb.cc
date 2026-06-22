@@ -62,7 +62,7 @@ inline constexpr ChatRecvNtf::Impl_::Impl_(
         message_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        sender_user_id_{::int64_t{0}} {}
+        sender_account_id_{::int64_t{0}} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR ChatRecvNtf::ChatRecvNtf(::_pbi::ConstantInitialized)
@@ -99,7 +99,7 @@ const ::uint32_t
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::ChatRecvNtf, _impl_._has_bits_),
         6, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::GamePacket::ChatRecvNtf, _impl_.sender_user_id_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ChatRecvNtf, _impl_.sender_account_id_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::ChatRecvNtf, _impl_.sender_name_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::ChatRecvNtf, _impl_.message_),
         2,
@@ -119,15 +119,16 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_GamePacket_2fchat_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\034GamePacket/chat_packet.proto\022\nGamePack"
-    "et\"\036\n\013ChatSendReq\022\017\n\007message\030\001 \001(\t\"K\n\013Ch"
-    "atRecvNtf\022\026\n\016sender_user_id\030\001 \001(\003\022\023\n\013sen"
-    "der_name\030\002 \001(\t\022\017\n\007message\030\003 \001(\tb\006proto3"
+    "et\"\036\n\013ChatSendReq\022\017\n\007message\030\001 \001(\t\"N\n\013Ch"
+    "atRecvNtf\022\031\n\021sender_account_id\030\001 \001(\003\022\023\n\013"
+    "sender_name\030\002 \001(\t\022\017\n\007message\030\003 \001(\tb\006prot"
+    "o3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fchat_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fchat_5fpacket_2eproto = {
     false,
     false,
-    159,
+    162,
     descriptor_table_protodef_GamePacket_2fchat_5fpacket_2eproto,
     "GamePacket/chat_packet.proto",
     &descriptor_table_GamePacket_2fchat_5fpacket_2eproto_once,
@@ -457,7 +458,7 @@ ChatRecvNtf::ChatRecvNtf(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  _impl_.sender_user_id_ = from._impl_.sender_user_id_;
+  _impl_.sender_account_id_ = from._impl_.sender_account_id_;
 
   // @@protoc_insertion_point(copy_constructor:GamePacket.ChatRecvNtf)
 }
@@ -470,7 +471,7 @@ PROTOBUF_NDEBUG_INLINE ChatRecvNtf::Impl_::Impl_(
 
 inline void ChatRecvNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.sender_user_id_ = {};
+  _impl_.sender_account_id_ = {};
 }
 ChatRecvNtf::~ChatRecvNtf() {
   // @@protoc_insertion_point(destructor:GamePacket.ChatRecvNtf)
@@ -551,10 +552,10 @@ ChatRecvNtf::_table_ = {
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // int64 sender_user_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(ChatRecvNtf, _impl_.sender_user_id_), 2>(),
+    // int64 sender_account_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(ChatRecvNtf, _impl_.sender_account_id_), 2>(),
      {8, 2, 0,
-      PROTOBUF_FIELD_OFFSET(ChatRecvNtf, _impl_.sender_user_id_)}},
+      PROTOBUF_FIELD_OFFSET(ChatRecvNtf, _impl_.sender_account_id_)}},
     // string sender_name = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 0, 0,
@@ -566,8 +567,8 @@ ChatRecvNtf::_table_ = {
   }}, {{
     65535, 65535
   }}, {{
-    // int64 sender_user_id = 1;
-    {PROTOBUF_FIELD_OFFSET(ChatRecvNtf, _impl_.sender_user_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 sender_account_id = 1;
+    {PROTOBUF_FIELD_OFFSET(ChatRecvNtf, _impl_.sender_account_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // string sender_name = 2;
     {PROTOBUF_FIELD_OFFSET(ChatRecvNtf, _impl_.sender_name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // string message = 3;
@@ -597,7 +598,7 @@ PROTOBUF_NOINLINE void ChatRecvNtf::Clear() {
       _impl_.message_.ClearNonDefaultToEmpty();
     }
   }
-  _impl_.sender_user_id_ = ::int64_t{0};
+  _impl_.sender_account_id_ = ::int64_t{0};
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -621,12 +622,12 @@ PROTOBUF_NOINLINE void ChatRecvNtf::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 sender_user_id = 1;
+  // int64 sender_account_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-    if (this_._internal_sender_user_id() != 0) {
+    if (this_._internal_sender_account_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_sender_user_id(), target);
+              stream, this_._internal_sender_account_id(), target);
     }
   }
 
@@ -690,11 +691,11 @@ PROTOBUF_NOINLINE void ChatRecvNtf::Clear() {
                                         this_._internal_message());
       }
     }
-    // int64 sender_user_id = 1;
+    // int64 sender_account_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (this_._internal_sender_user_id() != 0) {
+      if (this_._internal_sender_account_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_sender_user_id());
+            this_._internal_sender_account_id());
       }
     }
   }
@@ -736,8 +737,8 @@ void ChatRecvNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (from._internal_sender_user_id() != 0) {
-        _this->_impl_.sender_user_id_ = from._impl_.sender_user_id_;
+      if (from._internal_sender_account_id() != 0) {
+        _this->_impl_.sender_account_id_ = from._impl_.sender_account_id_;
       }
     }
   }
@@ -762,7 +763,7 @@ void ChatRecvNtf::InternalSwap(ChatRecvNtf* PROTOBUF_RESTRICT PROTOBUF_NONNULL o
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.sender_name_, &other->_impl_.sender_name_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, &other->_impl_.message_, arena);
-  swap(_impl_.sender_user_id_, other->_impl_.sender_user_id_);
+  swap(_impl_.sender_account_id_, other->_impl_.sender_account_id_);
 }
 
 ::google::protobuf::Metadata ChatRecvNtf::GetMetadata() const {

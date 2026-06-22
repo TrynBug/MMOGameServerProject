@@ -27,27 +27,27 @@ namespace GamePacket {
             "CilHYW1lUGFja2V0L29iamVjdF92aXNpYmlsaXR5X3BhY2tldC5wcm90bxIK",
             "R2FtZVBhY2tldCJRChBCdWZmU25hcHNob3RJbmZvEhAKCGJ1ZmZfa2V5GAEg",
             "ASgFEhMKC3N0YWNrX2NvdW50GAIgASgFEhYKDnJlbWFpbl90aW1lX21zGAMg",
-            "ASgFIooCChJDaGFyYWN0ZXJTcGF3bkluZm8SEQoJb2JqZWN0X2lkGAEgASgD",
-            "EhUKDW93bmVyX3VzZXJfaWQYAiABKAMSDAoEbmFtZRgDIAEoCRIOCgZqb2Jf",
-            "aWQYBCABKAUSDQoFbGV2ZWwYBSABKAUSCgoCaHAYBiABKAESDgoGbWF4X2hw",
-            "GAcgASgBEgoKAm1wGAggASgBEg4KBm1heF9tcBgJIAEoARINCgVwb3NfeBgK",
-            "IAEoAhINCgVwb3NfeRgLIAEoAhILCgN5YXcYDCABKAISDQoFcG9zX3oYDSAB",
-            "KAISKwoFYnVmZnMYDiADKAsyHC5HYW1lUGFja2V0LkJ1ZmZTbmFwc2hvdElu",
-            "Zm8i0gEKEE1vbnN0ZXJTcGF3bkluZm8SEQoJb2JqZWN0X2lkGAEgASgDEhMK",
-            "C21vbnN0ZXJfa2V5GAIgASgFEg0KBXBvc194GAMgASgCEg0KBXBvc195GAQg",
-            "ASgCEgsKA3lhdxgFIAEoAhINCgVwb3NfehgGIAEoAhIrCgVidWZmcxgHIAMo",
-            "CzIcLkdhbWVQYWNrZXQuQnVmZlNuYXBzaG90SW5mbxIPCgdpc19kZWFkGAgg",
-            "ASgIEg4KBmN1cl9ocBgJIAEoARIOCgZtYXhfaHAYCiABKAEimgEKE09iamVj",
-            "dFZpc2liaWxpdHlOdGYSOAoQY2hhcmFjdGVyX3NwYXducxgBIAMoCzIeLkdh",
-            "bWVQYWNrZXQuQ2hhcmFjdGVyU3Bhd25JbmZvEjQKDm1vbnN0ZXJfc3Bhd25z",
-            "GAIgAygLMhwuR2FtZVBhY2tldC5Nb25zdGVyU3Bhd25JbmZvEhMKC2Rlc3Bh",
-            "d25faWRzGAogAygDIj0KDk9iamVjdERlYXRoTnRmEhEKCW9iamVjdF9pZBgB",
-            "IAEoAxIYChBraWxsZXJfb2JqZWN0X2lkGAIgASgDYgZwcm90bzM="));
+            "ASgFIo0CChJDaGFyYWN0ZXJTcGF3bkluZm8SEQoJb2JqZWN0X2lkGAEgASgD",
+            "EhgKEG93bmVyX2FjY291bnRfaWQYAiABKAMSDAoEbmFtZRgDIAEoCRIOCgZq",
+            "b2JfaWQYBCABKAUSDQoFbGV2ZWwYBSABKAUSCgoCaHAYBiABKAESDgoGbWF4",
+            "X2hwGAcgASgBEgoKAm1wGAggASgBEg4KBm1heF9tcBgJIAEoARINCgVwb3Nf",
+            "eBgKIAEoAhINCgVwb3NfeRgLIAEoAhILCgN5YXcYDCABKAISDQoFcG9zX3oY",
+            "DSABKAISKwoFYnVmZnMYDiADKAsyHC5HYW1lUGFja2V0LkJ1ZmZTbmFwc2hv",
+            "dEluZm8i0gEKEE1vbnN0ZXJTcGF3bkluZm8SEQoJb2JqZWN0X2lkGAEgASgD",
+            "EhMKC21vbnN0ZXJfa2V5GAIgASgFEg0KBXBvc194GAMgASgCEg0KBXBvc195",
+            "GAQgASgCEgsKA3lhdxgFIAEoAhINCgVwb3NfehgGIAEoAhIrCgVidWZmcxgH",
+            "IAMoCzIcLkdhbWVQYWNrZXQuQnVmZlNuYXBzaG90SW5mbxIPCgdpc19kZWFk",
+            "GAggASgIEg4KBmN1cl9ocBgJIAEoARIOCgZtYXhfaHAYCiABKAEimgEKE09i",
+            "amVjdFZpc2liaWxpdHlOdGYSOAoQY2hhcmFjdGVyX3NwYXducxgBIAMoCzIe",
+            "LkdhbWVQYWNrZXQuQ2hhcmFjdGVyU3Bhd25JbmZvEjQKDm1vbnN0ZXJfc3Bh",
+            "d25zGAIgAygLMhwuR2FtZVBhY2tldC5Nb25zdGVyU3Bhd25JbmZvEhMKC2Rl",
+            "c3Bhd25faWRzGAogAygDIj0KDk9iamVjdERlYXRoTnRmEhEKCW9iamVjdF9p",
+            "ZBgBIAEoAxIYChBraWxsZXJfb2JqZWN0X2lkGAIgASgDYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.BuffSnapshotInfo), global::GamePacket.BuffSnapshotInfo.Parser, new[]{ "BuffKey", "StackCount", "RemainTimeMs" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSpawnInfo), global::GamePacket.CharacterSpawnInfo.Parser, new[]{ "ObjectId", "OwnerUserId", "Name", "JobId", "Level", "Hp", "MaxHp", "Mp", "MaxMp", "PosX", "PosY", "Yaw", "PosZ", "Buffs" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSpawnInfo), global::GamePacket.CharacterSpawnInfo.Parser, new[]{ "ObjectId", "OwnerAccountId", "Name", "JobId", "Level", "Hp", "MaxHp", "Mp", "MaxMp", "PosX", "PosY", "Yaw", "PosZ", "Buffs" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.MonsterSpawnInfo), global::GamePacket.MonsterSpawnInfo.Parser, new[]{ "ObjectId", "MonsterKey", "PosX", "PosY", "Yaw", "PosZ", "Buffs", "IsDead", "CurHp", "MaxHp" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ObjectVisibilityNtf), global::GamePacket.ObjectVisibilityNtf.Parser, new[]{ "CharacterSpawns", "MonsterSpawns", "DespawnIds" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ObjectDeathNtf), global::GamePacket.ObjectDeathNtf.Parser, new[]{ "ObjectId", "KillerObjectId" }, null, null, null, null)
@@ -379,7 +379,7 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public CharacterSpawnInfo(CharacterSpawnInfo other) : this() {
       objectId_ = other.objectId_;
-      ownerUserId_ = other.ownerUserId_;
+      ownerAccountId_ = other.ownerAccountId_;
       name_ = other.name_;
       jobId_ = other.jobId_;
       level_ = other.level_;
@@ -416,15 +416,15 @@ namespace GamePacket {
       }
     }
 
-    /// <summary>Field number for the "owner_user_id" field.</summary>
-    public const int OwnerUserIdFieldNumber = 2;
-    private long ownerUserId_;
+    /// <summary>Field number for the "owner_account_id" field.</summary>
+    public const int OwnerAccountIdFieldNumber = 2;
+    private long ownerAccountId_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long OwnerUserId {
-      get { return ownerUserId_; }
+    public long OwnerAccountId {
+      get { return ownerAccountId_; }
       set {
-        ownerUserId_ = value;
+        ownerAccountId_ = value;
       }
     }
 
@@ -611,7 +611,7 @@ namespace GamePacket {
         return true;
       }
       if (ObjectId != other.ObjectId) return false;
-      if (OwnerUserId != other.OwnerUserId) return false;
+      if (OwnerAccountId != other.OwnerAccountId) return false;
       if (Name != other.Name) return false;
       if (JobId != other.JobId) return false;
       if (Level != other.Level) return false;
@@ -632,7 +632,7 @@ namespace GamePacket {
     public override int GetHashCode() {
       int hash = 1;
       if (ObjectId != 0L) hash ^= ObjectId.GetHashCode();
-      if (OwnerUserId != 0L) hash ^= OwnerUserId.GetHashCode();
+      if (OwnerAccountId != 0L) hash ^= OwnerAccountId.GetHashCode();
       if (Name.Length != 0) hash ^= Name.GetHashCode();
       if (JobId != 0) hash ^= JobId.GetHashCode();
       if (Level != 0) hash ^= Level.GetHashCode();
@@ -667,9 +667,9 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(ObjectId);
       }
-      if (OwnerUserId != 0L) {
+      if (OwnerAccountId != 0L) {
         output.WriteRawTag(16);
-        output.WriteInt64(OwnerUserId);
+        output.WriteInt64(OwnerAccountId);
       }
       if (Name.Length != 0) {
         output.WriteRawTag(26);
@@ -730,9 +730,9 @@ namespace GamePacket {
         output.WriteRawTag(8);
         output.WriteInt64(ObjectId);
       }
-      if (OwnerUserId != 0L) {
+      if (OwnerAccountId != 0L) {
         output.WriteRawTag(16);
-        output.WriteInt64(OwnerUserId);
+        output.WriteInt64(OwnerAccountId);
       }
       if (Name.Length != 0) {
         output.WriteRawTag(26);
@@ -792,8 +792,8 @@ namespace GamePacket {
       if (ObjectId != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(ObjectId);
       }
-      if (OwnerUserId != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(OwnerUserId);
+      if (OwnerAccountId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(OwnerAccountId);
       }
       if (Name.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
@@ -844,8 +844,8 @@ namespace GamePacket {
       if (other.ObjectId != 0L) {
         ObjectId = other.ObjectId;
       }
-      if (other.OwnerUserId != 0L) {
-        OwnerUserId = other.OwnerUserId;
+      if (other.OwnerAccountId != 0L) {
+        OwnerAccountId = other.OwnerAccountId;
       }
       if (other.Name.Length != 0) {
         Name = other.Name;
@@ -905,7 +905,7 @@ namespace GamePacket {
             break;
           }
           case 16: {
-            OwnerUserId = input.ReadInt64();
+            OwnerAccountId = input.ReadInt64();
             break;
           }
           case 26: {
@@ -980,7 +980,7 @@ namespace GamePacket {
             break;
           }
           case 16: {
-            OwnerUserId = input.ReadInt64();
+            OwnerAccountId = input.ReadInt64();
             break;
           }
           case 26: {

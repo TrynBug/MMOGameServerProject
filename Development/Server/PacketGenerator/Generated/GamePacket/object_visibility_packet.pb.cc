@@ -121,7 +121,7 @@ inline constexpr CharacterSpawnInfo::Impl_::Impl_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
         object_id_{::int64_t{0}},
-        owner_user_id_{::int64_t{0}},
+        owner_account_id_{::int64_t{0}},
         job_id_{0},
         level_{0},
         hp_{0},
@@ -201,7 +201,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_._has_bits_),
         17, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.object_id_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.owner_user_id_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.owner_account_id_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.name_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.job_id_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.level_),
@@ -289,31 +289,31 @@ const char descriptor_table_protodef_GamePacket_2fobject_5fvisibility_5fpacket_2
     "\n)GamePacket/object_visibility_packet.pr"
     "oto\022\nGamePacket\"Q\n\020BuffSnapshotInfo\022\020\n\010b"
     "uff_key\030\001 \001(\005\022\023\n\013stack_count\030\002 \001(\005\022\026\n\016re"
-    "main_time_ms\030\003 \001(\005\"\212\002\n\022CharacterSpawnInf"
-    "o\022\021\n\tobject_id\030\001 \001(\003\022\025\n\rowner_user_id\030\002 "
-    "\001(\003\022\014\n\004name\030\003 \001(\t\022\016\n\006job_id\030\004 \001(\005\022\r\n\005lev"
-    "el\030\005 \001(\005\022\n\n\002hp\030\006 \001(\001\022\016\n\006max_hp\030\007 \001(\001\022\n\n\002"
-    "mp\030\010 \001(\001\022\016\n\006max_mp\030\t \001(\001\022\r\n\005pos_x\030\n \001(\002\022"
-    "\r\n\005pos_y\030\013 \001(\002\022\013\n\003yaw\030\014 \001(\002\022\r\n\005pos_z\030\r \001"
-    "(\002\022+\n\005buffs\030\016 \003(\0132\034.GamePacket.BuffSnaps"
-    "hotInfo\"\322\001\n\020MonsterSpawnInfo\022\021\n\tobject_i"
-    "d\030\001 \001(\003\022\023\n\013monster_key\030\002 \001(\005\022\r\n\005pos_x\030\003 "
-    "\001(\002\022\r\n\005pos_y\030\004 \001(\002\022\013\n\003yaw\030\005 \001(\002\022\r\n\005pos_z"
-    "\030\006 \001(\002\022+\n\005buffs\030\007 \003(\0132\034.GamePacket.BuffS"
-    "napshotInfo\022\017\n\007is_dead\030\010 \001(\010\022\016\n\006cur_hp\030\t"
-    " \001(\001\022\016\n\006max_hp\030\n \001(\001\"\232\001\n\023ObjectVisibilit"
-    "yNtf\0228\n\020character_spawns\030\001 \003(\0132\036.GamePac"
-    "ket.CharacterSpawnInfo\0224\n\016monster_spawns"
-    "\030\002 \003(\0132\034.GamePacket.MonsterSpawnInfo\022\023\n\013"
-    "despawn_ids\030\n \003(\003\"=\n\016ObjectDeathNtf\022\021\n\to"
-    "bject_id\030\001 \001(\003\022\030\n\020killer_object_id\030\002 \001(\003"
-    "b\006proto3"
+    "main_time_ms\030\003 \001(\005\"\215\002\n\022CharacterSpawnInf"
+    "o\022\021\n\tobject_id\030\001 \001(\003\022\030\n\020owner_account_id"
+    "\030\002 \001(\003\022\014\n\004name\030\003 \001(\t\022\016\n\006job_id\030\004 \001(\005\022\r\n\005"
+    "level\030\005 \001(\005\022\n\n\002hp\030\006 \001(\001\022\016\n\006max_hp\030\007 \001(\001\022"
+    "\n\n\002mp\030\010 \001(\001\022\016\n\006max_mp\030\t \001(\001\022\r\n\005pos_x\030\n \001"
+    "(\002\022\r\n\005pos_y\030\013 \001(\002\022\013\n\003yaw\030\014 \001(\002\022\r\n\005pos_z\030"
+    "\r \001(\002\022+\n\005buffs\030\016 \003(\0132\034.GamePacket.BuffSn"
+    "apshotInfo\"\322\001\n\020MonsterSpawnInfo\022\021\n\tobjec"
+    "t_id\030\001 \001(\003\022\023\n\013monster_key\030\002 \001(\005\022\r\n\005pos_x"
+    "\030\003 \001(\002\022\r\n\005pos_y\030\004 \001(\002\022\013\n\003yaw\030\005 \001(\002\022\r\n\005po"
+    "s_z\030\006 \001(\002\022+\n\005buffs\030\007 \003(\0132\034.GamePacket.Bu"
+    "ffSnapshotInfo\022\017\n\007is_dead\030\010 \001(\010\022\016\n\006cur_h"
+    "p\030\t \001(\001\022\016\n\006max_hp\030\n \001(\001\"\232\001\n\023ObjectVisibi"
+    "lityNtf\0228\n\020character_spawns\030\001 \003(\0132\036.Game"
+    "Packet.CharacterSpawnInfo\0224\n\016monster_spa"
+    "wns\030\002 \003(\0132\034.GamePacket.MonsterSpawnInfo\022"
+    "\023\n\013despawn_ids\030\n \003(\003\"=\n\016ObjectDeathNtf\022\021"
+    "\n\tobject_id\030\001 \001(\003\022\030\n\020killer_object_id\030\002 "
+    "\001(\003b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto = {
     false,
     false,
-    848,
+    851,
     descriptor_table_protodef_GamePacket_2fobject_5fvisibility_5fpacket_2eproto,
     "GamePacket/object_visibility_packet.proto",
     &descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto_once,
@@ -809,10 +809,10 @@ CharacterSpawnInfo::_table_ = {
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(CharacterSpawnInfo, _impl_.object_id_), 2>(),
      {8, 2, 0,
       PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.object_id_)}},
-    // int64 owner_user_id = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(CharacterSpawnInfo, _impl_.owner_user_id_), 3>(),
+    // int64 owner_account_id = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(CharacterSpawnInfo, _impl_.owner_account_id_), 3>(),
      {16, 3, 0,
-      PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.owner_user_id_)}},
+      PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.owner_account_id_)}},
     // string name = 3;
     {::_pbi::TcParser::FastUS1,
      {26, 1, 0,
@@ -867,8 +867,8 @@ CharacterSpawnInfo::_table_ = {
   }}, {{
     // int64 object_id = 1;
     {PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.object_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
-    // int64 owner_user_id = 2;
-    {PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.owner_user_id_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 owner_account_id = 2;
+    {PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.owner_account_id_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // string name = 3;
     {PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.name_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // int32 job_id = 4;
@@ -961,12 +961,12 @@ PROTOBUF_NOINLINE void CharacterSpawnInfo::Clear() {
     }
   }
 
-  // int64 owner_user_id = 2;
+  // int64 owner_account_id = 2;
   if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-    if (this_._internal_owner_user_id() != 0) {
+    if (this_._internal_owner_account_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<2>(
-              stream, this_._internal_owner_user_id(), target);
+              stream, this_._internal_owner_account_id(), target);
     }
   }
 
@@ -1130,11 +1130,11 @@ PROTOBUF_NOINLINE void CharacterSpawnInfo::Clear() {
             this_._internal_object_id());
       }
     }
-    // int64 owner_user_id = 2;
+    // int64 owner_account_id = 2;
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (this_._internal_owner_user_id() != 0) {
+      if (this_._internal_owner_account_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_owner_user_id());
+            this_._internal_owner_account_id());
       }
     }
     // int32 job_id = 4;
@@ -1242,8 +1242,8 @@ void CharacterSpawnInfo::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (from._internal_owner_user_id() != 0) {
-        _this->_impl_.owner_user_id_ = from._impl_.owner_user_id_;
+      if (from._internal_owner_account_id() != 0) {
+        _this->_impl_.owner_account_id_ = from._impl_.owner_account_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000010U)) {

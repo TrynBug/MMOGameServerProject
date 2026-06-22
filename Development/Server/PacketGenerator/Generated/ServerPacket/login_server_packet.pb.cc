@@ -29,7 +29,7 @@ namespace ServerPacket {
 inline constexpr LoginDuplicateNtf::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        user_id_{::int64_t{0}} {}
+        account_id_{::int64_t{0}} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR LoginDuplicateNtf::LoginDuplicateNtf(::_pbi::ConstantInitialized)
@@ -54,7 +54,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 inline constexpr LoginAuthTokenNtf::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        user_id_{::int64_t{0}},
+        account_id_{::int64_t{0}},
         auth_token_{::uint64_t{0u}},
         expire_time_ms_{::int64_t{0}} {}
 
@@ -88,7 +88,7 @@ const ::uint32_t
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::ServerPacket::LoginAuthTokenNtf, _impl_._has_bits_),
         6, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::LoginAuthTokenNtf, _impl_.user_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::LoginAuthTokenNtf, _impl_.account_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::LoginAuthTokenNtf, _impl_.auth_token_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::LoginAuthTokenNtf, _impl_.expire_time_ms_),
         0,
@@ -97,7 +97,7 @@ const ::uint32_t
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::ServerPacket::LoginDuplicateNtf, _impl_._has_bits_),
         4, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::LoginDuplicateNtf, _impl_.user_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::LoginDuplicateNtf, _impl_.account_id_),
         0,
 };
 
@@ -113,16 +113,16 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_ServerPacket_2flogin_5fserver_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n&ServerPacket/login_server_packet.proto"
-    "\022\014ServerPacket\"P\n\021LoginAuthTokenNtf\022\017\n\007u"
-    "ser_id\030\001 \001(\003\022\022\n\nauth_token\030\002 \001(\004\022\026\n\016expi"
-    "re_time_ms\030\003 \001(\003\"$\n\021LoginDuplicateNtf\022\017\n"
-    "\007user_id\030\001 \001(\003b\006proto3"
+    "\022\014ServerPacket\"S\n\021LoginAuthTokenNtf\022\022\n\na"
+    "ccount_id\030\001 \001(\003\022\022\n\nauth_token\030\002 \001(\004\022\026\n\016e"
+    "xpire_time_ms\030\003 \001(\003\"\'\n\021LoginDuplicateNtf"
+    "\022\022\n\naccount_id\030\001 \001(\003b\006proto3"
 };
 static ::absl::once_flag descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto = {
     false,
     false,
-    182,
+    188,
     descriptor_table_protodef_ServerPacket_2flogin_5fserver_5fpacket_2eproto,
     "ServerPacket/login_server_packet.proto",
     &descriptor_table_ServerPacket_2flogin_5fserver_5fpacket_2eproto_once,
@@ -174,10 +174,10 @@ PROTOBUF_NDEBUG_INLINE LoginAuthTokenNtf::Impl_::Impl_(
 inline void LoginAuthTokenNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, user_id_),
+               offsetof(Impl_, account_id_),
            0,
            offsetof(Impl_, expire_time_ms_) -
-               offsetof(Impl_, user_id_) +
+               offsetof(Impl_, account_id_) +
                sizeof(Impl_::expire_time_ms_));
 }
 LoginAuthTokenNtf::~LoginAuthTokenNtf() {
@@ -257,10 +257,10 @@ LoginAuthTokenNtf::_table_ = {
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // int64 user_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(LoginAuthTokenNtf, _impl_.user_id_), 0>(),
+    // int64 account_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(LoginAuthTokenNtf, _impl_.account_id_), 0>(),
      {8, 0, 0,
-      PROTOBUF_FIELD_OFFSET(LoginAuthTokenNtf, _impl_.user_id_)}},
+      PROTOBUF_FIELD_OFFSET(LoginAuthTokenNtf, _impl_.account_id_)}},
     // uint64 auth_token = 2;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(LoginAuthTokenNtf, _impl_.auth_token_), 1>(),
      {16, 1, 0,
@@ -272,8 +272,8 @@ LoginAuthTokenNtf::_table_ = {
   }}, {{
     65535, 65535
   }}, {{
-    // int64 user_id = 1;
-    {PROTOBUF_FIELD_OFFSET(LoginAuthTokenNtf, _impl_.user_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 account_id = 1;
+    {PROTOBUF_FIELD_OFFSET(LoginAuthTokenNtf, _impl_.account_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // uint64 auth_token = 2;
     {PROTOBUF_FIELD_OFFSET(LoginAuthTokenNtf, _impl_.auth_token_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUInt64)},
     // int64 expire_time_ms = 3;
@@ -292,9 +292,9 @@ PROTOBUF_NOINLINE void LoginAuthTokenNtf::Clear() {
 
   cached_has_bits = _impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
-    ::memset(&_impl_.user_id_, 0, static_cast<::size_t>(
+    ::memset(&_impl_.account_id_, 0, static_cast<::size_t>(
         reinterpret_cast<char*>(&_impl_.expire_time_ms_) -
-        reinterpret_cast<char*>(&_impl_.user_id_)) + sizeof(_impl_.expire_time_ms_));
+        reinterpret_cast<char*>(&_impl_.account_id_)) + sizeof(_impl_.expire_time_ms_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -319,12 +319,12 @@ PROTOBUF_NOINLINE void LoginAuthTokenNtf::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 user_id = 1;
+  // int64 account_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (this_._internal_user_id() != 0) {
+    if (this_._internal_account_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_user_id(), target);
+              stream, this_._internal_account_id(), target);
     }
   }
 
@@ -372,11 +372,11 @@ PROTOBUF_NOINLINE void LoginAuthTokenNtf::Clear() {
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
-    // int64 user_id = 1;
+    // int64 account_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (this_._internal_user_id() != 0) {
+      if (this_._internal_account_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_user_id());
+            this_._internal_account_id());
       }
     }
     // uint64 auth_token = 2;
@@ -414,8 +414,8 @@ void LoginAuthTokenNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
   cached_has_bits = from._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (from._internal_user_id() != 0) {
-        _this->_impl_.user_id_ = from._impl_.user_id_;
+      if (from._internal_account_id() != 0) {
+        _this->_impl_.account_id_ = from._impl_.account_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
@@ -449,9 +449,9 @@ void LoginAuthTokenNtf::InternalSwap(LoginAuthTokenNtf* PROTOBUF_RESTRICT PROTOB
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(LoginAuthTokenNtf, _impl_.expire_time_ms_)
       + sizeof(LoginAuthTokenNtf::_impl_.expire_time_ms_)
-      - PROTOBUF_FIELD_OFFSET(LoginAuthTokenNtf, _impl_.user_id_)>(
-          reinterpret_cast<char*>(&_impl_.user_id_),
-          reinterpret_cast<char*>(&other->_impl_.user_id_));
+      - PROTOBUF_FIELD_OFFSET(LoginAuthTokenNtf, _impl_.account_id_)>(
+          reinterpret_cast<char*>(&_impl_.account_id_),
+          reinterpret_cast<char*>(&other->_impl_.account_id_));
 }
 
 ::google::protobuf::Metadata LoginAuthTokenNtf::GetMetadata() const {
@@ -494,7 +494,7 @@ PROTOBUF_NDEBUG_INLINE LoginDuplicateNtf::Impl_::Impl_(
 
 inline void LoginDuplicateNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.user_id_ = {};
+  _impl_.account_id_ = {};
 }
 LoginDuplicateNtf::~LoginDuplicateNtf() {
   // @@protoc_insertion_point(destructor:ServerPacket.LoginDuplicateNtf)
@@ -572,15 +572,15 @@ LoginDuplicateNtf::_table_ = {
     ::_pbi::TcParser::GetTable<::ServerPacket::LoginDuplicateNtf>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // int64 user_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(LoginDuplicateNtf, _impl_.user_id_), 0>(),
+    // int64 account_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(LoginDuplicateNtf, _impl_.account_id_), 0>(),
      {8, 0, 0,
-      PROTOBUF_FIELD_OFFSET(LoginDuplicateNtf, _impl_.user_id_)}},
+      PROTOBUF_FIELD_OFFSET(LoginDuplicateNtf, _impl_.account_id_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // int64 user_id = 1;
-    {PROTOBUF_FIELD_OFFSET(LoginDuplicateNtf, _impl_.user_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 account_id = 1;
+    {PROTOBUF_FIELD_OFFSET(LoginDuplicateNtf, _impl_.account_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
   }},
   // no aux_entries
   {{
@@ -593,7 +593,7 @@ PROTOBUF_NOINLINE void LoginDuplicateNtf::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.user_id_ = ::int64_t{0};
+  _impl_.account_id_ = ::int64_t{0};
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -617,12 +617,12 @@ PROTOBUF_NOINLINE void LoginDuplicateNtf::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 user_id = 1;
+  // int64 account_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (this_._internal_user_id() != 0) {
+    if (this_._internal_account_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_user_id(), target);
+              stream, this_._internal_account_id(), target);
     }
   }
 
@@ -650,12 +650,12 @@ PROTOBUF_NOINLINE void LoginDuplicateNtf::Clear() {
   (void)cached_has_bits;
 
    {
-    // int64 user_id = 1;
+    // int64 account_id = 1;
     cached_has_bits = this_._impl_._has_bits_[0];
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (this_._internal_user_id() != 0) {
+      if (this_._internal_account_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_user_id());
+            this_._internal_account_id());
       }
     }
   }
@@ -678,8 +678,8 @@ void LoginDuplicateNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
 
   cached_has_bits = from._impl_._has_bits_[0];
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (from._internal_user_id() != 0) {
-      _this->_impl_.user_id_ = from._impl_.user_id_;
+    if (from._internal_account_id() != 0) {
+      _this->_impl_.account_id_ = from._impl_.account_id_;
     }
   }
   _this->_impl_._has_bits_[0] |= cached_has_bits;
@@ -699,7 +699,7 @@ void LoginDuplicateNtf::InternalSwap(LoginDuplicateNtf* PROTOBUF_RESTRICT PROTOB
   using ::std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  swap(_impl_.user_id_, other->_impl_.user_id_);
+  swap(_impl_.account_id_, other->_impl_.account_id_);
 }
 
 ::google::protobuf::Metadata LoginDuplicateNtf::GetMetadata() const {

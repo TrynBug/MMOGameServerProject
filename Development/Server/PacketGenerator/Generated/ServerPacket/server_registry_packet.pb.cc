@@ -32,7 +32,7 @@ inline constexpr UserEnterNtf::Impl_::Impl_(
         ip_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        user_id_{::int64_t{0}},
+        account_id_{::int64_t{0}},
         gateway_id_{0} {}
 
 template <typename>
@@ -58,7 +58,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 inline constexpr UserDisconnectNtf::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        user_id_{::int64_t{0}} {}
+        account_id_{::int64_t{0}} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR UserDisconnectNtf::UserDisconnectNtf(::_pbi::ConstantInitialized)
@@ -352,7 +352,7 @@ const ::uint32_t
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserEnterNtf, _impl_._has_bits_),
         6, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::UserEnterNtf, _impl_.user_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::UserEnterNtf, _impl_.account_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserEnterNtf, _impl_.gateway_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserEnterNtf, _impl_.ip_),
         1,
@@ -361,7 +361,7 @@ const ::uint32_t
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserDisconnectNtf, _impl_._has_bits_),
         4, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::UserDisconnectNtf, _impl_.user_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::UserDisconnectNtf, _impl_.account_id_),
         0,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::ServerPacket::ServerInfoMsg, _impl_._has_bits_),
@@ -467,43 +467,43 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_ServerPacket_2fserver_5fregistry_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n)ServerPacket/server_registry_packet.pr"
-    "oto\022\014ServerPacket\"\?\n\014UserEnterNtf\022\017\n\007use"
-    "r_id\030\001 \001(\003\022\022\n\ngateway_id\030\002 \001(\005\022\n\n\002ip\030\003 \001"
-    "(\t\"$\n\021UserDisconnectNtf\022\017\n\007user_id\030\001 \001(\003"
-    "\"\311\001\n\rServerInfoMsg\022\021\n\tserver_id\030\001 \001(\005\022-\n"
-    "\013server_type\030\002 \001(\0162\030.ServerPacket.Server"
-    "Type\022*\n\006status\030\003 \001(\0162\032.ServerPacket.Serv"
-    "erStatus\022\n\n\002ip\030\004 \001(\t\022\023\n\013client_port\030\005 \001("
-    "\005\022\025\n\rinternal_port\030\006 \001(\005\022\022\n\nuser_count\030\007"
-    " \001(\005\"\217\001\n\023RegistryRegisterReq\022-\n\013server_t"
-    "ype\030\001 \001(\0162\030.ServerPacket.ServerType\022\021\n\ts"
-    "erver_id\030\002 \001(\005\022\n\n\002ip\030\003 \001(\t\022\023\n\013client_por"
-    "t\030\004 \001(\005\022\025\n\rinternal_port\030\005 \001(\005\"J\n\023Regist"
-    "ryRegisterRes\022\017\n\007success\030\001 \001(\010\022\021\n\tserver"
-    "_id\030\002 \001(\005\022\017\n\007message\030\003 \001(\t\"I\n\025RegistrySe"
-    "rverInfoNtf\0220\n\013server_info\030\001 \001(\0132\033.Serve"
-    "rPacket.ServerInfoMsg\"A\n\017RegistryPollReq"
-    "\022.\n\014target_types\030\001 \003(\0162\030.ServerPacket.Se"
-    "rverType\"\?\n\017RegistryPollRes\022,\n\007servers\030\001"
-    " \003(\0132\033.ServerPacket.ServerInfoMsg\",\n\024Reg"
-    "istryHeartbeatReq\022\024\n\014timestamp_ms\030\001 \001(\003\""
-    ",\n\024RegistryHeartbeatRes\022\024\n\014timestamp_ms\030"
-    "\001 \001(\003\"*\n\024RegistryUserCountNtf\022\022\n\nuser_co"
-    "unt\030\001 \001(\005\"\025\n\023RegistryShutdownReq*\233\001\n\nSer"
-    "verType\022\027\n\023SERVER_TYPE_UNKNOWN\020\000\022\030\n\024SERV"
-    "ER_TYPE_REGISTRY\020\001\022\025\n\021SERVER_TYPE_LOGIN\020"
-    "\002\022\027\n\023SERVER_TYPE_GATEWAY\020\003\022\024\n\020SERVER_TYP"
-    "E_GAME\020\004\022\024\n\020SERVER_TYPE_CHAT\020\005*\205\001\n\014Serve"
-    "rStatus\022\031\n\025SERVER_STATUS_UNKNOWN\020\000\022\031\n\025SE"
-    "RVER_STATUS_RUNNING\020\001\022\037\n\033SERVER_STATUS_S"
-    "HUTTING_DOWN\020\002\022\036\n\032SERVER_STATUS_DISCONNE"
-    "CTED\020\003b\006proto3"
+    "oto\022\014ServerPacket\"B\n\014UserEnterNtf\022\022\n\nacc"
+    "ount_id\030\001 \001(\003\022\022\n\ngateway_id\030\002 \001(\005\022\n\n\002ip\030"
+    "\003 \001(\t\"\'\n\021UserDisconnectNtf\022\022\n\naccount_id"
+    "\030\001 \001(\003\"\311\001\n\rServerInfoMsg\022\021\n\tserver_id\030\001 "
+    "\001(\005\022-\n\013server_type\030\002 \001(\0162\030.ServerPacket."
+    "ServerType\022*\n\006status\030\003 \001(\0162\032.ServerPacke"
+    "t.ServerStatus\022\n\n\002ip\030\004 \001(\t\022\023\n\013client_por"
+    "t\030\005 \001(\005\022\025\n\rinternal_port\030\006 \001(\005\022\022\n\nuser_c"
+    "ount\030\007 \001(\005\"\217\001\n\023RegistryRegisterReq\022-\n\013se"
+    "rver_type\030\001 \001(\0162\030.ServerPacket.ServerTyp"
+    "e\022\021\n\tserver_id\030\002 \001(\005\022\n\n\002ip\030\003 \001(\t\022\023\n\013clie"
+    "nt_port\030\004 \001(\005\022\025\n\rinternal_port\030\005 \001(\005\"J\n\023"
+    "RegistryRegisterRes\022\017\n\007success\030\001 \001(\010\022\021\n\t"
+    "server_id\030\002 \001(\005\022\017\n\007message\030\003 \001(\t\"I\n\025Regi"
+    "stryServerInfoNtf\0220\n\013server_info\030\001 \001(\0132\033"
+    ".ServerPacket.ServerInfoMsg\"A\n\017RegistryP"
+    "ollReq\022.\n\014target_types\030\001 \003(\0162\030.ServerPac"
+    "ket.ServerType\"\?\n\017RegistryPollRes\022,\n\007ser"
+    "vers\030\001 \003(\0132\033.ServerPacket.ServerInfoMsg\""
+    ",\n\024RegistryHeartbeatReq\022\024\n\014timestamp_ms\030"
+    "\001 \001(\003\",\n\024RegistryHeartbeatRes\022\024\n\014timesta"
+    "mp_ms\030\001 \001(\003\"*\n\024RegistryUserCountNtf\022\022\n\nu"
+    "ser_count\030\001 \001(\005\"\025\n\023RegistryShutdownReq*\233"
+    "\001\n\nServerType\022\027\n\023SERVER_TYPE_UNKNOWN\020\000\022\030"
+    "\n\024SERVER_TYPE_REGISTRY\020\001\022\025\n\021SERVER_TYPE_"
+    "LOGIN\020\002\022\027\n\023SERVER_TYPE_GATEWAY\020\003\022\024\n\020SERV"
+    "ER_TYPE_GAME\020\004\022\024\n\020SERVER_TYPE_CHAT\020\005*\205\001\n"
+    "\014ServerStatus\022\031\n\025SERVER_STATUS_UNKNOWN\020\000"
+    "\022\031\n\025SERVER_STATUS_RUNNING\020\001\022\037\n\033SERVER_ST"
+    "ATUS_SHUTTING_DOWN\020\002\022\036\n\032SERVER_STATUS_DI"
+    "SCONNECTED\020\003b\006proto3"
 };
 static ::absl::once_flag descriptor_table_ServerPacket_2fserver_5fregistry_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2fserver_5fregistry_5fpacket_2eproto = {
     false,
     false,
-    1254,
+    1260,
     descriptor_table_protodef_ServerPacket_2fserver_5fregistry_5fpacket_2eproto,
     "ServerPacket/server_registry_packet.proto",
     &descriptor_table_ServerPacket_2fserver_5fregistry_5fpacket_2eproto_once,
@@ -570,11 +570,11 @@ UserEnterNtf::UserEnterNtf(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
   ::memcpy(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, user_id_),
+               offsetof(Impl_, account_id_),
            reinterpret_cast<const char*>(&from._impl_) +
-               offsetof(Impl_, user_id_),
+               offsetof(Impl_, account_id_),
            offsetof(Impl_, gateway_id_) -
-               offsetof(Impl_, user_id_) +
+               offsetof(Impl_, account_id_) +
                sizeof(Impl_::gateway_id_));
 
   // @@protoc_insertion_point(copy_constructor:ServerPacket.UserEnterNtf)
@@ -588,10 +588,10 @@ PROTOBUF_NDEBUG_INLINE UserEnterNtf::Impl_::Impl_(
 inline void UserEnterNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, user_id_),
+               offsetof(Impl_, account_id_),
            0,
            offsetof(Impl_, gateway_id_) -
-               offsetof(Impl_, user_id_) +
+               offsetof(Impl_, account_id_) +
                sizeof(Impl_::gateway_id_));
 }
 UserEnterNtf::~UserEnterNtf() {
@@ -672,10 +672,10 @@ UserEnterNtf::_table_ = {
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // int64 user_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(UserEnterNtf, _impl_.user_id_), 1>(),
+    // int64 account_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(UserEnterNtf, _impl_.account_id_), 1>(),
      {8, 1, 0,
-      PROTOBUF_FIELD_OFFSET(UserEnterNtf, _impl_.user_id_)}},
+      PROTOBUF_FIELD_OFFSET(UserEnterNtf, _impl_.account_id_)}},
     // int32 gateway_id = 2;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(UserEnterNtf, _impl_.gateway_id_), 2>(),
      {16, 2, 0,
@@ -687,8 +687,8 @@ UserEnterNtf::_table_ = {
   }}, {{
     65535, 65535
   }}, {{
-    // int64 user_id = 1;
-    {PROTOBUF_FIELD_OFFSET(UserEnterNtf, _impl_.user_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 account_id = 1;
+    {PROTOBUF_FIELD_OFFSET(UserEnterNtf, _impl_.account_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // int32 gateway_id = 2;
     {PROTOBUF_FIELD_OFFSET(UserEnterNtf, _impl_.gateway_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // string ip = 3;
@@ -713,9 +713,9 @@ PROTOBUF_NOINLINE void UserEnterNtf::Clear() {
     _impl_.ip_.ClearNonDefaultToEmpty();
   }
   if (BatchCheckHasBit(cached_has_bits, 0x00000006U)) {
-    ::memset(&_impl_.user_id_, 0, static_cast<::size_t>(
+    ::memset(&_impl_.account_id_, 0, static_cast<::size_t>(
         reinterpret_cast<char*>(&_impl_.gateway_id_) -
-        reinterpret_cast<char*>(&_impl_.user_id_)) + sizeof(_impl_.gateway_id_));
+        reinterpret_cast<char*>(&_impl_.account_id_)) + sizeof(_impl_.gateway_id_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -740,12 +740,12 @@ PROTOBUF_NOINLINE void UserEnterNtf::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 user_id = 1;
+  // int64 account_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-    if (this_._internal_user_id() != 0) {
+    if (this_._internal_account_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_user_id(), target);
+              stream, this_._internal_account_id(), target);
     }
   }
 
@@ -801,11 +801,11 @@ PROTOBUF_NOINLINE void UserEnterNtf::Clear() {
                                         this_._internal_ip());
       }
     }
-    // int64 user_id = 1;
+    // int64 account_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (this_._internal_user_id() != 0) {
+      if (this_._internal_account_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_user_id());
+            this_._internal_account_id());
       }
     }
     // int32 gateway_id = 2;
@@ -845,8 +845,8 @@ void UserEnterNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (from._internal_user_id() != 0) {
-        _this->_impl_.user_id_ = from._impl_.user_id_;
+      if (from._internal_account_id() != 0) {
+        _this->_impl_.account_id_ = from._impl_.account_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
@@ -878,9 +878,9 @@ void UserEnterNtf::InternalSwap(UserEnterNtf* PROTOBUF_RESTRICT PROTOBUF_NONNULL
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(UserEnterNtf, _impl_.gateway_id_)
       + sizeof(UserEnterNtf::_impl_.gateway_id_)
-      - PROTOBUF_FIELD_OFFSET(UserEnterNtf, _impl_.user_id_)>(
-          reinterpret_cast<char*>(&_impl_.user_id_),
-          reinterpret_cast<char*>(&other->_impl_.user_id_));
+      - PROTOBUF_FIELD_OFFSET(UserEnterNtf, _impl_.account_id_)>(
+          reinterpret_cast<char*>(&_impl_.account_id_),
+          reinterpret_cast<char*>(&other->_impl_.account_id_));
 }
 
 ::google::protobuf::Metadata UserEnterNtf::GetMetadata() const {
@@ -923,7 +923,7 @@ PROTOBUF_NDEBUG_INLINE UserDisconnectNtf::Impl_::Impl_(
 
 inline void UserDisconnectNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.user_id_ = {};
+  _impl_.account_id_ = {};
 }
 UserDisconnectNtf::~UserDisconnectNtf() {
   // @@protoc_insertion_point(destructor:ServerPacket.UserDisconnectNtf)
@@ -1001,15 +1001,15 @@ UserDisconnectNtf::_table_ = {
     ::_pbi::TcParser::GetTable<::ServerPacket::UserDisconnectNtf>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // int64 user_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(UserDisconnectNtf, _impl_.user_id_), 0>(),
+    // int64 account_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(UserDisconnectNtf, _impl_.account_id_), 0>(),
      {8, 0, 0,
-      PROTOBUF_FIELD_OFFSET(UserDisconnectNtf, _impl_.user_id_)}},
+      PROTOBUF_FIELD_OFFSET(UserDisconnectNtf, _impl_.account_id_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // int64 user_id = 1;
-    {PROTOBUF_FIELD_OFFSET(UserDisconnectNtf, _impl_.user_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 account_id = 1;
+    {PROTOBUF_FIELD_OFFSET(UserDisconnectNtf, _impl_.account_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
   }},
   // no aux_entries
   {{
@@ -1022,7 +1022,7 @@ PROTOBUF_NOINLINE void UserDisconnectNtf::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.user_id_ = ::int64_t{0};
+  _impl_.account_id_ = ::int64_t{0};
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -1046,12 +1046,12 @@ PROTOBUF_NOINLINE void UserDisconnectNtf::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 user_id = 1;
+  // int64 account_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (this_._internal_user_id() != 0) {
+    if (this_._internal_account_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_user_id(), target);
+              stream, this_._internal_account_id(), target);
     }
   }
 
@@ -1079,12 +1079,12 @@ PROTOBUF_NOINLINE void UserDisconnectNtf::Clear() {
   (void)cached_has_bits;
 
    {
-    // int64 user_id = 1;
+    // int64 account_id = 1;
     cached_has_bits = this_._impl_._has_bits_[0];
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (this_._internal_user_id() != 0) {
+      if (this_._internal_account_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_user_id());
+            this_._internal_account_id());
       }
     }
   }
@@ -1107,8 +1107,8 @@ void UserDisconnectNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
 
   cached_has_bits = from._impl_._has_bits_[0];
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (from._internal_user_id() != 0) {
-      _this->_impl_.user_id_ = from._impl_.user_id_;
+    if (from._internal_account_id() != 0) {
+      _this->_impl_.account_id_ = from._impl_.account_id_;
     }
   }
   _this->_impl_._has_bits_[0] |= cached_has_bits;
@@ -1128,7 +1128,7 @@ void UserDisconnectNtf::InternalSwap(UserDisconnectNtf* PROTOBUF_RESTRICT PROTOB
   using ::std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  swap(_impl_.user_id_, other->_impl_.user_id_);
+  swap(_impl_.account_id_, other->_impl_.account_id_);
 }
 
 ::google::protobuf::Metadata UserDisconnectNtf::GetMetadata() const {

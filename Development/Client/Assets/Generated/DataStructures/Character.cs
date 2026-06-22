@@ -25,15 +25,15 @@ namespace DataStructures {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Ch5EYXRhU3RydWN0dXJlcy9jaGFyYWN0ZXIucHJvdG8SDkRhdGFTdHJ1Y3R1",
-            "cmVzIsMBCglDaGFyYWN0ZXISFAoMY2hhcmFjdGVyX2lkGAEgASgDEhUKDW93",
-            "bmVyX3VzZXJfaWQYAiABKAMSDAoEbmFtZRgDIAEoCRIOCgZqb2JfaWQYBCAB",
-            "KAUSDQoFbGV2ZWwYBSABKAUSCwoDZXhwGAYgASgDEhUKDWxhc3Rfc3RhZ2Vf",
-            "aWQYCyABKAMSDQoFcG9zX3gYDCABKAISDQoFcG9zX3kYDSABKAISCwoDeWF3",
-            "GA4gASgCEg0KBXBvc196GA8gASgCYgZwcm90bzM="));
+            "cmVzIsYBCglDaGFyYWN0ZXISFAoMY2hhcmFjdGVyX2lkGAEgASgDEhgKEG93",
+            "bmVyX2FjY291bnRfaWQYAiABKAMSDAoEbmFtZRgDIAEoCRIOCgZqb2JfaWQY",
+            "BCABKAUSDQoFbGV2ZWwYBSABKAUSCwoDZXhwGAYgASgDEhUKDWxhc3Rfc3Rh",
+            "Z2VfaWQYCyABKAMSDQoFcG9zX3gYDCABKAISDQoFcG9zX3kYDSABKAISCwoD",
+            "eWF3GA4gASgCEg0KBXBvc196GA8gASgCYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::DataStructures.Character), global::DataStructures.Character.Parser, new[]{ "CharacterId", "OwnerUserId", "Name", "JobId", "Level", "Exp", "LastStageId", "PosX", "PosY", "Yaw", "PosZ" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::DataStructures.Character), global::DataStructures.Character.Parser, new[]{ "CharacterId", "OwnerAccountId", "Name", "JobId", "Level", "Exp", "LastStageId", "PosX", "PosY", "Yaw", "PosZ" }, null, null, null, null)
           }));
     }
     #endregion
@@ -83,7 +83,7 @@ namespace DataStructures {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public Character(Character other) : this() {
       characterId_ = other.characterId_;
-      ownerUserId_ = other.ownerUserId_;
+      ownerAccountId_ = other.ownerAccountId_;
       name_ = other.name_;
       jobId_ = other.jobId_;
       level_ = other.level_;
@@ -117,18 +117,18 @@ namespace DataStructures {
       }
     }
 
-    /// <summary>Field number for the "owner_user_id" field.</summary>
-    public const int OwnerUserIdFieldNumber = 2;
-    private long ownerUserId_;
+    /// <summary>Field number for the "owner_account_id" field.</summary>
+    public const int OwnerAccountIdFieldNumber = 2;
+    private long ownerAccountId_;
     /// <summary>
-    /// 소유자 User ID
+    /// 소유자 Account ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long OwnerUserId {
-      get { return ownerUserId_; }
+    public long OwnerAccountId {
+      get { return ownerAccountId_; }
       set {
-        ownerUserId_ = value;
+        ownerAccountId_ = value;
       }
     }
 
@@ -275,7 +275,7 @@ namespace DataStructures {
         return true;
       }
       if (CharacterId != other.CharacterId) return false;
-      if (OwnerUserId != other.OwnerUserId) return false;
+      if (OwnerAccountId != other.OwnerAccountId) return false;
       if (Name != other.Name) return false;
       if (JobId != other.JobId) return false;
       if (Level != other.Level) return false;
@@ -293,7 +293,7 @@ namespace DataStructures {
     public override int GetHashCode() {
       int hash = 1;
       if (CharacterId != 0L) hash ^= CharacterId.GetHashCode();
-      if (OwnerUserId != 0L) hash ^= OwnerUserId.GetHashCode();
+      if (OwnerAccountId != 0L) hash ^= OwnerAccountId.GetHashCode();
       if (Name.Length != 0) hash ^= Name.GetHashCode();
       if (JobId != 0) hash ^= JobId.GetHashCode();
       if (Level != 0) hash ^= Level.GetHashCode();
@@ -325,9 +325,9 @@ namespace DataStructures {
         output.WriteRawTag(8);
         output.WriteInt64(CharacterId);
       }
-      if (OwnerUserId != 0L) {
+      if (OwnerAccountId != 0L) {
         output.WriteRawTag(16);
-        output.WriteInt64(OwnerUserId);
+        output.WriteInt64(OwnerAccountId);
       }
       if (Name.Length != 0) {
         output.WriteRawTag(26);
@@ -379,9 +379,9 @@ namespace DataStructures {
         output.WriteRawTag(8);
         output.WriteInt64(CharacterId);
       }
-      if (OwnerUserId != 0L) {
+      if (OwnerAccountId != 0L) {
         output.WriteRawTag(16);
-        output.WriteInt64(OwnerUserId);
+        output.WriteInt64(OwnerAccountId);
       }
       if (Name.Length != 0) {
         output.WriteRawTag(26);
@@ -432,8 +432,8 @@ namespace DataStructures {
       if (CharacterId != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(CharacterId);
       }
-      if (OwnerUserId != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(OwnerUserId);
+      if (OwnerAccountId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(OwnerAccountId);
       }
       if (Name.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
@@ -477,8 +477,8 @@ namespace DataStructures {
       if (other.CharacterId != 0L) {
         CharacterId = other.CharacterId;
       }
-      if (other.OwnerUserId != 0L) {
-        OwnerUserId = other.OwnerUserId;
+      if (other.OwnerAccountId != 0L) {
+        OwnerAccountId = other.OwnerAccountId;
       }
       if (other.Name.Length != 0) {
         Name = other.Name;
@@ -531,7 +531,7 @@ namespace DataStructures {
             break;
           }
           case 16: {
-            OwnerUserId = input.ReadInt64();
+            OwnerAccountId = input.ReadInt64();
             break;
           }
           case 26: {
@@ -594,7 +594,7 @@ namespace DataStructures {
             break;
           }
           case 16: {
-            OwnerUserId = input.ReadInt64();
+            OwnerAccountId = input.ReadInt64();
             break;
           }
           case 26: {

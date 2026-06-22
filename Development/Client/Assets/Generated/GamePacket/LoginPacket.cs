@@ -26,15 +26,15 @@ namespace GamePacket {
           string.Concat(
             "Ch1HYW1lUGFja2V0L2xvZ2luX3BhY2tldC5wcm90bxIKR2FtZVBhY2tldCIu",
             "CghMb2dpblJlcRIQCghsb2dpbl9pZBgBIAEoCRIQCghwYXNzd29yZBgCIAEo",
-            "CSJ9CghMb2dpblJlcxIPCgdzdWNjZXNzGAEgASgIEhEKCWVycm9yX21zZxgC",
-            "IAEoCRIPCgd1c2VyX2lkGAMgASgDEhIKCmF1dGhfdG9rZW4YBCABKAQSEgoK",
-            "Z2F0ZXdheV9pcBgFIAEoCRIUCgxnYXRld2F5X3BvcnQYBiABKAViBnByb3Rv",
-            "Mw=="));
+            "CSKAAQoITG9naW5SZXMSDwoHc3VjY2VzcxgBIAEoCBIRCgllcnJvcl9tc2cY",
+            "AiABKAkSEgoKYWNjb3VudF9pZBgDIAEoAxISCgphdXRoX3Rva2VuGAQgASgE",
+            "EhIKCmdhdGV3YXlfaXAYBSABKAkSFAoMZ2F0ZXdheV9wb3J0GAYgASgFYgZw",
+            "cm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.LoginReq), global::GamePacket.LoginReq.Parser, new[]{ "LoginId", "Password" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.LoginRes), global::GamePacket.LoginRes.Parser, new[]{ "Success", "ErrorMsg", "UserId", "AuthToken", "GatewayIp", "GatewayPort" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.LoginRes), global::GamePacket.LoginRes.Parser, new[]{ "Success", "ErrorMsg", "AccountId", "AuthToken", "GatewayIp", "GatewayPort" }, null, null, null, null)
           }));
     }
     #endregion
@@ -319,7 +319,7 @@ namespace GamePacket {
     public LoginRes(LoginRes other) : this() {
       success_ = other.success_;
       errorMsg_ = other.errorMsg_;
-      userId_ = other.userId_;
+      accountId_ = other.accountId_;
       authToken_ = other.authToken_;
       gatewayIp_ = other.gatewayIp_;
       gatewayPort_ = other.gatewayPort_;
@@ -359,18 +359,18 @@ namespace GamePacket {
       }
     }
 
-    /// <summary>Field number for the "user_id" field.</summary>
-    public const int UserIdFieldNumber = 3;
-    private long userId_;
+    /// <summary>Field number for the "account_id" field.</summary>
+    public const int AccountIdFieldNumber = 3;
+    private long accountId_;
     /// <summary>
     /// 성공 시 채워지는 필드
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long UserId {
-      get { return userId_; }
+    public long AccountId {
+      get { return accountId_; }
       set {
-        userId_ = value;
+        accountId_ = value;
       }
     }
 
@@ -436,7 +436,7 @@ namespace GamePacket {
       }
       if (Success != other.Success) return false;
       if (ErrorMsg != other.ErrorMsg) return false;
-      if (UserId != other.UserId) return false;
+      if (AccountId != other.AccountId) return false;
       if (AuthToken != other.AuthToken) return false;
       if (GatewayIp != other.GatewayIp) return false;
       if (GatewayPort != other.GatewayPort) return false;
@@ -449,7 +449,7 @@ namespace GamePacket {
       int hash = 1;
       if (Success != false) hash ^= Success.GetHashCode();
       if (ErrorMsg.Length != 0) hash ^= ErrorMsg.GetHashCode();
-      if (UserId != 0L) hash ^= UserId.GetHashCode();
+      if (AccountId != 0L) hash ^= AccountId.GetHashCode();
       if (AuthToken != 0UL) hash ^= AuthToken.GetHashCode();
       if (GatewayIp.Length != 0) hash ^= GatewayIp.GetHashCode();
       if (GatewayPort != 0) hash ^= GatewayPort.GetHashCode();
@@ -479,9 +479,9 @@ namespace GamePacket {
         output.WriteRawTag(18);
         output.WriteString(ErrorMsg);
       }
-      if (UserId != 0L) {
+      if (AccountId != 0L) {
         output.WriteRawTag(24);
-        output.WriteInt64(UserId);
+        output.WriteInt64(AccountId);
       }
       if (AuthToken != 0UL) {
         output.WriteRawTag(32);
@@ -513,9 +513,9 @@ namespace GamePacket {
         output.WriteRawTag(18);
         output.WriteString(ErrorMsg);
       }
-      if (UserId != 0L) {
+      if (AccountId != 0L) {
         output.WriteRawTag(24);
-        output.WriteInt64(UserId);
+        output.WriteInt64(AccountId);
       }
       if (AuthToken != 0UL) {
         output.WriteRawTag(32);
@@ -545,8 +545,8 @@ namespace GamePacket {
       if (ErrorMsg.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(ErrorMsg);
       }
-      if (UserId != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(UserId);
+      if (AccountId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(AccountId);
       }
       if (AuthToken != 0UL) {
         size += 1 + pb::CodedOutputStream.ComputeUInt64Size(AuthToken);
@@ -575,8 +575,8 @@ namespace GamePacket {
       if (other.ErrorMsg.Length != 0) {
         ErrorMsg = other.ErrorMsg;
       }
-      if (other.UserId != 0L) {
-        UserId = other.UserId;
+      if (other.AccountId != 0L) {
+        AccountId = other.AccountId;
       }
       if (other.AuthToken != 0UL) {
         AuthToken = other.AuthToken;
@@ -615,7 +615,7 @@ namespace GamePacket {
             break;
           }
           case 24: {
-            UserId = input.ReadInt64();
+            AccountId = input.ReadInt64();
             break;
           }
           case 32: {
@@ -658,7 +658,7 @@ namespace GamePacket {
             break;
           }
           case 24: {
-            UserId = input.ReadInt64();
+            AccountId = input.ReadInt64();
             break;
           }
           case 32: {

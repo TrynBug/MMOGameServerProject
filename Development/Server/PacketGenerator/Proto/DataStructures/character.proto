@@ -9,7 +9,7 @@ package DataStructures;
 // - 인벤토리/장비/스킬은 별도 메시지/테이블로 관리.
 message Character {
     int64 character_id = 1;       // 영구 ObjectId (DB 저장, 캐릭터 생성 시 발급)
-    int64 owner_user_id = 2;      // 소유자 User ID
+    int64 owner_account_id = 2;   // 소유자 Account ID
     string name = 3;              // 캐릭터 이름
     int32 job_id = 4;             // 직업 (GameData로 관리, 마법사/전사 등)
     int32 level = 5;

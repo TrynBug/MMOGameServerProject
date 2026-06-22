@@ -347,7 +347,7 @@ class UserEnterNtf final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kIpFieldNumber = 3,
-    kUserIdFieldNumber = 1,
+    kAccountIdFieldNumber = 1,
     kGatewayIdFieldNumber = 2,
   };
   // string ip = 3;
@@ -365,14 +365,14 @@ class UserEnterNtf final : public ::google::protobuf::Message
   ::std::string* PROTOBUF_NONNULL _internal_mutable_ip();
 
   public:
-  // int64 user_id = 1;
-  void clear_user_id() ;
-  ::int64_t user_id() const;
-  void set_user_id(::int64_t value);
+  // int64 account_id = 1;
+  void clear_account_id() ;
+  ::int64_t account_id() const;
+  void set_account_id(::int64_t value);
 
   private:
-  ::int64_t _internal_user_id() const;
-  void _internal_set_user_id(::int64_t value);
+  ::int64_t _internal_account_id() const;
+  void _internal_set_account_id(::int64_t value);
 
   public:
   // int32 gateway_id = 2;
@@ -412,7 +412,7 @@ class UserEnterNtf final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr ip_;
-    ::int64_t user_id_;
+    ::int64_t account_id_;
     ::int32_t gateway_id_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -565,16 +565,16 @@ class UserDisconnectNtf final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kUserIdFieldNumber = 1,
+    kAccountIdFieldNumber = 1,
   };
-  // int64 user_id = 1;
-  void clear_user_id() ;
-  ::int64_t user_id() const;
-  void set_user_id(::int64_t value);
+  // int64 account_id = 1;
+  void clear_account_id() ;
+  ::int64_t account_id() const;
+  void set_account_id(::int64_t value);
 
   private:
-  ::int64_t _internal_user_id() const;
-  void _internal_set_user_id(::int64_t value);
+  ::int64_t _internal_account_id() const;
+  void _internal_set_account_id(::int64_t value);
 
   public:
   // @@protoc_insertion_point(class_scope:ServerPacket.UserDisconnectNtf)
@@ -603,7 +603,7 @@ class UserDisconnectNtf final : public ::google::protobuf::Message
         const UserDisconnectNtf& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::int64_t user_id_;
+    ::int64_t account_id_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -2653,29 +2653,29 @@ extern const ::google::protobuf::internal::ClassDataFull RegistryPollRes_class_d
 
 // UserEnterNtf
 
-// int64 user_id = 1;
-inline void UserEnterNtf::clear_user_id() {
+// int64 account_id = 1;
+inline void UserEnterNtf::clear_account_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = ::int64_t{0};
+  _impl_.account_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000002U);
 }
-inline ::int64_t UserEnterNtf::user_id() const {
-  // @@protoc_insertion_point(field_get:ServerPacket.UserEnterNtf.user_id)
-  return _internal_user_id();
+inline ::int64_t UserEnterNtf::account_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.UserEnterNtf.account_id)
+  return _internal_account_id();
 }
-inline void UserEnterNtf::set_user_id(::int64_t value) {
-  _internal_set_user_id(value);
+inline void UserEnterNtf::set_account_id(::int64_t value) {
+  _internal_set_account_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000002U);
-  // @@protoc_insertion_point(field_set:ServerPacket.UserEnterNtf.user_id)
+  // @@protoc_insertion_point(field_set:ServerPacket.UserEnterNtf.account_id)
 }
-inline ::int64_t UserEnterNtf::_internal_user_id() const {
+inline ::int64_t UserEnterNtf::_internal_account_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.user_id_;
+  return _impl_.account_id_;
 }
-inline void UserEnterNtf::_internal_set_user_id(::int64_t value) {
+inline void UserEnterNtf::_internal_set_account_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = value;
+  _impl_.account_id_ = value;
 }
 
 // int32 gateway_id = 2;
@@ -2772,29 +2772,29 @@ inline void UserEnterNtf::set_allocated_ip(::std::string* PROTOBUF_NULLABLE valu
 
 // UserDisconnectNtf
 
-// int64 user_id = 1;
-inline void UserDisconnectNtf::clear_user_id() {
+// int64 account_id = 1;
+inline void UserDisconnectNtf::clear_account_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = ::int64_t{0};
+  _impl_.account_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline ::int64_t UserDisconnectNtf::user_id() const {
-  // @@protoc_insertion_point(field_get:ServerPacket.UserDisconnectNtf.user_id)
-  return _internal_user_id();
+inline ::int64_t UserDisconnectNtf::account_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.UserDisconnectNtf.account_id)
+  return _internal_account_id();
 }
-inline void UserDisconnectNtf::set_user_id(::int64_t value) {
-  _internal_set_user_id(value);
+inline void UserDisconnectNtf::set_account_id(::int64_t value) {
+  _internal_set_account_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  // @@protoc_insertion_point(field_set:ServerPacket.UserDisconnectNtf.user_id)
+  // @@protoc_insertion_point(field_set:ServerPacket.UserDisconnectNtf.account_id)
 }
-inline ::int64_t UserDisconnectNtf::_internal_user_id() const {
+inline ::int64_t UserDisconnectNtf::_internal_account_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.user_id_;
+  return _impl_.account_id_;
 }
-inline void UserDisconnectNtf::_internal_set_user_id(::int64_t value) {
+inline void UserDisconnectNtf::_internal_set_account_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = value;
+  _impl_.account_id_ = value;
 }
 
 // -------------------------------------------------------------------

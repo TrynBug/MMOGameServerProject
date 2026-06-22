@@ -216,16 +216,16 @@ class LoginDuplicateNtf final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kUserIdFieldNumber = 1,
+    kAccountIdFieldNumber = 1,
   };
-  // int64 user_id = 1;
-  void clear_user_id() ;
-  ::int64_t user_id() const;
-  void set_user_id(::int64_t value);
+  // int64 account_id = 1;
+  void clear_account_id() ;
+  ::int64_t account_id() const;
+  void set_account_id(::int64_t value);
 
   private:
-  ::int64_t _internal_user_id() const;
-  void _internal_set_user_id(::int64_t value);
+  ::int64_t _internal_account_id() const;
+  void _internal_set_account_id(::int64_t value);
 
   public:
   // @@protoc_insertion_point(class_scope:ServerPacket.LoginDuplicateNtf)
@@ -254,7 +254,7 @@ class LoginDuplicateNtf final : public ::google::protobuf::Message
         const LoginDuplicateNtf& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::int64_t user_id_;
+    ::int64_t account_id_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -406,18 +406,18 @@ class LoginAuthTokenNtf final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kUserIdFieldNumber = 1,
+    kAccountIdFieldNumber = 1,
     kAuthTokenFieldNumber = 2,
     kExpireTimeMsFieldNumber = 3,
   };
-  // int64 user_id = 1;
-  void clear_user_id() ;
-  ::int64_t user_id() const;
-  void set_user_id(::int64_t value);
+  // int64 account_id = 1;
+  void clear_account_id() ;
+  ::int64_t account_id() const;
+  void set_account_id(::int64_t value);
 
   private:
-  ::int64_t _internal_user_id() const;
-  void _internal_set_user_id(::int64_t value);
+  ::int64_t _internal_account_id() const;
+  void _internal_set_account_id(::int64_t value);
 
   public:
   // uint64 auth_token = 2;
@@ -466,7 +466,7 @@ class LoginAuthTokenNtf final : public ::google::protobuf::Message
         const LoginAuthTokenNtf& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::int64_t user_id_;
+    ::int64_t account_id_;
     ::uint64_t auth_token_;
     ::int64_t expire_time_ms_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -493,29 +493,29 @@ extern const ::google::protobuf::internal::ClassDataFull LoginAuthTokenNtf_class
 
 // LoginAuthTokenNtf
 
-// int64 user_id = 1;
-inline void LoginAuthTokenNtf::clear_user_id() {
+// int64 account_id = 1;
+inline void LoginAuthTokenNtf::clear_account_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = ::int64_t{0};
+  _impl_.account_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline ::int64_t LoginAuthTokenNtf::user_id() const {
-  // @@protoc_insertion_point(field_get:ServerPacket.LoginAuthTokenNtf.user_id)
-  return _internal_user_id();
+inline ::int64_t LoginAuthTokenNtf::account_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.LoginAuthTokenNtf.account_id)
+  return _internal_account_id();
 }
-inline void LoginAuthTokenNtf::set_user_id(::int64_t value) {
-  _internal_set_user_id(value);
+inline void LoginAuthTokenNtf::set_account_id(::int64_t value) {
+  _internal_set_account_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  // @@protoc_insertion_point(field_set:ServerPacket.LoginAuthTokenNtf.user_id)
+  // @@protoc_insertion_point(field_set:ServerPacket.LoginAuthTokenNtf.account_id)
 }
-inline ::int64_t LoginAuthTokenNtf::_internal_user_id() const {
+inline ::int64_t LoginAuthTokenNtf::_internal_account_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.user_id_;
+  return _impl_.account_id_;
 }
-inline void LoginAuthTokenNtf::_internal_set_user_id(::int64_t value) {
+inline void LoginAuthTokenNtf::_internal_set_account_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = value;
+  _impl_.account_id_ = value;
 }
 
 // uint64 auth_token = 2;
@@ -572,29 +572,29 @@ inline void LoginAuthTokenNtf::_internal_set_expire_time_ms(::int64_t value) {
 
 // LoginDuplicateNtf
 
-// int64 user_id = 1;
-inline void LoginDuplicateNtf::clear_user_id() {
+// int64 account_id = 1;
+inline void LoginDuplicateNtf::clear_account_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = ::int64_t{0};
+  _impl_.account_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline ::int64_t LoginDuplicateNtf::user_id() const {
-  // @@protoc_insertion_point(field_get:ServerPacket.LoginDuplicateNtf.user_id)
-  return _internal_user_id();
+inline ::int64_t LoginDuplicateNtf::account_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.LoginDuplicateNtf.account_id)
+  return _internal_account_id();
 }
-inline void LoginDuplicateNtf::set_user_id(::int64_t value) {
-  _internal_set_user_id(value);
+inline void LoginDuplicateNtf::set_account_id(::int64_t value) {
+  _internal_set_account_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  // @@protoc_insertion_point(field_set:ServerPacket.LoginDuplicateNtf.user_id)
+  // @@protoc_insertion_point(field_set:ServerPacket.LoginDuplicateNtf.account_id)
 }
-inline ::int64_t LoginDuplicateNtf::_internal_user_id() const {
+inline ::int64_t LoginDuplicateNtf::_internal_account_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.user_id_;
+  return _impl_.account_id_;
 }
-inline void LoginDuplicateNtf::_internal_set_user_id(::int64_t value) {
+inline void LoginDuplicateNtf::_internal_set_account_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = value;
+  _impl_.account_id_ = value;
 }
 
 #ifdef __GNUC__

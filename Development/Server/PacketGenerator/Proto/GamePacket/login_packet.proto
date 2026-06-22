@@ -18,7 +18,7 @@ message LoginRes {
     string error_msg = 2;   // 실패 시 오류 메시지
 
     // 성공 시 채워지는 필드
-    int64  user_id = 3;
+    int64  account_id = 3;
     uint64 auth_token = 4;   // 인증 토큰 (8byte 랜덤값)
     string gateway_ip = 5;   // 접속할 게이트웨이 서버 IP
     int32  gateway_port = 6;   // 접속할 게이트웨이 서버 Port

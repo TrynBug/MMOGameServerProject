@@ -413,7 +413,7 @@ class ChatRecvNtf final : public ::google::protobuf::Message
   enum : int {
     kSenderNameFieldNumber = 2,
     kMessageFieldNumber = 3,
-    kSenderUserIdFieldNumber = 1,
+    kSenderAccountIdFieldNumber = 1,
   };
   // string sender_name = 2;
   void clear_sender_name() ;
@@ -445,14 +445,14 @@ class ChatRecvNtf final : public ::google::protobuf::Message
   ::std::string* PROTOBUF_NONNULL _internal_mutable_message();
 
   public:
-  // int64 sender_user_id = 1;
-  void clear_sender_user_id() ;
-  ::int64_t sender_user_id() const;
-  void set_sender_user_id(::int64_t value);
+  // int64 sender_account_id = 1;
+  void clear_sender_account_id() ;
+  ::int64_t sender_account_id() const;
+  void set_sender_account_id(::int64_t value);
 
   private:
-  ::int64_t _internal_sender_user_id() const;
-  void _internal_set_sender_user_id(::int64_t value);
+  ::int64_t _internal_sender_account_id() const;
+  void _internal_set_sender_account_id(::int64_t value);
 
   public:
   // @@protoc_insertion_point(class_scope:GamePacket.ChatRecvNtf)
@@ -483,7 +483,7 @@ class ChatRecvNtf final : public ::google::protobuf::Message
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr sender_name_;
     ::google::protobuf::internal::ArenaStringPtr message_;
-    ::int64_t sender_user_id_;
+    ::int64_t sender_account_id_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -577,29 +577,29 @@ inline void ChatSendReq::set_allocated_message(::std::string* PROTOBUF_NULLABLE 
 
 // ChatRecvNtf
 
-// int64 sender_user_id = 1;
-inline void ChatRecvNtf::clear_sender_user_id() {
+// int64 sender_account_id = 1;
+inline void ChatRecvNtf::clear_sender_account_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.sender_user_id_ = ::int64_t{0};
+  _impl_.sender_account_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000004U);
 }
-inline ::int64_t ChatRecvNtf::sender_user_id() const {
-  // @@protoc_insertion_point(field_get:GamePacket.ChatRecvNtf.sender_user_id)
-  return _internal_sender_user_id();
+inline ::int64_t ChatRecvNtf::sender_account_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ChatRecvNtf.sender_account_id)
+  return _internal_sender_account_id();
 }
-inline void ChatRecvNtf::set_sender_user_id(::int64_t value) {
-  _internal_set_sender_user_id(value);
+inline void ChatRecvNtf::set_sender_account_id(::int64_t value) {
+  _internal_set_sender_account_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000004U);
-  // @@protoc_insertion_point(field_set:GamePacket.ChatRecvNtf.sender_user_id)
+  // @@protoc_insertion_point(field_set:GamePacket.ChatRecvNtf.sender_account_id)
 }
-inline ::int64_t ChatRecvNtf::_internal_sender_user_id() const {
+inline ::int64_t ChatRecvNtf::_internal_sender_account_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.sender_user_id_;
+  return _impl_.sender_account_id_;
 }
-inline void ChatRecvNtf::_internal_set_sender_user_id(::int64_t value) {
+inline void ChatRecvNtf::_internal_set_sender_account_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.sender_user_id_ = value;
+  _impl_.sender_account_id_ = value;
 }
 
 // string sender_name = 2;

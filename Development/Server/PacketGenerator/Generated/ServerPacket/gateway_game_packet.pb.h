@@ -220,21 +220,21 @@ class UserMoveToGameServerReq final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kUserIdFieldNumber = 1,
+    kAccountIdFieldNumber = 1,
     kTargetGameServerIdFieldNumber = 2,
     kTargetStageIdFieldNumber = 3,
     kCharacterIdFieldNumber = 4,
     kTargetStageDataKeyFieldNumber = 5,
     kPositionTypeFieldNumber = 6,
   };
-  // int64 user_id = 1;
-  void clear_user_id() ;
-  ::int64_t user_id() const;
-  void set_user_id(::int64_t value);
+  // int64 account_id = 1;
+  void clear_account_id() ;
+  ::int64_t account_id() const;
+  void set_account_id(::int64_t value);
 
   private:
-  ::int64_t _internal_user_id() const;
-  void _internal_set_user_id(::int64_t value);
+  ::int64_t _internal_account_id() const;
+  void _internal_set_account_id(::int64_t value);
 
   public:
   // int32 target_game_server_id = 2;
@@ -313,7 +313,7 @@ class UserMoveToGameServerReq final : public ::google::protobuf::Message
         const UserMoveToGameServerReq& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::int64_t user_id_;
+    ::int64_t account_id_;
     ::int32_t target_game_server_id_;
     ::int32_t target_stage_id_;
     ::int64_t character_id_;
@@ -471,7 +471,7 @@ class UserMoveToGameServerFailNtf final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kReasonFieldNumber = 2,
-    kUserIdFieldNumber = 1,
+    kAccountIdFieldNumber = 1,
   };
   // string reason = 2;
   void clear_reason() ;
@@ -488,14 +488,14 @@ class UserMoveToGameServerFailNtf final : public ::google::protobuf::Message
   ::std::string* PROTOBUF_NONNULL _internal_mutable_reason();
 
   public:
-  // int64 user_id = 1;
-  void clear_user_id() ;
-  ::int64_t user_id() const;
-  void set_user_id(::int64_t value);
+  // int64 account_id = 1;
+  void clear_account_id() ;
+  ::int64_t account_id() const;
+  void set_account_id(::int64_t value);
 
   private:
-  ::int64_t _internal_user_id() const;
-  void _internal_set_user_id(::int64_t value);
+  ::int64_t _internal_account_id() const;
+  void _internal_set_account_id(::int64_t value);
 
   public:
   // @@protoc_insertion_point(class_scope:ServerPacket.UserMoveToGameServerFailNtf)
@@ -525,7 +525,7 @@ class UserMoveToGameServerFailNtf final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr reason_;
-    ::int64_t user_id_;
+    ::int64_t account_id_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -677,18 +677,18 @@ class SetClientLatencyReq final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kUserIdFieldNumber = 1,
+    kAccountIdFieldNumber = 1,
     kRecvDelayMsFieldNumber = 2,
     kSendDelayMsFieldNumber = 3,
   };
-  // int64 user_id = 1;
-  void clear_user_id() ;
-  ::int64_t user_id() const;
-  void set_user_id(::int64_t value);
+  // int64 account_id = 1;
+  void clear_account_id() ;
+  ::int64_t account_id() const;
+  void set_account_id(::int64_t value);
 
   private:
-  ::int64_t _internal_user_id() const;
-  void _internal_set_user_id(::int64_t value);
+  ::int64_t _internal_account_id() const;
+  void _internal_set_account_id(::int64_t value);
 
   public:
   // int32 recv_delay_ms = 2;
@@ -737,7 +737,7 @@ class SetClientLatencyReq final : public ::google::protobuf::Message
         const SetClientLatencyReq& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::int64_t user_id_;
+    ::int64_t account_id_;
     ::int32_t recv_delay_ms_;
     ::int32_t send_delay_ms_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -764,29 +764,29 @@ extern const ::google::protobuf::internal::ClassDataFull SetClientLatencyReq_cla
 
 // UserMoveToGameServerReq
 
-// int64 user_id = 1;
-inline void UserMoveToGameServerReq::clear_user_id() {
+// int64 account_id = 1;
+inline void UserMoveToGameServerReq::clear_account_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = ::int64_t{0};
+  _impl_.account_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline ::int64_t UserMoveToGameServerReq::user_id() const {
-  // @@protoc_insertion_point(field_get:ServerPacket.UserMoveToGameServerReq.user_id)
-  return _internal_user_id();
+inline ::int64_t UserMoveToGameServerReq::account_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.UserMoveToGameServerReq.account_id)
+  return _internal_account_id();
 }
-inline void UserMoveToGameServerReq::set_user_id(::int64_t value) {
-  _internal_set_user_id(value);
+inline void UserMoveToGameServerReq::set_account_id(::int64_t value) {
+  _internal_set_account_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  // @@protoc_insertion_point(field_set:ServerPacket.UserMoveToGameServerReq.user_id)
+  // @@protoc_insertion_point(field_set:ServerPacket.UserMoveToGameServerReq.account_id)
 }
-inline ::int64_t UserMoveToGameServerReq::_internal_user_id() const {
+inline ::int64_t UserMoveToGameServerReq::_internal_account_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.user_id_;
+  return _impl_.account_id_;
 }
-inline void UserMoveToGameServerReq::_internal_set_user_id(::int64_t value) {
+inline void UserMoveToGameServerReq::_internal_set_account_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = value;
+  _impl_.account_id_ = value;
 }
 
 // int32 target_game_server_id = 2;
@@ -918,29 +918,29 @@ inline void UserMoveToGameServerReq::_internal_set_position_type(::int32_t value
 
 // UserMoveToGameServerFailNtf
 
-// int64 user_id = 1;
-inline void UserMoveToGameServerFailNtf::clear_user_id() {
+// int64 account_id = 1;
+inline void UserMoveToGameServerFailNtf::clear_account_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = ::int64_t{0};
+  _impl_.account_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000002U);
 }
-inline ::int64_t UserMoveToGameServerFailNtf::user_id() const {
-  // @@protoc_insertion_point(field_get:ServerPacket.UserMoveToGameServerFailNtf.user_id)
-  return _internal_user_id();
+inline ::int64_t UserMoveToGameServerFailNtf::account_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.UserMoveToGameServerFailNtf.account_id)
+  return _internal_account_id();
 }
-inline void UserMoveToGameServerFailNtf::set_user_id(::int64_t value) {
-  _internal_set_user_id(value);
+inline void UserMoveToGameServerFailNtf::set_account_id(::int64_t value) {
+  _internal_set_account_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000002U);
-  // @@protoc_insertion_point(field_set:ServerPacket.UserMoveToGameServerFailNtf.user_id)
+  // @@protoc_insertion_point(field_set:ServerPacket.UserMoveToGameServerFailNtf.account_id)
 }
-inline ::int64_t UserMoveToGameServerFailNtf::_internal_user_id() const {
+inline ::int64_t UserMoveToGameServerFailNtf::_internal_account_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.user_id_;
+  return _impl_.account_id_;
 }
-inline void UserMoveToGameServerFailNtf::_internal_set_user_id(::int64_t value) {
+inline void UserMoveToGameServerFailNtf::_internal_set_account_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = value;
+  _impl_.account_id_ = value;
 }
 
 // string reason = 2;
@@ -1012,29 +1012,29 @@ inline void UserMoveToGameServerFailNtf::set_allocated_reason(::std::string* PRO
 
 // SetClientLatencyReq
 
-// int64 user_id = 1;
-inline void SetClientLatencyReq::clear_user_id() {
+// int64 account_id = 1;
+inline void SetClientLatencyReq::clear_account_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = ::int64_t{0};
+  _impl_.account_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline ::int64_t SetClientLatencyReq::user_id() const {
-  // @@protoc_insertion_point(field_get:ServerPacket.SetClientLatencyReq.user_id)
-  return _internal_user_id();
+inline ::int64_t SetClientLatencyReq::account_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.SetClientLatencyReq.account_id)
+  return _internal_account_id();
 }
-inline void SetClientLatencyReq::set_user_id(::int64_t value) {
-  _internal_set_user_id(value);
+inline void SetClientLatencyReq::set_account_id(::int64_t value) {
+  _internal_set_account_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  // @@protoc_insertion_point(field_set:ServerPacket.SetClientLatencyReq.user_id)
+  // @@protoc_insertion_point(field_set:ServerPacket.SetClientLatencyReq.account_id)
 }
-inline ::int64_t SetClientLatencyReq::_internal_user_id() const {
+inline ::int64_t SetClientLatencyReq::_internal_account_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.user_id_;
+  return _impl_.account_id_;
 }
-inline void SetClientLatencyReq::_internal_set_user_id(::int64_t value) {
+inline void SetClientLatencyReq::_internal_set_account_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = value;
+  _impl_.account_id_ = value;
 }
 
 // int32 recv_delay_ms = 2;

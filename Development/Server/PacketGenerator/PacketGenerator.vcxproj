@@ -20,9 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Generated\Common\packet_id.pb.cc" />
+    <ClCompile Include="Generated\DataStructures\account.pb.cc" />
     <ClCompile Include="Generated\DataStructures\character.pb.cc" />
     <ClCompile Include="Generated\DataStructures\item.pb.cc" />
-    <ClCompile Include="Generated\DataStructures\user.pb.cc" />
     <ClCompile Include="Generated\GamePacket\ability_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\buff_packet.pb.cc" />
     <ClCompile Include="Generated\GamePacket\character_packet.pb.cc" />
@@ -53,9 +53,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Generated\Common\packet_id.pb.h" />
+    <ClInclude Include="Generated\DataStructures\account.pb.h" />
     <ClInclude Include="Generated\DataStructures\character.pb.h" />
     <ClInclude Include="Generated\DataStructures\item.pb.h" />
-    <ClInclude Include="Generated\DataStructures\user.pb.h" />
     <ClInclude Include="Generated\GamePacket\ability_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\buff_packet.pb.h" />
     <ClInclude Include="Generated\GamePacket\character_packet.pb.h" />
@@ -84,9 +84,9 @@
   <ItemGroup>
     <None Include="generate_proto.bat" />
     <None Include="Proto\Common\packet_id.proto" />
+    <None Include="Proto\DataStructures\account.proto" />
     <None Include="Proto\DataStructures\character.proto" />
     <None Include="Proto\DataStructures\item.proto" />
-    <None Include="Proto\DataStructures\user.proto" />
     <None Include="Proto\GamePacket\ability_packet.proto" />
     <None Include="Proto\GamePacket\buff_packet.proto" />
     <None Include="Proto\GamePacket\character_packet.proto" />

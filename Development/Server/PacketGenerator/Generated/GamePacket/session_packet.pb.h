@@ -270,17 +270,17 @@ class GatewayAuthReq final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kUserIdFieldNumber = 1,
+    kAccountIdFieldNumber = 1,
     kAuthTokenFieldNumber = 2,
   };
-  // int64 user_id = 1;
-  void clear_user_id() ;
-  ::int64_t user_id() const;
-  void set_user_id(::int64_t value);
+  // int64 account_id = 1;
+  void clear_account_id() ;
+  ::int64_t account_id() const;
+  void set_account_id(::int64_t value);
 
   private:
-  ::int64_t _internal_user_id() const;
-  void _internal_set_user_id(::int64_t value);
+  ::int64_t _internal_account_id() const;
+  void _internal_set_account_id(::int64_t value);
 
   public:
   // uint64 auth_token = 2;
@@ -319,7 +319,7 @@ class GatewayAuthReq final : public ::google::protobuf::Message
         const GatewayAuthReq& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::int64_t user_id_;
+    ::int64_t account_id_;
     ::uint64_t auth_token_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -888,29 +888,29 @@ extern const ::google::protobuf::internal::ClassDataFull ForceDisconnectNtf_clas
 
 // GatewayAuthReq
 
-// int64 user_id = 1;
-inline void GatewayAuthReq::clear_user_id() {
+// int64 account_id = 1;
+inline void GatewayAuthReq::clear_account_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = ::int64_t{0};
+  _impl_.account_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline ::int64_t GatewayAuthReq::user_id() const {
-  // @@protoc_insertion_point(field_get:GamePacket.GatewayAuthReq.user_id)
-  return _internal_user_id();
+inline ::int64_t GatewayAuthReq::account_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.GatewayAuthReq.account_id)
+  return _internal_account_id();
 }
-inline void GatewayAuthReq::set_user_id(::int64_t value) {
-  _internal_set_user_id(value);
+inline void GatewayAuthReq::set_account_id(::int64_t value) {
+  _internal_set_account_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  // @@protoc_insertion_point(field_set:GamePacket.GatewayAuthReq.user_id)
+  // @@protoc_insertion_point(field_set:GamePacket.GatewayAuthReq.account_id)
 }
-inline ::int64_t GatewayAuthReq::_internal_user_id() const {
+inline ::int64_t GatewayAuthReq::_internal_account_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.user_id_;
+  return _impl_.account_id_;
 }
-inline void GatewayAuthReq::_internal_set_user_id(::int64_t value) {
+inline void GatewayAuthReq::_internal_set_account_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = value;
+  _impl_.account_id_ = value;
 }
 
 // uint64 auth_token = 2;

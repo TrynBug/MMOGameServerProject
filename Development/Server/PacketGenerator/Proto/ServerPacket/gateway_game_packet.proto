@@ -10,7 +10,7 @@ package ServerPacket;
 // 유저를 다른 게임서버로 이동 요청 (게임서버 -> 게이트웨이)
 // 현재 게임서버가 DB 저장 완료 후 전송
 message UserMoveToGameServerReq {
-    int64 user_id = 1;
+    int64 account_id = 1;
     int32 target_game_server_id = 2;
     int32 target_stage_id = 3;            // (크로스서버 이동에선 미사용. 런타임 stageId 는 서버마다 다름)
     int64 character_id = 4;               // 이동할 캐릭터 (목적지 서버가 DB 로드에 사용)
@@ -21,7 +21,7 @@ message UserMoveToGameServerReq {
 // 유저 이동 실패 응답 (게이트웨이 -> 게임서버)
 // 목적지 게임서버를 찾지 못했을 때
 message UserMoveToGameServerFailNtf {
-    int64 user_id = 1;
+    int64 account_id = 1;
     string reason = 2;
 }
 
@@ -33,7 +33,7 @@ message UserMoveToGameServerFailNtf {
 // 게임서버의 netdelay 치트가 발동하면 해당 유저가 접속한 게이트웨이로 전송한다.
 // 게이트웨이는 그 유저의 클라 Session 에 SetSimulatedDelay 를 적용한다. (0 = 지연 없음)
 message SetClientLatencyReq {
-    int64 user_id = 1;
+    int64 account_id = 1;
     int32 recv_delay_ms = 2;   // 클라->서버 수신 지연
     int32 send_delay_ms = 3;   // 서버->클라 송신 지연
 }

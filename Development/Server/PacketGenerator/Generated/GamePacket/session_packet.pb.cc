@@ -29,7 +29,7 @@ namespace GamePacket {
 inline constexpr GatewayAuthReq::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        user_id_{::int64_t{0}},
+        account_id_{::int64_t{0}},
         auth_token_{::uint64_t{0u}} {}
 
 template <typename>
@@ -134,7 +134,7 @@ const ::uint32_t
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::GatewayAuthReq, _impl_._has_bits_),
         5, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::GamePacket::GatewayAuthReq, _impl_.user_id_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::GatewayAuthReq, _impl_.account_id_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::GatewayAuthReq, _impl_.auth_token_),
         0,
         1,
@@ -171,23 +171,23 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_GamePacket_2fsession_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\037GamePacket/session_packet.proto\022\nGameP"
-    "acket\"5\n\016GatewayAuthReq\022\017\n\007user_id\030\001 \001(\003"
-    "\022\022\n\nauth_token\030\002 \001(\004\"3\n\014GameEnterNtf\022\020\n\010"
-    "stage_id\030\001 \001(\003\022\021\n\tstage_key\030\002 \001(\005\"\017\n\rGam"
-    "eLogoutReq\":\n\022ForceDisconnectNtf\022\023\n\013reas"
-    "on_code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t*\340\001\n\025Force"
-    "DisconnectReason\022 \n\034FORCE_DISCONNECT_REA"
-    "SON_NONE\020\000\022+\n\'FORCE_DISCONNECT_REASON_DU"
-    "PLICATE_LOGIN\020\001\022+\n\'FORCE_DISCONNECT_REAS"
-    "ON_SERVER_SHUTDOWN\020\002\022\'\n#FORCE_DISCONNECT"
-    "_REASON_AUTH_FAILED\020\003\022\"\n\036FORCE_DISCONNEC"
-    "T_REASON_KICKED\020\004b\006proto3"
+    "acket\"8\n\016GatewayAuthReq\022\022\n\naccount_id\030\001 "
+    "\001(\003\022\022\n\nauth_token\030\002 \001(\004\"3\n\014GameEnterNtf\022"
+    "\020\n\010stage_id\030\001 \001(\003\022\021\n\tstage_key\030\002 \001(\005\"\017\n\r"
+    "GameLogoutReq\":\n\022ForceDisconnectNtf\022\023\n\013r"
+    "eason_code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t*\340\001\n\025Fo"
+    "rceDisconnectReason\022 \n\034FORCE_DISCONNECT_"
+    "REASON_NONE\020\000\022+\n\'FORCE_DISCONNECT_REASON"
+    "_DUPLICATE_LOGIN\020\001\022+\n\'FORCE_DISCONNECT_R"
+    "EASON_SERVER_SHUTDOWN\020\002\022\'\n#FORCE_DISCONN"
+    "ECT_REASON_AUTH_FAILED\020\003\022\"\n\036FORCE_DISCON"
+    "NECT_REASON_KICKED\020\004b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fsession_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fsession_5fpacket_2eproto = {
     false,
     false,
-    465,
+    468,
     descriptor_table_protodef_GamePacket_2fsession_5fpacket_2eproto,
     "GamePacket/session_packet.proto",
     &descriptor_table_GamePacket_2fsession_5fpacket_2eproto_once,
@@ -245,10 +245,10 @@ PROTOBUF_NDEBUG_INLINE GatewayAuthReq::Impl_::Impl_(
 inline void GatewayAuthReq::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, user_id_),
+               offsetof(Impl_, account_id_),
            0,
            offsetof(Impl_, auth_token_) -
-               offsetof(Impl_, user_id_) +
+               offsetof(Impl_, account_id_) +
                sizeof(Impl_::auth_token_));
 }
 GatewayAuthReq::~GatewayAuthReq() {
@@ -331,15 +331,15 @@ GatewayAuthReq::_table_ = {
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(GatewayAuthReq, _impl_.auth_token_), 1>(),
      {16, 1, 0,
       PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.auth_token_)}},
-    // int64 user_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(GatewayAuthReq, _impl_.user_id_), 0>(),
+    // int64 account_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(GatewayAuthReq, _impl_.account_id_), 0>(),
      {8, 0, 0,
-      PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.user_id_)}},
+      PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.account_id_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // int64 user_id = 1;
-    {PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.user_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 account_id = 1;
+    {PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.account_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // uint64 auth_token = 2;
     {PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.auth_token_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUInt64)},
   }},
@@ -356,9 +356,9 @@ PROTOBUF_NOINLINE void GatewayAuthReq::Clear() {
 
   cached_has_bits = _impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
-    ::memset(&_impl_.user_id_, 0, static_cast<::size_t>(
+    ::memset(&_impl_.account_id_, 0, static_cast<::size_t>(
         reinterpret_cast<char*>(&_impl_.auth_token_) -
-        reinterpret_cast<char*>(&_impl_.user_id_)) + sizeof(_impl_.auth_token_));
+        reinterpret_cast<char*>(&_impl_.account_id_)) + sizeof(_impl_.auth_token_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -383,12 +383,12 @@ PROTOBUF_NOINLINE void GatewayAuthReq::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 user_id = 1;
+  // int64 account_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (this_._internal_user_id() != 0) {
+    if (this_._internal_account_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_user_id(), target);
+              stream, this_._internal_account_id(), target);
     }
   }
 
@@ -427,11 +427,11 @@ PROTOBUF_NOINLINE void GatewayAuthReq::Clear() {
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
-    // int64 user_id = 1;
+    // int64 account_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (this_._internal_user_id() != 0) {
+      if (this_._internal_account_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_user_id());
+            this_._internal_account_id());
       }
     }
     // uint64 auth_token = 2;
@@ -462,8 +462,8 @@ void GatewayAuthReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
   cached_has_bits = from._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (from._internal_user_id() != 0) {
-        _this->_impl_.user_id_ = from._impl_.user_id_;
+      if (from._internal_account_id() != 0) {
+        _this->_impl_.account_id_ = from._impl_.account_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
@@ -492,9 +492,9 @@ void GatewayAuthReq::InternalSwap(GatewayAuthReq* PROTOBUF_RESTRICT PROTOBUF_NON
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.auth_token_)
       + sizeof(GatewayAuthReq::_impl_.auth_token_)
-      - PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.user_id_)>(
-          reinterpret_cast<char*>(&_impl_.user_id_),
-          reinterpret_cast<char*>(&other->_impl_.user_id_));
+      - PROTOBUF_FIELD_OFFSET(GatewayAuthReq, _impl_.account_id_)>(
+          reinterpret_cast<char*>(&_impl_.account_id_),
+          reinterpret_cast<char*>(&other->_impl_.account_id_));
 }
 
 ::google::protobuf::Metadata GatewayAuthReq::GetMetadata() const {

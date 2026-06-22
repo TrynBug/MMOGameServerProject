@@ -33,7 +33,7 @@ inline constexpr Character::Impl_::Impl_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
         character_id_{::int64_t{0}},
-        owner_user_id_{::int64_t{0}},
+        owner_account_id_{::int64_t{0}},
         job_id_{0},
         level_{0},
         exp_{::int64_t{0}},
@@ -74,7 +74,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_._has_bits_),
         14, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.character_id_),
-        PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.owner_user_id_),
+        PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.owner_account_id_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.name_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.job_id_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.level_),
@@ -107,18 +107,18 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_DataStructures_2fcharacter_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\036DataStructures/character.proto\022\016DataSt"
-    "ructures\"\303\001\n\tCharacter\022\024\n\014character_id\030\001"
-    " \001(\003\022\025\n\rowner_user_id\030\002 \001(\003\022\014\n\004name\030\003 \001("
-    "\t\022\016\n\006job_id\030\004 \001(\005\022\r\n\005level\030\005 \001(\005\022\013\n\003exp\030"
-    "\006 \001(\003\022\025\n\rlast_stage_id\030\013 \001(\003\022\r\n\005pos_x\030\014 "
-    "\001(\002\022\r\n\005pos_y\030\r \001(\002\022\013\n\003yaw\030\016 \001(\002\022\r\n\005pos_z"
-    "\030\017 \001(\002b\006proto3"
+    "ructures\"\306\001\n\tCharacter\022\024\n\014character_id\030\001"
+    " \001(\003\022\030\n\020owner_account_id\030\002 \001(\003\022\014\n\004name\030\003"
+    " \001(\t\022\016\n\006job_id\030\004 \001(\005\022\r\n\005level\030\005 \001(\005\022\013\n\003e"
+    "xp\030\006 \001(\003\022\025\n\rlast_stage_id\030\013 \001(\003\022\r\n\005pos_x"
+    "\030\014 \001(\002\022\r\n\005pos_y\030\r \001(\002\022\013\n\003yaw\030\016 \001(\002\022\r\n\005po"
+    "s_z\030\017 \001(\002b\006proto3"
 };
 static ::absl::once_flag descriptor_table_DataStructures_2fcharacter_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_DataStructures_2fcharacter_2eproto = {
     false,
     false,
-    254,
+    257,
     descriptor_table_protodef_DataStructures_2fcharacter_2eproto,
     "DataStructures/character.proto",
     &descriptor_table_DataStructures_2fcharacter_2eproto_once,
@@ -279,10 +279,10 @@ Character::_table_ = {
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Character, _impl_.character_id_), 1>(),
      {8, 1, 0,
       PROTOBUF_FIELD_OFFSET(Character, _impl_.character_id_)}},
-    // int64 owner_user_id = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Character, _impl_.owner_user_id_), 2>(),
+    // int64 owner_account_id = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Character, _impl_.owner_account_id_), 2>(),
      {16, 2, 0,
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.owner_user_id_)}},
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.owner_account_id_)}},
     // string name = 3;
     {::_pbi::TcParser::FastUS1,
      {26, 0, 0,
@@ -328,8 +328,8 @@ Character::_table_ = {
   }}, {{
     // int64 character_id = 1;
     {PROTOBUF_FIELD_OFFSET(Character, _impl_.character_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
-    // int64 owner_user_id = 2;
-    {PROTOBUF_FIELD_OFFSET(Character, _impl_.owner_user_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 owner_account_id = 2;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.owner_account_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // string name = 3;
     {PROTOBUF_FIELD_OFFSET(Character, _impl_.name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // int32 job_id = 4;
@@ -409,12 +409,12 @@ PROTOBUF_NOINLINE void Character::Clear() {
     }
   }
 
-  // int64 owner_user_id = 2;
+  // int64 owner_account_id = 2;
   if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-    if (this_._internal_owner_user_id() != 0) {
+    if (this_._internal_owner_account_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<2>(
-              stream, this_._internal_owner_user_id(), target);
+              stream, this_._internal_owner_account_id(), target);
     }
   }
 
@@ -540,11 +540,11 @@ PROTOBUF_NOINLINE void Character::Clear() {
             this_._internal_character_id());
       }
     }
-    // int64 owner_user_id = 2;
+    // int64 owner_account_id = 2;
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (this_._internal_owner_user_id() != 0) {
+      if (this_._internal_owner_account_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_owner_user_id());
+            this_._internal_owner_account_id());
       }
     }
     // int32 job_id = 4;
@@ -636,8 +636,8 @@ void Character::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (from._internal_owner_user_id() != 0) {
-        _this->_impl_.owner_user_id_ = from._impl_.owner_user_id_;
+      if (from._internal_owner_account_id() != 0) {
+        _this->_impl_.owner_account_id_ = from._impl_.owner_account_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {

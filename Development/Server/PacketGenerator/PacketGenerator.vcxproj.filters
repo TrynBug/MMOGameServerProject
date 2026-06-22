@@ -114,9 +114,6 @@
     <ClInclude Include="Generated\GamePacket\object_visibility_packet.pb.h">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClInclude>
-    <ClInclude Include="Generated\DataStructures\user.pb.h">
-      <Filter>소스 파일\Generated\DataStructures</Filter>
-    </ClInclude>
     <ClInclude Include="Generated\GamePacket\stat_packet.pb.h">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClInclude>
@@ -134,6 +131,9 @@
     </ClInclude>
     <ClInclude Include="Generated\GamePacket\debug_packet.pb.h">
       <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClInclude>
+    <ClInclude Include="Generated\DataStructures\account.pb.h">
+      <Filter>소스 파일\Generated\DataStructures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -206,9 +206,6 @@
     <ClCompile Include="Generated\GamePacket\object_visibility_packet.pb.cc">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClCompile>
-    <ClCompile Include="Generated\DataStructures\user.pb.cc">
-      <Filter>소스 파일\Generated\DataStructures</Filter>
-    </ClCompile>
     <ClCompile Include="Generated\GamePacket\stat_packet.pb.cc">
       <Filter>소스 파일\Generated\GamePacket</Filter>
     </ClCompile>
@@ -226,6 +223,9 @@
     </ClCompile>
     <ClCompile Include="Generated\GamePacket\debug_packet.pb.cc">
       <Filter>소스 파일\Generated\GamePacket</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated\DataStructures\account.pb.cc">
+      <Filter>소스 파일\Generated\DataStructures</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -286,9 +286,6 @@
     <None Include="Proto\GamePacket\object_visibility_packet.proto">
       <Filter>소스 파일\Proto\GamePacket</Filter>
     </None>
-    <None Include="Proto\DataStructures\user.proto">
-      <Filter>소스 파일\Proto\DataStructures</Filter>
-    </None>
     <None Include="Proto\GamePacket\stat_packet.proto">
       <Filter>소스 파일\Proto\GamePacket</Filter>
     </None>
@@ -303,6 +300,9 @@
     </None>
     <None Include="Proto\GamePacket\ability_packet.proto">
       <Filter>소스 파일\Proto\GamePacket</Filter>
+    </None>
+    <None Include="Proto\DataStructures\account.proto">
+      <Filter>소스 파일\Proto\DataStructures</Filter>
     </None>
   </ItemGroup>
 </Project>

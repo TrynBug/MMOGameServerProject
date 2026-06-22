@@ -218,7 +218,7 @@ class LoginRes final : public ::google::protobuf::Message
   enum : int {
     kErrorMsgFieldNumber = 2,
     kGatewayIpFieldNumber = 5,
-    kUserIdFieldNumber = 3,
+    kAccountIdFieldNumber = 3,
     kSuccessFieldNumber = 1,
     kGatewayPortFieldNumber = 6,
     kAuthTokenFieldNumber = 4,
@@ -253,14 +253,14 @@ class LoginRes final : public ::google::protobuf::Message
   ::std::string* PROTOBUF_NONNULL _internal_mutable_gateway_ip();
 
   public:
-  // int64 user_id = 3;
-  void clear_user_id() ;
-  ::int64_t user_id() const;
-  void set_user_id(::int64_t value);
+  // int64 account_id = 3;
+  void clear_account_id() ;
+  ::int64_t account_id() const;
+  void set_account_id(::int64_t value);
 
   private:
-  ::int64_t _internal_user_id() const;
-  void _internal_set_user_id(::int64_t value);
+  ::int64_t _internal_account_id() const;
+  void _internal_set_account_id(::int64_t value);
 
   public:
   // bool success = 1;
@@ -321,7 +321,7 @@ class LoginRes final : public ::google::protobuf::Message
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr error_msg_;
     ::google::protobuf::internal::ArenaStringPtr gateway_ip_;
-    ::int64_t user_id_;
+    ::int64_t account_id_;
     bool success_;
     ::int32_t gateway_port_;
     ::uint64_t auth_token_;
@@ -785,29 +785,29 @@ inline void LoginRes::set_allocated_error_msg(::std::string* PROTOBUF_NULLABLE v
   // @@protoc_insertion_point(field_set_allocated:GamePacket.LoginRes.error_msg)
 }
 
-// int64 user_id = 3;
-inline void LoginRes::clear_user_id() {
+// int64 account_id = 3;
+inline void LoginRes::clear_account_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = ::int64_t{0};
+  _impl_.account_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000004U);
 }
-inline ::int64_t LoginRes::user_id() const {
-  // @@protoc_insertion_point(field_get:GamePacket.LoginRes.user_id)
-  return _internal_user_id();
+inline ::int64_t LoginRes::account_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.LoginRes.account_id)
+  return _internal_account_id();
 }
-inline void LoginRes::set_user_id(::int64_t value) {
-  _internal_set_user_id(value);
+inline void LoginRes::set_account_id(::int64_t value) {
+  _internal_set_account_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000004U);
-  // @@protoc_insertion_point(field_set:GamePacket.LoginRes.user_id)
+  // @@protoc_insertion_point(field_set:GamePacket.LoginRes.account_id)
 }
-inline ::int64_t LoginRes::_internal_user_id() const {
+inline ::int64_t LoginRes::_internal_account_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.user_id_;
+  return _impl_.account_id_;
 }
-inline void LoginRes::_internal_set_user_id(::int64_t value) {
+inline void LoginRes::_internal_set_account_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.user_id_ = value;
+  _impl_.account_id_ = value;
 }
 
 // uint64 auth_token = 4;

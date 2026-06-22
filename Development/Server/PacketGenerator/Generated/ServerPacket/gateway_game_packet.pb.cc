@@ -29,7 +29,7 @@ namespace ServerPacket {
 inline constexpr UserMoveToGameServerReq::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        user_id_{::int64_t{0}},
+        account_id_{::int64_t{0}},
         target_game_server_id_{0},
         target_stage_id_{0},
         character_id_{::int64_t{0}},
@@ -62,7 +62,7 @@ inline constexpr UserMoveToGameServerFailNtf::Impl_::Impl_(
         reason_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        user_id_{::int64_t{0}} {}
+        account_id_{::int64_t{0}} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR UserMoveToGameServerFailNtf::UserMoveToGameServerFailNtf(::_pbi::ConstantInitialized)
@@ -87,7 +87,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 inline constexpr SetClientLatencyReq::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        user_id_{::int64_t{0}},
+        account_id_{::int64_t{0}},
         recv_delay_ms_{0},
         send_delay_ms_{0} {}
 
@@ -121,7 +121,7 @@ const ::uint32_t
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerReq, _impl_._has_bits_),
         9, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerReq, _impl_.user_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerReq, _impl_.account_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerReq, _impl_.target_game_server_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerReq, _impl_.target_stage_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerReq, _impl_.character_id_),
@@ -136,14 +136,14 @@ const ::uint32_t
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerFailNtf, _impl_._has_bits_),
         5, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerFailNtf, _impl_.user_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerFailNtf, _impl_.account_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::UserMoveToGameServerFailNtf, _impl_.reason_),
         1,
         0,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::ServerPacket::SetClientLatencyReq, _impl_._has_bits_),
         6, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::SetClientLatencyReq, _impl_.user_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::SetClientLatencyReq, _impl_.account_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::SetClientLatencyReq, _impl_.recv_delay_ms_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::SetClientLatencyReq, _impl_.send_delay_ms_),
         0,
@@ -165,21 +165,21 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_ServerPacket_2fgateway_5fgame_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n&ServerPacket/gateway_game_packet.proto"
-    "\022\014ServerPacket\"\256\001\n\027UserMoveToGameServerR"
-    "eq\022\017\n\007user_id\030\001 \001(\003\022\035\n\025target_game_serve"
-    "r_id\030\002 \001(\005\022\027\n\017target_stage_id\030\003 \001(\005\022\024\n\014c"
-    "haracter_id\030\004 \001(\003\022\035\n\025target_stage_data_k"
-    "ey\030\005 \001(\005\022\025\n\rposition_type\030\006 \001(\005\">\n\033UserM"
-    "oveToGameServerFailNtf\022\017\n\007user_id\030\001 \001(\003\022"
-    "\016\n\006reason\030\002 \001(\t\"T\n\023SetClientLatencyReq\022\017"
-    "\n\007user_id\030\001 \001(\003\022\025\n\rrecv_delay_ms\030\002 \001(\005\022\025"
-    "\n\rsend_delay_ms\030\003 \001(\005b\006proto3"
+    "\022\014ServerPacket\"\261\001\n\027UserMoveToGameServerR"
+    "eq\022\022\n\naccount_id\030\001 \001(\003\022\035\n\025target_game_se"
+    "rver_id\030\002 \001(\005\022\027\n\017target_stage_id\030\003 \001(\005\022\024"
+    "\n\014character_id\030\004 \001(\003\022\035\n\025target_stage_dat"
+    "a_key\030\005 \001(\005\022\025\n\rposition_type\030\006 \001(\005\"A\n\033Us"
+    "erMoveToGameServerFailNtf\022\022\n\naccount_id\030"
+    "\001 \001(\003\022\016\n\006reason\030\002 \001(\t\"W\n\023SetClientLatenc"
+    "yReq\022\022\n\naccount_id\030\001 \001(\003\022\025\n\rrecv_delay_m"
+    "s\030\002 \001(\005\022\025\n\rsend_delay_ms\030\003 \001(\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto = {
     false,
     false,
-    389,
+    398,
     descriptor_table_protodef_ServerPacket_2fgateway_5fgame_5fpacket_2eproto,
     "ServerPacket/gateway_game_packet.proto",
     &descriptor_table_ServerPacket_2fgateway_5fgame_5fpacket_2eproto_once,
@@ -231,10 +231,10 @@ PROTOBUF_NDEBUG_INLINE UserMoveToGameServerReq::Impl_::Impl_(
 inline void UserMoveToGameServerReq::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, user_id_),
+               offsetof(Impl_, account_id_),
            0,
            offsetof(Impl_, position_type_) -
-               offsetof(Impl_, user_id_) +
+               offsetof(Impl_, account_id_) +
                sizeof(Impl_::position_type_));
 }
 UserMoveToGameServerReq::~UserMoveToGameServerReq() {
@@ -314,10 +314,10 @@ UserMoveToGameServerReq::_table_ = {
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // int64 user_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(UserMoveToGameServerReq, _impl_.user_id_), 0>(),
+    // int64 account_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(UserMoveToGameServerReq, _impl_.account_id_), 0>(),
      {8, 0, 0,
-      PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.user_id_)}},
+      PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.account_id_)}},
     // int32 target_game_server_id = 2;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(UserMoveToGameServerReq, _impl_.target_game_server_id_), 1>(),
      {16, 1, 0,
@@ -342,8 +342,8 @@ UserMoveToGameServerReq::_table_ = {
   }}, {{
     65535, 65535
   }}, {{
-    // int64 user_id = 1;
-    {PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.user_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 account_id = 1;
+    {PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.account_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // int32 target_game_server_id = 2;
     {PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.target_game_server_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // int32 target_stage_id = 3;
@@ -368,9 +368,9 @@ PROTOBUF_NOINLINE void UserMoveToGameServerReq::Clear() {
 
   cached_has_bits = _impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
-    ::memset(&_impl_.user_id_, 0, static_cast<::size_t>(
+    ::memset(&_impl_.account_id_, 0, static_cast<::size_t>(
         reinterpret_cast<char*>(&_impl_.position_type_) -
-        reinterpret_cast<char*>(&_impl_.user_id_)) + sizeof(_impl_.position_type_));
+        reinterpret_cast<char*>(&_impl_.account_id_)) + sizeof(_impl_.position_type_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -395,12 +395,12 @@ PROTOBUF_NOINLINE void UserMoveToGameServerReq::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 user_id = 1;
+  // int64 account_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (this_._internal_user_id() != 0) {
+    if (this_._internal_account_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_user_id(), target);
+              stream, this_._internal_account_id(), target);
     }
   }
 
@@ -475,11 +475,11 @@ PROTOBUF_NOINLINE void UserMoveToGameServerReq::Clear() {
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
-    // int64 user_id = 1;
+    // int64 account_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (this_._internal_user_id() != 0) {
+      if (this_._internal_account_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_user_id());
+            this_._internal_account_id());
       }
     }
     // int32 target_game_server_id = 2;
@@ -538,8 +538,8 @@ void UserMoveToGameServerReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
   cached_has_bits = from._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (from._internal_user_id() != 0) {
-        _this->_impl_.user_id_ = from._impl_.user_id_;
+      if (from._internal_account_id() != 0) {
+        _this->_impl_.account_id_ = from._impl_.account_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
@@ -588,9 +588,9 @@ void UserMoveToGameServerReq::InternalSwap(UserMoveToGameServerReq* PROTOBUF_RES
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.position_type_)
       + sizeof(UserMoveToGameServerReq::_impl_.position_type_)
-      - PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.user_id_)>(
-          reinterpret_cast<char*>(&_impl_.user_id_),
-          reinterpret_cast<char*>(&other->_impl_.user_id_));
+      - PROTOBUF_FIELD_OFFSET(UserMoveToGameServerReq, _impl_.account_id_)>(
+          reinterpret_cast<char*>(&_impl_.account_id_),
+          reinterpret_cast<char*>(&other->_impl_.account_id_));
 }
 
 ::google::protobuf::Metadata UserMoveToGameServerReq::GetMetadata() const {
@@ -636,7 +636,7 @@ UserMoveToGameServerFailNtf::UserMoveToGameServerFailNtf(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  _impl_.user_id_ = from._impl_.user_id_;
+  _impl_.account_id_ = from._impl_.account_id_;
 
   // @@protoc_insertion_point(copy_constructor:ServerPacket.UserMoveToGameServerFailNtf)
 }
@@ -648,7 +648,7 @@ PROTOBUF_NDEBUG_INLINE UserMoveToGameServerFailNtf::Impl_::Impl_(
 
 inline void UserMoveToGameServerFailNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.user_id_ = {};
+  _impl_.account_id_ = {};
 }
 UserMoveToGameServerFailNtf::~UserMoveToGameServerFailNtf() {
   // @@protoc_insertion_point(destructor:ServerPacket.UserMoveToGameServerFailNtf)
@@ -731,15 +731,15 @@ UserMoveToGameServerFailNtf::_table_ = {
     {::_pbi::TcParser::FastUS1,
      {18, 0, 0,
       PROTOBUF_FIELD_OFFSET(UserMoveToGameServerFailNtf, _impl_.reason_)}},
-    // int64 user_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(UserMoveToGameServerFailNtf, _impl_.user_id_), 1>(),
+    // int64 account_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(UserMoveToGameServerFailNtf, _impl_.account_id_), 1>(),
      {8, 1, 0,
-      PROTOBUF_FIELD_OFFSET(UserMoveToGameServerFailNtf, _impl_.user_id_)}},
+      PROTOBUF_FIELD_OFFSET(UserMoveToGameServerFailNtf, _impl_.account_id_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // int64 user_id = 1;
-    {PROTOBUF_FIELD_OFFSET(UserMoveToGameServerFailNtf, _impl_.user_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 account_id = 1;
+    {PROTOBUF_FIELD_OFFSET(UserMoveToGameServerFailNtf, _impl_.account_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // string reason = 2;
     {PROTOBUF_FIELD_OFFSET(UserMoveToGameServerFailNtf, _impl_.reason_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
@@ -761,7 +761,7 @@ PROTOBUF_NOINLINE void UserMoveToGameServerFailNtf::Clear() {
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
     _impl_.reason_.ClearNonDefaultToEmpty();
   }
-  _impl_.user_id_ = ::int64_t{0};
+  _impl_.account_id_ = ::int64_t{0};
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -785,12 +785,12 @@ PROTOBUF_NOINLINE void UserMoveToGameServerFailNtf::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 user_id = 1;
+  // int64 account_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-    if (this_._internal_user_id() != 0) {
+    if (this_._internal_account_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_user_id(), target);
+              stream, this_._internal_account_id(), target);
     }
   }
 
@@ -837,11 +837,11 @@ PROTOBUF_NOINLINE void UserMoveToGameServerFailNtf::Clear() {
                                         this_._internal_reason());
       }
     }
-    // int64 user_id = 1;
+    // int64 account_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (this_._internal_user_id() != 0) {
+      if (this_._internal_account_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_user_id());
+            this_._internal_account_id());
       }
     }
   }
@@ -874,8 +874,8 @@ void UserMoveToGameServerFailNtf::MergeImpl(::google::protobuf::MessageLite& to_
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (from._internal_user_id() != 0) {
-        _this->_impl_.user_id_ = from._impl_.user_id_;
+      if (from._internal_account_id() != 0) {
+        _this->_impl_.account_id_ = from._impl_.account_id_;
       }
     }
   }
@@ -899,7 +899,7 @@ void UserMoveToGameServerFailNtf::InternalSwap(UserMoveToGameServerFailNtf* PROT
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.reason_, &other->_impl_.reason_, arena);
-  swap(_impl_.user_id_, other->_impl_.user_id_);
+  swap(_impl_.account_id_, other->_impl_.account_id_);
 }
 
 ::google::protobuf::Metadata UserMoveToGameServerFailNtf::GetMetadata() const {
@@ -943,10 +943,10 @@ PROTOBUF_NDEBUG_INLINE SetClientLatencyReq::Impl_::Impl_(
 inline void SetClientLatencyReq::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, user_id_),
+               offsetof(Impl_, account_id_),
            0,
            offsetof(Impl_, send_delay_ms_) -
-               offsetof(Impl_, user_id_) +
+               offsetof(Impl_, account_id_) +
                sizeof(Impl_::send_delay_ms_));
 }
 SetClientLatencyReq::~SetClientLatencyReq() {
@@ -1026,10 +1026,10 @@ SetClientLatencyReq::_table_ = {
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // int64 user_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(SetClientLatencyReq, _impl_.user_id_), 0>(),
+    // int64 account_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(SetClientLatencyReq, _impl_.account_id_), 0>(),
      {8, 0, 0,
-      PROTOBUF_FIELD_OFFSET(SetClientLatencyReq, _impl_.user_id_)}},
+      PROTOBUF_FIELD_OFFSET(SetClientLatencyReq, _impl_.account_id_)}},
     // int32 recv_delay_ms = 2;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(SetClientLatencyReq, _impl_.recv_delay_ms_), 1>(),
      {16, 1, 0,
@@ -1041,8 +1041,8 @@ SetClientLatencyReq::_table_ = {
   }}, {{
     65535, 65535
   }}, {{
-    // int64 user_id = 1;
-    {PROTOBUF_FIELD_OFFSET(SetClientLatencyReq, _impl_.user_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 account_id = 1;
+    {PROTOBUF_FIELD_OFFSET(SetClientLatencyReq, _impl_.account_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // int32 recv_delay_ms = 2;
     {PROTOBUF_FIELD_OFFSET(SetClientLatencyReq, _impl_.recv_delay_ms_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // int32 send_delay_ms = 3;
@@ -1061,9 +1061,9 @@ PROTOBUF_NOINLINE void SetClientLatencyReq::Clear() {
 
   cached_has_bits = _impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
-    ::memset(&_impl_.user_id_, 0, static_cast<::size_t>(
+    ::memset(&_impl_.account_id_, 0, static_cast<::size_t>(
         reinterpret_cast<char*>(&_impl_.send_delay_ms_) -
-        reinterpret_cast<char*>(&_impl_.user_id_)) + sizeof(_impl_.send_delay_ms_));
+        reinterpret_cast<char*>(&_impl_.account_id_)) + sizeof(_impl_.send_delay_ms_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -1088,12 +1088,12 @@ PROTOBUF_NOINLINE void SetClientLatencyReq::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 user_id = 1;
+  // int64 account_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (this_._internal_user_id() != 0) {
+    if (this_._internal_account_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_user_id(), target);
+              stream, this_._internal_account_id(), target);
     }
   }
 
@@ -1141,11 +1141,11 @@ PROTOBUF_NOINLINE void SetClientLatencyReq::Clear() {
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
-    // int64 user_id = 1;
+    // int64 account_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (this_._internal_user_id() != 0) {
+      if (this_._internal_account_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_user_id());
+            this_._internal_account_id());
       }
     }
     // int32 recv_delay_ms = 2;
@@ -1183,8 +1183,8 @@ void SetClientLatencyReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
   cached_has_bits = from._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (from._internal_user_id() != 0) {
-        _this->_impl_.user_id_ = from._impl_.user_id_;
+      if (from._internal_account_id() != 0) {
+        _this->_impl_.account_id_ = from._impl_.account_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
@@ -1218,9 +1218,9 @@ void SetClientLatencyReq::InternalSwap(SetClientLatencyReq* PROTOBUF_RESTRICT PR
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(SetClientLatencyReq, _impl_.send_delay_ms_)
       + sizeof(SetClientLatencyReq::_impl_.send_delay_ms_)
-      - PROTOBUF_FIELD_OFFSET(SetClientLatencyReq, _impl_.user_id_)>(
-          reinterpret_cast<char*>(&_impl_.user_id_),
-          reinterpret_cast<char*>(&other->_impl_.user_id_));
+      - PROTOBUF_FIELD_OFFSET(SetClientLatencyReq, _impl_.account_id_)>(
+          reinterpret_cast<char*>(&_impl_.account_id_),
+          reinterpret_cast<char*>(&other->_impl_.account_id_));
 }
 
 ::google::protobuf::Metadata SetClientLatencyReq::GetMetadata() const {

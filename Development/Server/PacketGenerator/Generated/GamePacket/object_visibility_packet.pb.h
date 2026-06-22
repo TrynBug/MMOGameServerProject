@@ -952,7 +952,7 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
     kBuffsFieldNumber = 14,
     kNameFieldNumber = 3,
     kObjectIdFieldNumber = 1,
-    kOwnerUserIdFieldNumber = 2,
+    kOwnerAccountIdFieldNumber = 2,
     kJobIdFieldNumber = 4,
     kLevelFieldNumber = 5,
     kHpFieldNumber = 6,
@@ -1006,14 +1006,14 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
   void _internal_set_object_id(::int64_t value);
 
   public:
-  // int64 owner_user_id = 2;
-  void clear_owner_user_id() ;
-  ::int64_t owner_user_id() const;
-  void set_owner_user_id(::int64_t value);
+  // int64 owner_account_id = 2;
+  void clear_owner_account_id() ;
+  ::int64_t owner_account_id() const;
+  void set_owner_account_id(::int64_t value);
 
   private:
-  ::int64_t _internal_owner_user_id() const;
-  void _internal_set_owner_user_id(::int64_t value);
+  ::int64_t _internal_owner_account_id() const;
+  void _internal_set_owner_account_id(::int64_t value);
 
   public:
   // int32 job_id = 4;
@@ -1145,7 +1145,7 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
     ::google::protobuf::RepeatedPtrField< ::GamePacket::BuffSnapshotInfo > buffs_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::int64_t object_id_;
-    ::int64_t owner_user_id_;
+    ::int64_t owner_account_id_;
     ::int32_t job_id_;
     ::int32_t level_;
     double hp_;
@@ -1521,29 +1521,29 @@ inline void CharacterSpawnInfo::_internal_set_object_id(::int64_t value) {
   _impl_.object_id_ = value;
 }
 
-// int64 owner_user_id = 2;
-inline void CharacterSpawnInfo::clear_owner_user_id() {
+// int64 owner_account_id = 2;
+inline void CharacterSpawnInfo::clear_owner_account_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.owner_user_id_ = ::int64_t{0};
+  _impl_.owner_account_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000008U);
 }
-inline ::int64_t CharacterSpawnInfo::owner_user_id() const {
-  // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.owner_user_id)
-  return _internal_owner_user_id();
+inline ::int64_t CharacterSpawnInfo::owner_account_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.owner_account_id)
+  return _internal_owner_account_id();
 }
-inline void CharacterSpawnInfo::set_owner_user_id(::int64_t value) {
-  _internal_set_owner_user_id(value);
+inline void CharacterSpawnInfo::set_owner_account_id(::int64_t value) {
+  _internal_set_owner_account_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000008U);
-  // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.owner_user_id)
+  // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.owner_account_id)
 }
-inline ::int64_t CharacterSpawnInfo::_internal_owner_user_id() const {
+inline ::int64_t CharacterSpawnInfo::_internal_owner_account_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.owner_user_id_;
+  return _impl_.owner_account_id_;
 }
-inline void CharacterSpawnInfo::_internal_set_owner_user_id(::int64_t value) {
+inline void CharacterSpawnInfo::_internal_set_owner_account_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.owner_user_id_ = value;
+  _impl_.owner_account_id_ = value;
 }
 
 // string name = 3;

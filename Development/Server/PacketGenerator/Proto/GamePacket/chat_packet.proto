@@ -13,7 +13,7 @@ message ChatSendReq {
 
 // 채팅 수신 알림 (게임서버 -> 클라 브로드캐스트)
 message ChatRecvNtf {
-    int64 sender_user_id = 1;
+    int64 sender_account_id = 1;
     string sender_name = 2;
     string message = 3;
 }

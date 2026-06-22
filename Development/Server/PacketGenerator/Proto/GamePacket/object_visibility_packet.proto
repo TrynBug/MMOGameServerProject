@@ -13,7 +13,7 @@ package GamePacket;
 // despawn_ids 리스트의 id를 자기 사전에서 제거한다.
 //
 // idempotent 처리: 같은 object_id가 이미 사전에 있으면 정보를 갱신, 없으면 신규 생성.
-// 자기 자신의 캐릭터도 spawns에 포함될 수 있다 (owner_user_id로 자기/남 구분).
+// 자기 자신의 캐릭터도 spawns에 포함될 수 있다 (owner_account_id로 자기/남 구분).
 
 // 가시 범위 진입 시 해당 오브젝트가 보유한 버프 1개 (UI 뱃지용).
 // 스탯/HP 효과는 별도(StatUpdateNtf/HpMpNtf)로 전달되며, 여기는 표시 정보만 담는다.
@@ -27,7 +27,7 @@ message BuffSnapshotInfo {
 // 좌표계: Unity 와 동일. Y가 높이, X-Z 가 평면.
 message CharacterSpawnInfo {
     int64  object_id      = 1;   // = character_id
-    int64  owner_user_id  = 2;
+    int64  owner_account_id = 2;
     string name           = 3;
     int32  job_id         = 4;
     int32  level          = 5;

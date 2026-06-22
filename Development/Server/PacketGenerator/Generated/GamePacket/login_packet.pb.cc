@@ -35,7 +35,7 @@ inline constexpr LoginRes::Impl_::Impl_(
         gateway_ip_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        user_id_{::int64_t{0}},
+        account_id_{::int64_t{0}},
         success_{false},
         gateway_port_{0},
         auth_token_{::uint64_t{0u}} {}
@@ -109,7 +109,7 @@ const ::uint32_t
         9, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GamePacket::LoginRes, _impl_.success_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::LoginRes, _impl_.error_msg_),
-        PROTOBUF_FIELD_OFFSET(::GamePacket::LoginRes, _impl_.user_id_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::LoginRes, _impl_.account_id_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::LoginRes, _impl_.auth_token_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::LoginRes, _impl_.gateway_ip_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::LoginRes, _impl_.gateway_port_),
@@ -134,16 +134,16 @@ const char descriptor_table_protodef_GamePacket_2flogin_5fpacket_2eproto[] ABSL_
     protodesc_cold) = {
     "\n\035GamePacket/login_packet.proto\022\nGamePac"
     "ket\".\n\010LoginReq\022\020\n\010login_id\030\001 \001(\t\022\020\n\010pas"
-    "sword\030\002 \001(\t\"}\n\010LoginRes\022\017\n\007success\030\001 \001(\010"
-    "\022\021\n\terror_msg\030\002 \001(\t\022\017\n\007user_id\030\003 \001(\003\022\022\n\n"
-    "auth_token\030\004 \001(\004\022\022\n\ngateway_ip\030\005 \001(\t\022\024\n\014"
-    "gateway_port\030\006 \001(\005b\006proto3"
+    "sword\030\002 \001(\t\"\200\001\n\010LoginRes\022\017\n\007success\030\001 \001("
+    "\010\022\021\n\terror_msg\030\002 \001(\t\022\022\n\naccount_id\030\003 \001(\003"
+    "\022\022\n\nauth_token\030\004 \001(\004\022\022\n\ngateway_ip\030\005 \001(\t"
+    "\022\024\n\014gateway_port\030\006 \001(\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2flogin_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2flogin_5fpacket_2eproto = {
     false,
     false,
-    226,
+    230,
     descriptor_table_protodef_GamePacket_2flogin_5fpacket_2eproto,
     "GamePacket/login_packet.proto",
     &descriptor_table_GamePacket_2flogin_5fpacket_2eproto_once,
@@ -519,11 +519,11 @@ LoginRes::LoginRes(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
   ::memcpy(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, user_id_),
+               offsetof(Impl_, account_id_),
            reinterpret_cast<const char*>(&from._impl_) +
-               offsetof(Impl_, user_id_),
+               offsetof(Impl_, account_id_),
            offsetof(Impl_, auth_token_) -
-               offsetof(Impl_, user_id_) +
+               offsetof(Impl_, account_id_) +
                sizeof(Impl_::auth_token_));
 
   // @@protoc_insertion_point(copy_constructor:GamePacket.LoginRes)
@@ -538,10 +538,10 @@ PROTOBUF_NDEBUG_INLINE LoginRes::Impl_::Impl_(
 inline void LoginRes::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, user_id_),
+               offsetof(Impl_, account_id_),
            0,
            offsetof(Impl_, auth_token_) -
-               offsetof(Impl_, user_id_) +
+               offsetof(Impl_, account_id_) +
                sizeof(Impl_::auth_token_));
 }
 LoginRes::~LoginRes() {
@@ -631,10 +631,10 @@ LoginRes::_table_ = {
     {::_pbi::TcParser::FastUS1,
      {18, 0, 0,
       PROTOBUF_FIELD_OFFSET(LoginRes, _impl_.error_msg_)}},
-    // int64 user_id = 3;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(LoginRes, _impl_.user_id_), 2>(),
+    // int64 account_id = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(LoginRes, _impl_.account_id_), 2>(),
      {24, 2, 0,
-      PROTOBUF_FIELD_OFFSET(LoginRes, _impl_.user_id_)}},
+      PROTOBUF_FIELD_OFFSET(LoginRes, _impl_.account_id_)}},
     // uint64 auth_token = 4;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(LoginRes, _impl_.auth_token_), 5>(),
      {32, 5, 0,
@@ -655,8 +655,8 @@ LoginRes::_table_ = {
     {PROTOBUF_FIELD_OFFSET(LoginRes, _impl_.success_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
     // string error_msg = 2;
     {PROTOBUF_FIELD_OFFSET(LoginRes, _impl_.error_msg_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // int64 user_id = 3;
-    {PROTOBUF_FIELD_OFFSET(LoginRes, _impl_.user_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 account_id = 3;
+    {PROTOBUF_FIELD_OFFSET(LoginRes, _impl_.account_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // uint64 auth_token = 4;
     {PROTOBUF_FIELD_OFFSET(LoginRes, _impl_.auth_token_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kUInt64)},
     // string gateway_ip = 5;
@@ -689,9 +689,9 @@ PROTOBUF_NOINLINE void LoginRes::Clear() {
     }
   }
   if (BatchCheckHasBit(cached_has_bits, 0x0000003cU)) {
-    ::memset(&_impl_.user_id_, 0, static_cast<::size_t>(
+    ::memset(&_impl_.account_id_, 0, static_cast<::size_t>(
         reinterpret_cast<char*>(&_impl_.auth_token_) -
-        reinterpret_cast<char*>(&_impl_.user_id_)) + sizeof(_impl_.auth_token_));
+        reinterpret_cast<char*>(&_impl_.account_id_)) + sizeof(_impl_.auth_token_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -735,12 +735,12 @@ PROTOBUF_NOINLINE void LoginRes::Clear() {
     }
   }
 
-  // int64 user_id = 3;
+  // int64 account_id = 3;
   if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-    if (this_._internal_user_id() != 0) {
+    if (this_._internal_account_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<3>(
-              stream, this_._internal_user_id(), target);
+              stream, this_._internal_account_id(), target);
     }
   }
 
@@ -812,11 +812,11 @@ PROTOBUF_NOINLINE void LoginRes::Clear() {
                                         this_._internal_gateway_ip());
       }
     }
-    // int64 user_id = 3;
+    // int64 account_id = 3;
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (this_._internal_user_id() != 0) {
+      if (this_._internal_account_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_user_id());
+            this_._internal_account_id());
       }
     }
     // bool success = 1;
@@ -878,8 +878,8 @@ void LoginRes::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (from._internal_user_id() != 0) {
-        _this->_impl_.user_id_ = from._impl_.user_id_;
+      if (from._internal_account_id() != 0) {
+        _this->_impl_.account_id_ = from._impl_.account_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
@@ -922,9 +922,9 @@ void LoginRes::InternalSwap(LoginRes* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) 
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(LoginRes, _impl_.auth_token_)
       + sizeof(LoginRes::_impl_.auth_token_)
-      - PROTOBUF_FIELD_OFFSET(LoginRes, _impl_.user_id_)>(
-          reinterpret_cast<char*>(&_impl_.user_id_),
-          reinterpret_cast<char*>(&other->_impl_.user_id_));
+      - PROTOBUF_FIELD_OFFSET(LoginRes, _impl_.account_id_)>(
+          reinterpret_cast<char*>(&_impl_.account_id_),
+          reinterpret_cast<char*>(&other->_impl_.account_id_));
 }
 
 ::google::protobuf::Metadata LoginRes::GetMetadata() const {

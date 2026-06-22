@@ -25,14 +25,14 @@ namespace GamePacket {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChxHYW1lUGFja2V0L2NoYXRfcGFja2V0LnByb3RvEgpHYW1lUGFja2V0Ih4K",
-            "C0NoYXRTZW5kUmVxEg8KB21lc3NhZ2UYASABKAkiSwoLQ2hhdFJlY3ZOdGYS",
-            "FgoOc2VuZGVyX3VzZXJfaWQYASABKAMSEwoLc2VuZGVyX25hbWUYAiABKAkS",
-            "DwoHbWVzc2FnZRgDIAEoCWIGcHJvdG8z"));
+            "C0NoYXRTZW5kUmVxEg8KB21lc3NhZ2UYASABKAkiTgoLQ2hhdFJlY3ZOdGYS",
+            "GQoRc2VuZGVyX2FjY291bnRfaWQYASABKAMSEwoLc2VuZGVyX25hbWUYAiAB",
+            "KAkSDwoHbWVzc2FnZRgDIAEoCWIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ChatSendReq), global::GamePacket.ChatSendReq.Parser, new[]{ "Message" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ChatRecvNtf), global::GamePacket.ChatRecvNtf.Parser, new[]{ "SenderUserId", "SenderName", "Message" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ChatRecvNtf), global::GamePacket.ChatRecvNtf.Parser, new[]{ "SenderAccountId", "SenderName", "Message" }, null, null, null, null)
           }));
     }
     #endregion
@@ -278,7 +278,7 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public ChatRecvNtf(ChatRecvNtf other) : this() {
-      senderUserId_ = other.senderUserId_;
+      senderAccountId_ = other.senderAccountId_;
       senderName_ = other.senderName_;
       message_ = other.message_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -290,15 +290,15 @@ namespace GamePacket {
       return new ChatRecvNtf(this);
     }
 
-    /// <summary>Field number for the "sender_user_id" field.</summary>
-    public const int SenderUserIdFieldNumber = 1;
-    private long senderUserId_;
+    /// <summary>Field number for the "sender_account_id" field.</summary>
+    public const int SenderAccountIdFieldNumber = 1;
+    private long senderAccountId_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public long SenderUserId {
-      get { return senderUserId_; }
+    public long SenderAccountId {
+      get { return senderAccountId_; }
       set {
-        senderUserId_ = value;
+        senderAccountId_ = value;
       }
     }
 
@@ -341,7 +341,7 @@ namespace GamePacket {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (SenderUserId != other.SenderUserId) return false;
+      if (SenderAccountId != other.SenderAccountId) return false;
       if (SenderName != other.SenderName) return false;
       if (Message != other.Message) return false;
       return Equals(_unknownFields, other._unknownFields);
@@ -351,7 +351,7 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
-      if (SenderUserId != 0L) hash ^= SenderUserId.GetHashCode();
+      if (SenderAccountId != 0L) hash ^= SenderAccountId.GetHashCode();
       if (SenderName.Length != 0) hash ^= SenderName.GetHashCode();
       if (Message.Length != 0) hash ^= Message.GetHashCode();
       if (_unknownFields != null) {
@@ -372,9 +372,9 @@ namespace GamePacket {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (SenderUserId != 0L) {
+      if (SenderAccountId != 0L) {
         output.WriteRawTag(8);
-        output.WriteInt64(SenderUserId);
+        output.WriteInt64(SenderAccountId);
       }
       if (SenderName.Length != 0) {
         output.WriteRawTag(18);
@@ -394,9 +394,9 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (SenderUserId != 0L) {
+      if (SenderAccountId != 0L) {
         output.WriteRawTag(8);
-        output.WriteInt64(SenderUserId);
+        output.WriteInt64(SenderAccountId);
       }
       if (SenderName.Length != 0) {
         output.WriteRawTag(18);
@@ -416,8 +416,8 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
-      if (SenderUserId != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(SenderUserId);
+      if (SenderAccountId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(SenderAccountId);
       }
       if (SenderName.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(SenderName);
@@ -437,8 +437,8 @@ namespace GamePacket {
       if (other == null) {
         return;
       }
-      if (other.SenderUserId != 0L) {
-        SenderUserId = other.SenderUserId;
+      if (other.SenderAccountId != 0L) {
+        SenderAccountId = other.SenderAccountId;
       }
       if (other.SenderName.Length != 0) {
         SenderName = other.SenderName;
@@ -466,7 +466,7 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            SenderUserId = input.ReadInt64();
+            SenderAccountId = input.ReadInt64();
             break;
           }
           case 18: {
@@ -497,7 +497,7 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 8: {
-            SenderUserId = input.ReadInt64();
+            SenderAccountId = input.ReadInt64();
             break;
           }
           case 18: {
