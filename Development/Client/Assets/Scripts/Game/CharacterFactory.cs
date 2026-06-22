@@ -25,7 +25,7 @@ namespace Client.Game
         // Resources/ 하위 경로 (확장자 없음).
         private const string k_playerPrefabPath = "Prefabs/Characters/Mage";
 
-        public static PlayerCharacter Create(long accountId, string name, bool isLocalPlayer, Vector3 pos, float dirY)
+        public static PlayerCharacter Create(long objectId, string name, bool isLocalPlayer, Vector3 pos, float dirY)
         {
             // prefab 로드 + Instantiate.
             // 현재는 동기 Load (Resources). 추후 Addressables 도입 시 InstantiateAsync 로 교체.
@@ -46,7 +46,7 @@ namespace Client.Game
                 return null;
             }
 
-            pc.Initialize(accountId, name, isLocalPlayer, pos, dirY);
+            pc.Initialize(objectId, name, isLocalPlayer, pos, dirY);
 
             // 머리 위 체력바 부착 (코드 생성 placeholder). 로컬 플레이어를 빼려면 if (!isLocalPlayer) 가드.
             HealthBar.Attach(pc);

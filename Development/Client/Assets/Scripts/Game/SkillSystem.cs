@@ -517,7 +517,7 @@ namespace Client.Game
         private void onSkillCastNtf(SkillCastNtf ntf)
         {
             long localId = StageManager.Instance != null && StageManager.Instance.LocalPlayer != null
-                ? StageManager.Instance.LocalPlayer.AccountId
+                ? StageManager.Instance.LocalPlayer.ObjectId
                 : 0;
 
             if (ntf.CasterObjectId == localId)

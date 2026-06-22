@@ -266,7 +266,7 @@ namespace Client.Game
         {
             long myCharacterId = 0;
             if (LocalPlayer != null)
-                myCharacterId = LocalPlayer.AccountId;
+                myCharacterId = LocalPlayer.ObjectId;
 
             // 캐릭터 스폰정보 처리
             foreach (CharacterSpawnInfo characterSpawnInfo in ntf.CharacterSpawns)
@@ -280,7 +280,7 @@ namespace Client.Game
                 }
 
                 PlayerCharacter remoteCharacter = spawnRemoteCharacter(
-                    accountId: characterSpawnInfo.ObjectId,
+                    objectId: characterSpawnInfo.ObjectId,
                     name: characterSpawnInfo.Name,
                     pos: new Vector3(characterSpawnInfo.PosX, characterSpawnInfo.PosY, characterSpawnInfo.PosZ),
                     dirY: characterSpawnInfo.Yaw);
@@ -359,7 +359,7 @@ namespace Client.Game
             NetClock.OnServerTick(ntf.ServerTickSeq);
             double serverMs = ntf.ServerTickSeq * NetClock.ServerTickIntervalMs;
 
-            long myObjectId = (LocalPlayer != null) ? LocalPlayer.AccountId : 0;
+            long myObjectId = (LocalPlayer != null) ? LocalPlayer.ObjectId : 0;
 
             foreach (ActorStateInfo s in ntf.States)
             {
@@ -493,7 +493,7 @@ namespace Client.Game
         // ─── 내부 ──────────────────────────────────────────────────────
 
         // object_id 로 캐릭터/몬스터의 BuffHolder 를 찾는다. 없으면 null.
-        // (현재 character_id == object_id == accountId 체계라 캐릭터는 m_characters 에서 바로 찾힌다.)
+        // 캐릭터는 objectId(=characterId)를 키로 m_characters 에 저장되므로 바로 찾는다.
         private BuffHolder findBuffHolder(long objectId)
         {
             if (m_characters.TryGetValue(objectId, out PlayerCharacter character) && character != null)
@@ -524,18 +524,18 @@ namespace Client.Game
             SectorGridDebug.ShowForStage(stageData.NavMeshFileName, stageData.sectorSize, groundY);
         }
 
-        private PlayerCharacter spawnRemoteCharacter(long accountId, string name, Vector3 pos, float dirY)
+        private PlayerCharacter spawnRemoteCharacter(long objectId, string name, Vector3 pos, float dirY)
         {
-            if (m_characters.TryGetValue(accountId, out PlayerCharacter existing))
+            if (m_characters.TryGetValue(objectId, out PlayerCharacter existing))
             {
                 // 이미 존재(원격은 보간 중)하면 위치를 직접 덮어쓰지 않는다 — 스냅샷 보간과 충돌해 깜빡임/snap 유발.
                 // 중복 spawn 은 위치 갱신 없이 무시한다(위치는 SnapshotNtf 가 담당).
-                Debug.LogWarning($"[StageManager] character already exists. accountId={accountId}. Reusing (pos untouched).");
+                Debug.LogWarning($"[StageManager] character already exists. objectId={objectId}. Reusing (pos untouched).");
                 return existing;
             }
 
-            PlayerCharacter pc = CharacterFactory.Create(accountId, name, isLocalPlayer: false, pos, dirY);
-            m_characters.Add(accountId, pc);
+            PlayerCharacter pc = CharacterFactory.Create(objectId, name, isLocalPlayer: false, pos, dirY);
+            m_characters.Add(objectId, pc);
             return pc;
         }
 
