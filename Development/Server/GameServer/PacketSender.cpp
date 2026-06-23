@@ -204,10 +204,11 @@ void PacketSender::SendStatUpdateNtf(int64 accountId, const Character& character
 void PacketSender::SendHpMpNtf(int64 accountId, double curHp, double curMp)
 {
     GamePacket::HpMpNtf ntf;
-    // objectId 는 현재 본인에게만 보내므로 accountId 와 동일한 캐릭터 objectId 를 쓴다.
-    // (현재 character_id == objectId == accountId 체계. 향후 구분되면 명시 전달로 변경.)
+    // 본인에게만 보내는 Ntf. object_id 에는 소유 캐릭터의 objectId(=characterId)를 담는다.
+    // accountId(연결 식별자)와는 별개 값이므로 User 의 현재 캐릭터에서 objectId 를 얻는다.
+    // 캐릭터 미선택 등으로 못 찾으면 0(유효 objectId 없음 — 정상 흐름에선 발생하지 않음).
     UserPtr spUser;
-    int64 objectId = accountId;
+    int64 objectId = 0;
     if (m_safeUsers.Find(accountId, spUser) && spUser)
     {
         if (CharacterPtr spCharacter = spUser->GetCurrentCharacter())

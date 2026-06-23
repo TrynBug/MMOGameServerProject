@@ -772,11 +772,9 @@ void Stage::OnUserEnter(const UserPtr& spUser)
     // 캐릭터 스폰은 별도 단계 (2단계 입장).
     // 유저가 Moving 상태로 pendingCharacter를 들고 있으면, 클라의 StageLoadCompleteReq
     // 수신 시 spawnPendingCharacter가 스폰한다. SystemStage는 캐릭터가 없으므로 여기서 끝.
+    // 스크립트 OnPlayerEnter 콜백은 세션 입장이 아니라 캐릭터 스폰 완료 후(spawnPendingCharacter)에 발동한다.
     LOG_WRITE(LogLevel::Info, std::format("stageId={} accountId={} stageState={} totalUsers={}",
         m_stageId, accountId, static_cast<int32>(spUser->GetStageState()), m_users.size()));
-
-    if (m_pScript)
-        m_pScript->CallOnPlayerEnter(accountId);
 }
 
 void Stage::spawnPendingCharacter(const UserPtr& spUser)
@@ -838,7 +836,7 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     const int64 objectId = spCharacter->GetObjectId();
 
     // 캐릭터는 중요 오브젝트 → 매 tick(50ms) 업데이트. 등록 진입점에 주기를 명시 전달.
-    registerObject(spCharacter, k_characterUpdateIntervalMs, m_userObjects);
+    registerObject(spCharacter, k_characterUpdateIntervalMs, m_characterObjects);
 
     // 상태 전환 (캐릭터 소유는 이미 User가 갖고 있으므로 별도 설정 불필요).
     spUser->SetStageState(EUserStageState::InStage);
@@ -901,6 +899,10 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     // 스폰 완료 후 서브클래스 훅 (기본 no-op). 캐릭터가 Stage에 등록되고 통보까지 끝난 뒤 호출.
     // 예: 입장 버프 부여, 이벤트 트리거.
     OnCharacterSpawned(spUser, spCharacter);
+
+    // 스크립트 OnPlayerEnter 콜백 — 캐릭터 스폰이 끝난 뒤이므로 objectId(=characterId)를 넘긴다.
+    if (m_pScript)
+        m_pScript->CallOnPlayerEnter(objectId);
 }
 
 // ── AsyncPin (코루틴 후속작업 동안 Stage/Character 고정) ──────────────────────
@@ -983,7 +985,7 @@ void Stage::OnUserLeave(int64 accountId)
         }
     }
 
-    // User에 연결된 Character가 있으면 m_objects/m_userObjects에서 제거.
+    // User에 연결된 Character가 있으면 m_objects/m_characterObjects에서 제거.
     int64 leavingObjectId = 0;
     int32 leavingSectorX  = -1;
     int32 leavingSectorZ  = -1;
@@ -1002,7 +1004,7 @@ void Stage::OnUserLeave(int64 accountId)
             // sector에서 먼저 제거.
             removeObjectFromSector(spCharacter.get());
 
-            m_userObjects.erase(leavingObjectId);
+            m_characterObjects.erase(leavingObjectId);
             m_objects.erase(leavingObjectId);
             spCharacter->SetStage(nullptr);
         }
@@ -1013,13 +1015,14 @@ void Stage::OnUserLeave(int64 accountId)
     LOG_WRITE(LogLevel::Info, std::format("stageId={} accountId={} totalUsers={} totalObjects={}",
         m_stageId, accountId, m_users.size(), m_objects.size()));
 
+    // 스크립트 OnPlayerLeave 콜백 — 스폰됐던 캐릭터의 objectId. 캐릭터 없이 떠난 경우 0.
     if (m_pScript)
-        m_pScript->CallOnPlayerLeave(accountId);
+        m_pScript->CallOnPlayerLeave(leavingObjectId);
 
     // 이벤트영역 occupant 에서 제거 — 영역 안에 있던 채로 떠나도 stale 항목이 남지 않게.
-    // (남으면 같은 유저 재입장 시 진입 보고가 중복방지에 걸려 콜백이 안 뜸.)
+    // (남으면 같은 캐릭터 재입장 시 진입 보고가 중복방지에 걸려 콜백이 안 뜸.)
     for (auto& [eventKey, spEventArea] : m_eventAreas)
-        spEventArea->RemoveOccupant(accountId);
+        spEventArea->RemoveOccupant(leavingObjectId);
 
     // 주변 sector의 다른 캐릭터들에게 despawn broadcast.
     if (leavingObjectId != 0)
@@ -1352,6 +1355,7 @@ void Stage::handleEventAreaEnterReq(const UserPtr& spUser, const netlib::PacketP
     CharacterPtr spCharacter = spUser->GetCurrentCharacter();
     if (!spCharacter || spCharacter->GetStage() != this)
         return;
+    const int64 objectId = spCharacter->GetObjectId();
 
     // 2) 검증 — 클라는 예측 이동이라 서버의 권위 위치는 latency 만큼 뒤처진다.
     //    권위 위치를 직접 영역과 비교하면 그 lag 만큼 거의 항상 빗나가므로(=mismatch 경고 폭주),
@@ -1385,12 +1389,12 @@ void Stage::handleEventAreaEnterReq(const UserPtr& spUser, const netlib::PacketP
     }
 
     // 3) 중복 진입 방지 — 이미 안에 있으면 콜백 재발동 안 함(클라 Enter 재전송도 여기서 흡수).
-    if (!area.AddOccupant(accountId))
+    if (!area.AddOccupant(objectId))
         return;
 
     // 4) 스크립트 트리거. loc 은 영역 안으로 검증된 보고 위치를 넘긴다.
     if (m_pScript)
-        m_pScript->CallOnEnterEventArea(eventKey, accountId, rx, ry, rz);
+        m_pScript->CallOnEnterEventArea(eventKey, objectId, rx, ry, rz);
 }
 
 void Stage::handleEventAreaExitReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
@@ -1399,7 +1403,6 @@ void Stage::handleEventAreaExitReq(const UserPtr& spUser, const netlib::PacketPt
     if (!deserializeUserPacket(spUser, spPacket, req))
         return;
 
-    const int64 accountId   = spUser->GetAccountId();
     const int32 eventKey = req.event_key();
 
     auto it = m_eventAreas.find(eventKey);
@@ -1410,17 +1413,19 @@ void Stage::handleEventAreaExitReq(const UserPtr& spUser, const netlib::PacketPt
     if (it->second->IsSecure())
         return;
 
-    // 안에 있던 유저만 이탈 처리(중복/허위 이탈 무시). 이탈은 관대하게 — 위치 재검증 생략.
-    if (!it->second->RemoveOccupant(accountId))
+    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+    const int64 objectId = spCharacter ? spCharacter->GetObjectId() : 0;
+
+    // 안에 있던 캐릭터만 이탈 처리(중복/허위 이탈 무시). 이탈은 관대하게 — 위치 재검증 생략.
+    if (!it->second->RemoveOccupant(objectId))
         return;
 
-    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
     const float px = spCharacter ? spCharacter->GetPosX() : req.pos_x();
     const float py = spCharacter ? spCharacter->GetPosY() : req.pos_y();
     const float pz = spCharacter ? spCharacter->GetPosZ() : req.pos_z();
 
     if (m_pScript)
-        m_pScript->CallOnExitEventArea(eventKey, accountId, px, py, pz);
+        m_pScript->CallOnExitEventArea(eventKey, objectId, px, py, pz);
 }
 
 // secure 영역만 서버가 권위 위치로 직접 폴링한다(클라 보고 미신뢰 — 안티익스플로잇 게이트 등).
@@ -1438,6 +1443,7 @@ void Stage::pollSecureEventAreas()
             CharacterPtr spCharacter = spUser->GetCurrentCharacter();
             if (!spCharacter || spCharacter->GetStage() != this)
                 continue;
+            const int64 objectId = spCharacter->GetObjectId();
 
             const float px = spCharacter->GetPosX();
             const float pz = spCharacter->GetPosZ();
@@ -1446,14 +1452,14 @@ void Stage::pollSecureEventAreas()
             if (inside)
             {
                 // 신규 진입이면(AddOccupant==true) 콜백.
-                if (area.AddOccupant(accountId) && m_pScript)
-                    m_pScript->CallOnEnterEventArea(eventKey, accountId, px, spCharacter->GetPosY(), pz);
+                if (area.AddOccupant(objectId) && m_pScript)
+                    m_pScript->CallOnEnterEventArea(eventKey, objectId, px, spCharacter->GetPosY(), pz);
             }
             else
             {
                 // 안에 있다가 나갔으면(RemoveOccupant==true) 콜백.
-                if (area.RemoveOccupant(accountId) && m_pScript)
-                    m_pScript->CallOnExitEventArea(eventKey, accountId, px, spCharacter->GetPosY(), pz);
+                if (area.RemoveOccupant(objectId) && m_pScript)
+                    m_pScript->CallOnExitEventArea(eventKey, objectId, px, spCharacter->GetPosY(), pz);
             }
         }
     }
@@ -1514,7 +1520,7 @@ void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketP
 
     // 3) 스크립트 트리거 (fire-and-forget — prop 상태/Ntf 없음. 연출은 스크립트가 Notice 등으로).
     if (m_pScript)
-        m_pScript->CallOnObjectInteract(propKey, accountId);
+        m_pScript->CallOnObjectInteract(propKey, spCharacter->GetObjectId());
 }
 
 void Stage::processUserPackets()
@@ -1546,9 +1552,9 @@ void Stage::processUserPackets()
 
 void Stage::updateCharacters(int64 deltaMs)
 {
-    // m_userObjects의 모든 Character를 이동 시뮬레이션 한 다음 sector 소속 갱신.
-    // 현재 m_userObjects에 들어가는 객체는 모두 Character (EObjectType::User)이므로 static_cast 안전.
-    for (auto& [objectId, spObject] : m_userObjects)
+    // m_characterObjects의 모든 Character를 이동 시뮬레이션 한 다음 sector 소속 갱신.
+    // 현재 m_characterObjects에 들어가는 객체는 모두 Character (EObjectType::User)이므로 static_cast 안전.
+    for (auto& [objectId, spObject] : m_characterObjects)
     {
         Character* pCharacter = static_cast<Character*>(spObject.get());
 
@@ -1778,7 +1784,7 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
 
     // ── newAOI 순회 ──
     // oldAOI에 없던 sector(=새로 보임)의 캐릭터들에게 spawn 교환.
-    // 자기 자신은 제외 (이미 m_userObjects/newSector에 있고, 본인은 spawn 알 필요 없음).
+    // 자기 자신은 제외 (이미 m_characterObjects/newSector에 있고, 본인은 spawn 알 필요 없음).
     std::vector<GamePacket::CharacterSpawnInfo> newlyVisibleSpawnsForMe;
     newlyVisibleSpawnsForMe.reserve(8);
     std::vector<GamePacket::MonsterSpawnInfo> newlyVisibleMonstersForMe;

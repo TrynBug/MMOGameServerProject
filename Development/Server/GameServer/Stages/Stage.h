@@ -456,7 +456,7 @@ private:
     // 각 유저의 클라 패킷 큐 drain 및 처리
     void processUserPackets();
 
-    // m_userObjects 순회하면서 Character::Update 호출 + sector 갱신.
+    // m_characterObjects 순회하면서 Character::Update 호출 + sector 갱신.
     void updateCharacters(int64 deltaMs);
 
     // m_monsterObjects 순회하면서 Monster::Update(FSM) 호출.
@@ -578,9 +578,9 @@ private:
 
     // ── StageObject 통합 + 타입별 소유 컨테이너 ──
     // 모든 StageObject의 lifetime은 m_objects가 관리(shared_ptr).
-    // 타입별 맵(m_userObjects 등)은 같은 shared_ptr을 빠른 조회용으로 보관.
+    // 타입별 맵(m_characterObjects 등)은 같은 shared_ptr을 빠른 조회용으로 보관.
     std::unordered_map<int64, StageObjectPtr> m_objects;
-    std::unordered_map<int64, StageObjectPtr> m_userObjects;
+    std::unordered_map<int64, StageObjectPtr> m_characterObjects;
     std::unordered_map<int64, StageObjectPtr> m_monsterObjects;
     std::unordered_map<int64, StageObjectPtr> m_propObjects;
     std::unordered_map<int64, StageObjectPtr> m_dropObjects;

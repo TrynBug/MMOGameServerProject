@@ -38,16 +38,18 @@ public:
 
     // 생애주기 콜백 — 정의한 모든 스크립트에 멀티캐스트 (전부 pcall 격리 + 인스트럭션 가드).
     void CallOnStageStart();
-    void CallOnPlayerEnter(int64 accountId);
-    void CallOnPlayerLeave(int64 accountId);
+    // 캐릭터가 Stage 에 스폰 완료된 뒤 호출(세션 입장 시점 아님). objectId(=characterId)를 넘긴다.
+    void CallOnPlayerEnter(int64 objectId);
+    // 캐릭터 퇴장 시 호출. 스폰됐던 캐릭터의 objectId. 캐릭터 없이 떠난 경우(미스폰 등)는 0.
+    void CallOnPlayerLeave(int64 objectId);
 
     // 이벤트영역 진입/이탈 — Stage 가 클라 보고를 권위 위치로 검증한 뒤 호출.
-    // 좌표는 원시타입으로 전달(Vector3 헤더 의존 회피). Lua: OnEnterEventArea(eventKey, accountId, x, y, z).
-    void CallOnEnterEventArea(int32 eventKey, int64 accountId, float x, float y, float z);
-    void CallOnExitEventArea(int32 eventKey, int64 accountId, float x, float y, float z);
+    // 좌표는 원시타입으로 전달(Vector3 헤더 의존 회피). Lua: OnEnterEventArea(eventKey, objectId, x, y, z).
+    void CallOnEnterEventArea(int32 eventKey, int64 objectId, float x, float y, float z);
+    void CallOnExitEventArea(int32 eventKey, int64 objectId, float x, float y, float z);
 
-    // 오브젝트(prop) 상호작용 — Stage 가 근접+키 보고를 위치 검증한 뒤 호출. Lua: OnObjectInteract(propKey, accountId).
-    void CallOnObjectInteract(int32 propKey, int64 accountId);
+    // 오브젝트(prop) 상호작용 — Stage 가 근접+키 보고를 위치 검증한 뒤 호출. Lua: OnObjectInteract(propKey, objectId).
+    void CallOnObjectInteract(int32 propKey, int64 objectId);
 
     // 몬스터 사망 시 Stage 가 호출. (watch 등록분만 Lua 진입 — 대량몹 부하 방지.)
     //   · monsterKey 가 WatchMonsterDeath 등록 → OnMonsterDead 멀티캐스트

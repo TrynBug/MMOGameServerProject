@@ -17,7 +17,7 @@ using UserWPtr = std::weak_ptr<User>;
 // 캐릭터 선택이 완료된 후 생성되어, Stage(주로 Town/Field/Dungeon)에 등록된다.
 //
 // ── 라이프타임 ──
-// Stage가 유일한 강한 소유자 (m_objects/m_userObjects에 shared_ptr).
+// Stage와 User가 강한 소유자(shared_ptr).
 // User는 weak_ptr로만 참조 (Character::GetUser()로 lock해서 사용).
 // Character는 User를 weak_ptr로 참조.
 //
