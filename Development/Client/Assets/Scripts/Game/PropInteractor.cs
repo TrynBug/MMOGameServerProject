@@ -8,7 +8,7 @@ namespace Client.Game
 {
     // 로컬 플레이어가 prop(PropMarker) 근처에서 상호작용 키(Interact, 기본 F)를 누르면
     // 범위 안의 가장 가까운 PropMarker 에 대해 ObjectInteractReq 를 서버에 보낸다.
-    // 서버가 권위 위치를 검증한 뒤 Lua OnObjectInteract(markerKey, accountId) 를 발동한다(fire-and-forget).
+    // 서버가 권위 위치를 검증한 뒤 Lua OnObjectInteract(markerKey, objectId) 를 발동한다(fire-and-forget).
     //
     // 플레이어엔 물리 콜라이더가 없어(NavMesh 이동) 평면 거리판정을 쓴다. StageManager 가 런타임 부착.
     public class PropInteractor : MonoBehaviour
