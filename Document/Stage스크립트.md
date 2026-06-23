@@ -74,8 +74,8 @@ public:
     bool Load(Stage& stage, const std::vector<std::string>& scriptNames);  // lua_State 1개 생성 + 각 스크립트를 개별 환경으로 로드 + 바인딩 등록
     // 생애주기 호출: 정의한 모든 스크립트에 멀티캐스트(4.3).
     void CallOnStart();
-    void CallOnPlayerEnter(int64 userId);
-    void CallOnEnterEventArea(int32 eventKey, int64 userId, const Vector3& loc);
+    void CallOnPlayerEnter(int64 objectId);
+    void CallOnEnterEventArea(int32 eventKey, int64 objectId, const Vector3& loc);
     void CallOnMonsterDead(int64 objectId, int32 monsterKey, int64 killerId);            // death-watch 통과분만(Q4)
     void CallOnSpawnerMonsterDead(int32 spawnerKey, int64 objectId, int32 monsterKey);   // 스포너별 watch(Q4)
     void Update(int64 deltaMs);       // 타이머 만기 + 코루틴 재개 → Lua 콜백 (컨텐츠 스레드)
@@ -97,8 +97,8 @@ Stage::OnStart()        → OnStageStart()            // 스크립트 진입점(
 Stage::OnUpdate(dt)     → (시스템메시지 처리) → OnStageUpdate(dt):
                             └ MonsterSpawner.Update(dt)         // 메커니즘
                             └ StageScript.Update(dt)            // 타이머 만기 + 코루틴 재개 + secure 영역 폴링
-Stage::OnUserEnter      → OnPlayerEnter(userId)
-Stage::OnUserLeave      → OnPlayerLeave(userId)
+Stage::spawnPendingCharacter → OnPlayerEnter(objectId)   // 세션 입장이 아니라 캐릭터 스폰 완료 후
+Stage::OnUserLeave           → OnPlayerLeave(objectId)   // 스폰됐던 캐릭터 objectId(없으면 0)
 Stage::OnUserPacket     → (EventAreaEnterReq/ExitReq) 위치 검증 → OnEnterEventArea/OnExitEventArea   // 클라 선판정(8장)
 Monster 사망(MarkDead)  → OnMonsterDead / OnSpawnerMonsterDead   // death-watch 통과분만(Q4)
 Stage 종료/닫힘         → OnStageEnd()              // 정리(타이머 자동 해제)
@@ -169,14 +169,14 @@ Stage마다 기본 스크립트가 있지만, 게임 내 행사 등으로 **기�
 | 콜백 | 시점 | 인자 | 용도 |
 |---|---|---|---|
 | `OnStageStart()` | Stage 시작 1회 | — | 타이머 등록, 초기 스폰/스포너 활성화 (사용자 예시의 `main`) |
-| `OnPlayerEnter(userId)` | 유저 입장 | userId | 입장 인원 카운트, 첫 입장 이벤트 |
-| `OnPlayerLeave(userId)` | 유저 퇴장 | userId | 전원 퇴장 시 던전 정리 등 |
-| `OnEnterEventArea(eventKey, userId, loc)` | 플레이어가 이벤트영역 진입 | key,userId,pos | 트랩, 트리거 스폰, 대화, 컷 |
-| `OnExitEventArea(eventKey, userId)` | 이벤트영역 이탈 | key,userId | 영역 인원 추적 |
+| `OnPlayerEnter(objectId)` | 유저 입장 | objectId | 입장 인원 카운트, 첫 입장 이벤트 |
+| `OnPlayerLeave(objectId)` | 유저 퇴장 | objectId | 전원 퇴장 시 던전 정리 등 |
+| `OnEnterEventArea(eventKey, objectId, loc)` | 플레이어가 이벤트영역 진입 | key,objectId,pos | 트랩, 트리거 스폰, 대화, 컷 |
+| `OnExitEventArea(eventKey, objectId)` | 이벤트영역 이탈 | key,objectId | 영역 인원 추적 |
 | `OnMonsterDead(objectId, monsterKey, killerId)` | **watch 등록된 monsterKey** 사망 시만 | id,key,killer | 처치 카운트, 웨이브 클리어, 목표 진행. **대량몹 대비 필터 — Q4·아래 "대량 몬스터" 절** |
 | `OnSpawnerMonsterDead(spawnerKey, objectId, monsterKey)` | 그 스포너가 만든 watch 등록 몹 사망 시 | spawnerKey,id,key | 특정 스포너 무리의 클리어 판정 (Q4) |
 | `OnTimer(timerId)` | `RegisterTimer` 주기 만기 | timerId | 주기 로직 (또는 등록 시 넘긴 함수 직접 호출) |
-| `OnObjectInteract(markerKey, userId)` | 배치 오브젝트 상호작용 | key,userId | 문/레버/NPC. (상호작용 패킷 연동, 나중) |
+| `OnObjectInteract(markerKey, objectId)` | 배치 오브젝트 상호작용 | key,objectId | 문/레버/NPC. (상호작용 패킷 연동, 나중) |
 | `OnStageEnd()` | Stage 닫힘 | — | 명시적 정리(타이머는 자동 해제) |
 
 > **콜백은 정의한 모든 스크립트에 멀티캐스트**된다(4.3).
@@ -226,20 +226,20 @@ sol2로 바인딩하는 함수들. **경계를 작고 안정적으로** 유지�
 |---|---|
 | `GetAliveMonsterCount(filter)` | (스포너/영역/몬스터키 필터) 생존 수 — 웨이브 클리어 판정 |
 | `CountPlayersInArea(eventAreaKey)` | 영역 내 플레이어 수 |
-| `GetPlayersInStage() -> {userId}` | 전체 |
+| `GetPlayersInStage() -> {objectId}` | 전체 |
 | `GetStageElapsedMs()` | Stage 가동 경과 |
 | `Random(min, max)` | 난수(서버 권위) |
 
 ### 7.5 플레이어 / 이동
 | API | 설명 |
 |---|---|
-| `TeleportPlayer(userId, location)` | Stage 내 순간이동 |
+| `TeleportPlayer(objectId, location)` | Stage 내 순간이동 |
 | `MoveMonsterAlongPath(objectId, waypointKey)` | 배치 경로로 순찰/에스코트(기존 `WaypointMover` 재사용) |
 
 ### 7.6 이벤트 UI / 공지 (패킷 필요 — 11장)
 | API | 설명 | v1 |
 |---|---|---|
-| `Notice(userId 또는 all, message)` | 화면 공지 배너 | v1(`StageNoticeNtf`) |
+| `Notice(objectId 또는 all, message)` | 화면 공지 배너 | v1(`StageNoticeNtf`) |
 | `ShowObjective(scope, text, current, total)` | 목표 UI(예: "처치 7/10") | 나중 |
 | `ShowCountdown(scope, seconds, label)` | 카운트다운 UI(예: "60초 방어") | 나중 |
 | `StageClear(scope)` / `StageFail(scope)` | 클리어/실패 연출 | 나중 |
@@ -314,7 +314,7 @@ end
 이벤트영역 하나를 **`StageObject` 파생 객체**로 만든다(당신 제안). 영역마다 자기 상태를 갖는다:
 
 - **베이스:** `StageObject`(위치/소속). Actor 가 아니므로 `ActorObject` 가 아니라 `StageObject` 직접 파생. **클라 가시성 통보 안 함**(클라는 유니티 씬에서 이미 영역을 앎) — `SpawnMonster` 류 AOI 통보 경로를 타지 않는다.
-- **보유 상태:** `eventKey`, 모양(Sphere/Box)+크기, **발동 여부(triggered)**, **현재 안에 있는 userId 집합**, `secure` 플래그, 쿨다운 등 영역별 런타임 상태.
+- **보유 상태:** `eventKey`, 모양(Sphere/Box)+크기, **발동 여부(triggered)**, **현재 안에 있는 objectId 집합**, `secure` 플래그, 쿨다운 등 영역별 런타임 상태.
 - **로드:** `StageLayout` 의 `eventAreas`(§5.2)에서 영역마다 1개 생성, Stage가 `m_eventAreas`(map<key, EventAreaPtr>)로 보유.
 - **sector 등록은 선택:** 클라 선판정이 기본이라 서버가 공간질의할 일이 적다. `secure` 영역(서버 폴링)만 sector 버킷에 올려 후보를 좁힌다.
 - 모양 판정은 Sphere(거리)·Box(AABB)만 v1(스킬 `EffectShape` Circle/Obb 판정과 발상 동일).
@@ -401,7 +401,7 @@ message StageNoticeNtf {
 | 신규 | — | **`StageScript`**(lua_State 1개+다중 스크립트 환경+바인딩+타이머+코루틴 스케줄러+death-watch), **`StageLayout`**(json 로드+Key 조회), **`EventArea`**(StageObject 파생, Q2), **`StageScriptApi`**(sol2 바인딩 등록 한 곳) |
 
 신규 클래스 `StageLayout`: `Load(name)`, `GetSpawnPoint(key)`, `GetEventArea(key)`, `GetWaypointPath(key)`, `ForEachSpawner(fn)`, `ForEachEventArea(fn)`. 전부 컨텐츠 스레드 전용·락 없음.
-신규 클래스 `EventArea`(`StageObject` 파생): `eventKey`, 모양/크기, `triggered`, 안에 있는 `userId` 집합, `secure`. `Contains(pos)` 판정.
+신규 클래스 `EventArea`(`StageObject` 파생): `eventKey`, 모양/크기, `triggered`, 안에 있는 `objectId` 집합, `secure`. `Contains(pos)` 판정.
 
 ---
 
@@ -437,7 +437,7 @@ function TickBanner()
 end
 
 -- 이벤트영역(에디터 배치) 진입 콜백 — 사용자 예시와 동일 구조
-function OnEnterEventArea(eventKey, userId, loc)
+function OnEnterEventArea(eventKey, objectId, loc)
     if eventKey == 1001 then
         ActivateSpawner(1004)                 -- 함정방
     elseif eventKey == 1002 then
@@ -617,7 +617,7 @@ P0b StageNoticeNtf(패킷) ─────────────────�
 ### 18.6 이벤트영역 — 클라 선판정 + 서버 검증/폴링 (구현 완료, Q1·Q2)
 
 - **패킷**: `EventAreaEnterReq`/`EventAreaExitReq`(4012/4013, C→S, `event_key`+`pos_x/y/z`) 신설. `StageLayout` 가 `eventAreas`(key/shape/center/radius|size/secure) 로드.
-- **`EventArea` 클래스** = `StageObject` 파생(신규 enum값 `EObjectType::EventArea`). 중심=오브젝트 위치, `Contains(px,pz,tol)` 평면(X-Z) 판정, occupant(userId) set 보유. Stage 가 `m_eventAreas`(eventKey→`shared_ptr<EventArea>`)로 보유. **AOI/sector 미등록**(클라는 씬에서 이미 앎 — 가시성 통보 안 함). (설계 Q2 그대로. `EObjectType::EventArea` 는 `GameEnum.xlsx` 에 추가.)
+- **`EventArea` 클래스** = `StageObject` 파생(신규 enum값 `EObjectType::EventArea`). 중심=오브젝트 위치, `Contains(px,pz,tol)` 평면(X-Z) 판정, occupant(objectId) set 보유. Stage 가 `m_eventAreas`(eventKey→`shared_ptr<EventArea>`)로 보유. **AOI/sector 미등록**(클라는 씬에서 이미 앎 — 가시성 통보 안 함). (설계 Q2 그대로. `EObjectType::EventArea` 는 `GameEnum.xlsx` 에 추가.)
 - **검증(§8.2 보정 — 이동속도 기반 허용오차)**: 클라는 예측 이동이라 서버 **권위 위치가 latency 만큼 lag** → 권위 위치를 직접 영역과 비교하면 거의 항상 빗나간다(mismatch 폭주). 그래서 **영역 포함 판정은 클라가 보고한 위치**로 하고, 권위 위치와의 평면 괴리를 `MoveSpdTotal × kLagSeconds(0.5) + kAntiCheatMargin(1.0)` 이내로만 제한한다(거짓 보고 방지). `MoveSpdTotal` 은 `Character::GetStat().Get(EStat::MoveSpdTotal)`.
 - **secure 영역**: `eventAreas` 의 `secure:true` 면 클라 보고를 무시하고, `Stage::pollSecureEventAreas`(`OnUpdate` 4.7단계)가 매 tick **권위 위치로 직접** 진입/이탈 판정(안티익스플로잇 게이트용). 일반 영역은 클라 보고 구동(폴링 0).
 - **콜백/occupant**: `OnEnterEventArea`/`OnExitEventArea` 멀티캐스트. occupant set 으로 중복 진입/이탈 방지, `OnUserLeave` 시 occupant 정리(stale 방지). `GetEventArea(key)` 바인딩 제공.
@@ -634,7 +634,7 @@ P0b StageNoticeNtf(패킷) ─────────────────�
 - **패킷**: `ObjectInteractReq`(4014, C→S, `prop_key`+`pos_x/y/z`) 신설. 상태 동기화 없음 → **Ntf 없음**(연출은 스크립트가 `Notice` 등으로).
 - **배치**: `StageLayout` 가 `props`(`Prop{key,type,x,y,z,range}`) 로드 + `GetProp(key)` 바인딩. 클라 씬 마커(`PropMarker`)를 export 로 수집.
 - **검증**: EventArea 와 동일 결 — 클라 보고 위치가 마커 `range` 안인지 + 권위 위치와의 평면 괴리를 `MoveSpdTotal×lag+여유` 로 제한(거짓 보고 방지).
-- **콜백**: `OnObjectInteract(markerKey, userId)` 멀티캐스트. prop 은 StageObject 안 만듦(발동만 — `m_propObjects` 미사용).
+- **콜백**: `OnObjectInteract(markerKey, objectId)` 멀티캐스트. prop 은 StageObject 안 만듦(발동만 — `m_propObjects` 미사용).
 - **클라**: `PropMarker`(NavMesh 어셈블리, Key/Type/InteractRange) — export 소스 + 런타임 근접 판정 겸용. `PropInteractor`(Game, StageManager 부착) 가 Interact 키(Input System `Gameplay/Interact`=F)에 범위 내 최근접 `PropMarker` 로 `ObjectInteractReq` 송신. (`InputManager.OnInteract` 이벤트 경유.)
 
 ### 18.9 아직 안 된 것 / 다음

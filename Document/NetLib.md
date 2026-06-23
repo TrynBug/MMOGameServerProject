@@ -161,8 +161,8 @@ struct SidecarHeader
 ```
 
 - Sidecar 헤더는 패킷 payload 데이터는 그대로 유지하면서 패킷에 추가적인 라우팅 정보를 넣을 때 사용합니다. 게이트웨이↔게임서버 양방향에 모두 쓰입니다.
-	- **인바운드(클라→게임)**: 게이트웨이가 원본 클라 패킷에 보낸 유저의 UserId(int64 1개)를 sidecar로 끼워 게임서버로 relay.
-	- **아웃바운드(게임→클라)**: 게임서버가 클라용 패킷에 수신자 UserId 목록(int64 N개)을 sidecar로 붙여 게이트웨이로 전송 → 게이트웨이가 sidecar를 떼고 대상 클라들에게 전달. (별도 래핑 패킷 없이 직접 전달 — 유니캐스트 N=1, 브로드캐스트 N>1 동일 경로)
+	- **인바운드(클라→게임)**: 게이트웨이가 원본 클라 패킷에 보낸 유저의 AccountId(int64 1개)를 sidecar로 끼워 게임서버로 relay.
+	- **아웃바운드(게임→클라)**: 게임서버가 클라용 패킷에 수신자 AccountId 목록(int64 N개)을 sidecar로 붙여 게이트웨이로 전송 → 게이트웨이가 sidecar를 떼고 대상 클라들에게 전달. (별도 래핑 패킷 없이 직접 전달 — 유니캐스트 N=1, 브로드캐스트 N>1 동일 경로)
 - 사용법: PacketHeader의 flags에 PacketFlags::Sidecar를 세팅하고, payload를 memmove로 뒤로 밀어 그 사이에 SidecarHeader와 데이터를 넣습니다. 바이트구조는 `[PacketHeader][SidecarHeader][Sidecar 데이터(size)][payload]` 가 됩니다.
 - 패킷을 받는 쪽은 flags & PacketFlags::Sidecar 로 존재 여부를 확인하고 꺼내 씁니다. Sidecar를 넣거나 읽는 기능은 Packet 클래스가 제공합니다.
 	- `SetSidecar(data, size)`: payload 뒤에 sidecar를 삽입(payload가 이미 있으면 memmove 발생).

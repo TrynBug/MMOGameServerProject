@@ -225,6 +225,7 @@ DB.Browser.for.SQLite-v3.13.1-win64/
 **/Client/OUTPUT
 **/Client/Assets/TextMesh Pro
 **/Client/Assets/Resources/Art
+**/Client/Assets/Resources/Claude
 **/Client/Assets/StreamingAssets/NavMesh
 **/Client/Assets/Editor/ai_command_result.txt
 
@@ -234,6 +235,7 @@ DB.Browser.for.SQLite-v3.13.1-win64/
 # 6. Common
 # ==========================================
 ~$*
+Document/etc
 
 # ==========================================
 # 7. 기타
