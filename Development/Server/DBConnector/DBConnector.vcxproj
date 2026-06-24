@@ -44,13 +44,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Common;$(SolutionDir)mysql\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Common;$(SolutionDir)mysql\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
@@ -95,8 +95,6 @@
     <ClInclude Include="DBTypes.h" />
     <ClInclude Include="DBConnection.h" />
     <ClInclude Include="AsyncDBQueue.h" />
-    <ClInclude Include="sqlite3.h" />
-    <ClInclude Include="sqlite3ext.h" />
   </ItemGroup>
   <!-- C++ 소스 파일 (PCH 사용) -->
   <ItemGroup>
@@ -108,14 +106,6 @@
     <ClCompile Include="AsyncDBQueue.cpp" />
   </ItemGroup>
   <!-- C 소스 파일 (PCH 사용 안 함 — C 파일은 C++ PCH 불호환) -->
-  <ItemGroup>
-    <ClCompile Include="sqlite3.c">
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <!-- SQLite 내부 경고 억제 -->
-      <WarningLevel>TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

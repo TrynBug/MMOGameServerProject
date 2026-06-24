@@ -43,15 +43,6 @@ bool LoginServer::OnInitialize()
     };
     m_gatewayEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spSession) { onGatewayDisconnect(spSession); };
 
-    // AccountDB 열기
-    // TODO: 경로를 설정 파일에서 읽도록 개선
-    LOG_WRITE(LogLevel::Info, std::format("Resolved DB path={}", std::filesystem::absolute("AccountDB.db").string()));
-    if (!m_dbQueue.Open("AccountDB.db", 1))
-    {
-        LOG_WRITE(LogLevel::Error, "failed to open AccountDB");
-        return false;
-    }
-
     // prevGatewayMap TTL 정리 타이머 (1분마다)
     GetTimer().Register(60000, [this]()
     {
@@ -88,7 +79,6 @@ void LoginServer::OnServerInfoUpdated(const ServerInfo& info)
 void LoginServer::OnBeforeShutdown()
 {
     LOG_WRITE(LogLevel::Info, "LoginServer::OnBeforeShutdown");
-    m_dbQueue.Close();
 }
 
 // 클라이언트 accept 함
@@ -153,7 +143,8 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
 
 
     // DB 비동기 조회. 완료될 때까지 suspend, 이후 IOCP Worker에서 코루틴 resume
-    db::DBResult result = co_await m_dbQueue.ExecuteAsync(
+    db::DBResult result = co_await GetDB().ExecuteAsync(
+        db::EDBType::Account, 0,
         "SELECT data FROM Accounts WHERE login_name = ? LIMIT 1",
         { loginId },
         GetCoroutineResumeExecutor()   // IOCP Worker 스레드에서 resume

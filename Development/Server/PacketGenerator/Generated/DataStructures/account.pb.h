@@ -215,6 +215,7 @@ class Account final : public ::google::protobuf::Message
     kLoginNameFieldNumber = 2,
     kLoginPasswordHashFieldNumber = 3,
     kAccountIdFieldNumber = 1,
+    kGameDbIndexFieldNumber = 4,
   };
   // string login_name = 2;
   void clear_login_name() ;
@@ -256,11 +257,21 @@ class Account final : public ::google::protobuf::Message
   void _internal_set_account_id(::int64_t value);
 
   public:
+  // int32 game_db_index = 4;
+  void clear_game_db_index() ;
+  ::int32_t game_db_index() const;
+  void set_game_db_index(::int32_t value);
+
+  private:
+  ::int32_t _internal_game_db_index() const;
+  void _internal_set_game_db_index(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:DataStructures.Account)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 3,
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
                                    0, 60,
                                    2>
       _table_;
@@ -285,6 +296,7 @@ class Account final : public ::google::protobuf::Message
     ::google::protobuf::internal::ArenaStringPtr login_name_;
     ::google::protobuf::internal::ArenaStringPtr login_password_hash_;
     ::int64_t account_id_;
+    ::int32_t game_db_index_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -462,6 +474,31 @@ inline void Account::set_allocated_login_password_hash(::std::string* PROTOBUF_N
     _impl_.login_password_hash_.Set("", GetArena());
   }
   // @@protoc_insertion_point(field_set_allocated:DataStructures.Account.login_password_hash)
+}
+
+// int32 game_db_index = 4;
+inline void Account::clear_game_db_index() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.game_db_index_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline ::int32_t Account::game_db_index() const {
+  // @@protoc_insertion_point(field_get:DataStructures.Account.game_db_index)
+  return _internal_game_db_index();
+}
+inline void Account::set_game_db_index(::int32_t value) {
+  _internal_set_game_db_index(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:DataStructures.Account.game_db_index)
+}
+inline ::int32_t Account::_internal_game_db_index() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.game_db_index_;
+}
+inline void Account::_internal_set_game_db_index(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.game_db_index_ = value;
 }
 
 #ifdef __GNUC__

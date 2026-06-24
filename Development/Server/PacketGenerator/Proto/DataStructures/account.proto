@@ -7,4 +7,5 @@ message Account {
     int64 account_id = 1;
     string login_name = 2;          // 로그인할때 쓰는 name
     string login_password_hash = 3; // 로그인 password hash
+    int32 game_db_index = 4;        // 이 계정의 게임데이터가 들어가는 GameDB 샤드 인덱스
 }

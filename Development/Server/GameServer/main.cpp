@@ -65,11 +65,11 @@ int main()
     config.logDir   = configParser.GetString("Log", "Dir", "Logs");
     config.logLevel = Logger::StringToLogLevel(configParser.GetString("Log", "Level", "Debug"));
 
+    // DB 설정 ([AccountDB] + [GameDB]). ServerBase가 Initialize 때 알아서 연결한다.
+    serverbase::LoadDBConfigFromIni(config, configParser);
+
     // 서버 시작
     GameServer server;
-
-    // GameDB 경로
-    server.SetGameDBPath(configParser.GetString("Database", "GameDBPath", ""));
 
     SetConsoleCtrlHandler(consoleCtrlHandler, TRUE);
 

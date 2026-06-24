@@ -140,22 +140,6 @@ bool GameServer::OnInitialize()
         }
     }
 
-    // ── GameDB 열기 ────────────────────────────────────────────
-    // 경로가 비어있으면 sqlite3_open 은 성공하지만 "버려지는 임시 DB"를 연다(연결 종료 시 삭제).
-    // 그러면 영속성/공유가 깨진 채 무증상으로 동작하므로, 빈 경로는 설정 누락으로 보고 fail-fast 한다.
-    // (GameDB 경로는 GameServer.ini 의 [Database]GameDBPath 로 반드시 지정해야 한다. 기본값 없음.)
-    if (m_gameDBPath.empty())
-    {
-        LOG_WRITE(LogLevel::Error, "GameDBPath is empty. Set [Database]GameDBPath in GameServer.ini.");
-        return false;
-    }
-
-    if (!m_dbQueue.Open(m_gameDBPath, 1))
-    {
-        LOG_WRITE(LogLevel::Error, std::format("failed to open GameDB at {}", m_gameDBPath));
-        return false;
-    }
-
     LOG_WRITE(LogLevel::Info, std::format("complete. serverId={}", GetServerId()));
     return true;
 }
@@ -203,14 +187,37 @@ void GameServer::OnBeforeShutdown()
 
     // Stage들을 컨텐츠 스레드에서 제거 + StageManager 비우기
     m_stageManager.Clear();
-
-    // GameDB 닫기 (큐에 남은 요청 처리 후 종료)
-    m_dbQueue.Close();
 }
 
 void GameServer::OnShutdown()
 {
     LOG_WRITE(LogLevel::Info, "GameServer::OnShutdown");
+}
+
+// AccountDB에서 계정(DataStructures::Account)을 읽는다. 실패/미발견 시 nullopt.
+db::AwaitableCoTask<std::optional<DataStructures::Account>> GameServer::loadAccount(int64 accountId)
+{
+    db::DBResult result = co_await GetDB().ExecuteAsync(
+        db::EDBType::Account, 0,
+        "SELECT data FROM Accounts WHERE account_id = ?",
+        { accountId },
+        GetCoroutineResumeExecutor()
+    );
+
+    if (!result.success || result.IsEmpty())
+    {
+        LOG_WRITE(LogLevel::Error, std::format("loadAccount - account not found. accountId={} success={}", accountId, result.success));
+        co_return std::nullopt;
+    }
+
+    DataStructures::Account account;
+    if (!packet::ProtoJsonSerializer::FromJson(result.GetString(0, "data"), account))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("loadAccount - parse failed. accountId={}", accountId));
+        co_return std::nullopt;
+    }
+
+    co_return account;
 }
 
 // 내부 서버 연결 수락 (채팅서버 등)
@@ -364,10 +371,6 @@ InternalSessionMeta* GameServer::getInternalSessionMeta(const netlib::ISessionPt
 // ──────────────────────────────────────────────────────────────
 
 // 게이트웨이로부터 GatewayUserEnterNtf 수신 → 코루틴
-// 1) DB에서 캐릭터 목록 조회 (없으면 빈 목록)
-// 2) 유저 객체 생성 및 글로벌 맵 등록
-// 3) SystemStage(캐릭터 선택창)에 입장 메시지 push
-// 4) GameEnterNtf + CharacterListNtf 응답
 db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSession*/, ServerPacket::GatewayUserEnterNtf msg)
 {
     const int64 accountId    = msg.account_id();
@@ -383,8 +386,23 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
         co_return;
     }
 
-    // ── 1) DB에서 캐릭터 조회 ────────────────────────────────────
-    db::DBResult result = co_await m_dbQueue.ExecuteAsync(
+    // AccountDB에서 계정 로드, game_db_index로 샤드 번호 얻음
+    auto accountOpt = co_await loadAccount(accountId);
+    if (!accountOpt)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("enter - account load failed. accountId={}", accountId));
+        co_return;
+    }
+    const int32 gameDbIndex = accountOpt->game_db_index();
+    if (!GetDB().HasDatabase(db::EDBType::Game, gameDbIndex))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("enter - invalid GameDB shard. accountId={} gameDbIndex={}", accountId, gameDbIndex));
+        co_return;
+    }
+
+    // 해당 샤드에서 캐릭터 목록 조회
+    db::DBResult result = co_await GetDB().ExecuteAsync(
+        db::EDBType::Game, gameDbIndex,
         "SELECT data FROM Characters WHERE account_id = ?",
         { accountId },
         GetCoroutineResumeExecutor()
@@ -413,11 +431,12 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
 
     LOG_WRITE(LogLevel::Info, std::format("characters loaded from DB. accountId={} count={}", accountId, characters.size()));
 
-    // ── 2) 유저 객체 생성 및 글로벌 맵 등록 ────────────────────
+    // 유저 객체 생성 및 글로벌 맵 등록
     UserPtr spUser = std::make_shared<User>(accountId, gatewayId, clientIp);
+    spUser->SetAccount(*accountOpt);
     m_safeUsers.Insert(accountId, spUser);
 
-    // ── 3) SystemStage(캐릭터 선택창)에 입장 메시지 push ──────────
+    // SystemStage(캐릭터 선택창)에 입장 메시지 push
     // 캐릭터 선택이 끝나면 handleClientCharacterSelect에서 Town으로 이동시킨다.
     SystemStagePtr spSystemStage = m_stageManager.GetSystemStage();
     if (spSystemStage)
@@ -430,7 +449,7 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
         co_return;
     }
 
-    // ── 4) GameEnterNtf + CharacterListNtf 응답 (게이트웨이 통해 클라에게) ──
+    // GameEnterNtf + CharacterListNtf 응답 (게이트웨이 통해 클라에게)
     sendGameEnterNtf(accountId);
     sendCharacterListNtf(accountId, characters);
 }
@@ -466,22 +485,34 @@ void GameServer::sendCharacterListNtf(int64 accountId, const std::vector<DataStr
 }
 
 // 클라이언트 캐릭터 생성 요청 처리 → 코루틴
-// 1) 명칭 검증 (빈 문자열만 거부, 상세 검증은 향후 추가)
-// 2) ObjectId 발급 + 기본값 캐릭터 구성
-// 3) DB INSERT
-// 4) CharacterCreateRes 전송 (성공/실패)
 db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 accountId, GamePacket::CharacterCreateReq req)
 {
     LOG_WRITE(LogLevel::Info, std::format("CharacterCreateReq received. accountId={} name='{}' jobId={}", accountId, req.name(), req.job_id()));
 
-    // ── 1) 명칭 검증 ────────────────────────────────────────
+    // 명칭 검증
     if (req.name().empty())
     {
         sendCharacterCreateRes(accountId, EResultCode::Fail, "name is empty", nullptr);
         co_return;
     }
 
-    // ── 2) 캐릭터 구성 ──────────────────────────────────────
+    // 유저
+    UserPtr spUser;
+    if (!m_safeUsers.Find(accountId, spUser) || !spUser)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("CharacterCreate - user not found. accountId={}", accountId));
+        sendCharacterCreateRes(accountId, EResultCode::Fail, "user not found", nullptr);
+        co_return;
+    }
+    const int32 gameDbIndex = spUser->GetGameDbIndex();
+    if (!GetDB().HasDatabase(db::EDBType::Game, gameDbIndex))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("CharacterCreate - invalid shard. accountId={} idx={}", accountId, gameDbIndex));
+        sendCharacterCreateRes(accountId, EResultCode::Fail, "server error: shard", nullptr);
+        co_return;
+    }
+
+    // ── 캐릭터 구성 ──────────────────────────────────────
     DataStructures::Character character;
     character.set_character_id(GenerateObjectId());
     character.set_owner_account_id(accountId);
@@ -495,7 +526,7 @@ db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 accountId, Game
     character.set_pos_z(0.0f);
     character.set_yaw(0.0f);
 
-    // ── 3) DB INSERT ──────────────────────────────────────────
+    // ── DB INSERT ──────────────────────────────────────────
     std::string dataJson;
     if (!packet::ProtoJsonSerializer::ToJson(character, dataJson))
     {
@@ -504,7 +535,8 @@ db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 accountId, Game
         co_return;
     }
 
-    db::DBResult insertResult = co_await m_dbQueue.ExecuteAsync(
+    db::DBResult insertResult = co_await GetDB().ExecuteAsync(
+        db::EDBType::Game, gameDbIndex,
         "INSERT INTO Characters (account_id, character_id, data) VALUES (?, ?, ?)",
         { accountId, character.character_id(), dataJson },
         GetCoroutineResumeExecutor()
@@ -520,7 +552,7 @@ db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 accountId, Game
     LOG_WRITE(LogLevel::Info, std::format("character created. accountId={} characterId={} name='{}'",
         accountId, character.character_id(), character.name()));
 
-    // ── 4) 성공 응답 ────────────────────────────────────────────
+    // ── 성공 응답 ────────────────────────────────────────────
     sendCharacterCreateRes(accountId, EResultCode::Success, "", &character);
 }
 
@@ -536,14 +568,23 @@ void GameServer::sendCharacterCreateRes(int64 accountId, EResultCode resultCode,
     m_packetSender.SendToUser(accountId, Common::GAME_PACKET_ID_CHARACTER_CREATE_RES, res);
 }
 
-// (account_id, character_id)로 DB에서 캐릭터 row를 읽어 JSON 파싱 후 Character 객체를 생성하여 User에 소유 연결한다.
+// DB에서 캐릭터 row를 읽어 JSON 파싱 후 Character 객체를 생성하여 User에 소유 연결한다.
 // User가 강한 소유자(shared_ptr), Character→User는 약참조(weak_ptr).
 // 조회 실패/없음/파싱 실패/소유자 불일치/Initialize 실패 시 nullptr(사유는 내부 로그).
 // 호출자(캐릭터 선택 / 크로스서버 이동 입장)는 각자 프로토콜에 맞는 실패 응답을 처리한다.
 db::AwaitableCoTask<CharacterPtr> GameServer::loadCharacterForUser(int64 accountId, int64 characterId, UserPtr spUser)
 {
+    // ── 유저의 GameDB 샤드 해석 (호출 전에 spUser->GetGameDbIndex가 세팅돼 있어야 함) ──
+    const int32 gameDbIndex = spUser->GetGameDbIndex();
+    if (!GetDB().HasDatabase(db::EDBType::Game, gameDbIndex))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("loadCharacter - invalid shard. accountId={} idx={}", accountId, gameDbIndex));
+        co_return nullptr;
+    }
+
     // ── DB에서 캐릭터 조회 ──
-    db::DBResult result = co_await m_dbQueue.ExecuteAsync(
+    db::DBResult result = co_await GetDB().ExecuteAsync(
+        db::EDBType::Game, gameDbIndex,
         "SELECT data FROM Characters WHERE account_id = ? AND character_id = ?",
         { accountId, characterId },
         GetCoroutineResumeExecutor()
@@ -723,6 +764,15 @@ db::AwaitableCoTask<bool> GameServer::saveCharacterToDB(CharacterPtr spCharacter
     const int64 accountId      = proto.owner_account_id();
     const int64 characterId = proto.character_id();
 
+    // 샤드는 캐릭터의 소유 유저(Character→User)의 game_db_index로 선택한다.
+    UserPtr spUser = spCharacter->GetUserWeak().lock();
+    if (!spUser)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("saveCharacter - owner user gone. accountId={} characterId={}", accountId, characterId));
+        co_return false;
+    }
+    const int32 gameDbIndex = spUser->GetGameDbIndex();
+
     std::string dataJson;
     if (!packet::ProtoJsonSerializer::ToJson(proto, dataJson))
     {
@@ -730,7 +780,8 @@ db::AwaitableCoTask<bool> GameServer::saveCharacterToDB(CharacterPtr spCharacter
         co_return false;
     }
 
-    db::DBResult result = co_await m_dbQueue.ExecuteAsync(
+    db::DBResult result = co_await GetDB().ExecuteAsync(
+        db::EDBType::Game, gameDbIndex,
         "UPDATE Characters SET data = ? WHERE account_id = ? AND character_id = ?",
         { dataJson, accountId, characterId },
         pResumeExecutor
@@ -823,11 +874,30 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
         co_return;
     }
 
-    // ── 1) User 생성 + DB에서 캐릭터 로드 + Character 객체 생성 (loadCharacterForUser 공통 사용) ──
+    // ── User 생성 + DB에서 캐릭터 로드 + Character 객체 생성 (loadCharacterForUser 공통 사용) ──
     // StageMoveRes 송신은 유저가 글로벌맵(m_safeUsers)에 있어야 게이트웨이를 찾으므로,
     // 실패 시에도 응답을 먼저 보낸 다음 유저를 제거한다.
     UserPtr spUser = std::make_shared<User>(accountId, gatewayId, clientIp);
     m_safeUsers.Insert(accountId, spUser);
+
+    // 이 계정의 Account 로드 + 보관
+    auto accountOpt = co_await loadAccount(accountId);
+    if (!accountOpt)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("reroute - account load failed. accountId={}", accountId));
+        m_packetSender.SendStageMoveRes(accountId, EResultCode::Fail, "server error: account", targetStageDataKey);
+        UserPtr removed; m_safeUsers.EraseAndGet(accountId, removed);
+        co_return;
+    }
+    const int32 gameDbIndex = accountOpt->game_db_index();
+    if (!GetDB().HasDatabase(db::EDBType::Game, gameDbIndex))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("reroute - invalid GameDB shard. accountId={} idx={}", accountId, gameDbIndex));
+        m_packetSender.SendStageMoveRes(accountId, EResultCode::Fail, "server error: shard", targetStageDataKey);
+        UserPtr removed; m_safeUsers.EraseAndGet(accountId, removed);
+        co_return;
+    }
+    spUser->SetAccount(*accountOpt);
 
     CharacterPtr spCharacter = co_await loadCharacterForUser(accountId, characterId, spUser);
     if (!spCharacter)
@@ -837,7 +907,7 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
         co_return;
     }
 
-    // ── 2) 대상 Stage 해석 (정적 스테이지는 dataKey당 정확히 1개) ──
+    // ── 대상 Stage 해석 (정적 스테이지는 dataKey당 정확히 1개) ──
     std::vector<StagePtr> targets = m_stageManager.FindStagesByDataKey(targetStageDataKey);
     if (targets.size() != 1)
     {
@@ -849,12 +919,12 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
     }
     StagePtr spTarget = targets[0];
 
-    // ── 3) 2단계 입장 시작 (로컬 이동과 동일). 도착 위치타입 보관 + Moving 전환 → 유저만 입장 ──
+    // ── 2단계 입장 시작 (로컬 이동과 동일). 도착 위치타입 보관 + Moving 전환 → 유저만 입장 ──
     spUser->SetPendingPositionType(positionType);
     spUser->SetStageState(EUserStageState::Moving);
     spTarget->EnqueueMessage(StageMsg_UserEnter{spUser});
 
-    // ── 4) 클라에 StageMoveRes(성공) → 클라가 맵 로딩 시작 → StageLoadCompleteReq → 대상 Stage가 스폰 ──
+    // ── 클라에 StageMoveRes(성공) → 클라가 맵 로딩 시작 → StageLoadCompleteReq → 대상 Stage가 스폰 ──
     m_packetSender.SendStageMoveRes(accountId, EResultCode::Success, "", targetStageDataKey);
 
     LOG_WRITE(LogLevel::Info, std::format("reroute - user entering target stage. accountId={} stageId={} stageKey={}",

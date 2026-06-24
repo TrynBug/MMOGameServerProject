@@ -8,8 +8,7 @@
 #include "ContentsThread.h"
 #include "RegistryClient.h"
 #include "ThreadSafeUnorderedMap.h"
-
-#include "DBTask.h"
+#include "DBConnectorLib.h"  
 
 namespace serverbase
 {
@@ -51,7 +50,21 @@ struct ServerBaseConfig
     // 로그
     std::string logDir = "Logs";
     LogLevel logLevel = LogLevel::Debug;
+
+    // ── DB (선택) ───────────────────────────────────────────────
+    // 서버의 main 함수에서 LoadDBConfigFromIni()로 채운다. ServerBase가 Initialize 때 알아서 연결한다.
+    //   - [AccountDB] Host 있으면 useAccountDB=true (Host/Port/User/Password/DBName)
+    //   - [GameDB] Enabled=true 면 useGameDB=true. 샤드 목록은 AccountDB의 GameDBRegistry에서 읽고,
+    //     샤드 접속 자격증명(user/password)은 AccountDB와 공유한다. (AccountDB 필수)
+    bool useAccountDB = false;
+    db::DBConnectionConfig accountDBConfig;
+    bool useGameDB = false;
+    int  dbNumWorkers = 8;   // 공유 워커 스레드 수 (각 DB는 이 수만큼 커넥션을 연다)
 };
+
+// ini의 [AccountDB]/[GameDB] 섹션을 읽어 ServerBaseConfig의 DB 필드를 채운다.
+// (각 서버 main에서 ServerBaseConfig를 만들 때 호출)
+void LoadDBConfigFromIni(ServerBaseConfig& config, ConfigParser& parser);
 
 // 코루틴이 await 후 재시작될 때 IOCP Worker 스레드에서 재시작되도록 IOCP message 큐에 함수를 post 해주는 컴포넌트
 class CoroutineResumeExecutor : public db::IResumeExecutor
@@ -131,6 +144,11 @@ public:
     // DB worker 완료 후 코루틴을 IOCP Worker 스레드에서 resume한다.
     db::IResumeExecutor* GetCoroutineResumeExecutor()   { return &m_coroutineResumeExecutor; }
 
+    // 서버의 단일 DB 큐. AccountDB/GameDB 샤드를 모두 관리한다(ServerBaseConfig에 따라 Initialize 때 자동 연결).
+    //   GetDB().ExecuteAsync(db::EDBType::Account, 0, ...) 또는 (db::EDBType::Game, gameDbIndex, ...)
+    db::AsyncDBQueue&       GetDB()       { return m_dbQueue; }
+    const db::AsyncDBQueue& GetDB() const { return m_dbQueue; }
+
 public:
     // ── 패킷 ───────────────────────────────────────────────────
 
@@ -188,9 +206,17 @@ protected:
 private:
     void shutdownInternal();
 
+    // ServerBaseConfig의 DB 설정에 따라 AccountDB/GameDB 샤드를 m_dbQueue에 연다. DB 안 쓰면 그냥 true.
+    bool initializeDatabases();
+    // AccountDB의 GameDBRegistry(status='active')를 읽어 GameDB 샤드 등록정보를 entries에 추가한다.
+    bool loadGameShards(std::vector<db::AsyncDBQueue::OpenEntry>& entries);
+
 protected:
     ServerBaseConfig m_config;
     int32 m_serverId = 0;
+
+    // 서버의 모든 DB(AccountDB + GameDB 샤드)를 관리하는 단일 큐.
+    db::AsyncDBQueue m_dbQueue;
 
     netlib::IoContext m_ioContext; // IOCP + 워커스레드
     netlib::NetServerUPtr m_spClientListenServer;   // 클라이언트 접속용 Listen 서버

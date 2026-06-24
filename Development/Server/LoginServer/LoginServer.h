@@ -106,9 +106,6 @@ private:
     mutable std::mutex  m_rngMutex;
     std::mt19937_64     m_rng { std::random_device{}() };
 
-    // AccountDB
-    db::AsyncDBQueue m_dbQueue;
-
     // 네트워크 이벤트 핸들러, 패킷 디스패처
     netlib::FuncEventHandler     m_listenEventHandler;   // 네트워크 이벤트 핸들러
     serverbase::PacketDispatcher m_packetDispatcher;     // 클라이언트 패킷 디스패처

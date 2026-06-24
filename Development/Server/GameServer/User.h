@@ -55,6 +55,14 @@ public:
     int64              GetCurrentStageId() const { return m_currentStageId; }
     void               SetCurrentStageId(int64 stageId) { m_currentStageId = stageId; }
 
+    // 이 계정의 Account 데이터. 입장/리라우팅 시 AccountDB에서 로드해 보관한다.
+    const DataStructures::Account& GetAccount() const                          { return m_account; }
+    void                           SetAccount(const DataStructures::Account& account) { m_account = account; }
+
+    // 이 계정의 게임데이터가 들어있는 GameDB 샤드 인덱스 (Account에서 파생).
+    // 이 유저의 모든 게임DB 읽기/저장은 이 인덱스로 샤드를 고른다.
+    int32              GetGameDbIndex() const        { return m_account.game_db_index(); }
+
     // 현재 캐릭터 (User가 강한 소유자). 선택 전이면 nullptr.
     // 선택 시점에 설정되고, Stage 이동에도 유지되며, 로그아웃/끊김 시 User 파괴와 함께 사라진다.
     CharacterPtr GetCurrentCharacter() const { return m_spCharacter; }
@@ -101,6 +109,9 @@ private:
 
     // 현재 소속 Stage ID. 입장 시 설정되고, Stage 이동 시 갱신된다.
     int64       m_currentStageId = 0;
+
+    // 이 계정의 Account 데이터 (AccountDB에서 로드). game_db_index 등을 여기서 꺼내 쓴다.
+    DataStructures::Account m_account;
 
     // 현재 캐릭터 (강한 소유). User가 Character의 주인이다. 선택 전이면 nullptr.
     CharacterPtr m_spCharacter;

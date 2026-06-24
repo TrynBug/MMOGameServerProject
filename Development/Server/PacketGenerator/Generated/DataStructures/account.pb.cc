@@ -35,7 +35,8 @@ inline constexpr Account::Impl_::Impl_(
         login_password_hash_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        account_id_{::int64_t{0}} {}
+        account_id_{::int64_t{0}},
+        game_db_index_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR Account::Account(::_pbi::ConstantInitialized)
@@ -66,13 +67,15 @@ const ::uint32_t
         protodesc_cold) = {
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::DataStructures::Account, _impl_._has_bits_),
-        6, // hasbit index offset
+        7, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::DataStructures::Account, _impl_.account_id_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Account, _impl_.login_name_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Account, _impl_.login_password_hash_),
+        PROTOBUF_FIELD_OFFSET(::DataStructures::Account, _impl_.game_db_index_),
         2,
         0,
         1,
+        3,
 };
 
 static const ::_pbi::MigrationSchema
@@ -85,15 +88,15 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_DataStructures_2faccount_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\034DataStructures/account.proto\022\016DataStru"
-    "ctures\"N\n\007Account\022\022\n\naccount_id\030\001 \001(\003\022\022\n"
+    "ctures\"e\n\007Account\022\022\n\naccount_id\030\001 \001(\003\022\022\n"
     "\nlogin_name\030\002 \001(\t\022\033\n\023login_password_hash"
-    "\030\003 \001(\tb\006proto3"
+    "\030\003 \001(\t\022\025\n\rgame_db_index\030\004 \001(\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_DataStructures_2faccount_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_DataStructures_2faccount_2eproto = {
     false,
     false,
-    134,
+    157,
     descriptor_table_protodef_DataStructures_2faccount_2eproto,
     "DataStructures/account.proto",
     &descriptor_table_DataStructures_2faccount_2eproto_once,
@@ -148,7 +151,13 @@ Account::Account(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  _impl_.account_id_ = from._impl_.account_id_;
+  ::memcpy(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, account_id_),
+           reinterpret_cast<const char*>(&from._impl_) +
+               offsetof(Impl_, account_id_),
+           offsetof(Impl_, game_db_index_) -
+               offsetof(Impl_, account_id_) +
+               sizeof(Impl_::game_db_index_));
 
   // @@protoc_insertion_point(copy_constructor:DataStructures.Account)
 }
@@ -161,7 +170,12 @@ PROTOBUF_NDEBUG_INLINE Account::Impl_::Impl_(
 
 inline void Account::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.account_id_ = {};
+  ::memset(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, account_id_),
+           0,
+           offsetof(Impl_, game_db_index_) -
+               offsetof(Impl_, account_id_) +
+               sizeof(Impl_::game_db_index_));
 }
 Account::~Account() {
   // @@protoc_insertion_point(destructor:DataStructures.Account)
@@ -222,16 +236,16 @@ Account::GetClassData() const {
   return Account_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 0, 60, 2>
+const ::_pbi::TcParseTable<2, 4, 0, 60, 2>
 Account::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(Account, _impl_._has_bits_),
     0, // no _extensions_
-    3, 24,  // max_field_number, fast_idx_mask
+    4, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967288,  // skipmap
+    4294967280,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
+    4,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     Account_class_data_.base(),
@@ -241,7 +255,10 @@ Account::_table_ = {
     ::_pbi::TcParser::GetTable<::DataStructures::Account>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
+    // int32 game_db_index = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Account, _impl_.game_db_index_), 3>(),
+     {32, 3, 0,
+      PROTOBUF_FIELD_OFFSET(Account, _impl_.game_db_index_)}},
     // int64 account_id = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Account, _impl_.account_id_), 2>(),
      {8, 2, 0,
@@ -263,6 +280,8 @@ Account::_table_ = {
     {PROTOBUF_FIELD_OFFSET(Account, _impl_.login_name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // string login_password_hash = 3;
     {PROTOBUF_FIELD_OFFSET(Account, _impl_.login_password_hash_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int32 game_db_index = 4;
+    {PROTOBUF_FIELD_OFFSET(Account, _impl_.game_db_index_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
@@ -288,7 +307,11 @@ PROTOBUF_NOINLINE void Account::Clear() {
       _impl_.login_password_hash_.ClearNonDefaultToEmpty();
     }
   }
-  _impl_.account_id_ = ::int64_t{0};
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000cU)) {
+    ::memset(&_impl_.account_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.game_db_index_) -
+        reinterpret_cast<char*>(&_impl_.account_id_)) + sizeof(_impl_.game_db_index_));
+  }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -341,6 +364,15 @@ PROTOBUF_NOINLINE void Account::Clear() {
     }
   }
 
+  // int32 game_db_index = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (this_._internal_game_db_index() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<4>(
+              stream, this_._internal_game_db_index(), target);
+    }
+  }
+
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -366,7 +398,7 @@ PROTOBUF_NOINLINE void Account::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
     // string login_name = 2;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (!this_._internal_login_name().empty()) {
@@ -388,6 +420,13 @@ PROTOBUF_NOINLINE void Account::Clear() {
             this_._internal_account_id());
       }
     }
+    // int32 game_db_index = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (this_._internal_game_db_index() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_game_db_index());
+      }
+    }
   }
   return this_.MaybeComputeUnknownFieldsSize(total_size,
                                              &this_._impl_._cached_size_);
@@ -407,7 +446,7 @@ void Account::MergeImpl(::google::protobuf::MessageLite& to_msg,
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (!from._internal_login_name().empty()) {
         _this->_internal_set_login_name(from._internal_login_name());
@@ -429,6 +468,11 @@ void Account::MergeImpl(::google::protobuf::MessageLite& to_msg,
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
       if (from._internal_account_id() != 0) {
         _this->_impl_.account_id_ = from._impl_.account_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (from._internal_game_db_index() != 0) {
+        _this->_impl_.game_db_index_ = from._impl_.game_db_index_;
       }
     }
   }
@@ -453,7 +497,12 @@ void Account::InternalSwap(Account* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.login_name_, &other->_impl_.login_name_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.login_password_hash_, &other->_impl_.login_password_hash_, arena);
-  swap(_impl_.account_id_, other->_impl_.account_id_);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(Account, _impl_.game_db_index_)
+      + sizeof(Account::_impl_.game_db_index_)
+      - PROTOBUF_FIELD_OFFSET(Account, _impl_.account_id_)>(
+          reinterpret_cast<char*>(&_impl_.account_id_),
+          reinterpret_cast<char*>(&other->_impl_.account_id_));
 }
 
 ::google::protobuf::Metadata Account::GetMetadata() const {

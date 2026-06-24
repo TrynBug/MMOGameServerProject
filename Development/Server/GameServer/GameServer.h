@@ -67,9 +67,6 @@ public:
     // 특정 게이트웨이로 서버패킷 전송. 해당 게이트웨이 세션이 없으면 false. (netdelay 치트 등 내부 제어용)
     bool SendToGateway(int32 gatewayId, const netlib::PacketPtr& spPacket);
 
-    // GameDB 파일 경로 설정
-    void SetGameDBPath(const std::string& path) { m_gameDBPath = path; }
-
     // 크로스서버 이동 개시 (출발 서버). Stage::handleStageMoveReq 의 크로스서버 분기가 호출한다.
     //   1) 현재 캐릭터를 DB에 저장(UPDATE)
     //   2) (성공 시) 게이트웨이에 UserMoveToGameServerReq 전송 (게이트웨이가 목적지 서버로 재라우팅)
@@ -162,6 +159,9 @@ private:
     // pResumeExecutor: DB await 후속작업을 재개할 executor(호출 문맥의 스레드 선택). Stage에서 호출 시 그 Stage의 executor.
     db::AwaitableCoTask<bool> saveCharacterToDB(CharacterPtr spCharacter, db::IResumeExecutor* pResumeExecutor);
 
+    // AccountDB에서 계정(DataStructures::Account)을 읽는다. 실패/미발견 시 nullopt.
+    db::AwaitableCoTask<std::optional<DataStructures::Account>> loadAccount(int64 accountId);
+
 private:
     // 전역 단일 인스턴스 포인터. 생성자에서 1회 세팅, 소멸자에서 해제. Instance() 가 역참조한다.
     static inline GameServer* s_pInstance = nullptr;
@@ -200,9 +200,4 @@ private:
     // 클라이언트로 나가는 Ntf 송신 전담. m_server(=*this) + 위 두 맵(유저/게이트웨이세션)을 참조로 받는다.
     // 위 두 맵보다 뒤에 선언하여 초기화 순서상 안전하게 참조를 바인딩한다.
     PacketSender m_packetSender;
-
-    // ── GameDB ────────────────────────────────────────────────────
-    // 코루틴으로 co_await ExecuteAsync() 사용.
-    std::string      m_gameDBPath = "";
-    db::AsyncDBQueue m_dbQueue;
 };

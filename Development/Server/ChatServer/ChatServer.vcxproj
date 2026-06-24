@@ -76,12 +76,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)Common;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)PacketGenerator;$(SolutionDir)NetLib;$(SolutionDir)ServerBase;$(SolutionDir)Logger;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)OUTPUT\$(Configuration)\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)mysql\lib\;$(SolutionDir)OUTPUT\$(Configuration)\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)Common;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)PacketGenerator;$(SolutionDir)NetLib;$(SolutionDir)ServerBase;$(SolutionDir)Logger;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)OUTPUT\$(Configuration)\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)mysql\lib\;$(SolutionDir)OUTPUT\$(Configuration)\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

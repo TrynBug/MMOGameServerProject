@@ -57,6 +57,9 @@ int main()
     config.logDir   = configParser.GetString("Log", "Dir", "Logs");
     config.logLevel = LogLevel::Debug;
 
+    // DB 설정 ([AccountDB]). ServerBase가 Initialize 때 알아서 연결한다.
+    serverbase::LoadDBConfigFromIni(config, configParser);
+
     LoginServer server;
     g_pServer = &server;
 

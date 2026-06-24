@@ -157,6 +157,13 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
         LOG_WRITE(LogLevel::Info, "RegistryClient initialized");
     }
 
+    // DB 초기화 (ServerBaseConfig의 [AccountDB]/[GameDB] 설정에 따라 자동). OnInitialize 전에 열어 서브클래스가 쓸 수 있게 한다.
+    if (!initializeDatabases())
+    {
+        LOG_WRITE(LogLevel::Error, "initializeDatabases() failed");
+        return false;
+    }
+
     // 서브클래스 hook 함수 호출
     if (!OnInitialize())
     {
@@ -167,6 +174,117 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
     m_bRunning = true;
     LOG_WRITE(LogLevel::Info, std::format("{} initialized successfully", serverTypeName));
     return true;
+}
+
+// ServerBaseConfig의 DB 설정에 따라 AccountDB/GameDB 샤드를 m_dbQueue에 연다.
+bool ServerBase::initializeDatabases()
+{
+    if (!m_config.useAccountDB && !m_config.useGameDB)
+        return true;   // DB를 쓰지 않는 서버
+
+    // GameDB는 AccountDB(샤드 목록을 담은 GameDBRegistry 보관)가 반드시 있어야 한다.
+    if (m_config.useGameDB && !m_config.useAccountDB)
+    {
+        LOG_WRITE(LogLevel::Error, "GameDB requires AccountDB. Set [AccountDB] in ini.");
+        return false;
+    }
+
+    std::vector<db::AsyncDBQueue::OpenEntry> entries;
+
+    if (m_config.useAccountDB)
+    {
+        const auto& cfg = m_config.accountDBConfig;
+        if (cfg.host.empty() || cfg.user.empty() || cfg.database.empty())
+        {
+            LOG_WRITE(LogLevel::Error, "AccountDB config incomplete. Need [AccountDB] Host/User/DBName.");
+            return false;
+        }
+        entries.push_back({ db::EDBType::Account, 0, cfg });
+    }
+
+    if (m_config.useGameDB)
+    {
+        if (!loadGameShards(entries))
+            return false;
+    }
+
+    if (!m_dbQueue.Open(entries, m_config.dbNumWorkers))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("DB pool open failed. {}", m_dbQueue.GetLastError()));
+        return false;
+    }
+
+    LOG_WRITE(LogLevel::Info, std::format("DB pool opened. databases={} (account={} game={}) workers={}",
+        entries.size(), m_config.useAccountDB ? 1 : 0, entries.size() - (m_config.useAccountDB ? 1 : 0),
+        m_config.dbNumWorkers));
+    return true;
+}
+
+// AccountDB의 GameDBRegistry(status='active')를 읽어 GameDB 샤드 등록정보를 entries에 추가한다.
+// 동기 DBConnection으로 1회 수행. host/port/db는 레지스트리, user/password는 AccountDB와 공유.
+bool ServerBase::loadGameShards(std::vector<db::AsyncDBQueue::OpenEntry>& entries)
+{
+    db::DBConnection conn;
+    if (!conn.Open(m_config.accountDBConfig))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("loadGameShards - AccountDB connect failed. {}", conn.GetLastError()));
+        return false;
+    }
+
+    db::DBResult result = conn.Execute(
+        "SELECT game_db_index, host, port, db_name FROM GameDBRegistry WHERE status = 'active'");
+    if (!result.success)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("loadGameShards - registry query failed. {}", result.errorMsg));
+        return false;
+    }
+    if (result.IsEmpty())
+    {
+        LOG_WRITE(LogLevel::Error, "loadGameShards - no active GameDB shard in GameDBRegistry.");
+        return false;
+    }
+
+    for (int row = 0; row < result.RowCount(); ++row)
+    {
+        const int index = static_cast<int>(result.GetInt64(row, "game_db_index", -1));
+
+        db::DBConnectionConfig shardCfg;
+        shardCfg.host     = result.GetString(row, "host");
+        shardCfg.port     = static_cast<unsigned int>(result.GetInt64(row, "port", 3306));
+        shardCfg.user     = m_config.accountDBConfig.user;       // 샤드는 AccountDB와 자격증명 공유
+        shardCfg.password = m_config.accountDBConfig.password;
+        shardCfg.database = result.GetString(row, "db_name");
+
+        if (index < 0 || shardCfg.host.empty() || shardCfg.database.empty())
+        {
+            LOG_WRITE(LogLevel::Error, std::format("loadGameShards - invalid registry row. index={} host={} db={}",
+                index, shardCfg.host, shardCfg.database));
+            return false;
+        }
+        entries.push_back({ db::EDBType::Game, index, shardCfg });
+    }
+
+    LOG_WRITE(LogLevel::Info, std::format("GameDB shards from registry: {}", result.RowCount()));
+    return true;
+}
+
+// ini의 [AccountDB]/[GameDB] 섹션을 읽어 ServerBaseConfig의 DB 필드를 채운다.
+void LoadDBConfigFromIni(ServerBaseConfig& config, ConfigParser& parser)
+{
+    // [AccountDB] : Host가 있으면 사용
+    const std::string accHost = parser.GetString("AccountDB", "Host", "");
+    if (!accHost.empty())
+    {
+        config.useAccountDB = true;
+        config.accountDBConfig.host     = accHost;
+        config.accountDBConfig.port     = static_cast<unsigned int>(parser.GetInt32("AccountDB", "Port", 3306));
+        config.accountDBConfig.user     = parser.GetString("AccountDB", "User", "");
+        config.accountDBConfig.password = parser.GetString("AccountDB", "Password", "");
+        config.accountDBConfig.database = parser.GetString("AccountDB", "DBName", "");
+    }
+
+    // [GameDB] : Enabled=true 면 사용 (샤드 목록은 GameDBRegistry, 자격증명은 AccountDB와 공유)
+    config.useGameDB = parser.GetBool("GameDB", "Enabled", false);
 }
 
 bool ServerBase::StartAccept()
@@ -309,6 +427,10 @@ void ServerBase::shutdownInternal()
         m_spInternalListenServer.reset();
         LOG_WRITE(LogLevel::Info, "internal listen NetServer shutdown");
     }
+
+    // DB 큐 종료 (남은 요청 처리 후 worker 스레드 종료)
+    m_dbQueue.Close();
+    LOG_WRITE(LogLevel::Info, "DB queue closed");
 
     // IoContext 종료 (Worker 스레드 종료)
     m_ioContext.Shutdown();
