@@ -24,14 +24,14 @@ namespace DataStructures {
     static ItemReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChlEYXRhU3RydWN0dXJlcy9pdGVtLnByb3RvEg5EYXRhU3RydWN0dXJlcyJn",
-            "CgRJdGVtEg8KB2l0ZW1faWQYASABKAMSEwoLdGVtcGxhdGVfaWQYAiABKAUS",
-            "EAoIcXVhbnRpdHkYAyABKAUSEgoKZHVyYWJpbGl0eRgEIAEoBRITCgtpc19l",
-            "cXVpcHBlZBgFIAEoCGIGcHJvdG8z"));
+            "ChlEYXRhU3RydWN0dXJlcy9pdGVtLnByb3RvEg5EYXRhU3RydWN0dXJlcyJa",
+            "CgRJdGVtEg8KB2l0ZW1faWQYASABKAMSEAoIaXRlbV9rZXkYAiABKAUSEQoJ",
+            "aXRlbV90eXBlGAMgASgFEg0KBWdyYWRlGAQgASgFEg0KBWNvdW50GAUgASgF",
+            "YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::DataStructures.Item), global::DataStructures.Item.Parser, new[]{ "ItemId", "TemplateId", "Quantity", "Durability", "IsEquipped" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::DataStructures.Item), global::DataStructures.Item.Parser, new[]{ "ItemId", "ItemKey", "ItemType", "Grade", "Count" }, null, null, null, null)
           }));
     }
     #endregion
@@ -77,10 +77,10 @@ namespace DataStructures {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public Item(Item other) : this() {
       itemId_ = other.itemId_;
-      templateId_ = other.templateId_;
-      quantity_ = other.quantity_;
-      durability_ = other.durability_;
-      isEquipped_ = other.isEquipped_;
+      itemKey_ = other.itemKey_;
+      itemType_ = other.itemType_;
+      grade_ = other.grade_;
+      count_ = other.count_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -102,51 +102,51 @@ namespace DataStructures {
       }
     }
 
-    /// <summary>Field number for the "template_id" field.</summary>
-    public const int TemplateIdFieldNumber = 2;
-    private int templateId_;
+    /// <summary>Field number for the "item_key" field.</summary>
+    public const int ItemKeyFieldNumber = 2;
+    private int itemKey_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int TemplateId {
-      get { return templateId_; }
+    public int ItemKey {
+      get { return itemKey_; }
       set {
-        templateId_ = value;
+        itemKey_ = value;
       }
     }
 
-    /// <summary>Field number for the "quantity" field.</summary>
-    public const int QuantityFieldNumber = 3;
-    private int quantity_;
+    /// <summary>Field number for the "item_type" field.</summary>
+    public const int ItemTypeFieldNumber = 3;
+    private int itemType_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Quantity {
-      get { return quantity_; }
+    public int ItemType {
+      get { return itemType_; }
       set {
-        quantity_ = value;
+        itemType_ = value;
       }
     }
 
-    /// <summary>Field number for the "durability" field.</summary>
-    public const int DurabilityFieldNumber = 4;
-    private int durability_;
+    /// <summary>Field number for the "grade" field.</summary>
+    public const int GradeFieldNumber = 4;
+    private int grade_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Durability {
-      get { return durability_; }
+    public int Grade {
+      get { return grade_; }
       set {
-        durability_ = value;
+        grade_ = value;
       }
     }
 
-    /// <summary>Field number for the "is_equipped" field.</summary>
-    public const int IsEquippedFieldNumber = 5;
-    private bool isEquipped_;
+    /// <summary>Field number for the "count" field.</summary>
+    public const int CountFieldNumber = 5;
+    private int count_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool IsEquipped {
-      get { return isEquipped_; }
+    public int Count {
+      get { return count_; }
       set {
-        isEquipped_ = value;
+        count_ = value;
       }
     }
 
@@ -166,10 +166,10 @@ namespace DataStructures {
         return true;
       }
       if (ItemId != other.ItemId) return false;
-      if (TemplateId != other.TemplateId) return false;
-      if (Quantity != other.Quantity) return false;
-      if (Durability != other.Durability) return false;
-      if (IsEquipped != other.IsEquipped) return false;
+      if (ItemKey != other.ItemKey) return false;
+      if (ItemType != other.ItemType) return false;
+      if (Grade != other.Grade) return false;
+      if (Count != other.Count) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -178,10 +178,10 @@ namespace DataStructures {
     public override int GetHashCode() {
       int hash = 1;
       if (ItemId != 0L) hash ^= ItemId.GetHashCode();
-      if (TemplateId != 0) hash ^= TemplateId.GetHashCode();
-      if (Quantity != 0) hash ^= Quantity.GetHashCode();
-      if (Durability != 0) hash ^= Durability.GetHashCode();
-      if (IsEquipped != false) hash ^= IsEquipped.GetHashCode();
+      if (ItemKey != 0) hash ^= ItemKey.GetHashCode();
+      if (ItemType != 0) hash ^= ItemType.GetHashCode();
+      if (Grade != 0) hash ^= Grade.GetHashCode();
+      if (Count != 0) hash ^= Count.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -204,21 +204,21 @@ namespace DataStructures {
         output.WriteRawTag(8);
         output.WriteInt64(ItemId);
       }
-      if (TemplateId != 0) {
+      if (ItemKey != 0) {
         output.WriteRawTag(16);
-        output.WriteInt32(TemplateId);
+        output.WriteInt32(ItemKey);
       }
-      if (Quantity != 0) {
+      if (ItemType != 0) {
         output.WriteRawTag(24);
-        output.WriteInt32(Quantity);
+        output.WriteInt32(ItemType);
       }
-      if (Durability != 0) {
+      if (Grade != 0) {
         output.WriteRawTag(32);
-        output.WriteInt32(Durability);
+        output.WriteInt32(Grade);
       }
-      if (IsEquipped != false) {
+      if (Count != 0) {
         output.WriteRawTag(40);
-        output.WriteBool(IsEquipped);
+        output.WriteInt32(Count);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -234,21 +234,21 @@ namespace DataStructures {
         output.WriteRawTag(8);
         output.WriteInt64(ItemId);
       }
-      if (TemplateId != 0) {
+      if (ItemKey != 0) {
         output.WriteRawTag(16);
-        output.WriteInt32(TemplateId);
+        output.WriteInt32(ItemKey);
       }
-      if (Quantity != 0) {
+      if (ItemType != 0) {
         output.WriteRawTag(24);
-        output.WriteInt32(Quantity);
+        output.WriteInt32(ItemType);
       }
-      if (Durability != 0) {
+      if (Grade != 0) {
         output.WriteRawTag(32);
-        output.WriteInt32(Durability);
+        output.WriteInt32(Grade);
       }
-      if (IsEquipped != false) {
+      if (Count != 0) {
         output.WriteRawTag(40);
-        output.WriteBool(IsEquipped);
+        output.WriteInt32(Count);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -263,17 +263,17 @@ namespace DataStructures {
       if (ItemId != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(ItemId);
       }
-      if (TemplateId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TemplateId);
+      if (ItemKey != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ItemKey);
       }
-      if (Quantity != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Quantity);
+      if (ItemType != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ItemType);
       }
-      if (Durability != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Durability);
+      if (Grade != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Grade);
       }
-      if (IsEquipped != false) {
-        size += 1 + 1;
+      if (Count != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Count);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -290,17 +290,17 @@ namespace DataStructures {
       if (other.ItemId != 0L) {
         ItemId = other.ItemId;
       }
-      if (other.TemplateId != 0) {
-        TemplateId = other.TemplateId;
+      if (other.ItemKey != 0) {
+        ItemKey = other.ItemKey;
       }
-      if (other.Quantity != 0) {
-        Quantity = other.Quantity;
+      if (other.ItemType != 0) {
+        ItemType = other.ItemType;
       }
-      if (other.Durability != 0) {
-        Durability = other.Durability;
+      if (other.Grade != 0) {
+        Grade = other.Grade;
       }
-      if (other.IsEquipped != false) {
-        IsEquipped = other.IsEquipped;
+      if (other.Count != 0) {
+        Count = other.Count;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -326,19 +326,19 @@ namespace DataStructures {
             break;
           }
           case 16: {
-            TemplateId = input.ReadInt32();
+            ItemKey = input.ReadInt32();
             break;
           }
           case 24: {
-            Quantity = input.ReadInt32();
+            ItemType = input.ReadInt32();
             break;
           }
           case 32: {
-            Durability = input.ReadInt32();
+            Grade = input.ReadInt32();
             break;
           }
           case 40: {
-            IsEquipped = input.ReadBool();
+            Count = input.ReadInt32();
             break;
           }
         }
@@ -365,19 +365,19 @@ namespace DataStructures {
             break;
           }
           case 16: {
-            TemplateId = input.ReadInt32();
+            ItemKey = input.ReadInt32();
             break;
           }
           case 24: {
-            Quantity = input.ReadInt32();
+            ItemType = input.ReadInt32();
             break;
           }
           case 32: {
-            Durability = input.ReadInt32();
+            Grade = input.ReadInt32();
             break;
           }
           case 40: {
-            IsEquipped = input.ReadBool();
+            Count = input.ReadInt32();
             break;
           }
         }

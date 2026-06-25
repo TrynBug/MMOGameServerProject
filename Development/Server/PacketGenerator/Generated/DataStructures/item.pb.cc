@@ -30,10 +30,10 @@ inline constexpr Item::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
         item_id_{::int64_t{0}},
-        template_id_{0},
-        quantity_{0},
-        durability_{0},
-        is_equipped_{false} {}
+        item_key_{0},
+        item_type_{0},
+        grade_{0},
+        count_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR Item::Item(::_pbi::ConstantInitialized)
@@ -66,10 +66,10 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::DataStructures::Item, _impl_._has_bits_),
         8, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::DataStructures::Item, _impl_.item_id_),
-        PROTOBUF_FIELD_OFFSET(::DataStructures::Item, _impl_.template_id_),
-        PROTOBUF_FIELD_OFFSET(::DataStructures::Item, _impl_.quantity_),
-        PROTOBUF_FIELD_OFFSET(::DataStructures::Item, _impl_.durability_),
-        PROTOBUF_FIELD_OFFSET(::DataStructures::Item, _impl_.is_equipped_),
+        PROTOBUF_FIELD_OFFSET(::DataStructures::Item, _impl_.item_key_),
+        PROTOBUF_FIELD_OFFSET(::DataStructures::Item, _impl_.item_type_),
+        PROTOBUF_FIELD_OFFSET(::DataStructures::Item, _impl_.grade_),
+        PROTOBUF_FIELD_OFFSET(::DataStructures::Item, _impl_.count_),
         0,
         1,
         2,
@@ -87,15 +87,15 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_DataStructures_2fitem_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\031DataStructures/item.proto\022\016DataStructu"
-    "res\"g\n\004Item\022\017\n\007item_id\030\001 \001(\003\022\023\n\013template"
-    "_id\030\002 \001(\005\022\020\n\010quantity\030\003 \001(\005\022\022\n\ndurabilit"
-    "y\030\004 \001(\005\022\023\n\013is_equipped\030\005 \001(\010b\006proto3"
+    "res\"Z\n\004Item\022\017\n\007item_id\030\001 \001(\003\022\020\n\010item_key"
+    "\030\002 \001(\005\022\021\n\titem_type\030\003 \001(\005\022\r\n\005grade\030\004 \001(\005"
+    "\022\r\n\005count\030\005 \001(\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_DataStructures_2fitem_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_DataStructures_2fitem_2eproto = {
     false,
     false,
-    156,
+    143,
     descriptor_table_protodef_DataStructures_2fitem_2eproto,
     "DataStructures/item.proto",
     &descriptor_table_DataStructures_2fitem_2eproto_once,
@@ -149,9 +149,9 @@ inline void Item::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   ::memset(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, item_id_),
            0,
-           offsetof(Impl_, is_equipped_) -
+           offsetof(Impl_, count_) -
                offsetof(Impl_, item_id_) +
-               sizeof(Impl_::is_equipped_));
+               sizeof(Impl_::count_));
 }
 Item::~Item() {
   // @@protoc_insertion_point(destructor:DataStructures.Item)
@@ -234,22 +234,22 @@ Item::_table_ = {
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Item, _impl_.item_id_), 0>(),
      {8, 0, 0,
       PROTOBUF_FIELD_OFFSET(Item, _impl_.item_id_)}},
-    // int32 template_id = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Item, _impl_.template_id_), 1>(),
+    // int32 item_key = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Item, _impl_.item_key_), 1>(),
      {16, 1, 0,
-      PROTOBUF_FIELD_OFFSET(Item, _impl_.template_id_)}},
-    // int32 quantity = 3;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Item, _impl_.quantity_), 2>(),
+      PROTOBUF_FIELD_OFFSET(Item, _impl_.item_key_)}},
+    // int32 item_type = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Item, _impl_.item_type_), 2>(),
      {24, 2, 0,
-      PROTOBUF_FIELD_OFFSET(Item, _impl_.quantity_)}},
-    // int32 durability = 4;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Item, _impl_.durability_), 3>(),
+      PROTOBUF_FIELD_OFFSET(Item, _impl_.item_type_)}},
+    // int32 grade = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Item, _impl_.grade_), 3>(),
      {32, 3, 0,
-      PROTOBUF_FIELD_OFFSET(Item, _impl_.durability_)}},
-    // bool is_equipped = 5;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(Item, _impl_.is_equipped_), 4>(),
+      PROTOBUF_FIELD_OFFSET(Item, _impl_.grade_)}},
+    // int32 count = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Item, _impl_.count_), 4>(),
      {40, 4, 0,
-      PROTOBUF_FIELD_OFFSET(Item, _impl_.is_equipped_)}},
+      PROTOBUF_FIELD_OFFSET(Item, _impl_.count_)}},
     {::_pbi::TcParser::MiniParse, {}},
     {::_pbi::TcParser::MiniParse, {}},
   }}, {{
@@ -257,14 +257,14 @@ Item::_table_ = {
   }}, {{
     // int64 item_id = 1;
     {PROTOBUF_FIELD_OFFSET(Item, _impl_.item_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
-    // int32 template_id = 2;
-    {PROTOBUF_FIELD_OFFSET(Item, _impl_.template_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // int32 quantity = 3;
-    {PROTOBUF_FIELD_OFFSET(Item, _impl_.quantity_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // int32 durability = 4;
-    {PROTOBUF_FIELD_OFFSET(Item, _impl_.durability_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // bool is_equipped = 5;
-    {PROTOBUF_FIELD_OFFSET(Item, _impl_.is_equipped_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
+    // int32 item_key = 2;
+    {PROTOBUF_FIELD_OFFSET(Item, _impl_.item_key_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int32 item_type = 3;
+    {PROTOBUF_FIELD_OFFSET(Item, _impl_.item_type_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int32 grade = 4;
+    {PROTOBUF_FIELD_OFFSET(Item, _impl_.grade_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int32 count = 5;
+    {PROTOBUF_FIELD_OFFSET(Item, _impl_.count_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
@@ -280,8 +280,8 @@ PROTOBUF_NOINLINE void Item::Clear() {
   cached_has_bits = _impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
     ::memset(&_impl_.item_id_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.is_equipped_) -
-        reinterpret_cast<char*>(&_impl_.item_id_)) + sizeof(_impl_.is_equipped_));
+        reinterpret_cast<char*>(&_impl_.count_) -
+        reinterpret_cast<char*>(&_impl_.item_id_)) + sizeof(_impl_.count_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -315,39 +315,39 @@ PROTOBUF_NOINLINE void Item::Clear() {
     }
   }
 
-  // int32 template_id = 2;
+  // int32 item_key = 2;
   if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-    if (this_._internal_template_id() != 0) {
+    if (this_._internal_item_key() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<2>(
-              stream, this_._internal_template_id(), target);
+              stream, this_._internal_item_key(), target);
     }
   }
 
-  // int32 quantity = 3;
+  // int32 item_type = 3;
   if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-    if (this_._internal_quantity() != 0) {
+    if (this_._internal_item_type() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<3>(
-              stream, this_._internal_quantity(), target);
+              stream, this_._internal_item_type(), target);
     }
   }
 
-  // int32 durability = 4;
+  // int32 grade = 4;
   if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-    if (this_._internal_durability() != 0) {
+    if (this_._internal_grade() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<4>(
-              stream, this_._internal_durability(), target);
+              stream, this_._internal_grade(), target);
     }
   }
 
-  // bool is_equipped = 5;
+  // int32 count = 5;
   if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-    if (this_._internal_is_equipped() != 0) {
-      target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteBoolToArray(
-          5, this_._internal_is_equipped(), target);
+    if (this_._internal_count() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<5>(
+              stream, this_._internal_count(), target);
     }
   }
 
@@ -384,31 +384,32 @@ PROTOBUF_NOINLINE void Item::Clear() {
             this_._internal_item_id());
       }
     }
-    // int32 template_id = 2;
+    // int32 item_key = 2;
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (this_._internal_template_id() != 0) {
+      if (this_._internal_item_key() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-            this_._internal_template_id());
+            this_._internal_item_key());
       }
     }
-    // int32 quantity = 3;
+    // int32 item_type = 3;
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (this_._internal_quantity() != 0) {
+      if (this_._internal_item_type() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-            this_._internal_quantity());
+            this_._internal_item_type());
       }
     }
-    // int32 durability = 4;
+    // int32 grade = 4;
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (this_._internal_durability() != 0) {
+      if (this_._internal_grade() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-            this_._internal_durability());
+            this_._internal_grade());
       }
     }
-    // bool is_equipped = 5;
+    // int32 count = 5;
     if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-      if (this_._internal_is_equipped() != 0) {
-        total_size += 2;
+      if (this_._internal_count() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_count());
       }
     }
   }
@@ -437,23 +438,23 @@ void Item::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (from._internal_template_id() != 0) {
-        _this->_impl_.template_id_ = from._impl_.template_id_;
+      if (from._internal_item_key() != 0) {
+        _this->_impl_.item_key_ = from._impl_.item_key_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (from._internal_quantity() != 0) {
-        _this->_impl_.quantity_ = from._impl_.quantity_;
+      if (from._internal_item_type() != 0) {
+        _this->_impl_.item_type_ = from._impl_.item_type_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (from._internal_durability() != 0) {
-        _this->_impl_.durability_ = from._impl_.durability_;
+      if (from._internal_grade() != 0) {
+        _this->_impl_.grade_ = from._impl_.grade_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-      if (from._internal_is_equipped() != 0) {
-        _this->_impl_.is_equipped_ = from._impl_.is_equipped_;
+      if (from._internal_count() != 0) {
+        _this->_impl_.count_ = from._impl_.count_;
       }
     }
   }
@@ -475,8 +476,8 @@ void Item::InternalSwap(Item* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Item, _impl_.is_equipped_)
-      + sizeof(Item::_impl_.is_equipped_)
+      PROTOBUF_FIELD_OFFSET(Item, _impl_.count_)
+      + sizeof(Item::_impl_.count_)
       - PROTOBUF_FIELD_OFFSET(Item, _impl_.item_id_)>(
           reinterpret_cast<char*>(&_impl_.item_id_),
           reinterpret_cast<char*>(&other->_impl_.item_id_));

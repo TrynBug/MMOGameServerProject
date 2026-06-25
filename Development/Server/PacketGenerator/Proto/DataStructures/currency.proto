@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package DataStructures;
+
+// 아이템 데이터 구조체 (DB 저장 단위)
+message Currency {
+    int64 gold = 1;
+    int64 dia = 2;
+}
