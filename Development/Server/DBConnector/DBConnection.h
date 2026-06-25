@@ -33,6 +33,12 @@ public:
     // 쿼리 실행 (prepared statement + 파라미터 바인딩)
     DBResult Execute(const std::string& query, const std::vector<DBParam>& params = {});
 
+    // 트랜잭션 제어 (text 프로토콜). 한 커넥션에서 BEGIN…COMMIT 으로 여러 쿼리를 묶을 때 사용.
+    // 보통 AsyncDBQueue::TransactionAsync 가 내부에서 호출하므로 직접 쓸 일은 드물다.
+    DBResult Begin();      // START TRANSACTION
+    DBResult Commit();
+    DBResult Rollback();
+
     // 마지막 AUTO_INCREMENT 값 (snowflake ID 사용 시 보통 불필요)
     int64_t LastInsertRowId() const;
 
@@ -41,6 +47,7 @@ public:
 
 private:
     DBResult fetchResult(MYSQL_STMT* pStmt);
+    DBResult runControl(const char* sql);   // Begin/Commit/Rollback 공통(text 프로토콜)
 
     MYSQL*      m_pDb = nullptr;
     std::string m_lastError;   // 연결 실패 등으로 핸들을 닫은 뒤에도 사유를 보관(GetLastError용)

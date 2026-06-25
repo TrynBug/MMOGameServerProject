@@ -82,6 +82,10 @@ public:
     //   → 후속작업이 같은 Stage 스레드에서 재개되는지 + 핀 카운터 증감을 로그([savechar])로 확인한다.
     db::DetachedCoTask SaveCharacterFromStage(Stage* pStage, CharacterPtr spChar);
 
+    // [개발/테스트] Currency/Item 테이블 upsert 검증용. Stage::handleEventAreaEnterReq 가 호출한다.
+    // AsyncPin 획득 → 임의 데이터로 Currency(캐릭터당 1행) + Item(스노우플레이크 1행)을 한 트랜잭션으로 upsert.
+    db::DetachedCoTask UpsertTestCurrencyAndItemFromStage(Stage* pStage, CharacterPtr spChar);
+
 protected:
     // ServerBase 훅
     bool OnInitialize()                              override;

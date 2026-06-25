@@ -18,8 +18,43 @@
 namespace db
 {
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DBTransaction
+//
+// TransactionAsync의 본문(TxBody)에 넘겨지는 핸들. 한 커넥션에 고정되어 있으며,
+// Execute로 여러 쿼리를 같은 트랜잭션 안에서 실행한다. (BEGIN/COMMIT/ROLLBACK은 프레임워크가 처리)
+//
+// Execute가 DB 에러를 만나면 내부에 errorCode를 기록한다 → runTransaction이 이를 보고
+// 일시적 에러(데드락 등)면 본문을 재실행, 결정적 에러(중복키 등)면 즉시 실패시킨다.
+//
+// [주의] 본문은 worker 스레드에서 동기로, 재시도 시 여러 번 실행된다.
+//   - 순수 DB 작업만 할 것(게임오브젝트/Stage 상태 접근·패킷 전송 등 부수효과 금지).
+//   - 출력은 캡처한 지역변수에 기록하되, 결과 success==true일 때만 유효하다.
+// ─────────────────────────────────────────────────────────────────────────────
+class DBTransaction
+{
+public:
+    explicit DBTransaction(DBConnection& conn) : m_conn(conn) {}
+
+    DBTransaction(const DBTransaction&)            = delete;
+    DBTransaction& operator=(const DBTransaction&) = delete;
+
+    // 트랜잭션 안에서 쿼리 실행. 실패하면 내부에 사유를 기록한다.
+    DBResult Execute(const std::string& query, const std::vector<DBParam>& params = {});
+
+    bool         Failed()        const { return m_failed; }
+    unsigned int LastErrorCode() const { return m_lastErrorCode; }
+    const std::string& LastErrorMsg() const { return m_lastErrorMsg; }
+
+private:
+    DBConnection& m_conn;
+    bool          m_failed        = false;
+    unsigned int  m_lastErrorCode = 0;
+    std::string   m_lastErrorMsg;
+};
+
 // 여러 DB(AccountDB, GameDB 샤드, 기타)를 하나의 공유 워커 풀로 처리하는 비동기 DB 큐.
-// 서버는 이 큐를 "1개만" 가지며, dbKey(std::pair<EDBType, int>)로 어느 DB에 보낼지 지정한다.
+// 서버는 이 큐를 "1개만" 가지며, (EDBType, dbIndex)로 어느 DB에 보낼지 지정한다.
 //
 // @사용:
 //   1) Open(databases, numWorkers)  // dbKey → 연결설정. (단일 DB는 Open(config, ...) 편의 오버로드)
@@ -41,6 +76,16 @@ class AsyncDBQueue
 {
 public:
     using Callback = std::function<void(DBResult)>;
+
+    // 트랜잭션 본문. true 반환=커밋 의도 / false 반환=롤백(비즈니스 중단, 재시도 안 함).
+    using TxBody = std::function<bool(DBTransaction&)>;
+
+    // 트랜잭션 재시도 옵션.
+    struct TxOptions
+    {
+        int maxAttempts   = 4;   // 일시적 에러 시 본문 재실행 최대 횟수
+        int backoffBaseMs = 5;   // 백오프 기본 ms (실제 대기 = base*attempt + 지터)
+    };
 
     // Open에 넘기는 DB 1개의 등록 정보. (type=Account면 index 무시)
     struct OpenEntry
@@ -73,6 +118,12 @@ public:
     //   dbType=Account → dbIndex 무시 / dbType=Game → dbIndex(=game_db_index)로 샤드 선택.
     DBResultAwaitable ExecuteAsync(EDBType dbType, int dbIndex, const std::string& query, std::vector<DBParam> params = {}, IResumeExecutor* pExecutor = nullptr);
 
+    // 코루틴용 비동기 트랜잭션. 한 커넥션에서 BEGIN…(body)…COMMIT 으로 묶고, 일시적 에러는 본문을 재실행한다.
+    //   결과 해석: success==true → 커밋됨 / success==false && errorCode==0 → 비즈니스 롤백(body가 false 반환)
+    //              / success==false && errorCode!=0 → DB 에러(재시도 소진 포함).
+    //   body는 worker 스레드에서 동기로(재시도 시 여러 번) 실행된다. DBTransaction 주석의 작성 규칙 참고.
+    DBResultAwaitable TransactionAsync(EDBType dbType, int dbIndex, TxBody body, IResumeExecutor* pExecutor = nullptr, TxOptions opts = {});
+
     // 해당 DB가 등록되어 있는지. (호출부가 ExecuteAsync 전에 fail-fast 검증)
     bool HasDatabase(EDBType dbType, int dbIndex) const;
 
@@ -82,13 +133,16 @@ public:
     const std::string& GetLastError() const { return m_lastError; }
 
 private:
+    // worker가 점유한 커넥션에서 실행하는 작업 단위. (cfg = 그 DB의 접속설정 — 트랜잭션 재연결용)
+    //   단발 쿼리든 트랜잭션이든 worker는 job 하나만 호출하면 되므로 트랜잭션을 따로 몰라도 된다.
+    using DbJob = std::function<DBResult(DBConnection&, const DBConnectionConfig&)>;
+
     struct Request
     {
-        EDBType              type;
-        int                  index;   // Game은 game_db_index. Account는 무시(getDbState가 0으로 정규화).
-        std::string          query;
-        std::vector<DBParam> params;
-        Callback             callback;
+        EDBType  type;
+        int      index;   // Game은 game_db_index. Account는 무시(getDbState가 0으로 정규화).
+        DbJob    job;
+        Callback callback;
     };
 
     // DB 1개의 커넥션 풀. 모든 접근은 m_mutex 하에서.
@@ -100,6 +154,9 @@ private:
     };
 
     void workerProc();
+
+    // job을 해당 DB의 전역 큐에 적재하고 worker를 깨운다. 미등록 DB면 즉시 실패 콜백.
+    void enqueueJob(EDBType type, int index, DbJob job, Callback cb);
 
     // 등록된 DB의 DbState를 얻는 유일한 접근자. 없으면 nullptr. (m_mutex 하에서)
     //   Account → 싱글톤 m_accountDb (index 무시) / Game → m_gameDbs[index]

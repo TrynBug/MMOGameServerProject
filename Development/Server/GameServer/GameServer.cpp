@@ -964,6 +964,84 @@ db::DetachedCoTask GameServer::SaveCharacterFromStage(Stage* pStage, CharacterPt
         pStage->HasInFlightAsync(), spChar->HasPendingAsync()));
 }
 
+// [개발/테스트] Currency/Item 테이블 upsert 검증용. (Stage::handleEventAreaEnterReq 가 발사)
+db::DetachedCoTask GameServer::UpsertTestCurrencyAndItemFromStage(Stage* pStage, CharacterPtr spChar)
+{
+    // 코루틴 prologue(첫 co_await 이전, Stage 스레드)에서 핀 획득 → 후속작업까지 캐릭터 수명 보장.
+    AsyncPin pin = pStage->PinForAsync(spChar);
+
+    const DataStructures::Character& cproto = spChar->GetProto();
+    const int64 characterId = cproto.character_id();
+    const int64 accountId   = cproto.owner_account_id();
+
+    UserPtr spUser = spChar->GetUserWeak().lock();
+    if (!spUser)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("[testupsert] owner user gone. characterId={}", characterId));
+        co_return;
+    }
+    const int32 gameDbIndex = spUser->GetGameDbIndex();
+    if (!GetDB().HasDatabase(db::EDBType::Game, gameDbIndex))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("[testupsert] invalid shard. accountId={} idx={}", accountId, gameDbIndex));
+        co_return;
+    }
+
+    // ── 임의 테스트 데이터 구성 (직렬화는 Stage 스레드에서, 트랜잭션 본문 진입 전에) ──
+    DataStructures::Currency currency;
+    currency.set_gold(12345);
+    currency.set_dia(67);
+
+    DataStructures::Item item;
+    const int64 itemId = GenerateObjectId();   // snowflake, 전역 유일 → 매 진입마다 새 아이템 1행
+    item.set_item_id(itemId);
+    item.set_item_key(1001);
+    item.set_item_type(1);
+    item.set_grade(3);
+    item.set_count(5);
+
+    std::string currencyJson, itemJson;
+    if (!packet::ProtoJsonSerializer::ToJson(currency, currencyJson) ||
+        !packet::ProtoJsonSerializer::ToJson(item, itemJson))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("[testupsert] serialize failed. accountId={} characterId={}", accountId, characterId));
+        co_return;
+    }
+
+    // ── 두 테이블 upsert를 한 트랜잭션으로 묶는다(다중 테이블 원자 변경 = TransactionAsync 용례) ──
+    //    본문은 worker 스레드에서 실행되므로 캡처 값(JSON/ID)만 쓰고 게임상태는 건드리지 않는다.
+    db::DBResult txResult = co_await GetDB().TransactionAsync(
+        db::EDBType::Game, gameDbIndex,
+        [accountId, characterId, itemId, currencyJson, itemJson](db::DBTransaction& tx) -> bool
+        {
+            // Currency: PK(character_id) → 같은 캐릭터 재진입 시 data 갱신(진짜 upsert).
+            db::DBResult r1 = tx.Execute(
+                "INSERT INTO Currency (character_id, account_id, data) VALUES (?, ?, ?) AS new "
+                "ON DUPLICATE KEY UPDATE data = new.data",
+                { characterId, accountId, currencyJson });
+            if (!r1.success)
+                return false;
+
+            // Item: PK(item_id, snowflake) → 매번 새 행 insert.
+            db::DBResult r2 = tx.Execute(
+                "INSERT INTO Item (item_id, character_id, account_id, data) VALUES (?, ?, ?, ?) AS new "
+                "ON DUPLICATE KEY UPDATE data = new.data",
+                { itemId, characterId, accountId, itemJson });
+            return r2.success;   // true → COMMIT
+        },
+        pStage->GetResumeExecutor());
+
+    if (!txResult.success)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("[testupsert] tx failed. accountId={} characterId={} errorCode={} err={}",
+            accountId, characterId, txResult.errorCode, txResult.errorMsg));
+        co_return;
+    }
+
+    LOG_WRITE(LogLevel::Info, std::format("[testupsert] ok. accountId={} characterId={} itemId={}",
+        accountId, characterId, itemId));
+}
+
 // 게이트웨이서버로부터 HandshakeRes를 받음
 void GameServer::handleGatewayHandshakeRes(const netlib::ISessionPtr& spSession, const ServerPacket::ServerHandshakeRes& msg)
 {

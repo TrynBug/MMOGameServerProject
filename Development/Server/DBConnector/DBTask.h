@@ -3,6 +3,8 @@
 #include "pch.h"
 #include "DBTypes.h"
 
+#include <cassert>
+
 namespace db
 {
 
@@ -12,11 +14,11 @@ namespace db
 // co_await 완료 후 코루틴을 어느 스레드에서 재개할지 결정하는 인터페이스.
 //
 // 사용 예:
-//   - CoroutineTest : 자체 스레드 풀(SimpleThreadPool)을 구현해서 전달
-//   - 실제 서버    : ServerBase의 IOCP Worker 스레드 풀을 연결
+//   - 실제 서버 : ServerBase의 IOCP Worker 스레드(GetCoroutineResumeExecutor) 또는
+//                 Stage 컨텐츠 스레드(Stage::GetResumeExecutor)를 연결.
 //
-// nullptr을 전달하면 DB worker 스레드에서 직접 resume한다.
-// (단순 테스트나 Worker 스레드가 안전한 경우에만 사용)
+// [필수] 서버에서는 반드시 non-null executor를 넘겨야 한다. nullptr이면 DBResultAwaitable이
+// DB 작업을 시작하지 않고 즉시 실패 처리한다(worker 스레드 직접 resume = 스레드 안정성 위반).
 // ─────────────────────────────────────────────────────────────────────────────
 class IResumeExecutor
 {
@@ -239,45 +241,55 @@ struct DetachedCoTask
 class DBResultAwaitable
 {
 public:
-    DBResultAwaitable(
-        std::string           query,
-        std::vector<DBParam>  params,
-        std::function<void(std::string, std::vector<DBParam>, std::function<void(DBResult)>)> executeFn,
-        IResumeExecutor*      pExecutor)
-        : m_query(std::move(query))
-        , m_params(std::move(params))
-        , m_executeFn(std::move(executeFn))
+    // starter(cb): 작업을 시작하고, 완료 시 cb(DBResult)를 호출하기로 약속하는 함수.
+    //   - 단발 쿼리(ExecuteAsync)나 트랜잭션(TransactionAsync) 모두 자기 방식대로 starter를 만든다.
+    //   - cb는 worker 스레드에서 호출된다.
+    using Starter = std::function<void(std::function<void(DBResult)>)>;
+
+    DBResultAwaitable(Starter starter, IResumeExecutor* pExecutor)
+        : m_starter(std::move(starter))
         , m_pExecutor(pExecutor)
         , m_spResult(std::make_shared<DBResult>())  // 콜백과 공유할 결과 버퍼
     {}
 
     bool await_ready() const noexcept { return false; }
 
-    void await_suspend(std::coroutine_handle<> handle)
+    // 반환값:
+    //   true  → suspend(정상). worker 완료 후 executor가 코루틴을 재개.
+    //   false → suspend 안 함. 호출 스레드에서 즉시 await_resume로 진행(실패 결과).
+    bool await_suspend(std::coroutine_handle<> handle)
     {
-        // shared_ptr로 캡처 → awaitable 소멸 후에도 콜백이 안전하게 결과를 씀
-        auto spResult   = m_spResult;
-        auto pExecutor  = m_pExecutor;
+        // [필수 불변식] 서버에서는 반드시 resume executor가 있어야 스레드 안정성이 보장된다.
+        // executor가 없으면 worker 스레드에서 직접 resume하게 되는데, 그러면 게임상태를 엉뚱한
+        // 스레드에서 만지게 된다(Stage 단일스레드 불변식 위반). 이런 호출은 버그이므로
+        // DB 작업을 시작하지 않고(큐에 넣지 않고) 즉시 실패로 끝낸다.
+        if (m_pExecutor == nullptr)
+        {
+            ::OutputDebugStringA("DBResultAwaitable: pExecutor is null - DB request aborted (resume executor is required)\r\n");
+            assert(false && "DBResultAwaitable requires a resume executor (pExecutor)");
+            m_spResult->success  = false;
+            m_spResult->errorMsg = "DB request aborted: resume executor (pExecutor) is null";
+            return false;   // suspend 안 함 → 같은 스레드에서 await_resume가 실패 결과를 돌려준다.
+        }
 
-        m_executeFn(std::move(m_query), std::move(m_params),
+        // shared_ptr로 캡처 → awaitable 소멸 후에도 콜백이 안전하게 결과를 씀
+        auto spResult  = m_spResult;
+        auto pExecutor = m_pExecutor;   // 위에서 non-null 보장
+
+        m_starter(
             [spResult, pExecutor, handle](DBResult result) mutable
             {
                 *spResult = std::move(result);
-
-                if (pExecutor)
-                    pExecutor->Post([handle]() mutable { handle.resume(); });
-                else
-                    handle.resume();
+                pExecutor->Post([handle]() mutable { handle.resume(); });
             });
+        return true;
     }
 
     DBResult await_resume() { return std::move(*m_spResult); }
 
 private:
-    std::string           m_query;
-    std::vector<DBParam>  m_params;
-    std::function<void(std::string, std::vector<DBParam>, std::function<void(DBResult)>)> m_executeFn;
-    IResumeExecutor*      m_pExecutor = nullptr;
+    Starter                   m_starter;
+    IResumeExecutor*          m_pExecutor = nullptr;
     std::shared_ptr<DBResult> m_spResult;
 };
 

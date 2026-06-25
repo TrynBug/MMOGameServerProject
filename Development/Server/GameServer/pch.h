@@ -30,6 +30,8 @@
 #include "Generated/Common/packet_id.pb.h"
 #include "Generated/DataStructures/character.pb.h"
 #include "Generated/DataStructures/account.pb.h"
+#include "Generated/DataStructures/currency.pb.h"
+#include "Generated/DataStructures/item.pb.h"
 #include "Generated/GamePacket/character_packet.pb.h"
 #include "Generated/GamePacket/session_packet.pb.h"
 #include "Generated/GamePacket/stage_packet.pb.h"

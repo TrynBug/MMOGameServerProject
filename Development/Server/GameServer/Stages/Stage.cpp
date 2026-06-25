@@ -1395,6 +1395,9 @@ void Stage::handleEventAreaEnterReq(const UserPtr& spUser, const netlib::PacketP
     // 4) 스크립트 트리거. loc 은 영역 안으로 검증된 보고 위치를 넘긴다.
     if (m_pScript)
         m_pScript->CallOnEnterEventArea(eventKey, objectId, rx, ry, rz);
+
+    // [개발/테스트] Currency/Item 테이블 upsert 검증. 진입 1회당 1번 발사(중복 진입은 위 AddOccupant 에서 흡수됨).
+    GameServer::Instance().UpsertTestCurrencyAndItemFromStage(this, spCharacter);
 }
 
 void Stage::handleEventAreaExitReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)

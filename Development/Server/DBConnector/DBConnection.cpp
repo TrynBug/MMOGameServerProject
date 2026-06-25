@@ -110,13 +110,15 @@ DBResult DBConnection::Execute(const std::string& query, const std::vector<DBPar
     MYSQL_STMT* pStmt = mysql_stmt_init(m_pDb);
     if (!pStmt)
     {
-        result.errorMsg = mysql_error(m_pDb);
+        result.errorCode = mysql_errno(m_pDb);
+        result.errorMsg  = mysql_error(m_pDb);
         return result;
     }
 
     if (mysql_stmt_prepare(pStmt, query.c_str(), static_cast<unsigned long>(query.size())) != 0)
     {
-        result.errorMsg = mysql_stmt_error(pStmt);
+        result.errorCode = mysql_stmt_errno(pStmt);
+        result.errorMsg  = mysql_stmt_error(pStmt);
         mysql_stmt_close(pStmt);
         return result;
     }
@@ -174,14 +176,16 @@ DBResult DBConnection::Execute(const std::string& query, const std::vector<DBPar
 
     if (paramCount > 0 && mysql_stmt_bind_param(pStmt, paramBinds.data()) != 0)
     {
-        result.errorMsg = mysql_stmt_error(pStmt);
+        result.errorCode = mysql_stmt_errno(pStmt);
+        result.errorMsg  = mysql_stmt_error(pStmt);
         mysql_stmt_close(pStmt);
         return result;
     }
 
     if (mysql_stmt_execute(pStmt) != 0)
     {
-        result.errorMsg = mysql_stmt_error(pStmt);
+        result.errorCode = mysql_stmt_errno(pStmt);   // 데드락(1213)/락대기(1205) 등이 여기서 드러남
+        result.errorMsg  = mysql_stmt_error(pStmt);
         mysql_stmt_close(pStmt);
         return result;
     }
@@ -231,7 +235,8 @@ DBResult DBConnection::fetchResult(MYSQL_STMT* pStmt)
 
     if (mysql_stmt_bind_result(pStmt, binds.data()) != 0)
     {
-        result.errorMsg = mysql_stmt_error(pStmt);
+        result.errorCode = mysql_stmt_errno(pStmt);
+        result.errorMsg  = mysql_stmt_error(pStmt);
         mysql_free_result(pMeta);
         return result;
     }
@@ -239,7 +244,8 @@ DBResult DBConnection::fetchResult(MYSQL_STMT* pStmt)
     // 전체 결과를 클라이언트에 버퍼링 (fetch_column 안정성).
     if (mysql_stmt_store_result(pStmt) != 0)
     {
-        result.errorMsg = mysql_stmt_error(pStmt);
+        result.errorCode = mysql_stmt_errno(pStmt);
+        result.errorMsg  = mysql_stmt_error(pStmt);
         mysql_free_result(pMeta);
         return result;
     }
@@ -252,7 +258,8 @@ DBResult DBConnection::fetchResult(MYSQL_STMT* pStmt)
         if (fetchRc != 0 && fetchRc != MYSQL_DATA_TRUNCATED)
         {
             // 0-length 바인딩이라 MYSQL_DATA_TRUNCATED 는 정상. 그 외는 진짜 에러.
-            result.errorMsg = mysql_stmt_error(pStmt);
+            result.errorCode = mysql_stmt_errno(pStmt);
+            result.errorMsg  = mysql_stmt_error(pStmt);
             mysql_free_result(pMeta);
             return result;
         }
@@ -297,6 +304,32 @@ DBResult DBConnection::fetchResult(MYSQL_STMT* pStmt)
     mysql_free_result(pMeta);
     return result;
 }
+
+DBResult DBConnection::runControl(const char* sql)
+{
+    DBResult result;
+
+    if (!m_pDb)
+    {
+        result.errorMsg = "DB not open";
+        return result;
+    }
+
+    // 트랜잭션 제어문은 text 프로토콜로 보낸다(prepared statement 불필요/엣지케이스 회피).
+    if (mysql_real_query(m_pDb, sql, static_cast<unsigned long>(std::strlen(sql))) != 0)
+    {
+        result.errorCode = mysql_errno(m_pDb);   // 연결끊김(2006/2013)도 여기로
+        result.errorMsg  = mysql_error(m_pDb);
+        return result;
+    }
+
+    result.success = true;
+    return result;
+}
+
+DBResult DBConnection::Begin()    { return runControl("START TRANSACTION"); }
+DBResult DBConnection::Commit()   { return runControl("COMMIT"); }
+DBResult DBConnection::Rollback() { return runControl("ROLLBACK"); }
 
 int64_t DBConnection::LastInsertRowId() const
 {

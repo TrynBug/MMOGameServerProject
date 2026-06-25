@@ -45,6 +45,7 @@ struct DBResult
 {
 public:
     bool success = false;
+    unsigned int errorCode = 0;   // 실패 시 mysql_errno (재시도 분류 + 1062 중복키 등 판별). 0이면 DB에러 아님.
     std::string errorMsg;
     std::vector<DBRow> rows;
 
