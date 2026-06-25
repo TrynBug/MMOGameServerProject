@@ -323,7 +323,7 @@ void AsyncDBQueue::workerProc()
     {
         Request                       req;
         std::unique_ptr<DBConnection> conn;   // 이번에 사용할 커넥션(점유)
-        DBConnectionConfig            cfg;    // 그 DB의 접속설정(트랜잭션 재연결용). 락 안에서 복사.
+        DBConnectionConfig            cfg;    // 그 DB의 접속설정(재연결/커넥션 치유용). 락 안에서 복사.
 
         {
             std::unique_lock<std::mutex> lock(m_mutex);
@@ -350,8 +350,19 @@ void AsyncDBQueue::workerProc()
 
         // ── 블로킹 실행 (락 밖). job = 단발 쿼리 또는 트랜잭션. ──
         DBResult result = req.job(*conn, cfg);
+        const unsigned int resultErrorCode = result.errorCode;   // 콜백이 result를 move하기 전에 보관
         if (req.callback)
             req.callback(std::move(result));
+
+        // ── 죽은 커넥션 치유 (락 밖) ──
+        // 연결끊김(2006/2013) 후의 커넥션을 그대로 풀에 반납하면 다음 요청들이 연달아 실패한다.
+        // 반납 전에 재연결을 시도해 풀 오염을 막는다. (쿼리 재실행이 아니라 커넥션만 살리는 것 → idempotency 무관)
+        //   - 연결끊김은 핸들이 아직 열린 채라 errorCode로 판별. (직전 치유가 실패해 핸들이 닫힌 경우는 !IsOpen으로)
+        if (isConnectionLost(resultErrorCode) || !conn->IsOpen())
+        {
+            if (!conn->Open(cfg))
+                ::OutputDebugStringA("AsyncDBQueue: dead connection reconnect failed on return (DB down?)\r\n");
+        }
 
         // 커넥션 반납(busy → free).
         {
