@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Generated\Common\packet_id.pb.cc" />
     <ClCompile Include="Generated\DataStructures\account.pb.cc" />
+    <ClCompile Include="Generated\DataStructures\account_currency.pb.cc" />
     <ClCompile Include="Generated\DataStructures\character.pb.cc" />
     <ClCompile Include="Generated\DataStructures\currency.pb.cc" />
     <ClCompile Include="Generated\DataStructures\item.pb.cc" />
@@ -55,6 +56,7 @@
   <ItemGroup>
     <ClInclude Include="Generated\Common\packet_id.pb.h" />
     <ClInclude Include="Generated\DataStructures\account.pb.h" />
+    <ClInclude Include="Generated\DataStructures\account_currency.pb.h" />
     <ClInclude Include="Generated\DataStructures\character.pb.h" />
     <ClInclude Include="Generated\DataStructures\currency.pb.h" />
     <ClInclude Include="Generated\DataStructures\item.pb.h" />
@@ -87,6 +89,7 @@
     <None Include="generate_proto.bat" />
     <None Include="Proto\Common\packet_id.proto" />
     <None Include="Proto\DataStructures\account.proto" />
+    <None Include="Proto\DataStructures\account_currency.proto" />
     <None Include="Proto\DataStructures\character.proto" />
     <None Include="Proto\DataStructures\currency.proto" />
     <None Include="Proto\DataStructures\item.proto" />

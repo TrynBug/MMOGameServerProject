@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package DataStructures;
 
-message Currency {
-    int64 gold = 1;
+message AccountCurrency {
+    int64 dia = 1;
 }
+
