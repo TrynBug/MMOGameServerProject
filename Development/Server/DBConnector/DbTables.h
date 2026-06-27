@@ -15,7 +15,7 @@
 // 테이블 정체성을 3가지로 표현한다:
 //   1) EDbTable enum    : 런타임 식별자. 배치 맵 키 / 락 순서 / 로깅 기준.
 //   2) proto 타입       : 컴파일타임 식별자 + 직렬화 단위(DataStructures::*).
-//   3) DbTable<T> trait : 둘을 잇고(kType), 테이블 메타(kInfo)와 키 추출(Keys)을 한 곳에 담는다.
+//   3) DbTable<T> trait : 둘을 잇고(kType), 테이블 메타(kInfo)와 키 추출(IdColumns)을 한 곳에 담는다.
 //
 // 테이블명/PK/컬럼 메타(DbTableInfo)는 각 DbTable<T>::kInfo "한 곳"에만 작성한다.
 // GetDbTableInfo(enum) 카탈로그는 그 kInfo 들을 enum 순서로 가리키기만 한다(중복 작성 없음).
@@ -43,23 +43,23 @@ struct DbTableInfo
     const char* name;        // 테이블명
     const char* pkCols;      // PK 컬럼 목록(DELETE WHERE / 중복키 식별). 단일="item_id", 복합="account_id, slot"
     int         pkColCount;  // PK 컬럼 수. 키 벡터의 앞 N개가 PK (insertCols 도 PK를 맨 앞에 둔다)
-    const char* insertCols;  // INSERT 컬럼 목록(키들 + data, 키 순서는 DbTable<T>::Keys 와 일치)
+    const char* insertCols;  // INSERT 컬럼 목록(키들 + data, 키 순서는 DbTable<T>::IdColumns 와 일치)
 };
 
 // proto 타입 → 테이블 trait. 미등록 타입을 배치에 넣으면 컴파일 에러(누락 방지).
 //   kInfo  : 이 테이블의 모든 스키마 메타(이름/PK/컬럼) 단일 출처.
-//   Keys() : **고정 시그니처** (const T& msg, accountId, characterId). 호출부는 항상 셋 다 넘기고,
+//   IdColumns() : **고정 시그니처** (const T& msg, accountId, characterId). 호출부는 항상 셋 다 넘기고,
 //            어떤 키가 필요한지는 각 테이블이 알아서 고른다(호출부가 키 구성을 몰라도 됨).
 //            반환은 kInfo.insertCols 의 키 컬럼(data 제외)을 그 순서대로. 자기 PK는 proto에서, 소유자
 //            식별자(account/character)는 인자에서 가져온다.
-//   [주의] Keys() 반환 순서/개수는 kInfo.insertCols 의 키 컬럼과 일치(같은 trait 안에서 함께 관리).
+//   [주의] IdColumns() 반환 순서/개수는 kInfo.insertCols 의 키 컬럼과 일치(같은 trait 안에서 함께 관리).
 template<class T> struct DbTable;   // primary template (정의 없음)
 
 template<> struct DbTable<DataStructures::Character>
 {
     static constexpr EDbTable    kType = EDbTable::Character;
     static constexpr DbTableInfo kInfo = { "Characters", "character_id", 1, "character_id, account_id, data" };
-    static std::vector<db::DBParam> Keys(const DataStructures::Character& msg, int64_t accountId, int64_t /*characterId*/)
+    static std::vector<db::DBParam> IdColumns(const DataStructures::Character& msg, int64_t accountId, int64_t /*characterId*/)
     {
         return {
             msg.character_id(),   // character_id (PK, proto)
@@ -72,7 +72,7 @@ template<> struct DbTable<DataStructures::Currency>
 {
     static constexpr EDbTable    kType = EDbTable::Currency;
     static constexpr DbTableInfo kInfo = { "Currency", "character_id", 1, "character_id, account_id, data" };
-    static std::vector<db::DBParam> Keys(const DataStructures::Currency& /*msg*/, int64_t accountId, int64_t characterId)
+    static std::vector<db::DBParam> IdColumns(const DataStructures::Currency& /*msg*/, int64_t accountId, int64_t characterId)
     {
         return {
             characterId,          // character_id (PK)
@@ -85,7 +85,7 @@ template<> struct DbTable<DataStructures::Item>
 {
     static constexpr EDbTable    kType = EDbTable::Item;
     static constexpr DbTableInfo kInfo = { "Item", "item_id", 1, "item_id, character_id, account_id, data" };
-    static std::vector<db::DBParam> Keys(const DataStructures::Item& msg, int64_t accountId, int64_t characterId)
+    static std::vector<db::DBParam> IdColumns(const DataStructures::Item& msg, int64_t accountId, int64_t characterId)
     {
         return {
             msg.item_id(),        // item_id (PK, proto)
@@ -99,7 +99,7 @@ template<> struct DbTable<DataStructures::AccountCurrency>
 {
     static constexpr EDbTable    kType = EDbTable::AccountCurrency;
     static constexpr DbTableInfo kInfo = { "AccountCurrency", "account_id", 1, "account_id, data" };
-    static std::vector<db::DBParam> Keys(const DataStructures::AccountCurrency& /*msg*/, int64_t accountId, int64_t /*characterId*/)
+    static std::vector<db::DBParam> IdColumns(const DataStructures::AccountCurrency& /*msg*/, int64_t accountId, int64_t /*characterId*/)
     {
         return {
             accountId,            // account_id (PK)

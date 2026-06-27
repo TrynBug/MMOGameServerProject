@@ -24,7 +24,7 @@ public:
     //   spBatch    : 저장할 배치(shared_ptr). worker 람다에 by-value 복사 캡처 → DB 완료까지 수명 보장.
     //   shardIndex : game_db_index
     //   resume     : 후속작업 재개 executor (보통 Stage 의 GetResumeExecutor())
-    static db::DBResultAwaitable Save(db::AsyncDBQueue& dbq, const std::shared_ptr<DbSaveBatch>& spBatch, int shardIndex, db::IResumeExecutor* resume);
+    static db::DBResultAwaitable Save(db::AsyncDBQueue& dbQueue, const std::shared_ptr<DbSaveBatch>& spBatch, int shardIndex, db::IResumeExecutor* resume);
 };
 
 } // namespace db

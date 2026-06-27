@@ -14,7 +14,7 @@ namespace
 {
     // MySQL 컬럼(필드)의 문자열 표현을 DBValue 로 변환한다.
     // prepared statement 결과를 모두 문자열로 받아온 뒤, 필드 타입에 맞춰 int64/double/string/blob 으로 변환.
-    DBValue fieldToDBValue(const MYSQL_FIELD& field, const std::string& s)
+    DBValue fieldToDBValue(const MYSQL_FIELD& field, const std::string& fieldText)
     {
         switch (field.type)
         {
@@ -24,11 +24,25 @@ namespace
         case MYSQL_TYPE_LONGLONG:
         case MYSQL_TYPE_INT24:
         case MYSQL_TYPE_YEAR:
-            try { return static_cast<int64_t>(std::stoll(s)); } catch (...) { return s; }
+            try
+            {
+                return static_cast<int64_t>(std::stoll(fieldText));
+            }
+            catch (...)
+            {
+                return fieldText;
+            }
 
         case MYSQL_TYPE_FLOAT:
         case MYSQL_TYPE_DOUBLE:
-            try { return std::stod(s); } catch (...) { return s; }
+            try
+            {
+                return std::stod(fieldText);
+            }
+            catch (...)
+            {
+                return fieldText;
+            }
 
         case MYSQL_TYPE_TINY_BLOB:
         case MYSQL_TYPE_MEDIUM_BLOB:
@@ -36,12 +50,14 @@ namespace
         case MYSQL_TYPE_BLOB:
             // charset 63 = binary → 진짜 BLOB. 그 외(charset 있음)는 TEXT 이므로 문자열로.
             if (field.charsetnr == 63)
-                return std::vector<uint8_t>(s.begin(), s.end());
-            return s;
+            {
+                return std::vector<uint8_t>(fieldText.begin(), fieldText.end());
+            }
+            return fieldText;
 
         // VARCHAR / CHAR / JSON / DATETIME / TIMESTAMP / DECIMAL 등은 문자열로.
         default:
-            return s;
+            return fieldText;
         }
     }
 }
@@ -51,34 +67,45 @@ DBConnection::~DBConnection()
     Close();
 }
 
-bool DBConnection::Open(const DBConnectionConfig& cfg)
+bool DBConnection::Open(const DBConnectionConfig& config)
 {
     if (m_pDb)
+    {
         Close();
+    }
 
     m_pDb = mysql_init(nullptr);
     if (!m_pDb)
+    {
         return false;
+    }
 
     // utf8mb4 (JSON/한글 안전)
     mysql_options(m_pDb, MYSQL_SET_CHARSET_NAME, "utf8mb4");
 
     // caching_sha2_password(MySQL 8 기본 인증)를 비-TLS 연결에서도 쓰도록 서버 공개키 요청 허용.
-    bool getPubKey = true;
-    mysql_options(m_pDb, MYSQL_OPT_GET_SERVER_PUBLIC_KEY, &getPubKey);
+    bool getPublicKey = true;
+    mysql_options(m_pDb, MYSQL_OPT_GET_SERVER_PUBLIC_KEY, &getPublicKey);
+
+    // database 가 비어있으면 DB 미지정 연결(nullptr), 아니면 스키마명을 넘긴다.
+    const char* databaseName = nullptr;
+    if (!config.database.empty())
+    {
+        databaseName = config.database.c_str();
+    }
 
     if (!mysql_real_connect(
             m_pDb,
-            cfg.host.c_str(),
-            cfg.user.c_str(),
-            cfg.password.c_str(),
-            cfg.database.empty() ? nullptr : cfg.database.c_str(),
-            cfg.port,
+            config.host.c_str(),
+            config.user.c_str(),
+            config.password.c_str(),
+            databaseName,
+            config.port,
             nullptr, 0))
     {
         // 실패 사유를 핸들 닫기 전에 보관 (errno + 메시지)
         m_lastError = std::format("mysql_real_connect failed ({}): {} [host={} port={} user={} db={}]",
-            mysql_errno(m_pDb), mysql_error(m_pDb), cfg.host, cfg.port, cfg.user, cfg.database);
+            mysql_errno(m_pDb), mysql_error(m_pDb), config.host, config.port, config.user, config.database);
         mysql_close(m_pDb);
         m_pDb = nullptr;
         return false;
@@ -107,201 +134,221 @@ DBResult DBConnection::Execute(const std::string& query, const std::vector<DBPar
         return result;
     }
 
-    MYSQL_STMT* pStmt = mysql_stmt_init(m_pDb);
-    if (!pStmt)
+    MYSQL_STMT* pStatement = mysql_stmt_init(m_pDb);
+    if (!pStatement)
     {
         result.errorCode = mysql_errno(m_pDb);
         result.errorMsg  = mysql_error(m_pDb);
         return result;
     }
 
-    if (mysql_stmt_prepare(pStmt, query.c_str(), static_cast<unsigned long>(query.size())) != 0)
+    if (mysql_stmt_prepare(pStatement, query.c_str(), static_cast<unsigned long>(query.size())) != 0)
     {
-        result.errorCode = mysql_stmt_errno(pStmt);
-        result.errorMsg  = mysql_stmt_error(pStmt);
-        mysql_stmt_close(pStmt);
+        result.errorCode = mysql_stmt_errno(pStatement);
+        result.errorMsg  = mysql_stmt_error(pStatement);
+        mysql_stmt_close(pStatement);
         return result;
     }
 
     // ── 파라미터 바인딩 ──
     // MYSQL_BIND 와 보조 저장소(값/길이)는 execute 까지 유효해야 하므로 함수 스코프에 둔다.
     const size_t paramCount = params.size();
-    std::vector<MYSQL_BIND>    paramBinds(paramCount);
-    std::vector<long long>     i64store(paramCount, 0);
-    std::vector<double>        dblstore(paramCount, 0.0);
-    std::vector<unsigned long> paramLen(paramCount, 0);
+    std::vector<MYSQL_BIND>    parameterBindings(paramCount);
+    std::vector<long long>     int64Storage(paramCount, 0);
+    std::vector<double>        doubleStorage(paramCount, 0.0);
+    std::vector<unsigned long> parameterLengths(paramCount, 0);
     if (paramCount > 0)
-        std::memset(paramBinds.data(), 0, paramCount * sizeof(MYSQL_BIND));
-
-    for (size_t i = 0; i < paramCount; ++i)
     {
-        MYSQL_BIND& b = paramBinds[i];
-        std::visit([&](const auto& val)
+        std::memset(parameterBindings.data(), 0, paramCount * sizeof(MYSQL_BIND));
+    }
+
+    for (size_t paramIndex = 0; paramIndex < paramCount; ++paramIndex)
+    {
+        MYSQL_BIND& binding = parameterBindings[paramIndex];
+        std::visit([&](const auto& value)
         {
-            using T = std::decay_t<decltype(val)>;
-            if constexpr (std::is_same_v<T, std::monostate>)
+            using ValueType = std::decay_t<decltype(value)>;
+            if constexpr (std::is_same_v<ValueType, std::monostate>)
             {
-                b.buffer_type = MYSQL_TYPE_NULL;
+                binding.buffer_type = MYSQL_TYPE_NULL;
             }
-            else if constexpr (std::is_same_v<T, int64_t>)
+            else if constexpr (std::is_same_v<ValueType, int64_t>)
             {
-                i64store[i]   = val;
-                b.buffer_type = MYSQL_TYPE_LONGLONG;
-                b.buffer      = &i64store[i];
+                int64Storage[paramIndex] = value;
+                binding.buffer_type      = MYSQL_TYPE_LONGLONG;
+                binding.buffer           = &int64Storage[paramIndex];
             }
-            else if constexpr (std::is_same_v<T, double>)
+            else if constexpr (std::is_same_v<ValueType, double>)
             {
-                dblstore[i]   = val;
-                b.buffer_type = MYSQL_TYPE_DOUBLE;
-                b.buffer      = &dblstore[i];
+                doubleStorage[paramIndex] = value;
+                binding.buffer_type       = MYSQL_TYPE_DOUBLE;
+                binding.buffer            = &doubleStorage[paramIndex];
             }
-            else if constexpr (std::is_same_v<T, std::string>)
+            else if constexpr (std::is_same_v<ValueType, std::string>)
             {
-                paramLen[i]     = static_cast<unsigned long>(val.size());
-                b.buffer_type   = MYSQL_TYPE_STRING;
-                b.buffer        = const_cast<char*>(val.data());   // params 가 execute 까지 살아있어 안전
-                b.buffer_length = paramLen[i];
-                b.length        = &paramLen[i];
+                parameterLengths[paramIndex] = static_cast<unsigned long>(value.size());
+                binding.buffer_type          = MYSQL_TYPE_STRING;
+                binding.buffer               = const_cast<char*>(value.data());   // params 가 execute 까지 살아있어 안전
+                binding.buffer_length        = parameterLengths[paramIndex];
+                binding.length               = &parameterLengths[paramIndex];
             }
-            else if constexpr (std::is_same_v<T, std::vector<uint8_t>>)
+            else if constexpr (std::is_same_v<ValueType, std::vector<uint8_t>>)
             {
-                paramLen[i]     = static_cast<unsigned long>(val.size());
-                b.buffer_type   = MYSQL_TYPE_BLOB;
-                b.buffer        = const_cast<uint8_t*>(val.data());
-                b.buffer_length = paramLen[i];
-                b.length        = &paramLen[i];
+                parameterLengths[paramIndex] = static_cast<unsigned long>(value.size());
+                binding.buffer_type          = MYSQL_TYPE_BLOB;
+                binding.buffer               = const_cast<uint8_t*>(value.data());
+                binding.buffer_length        = parameterLengths[paramIndex];
+                binding.length               = &parameterLengths[paramIndex];
             }
-        }, params[i]);
+        }, params[paramIndex]);
     }
 
-    if (paramCount > 0 && mysql_stmt_bind_param(pStmt, paramBinds.data()) != 0)
+    if (paramCount > 0 && mysql_stmt_bind_param(pStatement, parameterBindings.data()) != 0)
     {
-        result.errorCode = mysql_stmt_errno(pStmt);
-        result.errorMsg  = mysql_stmt_error(pStmt);
-        mysql_stmt_close(pStmt);
+        result.errorCode = mysql_stmt_errno(pStatement);
+        result.errorMsg  = mysql_stmt_error(pStatement);
+        mysql_stmt_close(pStatement);
         return result;
     }
 
-    if (mysql_stmt_execute(pStmt) != 0)
+    if (mysql_stmt_execute(pStatement) != 0)
     {
-        result.errorCode = mysql_stmt_errno(pStmt);   // 데드락(1213)/락대기(1205) 등이 여기서 드러남
-        result.errorMsg  = mysql_stmt_error(pStmt);
-        mysql_stmt_close(pStmt);
+        result.errorCode = mysql_stmt_errno(pStatement);   // 데드락(1213)/락대기(1205) 등이 여기서 드러남
+        result.errorMsg  = mysql_stmt_error(pStatement);
+        mysql_stmt_close(pStatement);
         return result;
     }
 
-    result = fetchResult(pStmt);
+    result = fetchResult(pStatement);
 
-    mysql_stmt_close(pStmt);
+    mysql_stmt_close(pStatement);
     return result;
 }
 
-DBResult DBConnection::fetchResult(MYSQL_STMT* pStmt)
+DBResult DBConnection::fetchResult(MYSQL_STMT* pStatement)
 {
     DBResult result;
 
-    MYSQL_RES* pMeta = mysql_stmt_result_metadata(pStmt);
-    if (!pMeta)
+    MYSQL_RES* pMetadata = mysql_stmt_result_metadata(pStatement);
+    if (!pMetadata)
     {
         // 결과셋 없음 (INSERT/UPDATE/DELETE 등) → 성공.
         result.success = true;
         return result;
     }
 
-    const unsigned int colCount = mysql_num_fields(pMeta);
-    MYSQL_FIELD* fields = mysql_fetch_fields(pMeta);
+    const unsigned int columnCount = mysql_num_fields(pMetadata);
+    MYSQL_FIELD* fields = mysql_fetch_fields(pMetadata);
 
-    std::vector<std::string> colNames(colCount);
-    for (unsigned int i = 0; i < colCount; ++i)
-        colNames[i] = fields[i].name ? fields[i].name : "";
+    std::vector<std::string> columnNames(columnCount);
+    for (unsigned int columnIndex = 0; columnIndex < columnCount; ++columnIndex)
+    {
+        if (fields[columnIndex].name)
+        {
+            columnNames[columnIndex] = fields[columnIndex].name;
+        }
+        else
+        {
+            columnNames[columnIndex] = "";
+        }
+    }
 
     // 결과 바인딩: 모든 컬럼을 0-length 버퍼로 바인딩 → fetch 시 실제 길이가 length 에 채워지면
     // mysql_stmt_fetch_column 으로 가변길이 데이터를 안전하게 읽는다.
-    std::vector<MYSQL_BIND>    binds(colCount);
-    std::vector<unsigned long> lengths(colCount, 0);
-    auto isNull = std::make_unique<bool[]>(colCount);
-    auto errs   = std::make_unique<bool[]>(colCount);
-    std::memset(binds.data(), 0, colCount * sizeof(MYSQL_BIND));
+    std::vector<MYSQL_BIND>    resultBindings(columnCount);
+    std::vector<unsigned long> columnLengths(columnCount, 0);
+    auto columnIsNullFlags = std::make_unique<bool[]>(columnCount);
+    auto columnErrorFlags  = std::make_unique<bool[]>(columnCount);
+    std::memset(resultBindings.data(), 0, columnCount * sizeof(MYSQL_BIND));
 
-    for (unsigned int i = 0; i < colCount; ++i)
+    for (unsigned int columnIndex = 0; columnIndex < columnCount; ++columnIndex)
     {
-        binds[i].buffer_type   = MYSQL_TYPE_STRING;   // 문자열로 받아 타입별 변환
-        binds[i].buffer        = nullptr;
-        binds[i].buffer_length = 0;
-        binds[i].length        = &lengths[i];
-        binds[i].is_null       = &isNull[i];
-        binds[i].error         = &errs[i];
+        resultBindings[columnIndex].buffer_type   = MYSQL_TYPE_STRING;   // 문자열로 받아 타입별 변환
+        resultBindings[columnIndex].buffer        = nullptr;
+        resultBindings[columnIndex].buffer_length = 0;
+        resultBindings[columnIndex].length        = &columnLengths[columnIndex];
+        resultBindings[columnIndex].is_null       = &columnIsNullFlags[columnIndex];
+        resultBindings[columnIndex].error         = &columnErrorFlags[columnIndex];
     }
 
-    if (mysql_stmt_bind_result(pStmt, binds.data()) != 0)
+    if (mysql_stmt_bind_result(pStatement, resultBindings.data()) != 0)
     {
-        result.errorCode = mysql_stmt_errno(pStmt);
-        result.errorMsg  = mysql_stmt_error(pStmt);
-        mysql_free_result(pMeta);
+        result.errorCode = mysql_stmt_errno(pStatement);
+        result.errorMsg  = mysql_stmt_error(pStatement);
+        mysql_free_result(pMetadata);
         return result;
     }
 
     // 전체 결과를 클라이언트에 버퍼링 (fetch_column 안정성).
-    if (mysql_stmt_store_result(pStmt) != 0)
+    if (mysql_stmt_store_result(pStatement) != 0)
     {
-        result.errorCode = mysql_stmt_errno(pStmt);
-        result.errorMsg  = mysql_stmt_error(pStmt);
-        mysql_free_result(pMeta);
+        result.errorCode = mysql_stmt_errno(pStatement);
+        result.errorMsg  = mysql_stmt_error(pStatement);
+        mysql_free_result(pMetadata);
         return result;
     }
 
     while (true)
     {
-        const int fetchRc = mysql_stmt_fetch(pStmt);
-        if (fetchRc == MYSQL_NO_DATA)
+        const int fetchResultCode = mysql_stmt_fetch(pStatement);
+        if (fetchResultCode == MYSQL_NO_DATA)
+        {
             break;
-        if (fetchRc != 0 && fetchRc != MYSQL_DATA_TRUNCATED)
+        }
+        if (fetchResultCode != 0 && fetchResultCode != MYSQL_DATA_TRUNCATED)
         {
             // 0-length 바인딩이라 MYSQL_DATA_TRUNCATED 는 정상. 그 외는 진짜 에러.
-            result.errorCode = mysql_stmt_errno(pStmt);
-            result.errorMsg  = mysql_stmt_error(pStmt);
-            mysql_free_result(pMeta);
+            result.errorCode = mysql_stmt_errno(pStatement);
+            result.errorMsg  = mysql_stmt_error(pStatement);
+            mysql_free_result(pMetadata);
             return result;
         }
 
         DBRow row;
-        for (unsigned int i = 0; i < colCount; ++i)
+        for (unsigned int columnIndex = 0; columnIndex < columnCount; ++columnIndex)
         {
-            if (isNull[i])
+            if (columnIsNullFlags[columnIndex])
             {
-                row[colNames[i]] = std::monostate{};
+                row[columnNames[columnIndex]] = std::monostate{};
                 continue;
             }
 
             // 실제 데이터를 길이만큼 가변 버퍼로 읽는다.
-            const unsigned long len = lengths[i];
-            std::string buf;
-            buf.resize(len);
+            const unsigned long columnLength = columnLengths[columnIndex];
+            std::string columnBuffer;
+            columnBuffer.resize(columnLength);
 
-            MYSQL_BIND col;
-            std::memset(&col, 0, sizeof(col));
-            unsigned long realLen = 0;
-            bool          colNull = false;
-            col.buffer_type   = MYSQL_TYPE_STRING;
-            col.buffer        = len ? buf.data() : nullptr;
-            col.buffer_length = len;
-            col.length        = &realLen;
-            col.is_null       = &colNull;
-
-            if (mysql_stmt_fetch_column(pStmt, &col, i, 0) != 0)
+            MYSQL_BIND columnBinding;
+            std::memset(&columnBinding, 0, sizeof(columnBinding));
+            unsigned long actualLength = 0;
+            bool          columnIsNull = false;
+            columnBinding.buffer_type   = MYSQL_TYPE_STRING;
+            if (columnLength > 0)
             {
-                row[colNames[i]] = std::monostate{};
+                columnBinding.buffer = columnBuffer.data();
+            }
+            else
+            {
+                columnBinding.buffer = nullptr;
+            }
+            columnBinding.buffer_length = columnLength;
+            columnBinding.length        = &actualLength;
+            columnBinding.is_null       = &columnIsNull;
+
+            if (mysql_stmt_fetch_column(pStatement, &columnBinding, columnIndex, 0) != 0)
+            {
+                row[columnNames[columnIndex]] = std::monostate{};
                 continue;
             }
 
-            row[colNames[i]] = fieldToDBValue(fields[i], buf);
+            row[columnNames[columnIndex]] = fieldToDBValue(fields[columnIndex], columnBuffer);
         }
 
         result.rows.push_back(std::move(row));
     }
 
     result.success = true;
-    mysql_free_result(pMeta);
+    mysql_free_result(pMetadata);
     return result;
 }
 
@@ -331,16 +378,17 @@ DBResult DBConnection::Begin()    { return runControl("START TRANSACTION"); }
 DBResult DBConnection::Commit()   { return runControl("COMMIT"); }
 DBResult DBConnection::Rollback() { return runControl("ROLLBACK"); }
 
-int64_t DBConnection::LastInsertRowId() const
-{
-    return m_pDb ? static_cast<int64_t>(mysql_insert_id(m_pDb)) : 0;
-}
-
 std::string DBConnection::GetLastError() const
 {
     if (m_pDb)
+    {
         return mysql_error(m_pDb);
-    return m_lastError.empty() ? "DB not open" : m_lastError;
+    }
+    if (m_lastError.empty())
+    {
+        return "DB not open";
+    }
+    return m_lastError;
 }
 
 } // namespace db

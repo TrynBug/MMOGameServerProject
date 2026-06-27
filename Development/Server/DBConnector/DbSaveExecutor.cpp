@@ -7,117 +7,158 @@ namespace db
 
 namespace
 {
-    // "?, ?, ..., ?" (n개) 를 sql 뒤에 붙인다. (괄호 없음)
-    void appendQ(std::string& sql, size_t n)
+    // "?, ?, ..., ?" (count개) 를 sql 뒤에 붙인다. (괄호 없음)
+    void appendPlaceholders(std::string& sql, size_t count)
     {
-        for (size_t i = 0; i < n; ++i)
-            sql += (i ? ", ?" : "?");
+        for (size_t index = 0; index < count; ++index)
+        {
+            if (index > 0)
+            {
+                sql += ", ?";
+            }
+            else
+            {
+                sql += "?";
+            }
+        }
     }
 
     // 한 테이블의 upsert 행들을 멀티행 INSERT ... ON DUPLICATE KEY UPDATE 로 실행.
-    // 직렬화는 여기서(write 직전) 재사용 버퍼 jsonBuf 로. 성공 true.
-    bool execUpserts(db::DBTransaction& tx, const DbTableInfo& info,
-                     const std::vector<const DbSaveBatch::Entry*>& rows, std::string& jsonBuf)
+    // 직렬화는 여기서(write 직전) 재사용 버퍼 jsonBuffer 로. 성공 true.
+    bool execUpserts(db::DBTransaction& transaction, const DbTableInfo& tableInfo,
+                     const std::vector<const DbSaveBatch::Entry*>& rows, std::string& jsonBuffer)
     {
         if (rows.empty())
+        {
             return true;
+        }
 
-        const size_t keyCount = rows.front()->keys.size();   // 같은 테이블이면 동일
+        const size_t idColumnCount = rows.front()->idColumns.size();   // 같은 테이블이면 동일
 
         std::string sql = "INSERT INTO ";
-        sql += info.name;
+        sql += tableInfo.name;
         sql += " (";
-        sql += info.insertCols;
+        sql += tableInfo.insertCols;
         sql += ") VALUES ";
 
         std::vector<db::DBParam> params;
-        params.reserve(rows.size() * (keyCount + 1));
-        for (size_t i = 0; i < rows.size(); ++i)
+        params.reserve(rows.size() * (idColumnCount + 1));
+        for (size_t rowIndex = 0; rowIndex < rows.size(); ++rowIndex)
         {
-            if (i) sql += ", ";
+            if (rowIndex > 0)
+            {
+                sql += ", ";
+            }
             sql += '(';
-            appendQ(sql, keyCount + 1);   // 키들 + data
+            appendPlaceholders(sql, idColumnCount + 1);   // 키들 + data
             sql += ')';
 
-            for (const db::DBParam& k : rows[i]->keys)
-                params.push_back(k);
+            for (const db::DBParam& idColumn : rows[rowIndex]->idColumns)
+            {
+                params.push_back(idColumn);
+            }
 
-            jsonBuf.clear();
-            if (!packet::ProtoJsonSerializer::ToJson(*rows[i]->proto, jsonBuf))
+            jsonBuffer.clear();
+            if (!packet::ProtoJsonSerializer::ToJson(*rows[rowIndex]->proto, jsonBuffer))
+            {
                 return false;             // 직렬화 실패 → 롤백
-            params.push_back(jsonBuf);    // DBParam(string) 으로 복사
+            }
+            params.push_back(jsonBuffer);    // DBParam(string) 으로 복사
         }
         sql += " AS new ON DUPLICATE KEY UPDATE data = new.data";
 
-        return tx.Execute(sql, params).success;
+        return transaction.Execute(sql, params).success;
     }
 
     // 한 테이블의 delete 행들을 실행. 단일 PK → WHERE pk IN (...), 복합 PK → WHERE (a,b) IN ((..),..).
-    bool execDeletes(db::DBTransaction& tx, const DbTableInfo& info,
+    bool execDeletes(db::DBTransaction& transaction, const DbTableInfo& tableInfo,
                      const std::vector<const DbSaveBatch::Entry*>& rows)
     {
         if (rows.empty())
+        {
             return true;
+        }
 
-        const int pkCols = info.pkColCount;
+        const int pkColumnCount = tableInfo.pkColCount;
 
         std::string sql = "DELETE FROM ";
-        sql += info.name;
+        sql += tableInfo.name;
         sql += " WHERE ";
-        if (pkCols == 1)
+        if (pkColumnCount == 1)
         {
-            sql += info.pkCols;
+            sql += tableInfo.pkCols;
             sql += " IN (";
-            appendQ(sql, rows.size());
+            appendPlaceholders(sql, rows.size());
             sql += ")";
         }
         else
         {
             sql += "(";
-            sql += info.pkCols;               // "a, b"
+            sql += tableInfo.pkCols;               // "a, b"
             sql += ") IN (";
-            for (size_t i = 0; i < rows.size(); ++i)
+            for (size_t rowIndex = 0; rowIndex < rows.size(); ++rowIndex)
             {
-                if (i) sql += ", ";
+                if (rowIndex > 0)
+                {
+                    sql += ", ";
+                }
                 sql += '(';
-                appendQ(sql, static_cast<size_t>(pkCols));
+                appendPlaceholders(sql, static_cast<size_t>(pkColumnCount));
                 sql += ')';
             }
             sql += ")";
         }
 
         std::vector<db::DBParam> params;
-        params.reserve(rows.size() * pkCols);
-        for (const DbSaveBatch::Entry* e : rows)
-            for (int c = 0; c < pkCols; ++c)
-                params.push_back(e->keys[c]);   // PK = 키 벡터 앞 N개
+        params.reserve(rows.size() * pkColumnCount);
+        for (const DbSaveBatch::Entry* entry : rows)
+        {
+            for (int columnIndex = 0; columnIndex < pkColumnCount; ++columnIndex)
+            {
+                params.push_back(entry->idColumns[columnIndex]);   // PK = 키 벡터 앞 N개
+            }
+        }
 
-        return tx.Execute(sql, params).success;
+        return transaction.Execute(sql, params).success;
     }
 }
 
-db::DBResultAwaitable DbSaveExecutor::Save(db::AsyncDBQueue& dbq, const std::shared_ptr<DbSaveBatch>& spBatch, int shardIndex, db::IResumeExecutor* resume)
+db::DBResultAwaitable DbSaveExecutor::Save(db::AsyncDBQueue& dbQueue, const std::shared_ptr<DbSaveBatch>& spBatch, int shardIndex, db::IResumeExecutor* resume)
 {
-    return dbq.TransactionAsync(
+    return dbQueue.TransactionAsync(
         db::EDBType::Game, shardIndex,
-        [spBatch](db::DBTransaction& tx) -> bool   // shared_ptr by-value 캡처(수명)
+        [spBatch](db::DBTransaction& transaction) -> bool   // shared_ptr by-value 캡처(수명)
         {
-            std::string jsonBuf;   // 직렬화 재사용 버퍼
+            std::string jsonBuffer;   // 직렬화 재사용 버퍼
 
             // Tables() 는 std::map<EDbTable,..> → enum 선언순 순회(테이블 락 순서 일관).
             for (const auto& [tableEnum, rows] : spBatch->Tables())
             {
-                const DbTableInfo& info = GetDbTableInfo(tableEnum);
+                const DbTableInfo& tableInfo = GetDbTableInfo(tableEnum);
 
                 // rows(RowMap) 는 PK 오름차순. upsert/delete 로 분할(둘 다 PK 순서 유지).
-                std::vector<const DbSaveBatch::Entry*> upserts, deletes;
-                for (const auto& [pk, entry] : rows)
-                    (entry.isDelete ? deletes : upserts).push_back(&entry);
+                std::vector<const DbSaveBatch::Entry*> upserts;
+                std::vector<const DbSaveBatch::Entry*> deletes;
+                for (const auto& [primaryKey, entry] : rows)
+                {
+                    if (entry.isDelete)
+                    {
+                        deletes.push_back(&entry);
+                    }
+                    else
+                    {
+                        upserts.push_back(&entry);
+                    }
+                }
 
-                if (!execUpserts(tx, info, upserts, jsonBuf))
+                if (!execUpserts(transaction, tableInfo, upserts, jsonBuffer))
+                {
                     return false;
-                if (!execDeletes(tx, info, deletes))
+                }
+                if (!execDeletes(transaction, tableInfo, deletes))
+                {
                     return false;
+                }
             }
             return true;   // COMMIT
         },

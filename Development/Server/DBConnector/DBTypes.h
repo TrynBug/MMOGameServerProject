@@ -15,7 +15,7 @@ enum class EDBType
 };
 
 // DB 컬럼 값 타입
-// SQLite의 컬럼 타입 5가지(INTEGER, REAL, TEXT, BLOB, NULL)에 대응한다.
+// MySQL 값 5종류(NULL / INTEGER / REAL / TEXT / BLOB)에 대응한다.
 using DBValue = std::variant<
     std::monostate,   // NULL
     int64_t,          // INTEGER

@@ -28,21 +28,21 @@ class DbSaveBatch
 {
 public:
     // upsert/delete 예약. **고정 시그니처** — 항상 (proto, accountId, characterId) 를 넘긴다.
-    // 어떤 키가 실제로 쓰이는지는 DbTable<T>::Keys 가 알아서 고르므로, 호출부는 키 구성을 몰라도 된다.
+    // 어떤 키가 실제로 쓰이는지는 DbTable<T>::IdColumns 가 알아서 고르므로, 호출부는 키 구성을 몰라도 된다.
     //   예) Upsert(spItem, accountId, characterId) / Delete(spItem, accountId, characterId)
     //       Upsert(spCharacter, accountId, characterId) / Upsert(spAccountCurrency, accountId, characterId)
     template<class T>
     void Upsert(std::shared_ptr<T> msg, int64_t accountId, int64_t characterId)
     {
-        auto keys = DbTable<T>::Keys(*msg, accountId, characterId);
-        add(DbTable<T>::kType, std::move(msg), std::move(keys), /*isDelete*/ false);
+        auto idColumns = DbTable<T>::IdColumns(*msg, accountId, characterId);
+        add(DbTable<T>::kType, std::move(msg), std::move(idColumns), /*isDelete*/ false);
     }
 
     template<class T>
     void Delete(std::shared_ptr<T> msg, int64_t accountId, int64_t characterId)
     {
-        auto keys = DbTable<T>::Keys(*msg, accountId, characterId);
-        add(DbTable<T>::kType, std::move(msg), std::move(keys), /*isDelete*/ true);
+        auto idColumns = DbTable<T>::IdColumns(*msg, accountId, characterId);
+        add(DbTable<T>::kType, std::move(msg), std::move(idColumns), /*isDelete*/ true);
     }
 
     bool Empty() const { return m_tables.empty(); }
@@ -52,7 +52,7 @@ public:
     struct Entry
     {
         std::shared_ptr<google::protobuf::Message> proto;  // 직렬화 원본 + readback/로깅(non-const)
-        std::vector<db::DBParam>                   keys;   // 전체 키(insertCols 순서). PK = 앞 pkColCount개.
+        std::vector<db::DBParam>                   idColumns;   // 전체 키(insertCols 순서). PK = 앞 pkColCount개.
         bool                                       isDelete = false;
     };
     // PK 튜플 → Entry. 키 정렬 = PK 오름차순, 같은 PK = 교체.
@@ -61,14 +61,16 @@ public:
     const std::map<EDbTable, RowMap>& Tables() const { return m_tables; }
 
 private:
-    void add(EDbTable t, std::shared_ptr<google::protobuf::Message> proto, std::vector<db::DBParam> keys, bool isDelete)
+    void add(EDbTable tableType, std::shared_ptr<google::protobuf::Message> proto, std::vector<db::DBParam> idColumns, bool isDelete)
     {
-        const DbTableInfo& info = GetDbTableInfo(t);
-        std::vector<db::DBParam> pk(keys.begin(), keys.begin() + info.pkColCount);   // PK 튜플
-        RowMap& rows = m_tables[t];
-        if (rows.find(pk) != rows.end())   // 같은 PK 중복 입력 → 경고 + 교체(last-wins)
-            LOG_WRITE(LogLevel::Warn, std::format("[DbSaveBatch] duplicate key, replacing. table={}", info.name));
-        rows[std::move(pk)] = Entry{ std::move(proto), std::move(keys), isDelete };
+        const DbTableInfo& tableInfo = GetDbTableInfo(tableType);
+        std::vector<db::DBParam> primaryKey(idColumns.begin(), idColumns.begin() + tableInfo.pkColCount);   // PK 튜플
+        RowMap& rows = m_tables[tableType];
+        if (rows.find(primaryKey) != rows.end())   // 같은 PK 중복 입력 → 경고 + 교체(last-wins)
+        {
+            LOG_WRITE(LogLevel::Warn, std::format("[DbSaveBatch] duplicate key, replacing. table={}", tableInfo.name));
+        }
+        rows[std::move(primaryKey)] = Entry{ std::move(proto), std::move(idColumns), isDelete };
     }
 
     std::map<EDbTable, RowMap> m_tables;   // 테이블=enum 선언순(락 순서), 행=PK 오름차순(맵 정렬)

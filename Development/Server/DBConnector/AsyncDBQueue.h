@@ -57,7 +57,7 @@ private:
 // 서버는 이 큐를 "1개만" 가지며, (EDBType, dbIndex)로 어느 DB에 보낼지 지정한다.
 //
 // @사용:
-//   1) Open(databases, numWorkers)  // dbKey → 연결설정. (단일 DB는 Open(config, ...) 편의 오버로드)
+//   1) Open(databases, numWorkers)  // dbKey → 연결설정.
 //   2) co_await ExecuteAsync(dbType, dbIndex, query, params, executor)  // 코루틴
 //
 // @설계 (단순 버전):
@@ -108,9 +108,6 @@ public:
     // Open 시 각 DB의 커넥션을 전부 열어 연결성을 검증한다(실패 시 false, 사유는 GetLastError).
     bool Open(const std::vector<OpenEntry>& entries, int numWorkers);
 
-    // 단일 DB 편의 오버로드. AccountDB 1개로 등록한다. (단독 테스트/단일 DB 서버용)
-    bool Open(const DBConnectionConfig& config, int numWorkers = 1);
-
     // 닫는다. 전역 큐에 남은 요청을 모두 처리한 뒤 종료한다.
     void Close();
 
@@ -156,7 +153,7 @@ private:
     void workerProc();
 
     // job을 해당 DB의 전역 큐에 적재하고 worker를 깨운다. 미등록 DB면 즉시 실패 콜백.
-    void enqueueJob(EDBType type, int index, DbJob job, Callback cb);
+    void enqueueJob(EDBType type, int index, DbJob job, Callback callback);
 
     // 등록된 DB의 DbState를 얻는 유일한 접근자. 없으면 nullptr. (m_mutex 하에서)
     //   Account → 싱글톤 m_accountDb (index 무시) / Game → m_gameDbs[index]

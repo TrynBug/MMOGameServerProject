@@ -42,7 +42,7 @@ public:
 //       co_return r2;
 //   }
 // ─────────────────────────────────────────────────────────────────────────────
-template<typename T = void>
+template<typename T>
 class AwaitableCoTask
 {
 public:
@@ -67,10 +67,14 @@ public:
             bool await_ready() noexcept { return false; }
             void await_resume() noexcept {}
 
-            std::coroutine_handle<> await_suspend(std::coroutine_handle<promise_type> h) noexcept
+            std::coroutine_handle<> await_suspend(std::coroutine_handle<promise_type> handle) noexcept
             {
-                auto cont = h.promise().continuation;
-                return cont ? cont : std::noop_coroutine();
+                auto continuation = handle.promise().continuation;
+                if (continuation)
+                {
+                    return continuation;
+                }
+                return std::noop_coroutine();
             }
         };
         FinalAwaiter final_suspend() noexcept { return {}; }
@@ -93,74 +97,24 @@ public:
 
     T await_resume()
     {
-        auto& p = m_handle.promise();
-        if (p.exception)
-            std::rethrow_exception(p.exception);
-        return std::move(*p.result);
+        auto& promise = m_handle.promise();
+        if (promise.exception)
+        {
+            std::rethrow_exception(promise.exception);
+        }
+        return std::move(*promise.result);
     }
 
     // ── 생성/소멸 ────────────────────────────────────────────────────────────
-    explicit AwaitableCoTask(std::coroutine_handle<promise_type> h) : m_handle(h) {}
+    explicit AwaitableCoTask(std::coroutine_handle<promise_type> handle) : m_handle(handle) {}
     AwaitableCoTask(AwaitableCoTask&& other) noexcept : m_handle(std::exchange(other.m_handle, {})) {}
-    ~AwaitableCoTask() { if (m_handle) m_handle.destroy(); }
-
-    AwaitableCoTask(const AwaitableCoTask&) = delete;
-    AwaitableCoTask& operator=(const AwaitableCoTask&) = delete;
-
-private:
-    std::coroutine_handle<promise_type> m_handle;
-};
-
-
-// void 특수화
-template<>
-class AwaitableCoTask<void>
-{
-public:
-    struct promise_type
+    ~AwaitableCoTask()
     {
-        std::exception_ptr      exception;
-        std::coroutine_handle<> continuation;
-
-        AwaitableCoTask get_return_object()
+        if (m_handle)
         {
-            return AwaitableCoTask{ std::coroutine_handle<promise_type>::from_promise(*this) };
+            m_handle.destroy();
         }
-
-        std::suspend_never initial_suspend() noexcept { return {}; }
-
-        struct FinalAwaiter
-        {
-            bool await_ready() noexcept { return false; }
-            void await_resume() noexcept {}
-            std::coroutine_handle<> await_suspend(std::coroutine_handle<promise_type> h) noexcept
-            {
-                auto cont = h.promise().continuation;
-                return cont ? cont : std::noop_coroutine();
-            }
-        };
-        FinalAwaiter final_suspend() noexcept { return {}; }
-
-        void return_void() {}
-        void unhandled_exception() { exception = std::current_exception(); }
-    };
-
-    bool await_ready() const noexcept { return m_handle && m_handle.done(); }
-
-    void await_suspend(std::coroutine_handle<> caller) noexcept
-    {
-        m_handle.promise().continuation = caller;
     }
-
-    void await_resume()
-    {
-        if (m_handle.promise().exception)
-            std::rethrow_exception(m_handle.promise().exception);
-    }
-
-    explicit AwaitableCoTask(std::coroutine_handle<promise_type> h) : m_handle(h) {}
-    AwaitableCoTask(AwaitableCoTask&& other) noexcept : m_handle(std::exchange(other.m_handle, {})) {}
-    ~AwaitableCoTask() { if (m_handle) m_handle.destroy(); }
 
     AwaitableCoTask(const AwaitableCoTask&) = delete;
     AwaitableCoTask& operator=(const AwaitableCoTask&) = delete;
@@ -178,7 +132,7 @@ private:
 //
 // AwaitableCoTask<T>는 다른 코루틴에서 co_await으로 결과를 받는 용도이므로
 // 호출자가 핸들을 보관해야 한다. 반면 패킷 핸들러 같은 최상위 진입점은
-// 반환값을 받아 보관할 곳이 없기 때문에 AwaitableCoTask<void>를 그대로 쓰면
+// 반환값을 받아 보관할 곳이 없기 때문에 AwaitableCoTask 를 최상위에서 그대로 쓰면
 // 호출 즉시 AwaitableCoTask 임시 객체가 소멸하면서 코루틴 프레임이 destroy 되어버린다.
 // 이후 DB 콜백이 핸들을 resume하면 use-after-free.
 //
@@ -208,16 +162,17 @@ struct DetachedCoTask
         void return_void() noexcept {}
         void unhandled_exception() noexcept
         {
-            try { std::rethrow_exception(std::current_exception()); }
-            catch (const std::exception& e)
+            try
             {
-                ::OutputDebugStringA("DetachedCoTask unhandled exception: ");
-                ::OutputDebugStringA(e.what());
-                ::OutputDebugStringA("\r\n");
+                std::rethrow_exception(std::current_exception());
+            }
+            catch (const std::exception& exception)
+            {
+                LOG_WRITE(LogLevel::Error, std::format("DetachedCoTask unhandled exception: {}", exception.what()));
             }
             catch (...)
             {
-                ::OutputDebugStringA("DetachedCoTask unhandled unknown exception\r\n");
+                LOG_WRITE(LogLevel::Error, "DetachedCoTask unhandled unknown exception");
             }
         }
     };
@@ -265,7 +220,7 @@ public:
         // DB 작업을 시작하지 않고(큐에 넣지 않고) 즉시 실패로 끝낸다.
         if (m_pExecutor == nullptr)
         {
-            ::OutputDebugStringA("DBResultAwaitable: pExecutor is null - DB request aborted (resume executor is required)\r\n");
+            LOG_WRITE(LogLevel::Error, "DBResultAwaitable: pExecutor is null - DB request aborted (resume executor is required)");
             assert(false && "DBResultAwaitable requires a resume executor (pExecutor)");
             m_spResult->success  = false;
             m_spResult->errorMsg = "DB request aborted: resume executor (pExecutor) is null";

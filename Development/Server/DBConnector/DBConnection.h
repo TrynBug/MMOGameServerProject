@@ -39,14 +39,11 @@ public:
     DBResult Commit();
     DBResult Rollback();
 
-    // 마지막 AUTO_INCREMENT 값 (snowflake ID 사용 시 보통 불필요)
-    int64_t LastInsertRowId() const;
-
     // 마지막 오류 메시지
     std::string GetLastError() const;
 
 private:
-    DBResult fetchResult(MYSQL_STMT* pStmt);
+    DBResult fetchResult(MYSQL_STMT* pStatement);
     DBResult runControl(const char* sql);   // Begin/Commit/Rollback 공통(text 프로토콜)
 
     MYSQL*      m_pDb = nullptr;

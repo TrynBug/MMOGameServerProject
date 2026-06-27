@@ -18,8 +18,5 @@
 #include <variant>
 #include <vector>
 
-// SQLite
-#include "sqlite3.h"
-
 // Logger (LOG_WRITE)
 #include "LoggerLib.h"
