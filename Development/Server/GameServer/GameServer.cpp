@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GameServer.h"
 #include "StageObjects/Character.h"
+#include "DbSaveExecutor.h"
 
 // ── [치트] 패킷 로깅 헬퍼 정의 (선언은 GameServerDefine.h) ──────────────
 namespace packetlog
@@ -754,7 +755,7 @@ void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSess
 // HP/MP/버프/쿨다운 등 휘발성 상태는 현재 Character proto에 저장되지 않으므로 이동 시 직업기본 최대치로
 // 리셋된다(캐릭터 재선택과 동일). v1 한정. 보존하려면 proto에 필드를 추가해야 한다.
 
-// 캐릭터의 런타임 상태를 proto에 동기화한 뒤 JSON으로 직렬화하여 DB에 저장(UPDATE)한다.
+// 캐릭터의 런타임 상태를 proto에 동기화한 뒤 퍼시스턴스 배치로 통째 upsert 한다([B] 주기/강제 저장 경로).
 // account_id/character_id 는 캐릭터 proto에서 얻는다. 직렬화 실패/DB 실패 시 false(사유는 내부 로그).
 db::AwaitableCoTask<bool> GameServer::saveCharacterToDB(CharacterPtr spCharacter, db::IResumeExecutor* pResumeExecutor)
 {
@@ -773,23 +774,15 @@ db::AwaitableCoTask<bool> GameServer::saveCharacterToDB(CharacterPtr spCharacter
     }
     const int32 gameDbIndex = spUser->GetGameDbIndex();
 
-    std::string dataJson;
-    if (!packet::ProtoJsonSerializer::ToJson(proto, dataJson))
-    {
-        LOG_WRITE(LogLevel::Error, std::format("saveCharacter - serialize failed. accountId={} characterId={}", accountId, characterId));
-        co_return false;
-    }
+    // Character(상주 상태)를 배치로 통째 upsert. 호출부는 (proto, accountId, characterId)만 넘기면 된다.
+    // live proto의 private copy를 shared_ptr로 담는다(직렬화는 실행기가 write 직전에 — 불변식: in-flight 중 수정 금지).
+    auto spBatch = std::make_shared<db::DbSaveBatch>();
+    spBatch->Upsert(std::make_shared<DataStructures::Character>(proto), accountId, characterId);
 
-    db::DBResult result = co_await GetDB().ExecuteAsync(
-        db::EDBType::Game, gameDbIndex,
-        "UPDATE Characters SET data = ? WHERE account_id = ? AND character_id = ?",
-        { dataJson, accountId, characterId },
-        pResumeExecutor
-    );
-
+    db::DBResult result = co_await db::DbSaveExecutor::Save(GetDB(), spBatch, gameDbIndex, pResumeExecutor);
     if (!result.success)
     {
-        LOG_WRITE(LogLevel::Error, std::format("saveCharacter - DB update failed. accountId={} characterId={} err={}",
+        LOG_WRITE(LogLevel::Error, std::format("saveCharacter - DB save failed. accountId={} characterId={} err={}",
             accountId, characterId, result.errorMsg));
         co_return false;
     }
@@ -987,49 +980,30 @@ db::DetachedCoTask GameServer::UpsertTestCurrencyAndItemFromStage(Stage* pStage,
         co_return;
     }
 
-    // ── 임의 테스트 데이터 구성 (직렬화는 Stage 스레드에서, 트랜잭션 본문 진입 전에) ──
-    DataStructures::Currency currency;
-    currency.set_gold(12345);
-    currency.set_dia(67);
+    // ── 임의 테스트 데이터 구성 (Stage 스레드). proto는 shared_ptr 로(private copy) ──
+    auto spCurrency = std::make_shared<DataStructures::Currency>();
+    spCurrency->set_gold(12345);
 
-    DataStructures::Item item;
+    auto spAccountCurrency = std::make_shared<DataStructures::AccountCurrency>();
+    spAccountCurrency->set_dia(555);
+
+    auto spItem = std::make_shared<DataStructures::Item>();
     const int64 itemId = GenerateObjectId();   // snowflake, 전역 유일 → 매 진입마다 새 아이템 1행
-    item.set_item_id(itemId);
-    item.set_item_key(1001);
-    item.set_item_type(1);
-    item.set_grade(3);
-    item.set_count(5);
+    spItem->set_item_id(itemId);
+    spItem->set_item_key(1001);
+    spItem->set_item_type(1);
+    spItem->set_grade(3);
+    spItem->set_count(5);
 
-    std::string currencyJson, itemJson;
-    if (!packet::ProtoJsonSerializer::ToJson(currency, currencyJson) ||
-        !packet::ProtoJsonSerializer::ToJson(item, itemJson))
-    {
-        LOG_WRITE(LogLevel::Error, std::format("[testupsert] serialize failed. accountId={} characterId={}", accountId, characterId));
-        co_return;
-    }
+    // ── 배치에 여러 테이블을 담아 한 트랜잭션으로 저장(퍼시스턴스 레이어) ──
+    //    고정 시그니처: 항상 (proto, accountId, characterId). 키 조립은 각 테이블이 알아서 한다.
+    auto spBatch = std::make_shared<db::DbSaveBatch>();
+    spBatch->Upsert(spCurrency, accountId, characterId);
+    spBatch->Upsert(spItem, accountId, characterId);
+    spBatch->Upsert(spAccountCurrency, accountId, characterId);
 
-    // ── 두 테이블 upsert를 한 트랜잭션으로 묶는다(다중 테이블 원자 변경 = TransactionAsync 용례) ──
-    //    본문은 worker 스레드에서 실행되므로 캡처 값(JSON/ID)만 쓰고 게임상태는 건드리지 않는다.
-    db::DBResult txResult = co_await GetDB().TransactionAsync(
-        db::EDBType::Game, gameDbIndex,
-        [accountId, characterId, itemId, currencyJson, itemJson](db::DBTransaction& tx) -> bool
-        {
-            // Currency: PK(character_id) → 같은 캐릭터 재진입 시 data 갱신(진짜 upsert).
-            db::DBResult r1 = tx.Execute(
-                "INSERT INTO Currency (character_id, account_id, data) VALUES (?, ?, ?) AS new "
-                "ON DUPLICATE KEY UPDATE data = new.data",
-                { characterId, accountId, currencyJson });
-            if (!r1.success)
-                return false;
-
-            // Item: PK(item_id, snowflake) → 매번 새 행 insert.
-            db::DBResult r2 = tx.Execute(
-                "INSERT INTO Item (item_id, character_id, account_id, data) VALUES (?, ?, ?, ?) AS new "
-                "ON DUPLICATE KEY UPDATE data = new.data",
-                { itemId, characterId, accountId, itemJson });
-            return r2.success;   // true → COMMIT
-        },
-        pStage->GetResumeExecutor());
+    db::DBResult txResult = co_await db::DbSaveExecutor::Save(
+        GetDB(), spBatch, gameDbIndex, pStage->GetResumeExecutor());
 
     if (!txResult.success)
     {
