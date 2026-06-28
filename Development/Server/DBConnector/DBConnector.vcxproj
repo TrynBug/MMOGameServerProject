@@ -102,6 +102,9 @@
     <ClInclude Include="DbTables.h" />
     <ClInclude Include="DbSaveBatch.h" />
     <ClInclude Include="DbSaveExecutor.h" />
+    <ClInclude Include="DbLoadResult.h" />
+    <ClInclude Include="DbLoadBatch.h" />
+    <ClInclude Include="DbLoadExecutor.h" />
   </ItemGroup>
   <!-- C++ 소스 파일 (PCH 사용) -->
   <ItemGroup>
@@ -112,6 +115,7 @@
     <ClCompile Include="DBConnection.cpp" />
     <ClCompile Include="AsyncDBQueue.cpp" />
     <ClCompile Include="DbSaveExecutor.cpp" />
+    <ClCompile Include="DbLoadExecutor.cpp" />
   </ItemGroup>
   <!-- C 소스 파일 (PCH 사용 안 함 — C 파일은 C++ PCH 불호환) -->
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

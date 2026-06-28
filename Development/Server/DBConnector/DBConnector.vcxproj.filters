@@ -33,6 +33,9 @@
     <ClCompile Include="DbSaveExecutor.cpp">
       <Filter>소스 파일\Connection</Filter>
     </ClCompile>
+    <ClCompile Include="DbLoadExecutor.cpp">
+      <Filter>소스 파일\Connection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -60,6 +63,15 @@
       <Filter>소스 파일\Connection</Filter>
     </ClInclude>
     <ClInclude Include="DbTables.h">
+      <Filter>소스 파일\Connection</Filter>
+    </ClInclude>
+    <ClInclude Include="DbLoadResult.h">
+      <Filter>소스 파일\Connection</Filter>
+    </ClInclude>
+    <ClInclude Include="DbLoadBatch.h">
+      <Filter>소스 파일\Connection</Filter>
+    </ClInclude>
+    <ClInclude Include="DbLoadExecutor.h">
       <Filter>소스 파일\Connection</Filter>
     </ClInclude>
   </ItemGroup>

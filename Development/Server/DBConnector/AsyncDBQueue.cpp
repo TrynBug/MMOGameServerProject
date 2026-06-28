@@ -24,6 +24,22 @@ DBResult DBTransaction::Execute(const std::string& query, const std::vector<DBPa
     return result;
 }
 
+std::vector<DBResult> DBTransaction::ExecuteMulti(const std::string& multiQuery)
+{
+    std::vector<DBResult> results = m_conn.ExecuteMulti(multiQuery);
+    for (const DBResult& result : results)
+    {
+        if (!result.success)
+        {
+            m_failed        = true;
+            m_lastErrorCode = result.errorCode;   // 연결끊김이면 runTransaction 이 재시도(재연결) 분류
+            m_lastErrorMsg  = result.errorMsg;
+            break;
+        }
+    }
+    return results;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 트랜잭션 실행 (worker 스레드에서 동기로). 일시적 에러면 본문을 재실행한다.
 // ─────────────────────────────────────────────────────────────────────────────

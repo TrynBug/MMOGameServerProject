@@ -53,6 +53,11 @@ struct DbTableInfo
 //            반환은 kInfo.insertCols 의 키 컬럼(data 제외)을 그 순서대로. 자기 PK는 proto에서, 소유자
 //            식별자(account/character)는 인자에서 가져온다.
 //   [주의] IdColumns() 반환 순서/개수는 kInfo.insertCols 의 키 컬럼과 일치(같은 trait 안에서 함께 관리).
+//
+//   ── 로드(읽기) 측 ── (DbLoadBatch/DbLoadExecutor 가 사용)
+//   kLoadKeyCol : 이 테이블을 로드할 때 WHERE 를 거는 컬럼(소유자 스코프). 예) Characters=account_id, Item=character_id.
+//   LoadKey()   : **고정 시그니처** (accountId, characterId). 둘 다 받고, 이 테이블이 어느 값으로 WHERE 를
+//                 걸지 고른다(호출부는 키 구성을 몰라도 됨). IdColumns 와 동일 철학.
 template<class T> struct DbTable;   // primary template (정의 없음)
 
 template<> struct DbTable<DataStructures::Character>
@@ -66,6 +71,9 @@ template<> struct DbTable<DataStructures::Character>
             accountId,            // account_id
         };
     }
+    // 로드: 계정의 캐릭터 목록 → account_id 로 조회.
+    static constexpr const char* kLoadKeyCol = "account_id";
+    static int64_t LoadKey(int64_t accountId, int64_t /*characterId*/) { return accountId; }
 };
 
 template<> struct DbTable<DataStructures::Currency>
@@ -79,6 +87,9 @@ template<> struct DbTable<DataStructures::Currency>
             accountId,            // account_id
         };
     }
+    // 로드: 캐릭터의 재화 → character_id 로 조회.
+    static constexpr const char* kLoadKeyCol = "character_id";
+    static int64_t LoadKey(int64_t /*accountId*/, int64_t characterId) { return characterId; }
 };
 
 template<> struct DbTable<DataStructures::Item>
@@ -93,6 +104,9 @@ template<> struct DbTable<DataStructures::Item>
             accountId,            // account_id
         };
     }
+    // 로드: 캐릭터의 인벤토리 → character_id 로 조회.
+    static constexpr const char* kLoadKeyCol = "character_id";
+    static int64_t LoadKey(int64_t /*accountId*/, int64_t characterId) { return characterId; }
 };
 
 template<> struct DbTable<DataStructures::AccountCurrency>
@@ -105,6 +119,9 @@ template<> struct DbTable<DataStructures::AccountCurrency>
             accountId,            // account_id (PK)
         };
     }
+    // 로드: 계정 재화 → account_id 로 조회.
+    static constexpr const char* kLoadKeyCol = "account_id";
+    static int64_t LoadKey(int64_t accountId, int64_t /*characterId*/) { return accountId; }
 };
 
 // enum → 테이블 메타. 각 trait의 kInfo 를 enum 순서로 가리킨다(메타는 trait에 단일 작성).

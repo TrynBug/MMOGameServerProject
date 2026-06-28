@@ -94,6 +94,9 @@ bool DBConnection::Open(const DBConnectionConfig& config)
         databaseName = config.database.c_str();
     }
 
+    // CLIENT_MULTI_STATEMENTS: 한 번에 여러 문장(멀티문장)을 보내 1왕복으로 처리하기 위함(ExecuteMulti 용, 배치 읽기).
+    //   - prepared statement(Execute) 는 멀티문장을 허용하지 않으므로 이 플래그의 영향을 받지 않는다.
+    //   - 멀티문장은 ExecuteMulti(서버 생성 SQL, 정수 키) 에서만 쓰고, 사용자 입력이 SQL 로 들어가지 않는다 → 인젝션 위험 없음.
     if (!mysql_real_connect(
             m_pDb,
             config.host.c_str(),
@@ -101,7 +104,7 @@ bool DBConnection::Open(const DBConnectionConfig& config)
             config.password.c_str(),
             databaseName,
             config.port,
-            nullptr, 0))
+            nullptr, CLIENT_MULTI_STATEMENTS))
     {
         // 실패 사유를 핸들 닫기 전에 보관 (errno + 메시지)
         m_lastError = std::format("mysql_real_connect failed ({}): {} [host={} port={} user={} db={}]",
@@ -376,6 +379,114 @@ DBResult DBConnection::fetchResult(MYSQL_STMT* pStatement)
 
     result.success = true;
     mysql_free_result(pMetadata);
+    return result;
+}
+
+std::vector<DBResult> DBConnection::ExecuteMulti(const std::string& multiQuery)
+{
+    std::vector<DBResult> results;
+
+    if (!m_pDb)
+    {
+        DBResult result;
+        result.errorMsg = "DB not open";
+        results.push_back(std::move(result));
+        return results;
+    }
+
+    // 멀티문장을 text 프로토콜로 한 번에 전송(1왕복). 결과셋들은 아래에서 순회한다.
+    if (mysql_real_query(m_pDb, multiQuery.c_str(), static_cast<unsigned long>(multiQuery.size())) != 0)
+    {
+        DBResult result;
+        result.errorCode = mysql_errno(m_pDb);   // 연결끊김(2006/2013)도 여기로
+        result.errorMsg  = mysql_error(m_pDb);
+        results.push_back(std::move(result));
+        return results;
+    }
+
+    // 결과셋을 끝까지(next_result==-1) 순회한다 — 중간에 끊지 않아야 커넥션이 재사용 가능 상태로 비워진다.
+    while (true)
+    {
+        MYSQL_RES* pResultSet = mysql_store_result(m_pDb);
+        if (pResultSet)
+        {
+            results.push_back(textResultToDBResult(pResultSet));
+            mysql_free_result(pResultSet);
+        }
+        else
+        {
+            // 결과셋이 없는 경우: 비-SELECT 문장(field_count==0)이면 성공, 아니면 store 에러.
+            DBResult result;
+            if (mysql_field_count(m_pDb) == 0)
+            {
+                result.success = true;   // 우리 read 경로엔 비-SELECT 가 없지만 방어적으로.
+            }
+            else
+            {
+                result.errorCode = mysql_errno(m_pDb);
+                result.errorMsg  = mysql_error(m_pDb);
+            }
+            results.push_back(std::move(result));
+        }
+
+        const int next = mysql_next_result(m_pDb);
+        if (next == 0)
+        {
+            continue;   // 다음 결과셋 있음
+        }
+        if (next == -1)
+        {
+            break;      // 더 없음(정상 종료)
+        }
+        // next > 0 → 다음 문장 실행 에러(스트림 종료). 에러 결과 1개 추가하고 끝.
+        DBResult result;
+        result.errorCode = mysql_errno(m_pDb);
+        result.errorMsg  = mysql_error(m_pDb);
+        results.push_back(std::move(result));
+        break;
+    }
+
+    return results;
+}
+
+DBResult DBConnection::textResultToDBResult(MYSQL_RES* pResultSet)
+{
+    DBResult result;
+
+    const unsigned int columnCount = mysql_num_fields(pResultSet);
+    MYSQL_FIELD* fields = mysql_fetch_fields(pResultSet);
+
+    std::vector<std::string> columnNames(columnCount);
+    for (unsigned int columnIndex = 0; columnIndex < columnCount; ++columnIndex)
+    {
+        if (fields[columnIndex].name)
+        {
+            columnNames[columnIndex] = fields[columnIndex].name;
+        }
+        else
+        {
+            columnNames[columnIndex] = "";
+        }
+    }
+
+    while (MYSQL_ROW row = mysql_fetch_row(pResultSet))
+    {
+        unsigned long* lengths = mysql_fetch_lengths(pResultSet);
+        DBRow dbRow;
+        for (unsigned int columnIndex = 0; columnIndex < columnCount; ++columnIndex)
+        {
+            if (row[columnIndex] == nullptr)
+            {
+                dbRow[columnNames[columnIndex]] = std::monostate{};
+                continue;
+            }
+            std::string cell(row[columnIndex], lengths[columnIndex]);
+            dbRow[columnNames[columnIndex]] = fieldToDBValue(fields[columnIndex], cell);
+        }
+        result.rows.push_back(std::move(dbRow));
+    }
+
+    result.success = true;
     return result;
 }
 
