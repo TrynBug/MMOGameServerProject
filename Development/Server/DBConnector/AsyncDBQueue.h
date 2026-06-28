@@ -146,7 +146,8 @@ private:
     // 커넥션 수는 항상 numWorkers개(Open에서 전부 열고, 점유/반납만 일어난다).
     struct DbState
     {
-        DBConnectionConfig                         config;
+        // 접속설정은 shared_ptr 로 보유 → worker 가 락 밖에서 refcount 복사만으로 안전하게 들고 쓴다(문자열 복사 없음, 수명 보장).
+        std::shared_ptr<const DBConnectionConfig>  config;
         std::vector<std::unique_ptr<DBConnection>> freeConns;   // 유휴 커넥션
     };
 

@@ -117,11 +117,48 @@ bool DBConnection::Open(const DBConnectionConfig& config)
 
 void DBConnection::Close()
 {
+    // 캐시된 prepared statement 를 먼저 닫는다(핸들을 닫기 전에). 재연결 시에도 Open 이 Close 를 호출하므로
+    // 끊긴 커넥션의 statement 가 남지 않는다.
+    for (auto& [query, pStatement] : m_statementCache)
+    {
+        mysql_stmt_close(pStatement);
+    }
+    m_statementCache.clear();
+
     if (m_pDb)
     {
         mysql_close(m_pDb);
         m_pDb = nullptr;
     }
+}
+
+// 같은 SQL 이면 캐시된 statement 를 재사용(prepare 왕복 절약). 없으면 새로 prepare 해서 캐시에 넣는다.
+MYSQL_STMT* DBConnection::acquireStatement(const std::string& query, DBResult& outError)
+{
+    auto found = m_statementCache.find(query);
+    if (found != m_statementCache.end())
+    {
+        return found->second;
+    }
+
+    MYSQL_STMT* pStatement = mysql_stmt_init(m_pDb);
+    if (!pStatement)
+    {
+        outError.errorCode = mysql_errno(m_pDb);
+        outError.errorMsg  = mysql_error(m_pDb);
+        return nullptr;
+    }
+
+    if (mysql_stmt_prepare(pStatement, query.c_str(), static_cast<unsigned long>(query.size())) != 0)
+    {
+        outError.errorCode = mysql_stmt_errno(pStatement);
+        outError.errorMsg  = mysql_stmt_error(pStatement);
+        mysql_stmt_close(pStatement);   // prepare 실패한 statement 는 캐시하지 않는다.
+        return nullptr;
+    }
+
+    m_statementCache.emplace(query, pStatement);
+    return pStatement;
 }
 
 DBResult DBConnection::Execute(const std::string& query, const std::vector<DBParam>& params)
@@ -134,20 +171,11 @@ DBResult DBConnection::Execute(const std::string& query, const std::vector<DBPar
         return result;
     }
 
-    MYSQL_STMT* pStatement = mysql_stmt_init(m_pDb);
+    // 같은 SQL 의 prepared statement 를 커넥션별로 캐시·재사용한다(반복 쿼리의 prepare 왕복 절약).
+    MYSQL_STMT* pStatement = acquireStatement(query, result);
     if (!pStatement)
     {
-        result.errorCode = mysql_errno(m_pDb);
-        result.errorMsg  = mysql_error(m_pDb);
-        return result;
-    }
-
-    if (mysql_stmt_prepare(pStatement, query.c_str(), static_cast<unsigned long>(query.size())) != 0)
-    {
-        result.errorCode = mysql_stmt_errno(pStatement);
-        result.errorMsg  = mysql_stmt_error(pStatement);
-        mysql_stmt_close(pStatement);
-        return result;
+        return result;   // result 에 에러가 채워져 있음
     }
 
     // ── 파라미터 바인딩 ──
@@ -207,21 +235,20 @@ DBResult DBConnection::Execute(const std::string& query, const std::vector<DBPar
     {
         result.errorCode = mysql_stmt_errno(pStatement);
         result.errorMsg  = mysql_stmt_error(pStatement);
-        mysql_stmt_close(pStatement);
-        return result;
+        return result;   // 캐시된 statement 는 닫지 않는다(statement 자체는 유효, 재사용).
     }
 
     if (mysql_stmt_execute(pStatement) != 0)
     {
         result.errorCode = mysql_stmt_errno(pStatement);   // 데드락(1213)/락대기(1205) 등이 여기서 드러남
         result.errorMsg  = mysql_stmt_error(pStatement);
-        mysql_stmt_close(pStatement);
-        return result;
+        return result;   // 연결레벨 에러(2006/2013)면 호출측이 재연결 → Close 가 statement 캐시를 비운다.
     }
 
     result = fetchResult(pStatement);
 
-    mysql_stmt_close(pStatement);
+    // 결과 자원만 풀고 statement 는 캐시에 열린 채 보관(다음 execute 에 재사용).
+    mysql_stmt_free_result(pStatement);
     return result;
 }
 

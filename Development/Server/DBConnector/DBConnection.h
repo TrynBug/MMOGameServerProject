@@ -46,8 +46,16 @@ private:
     DBResult fetchResult(MYSQL_STMT* pStatement);
     DBResult runControl(const char* sql);   // Begin/Commit/Rollback 공통(text 프로토콜)
 
+    // 같은 SQL 의 prepared statement 를 재사용하려고 캐시에서 찾고, 없으면 prepare 해서 캐시에 넣는다.
+    // 실패 시 nullptr 반환 + outError 에 사유 기록.
+    MYSQL_STMT* acquireStatement(const std::string& query, DBResult& outError);
+
     MYSQL*      m_pDb = nullptr;
     std::string m_lastError;   // 연결 실패 등으로 핸들을 닫은 뒤에도 사유를 보관(GetLastError용)
+
+    // SQL → 그 SQL 로 prepare 된 statement. 커넥션 1개를 1스레드가 단독 사용하므로 락 불필요.
+    // 커넥션이 닫히거나 재연결되면(Close) 전부 폐기된다(끊긴 핸들의 statement 는 무효).
+    std::unordered_map<std::string, MYSQL_STMT*> m_statementCache;
 };
 
 } // namespace db

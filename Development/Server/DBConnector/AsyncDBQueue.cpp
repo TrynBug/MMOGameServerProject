@@ -222,7 +222,7 @@ bool AsyncDBQueue::Open(const std::vector<OpenEntry>& entries, int numWorkers)
         }
 
         DbState state;
-        state.config = entry.config;
+        state.config = std::make_shared<const DBConnectionConfig>(entry.config);
         state.freeConns.reserve(numWorkers);
         for (int connectionIndex = 0; connectionIndex < numWorkers; ++connectionIndex)
         {
@@ -378,7 +378,7 @@ void AsyncDBQueue::workerProc()
     {
         Request                       request;
         std::unique_ptr<DBConnection> connection;   // 이번에 사용할 커넥션(점유)
-        DBConnectionConfig            config;       // 그 DB의 접속설정(재연결/커넥션 치유용). 락 안에서 복사.
+        std::shared_ptr<const DBConnectionConfig> config;   // 그 DB의 접속설정(재연결/커넥션 치유용). 락 안에서 refcount 복사만.
 
         {
             std::unique_lock<std::mutex> lock(m_mutex);
@@ -406,7 +406,7 @@ void AsyncDBQueue::workerProc()
         }
 
         // ── 블로킹 실행 (락 밖). job = 단발 쿼리 또는 트랜잭션. ──
-        DBResult result = request.job(*connection, config);
+        DBResult result = request.job(*connection, *config);
         const unsigned int resultErrorCode = result.errorCode;   // 콜백이 result를 move하기 전에 보관
         if (request.callback)
         {
@@ -419,7 +419,7 @@ void AsyncDBQueue::workerProc()
         //   - 연결끊김은 핸들이 아직 열린 채라 errorCode로 판별. (직전 치유가 실패해 핸들이 닫힌 경우는 !IsOpen으로)
         if (isConnectionLost(resultErrorCode) || !connection->IsOpen())
         {
-            if (!connection->Open(config))
+            if (!connection->Open(*config))
             {
                 LOG_WRITE(LogLevel::Error, "AsyncDBQueue: dead connection reconnect failed on return (DB down?)");
             }

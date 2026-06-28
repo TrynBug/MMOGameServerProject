@@ -24,9 +24,9 @@ namespace
     }
 
     // 한 테이블의 upsert 행들을 멀티행 INSERT ... ON DUPLICATE KEY UPDATE 로 실행.
-    // 직렬화는 여기서(write 직전) 재사용 버퍼 jsonBuffer 로. 성공 true.
+    // 직렬화는 여기서(write 직전) 한다. 성공 true.
     bool execUpserts(db::DBTransaction& transaction, const DbTableInfo& tableInfo,
-                     const std::vector<const DbSaveBatch::Entry*>& rows, std::string& jsonBuffer)
+                     const std::vector<const DbSaveBatch::Entry*>& rows)
     {
         if (rows.empty())
         {
@@ -34,6 +34,7 @@ namespace
         }
 
         const size_t idColumnCount = rows.front()->idColumns.size();   // 같은 테이블이면 동일
+        std::string  jsonBuffer;   // 행 루프 동안 재사용하는 직렬화 버퍼
 
         std::string sql = "INSERT INTO ";
         sql += tableInfo.name;
@@ -129,8 +130,6 @@ db::DBResultAwaitable DbSaveExecutor::Save(db::AsyncDBQueue& dbQueue, const std:
         db::EDBType::Game, shardIndex,
         [spBatch](db::DBTransaction& transaction) -> bool   // shared_ptr by-value 캡처(수명)
         {
-            std::string jsonBuffer;   // 직렬화 재사용 버퍼
-
             // Tables() 는 std::map<EDbTable,..> → enum 선언순 순회(테이블 락 순서 일관).
             for (const auto& [tableEnum, rows] : spBatch->Tables())
             {
@@ -151,7 +150,7 @@ db::DBResultAwaitable DbSaveExecutor::Save(db::AsyncDBQueue& dbQueue, const std:
                     }
                 }
 
-                if (!execUpserts(transaction, tableInfo, upserts, jsonBuffer))
+                if (!execUpserts(transaction, tableInfo, upserts))
                 {
                     return false;
                 }
