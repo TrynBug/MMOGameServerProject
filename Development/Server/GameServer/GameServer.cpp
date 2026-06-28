@@ -2,6 +2,7 @@
 #include "GameServer.h"
 #include "StageObjects/Character.h"
 #include "DbSaveExecutor.h"
+#include "DbLoadExecutor.h"
 
 // ── [치트] 패킷 로깅 헬퍼 정의 (선언은 GameServerDefine.h) ──────────────
 namespace packetlog
@@ -198,27 +199,28 @@ void GameServer::OnShutdown()
 // AccountDB에서 계정(DataStructures::Account)을 읽는다. 실패/미발견 시 nullopt.
 db::AwaitableCoTask<std::optional<DataStructures::Account>> GameServer::loadAccount(int64 accountId)
 {
-    db::DBResult result = co_await GetDB().ExecuteAsync(
-        db::EDBType::Account, 0,
-        "SELECT data FROM Accounts WHERE account_id = ?",
-        { accountId },
-        GetCoroutineResumeExecutor()
-    );
+    // AccountDB 의 Accounts 를 퍼시스턴스 레이어로 로드(account_id 로 조회, 역직렬화는 DB 워커 스레드에서).
+    // 한 Load = 한 DB → AccountDB(EDBType::Account, index 0) 로 보낸다.
+    auto loadBatch = std::make_shared<db::DbLoadBatch>();
+    loadBatch->Load<DataStructures::Account>(accountId, /*characterId*/ 0);
 
-    if (!result.success || result.IsEmpty())
+    db::DbLoadResult loaded = co_await db::DbLoadExecutor::Load(
+        GetDB(), loadBatch, db::EDBType::Account, 0, GetCoroutineResumeExecutor());
+
+    if (!loaded.success)
     {
-        LOG_WRITE(LogLevel::Error, std::format("loadAccount - account not found. accountId={} success={}", accountId, result.success));
+        LOG_WRITE(LogLevel::Error, std::format("loadAccount - DB load failed. accountId={}", accountId));
         co_return std::nullopt;
     }
 
-    DataStructures::Account account;
-    if (!packet::ProtoJsonSerializer::FromJson(result.GetString(0, "data"), account))
+    auto spAccount = loaded.Get<DataStructures::Account>();
+    if (!spAccount)
     {
-        LOG_WRITE(LogLevel::Error, std::format("loadAccount - parse failed. accountId={}", accountId));
+        LOG_WRITE(LogLevel::Error, std::format("loadAccount - account not found. accountId={}", accountId));
         co_return std::nullopt;
     }
 
-    co_return account;
+    co_return *spAccount;
 }
 
 // 내부 서버 연결 수락 (채팅서버 등)
@@ -401,33 +403,28 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
         co_return;
     }
 
-    // 해당 샤드에서 캐릭터 목록 조회
-    db::DBResult result = co_await GetDB().ExecuteAsync(
-        db::EDBType::Game, gameDbIndex,
-        "SELECT data FROM Characters WHERE account_id = ?",
-        { accountId },
-        GetCoroutineResumeExecutor()
-    );
+    // 해당 샤드에서 캐릭터 목록을 퍼시스턴스 레이어로 로드(역직렬화는 DB 워커 스레드에서).
+    auto loadBatch = std::make_shared<db::DbLoadBatch>();
+    loadBatch->LoadMany<DataStructures::Character>(accountId, /*characterId*/ 0);   // Character 는 account_id 로 조회
 
-    if (!result.success)
+    db::DbLoadResult loaded = co_await db::DbLoadExecutor::Load(
+        GetDB(), loadBatch, db::EDBType::Game, gameDbIndex, GetCoroutineResumeExecutor());
+
+    if (!loaded.success)
     {
-        LOG_WRITE(LogLevel::Error, std::format("DB select failed. accountId={} err={}", accountId, result.errorMsg));
+        LOG_WRITE(LogLevel::Error, std::format("DB load failed. accountId={}", accountId));
         co_return;
     }
 
-    // 조회된 모든 캐릭터를 protobuf 메시지로 역직렬화하여 목록에 적재.
+    // 이미 파싱된 캐릭터 proto 목록을 응답용 벡터로 복사.
     std::vector<DataStructures::Character> characters;
-    characters.reserve(result.RowCount());
-    for (int row = 0; row < result.RowCount(); ++row)
     {
-        const std::string dataJson = result.GetString(row, "data");
-        DataStructures::Character character;
-        if (!packet::ProtoJsonSerializer::FromJson(dataJson, character))
+        auto loadedCharacters = loaded.GetMany<DataStructures::Character>();
+        characters.reserve(loadedCharacters.size());
+        for (const auto& spChar : loadedCharacters)
         {
-            LOG_WRITE(LogLevel::Error, std::format("failed to parse character JSON. accountId={} row={}", accountId, row));
-            continue;
+            characters.push_back(*spChar);
         }
-        characters.push_back(std::move(character));
     }
 
     LOG_WRITE(LogLevel::Info, std::format("characters loaded from DB. accountId={} count={}", accountId, characters.size()));
@@ -527,26 +524,18 @@ db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 accountId, Game
     character.set_pos_z(0.0f);
     character.set_yaw(0.0f);
 
-    // ── DB INSERT ──────────────────────────────────────────
-    std::string dataJson;
-    if (!packet::ProtoJsonSerializer::ToJson(character, dataJson))
-    {
-        LOG_WRITE(LogLevel::Error, std::format("failed to serialize character to JSON. accountId={}", accountId));
-        sendCharacterCreateRes(accountId, EResultCode::Fail, "server error: serialize", nullptr);
-        co_return;
-    }
+    // ── DB 저장 (퍼시스턴스 레이어 배치 upsert) ──────────────
+    // character_id 가 snowflake(전역 유일)라 upsert = insert 와 동치. 직렬화는 실행기가 worker 스레드에서.
+    auto spBatch = std::make_shared<db::DbSaveBatch>();
+    spBatch->Upsert(std::make_shared<DataStructures::Character>(character), accountId, character.character_id());
 
-    db::DBResult insertResult = co_await GetDB().ExecuteAsync(
-        db::EDBType::Game, gameDbIndex,
-        "INSERT INTO Characters (account_id, character_id, data) VALUES (?, ?, ?)",
-        { accountId, character.character_id(), dataJson },
-        GetCoroutineResumeExecutor()
-    );
+    db::DBResult saveResult = co_await db::DbSaveExecutor::Save(
+        GetDB(), spBatch, gameDbIndex, GetCoroutineResumeExecutor());
 
-    if (!insertResult.success)
+    if (!saveResult.success)
     {
-        LOG_WRITE(LogLevel::Error, std::format("CharacterCreate DB insert failed. accountId={} err={}", accountId, insertResult.errorMsg));
-        sendCharacterCreateRes(accountId, EResultCode::Fail, "server error: db insert", nullptr);
+        LOG_WRITE(LogLevel::Error, std::format("CharacterCreate DB save failed. accountId={} err={}", accountId, saveResult.errorMsg));
+        sendCharacterCreateRes(accountId, EResultCode::Fail, "server error: db save", nullptr);
         co_return;
     }
 
@@ -569,9 +558,10 @@ void GameServer::sendCharacterCreateRes(int64 accountId, EResultCode resultCode,
     m_packetSender.SendToUser(accountId, Common::GAME_PACKET_ID_CHARACTER_CREATE_RES, res);
 }
 
-// DB에서 캐릭터 row를 읽어 JSON 파싱 후 Character 객체를 생성하여 User에 소유 연결한다.
+// DB에서 캐릭터 + 재화 + 아이템 + 계정재화를 **한 번에**(한 트랜잭션/한 라운드트립) 로드하고,
+// JSON 역직렬화는 DB 워커 스레드에서 끝낸 뒤(게임로직 스레드 파싱 0), Character 객체를 생성해 User에 소유 연결한다.
 // User가 강한 소유자(shared_ptr), Character→User는 약참조(weak_ptr).
-// 조회 실패/없음/파싱 실패/소유자 불일치/Initialize 실패 시 nullptr(사유는 내부 로그).
+// 로드 실패/캐릭터 없음/소유자 불일치/Initialize 실패 시 nullptr(사유는 내부 로그).
 // 호출자(캐릭터 선택 / 크로스서버 이동 입장)는 각자 프로토콜에 맞는 실패 응답을 처리한다.
 db::AwaitableCoTask<CharacterPtr> GameServer::loadCharacterForUser(int64 accountId, int64 characterId, UserPtr spUser)
 {
@@ -583,46 +573,83 @@ db::AwaitableCoTask<CharacterPtr> GameServer::loadCharacterForUser(int64 account
         co_return nullptr;
     }
 
-    // ── DB에서 캐릭터 조회 ──
-    db::DBResult result = co_await GetDB().ExecuteAsync(
-        db::EDBType::Game, gameDbIndex,
-        "SELECT data FROM Characters WHERE account_id = ? AND character_id = ?",
-        { accountId, characterId },
-        GetCoroutineResumeExecutor()
-    );
+    // ── 캐릭터 + 재화 + 아이템 + 계정재화를 한 DB job(한 트랜잭션/한 라운드트립)으로 로드 ──
+    //   역직렬화는 DB 워커 스레드에서 끝난다(게임로직 스레드 파싱 0).
+    //   Character 는 account_id 로 조회(목록)되므로 아래에서 characterId 로 골라낸다.
+    auto loadBatch = std::make_shared<db::DbLoadBatch>();
+    loadBatch->LoadMany<DataStructures::Character>(accountId, characterId);
+    loadBatch->Load<DataStructures::Currency>(accountId, characterId);
+    loadBatch->LoadMany<DataStructures::Item>(accountId, characterId);
+    loadBatch->Load<DataStructures::AccountCurrency>(accountId, characterId);
 
-    if (!result.success || result.IsEmpty())
+    db::DbLoadResult loaded = co_await db::DbLoadExecutor::Load(
+        GetDB(), loadBatch, db::EDBType::Game, gameDbIndex, GetCoroutineResumeExecutor());
+
+    if (!loaded.success)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("loadCharacter - select failed/empty. accountId={} characterId={} success={}",
-            accountId, characterId, result.success));
+        LOG_WRITE(LogLevel::Warn, std::format("loadCharacter - DB load failed. accountId={} characterId={}", accountId, characterId));
         co_return nullptr;
     }
 
-    // ── JSON 파싱 ──
-    DataStructures::Character protoData;
-    if (!packet::ProtoJsonSerializer::FromJson(result.GetString(0, "data"), protoData))
+    // ── 요청한 캐릭터를 목록에서 선택 (존재/소유 검증 겸용) ──
+    std::shared_ptr<DataStructures::Character> spCharProto;
+    for (const auto& spChar : loaded.GetMany<DataStructures::Character>())
     {
-        LOG_WRITE(LogLevel::Error, std::format("loadCharacter - parse failed. accountId={} characterId={}", accountId, characterId));
+        if (spChar->character_id() == characterId)
+        {
+            spCharProto = spChar;
+            break;
+        }
+    }
+    if (!spCharProto)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("loadCharacter - character not found for account. accountId={} characterId={}", accountId, characterId));
         co_return nullptr;
     }
 
-    // owner_account_id 검증 (PK가 (account_id, character_id) 이므로 통상 통과. DB 손상 방어).
-    if (protoData.owner_account_id() != accountId)
+    // owner_account_id 검증 (account_id 로 조회했으니 통상 통과. DB 손상 방어).
+    if (spCharProto->owner_account_id() != accountId)
     {
         LOG_WRITE(LogLevel::Error, std::format("loadCharacter - owner mismatch. accountId={} owner={} characterId={}",
-            accountId, protoData.owner_account_id(), characterId));
+            accountId, spCharProto->owner_account_id(), characterId));
         co_return nullptr;
     }
 
-    // ── Character 객체 생성 + User 소유 연결 ──
+    // ── Character 객체 생성 ──
     CharacterPtr spCharacter = std::make_shared<Character>();
-    if (!spCharacter->Initialize(protoData))
+    if (!spCharacter->Initialize(*spCharProto))
     {
         LOG_WRITE(LogLevel::Error, std::format("loadCharacter - Initialize failed. accountId={} characterId={}", accountId, characterId));
         co_return nullptr;
     }
+
+    // ── 함께 로드한 재화/아이템/계정재화 보관 (이미 워커 스레드에서 파싱 완료된 proto) ──
+    if (auto spCurrency = loaded.Get<DataStructures::Currency>())
+    {
+        // TBD: 보관 로직
+    }
+    {
+        std::vector<DataStructures::Item> items;
+        auto loadedItems = loaded.GetMany<DataStructures::Item>();
+        items.reserve(loadedItems.size());
+        for (const auto& spItem : loadedItems)
+        {
+            items.push_back(*spItem);
+        }
+
+        // TBD: 보관 로직
+    }
+    if (auto spAccountCurrency = loaded.Get<DataStructures::AccountCurrency>())
+    {
+        // TBD: 보관 로직
+    }
+
+    // ── User 소유 연결 ──
     spCharacter->SetUser(spUser);              // Character -> User weak_ptr
     spUser->SetCurrentCharacter(spCharacter);  // User -> Character shared_ptr (소유)
+
+    LOG_WRITE(LogLevel::Info, std::format("loadCharacter - loaded. accountId={} characterId={}",
+        accountId, characterId));
 
     co_return spCharacter;
 }
@@ -995,11 +1022,20 @@ db::DetachedCoTask GameServer::UpsertTestCurrencyAndItemFromStage(Stage* pStage,
     spItem->set_grade(3);
     spItem->set_count(5);
 
+    auto spItem2 = std::make_shared<DataStructures::Item>();
+    const int64 itemId2 = GenerateObjectId();   // snowflake, 전역 유일 → 매 진입마다 새 아이템 1행
+    spItem2->set_item_id(itemId2);
+    spItem2->set_item_key(1001);
+    spItem2->set_item_type(1);
+    spItem2->set_grade(3);
+    spItem2->set_count(5);
+
     // ── 배치에 여러 테이블을 담아 한 트랜잭션으로 저장(퍼시스턴스 레이어) ──
     //    고정 시그니처: 항상 (proto, accountId, characterId). 키 조립은 각 테이블이 알아서 한다.
     auto spBatch = std::make_shared<db::DbSaveBatch>();
     spBatch->Upsert(spCurrency, accountId, characterId);
     spBatch->Upsert(spItem, accountId, characterId);
+    spBatch->Upsert(spItem2, accountId, characterId);
     spBatch->Upsert(spAccountCurrency, accountId, characterId);
 
     db::DBResult txResult = co_await db::DbSaveExecutor::Save(
