@@ -4,16 +4,16 @@
 namespace db
 {
 
-db::AwaitableCoTask<DbLoadResult> DbLoadExecutor::Load(db::AsyncDBQueue& dbQueue, const std::shared_ptr<DbLoadBatch>& spBatch, int shardIndex, db::IResumeExecutor* resume)
+db::AwaitableCoTask<DbLoadResult> DbLoadExecutor::Load(db::AsyncDBQueue& dbQueue, const std::shared_ptr<DbLoadBatch>& spBatch, db::EDBType dbType, int dbIndex, db::IResumeExecutor* resume)
 {
     auto spResult = std::make_shared<DbLoadResult>();
 
     // 읽기도 쓰기(DbSaveExecutor)와 동일하게 **TransactionAsync** 한 경로로 처리한다.
-    //   - body 안에서 모든 SELECT 를 **멀티문장 1회**(tx.ExecuteMulti)로 실행 → 테이블 수와 무관하게 BEGIN+멀티문장+COMMIT(3왕복).
+    //   - body 안에서 모든 SELECT 를 **멀티문장 1회**(tx.ExecuteMultiStatement)로 실행 → 테이블 수와 무관하게 BEGIN+멀티문장+COMMIT(3왕복).
     //   - 한 트랜잭션이라 모든 테이블을 한 스냅샷에서 일관 로드.
     //   - JSON 역직렬화는 body(= DB 워커 스레드)에서 끝낸다(게임로직 스레드 파싱 0).
     db::DBResult txResult = co_await dbQueue.TransactionAsync(
-        db::EDBType::Game, shardIndex,
+        dbType, dbIndex,
         [spBatch, spResult](db::DBTransaction& transaction) -> bool
         {
             spResult->Clear();   // [필수] 재시도 replay 대비: 채우기 전 초기화
@@ -38,7 +38,7 @@ db::AwaitableCoTask<DbLoadResult> DbLoadExecutor::Load(db::AsyncDBQueue& dbQueue
             }
 
             // 한 왕복으로 실행 → 결과셋들(요청과 같은 순서). 실패가 있으면 transaction 이 내부에 사유 기록(→ 롤백/재시도 분류).
-            std::vector<db::DBResult> resultSets = transaction.ExecuteMulti(multiQuery);
+            std::vector<db::DBResult> resultSets = transaction.ExecuteMultiStatement(multiQuery);
             if (resultSets.size() != requests.size())
             {
                 return false;   // 개수 불일치(중간 에러 등) → 롤백

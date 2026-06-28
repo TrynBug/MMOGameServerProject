@@ -24,9 +24,9 @@ DBResult DBTransaction::Execute(const std::string& query, const std::vector<DBPa
     return result;
 }
 
-std::vector<DBResult> DBTransaction::ExecuteMulti(const std::string& multiQuery)
+std::vector<DBResult> DBTransaction::ExecuteMultiStatement(const std::string& multiQuery)
 {
-    std::vector<DBResult> results = m_conn.ExecuteMulti(multiQuery);
+    std::vector<DBResult> results = m_conn.ExecuteMultiStatement(multiQuery);
     for (const DBResult& result : results)
     {
         if (!result.success)

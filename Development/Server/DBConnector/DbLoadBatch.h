@@ -44,7 +44,7 @@ public:
     {
         EDbTable    table;
         const char* tableName;   // SELECT 대상 테이블(DbTable<T>::kInfo.name)
-        const char* keyCol;      // WHERE 컬럼(DbTable<T>::kLoadKeyCol)
+        const char* keyCol;      // WHERE 컬럼(DbTable<T>::kInfo.loadKeyCol)
         int64_t     keyValue;    // WHERE 값(DbTable<T>::LoadKey 가 acc/char 중 선택)
         bool        many;        // false=단일(≤1) / true=목록
         // 워커 스레드에서 한 행(JSON)을 proto 로 파싱한다(타입 T 를 클로저에 가둠). ok=false 면 파싱 실패.
@@ -59,7 +59,7 @@ private:
         Request request;
         request.table     = DbTable<T>::kType;
         request.tableName = DbTable<T>::kInfo.name;
-        request.keyCol    = DbTable<T>::kLoadKeyCol;
+        request.keyCol    = DbTable<T>::kInfo.loadKeyCol;
         request.keyValue  = DbTable<T>::LoadKey(accountId, characterId);   // ← trait 가 키 선택
         request.many      = many;
         request.parse = [](const std::string& json, bool& ok) -> std::shared_ptr<google::protobuf::Message>

@@ -37,7 +37,7 @@ public:
     // 멀티문장(여러 SELECT 를 ';' 로 이은 쿼리)을 **한 왕복**으로 실행하고 결과셋을 문장 순서대로 돌려준다.
     // text 프로토콜(mysql_real_query) 사용 → prepared statement/파라미터 바인딩 없음. 호출자가 SQL 을 안전하게 조립해야 한다
     // (이 프로젝트에서는 키가 정수라 직접 삽입 → 인젝션 없음). 배치 읽기(DbLoadExecutor)용.
-    std::vector<DBResult> ExecuteMulti(const std::string& multiQuery);
+    std::vector<DBResult> ExecuteMultiStatement(const std::string& multiQuery);
 
     // 트랜잭션 제어 (text 프로토콜). 한 커넥션에서 BEGIN…COMMIT 으로 여러 쿼리를 묶을 때 사용.
     // 보통 AsyncDBQueue::TransactionAsync 가 내부에서 호출하므로 직접 쓸 일은 드물다.
@@ -49,9 +49,9 @@ public:
     std::string GetLastError() const;
 
 private:
-    DBResult fetchResult(MYSQL_STMT* pStatement);
+    DBResult fetchPreparedResult(MYSQL_STMT* pStatement);
     DBResult textResultToDBResult(MYSQL_RES* pResultSet);   // text 프로토콜(mysql_store_result) 결과 → DBResult
-    DBResult runControl(const char* sql);   // Begin/Commit/Rollback 공통(text 프로토콜)
+    DBResult executeControlStatement(const char* sql);   // Begin/Commit/Rollback 공통(text 프로토콜)
 
     // 같은 SQL 의 prepared statement 를 재사용하려고 캐시에서 찾고, 없으면 prepare 해서 캐시에 넣는다.
     // 실패 시 nullptr 반환 + outError 에 사유 기록.

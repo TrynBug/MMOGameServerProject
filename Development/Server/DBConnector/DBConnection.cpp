@@ -94,9 +94,9 @@ bool DBConnection::Open(const DBConnectionConfig& config)
         databaseName = config.database.c_str();
     }
 
-    // CLIENT_MULTI_STATEMENTS: 한 번에 여러 문장(멀티문장)을 보내 1왕복으로 처리하기 위함(ExecuteMulti 용, 배치 읽기).
+    // CLIENT_MULTI_STATEMENTS: 한 번에 여러 문장(멀티문장)을 보내 1왕복으로 처리하기 위함(ExecuteMultiStatement 용, 배치 읽기).
     //   - prepared statement(Execute) 는 멀티문장을 허용하지 않으므로 이 플래그의 영향을 받지 않는다.
-    //   - 멀티문장은 ExecuteMulti(서버 생성 SQL, 정수 키) 에서만 쓰고, 사용자 입력이 SQL 로 들어가지 않는다 → 인젝션 위험 없음.
+    //   - 멀티문장은 ExecuteMultiStatement(서버 생성 SQL, 정수 키) 에서만 쓰고, 사용자 입력이 SQL 로 들어가지 않는다 → 인젝션 위험 없음.
     if (!mysql_real_connect(
             m_pDb,
             config.host.c_str(),
@@ -248,14 +248,14 @@ DBResult DBConnection::Execute(const std::string& query, const std::vector<DBPar
         return result;   // 연결레벨 에러(2006/2013)면 호출측이 재연결 → Close 가 statement 캐시를 비운다.
     }
 
-    result = fetchResult(pStatement);
+    result = fetchPreparedResult(pStatement);
 
     // 결과 자원만 풀고 statement 는 캐시에 열린 채 보관(다음 execute 에 재사용).
     mysql_stmt_free_result(pStatement);
     return result;
 }
 
-DBResult DBConnection::fetchResult(MYSQL_STMT* pStatement)
+DBResult DBConnection::fetchPreparedResult(MYSQL_STMT* pStatement)
 {
     DBResult result;
 
@@ -382,7 +382,7 @@ DBResult DBConnection::fetchResult(MYSQL_STMT* pStatement)
     return result;
 }
 
-std::vector<DBResult> DBConnection::ExecuteMulti(const std::string& multiQuery)
+std::vector<DBResult> DBConnection::ExecuteMultiStatement(const std::string& multiQuery)
 {
     std::vector<DBResult> results;
 
@@ -490,7 +490,7 @@ DBResult DBConnection::textResultToDBResult(MYSQL_RES* pResultSet)
     return result;
 }
 
-DBResult DBConnection::runControl(const char* sql)
+DBResult DBConnection::executeControlStatement(const char* sql)
 {
     DBResult result;
 
@@ -512,9 +512,9 @@ DBResult DBConnection::runControl(const char* sql)
     return result;
 }
 
-DBResult DBConnection::Begin()    { return runControl("START TRANSACTION"); }
-DBResult DBConnection::Commit()   { return runControl("COMMIT"); }
-DBResult DBConnection::Rollback() { return runControl("ROLLBACK"); }
+DBResult DBConnection::Begin()    { return executeControlStatement("START TRANSACTION"); }
+DBResult DBConnection::Commit()   { return executeControlStatement("COMMIT"); }
+DBResult DBConnection::Rollback() { return executeControlStatement("ROLLBACK"); }
 
 std::string DBConnection::GetLastError() const
 {

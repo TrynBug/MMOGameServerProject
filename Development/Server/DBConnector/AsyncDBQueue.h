@@ -44,7 +44,7 @@ public:
 
     // 트랜잭션 안에서 멀티문장(여러 SELECT 를 ';' 로 이은 쿼리)을 **한 왕복**으로 실행하고 결과셋들을 문장 순서대로 돌려준다.
     // 배치 읽기(DbLoadExecutor)용. 결과셋 중 하나라도 실패하면 내부에 사유를 기록한다(Execute 와 동일).
-    std::vector<DBResult> ExecuteMulti(const std::string& multiQuery);
+    std::vector<DBResult> ExecuteMultiStatement(const std::string& multiQuery);
 
     bool         Failed()        const { return m_failed; }
     unsigned int LastErrorCode() const { return m_lastErrorCode; }
