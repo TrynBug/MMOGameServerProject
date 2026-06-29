@@ -1342,19 +1342,19 @@ class ObjectInteractReq final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kPropKeyFieldNumber = 1,
+    kObjectIdFieldNumber = 1,
     kPosXFieldNumber = 2,
     kPosYFieldNumber = 3,
     kPosZFieldNumber = 4,
   };
-  // int32 prop_key = 1;
-  void clear_prop_key() ;
-  ::int32_t prop_key() const;
-  void set_prop_key(::int32_t value);
+  // int64 object_id = 1;
+  void clear_object_id() ;
+  ::int64_t object_id() const;
+  void set_object_id(::int64_t value);
 
   private:
-  ::int32_t _internal_prop_key() const;
-  void _internal_set_prop_key(::int32_t value);
+  ::int64_t _internal_object_id() const;
+  void _internal_set_object_id(::int64_t value);
 
   public:
   // float pos_x = 2;
@@ -1413,7 +1413,7 @@ class ObjectInteractReq final : public ::google::protobuf::Message
         const ObjectInteractReq& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::int32_t prop_key_;
+    ::int64_t object_id_;
     float pos_x_;
     float pos_y_;
     float pos_z_;
@@ -2741,29 +2741,29 @@ inline void EventAreaExitReq::_internal_set_pos_z(float value) {
 
 // ObjectInteractReq
 
-// int32 prop_key = 1;
-inline void ObjectInteractReq::clear_prop_key() {
+// int64 object_id = 1;
+inline void ObjectInteractReq::clear_object_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.prop_key_ = 0;
+  _impl_.object_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline ::int32_t ObjectInteractReq::prop_key() const {
-  // @@protoc_insertion_point(field_get:GamePacket.ObjectInteractReq.prop_key)
-  return _internal_prop_key();
+inline ::int64_t ObjectInteractReq::object_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectInteractReq.object_id)
+  return _internal_object_id();
 }
-inline void ObjectInteractReq::set_prop_key(::int32_t value) {
-  _internal_set_prop_key(value);
+inline void ObjectInteractReq::set_object_id(::int64_t value) {
+  _internal_set_object_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  // @@protoc_insertion_point(field_set:GamePacket.ObjectInteractReq.prop_key)
+  // @@protoc_insertion_point(field_set:GamePacket.ObjectInteractReq.object_id)
 }
-inline ::int32_t ObjectInteractReq::_internal_prop_key() const {
+inline ::int64_t ObjectInteractReq::_internal_object_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.prop_key_;
+  return _impl_.object_id_;
 }
-inline void ObjectInteractReq::_internal_set_prop_key(::int32_t value) {
+inline void ObjectInteractReq::_internal_set_object_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.prop_key_ = value;
+  _impl_.object_id_ = value;
 }
 
 // float pos_x = 2;

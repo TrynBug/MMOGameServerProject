@@ -40,9 +40,9 @@ namespace GamePacket {
             "RW50ZXJSZXESEQoJZXZlbnRfa2V5GAEgASgFEg0KBXBvc194GAIgASgCEg0K",
             "BXBvc195GAMgASgCEg0KBXBvc196GAQgASgCIlIKEEV2ZW50QXJlYUV4aXRS",
             "ZXESEQoJZXZlbnRfa2V5GAEgASgFEg0KBXBvc194GAIgASgCEg0KBXBvc195",
-            "GAMgASgCEg0KBXBvc196GAQgASgCIlIKEU9iamVjdEludGVyYWN0UmVxEhAK",
-            "CHByb3Bfa2V5GAEgASgFEg0KBXBvc194GAIgASgCEg0KBXBvc195GAMgASgC",
-            "Eg0KBXBvc196GAQgASgCYgZwcm90bzM="));
+            "GAMgASgCEg0KBXBvc196GAQgASgCIlMKEU9iamVjdEludGVyYWN0UmVxEhEK",
+            "CW9iamVjdF9pZBgBIAEoAxINCgVwb3NfeBgCIAEoAhINCgVwb3NfeRgDIAEo",
+            "AhINCgVwb3NfehgEIAEoAmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -53,7 +53,7 @@ namespace GamePacket {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.StageNoticeNtf), global::GamePacket.StageNoticeNtf.Parser, new[]{ "Message", "DurationMs" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.EventAreaEnterReq), global::GamePacket.EventAreaEnterReq.Parser, new[]{ "EventKey", "PosX", "PosY", "PosZ" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.EventAreaExitReq), global::GamePacket.EventAreaExitReq.Parser, new[]{ "EventKey", "PosX", "PosY", "PosZ" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ObjectInteractReq), global::GamePacket.ObjectInteractReq.Parser, new[]{ "PropKey", "PosX", "PosY", "PosZ" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ObjectInteractReq), global::GamePacket.ObjectInteractReq.Parser, new[]{ "ObjectId", "PosX", "PosY", "PosZ" }, null, null, null, null)
           }));
     }
     #endregion
@@ -2323,9 +2323,8 @@ namespace GamePacket {
   /// ──────────────────────────────────────────────
   /// 오브젝트(prop) 상호작용 요청 (클라 -> 서버)
   /// ──────────────────────────────────────────────
-  /// 클라가 prop(문/레버/NPC) 근처에서 상호작용 키를 누르면 보고한다. 서버는 권위 위치가
-  /// 해당 marker 의 상호작용 범위 안인지 검증한 뒤 스크립트 OnObjectInteract 를 발동한다.
-  /// 상태 동기화 없음(fire-and-forget) — 결과 연출은 스크립트가 Notice 등으로 처리.
+  /// 클라가 prop(문/레버/스위치/포탈) 근처에서 상호작용 키를 누르면 보고한다.  
+  /// 서버는 권위 위치가 prop 상호작용 범위 안인지 검증한 뒤 상태전이(PropStateNtf) + 스크립트 OnObjectInteract(효과)를 발동한다.
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ObjectInteractReq : pb::IMessage<ObjectInteractReq>
@@ -2362,7 +2361,7 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public ObjectInteractReq(ObjectInteractReq other) : this() {
-      propKey_ = other.propKey_;
+      objectId_ = other.objectId_;
       posX_ = other.posX_;
       posY_ = other.posY_;
       posZ_ = other.posZ_;
@@ -2375,18 +2374,18 @@ namespace GamePacket {
       return new ObjectInteractReq(this);
     }
 
-    /// <summary>Field number for the "prop_key" field.</summary>
-    public const int PropKeyFieldNumber = 1;
-    private int propKey_;
+    /// <summary>Field number for the "object_id" field.</summary>
+    public const int ObjectIdFieldNumber = 1;
+    private long objectId_;
     /// <summary>
-    /// 상호작용한 prop(배치 오브젝트) Key
+    /// 상호작용 대상 prop 의 ObjectId
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int PropKey {
-      get { return propKey_; }
+    public long ObjectId {
+      get { return objectId_; }
       set {
-        propKey_ = value;
+        objectId_ = value;
       }
     }
 
@@ -2444,7 +2443,7 @@ namespace GamePacket {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (PropKey != other.PropKey) return false;
+      if (ObjectId != other.ObjectId) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosX, other.PosX)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
@@ -2455,7 +2454,7 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
-      if (PropKey != 0) hash ^= PropKey.GetHashCode();
+      if (ObjectId != 0L) hash ^= ObjectId.GetHashCode();
       if (PosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosX);
       if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
       if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
@@ -2477,9 +2476,9 @@ namespace GamePacket {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (PropKey != 0) {
+      if (ObjectId != 0L) {
         output.WriteRawTag(8);
-        output.WriteInt32(PropKey);
+        output.WriteInt64(ObjectId);
       }
       if (PosX != 0F) {
         output.WriteRawTag(21);
@@ -2503,9 +2502,9 @@ namespace GamePacket {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (PropKey != 0) {
+      if (ObjectId != 0L) {
         output.WriteRawTag(8);
-        output.WriteInt32(PropKey);
+        output.WriteInt64(ObjectId);
       }
       if (PosX != 0F) {
         output.WriteRawTag(21);
@@ -2529,8 +2528,8 @@ namespace GamePacket {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
-      if (PropKey != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PropKey);
+      if (ObjectId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ObjectId);
       }
       if (PosX != 0F) {
         size += 1 + 4;
@@ -2553,8 +2552,8 @@ namespace GamePacket {
       if (other == null) {
         return;
       }
-      if (other.PropKey != 0) {
-        PropKey = other.PropKey;
+      if (other.ObjectId != 0L) {
+        ObjectId = other.ObjectId;
       }
       if (other.PosX != 0F) {
         PosX = other.PosX;
@@ -2585,7 +2584,7 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            PropKey = input.ReadInt32();
+            ObjectId = input.ReadInt64();
             break;
           }
           case 21: {
@@ -2620,7 +2619,7 @@ namespace GamePacket {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 8: {
-            PropKey = input.ReadInt32();
+            ObjectId = input.ReadInt64();
             break;
           }
           case 21: {

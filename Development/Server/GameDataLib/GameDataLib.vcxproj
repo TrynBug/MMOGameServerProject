@@ -147,6 +147,7 @@
     <ClCompile Include="GameDataManager.cpp" />
     <ClCompile Include="Generated\Enum\GameEnum_Common.cpp" />
     <ClCompile Include="Generated\Enum\GameEnum_Monster.cpp" />
+    <ClCompile Include="Generated\Enum\GameEnum_Prop.cpp" />
     <ClCompile Include="Generated\Enum\GameEnum_Skill.cpp" />
     <ClCompile Include="Generated\Enum\GameEnum_Stage.cpp" />
     <ClCompile Include="Generated\Enum\GameEnum_Stat.cpp" />
@@ -154,6 +155,7 @@
     <ClCompile Include="Generated\GameDataBase_JobBase.cpp" />
     <ClCompile Include="Generated\GameDataBase_Monster.cpp" />
     <ClCompile Include="Generated\GameDataBase_MonsterAI.cpp" />
+    <ClCompile Include="Generated\GameDataBase_Prop.cpp" />
     <ClCompile Include="Generated\GameDataBase_Skill.cpp" />
     <ClCompile Include="Generated\GameDataBase_Spawner.cpp" />
     <ClCompile Include="Generated\GameDataBase_SpawnGroup.cpp" />
@@ -164,6 +166,7 @@
     <ClCompile Include="Generated\GameData_JobBase.cpp" />
     <ClCompile Include="Generated\GameData_Monster.cpp" />
     <ClCompile Include="Generated\GameData_MonsterAI.cpp" />
+    <ClCompile Include="Generated\GameData_Prop.cpp" />
     <ClCompile Include="Generated\GameData_Skill.cpp" />
     <ClCompile Include="Generated\GameData_Spawner.cpp" />
     <ClCompile Include="Generated\GameData_SpawnGroup.cpp" />
@@ -179,6 +182,7 @@
     <ClInclude Include="GameDataManagerBase.h" />
     <ClInclude Include="Generated\Enum\GameEnum_Common.h" />
     <ClInclude Include="Generated\Enum\GameEnum_Monster.h" />
+    <ClInclude Include="Generated\Enum\GameEnum_Prop.h" />
     <ClInclude Include="Generated\Enum\GameEnum_Skill.h" />
     <ClInclude Include="Generated\Enum\GameEnum_Stage.h" />
     <ClInclude Include="Generated\Enum\GameEnum_Stat.h" />
@@ -186,6 +190,7 @@
     <ClInclude Include="Generated\GameDataBase_JobBase.h" />
     <ClInclude Include="Generated\GameDataBase_Monster.h" />
     <ClInclude Include="Generated\GameDataBase_MonsterAI.h" />
+    <ClInclude Include="Generated\GameDataBase_Prop.h" />
     <ClInclude Include="Generated\GameDataBase_Skill.h" />
     <ClInclude Include="Generated\GameDataBase_Spawner.h" />
     <ClInclude Include="Generated\GameDataBase_SpawnGroup.h" />
@@ -196,6 +201,7 @@
     <ClInclude Include="Generated\GameData_JobBase.h" />
     <ClInclude Include="Generated\GameData_Monster.h" />
     <ClInclude Include="Generated\GameData_MonsterAI.h" />
+    <ClInclude Include="Generated\GameData_Prop.h" />
     <ClInclude Include="Generated\GameData_Skill.h" />
     <ClInclude Include="Generated\GameData_Spawner.h" />
     <ClInclude Include="Generated\GameData_SpawnGroup.h" />

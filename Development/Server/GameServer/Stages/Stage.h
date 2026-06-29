@@ -36,6 +36,9 @@ using CharacterPtr = std::shared_ptr<Character>;
 // Monster forward declaration (SpawnMonster 리턴 타입). 완전타입은 Stage.cpp 에서 include.
 class Monster;
 
+// PropObject forward declaration (SpawnProp/FindProp 리턴 타입). 완전타입은 Stage.cpp 에서 include.
+class PropObject;
+
 // ActorObject forward declaration (BroadcastBuff* takes const ActorObject&). Full type in Stage.cpp.
 class ActorObject;
 
@@ -373,6 +376,25 @@ protected:
     // 성공 시 true, 해당 몬스터가 없으면 false.
     bool DespawnMonster(int64 objectId);
 
+    // ── prop 스폰/디스폰/상태 ──────────────────────────────────
+    // SpawnProp: propDataKey(GameData_Prop) 로 PropObject 를 동적 생성하여 컨테이너/sector 에 등록하고
+    // 주변 AOI 유저에게 ObjectVisibilityNtf(prop_spawns)로 spawn 통보한다(레이아웃 배치와 달리 broadcast).
+    // placementKey: 스크립트 분기용 인스턴스 키(0 가능). initialState: 시작상태(<0 이면 데이터 기본값).
+    // 성공 시 PropObject*, 실패 시 nullptr (소유권은 Stage).
+    PropObject* SpawnProp(int32 propDataKey, float posX, float posY, float posZ, float yaw,
+                          int32 placementKey, int32 initialState);
+
+    // DespawnProp: objectId 의 prop 을 컨테이너/sector 에서 제거하고 주변 AOI 에 despawn 통보한다.
+    // 성공 시 true, 해당 prop 이 없으면 false.
+    bool DespawnProp(int64 objectId);
+
+    // SetPropState: objectId 의 prop 상태를 직접 설정(스크립트용). 값이 바뀌면 주변 AOI 에 PropStateNtf 통보 후 true.
+    // actorObjectId: 유발 액터(없으면 0). 게이팅 없이 적용한다.
+    bool SetPropState(int64 objectId, int32 state, int64 actorObjectId);
+
+    // FindProp: objectId 로 PropObject 조회. 없으면 nullptr.
+    PropObject* FindProp(int64 objectId);
+
     // ── 시스템 메시지 처리 hooks (파생 클래스가 override 가능) ──
     // 기본 동작: 유저를 m_users에 추가/제거 (캐릭터 스폰은 spawnPendingCharacter 별도 단계).
     virtual void OnUserEnter(const UserPtr& spUser);
@@ -427,6 +449,14 @@ protected:
     // old Stage(=this)의 컨텐츠 스레드에서 실행된다. 검증 → leave → pending 보관 → target enter → Res.
     void handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
 
+    // 같은 서버 내 Stage 이동을 실행한다(handleStageMoveReq 동일서버 분기 + 포탈 prop 공용).
+    // 대상 검증(존재/단일인스턴스/이동가능타입/도착위치데이터) 통과 시 old Stage 퇴장 + target 입장 +
+    // StageMoveRes(성공) 송신 후 true. 실패 시 outFailReason 채우고 false(StageMoveRes 미송신).
+    // 호출 전 spCharacter 가 이 Stage 소속 + async 미진행임을 보장해야 한다.
+    bool executeLocalStageMove(const UserPtr& spUser, const CharacterPtr& spCharacter,
+                               int32 targetStageDataKey, EStagePositionType positionType,
+                               std::string& outFailReason);
+
     // 클라 맵 로딩 완료 보고. target Stage(=this)의 컨텐츠 스레드에서 실행된다.
     // Moving 상태의 유저면 spawnPendingCharacter로 스폰한다.
     void handleStageLoadCompleteReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
@@ -462,6 +492,17 @@ private:
     // m_monsterObjects 순회하면서 Monster::Update(FSM) 호출.
     // (이동 시 sector 갱신은 Monster 내부에서 한다. 컨텐츠 스레드 전용.)
     void updateMonsters(int64 deltaMs);
+
+    // DespawnDelayMs 가 예약된 prop 의 제거 타이머를 진행하고, 만료된 prop 을 디스폰한다.
+    // 대부분의 prop 은 정적이라 예약된 것만 처리한다(컨텐츠 스레드 전용).
+    void updateProps(int64 deltaMs);
+
+    // prop 상태 변경을 prop 주변 AOI 유저에게 PropStateNtf 로 broadcast 한다.
+    void broadcastPropState(const PropObject& prop, int64 actorObjectId);
+
+    // prop 의 선언형 동작(Behavior=Portal 등)을 발동한다. 상호작용이 수락된 직후 호출.
+    // 같은 서버 Stage 이동만 지원(v1). 목적지는 데이터 PortalStageKey(placement param0 override).
+    void triggerPropBehavior(const PropObject& prop, const UserPtr& spUser, const CharacterPtr& spCharacter);
 
     // 진행 중인 스킬 효과(AreaEffect)들을 tick 하고 만료된 것을 제거한다. OnUpdate 에서 매 tick 호출.
     void updateSkillEffects(int64 deltaMs);

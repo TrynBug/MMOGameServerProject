@@ -107,7 +107,11 @@ bool StageLayout::Load(const std::string& stageLayoutFileName)
                 pr.x = pos.at(0).get<float>();
                 pr.y = pos.at(1).get<float>();
                 pr.z = pos.at(2).get<float>();
-                pr.range = p.value("range", 2.0f);
+                pr.yaw          = p.value("yaw", 0.0f);
+                pr.range        = p.value("range", 0.0f);        // <=0 → GameData_Prop.InteractRange
+                pr.initialState = p.value("initialState", -1);   // <0  → GameData_Prop.InitialState
+                pr.param0       = p.value("param0", 0);
+                pr.param1       = p.value("param1", 0);
                 m_props.push_back(pr);
             }
         }

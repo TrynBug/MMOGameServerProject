@@ -73,6 +73,14 @@ class ObjectVisibilityNtf;
 struct ObjectVisibilityNtfDefaultTypeInternal;
 extern ObjectVisibilityNtfDefaultTypeInternal _ObjectVisibilityNtf_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull ObjectVisibilityNtf_class_data_;
+class PropSpawnInfo;
+struct PropSpawnInfoDefaultTypeInternal;
+extern PropSpawnInfoDefaultTypeInternal _PropSpawnInfo_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull PropSpawnInfo_class_data_;
+class PropStateNtf;
+struct PropStateNtfDefaultTypeInternal;
+extern PropStateNtfDefaultTypeInternal _PropStateNtf_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull PropStateNtf_class_data_;
 }  // namespace GamePacket
 namespace google {
 namespace protobuf {
@@ -84,6 +92,482 @@ namespace GamePacket {
 // ===================================================================
 
 
+// -------------------------------------------------------------------
+
+class PropStateNtf final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.PropStateNtf) */ {
+ public:
+  inline PropStateNtf() : PropStateNtf(nullptr) {}
+  ~PropStateNtf() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(PropStateNtf* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(PropStateNtf));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR PropStateNtf(::google::protobuf::internal::ConstantInitialized);
+
+  inline PropStateNtf(const PropStateNtf& from) : PropStateNtf(nullptr, from) {}
+  inline PropStateNtf(PropStateNtf&& from) noexcept
+      : PropStateNtf(nullptr, ::std::move(from)) {}
+  inline PropStateNtf& operator=(const PropStateNtf& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline PropStateNtf& operator=(PropStateNtf&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const PropStateNtf& default_instance() {
+    return *reinterpret_cast<const PropStateNtf*>(
+        &_PropStateNtf_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 5;
+  friend void swap(PropStateNtf& a, PropStateNtf& b) { a.Swap(&b); }
+  inline void Swap(PropStateNtf* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(PropStateNtf* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  PropStateNtf* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<PropStateNtf>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const PropStateNtf& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const PropStateNtf& from) { PropStateNtf::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(PropStateNtf* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.PropStateNtf"; }
+
+  explicit PropStateNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  PropStateNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const PropStateNtf& from);
+  PropStateNtf(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, PropStateNtf&& from) noexcept
+      : PropStateNtf(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kObjectIdFieldNumber = 1,
+    kActorObjectIdFieldNumber = 3,
+    kStateFieldNumber = 2,
+  };
+  // int64 object_id = 1;
+  void clear_object_id() ;
+  ::int64_t object_id() const;
+  void set_object_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_object_id() const;
+  void _internal_set_object_id(::int64_t value);
+
+  public:
+  // int64 actor_object_id = 3;
+  void clear_actor_object_id() ;
+  ::int64_t actor_object_id() const;
+  void set_actor_object_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_actor_object_id() const;
+  void _internal_set_actor_object_id(::int64_t value);
+
+  public:
+  // int32 state = 2;
+  void clear_state() ;
+  ::int32_t state() const;
+  void set_state(::int32_t value);
+
+  private:
+  ::int32_t _internal_state() const;
+  void _internal_set_state(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.PropStateNtf)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 3,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const PropStateNtf& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int64_t object_id_;
+    ::int64_t actor_object_id_;
+    ::int32_t state_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fobject_5fvisibility_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull PropStateNtf_class_data_;
+// -------------------------------------------------------------------
+
+class PropSpawnInfo final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.PropSpawnInfo) */ {
+ public:
+  inline PropSpawnInfo() : PropSpawnInfo(nullptr) {}
+  ~PropSpawnInfo() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(PropSpawnInfo* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(PropSpawnInfo));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR PropSpawnInfo(::google::protobuf::internal::ConstantInitialized);
+
+  inline PropSpawnInfo(const PropSpawnInfo& from) : PropSpawnInfo(nullptr, from) {}
+  inline PropSpawnInfo(PropSpawnInfo&& from) noexcept
+      : PropSpawnInfo(nullptr, ::std::move(from)) {}
+  inline PropSpawnInfo& operator=(const PropSpawnInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline PropSpawnInfo& operator=(PropSpawnInfo&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const PropSpawnInfo& default_instance() {
+    return *reinterpret_cast<const PropSpawnInfo*>(
+        &_PropSpawnInfo_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 3;
+  friend void swap(PropSpawnInfo& a, PropSpawnInfo& b) { a.Swap(&b); }
+  inline void Swap(PropSpawnInfo* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(PropSpawnInfo* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  PropSpawnInfo* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<PropSpawnInfo>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const PropSpawnInfo& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const PropSpawnInfo& from) { PropSpawnInfo::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(PropSpawnInfo* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.PropSpawnInfo"; }
+
+  explicit PropSpawnInfo(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  PropSpawnInfo(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const PropSpawnInfo& from);
+  PropSpawnInfo(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, PropSpawnInfo&& from) noexcept
+      : PropSpawnInfo(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kObjectIdFieldNumber = 1,
+    kPropKeyFieldNumber = 2,
+    kPosXFieldNumber = 3,
+    kPosYFieldNumber = 4,
+    kPosZFieldNumber = 5,
+    kYawFieldNumber = 6,
+    kStateFieldNumber = 7,
+  };
+  // int64 object_id = 1;
+  void clear_object_id() ;
+  ::int64_t object_id() const;
+  void set_object_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_object_id() const;
+  void _internal_set_object_id(::int64_t value);
+
+  public:
+  // int32 prop_key = 2;
+  void clear_prop_key() ;
+  ::int32_t prop_key() const;
+  void set_prop_key(::int32_t value);
+
+  private:
+  ::int32_t _internal_prop_key() const;
+  void _internal_set_prop_key(::int32_t value);
+
+  public:
+  // float pos_x = 3;
+  void clear_pos_x() ;
+  float pos_x() const;
+  void set_pos_x(float value);
+
+  private:
+  float _internal_pos_x() const;
+  void _internal_set_pos_x(float value);
+
+  public:
+  // float pos_y = 4;
+  void clear_pos_y() ;
+  float pos_y() const;
+  void set_pos_y(float value);
+
+  private:
+  float _internal_pos_y() const;
+  void _internal_set_pos_y(float value);
+
+  public:
+  // float pos_z = 5;
+  void clear_pos_z() ;
+  float pos_z() const;
+  void set_pos_z(float value);
+
+  private:
+  float _internal_pos_z() const;
+  void _internal_set_pos_z(float value);
+
+  public:
+  // float yaw = 6;
+  void clear_yaw() ;
+  float yaw() const;
+  void set_yaw(float value);
+
+  private:
+  float _internal_yaw() const;
+  void _internal_set_yaw(float value);
+
+  public:
+  // int32 state = 7;
+  void clear_state() ;
+  ::int32_t state() const;
+  void set_state(::int32_t value);
+
+  private:
+  ::int32_t _internal_state() const;
+  void _internal_set_state(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.PropSpawnInfo)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<3, 7,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const PropSpawnInfo& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int64_t object_id_;
+    ::int32_t prop_key_;
+    float pos_x_;
+    float pos_y_;
+    float pos_z_;
+    float yaw_;
+    ::int32_t state_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fobject_5fvisibility_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull PropSpawnInfo_class_data_;
 // -------------------------------------------------------------------
 
 class ObjectDeathNtf final : public ::google::protobuf::Message
@@ -141,7 +625,7 @@ class ObjectDeathNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const ObjectDeathNtf*>(
         &_ObjectDeathNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 4;
+  static constexpr int kIndexInFileMessages = 6;
   friend void swap(ObjectDeathNtf& a, ObjectDeathNtf& b) { a.Swap(&b); }
   inline void Swap(ObjectDeathNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -649,8 +1133,8 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
     kMonsterKeyFieldNumber = 2,
     kPosXFieldNumber = 3,
     kPosYFieldNumber = 4,
-    kYawFieldNumber = 5,
-    kPosZFieldNumber = 6,
+    kPosZFieldNumber = 5,
+    kYawFieldNumber = 6,
     kIsDeadFieldNumber = 8,
     kCurHpFieldNumber = 9,
     kMaxHpFieldNumber = 10,
@@ -712,17 +1196,7 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
   void _internal_set_pos_y(float value);
 
   public:
-  // float yaw = 5;
-  void clear_yaw() ;
-  float yaw() const;
-  void set_yaw(float value);
-
-  private:
-  float _internal_yaw() const;
-  void _internal_set_yaw(float value);
-
-  public:
-  // float pos_z = 6;
+  // float pos_z = 5;
   void clear_pos_z() ;
   float pos_z() const;
   void set_pos_z(float value);
@@ -730,6 +1204,16 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
   private:
   float _internal_pos_z() const;
   void _internal_set_pos_z(float value);
+
+  public:
+  // float yaw = 6;
+  void clear_yaw() ;
+  float yaw() const;
+  void set_yaw(float value);
+
+  private:
+  float _internal_yaw() const;
+  void _internal_set_yaw(float value);
 
   public:
   // bool is_dead = 8;
@@ -793,8 +1277,8 @@ class MonsterSpawnInfo final : public ::google::protobuf::Message
     ::int32_t monster_key_;
     float pos_x_;
     float pos_y_;
-    float yaw_;
     float pos_z_;
+    float yaw_;
     bool is_dead_;
     double cur_hp_;
     double max_hp_;
@@ -961,8 +1445,8 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
     kMaxMpFieldNumber = 9,
     kPosXFieldNumber = 10,
     kPosYFieldNumber = 11,
-    kYawFieldNumber = 12,
-    kPosZFieldNumber = 13,
+    kPosZFieldNumber = 12,
+    kYawFieldNumber = 13,
   };
   // repeated .GamePacket.BuffSnapshotInfo buffs = 14;
   int buffs_size() const;
@@ -1096,17 +1580,7 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
   void _internal_set_pos_y(float value);
 
   public:
-  // float yaw = 12;
-  void clear_yaw() ;
-  float yaw() const;
-  void set_yaw(float value);
-
-  private:
-  float _internal_yaw() const;
-  void _internal_set_yaw(float value);
-
-  public:
-  // float pos_z = 13;
+  // float pos_z = 12;
   void clear_pos_z() ;
   float pos_z() const;
   void set_pos_z(float value);
@@ -1114,6 +1588,16 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
   private:
   float _internal_pos_z() const;
   void _internal_set_pos_z(float value);
+
+  public:
+  // float yaw = 13;
+  void clear_yaw() ;
+  float yaw() const;
+  void set_yaw(float value);
+
+  private:
+  float _internal_yaw() const;
+  void _internal_set_yaw(float value);
 
   public:
   // @@protoc_insertion_point(class_scope:GamePacket.CharacterSpawnInfo)
@@ -1154,8 +1638,8 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
     double max_mp_;
     float pos_x_;
     float pos_y_;
-    float yaw_;
     float pos_z_;
+    float yaw_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -1220,7 +1704,7 @@ class ObjectVisibilityNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const ObjectVisibilityNtf*>(
         &_ObjectVisibilityNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 3;
+  static constexpr int kIndexInFileMessages = 4;
   friend void swap(ObjectVisibilityNtf& a, ObjectVisibilityNtf& b) { a.Swap(&b); }
   inline void Swap(ObjectVisibilityNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -1309,6 +1793,7 @@ class ObjectVisibilityNtf final : public ::google::protobuf::Message
   enum : int {
     kCharacterSpawnsFieldNumber = 1,
     kMonsterSpawnsFieldNumber = 2,
+    kPropSpawnsFieldNumber = 3,
     kDespawnIdsFieldNumber = 10,
   };
   // repeated .GamePacket.CharacterSpawnInfo character_spawns = 1;
@@ -1345,6 +1830,23 @@ class ObjectVisibilityNtf final : public ::google::protobuf::Message
   const ::GamePacket::MonsterSpawnInfo& monster_spawns(int index) const;
   ::GamePacket::MonsterSpawnInfo* PROTOBUF_NONNULL add_monster_spawns();
   const ::google::protobuf::RepeatedPtrField<::GamePacket::MonsterSpawnInfo>& monster_spawns() const;
+  // repeated .GamePacket.PropSpawnInfo prop_spawns = 3;
+  int prop_spawns_size() const;
+  private:
+  int _internal_prop_spawns_size() const;
+
+  public:
+  void clear_prop_spawns() ;
+  ::GamePacket::PropSpawnInfo* PROTOBUF_NONNULL mutable_prop_spawns(int index);
+  ::google::protobuf::RepeatedPtrField<::GamePacket::PropSpawnInfo>* PROTOBUF_NONNULL mutable_prop_spawns();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::GamePacket::PropSpawnInfo>& _internal_prop_spawns() const;
+  ::google::protobuf::RepeatedPtrField<::GamePacket::PropSpawnInfo>* PROTOBUF_NONNULL _internal_mutable_prop_spawns();
+  public:
+  const ::GamePacket::PropSpawnInfo& prop_spawns(int index) const;
+  ::GamePacket::PropSpawnInfo* PROTOBUF_NONNULL add_prop_spawns();
+  const ::google::protobuf::RepeatedPtrField<::GamePacket::PropSpawnInfo>& prop_spawns() const;
   // repeated int64 despawn_ids = 10;
   int despawn_ids_size() const;
   private:
@@ -1367,8 +1869,8 @@ class ObjectVisibilityNtf final : public ::google::protobuf::Message
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<1, 3,
-                                   2, 0,
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
+                                   3, 0,
                                    2>
       _table_;
 
@@ -1391,6 +1893,7 @@ class ObjectVisibilityNtf final : public ::google::protobuf::Message
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::RepeatedPtrField< ::GamePacket::CharacterSpawnInfo > character_spawns_;
     ::google::protobuf::RepeatedPtrField< ::GamePacket::MonsterSpawnInfo > monster_spawns_;
+    ::google::protobuf::RepeatedPtrField< ::GamePacket::PropSpawnInfo > prop_spawns_;
     ::google::protobuf::RepeatedField<::int64_t> despawn_ids_;
     ::google::protobuf::internal::CachedSize _despawn_ids_cached_byte_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -1811,37 +2314,12 @@ inline void CharacterSpawnInfo::_internal_set_pos_y(float value) {
   _impl_.pos_y_ = value;
 }
 
-// float yaw = 12;
-inline void CharacterSpawnInfo::clear_yaw() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.yaw_ = 0;
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00001000U);
-}
-inline float CharacterSpawnInfo::yaw() const {
-  // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.yaw)
-  return _internal_yaw();
-}
-inline void CharacterSpawnInfo::set_yaw(float value) {
-  _internal_set_yaw(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00001000U);
-  // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.yaw)
-}
-inline float CharacterSpawnInfo::_internal_yaw() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.yaw_;
-}
-inline void CharacterSpawnInfo::_internal_set_yaw(float value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.yaw_ = value;
-}
-
-// float pos_z = 13;
+// float pos_z = 12;
 inline void CharacterSpawnInfo::clear_pos_z() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_z_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00002000U);
+                  0x00001000U);
 }
 inline float CharacterSpawnInfo::pos_z() const {
   // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.pos_z)
@@ -1849,7 +2327,7 @@ inline float CharacterSpawnInfo::pos_z() const {
 }
 inline void CharacterSpawnInfo::set_pos_z(float value) {
   _internal_set_pos_z(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00002000U);
+  SetHasBit(_impl_._has_bits_[0], 0x00001000U);
   // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.pos_z)
 }
 inline float CharacterSpawnInfo::_internal_pos_z() const {
@@ -1859,6 +2337,31 @@ inline float CharacterSpawnInfo::_internal_pos_z() const {
 inline void CharacterSpawnInfo::_internal_set_pos_z(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_z_ = value;
+}
+
+// float yaw = 13;
+inline void CharacterSpawnInfo::clear_yaw() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.yaw_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00002000U);
+}
+inline float CharacterSpawnInfo::yaw() const {
+  // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.yaw)
+  return _internal_yaw();
+}
+inline void CharacterSpawnInfo::set_yaw(float value) {
+  _internal_set_yaw(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00002000U);
+  // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.yaw)
+}
+inline float CharacterSpawnInfo::_internal_yaw() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.yaw_;
+}
+inline void CharacterSpawnInfo::_internal_set_yaw(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.yaw_ = value;
 }
 
 // repeated .GamePacket.BuffSnapshotInfo buffs = 14;
@@ -2021,37 +2524,12 @@ inline void MonsterSpawnInfo::_internal_set_pos_y(float value) {
   _impl_.pos_y_ = value;
 }
 
-// float yaw = 5;
-inline void MonsterSpawnInfo::clear_yaw() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.yaw_ = 0;
-  ClearHasBit(_impl_._has_bits_[0],
-                  0x00000020U);
-}
-inline float MonsterSpawnInfo::yaw() const {
-  // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.yaw)
-  return _internal_yaw();
-}
-inline void MonsterSpawnInfo::set_yaw(float value) {
-  _internal_set_yaw(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
-  // @@protoc_insertion_point(field_set:GamePacket.MonsterSpawnInfo.yaw)
-}
-inline float MonsterSpawnInfo::_internal_yaw() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.yaw_;
-}
-inline void MonsterSpawnInfo::_internal_set_yaw(float value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.yaw_ = value;
-}
-
-// float pos_z = 6;
+// float pos_z = 5;
 inline void MonsterSpawnInfo::clear_pos_z() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_z_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000040U);
+                  0x00000020U);
 }
 inline float MonsterSpawnInfo::pos_z() const {
   // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.pos_z)
@@ -2059,7 +2537,7 @@ inline float MonsterSpawnInfo::pos_z() const {
 }
 inline void MonsterSpawnInfo::set_pos_z(float value) {
   _internal_set_pos_z(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
   // @@protoc_insertion_point(field_set:GamePacket.MonsterSpawnInfo.pos_z)
 }
 inline float MonsterSpawnInfo::_internal_pos_z() const {
@@ -2069,6 +2547,31 @@ inline float MonsterSpawnInfo::_internal_pos_z() const {
 inline void MonsterSpawnInfo::_internal_set_pos_z(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_z_ = value;
+}
+
+// float yaw = 6;
+inline void MonsterSpawnInfo::clear_yaw() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.yaw_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000040U);
+}
+inline float MonsterSpawnInfo::yaw() const {
+  // @@protoc_insertion_point(field_get:GamePacket.MonsterSpawnInfo.yaw)
+  return _internal_yaw();
+}
+inline void MonsterSpawnInfo::set_yaw(float value) {
+  _internal_set_yaw(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
+  // @@protoc_insertion_point(field_set:GamePacket.MonsterSpawnInfo.yaw)
+}
+inline float MonsterSpawnInfo::_internal_yaw() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.yaw_;
+}
+inline void MonsterSpawnInfo::_internal_set_yaw(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.yaw_ = value;
 }
 
 // repeated .GamePacket.BuffSnapshotInfo buffs = 7;
@@ -2204,6 +2707,185 @@ inline void MonsterSpawnInfo::_internal_set_max_hp(double value) {
 
 // -------------------------------------------------------------------
 
+// PropSpawnInfo
+
+// int64 object_id = 1;
+inline void PropSpawnInfo::clear_object_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.object_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::int64_t PropSpawnInfo::object_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.PropSpawnInfo.object_id)
+  return _internal_object_id();
+}
+inline void PropSpawnInfo::set_object_id(::int64_t value) {
+  _internal_set_object_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_set:GamePacket.PropSpawnInfo.object_id)
+}
+inline ::int64_t PropSpawnInfo::_internal_object_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.object_id_;
+}
+inline void PropSpawnInfo::_internal_set_object_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.object_id_ = value;
+}
+
+// int32 prop_key = 2;
+inline void PropSpawnInfo::clear_prop_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.prop_key_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline ::int32_t PropSpawnInfo::prop_key() const {
+  // @@protoc_insertion_point(field_get:GamePacket.PropSpawnInfo.prop_key)
+  return _internal_prop_key();
+}
+inline void PropSpawnInfo::set_prop_key(::int32_t value) {
+  _internal_set_prop_key(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:GamePacket.PropSpawnInfo.prop_key)
+}
+inline ::int32_t PropSpawnInfo::_internal_prop_key() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.prop_key_;
+}
+inline void PropSpawnInfo::_internal_set_prop_key(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.prop_key_ = value;
+}
+
+// float pos_x = 3;
+inline void PropSpawnInfo::clear_pos_x() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_x_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline float PropSpawnInfo::pos_x() const {
+  // @@protoc_insertion_point(field_get:GamePacket.PropSpawnInfo.pos_x)
+  return _internal_pos_x();
+}
+inline void PropSpawnInfo::set_pos_x(float value) {
+  _internal_set_pos_x(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:GamePacket.PropSpawnInfo.pos_x)
+}
+inline float PropSpawnInfo::_internal_pos_x() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_x_;
+}
+inline void PropSpawnInfo::_internal_set_pos_x(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_x_ = value;
+}
+
+// float pos_y = 4;
+inline void PropSpawnInfo::clear_pos_y() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_y_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline float PropSpawnInfo::pos_y() const {
+  // @@protoc_insertion_point(field_get:GamePacket.PropSpawnInfo.pos_y)
+  return _internal_pos_y();
+}
+inline void PropSpawnInfo::set_pos_y(float value) {
+  _internal_set_pos_y(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:GamePacket.PropSpawnInfo.pos_y)
+}
+inline float PropSpawnInfo::_internal_pos_y() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_y_;
+}
+inline void PropSpawnInfo::_internal_set_pos_y(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_y_ = value;
+}
+
+// float pos_z = 5;
+inline void PropSpawnInfo::clear_pos_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000010U);
+}
+inline float PropSpawnInfo::pos_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.PropSpawnInfo.pos_z)
+  return _internal_pos_z();
+}
+inline void PropSpawnInfo::set_pos_z(float value) {
+  _internal_set_pos_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
+  // @@protoc_insertion_point(field_set:GamePacket.PropSpawnInfo.pos_z)
+}
+inline float PropSpawnInfo::_internal_pos_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_z_;
+}
+inline void PropSpawnInfo::_internal_set_pos_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = value;
+}
+
+// float yaw = 6;
+inline void PropSpawnInfo::clear_yaw() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.yaw_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000020U);
+}
+inline float PropSpawnInfo::yaw() const {
+  // @@protoc_insertion_point(field_get:GamePacket.PropSpawnInfo.yaw)
+  return _internal_yaw();
+}
+inline void PropSpawnInfo::set_yaw(float value) {
+  _internal_set_yaw(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
+  // @@protoc_insertion_point(field_set:GamePacket.PropSpawnInfo.yaw)
+}
+inline float PropSpawnInfo::_internal_yaw() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.yaw_;
+}
+inline void PropSpawnInfo::_internal_set_yaw(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.yaw_ = value;
+}
+
+// int32 state = 7;
+inline void PropSpawnInfo::clear_state() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.state_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000040U);
+}
+inline ::int32_t PropSpawnInfo::state() const {
+  // @@protoc_insertion_point(field_get:GamePacket.PropSpawnInfo.state)
+  return _internal_state();
+}
+inline void PropSpawnInfo::set_state(::int32_t value) {
+  _internal_set_state(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
+  // @@protoc_insertion_point(field_set:GamePacket.PropSpawnInfo.state)
+}
+inline ::int32_t PropSpawnInfo::_internal_state() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.state_;
+}
+inline void PropSpawnInfo::_internal_set_state(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.state_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // ObjectVisibilityNtf
 
 // repeated .GamePacket.CharacterSpawnInfo character_spawns = 1;
@@ -2318,6 +3000,62 @@ ObjectVisibilityNtf::_internal_mutable_monster_spawns() {
   return &_impl_.monster_spawns_;
 }
 
+// repeated .GamePacket.PropSpawnInfo prop_spawns = 3;
+inline int ObjectVisibilityNtf::_internal_prop_spawns_size() const {
+  return _internal_prop_spawns().size();
+}
+inline int ObjectVisibilityNtf::prop_spawns_size() const {
+  return _internal_prop_spawns_size();
+}
+inline void ObjectVisibilityNtf::clear_prop_spawns() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.prop_spawns_.Clear();
+  ClearHasBitForRepeated(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline ::GamePacket::PropSpawnInfo* PROTOBUF_NONNULL ObjectVisibilityNtf::mutable_prop_spawns(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:GamePacket.ObjectVisibilityNtf.prop_spawns)
+  return _internal_mutable_prop_spawns()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::GamePacket::PropSpawnInfo>* PROTOBUF_NONNULL ObjectVisibilityNtf::mutable_prop_spawns()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_mutable_list:GamePacket.ObjectVisibilityNtf.prop_spawns)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_prop_spawns();
+}
+inline const ::GamePacket::PropSpawnInfo& ObjectVisibilityNtf::prop_spawns(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectVisibilityNtf.prop_spawns)
+  return _internal_prop_spawns().Get(index);
+}
+inline ::GamePacket::PropSpawnInfo* PROTOBUF_NONNULL ObjectVisibilityNtf::add_prop_spawns()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::GamePacket::PropSpawnInfo* _add =
+      _internal_mutable_prop_spawns()->InternalAddWithArena(
+          ::google::protobuf::MessageLite::internal_visibility(), GetArena());
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_add:GamePacket.ObjectVisibilityNtf.prop_spawns)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::GamePacket::PropSpawnInfo>& ObjectVisibilityNtf::prop_spawns() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:GamePacket.ObjectVisibilityNtf.prop_spawns)
+  return _internal_prop_spawns();
+}
+inline const ::google::protobuf::RepeatedPtrField<::GamePacket::PropSpawnInfo>&
+ObjectVisibilityNtf::_internal_prop_spawns() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.prop_spawns_;
+}
+inline ::google::protobuf::RepeatedPtrField<::GamePacket::PropSpawnInfo>* PROTOBUF_NONNULL
+ObjectVisibilityNtf::_internal_mutable_prop_spawns() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.prop_spawns_;
+}
+
 // repeated int64 despawn_ids = 10;
 inline int ObjectVisibilityNtf::_internal_despawn_ids_size() const {
   return _internal_despawn_ids().size();
@@ -2329,7 +3067,7 @@ inline void ObjectVisibilityNtf::clear_despawn_ids() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.despawn_ids_.Clear();
   ClearHasBitForRepeated(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000008U);
 }
 inline ::int64_t ObjectVisibilityNtf::despawn_ids(int index) const {
   // @@protoc_insertion_point(field_get:GamePacket.ObjectVisibilityNtf.despawn_ids)
@@ -2342,7 +3080,7 @@ inline void ObjectVisibilityNtf::set_despawn_ids(int index, ::int64_t value) {
 inline void ObjectVisibilityNtf::add_despawn_ids(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _internal_mutable_despawn_ids()->Add(value);
-  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000008U);
   // @@protoc_insertion_point(field_add:GamePacket.ObjectVisibilityNtf.despawn_ids)
 }
 inline const ::google::protobuf::RepeatedField<::int64_t>& ObjectVisibilityNtf::despawn_ids() const
@@ -2352,7 +3090,7 @@ inline const ::google::protobuf::RepeatedField<::int64_t>& ObjectVisibilityNtf::
 }
 inline ::google::protobuf::RepeatedField<::int64_t>* PROTOBUF_NONNULL ObjectVisibilityNtf::mutable_despawn_ids()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000008U);
   // @@protoc_insertion_point(field_mutable_list:GamePacket.ObjectVisibilityNtf.despawn_ids)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   return _internal_mutable_despawn_ids();
@@ -2366,6 +3104,85 @@ inline ::google::protobuf::RepeatedField<::int64_t>* PROTOBUF_NONNULL
 ObjectVisibilityNtf::_internal_mutable_despawn_ids() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.despawn_ids_;
+}
+
+// -------------------------------------------------------------------
+
+// PropStateNtf
+
+// int64 object_id = 1;
+inline void PropStateNtf::clear_object_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.object_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::int64_t PropStateNtf::object_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.PropStateNtf.object_id)
+  return _internal_object_id();
+}
+inline void PropStateNtf::set_object_id(::int64_t value) {
+  _internal_set_object_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_set:GamePacket.PropStateNtf.object_id)
+}
+inline ::int64_t PropStateNtf::_internal_object_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.object_id_;
+}
+inline void PropStateNtf::_internal_set_object_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.object_id_ = value;
+}
+
+// int32 state = 2;
+inline void PropStateNtf::clear_state() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.state_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline ::int32_t PropStateNtf::state() const {
+  // @@protoc_insertion_point(field_get:GamePacket.PropStateNtf.state)
+  return _internal_state();
+}
+inline void PropStateNtf::set_state(::int32_t value) {
+  _internal_set_state(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:GamePacket.PropStateNtf.state)
+}
+inline ::int32_t PropStateNtf::_internal_state() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.state_;
+}
+inline void PropStateNtf::_internal_set_state(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.state_ = value;
+}
+
+// int64 actor_object_id = 3;
+inline void PropStateNtf::clear_actor_object_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.actor_object_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline ::int64_t PropStateNtf::actor_object_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.PropStateNtf.actor_object_id)
+  return _internal_actor_object_id();
+}
+inline void PropStateNtf::set_actor_object_id(::int64_t value) {
+  _internal_set_actor_object_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:GamePacket.PropStateNtf.actor_object_id)
+}
+inline ::int64_t PropStateNtf::_internal_actor_object_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.actor_object_id_;
+}
+inline void PropStateNtf::_internal_set_actor_object_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.actor_object_id_ = value;
 }
 
 // -------------------------------------------------------------------

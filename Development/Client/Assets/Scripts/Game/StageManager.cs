@@ -31,6 +31,9 @@ namespace Client.Game
         // object_id -> MonsterObject (몬스터 전용 레지스트리. 디스폰은 despawnObject 로 공용 처리)
         private readonly Dictionary<long, MonsterObject> m_monsters = new Dictionary<long, MonsterObject>();
 
+        // object_id -> PropObject (prop 전용 레지스트리. 디스폰은 despawnObject 로 공용 처리, 상태변경은 PropStateNtf)
+        private readonly Dictionary<long, PropObject> m_props = new Dictionary<long, PropObject>();
+
         // 내 캐릭터 (편의 접근). CharacterSelectRes 데이터모델로 1회 생성 후 영속.
         // 스테이지 이동 시 파괴하지 않고 숨김(SetActive false)+재배치만 한다.
         public PlayerCharacter LocalPlayer { get; private set; }
@@ -69,6 +72,7 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<BuffRemoveNtf>(GamePacketId.BuffRemoveNtf, onBuffRemoveNtf);
             PacketDispatcher.Instance.Register<ObjectDeathNtf>(GamePacketId.ObjectDeathNtf, onObjectDeathNtf);
             PacketDispatcher.Instance.Register<StageNoticeNtf>(GamePacketId.StageNoticeNtf, onStageNoticeNtf);
+            PacketDispatcher.Instance.Register<PropStateNtf>(GamePacketId.PropStateNtf, onPropStateNtf);
 
             // 이벤트영역 진입/이탈 감지기(로컬 플레이어 위치로 매 프레임 판정 → Req 송신).
             gameObject.AddComponent<EventAreaDetector>();
@@ -318,12 +322,36 @@ namespace Client.Game
                 Debug.Log($"[StageManager] ObjectVisibilityNtf: MonsterSpawn objectId={monsterSpawnInfo.ObjectId} key={monsterSpawnInfo.MonsterKey}");
             }
 
-            // 오브젝트 디스폰 정보 처리 (캐릭터/몬스터 공용)
+            // prop 스폰정보 처리 (현재 상태 포함). prop 은 정적이라 위치 스냅샷을 받지 않는다.
+            foreach (PropSpawnInfo propSpawnInfo in ntf.PropSpawns)
+            {
+                spawnProp(
+                    objectId: propSpawnInfo.ObjectId,
+                    propKey: propSpawnInfo.PropKey,
+                    pos: new Vector3(propSpawnInfo.PosX, propSpawnInfo.PosY, propSpawnInfo.PosZ),
+                    dirY: propSpawnInfo.Yaw,
+                    state: propSpawnInfo.State);
+
+                Debug.Log($"[StageManager] ObjectVisibilityNtf: PropSpawn objectId={propSpawnInfo.ObjectId} key={propSpawnInfo.PropKey} state={propSpawnInfo.State}");
+            }
+
+            // 오브젝트 디스폰 정보 처리 (캐릭터/몬스터/prop 공용)
             foreach (long despawnObjectId in ntf.DespawnIds)
             {
                 despawnObject(despawnObjectId);
 
                 Debug.Log($"[StageManager] ObjectVisibilityNtf: Despawn objectId={despawnObjectId}");
+            }
+        }
+
+        // prop 상태 변경 알림. 해당 prop 을 찾아 상태값/비주얼을 갱신한다.
+        // 대상이 없으면(아직 미스폰/이미 디스폰) 조용히 무시 (idempotent).
+        private void onPropStateNtf(PropStateNtf ntf)
+        {
+            if (m_props.TryGetValue(ntf.ObjectId, out PropObject prop) && prop != null)
+            {
+                prop.SetState(ntf.State);
+                Debug.Log($"[StageManager] PropStateNtf: objectId={ntf.ObjectId} state={ntf.State}");
             }
         }
 
@@ -555,6 +583,42 @@ namespace Client.Game
             return mo;
         }
 
+        // prop 스폰. 게임데이터 Key 로 PropFactory 가 prefab 을 찾아 생성한다.
+        // 이미 같은 objectId 가 있으면 중복 spawn 무시 (idempotent).
+        private PropObject spawnProp(long objectId, int propKey, Vector3 pos, float dirY, int state)
+        {
+            if (m_props.TryGetValue(objectId, out PropObject existing) && existing != null)
+                return existing;
+
+            PropObject po = PropFactory.Create(objectId, propKey, pos, dirY, state);
+            if (po != null)
+                m_props.Add(objectId, po);
+            return po;
+        }
+
+        // 로컬 플레이어 위치(pos)에서 maxRange(평면 X-Z) 안의 가장 가까운 prop 을 찾는다(없으면 null).
+        // PropInteractor 의 상호작용 대상 선택용. 실제 사거리 검증은 서버 권위.
+        public PropObject FindNearestProp(Vector3 pos, float maxRange)
+        {
+            PropObject best = null;
+            float bestSq = maxRange * maxRange;
+            foreach (PropObject po in m_props.Values)
+            {
+                if (po == null)
+                    continue;
+                Vector3 c = po.transform.position;
+                float dx = pos.x - c.x;
+                float dz = pos.z - c.z;
+                float dsq = dx * dx + dz * dz;
+                if (dsq <= bestSq)
+                {
+                    bestSq = dsq;
+                    best = po;
+                }
+            }
+            return best;
+        }
+
         // 원격 오브젝트(타 캐릭터/몬스터)만 제거. LocalPlayer 는 보존(영속). 스테이지 로딩 시작 시 호출.
         private void despawnRemoteObjects()
         {
@@ -577,6 +641,13 @@ namespace Client.Game
                     Destroy(monster.gameObject);
             }
             m_monsters.Clear();
+
+            foreach (PropObject prop in m_props.Values)
+            {
+                if (prop != null)
+                    Destroy(prop.gameObject);
+            }
+            m_props.Clear();
         }
 
         // 오브젝트 공용 디스폰. objectId 로 캐릭터/몬스터 어느 쪽이든 찾아 제거한다.
@@ -594,6 +665,13 @@ namespace Client.Game
             {
                 m_monsters.Remove(objectId);
                 Destroy(monster.gameObject);
+                return;
+            }
+
+            if (m_props.TryGetValue(objectId, out PropObject prop) && prop != null)
+            {
+                m_props.Remove(objectId);
+                Destroy(prop.gameObject);
                 return;
             }
         }

@@ -10,6 +10,8 @@
 #include "StageObjects/MonsterSpawner.h"
 #include "Stages/StageScript.h"
 #include "StageObjects/EventArea.h"
+#include "StageObjects/PropObject.h"
+#include "Generated/GameData_Prop.h"
 #include "Skills/EffectShape.h"
 #include "Skills/EffectParams.h"
 #include "Skills/AreaEffect.h"
@@ -115,6 +117,22 @@ namespace
                 pBuff->set_remain_time_ms(remainMs);
             });
 
+        return info;
+    }
+
+    // PropObject 정보를 PropSpawnInfo (패킷) 형식으로 채웁니다.
+    // 클라는 prop_key(종류)로 게임데이터를 조회해 프리팹 등을 얻고, state 로 초기 시각 상태를 맞춘다.
+    // 좌표계: Unity 와 동일 (X, Y, Z). Y가 높이, X-Z 가 평면.
+    GamePacket::PropSpawnInfo makePropSpawnInfo(const PropObject& prop)
+    {
+        GamePacket::PropSpawnInfo info;
+        info.set_object_id(prop.GetObjectId());
+        info.set_prop_key(prop.GetPropDataKey());
+        info.set_pos_x(prop.GetPosX());
+        info.set_pos_y(prop.GetPosY());
+        info.set_pos_z(prop.GetPosZ());
+        info.set_yaw(prop.GetYaw());
+        info.set_state(prop.GetState());
         return info;
     }
 
@@ -427,6 +445,37 @@ void Stage::OnStart()
         }
     }
 
+    // prop 객체 생성(인스턴스별). 레이아웃 배치마다 PropObject(StageObject 파생)를 만들어
+    // m_objects/m_propObjects/sector 에 등록한다(몬스터와 달리 정적이라 위치 스냅샷에는 안 들어감).
+    // 입장 유저가 AOI 스캔으로 집어가므로 생성 시점 broadcast 는 하지 않는다(동적 SpawnProp 만 broadcast).
+    if (m_pLayout)
+    {
+        for (const auto& placement : m_pLayout->GetProps())
+        {
+            const GameData_Prop* pPropData = GameDataTable_Prop::FindData(placement.type);
+            if (!pPropData)
+            {
+                LOG_WRITE(LogLevel::Error, std::format("GameData_Prop not found. stageId={} propKey(placement)={} type={}",
+                    m_stageId, placement.key, placement.type));
+                continue;
+            }
+
+            const int64 objectId = GameServer::Instance().GenerateObjectId();
+            auto spProp = std::make_shared<PropObject>();
+            if (!spProp->Initialize(objectId, pPropData, placement.key, placement.initialState, placement.range))
+            {
+                LOG_WRITE(LogLevel::Error, std::format("PropObject Initialize failed. stageId={} propKey(placement)={} type={}",
+                    m_stageId, placement.key, placement.type));
+                continue;
+            }
+            spProp->SetPos(placement.x, placement.y, placement.z);
+            spProp->SetYaw(placement.yaw);
+
+            registerObject(spProp, k_propUpdateIntervalMs, m_propObjects);
+        }
+        LOG_WRITE(LogLevel::Info, std::format("stageId={} props instantiated={}", m_stageId, m_propObjects.size()));
+    }
+
     // Stage 로직 스크립트 로드 (GameData_Stage.ScriptName1~3, 빈 슬롯 제외).
     // 파일 경로는 StageScript 가 Map/StageScript/<이름>.lua 로 해석한다.
     std::vector<std::string> scriptNames;
@@ -446,51 +495,55 @@ void Stage::OnStart()
 
 void Stage::OnUpdate(int64 deltaMs)
 {
-    // 0. Stage 단조 시계 갱신 (스킬 효과/투사체 타이밍 기준).
+    // Stage 단조 시계 갱신 (스킬 효과/투사체 타이밍 기준).
     m_stageClockMs += deltaMs;
     ++m_serverTickSeq;   // 스냅샷 스트리밍용 tick 번호 (클라 보간 시계 기준).
 
-    // 0.5 코루틴 후속작업(핀) 때문에 보류된 유저 퇴장을, 핀이 풀린 유저에 한해 처리.
+    // 코루틴 후속작업(핀) 때문에 보류된 유저 퇴장을, 핀이 풀린 유저에 한해 처리.
     processPendingLeaves();
 
-    // 1. 시스템 메시지 처리 (유저 입장/퇴장 등)
+    // 시스템 메시지 처리 (유저 입장/퇴장 등)
     processSystemMessages();
 
-    // 2. 각 유저의 클라 패킷 처리 (유저별로 queue drain)
+    // 각 유저의 클라 패킷 처리 (유저별로 queue drain)
     processUserPackets();
 
-    // 3. 캐릭터 이동 시뮬레이션 + sector 갱신
+    // 캐릭터 이동 시뮬레이션 + sector 갱신
     updateCharacters(deltaMs);
 
-    // 4. 몬스터 AI(FSM) 시뮬레이션 + sector 갱신
+    // 몬스터 AI(FSM) 시뮬레이션 + sector 갱신
     updateMonsters(deltaMs);
 
-    // 4.5 몬스터 스포너 (밀도 유지/리스폰/활성화). 데이터 구동 스폰.
+    // 몬스터 스포너 (밀도 유지/리스폰/활성화). 데이터 구동 스폰.
     if (m_pSpawner)
         m_pSpawner->Update(deltaMs);
 
-    // 4.6 Stage 스크립트 (타이머 만기 → Lua 콜백).
+    // prop 라이프사이클 (DespawnDelay 예약된 prop 의 제거 타이머). 대부분 no-op.
+    if (!m_propObjects.empty())
+        updateProps(deltaMs);
+
+    // Stage 스크립트 (타이머 만기 → Lua 콜백).
     if (m_pScript)
         m_pScript->Update(deltaMs);
 
-    // 4.7 secure 이벤트영역 폴링 (클라 미신뢰 영역만 — 서버가 권위 위치로 직접 진입/이탈 판정).
+    // secure 이벤트영역 폴링 (클라 미신뢰 영역만 — 서버가 권위 위치로 직접 진입/이탈 판정).
     if (!m_eventAreas.empty())
         pollSecureEventAreas();
 
-    // 5. 파생 클래스 로직
+    // 파생 클래스 로직
     OnStageUpdate(deltaMs);
 
-    // 6. 진행 중인 스킬 효과(AreaEffect) tick + 만료 처리
+    // 진행 중인 스킬 효과(AreaEffect) tick + 만료 처리
     updateSkillEffects(deltaMs);
 
-    // 6.4 NetClock 시각 동기 (저빈도). SnapshotNtf 와 독립적으로 클라 재생 시계를 앵커링.
+    // NetClock 시각 동기 (저빈도). SnapshotNtf 와 독립적으로 클라 재생 시계를 앵커링.
     buildAndSendTimeSync();
 
-    // 6.5 AOI 스냅샷 스트리밍 (이동 복제). 이번 tick 시뮬레이션 결과(위치)를 주변 유저에게 송신.
+    // AOI 스냅샷 스트리밍 (이동 복제). 이번 tick 시뮬레이션 결과(위치)를 주변 유저에게 송신.
     buildAndSendSnapshots();
 
 #ifdef _DEBUG
-    // 6.6 [디버그 UI] 구독 중인 유저에게 디버그 패킷 주기 push (개발용).
+    // [디버그 UI] 구독 중인 유저에게 디버그 패킷 주기 push (개발용).
     sendDebugSubscriptions();
 #endif
 }
@@ -620,6 +673,177 @@ bool Stage::DespawnMonster(int64 objectId)
 
 
     return true;
+}
+
+// ── prop 스폰/디스폰/상태/동작 ─────────────────────────────
+
+PropObject* Stage::FindProp(int64 objectId)
+{
+    auto iter = m_propObjects.find(objectId);
+    if (iter == m_propObjects.end())
+        return nullptr;
+    return static_cast<PropObject*>(iter->second.get());
+}
+
+PropObject* Stage::SpawnProp(int32 propDataKey, float posX, float posY, float posZ, float yaw,
+                             int32 placementKey, int32 initialState)
+{
+    const GameData_Prop* pPropData = GameDataTable_Prop::FindData(propDataKey);
+    if (!pPropData)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("GameData_Prop not found. stageId={} propDataKey={}", m_stageId, propDataKey));
+        return nullptr;
+    }
+
+    // 월드 경계 검증(sector 등록 가능 여부). prop 은 정적이라 NavMesh 스냅은 하지 않는다(벽/공중 배치 허용).
+    int32 sx = 0, sz = 0;
+    if (!GetSectorIndex(posX, posZ, sx, sz))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("prop spawn pos out of world bounds. stageId={} propDataKey={} pos=({},{},{})",
+            m_stageId, propDataKey, posX, posY, posZ));
+        return nullptr;
+    }
+
+    const int64 objectId = GameServer::Instance().GenerateObjectId();
+    auto spProp = std::make_shared<PropObject>();
+    if (!spProp->Initialize(objectId, pPropData, placementKey, initialState, 0.0f))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("PropObject Initialize failed. stageId={} propDataKey={} objectId={}", m_stageId, propDataKey, objectId));
+        return nullptr;
+    }
+    spProp->SetPos(posX, posY, posZ);
+    spProp->SetYaw(yaw);
+
+    registerObject(spProp, k_propUpdateIntervalMs, m_propObjects);
+
+    // 동적 스폰은 주변 AOI 유저에게 spawn 통보(레이아웃 배치는 입장 시 AOI 수집되므로 통보 불필요).
+    const std::vector<GamePacket::PropSpawnInfo> single = { makePropSpawnInfo(*spProp) };
+    ForEachUserInAoi(spProp->GetCurSectorX(), spProp->GetCurSectorZ(),
+        [&](int64 acc)
+        {
+            GameServer::Instance().GetPacketSender().SendObjectVisibilityNtf(acc, {}, {}, {}, single);
+        });
+
+    LOG_WRITE(LogLevel::Info, std::format("prop spawned. stageId={} propDataKey={} objectId={} placementKey={} pos=({},{},{})",
+        m_stageId, propDataKey, objectId, placementKey, posX, posY, posZ));
+    return spProp.get();
+}
+
+bool Stage::DespawnProp(int64 objectId)
+{
+    auto iter = m_propObjects.find(objectId);
+    if (iter == m_propObjects.end())
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("prop not found. stageId={} objectId={}", m_stageId, objectId));
+        return false;
+    }
+
+    StageObjectPtr spProp = iter->second;
+    const int32 sx = spProp->GetCurSectorX();
+    const int32 sz = spProp->GetCurSectorZ();
+
+    removeObjectFromSector(spProp.get());
+    m_propObjects.erase(iter);
+    m_objects.erase(objectId);
+
+    // 주변 AOI 유저에게 despawn 통보(despawn_ids 는 타입 무관).
+    const std::vector<int64> despawnIds = { objectId };
+    ForEachUserInAoi(sx, sz,
+        [&](int64 acc)
+        {
+            GameServer::Instance().GetPacketSender().SendObjectVisibilityNtf(acc, {}, despawnIds);
+        });
+
+    LOG_WRITE(LogLevel::Info, std::format("prop despawned. stageId={} objectId={} totalObjects={}", m_stageId, objectId, m_objects.size()));
+    return true;
+}
+
+bool Stage::SetPropState(int64 objectId, int32 state, int64 actorObjectId)
+{
+    PropObject* pProp = FindProp(objectId);
+    if (!pProp)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("SetPropState: prop not found. stageId={} objectId={}", m_stageId, objectId));
+        return false;
+    }
+    if (!pProp->SetState(state))
+        return false;   // 값 변화 없음 → broadcast 불필요.
+
+    broadcastPropState(*pProp, actorObjectId);
+    return true;
+}
+
+void Stage::broadcastPropState(const PropObject& prop, int64 actorObjectId)
+{
+    // prop 주변 AOI 유저를 수집해 PropStateNtf 를 broadcast 한다.
+    std::vector<int64> recipients;
+    recipients.reserve(8);
+    ForEachUserInAoi(prop.GetCurSectorX(), prop.GetCurSectorZ(),
+        [&](int64 acc) { recipients.push_back(acc); });
+
+    if (!recipients.empty())
+        GameServer::Instance().GetPacketSender().SendPropStateNtf(recipients, prop.GetObjectId(), prop.GetState(), actorObjectId);
+}
+
+void Stage::triggerPropBehavior(const PropObject& prop, const UserPtr& spUser, const CharacterPtr& spCharacter)
+{
+    const GameData_Prop* pData = prop.GetPropData();
+    if (!pData)
+        return;
+
+    switch (pData->Behavior)
+    {
+    case EPropBehavior::Portal:
+    {
+        // 목적지 스테이지: placement param0 override 우선, 없으면 데이터 PortalStageKey.
+        int32 targetStageKey = pData->PortalStageKey;
+        if (m_pLayout)
+        {
+            const StageLayout::Prop* pPlacement = m_pLayout->GetProp(prop.GetPlacementKey());
+            if (pPlacement && pPlacement->param0 > 0)
+                targetStageKey = pPlacement->param0;
+        }
+        if (targetStageKey <= 0)
+        {
+            LOG_WRITE(LogLevel::Warn, std::format("portal prop without target stage. stageId={} propObjectId={} placementKey={}",
+                m_stageId, prop.GetObjectId(), prop.GetPlacementKey()));
+            return;
+        }
+
+        // 이동 가드: 전환 중복/async 진행 중이면 스킵(클라 재시도).
+        if (spUser->GetStageState() != EUserStageState::InStage || spCharacter->HasPendingAsync())
+        {
+            LOG_WRITE(LogLevel::Warn, std::format("portal move skipped (busy). stageId={} accountId={}", m_stageId, spUser->GetAccountId()));
+            return;
+        }
+
+        // v1: 같은 서버 이동만 지원. executeLocalStageMove 가 성공 시 StageMoveRes(성공)까지 송신한다.
+        std::string failReason;
+        if (!executeLocalStageMove(spUser, spCharacter, targetStageKey, pData->PortalPositionType, failReason))
+        {
+            LOG_WRITE(LogLevel::Warn, std::format("portal move failed. stageId={} accountId={} targetStageKey={} reason={}",
+                m_stageId, spUser->GetAccountId(), targetStageKey, failReason));
+        }
+        break;
+    }
+    case EPropBehavior::None:
+    default:
+        break;
+    }
+}
+
+void Stage::updateProps(int64 deltaMs)
+{
+    // DespawnDelay 가 예약된 prop 만 타이머 진행. 만료된 것은 따로 모아 제거(순회 중 컨테이너 변경 방지).
+    std::vector<int64> toDespawn;
+    for (auto& [objId, spObj] : m_propObjects)
+    {
+        PropObject* pProp = static_cast<PropObject*>(spObj.get());
+        if (pProp->IsDespawnScheduled() && pProp->AdvanceDespawnTimer(deltaMs))
+            toDespawn.push_back(objId);
+    }
+    for (int64 id : toDespawn)
+        DespawnProp(id);
 }
 
 // ── sector 등록/제거/이동 헬퍼 ─────────────────────────────
@@ -857,6 +1081,8 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     spawnsForMe.reserve(16);
     std::vector<GamePacket::MonsterSpawnInfo> monsterSpawnsForMe;
     monsterSpawnsForMe.reserve(16);
+    std::vector<GamePacket::PropSpawnInfo> propSpawnsForMe;
+    propSpawnsForMe.reserve(16);
 
     // 다른 캐릭터에게 전송할 용도의 "내 spawn 1개".
     std::vector<GamePacket::CharacterSpawnInfo> singleSpawn = { myInfo };
@@ -882,6 +1108,12 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
             {
                 monsterSpawnsForMe.push_back(makeMonsterSpawnInfo(*static_cast<Monster*>(pMonsterObj)));
             }
+
+            // 주변 prop 도 나에게 spawn 통보(현재 상태 포함). (prop 은 관찰자가 아니므로 받기만 한다.)
+            for (const auto& [propObjId, pPropObj] : pSector->GetProps())
+            {
+                propSpawnsForMe.push_back(makePropSpawnInfo(*static_cast<PropObject*>(pPropObj)));
+            }
         });
 
     // ── StageLoadCompleteRes 를 먼저 보낸다 (StatUpdate/HpMp 는 PacketSender 가 그 뒤에 송신) ──
@@ -893,7 +1125,7 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
         static_cast<float>(GetWorldMinX()), static_cast<float>(GetWorldMinZ()),
         static_cast<float>(GetWorldMaxX()), static_cast<float>(GetWorldMaxZ()));
 
-    server.GetPacketSender().SendObjectVisibilityNtf(accountId, spawnsForMe, {}, monsterSpawnsForMe);
+    server.GetPacketSender().SendObjectVisibilityNtf(accountId, spawnsForMe, {}, monsterSpawnsForMe, propSpawnsForMe);
 
 
     // 스폰 완료 후 서브클래스 훅 (기본 no-op). 캐릭터가 Stage에 등록되고 통보까지 끝난 뒤 호출.
@@ -1201,41 +1433,54 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
         return;
     }
 
+    // 같은 서버 내 이동 실행(검증 + 퇴장 + target 입장 + 성공 Res). 포탈 prop 과 공용 경로.
+    std::string failReason;
+    if (!executeLocalStageMove(spUser, spCharacter, req.target_stage_data_key(), positionType, failReason))
+        sendFail(failReason);
+}
+
+bool Stage::executeLocalStageMove(const UserPtr& spUser, const CharacterPtr& spCharacter,
+                                  int32 targetStageDataKey, EStagePositionType positionType,
+                                  std::string& outFailReason)
+{
+    GameServer& server = GameServer::Instance();
+    const int64 accountId = spUser->GetAccountId();
+
     // 대상 Stage 해석. 인스턴스 선택 정책 v1: 정적 스테이지는 dataKey당 정확히 1개.
     // (채널/인스턴스 던전 도입 시 이 지점에 선택 정책이 들어간다.)
-    std::vector<StagePtr> targets = server.GetStageManager().FindStagesByDataKey(req.target_stage_data_key());
+    std::vector<StagePtr> targets = server.GetStageManager().FindStagesByDataKey(targetStageDataKey);
     if (targets.empty())
     {
-        sendFail("target stage not found");
-        return;
+        outFailReason = "target stage not found";
+        return false;
     }
     if (targets.size() > 1)
     {
         LOG_WRITE(LogLevel::Error, std::format("multiple instances for static stage. dataKey={} count={}",
-            req.target_stage_data_key(), targets.size()));
-        sendFail("ambiguous target stage");
-        return;
+            targetStageDataKey, targets.size()));
+        outFailReason = "ambiguous target stage";
+        return false;
     }
 
     StagePtr spTarget = targets[0];
     if (spTarget.get() == this)
     {
-        sendFail("already in target stage");
-        return;
+        outFailReason = "already in target stage";
+        return false;
     }
 
     const EStageType targetType = spTarget->GetStageType();
     if (targetType != EStageType::Town && targetType != EStageType::Field)
     {
-        sendFail("target stage type not movable");
-        return;
+        outFailReason = "target stage type not movable";
+        return false;
     }
 
     // 도착 위치 데이터 존재 검증 (스폰 시점의 lookup 실패를 미리 차단).
     if (!GameDataTable_StageStartPosition::FindByStageAndType(spTarget->GetStageDataKey(), positionType))
     {
-        sendFail("no start position data");
-        return;
+        outFailReason = "no start position data";
+        return false;
     }
 
     // ── 이동 확정 ─────────────────────────────────────────
@@ -1251,10 +1496,11 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
     spTarget->EnqueueMessage(StageMsg_UserEnter{spUser});
 
     // 4) 성공 응답 → 클라는 로딩 시작, 완료 시 StageLoadCompleteReq.
-    server.GetPacketSender().SendStageMoveRes(accountId, EResultCode::Success, "", req.target_stage_data_key());
+    server.GetPacketSender().SendStageMoveRes(accountId, EResultCode::Success, "", targetStageDataKey);
 
     LOG_WRITE(LogLevel::Info, std::format("moving. accountId={} from stageId={} to stageId={} (dataKey={}) positionType={}",
-        accountId, m_stageId, spTarget->GetStageId(), req.target_stage_data_key(), static_cast<int32>(positionType)));
+        accountId, m_stageId, spTarget->GetStageId(), targetStageDataKey, static_cast<int32>(positionType)));
+    return true;
 }
 
 void Stage::handleStageLoadCompleteReq(const UserPtr& spUser, const netlib::PacketPtr& /*spPacket*/)
@@ -1474,15 +1720,15 @@ void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketP
     if (!deserializeUserPacket(spUser, spPacket, req))
         return;
 
-    const int64 accountId  = spUser->GetAccountId();
-    const int32 propKey = req.prop_key();
+    const int64 accountId = spUser->GetAccountId();
+    const int64 objectId  = req.object_id();
 
-    // 1) 유효 prop 인지(레이아웃에 정의).
-    const StageLayout::Prop* pProp = m_pLayout ? m_pLayout->GetProp(propKey) : nullptr;
+    // 1) 유효 prop 엔티티인지(이 Stage 에 존재).
+    PropObject* pProp = FindProp(objectId);
     if (!pProp)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq unknown prop. stageId={} accountId={} propKey={}",
-            m_stageId, accountId, propKey));
+        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq unknown prop. stageId={} accountId={} objectId={}",
+            m_stageId, accountId, objectId));
         return;
     }
 
@@ -1490,7 +1736,7 @@ void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketP
     if (!spCharacter || spCharacter->GetStage() != this)
         return;
 
-    // 2) 검증 (EventArea 와 동일 결) — 보고 위치가 마커 상호작용 범위 안인지 + 권위 위치와의 괴리 제한.
+    // 2) 검증 (EventArea 와 동일 결) — 보고 위치가 prop 상호작용 범위 안인지 + 권위 위치와의 괴리 제한.
     const float rx = req.pos_x();
     const float rz = req.pos_z();
 
@@ -1499,13 +1745,13 @@ void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketP
     constexpr float kAntiCheatMargin = 1.0f;
 
     // (a) 보고 위치가 prop 상호작용 range 안인가(평면).
-    const float mdx = rx - pProp->x;
-    const float mdz = rz - pProp->z;
-    const float reach = pProp->range + kBoundaryTol;
+    const float mdx = rx - pProp->GetPosX();
+    const float mdz = rz - pProp->GetPosZ();
+    const float reach = pProp->GetInteractRange() + kBoundaryTol;
     if (mdx * mdx + mdz * mdz > reach * reach)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq out of range. stageId={} accountId={} propKey={}",
-            m_stageId, accountId, propKey));
+        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq out of range. stageId={} accountId={} objectId={}",
+            m_stageId, accountId, objectId));
         return;
     }
 
@@ -1516,14 +1762,31 @@ void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketP
     const float gdz = rz - spCharacter->GetPosZ();
     if (gdx * gdx + gdz * gdz > maxGap * maxGap)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq reported pos too far from authoritative. stageId={} accountId={} propKey={}",
-            m_stageId, accountId, propKey));
+        LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq reported pos too far from authoritative. stageId={} accountId={} objectId={}",
+            m_stageId, accountId, objectId));
         return;
     }
 
-    // 3) 스크립트 트리거 (fire-and-forget — prop 상태/Ntf 없음. 연출은 스크립트가 Notice 등으로).
+    // 3) 상태머신 전이(데이터 기반, 서버 권위). 게이팅(Interactable/MaxInteract/쿨다운) 미통과면 무시.
+    const PropObject::InteractResult result = pProp->TryInteract(m_stageClockMs);
+    if (!result.accepted)
+        return;   // 한도초과/쿨다운/비상호작용 — 조용히 무시(클라가 재시도 가능).
+
+    const int64 actorObjectId = spCharacter->GetObjectId();
+
+    // 4) 상태가 바뀌었으면 주변 AOI 에 PropStateNtf broadcast.
+    if (result.stateChanged)
+        broadcastPropState(*pProp, actorObjectId);
+
+    // 5) 선언형 동작(Portal 등) 발동. (Portal 은 Stage 이동을 일으키므로 이후 스크립트/디스폰보다 먼저.)
+    if (pProp->GetBehavior() != EPropBehavior::None)
+        triggerPropBehavior(*pProp, spUser, spCharacter);
+
+    // 6) 효과(게임플레이) 스크립트 훅. 배치키(placementKey)로 분기, 전이 후 상태(newState) 전달.
     if (m_pScript)
-        m_pScript->CallOnObjectInteract(propKey, spCharacter->GetObjectId());
+        m_pScript->CallOnObjectInteract(pProp->GetObjectId(), pProp->GetPlacementKey(), actorObjectId, result.newState);
+
+    // 7) DespawnDelay 가 예약됐으면(OneShot 등) updateProps 가 타이머 만료 시 제거한다.
 }
 
 void Stage::processUserPackets()
@@ -1792,6 +2055,8 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
     newlyVisibleSpawnsForMe.reserve(8);
     std::vector<GamePacket::MonsterSpawnInfo> newlyVisibleMonstersForMe;
     newlyVisibleMonstersForMe.reserve(8);
+    std::vector<GamePacket::PropSpawnInfo> newlyVisiblePropsForMe;
+    newlyVisiblePropsForMe.reserve(8);
     std::vector<GamePacket::CharacterSpawnInfo> singleSpawnOfMe = { myInfo };
 
     ForEachAdjacentSector(newSectorX, newSectorZ, k_aoiRange,
@@ -1820,11 +2085,17 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
             {
                 newlyVisibleMonstersForMe.push_back(makeMonsterSpawnInfo(*static_cast<Monster*>(pMonsterObj)));
             }
+
+            // 새로 보이는 sector의 prop 들도 나에게 spawn(현재 상태 포함). (prop 은 받기만 한다.)
+            for (const auto& [propObjId, pPropObj] : pSector->GetProps())
+            {
+                newlyVisiblePropsForMe.push_back(makePropSpawnInfo(*static_cast<PropObject*>(pPropObj)));
+            }
         });
 
-    if (!newlyVisibleSpawnsForMe.empty() || !newlyVisibleMonstersForMe.empty())
+    if (!newlyVisibleSpawnsForMe.empty() || !newlyVisibleMonstersForMe.empty() || !newlyVisiblePropsForMe.empty())
     {
-        server.GetPacketSender().SendObjectVisibilityNtf(myAccountId, newlyVisibleSpawnsForMe, {}, newlyVisibleMonstersForMe);
+        server.GetPacketSender().SendObjectVisibilityNtf(myAccountId, newlyVisibleSpawnsForMe, {}, newlyVisibleMonstersForMe, newlyVisiblePropsForMe);
     }
 
     // ── oldAOI 순회 ──
@@ -1858,6 +2129,12 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
             for (const auto& [monsterObjId, pMonsterObj] : pSector->GetMonsters())
             {
                 despawnIdsForMe.push_back(monsterObjId);
+            }
+
+            // 더 이상 안 보이는 sector의 prop 들도 나에게 despawn (despawn_ids 는 타입 무관).
+            for (const auto& [propObjId, pPropObj] : pSector->GetProps())
+            {
+                despawnIdsForMe.push_back(propObjId);
             }
         });
 

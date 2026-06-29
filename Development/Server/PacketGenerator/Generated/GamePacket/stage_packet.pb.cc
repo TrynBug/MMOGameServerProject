@@ -169,7 +169,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 inline constexpr ObjectInteractReq::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        prop_key_{0},
+        object_id_{::int64_t{0}},
         pos_x_{0},
         pos_y_{0},
         pos_z_{0} {}
@@ -335,7 +335,7 @@ const ::uint32_t
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectInteractReq, _impl_._has_bits_),
         7, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectInteractReq, _impl_.prop_key_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectInteractReq, _impl_.object_id_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectInteractReq, _impl_.pos_x_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectInteractReq, _impl_.pos_y_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectInteractReq, _impl_.pos_z_),
@@ -386,15 +386,15 @@ const char descriptor_table_protodef_GamePacket_2fstage_5fpacket_2eproto[] ABSL_
     "nt_key\030\001 \001(\005\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y\030\003 \001"
     "(\002\022\r\n\005pos_z\030\004 \001(\002\"R\n\020EventAreaExitReq\022\021\n"
     "\tevent_key\030\001 \001(\005\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y"
-    "\030\003 \001(\002\022\r\n\005pos_z\030\004 \001(\002\"R\n\021ObjectInteractR"
-    "eq\022\020\n\010prop_key\030\001 \001(\005\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005p"
-    "os_y\030\003 \001(\002\022\r\n\005pos_z\030\004 \001(\002b\006proto3"
+    "\030\003 \001(\002\022\r\n\005pos_z\030\004 \001(\002\"S\n\021ObjectInteractR"
+    "eq\022\021\n\tobject_id\030\001 \001(\003\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005"
+    "pos_y\030\003 \001(\002\022\r\n\005pos_z\030\004 \001(\002b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fstage_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fstage_5fpacket_2eproto = {
     false,
     false,
-    833,
+    834,
     descriptor_table_protodef_GamePacket_2fstage_5fpacket_2eproto,
     "GamePacket/stage_packet.proto",
     &descriptor_table_GamePacket_2fstage_5fpacket_2eproto_once,
@@ -2834,10 +2834,10 @@ PROTOBUF_NDEBUG_INLINE ObjectInteractReq::Impl_::Impl_(
 inline void ObjectInteractReq::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, prop_key_),
+               offsetof(Impl_, object_id_),
            0,
            offsetof(Impl_, pos_z_) -
-               offsetof(Impl_, prop_key_) +
+               offsetof(Impl_, object_id_) +
                sizeof(Impl_::pos_z_));
 }
 ObjectInteractReq::~ObjectInteractReq() {
@@ -2920,10 +2920,10 @@ ObjectInteractReq::_table_ = {
     {::_pbi::TcParser::FastF32S1,
      {37, 3, 0,
       PROTOBUF_FIELD_OFFSET(ObjectInteractReq, _impl_.pos_z_)}},
-    // int32 prop_key = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ObjectInteractReq, _impl_.prop_key_), 0>(),
+    // int64 object_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(ObjectInteractReq, _impl_.object_id_), 0>(),
      {8, 0, 0,
-      PROTOBUF_FIELD_OFFSET(ObjectInteractReq, _impl_.prop_key_)}},
+      PROTOBUF_FIELD_OFFSET(ObjectInteractReq, _impl_.object_id_)}},
     // float pos_x = 2;
     {::_pbi::TcParser::FastF32S1,
      {21, 1, 0,
@@ -2935,8 +2935,8 @@ ObjectInteractReq::_table_ = {
   }}, {{
     65535, 65535
   }}, {{
-    // int32 prop_key = 1;
-    {PROTOBUF_FIELD_OFFSET(ObjectInteractReq, _impl_.prop_key_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int64 object_id = 1;
+    {PROTOBUF_FIELD_OFFSET(ObjectInteractReq, _impl_.object_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // float pos_x = 2;
     {PROTOBUF_FIELD_OFFSET(ObjectInteractReq, _impl_.pos_x_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
     // float pos_y = 3;
@@ -2957,9 +2957,9 @@ PROTOBUF_NOINLINE void ObjectInteractReq::Clear() {
 
   cached_has_bits = _impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
-    ::memset(&_impl_.prop_key_, 0, static_cast<::size_t>(
+    ::memset(&_impl_.object_id_, 0, static_cast<::size_t>(
         reinterpret_cast<char*>(&_impl_.pos_z_) -
-        reinterpret_cast<char*>(&_impl_.prop_key_)) + sizeof(_impl_.pos_z_));
+        reinterpret_cast<char*>(&_impl_.object_id_)) + sizeof(_impl_.pos_z_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -2984,12 +2984,12 @@ PROTOBUF_NOINLINE void ObjectInteractReq::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int32 prop_key = 1;
+  // int64 object_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (this_._internal_prop_key() != 0) {
+    if (this_._internal_object_id() != 0) {
       target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<1>(
-              stream, this_._internal_prop_key(), target);
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
+              stream, this_._internal_object_id(), target);
     }
   }
 
@@ -3046,11 +3046,11 @@ PROTOBUF_NOINLINE void ObjectInteractReq::Clear() {
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
-    // int32 prop_key = 1;
+    // int64 object_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (this_._internal_prop_key() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-            this_._internal_prop_key());
+      if (this_._internal_object_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_object_id());
       }
     }
     // float pos_x = 2;
@@ -3092,8 +3092,8 @@ void ObjectInteractReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
   cached_has_bits = from._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (from._internal_prop_key() != 0) {
-        _this->_impl_.prop_key_ = from._impl_.prop_key_;
+      if (from._internal_object_id() != 0) {
+        _this->_impl_.object_id_ = from._impl_.object_id_;
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
@@ -3132,9 +3132,9 @@ void ObjectInteractReq::InternalSwap(ObjectInteractReq* PROTOBUF_RESTRICT PROTOB
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(ObjectInteractReq, _impl_.pos_z_)
       + sizeof(ObjectInteractReq::_impl_.pos_z_)
-      - PROTOBUF_FIELD_OFFSET(ObjectInteractReq, _impl_.prop_key_)>(
-          reinterpret_cast<char*>(&_impl_.prop_key_),
-          reinterpret_cast<char*>(&other->_impl_.prop_key_));
+      - PROTOBUF_FIELD_OFFSET(ObjectInteractReq, _impl_.object_id_)>(
+          reinterpret_cast<char*>(&_impl_.object_id_),
+          reinterpret_cast<char*>(&other->_impl_.object_id_));
 }
 
 ::google::protobuf::Metadata ObjectInteractReq::GetMetadata() const {

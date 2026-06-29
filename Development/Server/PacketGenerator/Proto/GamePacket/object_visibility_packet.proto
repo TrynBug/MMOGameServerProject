@@ -37,8 +37,8 @@ message CharacterSpawnInfo {
     double max_mp         = 9;   // 최대 MP(=MpTotal)
     float  pos_x          = 10;
     float  pos_y          = 11;  // 높이
-    float  yaw            = 12;  // Y축 회전, degree 단위
-    float  pos_z          = 13;  // 평면 깊이축
+    float  pos_z          = 12;  // 평면 깊이축
+    float  yaw            = 13;  // Y축 회전, degree 단위
     repeated BuffSnapshotInfo buffs = 14;  // 현재 보유 버프 (UI 뱃지용)
 }
 
@@ -50,12 +50,26 @@ message MonsterSpawnInfo {
     int32 monster_key = 2;   // GameData_Monster 의 Key
     float pos_x       = 3;
     float pos_y       = 4;   // 높이
-    float yaw         = 5;   // Y축 회전, degree 단위
-    float pos_z       = 6;   // 평면 깊이축
+    float pos_z       = 5;   // 평면 깊이축
+    float yaw         = 6;   // Y축 회전, degree 단위
     repeated BuffSnapshotInfo buffs = 7;   // 현재 보유 버프 (UI 뱃지용)
     bool is_dead = 8;                       // 사망(시체) 상태. corpse 유지 중 진입한 관전자가 사망 포즈로 표시한다.
     double cur_hp = 9;                      // 현재 HP. 살아있으면 max 와 같고, AOI 중간 진입/corpse 면 max 보다 작다(corpse=0).
     double max_hp = 10;                     // 최대 HP(=HpTotal). 클라가 HP바 계산의 분모로 쓴다.
+}
+
+// prop spawn 정보. 클라는 prop_key(종류)로 게임데이터를 조회해 프리팹 등을 얻고,
+// state 로 초기 시각 상태를 맞춘다. prop 은 정적이라 위치 SnapshotNtf 에는 포함되지 않으며,
+// 이후 상태 변경은 PropStateNtf 로만 전달된다.
+// 좌표계: Unity 와 동일. Y가 높이, X-Z 가 평면.
+message PropSpawnInfo {
+    int64 object_id = 1;
+    int32 prop_key  = 2;   // GameData_Prop 의 Key (= prop 종류/type)
+    float pos_x     = 3;
+    float pos_y     = 4;   // 높이
+    float pos_z     = 5;   // 평면 깊이축
+    float yaw       = 6;   // Y축 회전, degree 단위
+    int32 state     = 7;   // 현재 상태값(진입 시점 시각 상태)
 }
 
 // 오브젝트 가시성 변경 알림 (서버 -> 클라)
@@ -64,11 +78,20 @@ message MonsterSpawnInfo {
 message ObjectVisibilityNtf {
     repeated CharacterSpawnInfo character_spawns = 1;
     repeated MonsterSpawnInfo   monster_spawns   = 2;
+    repeated PropSpawnInfo      prop_spawns      = 3;
     // 향후 추가 예정:
-    // repeated PropSpawnInfo     prop_spawns     = 3;
     // repeated DropSpawnInfo     drop_spawns     = 4;
 
     repeated int64 despawn_ids = 10;
+}
+
+// prop 상태 변경 알림 (서버 -> 클라)
+// 상호작용/스크립트로 prop 상태가 전이된 시점에 주변 AOI 유저들에게 broadcast 한다.
+// 클라는 object_id 로 prop 을 찾아 state 에 맞는 시각 상태(문 열림/레버 On 등)로 전환한다.
+message PropStateNtf {
+    int64 object_id       = 1;   // 상태가 바뀐 prop
+    int32 state           = 2;   // 전이 후 상태값
+    int64 actor_object_id = 3;   // 상호작용을 유발한 액터(없으면 0, 예: 스크립트 SetPropState)
 }
 
 // 오브젝트 사망 알림 (서버 -> 클라)

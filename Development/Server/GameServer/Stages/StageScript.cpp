@@ -6,6 +6,7 @@
 #include "GameServer.h"
 #include "StageObjects/Monster.h"
 #include "StageObjects/MonsterSpawner.h"
+#include "StageObjects/PropObject.h"
 #include "Generated/GameData_Monster.h"
 
 #include <sol/sol.hpp>
@@ -279,6 +280,34 @@ bool StageScript::Load(Stage& stage, const std::vector<std::string>& scriptNames
         t["type"] = pr->type;
         t["range"] = pr->range;
         return sol::make_object(lua, t);
+    });
+
+    // prop 상태 조회. objectId 의 현재 상태값(없으면 -1).
+    m_pImpl->lua.set_function("GetPropState", [stagePtr](int64 objectId) -> int
+    {
+        PropObject* p = stagePtr->FindProp(objectId);
+        return p ? p->GetState() : -1;
+    });
+
+    // prop 상태 직접 설정(게이팅 없이). 값이 바뀌면 주변 AOI 에 PropStateNtf broadcast 후 true.
+    m_pImpl->lua.set_function("SetPropState", [stagePtr](int64 objectId, int32 state) -> bool
+    {
+        return stagePtr->SetPropState(objectId, state, 0);
+    });
+
+    // prop 동적 스폰: (propDataKey, x, y, z[, yaw, placementKey, initialState]) → objectId(실패 0).
+    m_pImpl->lua.set_function("SpawnProp", [stagePtr](int32 propDataKey, float x, float y, float z,
+                                                      sol::optional<float> yaw, sol::optional<int> placementKey, sol::optional<int> initialState) -> int64
+    {
+        PropObject* p = stagePtr->SpawnProp(propDataKey, x, y, z,
+            yaw.value_or(0.f), placementKey.value_or(0), initialState.value_or(-1));
+        return p ? p->GetObjectId() : 0;
+    });
+
+    // prop 디스폰: objectId 제거 + AOI despawn 통보. 성공 시 true.
+    m_pImpl->lua.set_function("DespawnProp", [stagePtr](int64 objectId) -> bool
+    {
+        return stagePtr->DespawnProp(objectId);
     });
 
     // 스포너 on/off (Manual 존 구동 등). MonsterSpawner 가 밀도/리스폰/팩 처리.
@@ -576,7 +605,7 @@ void StageScript::CallOnExitEventArea(int32 eventKey, int64 objectId, float x, f
     }
 }
 
-void StageScript::CallOnObjectInteract(int32 propKey, int64 objectId)
+void StageScript::CallOnObjectInteract(int64 propObjectId, int32 placementKey, int64 actorObjectId, int32 newState)
 {
     for (auto& env : m_pImpl->scripts)
     {
@@ -585,7 +614,7 @@ void StageScript::CallOnObjectInteract(int32 propKey, int64 objectId)
             continue;
 
         armGuard(m_pImpl->lua);
-        sol::protected_function_result r = fn(propKey, objectId);
+        sol::protected_function_result r = fn(propObjectId, placementKey, actorObjectId, newState);
         if (!r.valid())
         {
             sol::error e = r;

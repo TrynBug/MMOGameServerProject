@@ -125,6 +125,7 @@
     <ClInclude Include="StageObjects\EventArea.h" />
     <ClInclude Include="StageObjects\Monster.h" />
     <ClInclude Include="StageObjects\MonsterSpawner.h" />
+    <ClInclude Include="StageObjects\PropObject.h" />
     <ClInclude Include="StageObjects\StageObject.h" />
     <ClInclude Include="StageObjects\WaypointMover.h" />
     <ClInclude Include="Stages\Field.h" />
@@ -164,6 +165,7 @@
     <ClCompile Include="StageObjects\EventArea.cpp" />
     <ClCompile Include="StageObjects\Monster.cpp" />
     <ClCompile Include="StageObjects\MonsterSpawner.cpp" />
+    <ClCompile Include="StageObjects\PropObject.cpp" />
     <ClCompile Include="StageObjects\StageObject.cpp" />
     <ClCompile Include="StageObjects\WaypointMover.cpp" />
     <ClCompile Include="Stages\Field.cpp" />

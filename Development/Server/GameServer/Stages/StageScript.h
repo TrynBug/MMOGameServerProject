@@ -48,8 +48,10 @@ public:
     void CallOnEnterEventArea(int32 eventKey, int64 objectId, float x, float y, float z);
     void CallOnExitEventArea(int32 eventKey, int64 objectId, float x, float y, float z);
 
-    // 오브젝트(prop) 상호작용 — Stage 가 근접+키 보고를 위치 검증한 뒤 호출. Lua: OnObjectInteract(propKey, objectId).
-    void CallOnObjectInteract(int32 propKey, int64 objectId);
+    // 오브젝트(prop) 상호작용 — Stage 가 위치 검증 + 상태전이 후 호출(효과/게임플레이용).
+    // Lua: OnObjectInteract(propObjectId, placementKey, actorObjectId, newState).
+    //   placementKey(배치 인스턴스 키)로 분기하고, propObjectId 로 prop 을 타게팅(GetPropState/SetPropState)한다.
+    void CallOnObjectInteract(int64 propObjectId, int32 placementKey, int64 actorObjectId, int32 newState);
 
     // 몬스터 사망 시 Stage 가 호출. (watch 등록분만 Lua 진입 — 대량몹 부하 방지.)
     //   · monsterKey 가 WatchMonsterDeath 등록 → OnMonsterDead 멀티캐스트

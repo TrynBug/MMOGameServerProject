@@ -146,13 +146,14 @@ namespace Client.EditorTools
             }
             sb.Append(waypoints.Length > 0 ? "\n  ],\n" : "],\n");
 
-            // props (상호작용 오브젝트 — 문/레버/NPC)
+            // props (상호작용 오브젝트 — 문/레버/스위치/포탈). 서버가 배치마다 PropObject 엔티티로 인스턴스화.
             sb.Append("  \"props\": [");
             for (int i = 0; i < props.Length; ++i)
             {
                 PropMarker p = props[i];
                 sb.Append(i == 0 ? "\n" : ",\n");
-                sb.Append($"    {{ \"key\": {p.Key}, \"type\": {p.Type}, \"pos\": {Vec3(p.transform.position)}, \"range\": {F(p.InteractRange)} }}");
+                sb.Append($"    {{ \"key\": {p.Key}, \"type\": {p.Type}, \"pos\": {Vec3(p.transform.position)}, \"yaw\": {F(p.transform.eulerAngles.y)}, ");
+                sb.Append($"\"range\": {F(p.InteractRange)}, \"initialState\": {p.InitialState}, \"param0\": {p.Param0}, \"param1\": {p.Param1} }}");
             }
             sb.Append(props.Length > 0 ? "\n  ]\n" : "]\n");
 

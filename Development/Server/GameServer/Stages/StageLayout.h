@@ -60,16 +60,21 @@ public:
         bool  secure = false; // true = 클라 미신뢰. 서버가 매 tick 권위 위치로 직접 폴링.
     };
 
-    // 상호작용 오브젝트(문/레버/NPC 등) 배치 데이터. 클라가 prop 근처에서 상호작용 시 서버가
-    // 권위 위치 ↔ 이 위치의 거리(range 내)를 검증한 뒤 OnObjectInteract 발동(Stage스크립트.md §6·§7.3).
+    // 상호작용 오브젝트(문/레버/스위치/포탈 등) 배치 인스턴스 데이터.
+    // Stage 가 OnStart 에서 이 배치마다 PropObject(StageObject 파생)를 인스턴스화한다.
+    // 상태머신/게이팅/선언형동작은 GameData_Prop(type) 이 정의하고, 여기는 배치별 값만 담는다.
     struct Prop
     {
-        int32 key   = 0;
-        int32 type  = 0;     // 용도 구분(0=기본/문/레버/NPC… 스크립트가 해석). v1은 참고값.
+        int32 key   = 0;     // 배치 인스턴스 키(작성자 지정). 스크립트 OnObjectInteract 분기용 안정 식별자.
+        int32 type  = 0;     // GameData_Prop.Key (= prop 종류). 상태머신/사거리/동작의 출처.
         float x     = 0.f;
         float y     = 0.f;
         float z     = 0.f;
-        float range = 2.f;   // 상호작용 허용 반경(m, 평면). 서버 검증 기준.
+        float yaw   = 0.f;   // Y축 회전(degree). 배치 방향.
+        float range = 0.f;   // 상호작용 허용 반경(m, 평면) override. <=0 이면 GameData_Prop.InteractRange 사용.
+        int32 initialState = -1;  // 시작상태 override. <0 이면 GameData_Prop.InitialState 사용.
+        int32 param0 = 0;    // 배치별 동작 파라미터(예: 포탈 목적지 스테이지 override). 0 = 미사용.
+        int32 param1 = 0;    // 배치별 동작 파라미터(예비).
     };
 
     // stageLayoutFileName 의 레이아웃 파일(<stageLayoutFileName>.json)을 로드한다.
@@ -79,6 +84,7 @@ public:
 
     const std::vector<SpawnerPlacement>& GetSpawners()   const { return m_spawners; }
     const std::vector<EventArea>&        GetEventAreas() const { return m_eventAreas; }
+    const std::vector<Prop>&             GetProps()      const { return m_props; }
 
     // Key 로 조회. 없으면 nullptr.
     const SpawnPoint* GetSpawnPoint(int32 key) const;

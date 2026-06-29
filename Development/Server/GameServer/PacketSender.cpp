@@ -131,7 +131,8 @@ void PacketSender::SendStageMoveRes(int64 accountId, EResultCode resultCode, con
 void PacketSender::SendObjectVisibilityNtf(int64 accountId,
                                            const std::vector<GamePacket::CharacterSpawnInfo>& characterSpawns,
                                            const std::vector<int64>& despawnIds,
-                                           const std::vector<GamePacket::MonsterSpawnInfo>& monsterSpawns)
+                                           const std::vector<GamePacket::MonsterSpawnInfo>& monsterSpawns,
+                                           const std::vector<GamePacket::PropSpawnInfo>& propSpawns)
 {
     GamePacket::ObjectVisibilityNtf ntf;
     for (const auto& spawn : characterSpawns)
@@ -144,6 +145,11 @@ void PacketSender::SendObjectVisibilityNtf(int64 accountId,
         *ntf.add_monster_spawns() = spawn;
     }
 
+    for (const auto& spawn : propSpawns)
+    {
+        *ntf.add_prop_spawns() = spawn;
+    }
+
     for (int64 id : despawnIds)
     {
         ntf.add_despawn_ids(id);
@@ -151,8 +157,21 @@ void PacketSender::SendObjectVisibilityNtf(int64 accountId,
 
     SendToUser(accountId, Common::GAME_PACKET_ID_OBJECT_VISIBILITY_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("ObjectVisibilityNtf sent. accountId={} characterSpawns={} monsterSpawns={} despawns={}",
-        accountId, characterSpawns.size(), monsterSpawns.size(), despawnIds.size()));
+    LOG_WRITE(LogLevel::Info, std::format("ObjectVisibilityNtf sent. accountId={} characterSpawns={} monsterSpawns={} propSpawns={} despawns={}",
+        accountId, characterSpawns.size(), monsterSpawns.size(), propSpawns.size(), despawnIds.size()));
+}
+
+void PacketSender::SendPropStateNtf(std::span<const int64> accountIds, int64 objectId, int32 state, int64 actorObjectId)
+{
+    GamePacket::PropStateNtf ntf;
+    ntf.set_object_id(objectId);
+    ntf.set_state(state);
+    ntf.set_actor_object_id(actorObjectId);
+
+    SendToUsers(accountIds, Common::GAME_PACKET_ID_PROP_STATE_NTF, ntf);
+
+    LOG_WRITE(LogLevel::Info, std::format("PropStateNtf sent. recipients={} objectId={} state={} actorObjectId={}",
+        accountIds.size(), objectId, state, actorObjectId));
 }
 
 void PacketSender::SendMovePosCorrectNtf(int64 accountId, float posX, float posY, float posZ, float yaw)

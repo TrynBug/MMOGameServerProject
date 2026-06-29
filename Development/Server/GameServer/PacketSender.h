@@ -79,7 +79,12 @@ public:
     void SendObjectVisibilityNtf(int64 accountId,
                                  const std::vector<GamePacket::CharacterSpawnInfo>& characterSpawns,
                                  const std::vector<int64>& despawnIds,
-                                 const std::vector<GamePacket::MonsterSpawnInfo>& monsterSpawns = {});
+                                 const std::vector<GamePacket::MonsterSpawnInfo>& monsterSpawns = {},
+                                 const std::vector<GamePacket::PropSpawnInfo>& propSpawns = {});
+
+    // prop 상태 변경 알림 전송 (PropStateNtf). Stage 가 상태전이 시 prop 주변 AOI 유저들에게 broadcast.
+    // actorObjectId: 상호작용을 유발한 액터(없으면 0, 예: 스크립트 SetPropState).
+    void SendPropStateNtf(std::span<const int64> accountIds, int64 objectId, int32 state, int64 actorObjectId);
 
     // 위치 보정 알림 전송 (MovePosCorrectNtf). 서버가 클라/서버 위치 오차가 크다고 판단했을 때 unicast.
     void SendMovePosCorrectNtf(int64 accountId, float posX, float posY, float posZ, float yaw);

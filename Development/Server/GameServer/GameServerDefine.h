@@ -57,6 +57,7 @@ constexpr int32 k_aoiRange = 1;
 // 중요 오브젝트(캐릭터)는 매 tick, 그 외는 종류에 맞게 조정한다.
 constexpr int64 k_characterUpdateIntervalMs = 50;    // 캐릭터: 매 tick (중요)
 constexpr int64 k_monsterUpdateIntervalMs   = 500;   // 몬스터 idle 기본 주기(비관여, 비용 절감). 타겟 관여 시 Monster::SetEngagedTick 으로 engaged(데이터, 예 100ms)로 승격. 적응형 LOD.
+constexpr int64 k_propUpdateIntervalMs      = 500;   // prop: 정적이라 거의 Update 불필요. DespawnDelay 예약된 prop 의 제거타이머만 이 주기로 진행.
 
 // ── 스냅샷 가변 송신율 ────────────────────────────────────────────
 // 위치/회전이 바뀐 오브젝트는 매 tick(20Hz), 유휴 오브젝트는 이 주기로만 스냅샷에 포함한다.
