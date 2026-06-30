@@ -18,21 +18,49 @@ namespace Client.Game
     // 그 시점에 MonoBehaviour 매니저로 승격할 수 있음.
     //
     // prefab 경로:
-    //   임시로 "Prefabs/Characters/Mage" 한 종류만 사용.
-    //   직업별 prefab 도입 시 enum/string 으로 분기.
+    //   직업(EJob) + 외형 프리셋 인덱스로 "Prefabs/Characters/{Job}_{preset}" 분기.
+    //   예) Mage_0, Mage_1, Warrior_0, Warrior_1.
     public static class CharacterFactory
     {
-        // Resources/ 하위 경로 (확장자 없음).
-        private const string k_playerPrefabPath = "Prefabs/Characters/Mage";
+        // 폴백 prefab (잘못된 job/preset 또는 로드 실패 시).
+        private const string k_fallbackPrefabPath = "Prefabs/Characters/Mage_0";
 
-        public static PlayerCharacter Create(long objectId, string name, bool isLocalPlayer, Vector3 pos, float dirY)
+        // 직업당 프리셋 개수 (Stage 1 에서 직업당 2종 제작).
+        private const int k_presetCount = 2;
+
+        // (jobId, presetId) → Resources prefab 경로. job/preset 매핑은 여기 한 곳에 둔다.
+        // (CharacterPreviewRig 등에서도 재사용)
+        public static string ResolvePrefabPath(int jobId, int presetId)
+        {
+            // EJob: Mage=1, Warrior=2 (GameEnum_Common). 그 외는 폴백.
+            string job = jobId switch
+            {
+                (int)GameData.EJob.Mage => "Mage",
+                (int)GameData.EJob.Warrior => "Warrior",
+                _ => null,
+            };
+            if (job == null) return k_fallbackPrefabPath;
+
+            int preset = Mathf.Clamp(presetId, 0, k_presetCount - 1);
+            return $"Prefabs/Characters/{job}_{preset}";
+        }
+
+        // jobId/presetId 를 받아 해당 직업/프리셋 prefab 으로 생성한다.
+        // jobId 미지정(0 등)이면 폴백 prefab 사용 (원격 캐릭터 등 직업 정보가 아직 없을 때).
+        public static PlayerCharacter Create(long objectId, string name, bool isLocalPlayer, Vector3 pos, float dirY, int jobId = 0, int presetId = 0)
         {
             // prefab 로드 + Instantiate.
             // 현재는 동기 Load (Resources). 추후 Addressables 도입 시 InstantiateAsync 로 교체.
-            GameObject go = Managers.Managers.Resource.Instantiate(k_playerPrefabPath);
+            string prefabPath = ResolvePrefabPath(jobId, presetId);
+            GameObject go = Managers.Managers.Resource.Instantiate(prefabPath);
+            if (go == null && prefabPath != k_fallbackPrefabPath)
+            {
+                Debug.LogWarning($"[CharacterFactory] prefab 로드 실패: {prefabPath}. 폴백 사용.");
+                go = Managers.Managers.Resource.Instantiate(k_fallbackPrefabPath);
+            }
             if (go == null)
             {
-                Debug.LogError($"[CharacterFactory] PlayerCharacter prefab 로드 실패: {k_playerPrefabPath}");
+                Debug.LogError($"[CharacterFactory] PlayerCharacter prefab 로드 실패: {prefabPath}");
                 return null;
             }
 
@@ -41,7 +69,7 @@ namespace Client.Game
             PlayerCharacter pc = go.GetComponent<PlayerCharacter>();
             if (pc == null)
             {
-                Debug.LogError($"[CharacterFactory] prefab 에 PlayerCharacter 컴포넌트가 없습니다: {k_playerPrefabPath}");
+                Debug.LogError($"[CharacterFactory] prefab 에 PlayerCharacter 컴포넌트가 없습니다: {prefabPath}");
                 GameObject.Destroy(go);
                 return null;
             }

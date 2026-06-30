@@ -99,7 +99,8 @@ namespace Client.Game
                 return;
 
             long objectId = data.CharacterId;
-            PlayerCharacter pc = CharacterFactory.Create(objectId, data.Name, isLocalPlayer: true, Vector3.zero, 0f);
+            // 로컬 캐릭터는 데이터모델의 직업/외형프리셋으로 prefab 분기.
+            PlayerCharacter pc = CharacterFactory.Create(objectId, data.Name, isLocalPlayer: true, Vector3.zero, 0f, jobId: data.JobId, presetId: data.AppearancePresetId);
             if (pc == null)
             {
                 Debug.LogError("[StageManager] EnsureLocalPlayer: LocalPlayer 생성 실패.");
@@ -287,7 +288,9 @@ namespace Client.Game
                     objectId: characterSpawnInfo.ObjectId,
                     name: characterSpawnInfo.Name,
                     pos: new Vector3(characterSpawnInfo.PosX, characterSpawnInfo.PosY, characterSpawnInfo.PosZ),
-                    dirY: characterSpawnInfo.Yaw);
+                    dirY: characterSpawnInfo.Yaw,
+                    jobId: characterSpawnInfo.JobId,
+                    presetId: characterSpawnInfo.AppearancePresetId);
 
                 if (remoteCharacter != null)
                 {
@@ -552,7 +555,7 @@ namespace Client.Game
             SectorGridDebug.ShowForStage(stageData.NavMeshFileName, stageData.sectorSize, groundY);
         }
 
-        private PlayerCharacter spawnRemoteCharacter(long objectId, string name, Vector3 pos, float dirY)
+        private PlayerCharacter spawnRemoteCharacter(long objectId, string name, Vector3 pos, float dirY, int jobId, int presetId)
         {
             if (m_characters.TryGetValue(objectId, out PlayerCharacter existing))
             {
@@ -562,7 +565,7 @@ namespace Client.Game
                 return existing;
             }
 
-            PlayerCharacter pc = CharacterFactory.Create(objectId, name, isLocalPlayer: false, pos, dirY);
+            PlayerCharacter pc = CharacterFactory.Create(objectId, name, isLocalPlayer: false, pos, dirY, jobId: jobId, presetId: presetId);
             m_characters.Add(objectId, pc);
             return pc;
         }

@@ -78,6 +78,8 @@ namespace Client.Managers
         {
             if (string.IsNullOrEmpty(name)) name = typeof(T).Name;
 
+            ensureEventSystem();   // UI 클릭 처리를 위한 EventSystem 보장 (Game 씬처럼 없는 경우 생성)
+
             GameObject go = Managers.Resource.Instantiate($"UI/Scene/{name}");
             if (go == null) return null;
 
@@ -98,6 +100,8 @@ namespace Client.Managers
         public T ShowPopupUI<T>(string name = null) where T : UI_Popup
         {
             if (string.IsNullOrEmpty(name)) name = typeof(T).Name;
+
+            ensureEventSystem();
 
             GameObject go = Managers.Resource.Instantiate($"UI/Popup/{name}");
             if (go == null) return null;
@@ -187,6 +191,18 @@ namespace Client.Managers
         {
             while (m_popupStack.Count > 0)
                 ClosePopupUI();
+        }
+
+        // UI 클릭(EventSystem) 보장. 씬에 EventSystem 이 없으면 생성한다.
+        // 게임플레이만 있는 Game 씬은 EventSystem 이 없으므로, 거기서 팝업/HUD 버튼이 동작하려면 필요.
+        private void ensureEventSystem()
+        {
+            if (UnityEngine.EventSystems.EventSystem.current != null) return;
+            if (Object.FindAnyObjectByType<UnityEngine.EventSystems.EventSystem>() != null) return;
+
+            GameObject go = new GameObject("@EventSystem");
+            go.AddComponent<UnityEngine.EventSystems.EventSystem>();
+            go.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();   // 기본 UI 액션 자동 할당됨
         }
 
         // 씬 전환 등 일괄 정리 시 호출.

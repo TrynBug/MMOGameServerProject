@@ -24,6 +24,11 @@ namespace Client.Managers
     {
         private GameInput m_gameInput;
 
+        // 게임플레이 입력(이동/스킬/상호작용) 차단 플래그. 메뉴 팝업 등이 떠 있을 때 true.
+        // Menu(Esc)는 차단하지 않으므로, 메뉴가 떠 있어도 Esc로 다시 닫을 수 있다.
+        private bool m_gameplayBlocked;
+        public void SetGameplayBlocked(bool blocked) { m_gameplayBlocked = blocked; }
+
         // ─── 외부 노출 이벤트 (Rookiss 스타일 Action 델리게이트) ──────────
         //
         // performed 시점에 한 번 호출. 즉 Q를 누른 순간에 한 번.
@@ -50,6 +55,7 @@ namespace Client.Managers
             get
             {
                 if (m_gameInput == null) return false;
+                if (m_gameplayBlocked) return false;
                 return m_gameInput.Gameplay.MouseClick.IsPressed();
             }
         }
@@ -91,15 +97,15 @@ namespace Client.Managers
             m_gameInput.Gameplay.MouseClick.started   += onMouseClickStarted;
             m_gameInput.Gameplay.MouseClick.canceled  += onMouseClickCanceled;
 
-            m_gameInput.Gameplay.Skill1.performed        += _ => OnSkill1?.Invoke();
-            m_gameInput.Gameplay.Skill2.performed        += _ => OnSkill2?.Invoke();
-            m_gameInput.Gameplay.Skill3.performed        += _ => OnSkill3?.Invoke();
-            m_gameInput.Gameplay.Skill4.performed        += _ => OnSkill4?.Invoke();
+            m_gameInput.Gameplay.Skill1.performed        += _ => { if (!m_gameplayBlocked) OnSkill1?.Invoke(); };
+            m_gameInput.Gameplay.Skill2.performed        += _ => { if (!m_gameplayBlocked) OnSkill2?.Invoke(); };
+            m_gameInput.Gameplay.Skill3.performed        += _ => { if (!m_gameplayBlocked) OnSkill3?.Invoke(); };
+            m_gameInput.Gameplay.Skill4.performed        += _ => { if (!m_gameplayBlocked) OnSkill4?.Invoke(); };
 
-            m_gameInput.Gameplay.Inventory.performed     += _ => OnInventory?.Invoke();
-            m_gameInput.Gameplay.CharacterMenu.performed += _ => OnCharacterMenu?.Invoke();
-            m_gameInput.Gameplay.Menu.performed          += _ => OnMenu?.Invoke();
-            m_gameInput.Gameplay.Interact.performed      += _ => OnInteract?.Invoke();
+            m_gameInput.Gameplay.Inventory.performed     += _ => { if (!m_gameplayBlocked) OnInventory?.Invoke(); };
+            m_gameInput.Gameplay.CharacterMenu.performed += _ => { if (!m_gameplayBlocked) OnCharacterMenu?.Invoke(); };
+            m_gameInput.Gameplay.Menu.performed          += _ => OnMenu?.Invoke();   // Esc 는 차단하지 않음 (메뉴 토글)
+            m_gameInput.Gameplay.Interact.performed      += _ => { if (!m_gameplayBlocked) OnInteract?.Invoke(); };
 
             // 시작은 Gameplay 액션맵부터
             m_gameInput.Gameplay.Enable();
@@ -107,11 +113,13 @@ namespace Client.Managers
 
         private void onMouseClickStarted(InputAction.CallbackContext ctx)
         {
+            if (m_gameplayBlocked) return;
             MouseClickedDown?.Invoke();
         }
 
         private void onMouseClickCanceled(InputAction.CallbackContext ctx)
         {
+            if (m_gameplayBlocked) return;
             MouseClickedUp?.Invoke();
         }
 

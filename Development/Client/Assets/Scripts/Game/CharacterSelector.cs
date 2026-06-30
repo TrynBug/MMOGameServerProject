@@ -28,6 +28,9 @@ namespace Client.Game
         // 외부 이벤트. UI 가 진행 상태를 표시할 수 있도록.
         public event System.Action<string> OnStatusChanged;
 
+        // 캐릭터 목록이 (재)수신되어 갱신되었을 때. UI 가 슬롯을 다시 구성한다.
+        public event System.Action<IReadOnlyList<Character>> OnCharacterListUpdated;
+
         private void Start()
         {
             // 선택/생성 흐름의 응답 패킷 핸들러 등록.
@@ -37,33 +40,34 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<CharacterSelectRes>(GamePacketId.CharacterSelectRes, onCharacterSelectRes);
             PacketDispatcher.Instance.Register<CharacterListNtf>(GamePacketId.CharacterListNtf, onCharacterListNtf);
 
-            // 캐시의 캐릭터 목록으로 즉시 처리 시작.
-            CharacterDataCache cache = CharacterDataCache.Instance;
-            processCharacterList(cache.Characters);
+            // 자동 진행하지 않는다. 목록 표시/선택/생성은 UI(CharacterSelectionScene)가 주도한다.
+        }
+
+        // ─── UI 주도 API ─────────────────────────────────────────────────
+
+        // 현재 캐시된 캐릭터 목록. UI 가 슬롯을 구성할 때 사용.
+        public IReadOnlyList<Character> Characters => CharacterDataCache.Instance.Characters;
+
+        // UI 가 슬롯 클릭 시 호출: 해당 캐릭터 선택 요청.
+        public void RequestSelect(long characterId)
+        {
+            selectCharacterById(characterId);
+        }
+
+        // UI 가 생성 확정 시 호출: 캐릭터 생성 요청. 생성 성공 시 자동으로 그 캐릭터를 선택한다.
+        // appearancePresetId: 외형 프리셋 (0-base). UI 프리셋 선택은 Stage 4, 그 전까지 기본 0.
+        public void RequestCreate(string name, int jobId, int appearancePresetId = 0)
+        {
+            setStatus("캐릭터 생성 중...");
+            sendCharacterCreateReq(name, jobId, appearancePresetId);
         }
 
         // ─── 흐름 ───────────────────────────────────────────────────────
 
-        private void processCharacterList(IReadOnlyList<Character> characters)
+        private void selectCharacterById(long characterId)
         {
-            if (characters == null || characters.Count == 0)
-            {
-                // 캐릭터 없음 → 생성 요청
-                setStatus("캐릭터 생성 중...");
-                sendCharacterCreateReq("test_character", 1);
-                return;
-            }
-
-            // 첫 번째 캐릭터 자동 선택 (테스트 단계)
-            Character first = characters[0];
-            if (first == null)
-            {
-                Debug.LogError("[CharacterSelector] First character is null");
-                return;
-            }
-
-            Debug.Log($"[CharacterSelector] Auto-selecting first character: id={first.CharacterId}, name={first.Name}");
-            selectCharacter(first);
+            setStatus("캐릭터 선택 중...");
+            sendCharacterSelectReq(characterId);
         }
 
         private void selectCharacter(Character ch)
@@ -76,9 +80,9 @@ namespace Client.Game
 
         private void onCharacterListNtf(CharacterListNtf ntf)
         {
-            // fallback 경로. 캐시를 업데이트하고 처리.
+            // fallback 경로. 캐시를 업데이트하고 UI 에 갱신을 알린다.
             CharacterDataCache.Instance.SetCharacters(ntf.Characters);
-            processCharacterList(CharacterDataCache.Instance.Characters);
+            OnCharacterListUpdated?.Invoke(CharacterDataCache.Instance.Characters);
         }
 
         private void onCharacterCreateRes(CharacterCreateRes res)
@@ -134,7 +138,7 @@ namespace Client.Game
 
         // ─── 송신 ───────────────────────────────────────────────────────
 
-        private void sendCharacterCreateReq(string name, int jobId)
+        private void sendCharacterCreateReq(string name, int jobId, int appearancePresetId)
         {
             NetworkManager net = NetworkManager.Instance;
             if (net == null || !net.IsConnected)
@@ -147,10 +151,11 @@ namespace Client.Game
             {
                 Name = name,
                 JobId = jobId,
+                AppearancePresetId = appearancePresetId,
             };
             net.Send(GamePacketId.CharacterCreateReq, req);
 
-            Debug.Log($"[CharacterSelector] Sent CharacterCreateReq: name={req.Name}, jobId={req.JobId}");
+            Debug.Log($"[CharacterSelector] Sent CharacterCreateReq: name={req.Name}, jobId={req.JobId}, preset={req.AppearancePresetId}");
         }
 
         private void sendCharacterSelectReq(long characterId)
