@@ -403,31 +403,6 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
         co_return;
     }
 
-    // 해당 샤드에서 캐릭터 목록을 퍼시스턴스 레이어로 로드(역직렬화는 DB 워커 스레드에서).
-    auto loadBatch = std::make_shared<db::DbLoadBatch>();
-    loadBatch->LoadMany<DataStructures::Character>(accountId, /*characterId*/ 0);   // Character 는 account_id 로 조회
-
-    db::DbLoadResult loaded = co_await db::DbLoadExecutor::Load(
-        GetDB(), loadBatch, db::EDBType::Game, gameDbIndex, GetCoroutineResumeExecutor());
-
-    if (!loaded.success)
-    {
-        LOG_WRITE(LogLevel::Error, std::format("DB load failed. accountId={}", accountId));
-        co_return;
-    }
-
-    // 이미 파싱된 캐릭터 proto 목록을 응답용 벡터로 복사.
-    std::vector<DataStructures::Character> characters;
-    {
-        auto loadedCharacters = loaded.GetMany<DataStructures::Character>();
-        characters.reserve(loadedCharacters.size());
-        for (const auto& spChar : loadedCharacters)
-        {
-            characters.push_back(*spChar);
-        }
-    }
-
-    LOG_WRITE(LogLevel::Info, std::format("characters loaded from DB. accountId={} count={}", accountId, characters.size()));
 
     // 유저 객체 생성 및 글로벌 맵 등록
     UserPtr spUser = std::make_shared<User>(accountId, gatewayId, clientIp);
@@ -447,9 +422,8 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
         co_return;
     }
 
-    // GameEnterNtf + CharacterListNtf 응답 (게이트웨이 통해 클라에게)
+    // GameEnterNtf 응답. CharacterListNtf 는 SystemStage::OnUserEnter 가 전송한다.
     sendGameEnterNtf(accountId);
-    sendCharacterListNtf(accountId, characters);
 }
 
 void GameServer::sendGameEnterNtf(int64 accountId)
@@ -516,6 +490,7 @@ db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 accountId, Game
     character.set_owner_account_id(accountId);
     character.set_name(req.name());
     character.set_job_id(req.job_id());
+    character.set_appearance_preset_id(req.appearance_preset_id()); // 외형 프리셋 (직업과 함께 외형 결정)
     character.set_level(1);
     character.set_exp(0);
     character.set_last_stage_id(0); // TBD
@@ -721,6 +696,49 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 accountId, Game
         spSystemStage->EnqueueMessage(StageMsg_UserLeave{accountId});
     }
     spTown->EnqueueMessage(StageMsg_UserEnter{spUser});
+}
+
+// 캐릭터 목록을 DB에서 로드해 CharacterListNtf 전송. (전송 시점 일원화)
+// SystemStage::OnUserEnter 가 호출한다 — 로그인 최초 입장과 캐릭터선택 복귀 공통 경로.
+// 코루틴은 GameServer resume executor 에서 재개되며 패킷만 전송한다(Stage 상태 미접근).
+db::DetachedCoTask GameServer::SendCharacterListForUser(int64 accountId, int32 gameDbIndex, db::IResumeExecutor* pResumeExecutor)
+{
+    std::vector<DataStructures::Character> characters = co_await loadAllCharactersForUser(accountId, gameDbIndex, pResumeExecutor);
+    sendCharacterListNtf(accountId, characters);
+    LOG_WRITE(LogLevel::Info, std::format("CharacterListNtf sent on SystemStage enter. accountId={} count={}", accountId, characters.size()));
+}
+
+// 계정의 모든 캐릭터를 DB에서 로드 (handleGatewayUserEnter 의 로드 패턴과 동일).
+db::AwaitableCoTask<std::vector<DataStructures::Character>> GameServer::loadAllCharactersForUser(int64 accountId, int32 gameDbIndex, db::IResumeExecutor* pResumeExecutor)
+{
+    std::vector<DataStructures::Character> characters;
+
+    if (!GetDB().HasDatabase(db::EDBType::Game, gameDbIndex))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("loadAllCharacters - invalid shard. accountId={} idx={}", accountId, gameDbIndex));
+        co_return characters;
+    }
+
+    auto loadBatch = std::make_shared<db::DbLoadBatch>();
+    loadBatch->LoadMany<DataStructures::Character>(accountId, /*characterId*/ 0);
+
+    // 후속작업(전송)을 호출자가 지정한 스레드에서 재개 (SystemStage 컨텐츠 스레드).
+    db::DbLoadResult loaded = co_await db::DbLoadExecutor::Load(
+        GetDB(), loadBatch, db::EDBType::Game, gameDbIndex, pResumeExecutor);
+
+    if (!loaded.success)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("loadAllCharacters - DB load failed. accountId={}", accountId));
+        co_return characters;
+    }
+
+    auto loadedCharacters = loaded.GetMany<DataStructures::Character>();
+    characters.reserve(loadedCharacters.size());
+    for (const auto& spChar : loadedCharacters)
+    {
+        characters.push_back(*spChar);
+    }
+    co_return characters;
 }
 
 void GameServer::sendCharacterSelectRes(int64 accountId, EResultCode resultCode, const std::string& errorMsg,

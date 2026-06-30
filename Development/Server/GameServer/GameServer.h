@@ -77,6 +77,11 @@ public:
     db::DetachedCoTask BeginCrossServerMove(int64 accountId, int32 targetGameServerId, int32 targetStageDataKey, int32 positionType,
                                             Stage* pSourceStage);
 
+    // 캐릭터 목록을 DB에서 로드해 CharacterListNtf 를 전송한다(DB 코루틴).
+    // SystemStage::OnUserEnter 가 호출 — 로그인 최초 입장 / 캐릭터선택 복귀 공통 전송 경로(전송 시점 일원화).
+    // pResumeExecutor: DB await 후속작업(전송)을 재개할 executor. SystemStage 의 resume executor 를 넘겨 SystemStage 의 컨텐츠 스레드에서 재개되게 한다.
+    db::DetachedCoTask SendCharacterListForUser(int64 accountId, int32 gameDbIndex, db::IResumeExecutor* pResumeExecutor);
+
     // [개발/테스트] Stage에서 시작하는 코루틴 절차 검증용 (치트 savechar 가 호출).
     // AsyncPin 획득 → saveCharacterToDB(캐릭터를 DB에 UPDATE)를 Stage의 resume executor로 co_await
     //   → 후속작업이 같은 Stage 스레드에서 재개되는지 + 핀 카운터 증감을 로그([savechar])로 확인한다.
@@ -148,6 +153,7 @@ private:
     // 캐릭터 선택 요청 핸들러. DB SELECT 이후 SystemStage → Town 이동.
     db::DetachedCoTask handleClientCharacterSelect(int64 accountId, GamePacket::CharacterSelectReq req);
 
+
     // 캐릭터 선택 결과 전송 (CharacterSelectRes). 성공/실패 모두 이 함수로 송신.
     //   - 성공: resultCode=Success, errorMsg="", pCharacter(전체 데이터)/stageDataKey 채움 (클라는 데이터모델 보관 후 로딩 시작)
     //   - 실패: resultCode=Fail,    errorMsg=사유, pCharacter=nullptr
@@ -158,6 +164,10 @@ private:
     // (account_id, character_id)로 DB에서 캐릭터 row를 읽어 JSON 파싱 후 Character 객체를 생성하고
     // User에 소유 연결한다(User→Character 강참조, Character→User 약참조).
     db::AwaitableCoTask<CharacterPtr> loadCharacterForUser(int64 accountId, int64 characterId, UserPtr spUser);
+
+    // 계정의 모든 캐릭터를 DB에서 로드한다 (CharacterListNtf 전송용).
+    // pResumeExecutor: DB await 후속작업을 재개할 executor (호출 문맥의 스레드 선택).
+    db::AwaitableCoTask<std::vector<DataStructures::Character>> loadAllCharactersForUser(int64 accountId, int32 gameDbIndex, db::IResumeExecutor* pResumeExecutor);
 
     // 캐릭터의 런타임 상태를 proto에 동기화(SyncRuntimeToProto)한 뒤 JSON 직렬화하여 DB에 저장(UPDATE)한다.
     // pResumeExecutor: DB await 후속작업을 재개할 executor(호출 문맥의 스레드 선택). Stage에서 호출 시 그 Stage의 executor.

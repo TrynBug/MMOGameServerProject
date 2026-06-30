@@ -19,6 +19,10 @@ public:
 protected:
     void OnStageUpdate(int64 deltaMs) override;
 
+    // SystemStage(캐릭터 선택창) 입장 시 캐릭터 목록(CharacterListNtf)을 전송한다.
+    // 로그인 최초 입장과 게임 중 "캐릭터 선택으로 복귀" 모두 이 한 경로로 통일된다.
+    void OnUserEnter(const UserPtr& spUser) override;
+
 private:
     // 위임 생성자용 private 생성자. StageGridParams를 1회만 평가하기 위해 사용.
     SystemStage(int64 stageId, int32 stageDataKey, const StageGridParams& params);

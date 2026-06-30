@@ -449,6 +449,15 @@ protected:
     // old Stage(=this)의 컨텐츠 스레드에서 실행된다. 검증 → leave → pending 보관 → target enter → Res.
     void handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
 
+    // 캐릭터 선택 화면 복귀 요청
+    // 현재 Stage 퇴장 → 상태 None → SystemStage 입장 → GameServer가 캐릭터 목록 재로드+재전송.
+    void handleReturnToCharacterSelectReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+
+    // 이 Stage 에서 캐릭터를 퇴장시켜도 되는지 공통 방어 검증.
+    // (InStage 상태 + 캐릭터가 이 Stage 소속 + 진행중 async 없음)
+    // 통과 시 outCharacter 에 캐릭터를 담아 true, 실패 시 outReason 채우고 false.
+    bool canLeaveStage(const UserPtr& spUser, CharacterPtr& outCharacter, std::string& outReason);
+
     // 같은 서버 내 Stage 이동을 실행한다(handleStageMoveReq 동일서버 분기 + 포탈 prop 공용).
     // 대상 검증(존재/단일인스턴스/이동가능타입/도착위치데이터) 통과 시 old Stage 퇴장 + target 입장 +
     // StageMoveRes(성공) 송신 후 true. 실패 시 outFailReason 채우고 false(StageMoveRes 미송신).

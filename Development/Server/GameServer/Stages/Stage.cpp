@@ -67,6 +67,7 @@ namespace
         info.set_owner_account_id(proto.owner_account_id());
         info.set_name(proto.name());
         info.set_job_id(proto.job_id());
+        info.set_appearance_preset_id(proto.appearance_preset_id()); // 외형 프리셋 (원격 캐릭터 모델 결정)
         info.set_level(proto.level());
         info.set_hp(character.GetCurHp());
         info.set_max_hp(character.GetMaxHp());
@@ -1303,6 +1304,7 @@ const Stage::UserPacketHandlerMap& Stage::getUserPacketHandlerMap() const
         { Common::GAME_PACKET_ID_SKILL_CAST_REQ,           &Stage::handleSkillCastReq },
         { Common::GAME_PACKET_ID_SKILL_PROJECTILE_HIT_REQ, &Stage::handleSkillProjectileHitReq },
         { Common::GAME_PACKET_ID_STAGE_MOVE_REQ,           &Stage::handleStageMoveReq },
+        { Common::GAME_PACKET_ID_RETURN_TO_CHARACTER_SELECT_REQ, &Stage::handleReturnToCharacterSelectReq },
         { Common::GAME_PACKET_ID_STAGE_LOAD_COMPLETE_REQ,  &Stage::handleStageLoadCompleteReq },
         { Common::GAME_PACKET_ID_EVENT_AREA_ENTER_REQ,     &Stage::handleEventAreaEnterReq },
         { Common::GAME_PACKET_ID_EVENT_AREA_EXIT_REQ,      &Stage::handleEventAreaExitReq },
@@ -1385,25 +1387,12 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
     };
 
     // ── 검증 ─────────────────────────────────────────────
-    // 전환 중 중복 요청 거부.
-    if (spUser->GetStageState() != EUserStageState::InStage)
+    // 퇴장 가능 여부 확인 (InStage + 이 Stage 소속 + async 미진행)
+    CharacterPtr spCharacter;
+    std::string leaveReason;
+    if (!canLeaveStage(spUser, spCharacter, leaveReason))
     {
-        sendFail("not in stage (moving?)");
-        return;
-    }
-
-    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
-    if (!spCharacter || spCharacter->GetStage() != this)
-    {
-        sendFail("no character in this stage");
-        return;
-    }
-
-    // 진행 중인 코루틴 후속작업(인벤토리 갱신 등)이 있으면 이동 거부.
-    // 그래야 그 후속작업이 같은 Stage 단일 스레드에서 완결된다. (async op은 짧으니 클라가 재시도)
-    if (spCharacter->HasPendingAsync())
-    {
-        sendFail("character busy (async in progress)");
+        sendFail(leaveReason);
         return;
     }
 
@@ -1437,6 +1426,74 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
     std::string failReason;
     if (!executeLocalStageMove(spUser, spCharacter, req.target_stage_data_key(), positionType, failReason))
         sendFail(failReason);
+}
+
+// 이 Stage 에서 캐릭터를 퇴장시켜도 되는지 공통 방어 (스테이지 이동 / 캐릭터선택 복귀 공유).
+// InStage 상태 + 캐릭터가 이 Stage 소속 + 진행중 async 없음 일 때만 true.
+bool Stage::canLeaveStage(const UserPtr& spUser, CharacterPtr& outCharacter, std::string& outReason)
+{
+    // 전환 중(Moving)이거나 미입장(None)이면 거부.
+    if (spUser->GetStageState() != EUserStageState::InStage)
+    {
+        outReason = "not in stage (moving?)";
+        return false;
+    }
+
+    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+    if (!spCharacter || spCharacter->GetStage() != this)
+    {
+        outReason = "no character in this stage";
+        return false;
+    }
+
+    // 진행 중인 코루틴 후속작업(인벤토리 갱신 등)이 있으면 거부.
+    // 그래야 그 후속작업이 같은 Stage 단일 스레드에서 완결된다. (async op은 짧으니 클라가 재시도)
+    if (spCharacter->HasPendingAsync())
+    {
+        outReason = "character busy (async in progress)";
+        return false;
+    }
+
+    outCharacter = spCharacter;
+    return true;
+}
+
+// 게임 중 캐릭터 선택 화면으로 복귀. 현재 Stage(=this)의 컨텐츠 스레드에서 실행된다.
+// 스테이지 이동(handleStageMoveReq)과 동일한 canLeaveStage 방어를 공유한다.
+void Stage::handleReturnToCharacterSelectReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+{
+    GamePacket::ReturnToCharacterSelectReq req;
+    if (!deserializeUserPacket(spUser, spPacket, req))
+        return;
+
+    GameServer& server = GameServer::Instance();
+    const int64 accountId = spUser->GetAccountId();
+
+    // 퇴장 가능 여부 공통 방어 (스테이지 이동과 동일).
+    CharacterPtr spCharacter;
+    std::string leaveReason;
+    if (!canLeaveStage(spUser, spCharacter, leaveReason))
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("ReturnToCharacterSelect rejected. stageId={} accountId={} reason={}",
+            m_stageId, accountId, leaveReason));
+        return;
+    }
+
+    auto spSystemStage = server.GetStageManager().GetSystemStage();
+    if (!spSystemStage)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("ReturnToCharacterSelect - system stage null. accountId={}", accountId));
+        return;
+    }
+
+    // 캐릭터 선택 상태(None)로 되돌리고 현재 Stage(=this)에서 퇴장 (직접 호출 — 이 Stage 스레드).
+    // 캐릭터는 User 가 계속 소유하며, 다음 선택 시 재로드되어 교체된다. (despawn 브로드캐스트는 OnUserLeave 가 처리)
+    spUser->SetStageState(EUserStageState::None);
+    OnUserLeave(accountId);
+    // SystemStage 입장 → SystemStage::OnUserEnter 가 CharacterListNtf 를 전송한다(전송 시점 일원화).
+    spSystemStage->EnqueueMessage(StageMsg_UserEnter{spUser});
+
+    LOG_WRITE(LogLevel::Info, std::format("ReturnToCharacterSelect - left stage. stageId={} accountId={}", m_stageId, accountId));
 }
 
 bool Stage::executeLocalStageMove(const UserPtr& spUser, const CharacterPtr& spCharacter,
