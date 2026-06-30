@@ -43,6 +43,9 @@ using BaseUPtr = std::unique_ptr<Base>
 예) class MonsterAI
 
 ### 변수명
+- 변수명은 의미가 전달될 수 있게 작성합니다. 너무 줄여서 사용하지 않습니다.
+	- 예) sp, s, f 같은 너무 짧은 변수명 사용 금지
+
 - 지역변수
 	- 첫글자가 소문자입니다.
 	- 예) int32 errorReason;
