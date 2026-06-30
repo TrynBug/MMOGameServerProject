@@ -61,6 +61,10 @@ namespace Client.Game
         // 다음 시전 가능 시각 (액션락). Time.time 기준.
         private float m_actionLockUntil;
 
+        // 스킬별 쿨다운 종료 시각 (skillKey → Time.time). 시전 선체크 + HUD 라디얼 공용.
+        // 클라 예측이며 서버 권위 검증은 5c. CooldownMs<=0 인 스킬은 등록하지 않는다.
+        private readonly Dictionary<int, float> m_cooldownUntil = new Dictionary<int, float>();
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -113,10 +117,58 @@ namespace Client.Game
         private void castSkill3() => tryCast(m_skill3Key);
         private void castSkill4() => tryCast(m_skill4Key);
 
+        // ─── HUD 조회 API (UI_PlayerHud 가 폴링) ─────────────────────
+        // 스킬 슬롯 개수 (입력 OnSkill1~4 에 대응). 슬롯 키 매핑이 늘면 여기와 GetSlotSkillKey 를 함께 늘린다.
+        public const int SkillSlotCount = 4;
+
+        // 슬롯(0..SkillSlotCount-1)에 매핑된 스킬 키. 범위 밖이면 0.
+        public int GetSlotSkillKey(int slot)
+        {
+            switch (slot)
+            {
+                case 0:  return m_skill1Key;
+                case 1:  return m_skill2Key;
+                case 2:  return m_skill3Key;
+                case 3:  return m_skill4Key;
+                default: return 0;
+            }
+        }
+
+        // 스킬이 쿨다운 중인가. 시전 선체크 + HUD 공용.
+        public bool IsOnCooldown(int skillKey)
+            => m_cooldownUntil.TryGetValue(skillKey, out float until) && Time.time < until;
+
+        // 남은 쿨다운(초). 준비 완료면 0.
+        public float GetCooldownRemainSec(int skillKey)
+        {
+            if (m_cooldownUntil.TryGetValue(skillKey, out float until))
+            {
+                float remain = until - Time.time;
+                return remain > 0f ? remain : 0f;
+            }
+            return 0f;
+        }
+
+        // 남은 쿨다운 비율 (1=방금 시전, 0=준비완료). HUD 라디얼 fillAmount 용.
+        // CooldownMs<=0(쿨다운 없는 스킬)이면 항상 0.
+        public float GetCooldownRatio(int skillKey)
+        {
+            GameData_Skill skill = GameDataTable_Skill.FindData(skillKey);
+            if (skill == null || skill.CooldownMs <= 0)
+                return 0f;
+
+            float remain = GetCooldownRemainSec(skillKey);
+            return Mathf.Clamp01(remain / (skill.CooldownMs / 1000f));
+        }
+
         private void tryCast(int skillKey)
         {
             if (Time.time < m_actionLockUntil)
                 return;   // 이전 시전 애니메이션(액션락) 중.
+
+            // 스킬별 쿨다운 중이면 시전 불가 (클라 예측, 서버 권위는 5c). HUD 라디얼과 동일 소스.
+            if (IsOnCooldown(skillKey))
+                return;
 
             GameData_Skill skill = GameDataTable_Skill.FindData(skillKey);
             if (skill == null)
@@ -222,6 +274,10 @@ namespace Client.Game
 
             // 액션락 설정 (다음 시전까지 잠금).
             m_actionLockUntil = Time.time + skill.ActionLockMs / 1000f;
+
+            // 스킬별 쿨다운 시작 (클라 예측). HUD 라디얼 + 다음 시전 선체크 공용.
+            if (skill.CooldownMs > 0)
+                m_cooldownUntil[skillKey] = Time.time + skill.CooldownMs / 1000f;
 
             // 시전음 (클라 전용). 데이터 SfxCast 경로 prefix 의 변형을 라운드로빈+피치로 재생.
             SfxPlayer.Play(skill.SfxCast, caster.transform.position);

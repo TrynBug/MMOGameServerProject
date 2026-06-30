@@ -50,7 +50,8 @@ namespace Client.Game
             // LocalPlayer 는 이후 StageLoadCompleteRes 수신 시 활성화+배치된다.
             StageManager.Instance.BeginStageLoad(CharacterDataCache.Instance.SelectedStageDataKey);
 
-            // Create the local player's buff bar HUD (code-built, no prefab/art needed).
+            // 플레이어 HUD (HP/MP 바 + 스킬 슬롯) + 버프 바 표시.
+            Managers.Managers.UI.ShowSceneUI<UI_PlayerHud>();
             Managers.Managers.UI.ShowSceneUI<UI_BuffBar>();
 
             // Esc 메뉴 토글 구독.
