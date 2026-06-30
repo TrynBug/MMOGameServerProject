@@ -189,7 +189,8 @@ inline constexpr CharacterSpawnInfo::Impl_::Impl_(
         pos_x_{0},
         pos_y_{0},
         pos_z_{0},
-        yaw_{0} {}
+        yaw_{0},
+        appearance_preset_id_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR CharacterSpawnInfo::CharacterSpawnInfo(::_pbi::ConstantInitialized)
@@ -258,7 +259,7 @@ const ::uint32_t
         2,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_._has_bits_),
-        17, // hasbit index offset
+        18, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.object_id_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.owner_account_id_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.name_),
@@ -273,6 +274,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.pos_z_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.yaw_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.buffs_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.appearance_preset_id_),
         2,
         3,
         1,
@@ -287,6 +289,7 @@ const ::uint32_t
         12,
         13,
         0,
+        14,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::MonsterSpawnInfo, _impl_._has_bits_),
         13, // hasbit index offset
@@ -360,11 +363,11 @@ static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, sizeof(::GamePacket::BuffSnapshotInfo)},
         {9, sizeof(::GamePacket::CharacterSpawnInfo)},
-        {40, sizeof(::GamePacket::MonsterSpawnInfo)},
-        {63, sizeof(::GamePacket::PropSpawnInfo)},
-        {80, sizeof(::GamePacket::ObjectVisibilityNtf)},
-        {91, sizeof(::GamePacket::PropStateNtf)},
-        {100, sizeof(::GamePacket::ObjectDeathNtf)},
+        {42, sizeof(::GamePacket::MonsterSpawnInfo)},
+        {65, sizeof(::GamePacket::PropSpawnInfo)},
+        {82, sizeof(::GamePacket::ObjectVisibilityNtf)},
+        {93, sizeof(::GamePacket::PropStateNtf)},
+        {102, sizeof(::GamePacket::ObjectDeathNtf)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::GamePacket::_BuffSnapshotInfo_default_instance_._instance,
@@ -380,37 +383,38 @@ const char descriptor_table_protodef_GamePacket_2fobject_5fvisibility_5fpacket_2
     "\n)GamePacket/object_visibility_packet.pr"
     "oto\022\nGamePacket\"Q\n\020BuffSnapshotInfo\022\020\n\010b"
     "uff_key\030\001 \001(\005\022\023\n\013stack_count\030\002 \001(\005\022\026\n\016re"
-    "main_time_ms\030\003 \001(\005\"\215\002\n\022CharacterSpawnInf"
+    "main_time_ms\030\003 \001(\005\"\253\002\n\022CharacterSpawnInf"
     "o\022\021\n\tobject_id\030\001 \001(\003\022\030\n\020owner_account_id"
     "\030\002 \001(\003\022\014\n\004name\030\003 \001(\t\022\016\n\006job_id\030\004 \001(\005\022\r\n\005"
     "level\030\005 \001(\005\022\n\n\002hp\030\006 \001(\001\022\016\n\006max_hp\030\007 \001(\001\022"
     "\n\n\002mp\030\010 \001(\001\022\016\n\006max_mp\030\t \001(\001\022\r\n\005pos_x\030\n \001"
     "(\002\022\r\n\005pos_y\030\013 \001(\002\022\r\n\005pos_z\030\014 \001(\002\022\013\n\003yaw\030"
     "\r \001(\002\022+\n\005buffs\030\016 \003(\0132\034.GamePacket.BuffSn"
-    "apshotInfo\"\322\001\n\020MonsterSpawnInfo\022\021\n\tobjec"
-    "t_id\030\001 \001(\003\022\023\n\013monster_key\030\002 \001(\005\022\r\n\005pos_x"
-    "\030\003 \001(\002\022\r\n\005pos_y\030\004 \001(\002\022\r\n\005pos_z\030\005 \001(\002\022\013\n\003"
-    "yaw\030\006 \001(\002\022+\n\005buffs\030\007 \003(\0132\034.GamePacket.Bu"
-    "ffSnapshotInfo\022\017\n\007is_dead\030\010 \001(\010\022\016\n\006cur_h"
-    "p\030\t \001(\001\022\016\n\006max_hp\030\n \001(\001\"}\n\rPropSpawnInfo"
-    "\022\021\n\tobject_id\030\001 \001(\003\022\020\n\010prop_key\030\002 \001(\005\022\r\n"
-    "\005pos_x\030\003 \001(\002\022\r\n\005pos_y\030\004 \001(\002\022\r\n\005pos_z\030\005 \001"
-    "(\002\022\013\n\003yaw\030\006 \001(\002\022\r\n\005state\030\007 \001(\005\"\312\001\n\023Objec"
-    "tVisibilityNtf\0228\n\020character_spawns\030\001 \003(\013"
-    "2\036.GamePacket.CharacterSpawnInfo\0224\n\016mons"
-    "ter_spawns\030\002 \003(\0132\034.GamePacket.MonsterSpa"
-    "wnInfo\022.\n\013prop_spawns\030\003 \003(\0132\031.GamePacket"
-    ".PropSpawnInfo\022\023\n\013despawn_ids\030\n \003(\003\"I\n\014P"
-    "ropStateNtf\022\021\n\tobject_id\030\001 \001(\003\022\r\n\005state\030"
-    "\002 \001(\005\022\027\n\017actor_object_id\030\003 \001(\003\"=\n\016Object"
-    "DeathNtf\022\021\n\tobject_id\030\001 \001(\003\022\030\n\020killer_ob"
-    "ject_id\030\002 \001(\003b\006proto3"
+    "apshotInfo\022\034\n\024appearance_preset_id\030\017 \001(\005"
+    "\"\322\001\n\020MonsterSpawnInfo\022\021\n\tobject_id\030\001 \001(\003"
+    "\022\023\n\013monster_key\030\002 \001(\005\022\r\n\005pos_x\030\003 \001(\002\022\r\n\005"
+    "pos_y\030\004 \001(\002\022\r\n\005pos_z\030\005 \001(\002\022\013\n\003yaw\030\006 \001(\002\022"
+    "+\n\005buffs\030\007 \003(\0132\034.GamePacket.BuffSnapshot"
+    "Info\022\017\n\007is_dead\030\010 \001(\010\022\016\n\006cur_hp\030\t \001(\001\022\016\n"
+    "\006max_hp\030\n \001(\001\"}\n\rPropSpawnInfo\022\021\n\tobject"
+    "_id\030\001 \001(\003\022\020\n\010prop_key\030\002 \001(\005\022\r\n\005pos_x\030\003 \001"
+    "(\002\022\r\n\005pos_y\030\004 \001(\002\022\r\n\005pos_z\030\005 \001(\002\022\013\n\003yaw\030"
+    "\006 \001(\002\022\r\n\005state\030\007 \001(\005\"\312\001\n\023ObjectVisibilit"
+    "yNtf\0228\n\020character_spawns\030\001 \003(\0132\036.GamePac"
+    "ket.CharacterSpawnInfo\0224\n\016monster_spawns"
+    "\030\002 \003(\0132\034.GamePacket.MonsterSpawnInfo\022.\n\013"
+    "prop_spawns\030\003 \003(\0132\031.GamePacket.PropSpawn"
+    "Info\022\023\n\013despawn_ids\030\n \003(\003\"I\n\014PropStateNt"
+    "f\022\021\n\tobject_id\030\001 \001(\003\022\r\n\005state\030\002 \001(\005\022\027\n\017a"
+    "ctor_object_id\030\003 \001(\003\"=\n\016ObjectDeathNtf\022\021"
+    "\n\tobject_id\030\001 \001(\003\022\030\n\020killer_object_id\030\002 "
+    "\001(\003b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto = {
     false,
     false,
-    1101,
+    1131,
     descriptor_table_protodef_GamePacket_2fobject_5fvisibility_5fpacket_2eproto,
     "GamePacket/object_visibility_packet.proto",
     &descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto_once,
@@ -790,9 +794,9 @@ CharacterSpawnInfo::CharacterSpawnInfo(
                offsetof(Impl_, object_id_),
            reinterpret_cast<const char*>(&from._impl_) +
                offsetof(Impl_, object_id_),
-           offsetof(Impl_, yaw_) -
+           offsetof(Impl_, appearance_preset_id_) -
                offsetof(Impl_, object_id_) +
-               sizeof(Impl_::yaw_));
+               sizeof(Impl_::appearance_preset_id_));
 
   // @@protoc_insertion_point(copy_constructor:GamePacket.CharacterSpawnInfo)
 }
@@ -808,9 +812,9 @@ inline void CharacterSpawnInfo::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena
   ::memset(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, object_id_),
            0,
-           offsetof(Impl_, yaw_) -
+           offsetof(Impl_, appearance_preset_id_) -
                offsetof(Impl_, object_id_) +
-               sizeof(Impl_::yaw_));
+               sizeof(Impl_::appearance_preset_id_));
 }
 CharacterSpawnInfo::~CharacterSpawnInfo() {
   // @@protoc_insertion_point(destructor:GamePacket.CharacterSpawnInfo)
@@ -882,16 +886,16 @@ CharacterSpawnInfo::GetClassData() const {
   return CharacterSpawnInfo_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<4, 14, 1, 50, 2>
+const ::_pbi::TcParseTable<4, 15, 1, 50, 2>
 CharacterSpawnInfo::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_._has_bits_),
     0, // no _extensions_
-    14, 120,  // max_field_number, fast_idx_mask
+    15, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294950912,  // skipmap
+    4294934528,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    14,  // num_field_entries
+    15,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     CharacterSpawnInfo_class_data_.base(),
@@ -958,7 +962,10 @@ CharacterSpawnInfo::_table_ = {
     {::_pbi::TcParser::FastMtR1,
      {114, 0, 0,
       PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.buffs_)}},
-    {::_pbi::TcParser::MiniParse, {}},
+    // int32 appearance_preset_id = 15;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CharacterSpawnInfo, _impl_.appearance_preset_id_), 14>(),
+     {120, 14, 0,
+      PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.appearance_preset_id_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -990,6 +997,8 @@ CharacterSpawnInfo::_table_ = {
     {PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.yaw_), _Internal::kHasBitsOffset + 13, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
     // repeated .GamePacket.BuffSnapshotInfo buffs = 14;
     {PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.buffs_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+    // int32 appearance_preset_id = 15;
+    {PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.appearance_preset_id_), _Internal::kHasBitsOffset + 14, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   {{
       {::_pbi::TcParser::GetTable<::GamePacket::BuffSnapshotInfo>()},
@@ -1021,10 +1030,10 @@ PROTOBUF_NOINLINE void CharacterSpawnInfo::Clear() {
         reinterpret_cast<char*>(&_impl_.max_hp_) -
         reinterpret_cast<char*>(&_impl_.object_id_)) + sizeof(_impl_.max_hp_));
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x00003f00U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x00007f00U)) {
     ::memset(&_impl_.mp_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.yaw_) -
-        reinterpret_cast<char*>(&_impl_.mp_)) + sizeof(_impl_.yaw_));
+        reinterpret_cast<char*>(&_impl_.appearance_preset_id_) -
+        reinterpret_cast<char*>(&_impl_.mp_)) + sizeof(_impl_.appearance_preset_id_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -1180,6 +1189,15 @@ PROTOBUF_NOINLINE void CharacterSpawnInfo::Clear() {
     }
   }
 
+  // int32 appearance_preset_id = 15;
+  if (CheckHasBit(cached_has_bits, 0x00004000U)) {
+    if (this_._internal_appearance_preset_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<15>(
+              stream, this_._internal_appearance_preset_id(), target);
+    }
+  }
+
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -1261,7 +1279,7 @@ PROTOBUF_NOINLINE void CharacterSpawnInfo::Clear() {
       }
     }
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x00003f00U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x00007f00U)) {
     // double mp = 8;
     if (CheckHasBit(cached_has_bits, 0x00000100U)) {
       if (::absl::bit_cast<::uint64_t>(this_._internal_mp()) != 0) {
@@ -1296,6 +1314,13 @@ PROTOBUF_NOINLINE void CharacterSpawnInfo::Clear() {
     if (CheckHasBit(cached_has_bits, 0x00002000U)) {
       if (::absl::bit_cast<::uint32_t>(this_._internal_yaw()) != 0) {
         total_size += 5;
+      }
+    }
+    // int32 appearance_preset_id = 15;
+    if (CheckHasBit(cached_has_bits, 0x00004000U)) {
+      if (this_._internal_appearance_preset_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_appearance_preset_id());
       }
     }
   }
@@ -1364,7 +1389,7 @@ void CharacterSpawnInfo::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x00003f00U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x00007f00U)) {
     if (CheckHasBit(cached_has_bits, 0x00000100U)) {
       if (::absl::bit_cast<::uint64_t>(from._internal_mp()) != 0) {
         _this->_impl_.mp_ = from._impl_.mp_;
@@ -1395,6 +1420,11 @@ void CharacterSpawnInfo::MergeImpl(::google::protobuf::MessageLite& to_msg,
         _this->_impl_.yaw_ = from._impl_.yaw_;
       }
     }
+    if (CheckHasBit(cached_has_bits, 0x00004000U)) {
+      if (from._internal_appearance_preset_id() != 0) {
+        _this->_impl_.appearance_preset_id_ = from._impl_.appearance_preset_id_;
+      }
+    }
   }
   _this->_impl_._has_bits_[0] |= cached_has_bits;
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
@@ -1418,8 +1448,8 @@ void CharacterSpawnInfo::InternalSwap(CharacterSpawnInfo* PROTOBUF_RESTRICT PROT
   _impl_.buffs_.InternalSwap(&other->_impl_.buffs_);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.yaw_)
-      + sizeof(CharacterSpawnInfo::_impl_.yaw_)
+      PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.appearance_preset_id_)
+      + sizeof(CharacterSpawnInfo::_impl_.appearance_preset_id_)
       - PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.object_id_)>(
           reinterpret_cast<char*>(&_impl_.object_id_),
           reinterpret_cast<char*>(&other->_impl_.object_id_));

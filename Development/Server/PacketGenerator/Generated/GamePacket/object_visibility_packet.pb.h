@@ -1447,6 +1447,7 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
     kPosYFieldNumber = 11,
     kPosZFieldNumber = 12,
     kYawFieldNumber = 13,
+    kAppearancePresetIdFieldNumber = 15,
   };
   // repeated .GamePacket.BuffSnapshotInfo buffs = 14;
   int buffs_size() const;
@@ -1600,11 +1601,21 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
   void _internal_set_yaw(float value);
 
   public:
+  // int32 appearance_preset_id = 15;
+  void clear_appearance_preset_id() ;
+  ::int32_t appearance_preset_id() const;
+  void set_appearance_preset_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_appearance_preset_id() const;
+  void _internal_set_appearance_preset_id(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:GamePacket.CharacterSpawnInfo)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<4, 14,
+  static const ::google::protobuf::internal::TcParseTable<4, 15,
                                    1, 50,
                                    2>
       _table_;
@@ -1640,6 +1651,7 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
     float pos_y_;
     float pos_z_;
     float yaw_;
+    ::int32_t appearance_preset_id_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -2418,6 +2430,31 @@ inline ::google::protobuf::RepeatedPtrField<::GamePacket::BuffSnapshotInfo>* PRO
 CharacterSpawnInfo::_internal_mutable_buffs() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.buffs_;
+}
+
+// int32 appearance_preset_id = 15;
+inline void CharacterSpawnInfo::clear_appearance_preset_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.appearance_preset_id_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00004000U);
+}
+inline ::int32_t CharacterSpawnInfo::appearance_preset_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.appearance_preset_id)
+  return _internal_appearance_preset_id();
+}
+inline void CharacterSpawnInfo::set_appearance_preset_id(::int32_t value) {
+  _internal_set_appearance_preset_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00004000U);
+  // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.appearance_preset_id)
+}
+inline ::int32_t CharacterSpawnInfo::_internal_appearance_preset_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.appearance_preset_id_;
+}
+inline void CharacterSpawnInfo::_internal_set_appearance_preset_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.appearance_preset_id_ = value;
 }
 
 // -------------------------------------------------------------------

@@ -22,4 +22,7 @@ message Character {
     float pos_y = 13;             // 높이
     float yaw = 14;               // Y축 회전, degree 단위
     float pos_z = 15;             // 평면 깊이축
+
+    // 외형 프리셋 인덱스 (직업당 사전조립 프리팹 선택용). 0-base. 직업과 함께 외형을 결정.
+    int32 appearance_preset_id = 16;
 }

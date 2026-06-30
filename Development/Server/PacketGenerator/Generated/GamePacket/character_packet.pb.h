@@ -20,6 +20,7 @@
 #include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/arena.h"
 #include "google/protobuf/arenastring.h"
+#include "google/protobuf/generated_message_bases.h"
 #include "google/protobuf/generated_message_tctable_decl.h"
 #include "google/protobuf/generated_message_util.h"
 #include "google/protobuf/metadata_lite.h"
@@ -74,6 +75,10 @@ class CharacterSelectRes;
 struct CharacterSelectResDefaultTypeInternal;
 extern CharacterSelectResDefaultTypeInternal _CharacterSelectRes_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull CharacterSelectRes_class_data_;
+class ReturnToCharacterSelectReq;
+struct ReturnToCharacterSelectReqDefaultTypeInternal;
+extern ReturnToCharacterSelectReqDefaultTypeInternal _ReturnToCharacterSelectReq_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ReturnToCharacterSelectReq_class_data_;
 }  // namespace GamePacket
 namespace google {
 namespace protobuf {
@@ -85,6 +90,140 @@ namespace GamePacket {
 // ===================================================================
 
 
+// -------------------------------------------------------------------
+
+class ReturnToCharacterSelectReq final : public ::google::protobuf::internal::ZeroFieldsBase
+/* @@protoc_insertion_point(class_definition:GamePacket.ReturnToCharacterSelectReq) */ {
+ public:
+  inline ReturnToCharacterSelectReq() : ReturnToCharacterSelectReq(nullptr) {}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ReturnToCharacterSelectReq* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ReturnToCharacterSelectReq));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ReturnToCharacterSelectReq(::google::protobuf::internal::ConstantInitialized);
+
+  inline ReturnToCharacterSelectReq(const ReturnToCharacterSelectReq& from) : ReturnToCharacterSelectReq(nullptr, from) {}
+  inline ReturnToCharacterSelectReq(ReturnToCharacterSelectReq&& from) noexcept
+      : ReturnToCharacterSelectReq(nullptr, ::std::move(from)) {}
+  inline ReturnToCharacterSelectReq& operator=(const ReturnToCharacterSelectReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ReturnToCharacterSelectReq& operator=(ReturnToCharacterSelectReq&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ReturnToCharacterSelectReq& default_instance() {
+    return *reinterpret_cast<const ReturnToCharacterSelectReq*>(
+        &_ReturnToCharacterSelectReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 5;
+  friend void swap(ReturnToCharacterSelectReq& a, ReturnToCharacterSelectReq& b) { a.Swap(&b); }
+  inline void Swap(ReturnToCharacterSelectReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ReturnToCharacterSelectReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ReturnToCharacterSelectReq* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::internal::ZeroFieldsBase::DefaultConstruct<ReturnToCharacterSelectReq>(arena);
+  }
+  using ::google::protobuf::internal::ZeroFieldsBase::CopyFrom;
+  inline void CopyFrom(const ReturnToCharacterSelectReq& from) {
+    ::google::protobuf::internal::ZeroFieldsBase::CopyImpl(*this, from);
+  }
+  using ::google::protobuf::internal::ZeroFieldsBase::MergeFrom;
+  void MergeFrom(const ReturnToCharacterSelectReq& from) {
+    ::google::protobuf::internal::ZeroFieldsBase::MergeImpl(*this, from);
+  }
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.ReturnToCharacterSelectReq"; }
+
+  explicit ReturnToCharacterSelectReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ReturnToCharacterSelectReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ReturnToCharacterSelectReq& from);
+  ReturnToCharacterSelectReq(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ReturnToCharacterSelectReq&& from) noexcept
+      : ReturnToCharacterSelectReq(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  // @@protoc_insertion_point(class_scope:GamePacket.ReturnToCharacterSelectReq)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<0, 0,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  friend struct ::TableStruct_GamePacket_2fcharacter_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ReturnToCharacterSelectReq_class_data_;
 // -------------------------------------------------------------------
 
 class CharacterSelectReq final : public ::google::protobuf::Message
@@ -421,6 +560,7 @@ class CharacterCreateReq final : public ::google::protobuf::Message
   enum : int {
     kNameFieldNumber = 1,
     kJobIdFieldNumber = 2,
+    kAppearancePresetIdFieldNumber = 3,
   };
   // string name = 1;
   void clear_name() ;
@@ -447,11 +587,21 @@ class CharacterCreateReq final : public ::google::protobuf::Message
   void _internal_set_job_id(::int32_t value);
 
   public:
+  // int32 appearance_preset_id = 3;
+  void clear_appearance_preset_id() ;
+  ::int32_t appearance_preset_id() const;
+  void set_appearance_preset_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_appearance_preset_id() const;
+  void _internal_set_appearance_preset_id(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:GamePacket.CharacterCreateReq)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<1, 2,
+  static const ::google::protobuf::internal::TcParseTable<2, 3,
                                    0, 42,
                                    2>
       _table_;
@@ -475,6 +625,7 @@ class CharacterCreateReq final : public ::google::protobuf::Message
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::int32_t job_id_;
+    ::int32_t appearance_preset_id_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -1300,6 +1451,31 @@ inline void CharacterCreateReq::_internal_set_job_id(::int32_t value) {
   _impl_.job_id_ = value;
 }
 
+// int32 appearance_preset_id = 3;
+inline void CharacterCreateReq::clear_appearance_preset_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.appearance_preset_id_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline ::int32_t CharacterCreateReq::appearance_preset_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.CharacterCreateReq.appearance_preset_id)
+  return _internal_appearance_preset_id();
+}
+inline void CharacterCreateReq::set_appearance_preset_id(::int32_t value) {
+  _internal_set_appearance_preset_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:GamePacket.CharacterCreateReq.appearance_preset_id)
+}
+inline ::int32_t CharacterCreateReq::_internal_appearance_preset_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.appearance_preset_id_;
+}
+inline void CharacterCreateReq::_internal_set_appearance_preset_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.appearance_preset_id_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // CharacterCreateRes
@@ -1727,6 +1903,10 @@ inline void CharacterSelectRes::_internal_set_stage_data_key(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.stage_data_key_ = value;
 }
+
+// -------------------------------------------------------------------
+
+// ReturnToCharacterSelectReq
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop

@@ -25,6 +25,24 @@ namespace _pb = ::google::protobuf;
 namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 namespace GamePacket {
+template <typename>
+PROTOBUF_CONSTEXPR ReturnToCharacterSelectReq::ReturnToCharacterSelectReq(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::internal::ZeroFieldsBase(ReturnToCharacterSelectReq_class_data_.base()){}
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::internal::ZeroFieldsBase() {
+}
+#endif  // PROTOBUF_CUSTOM_VTABLE
+struct ReturnToCharacterSelectReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ReturnToCharacterSelectReqDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ReturnToCharacterSelectReqDefaultTypeInternal() {}
+  union {
+    ReturnToCharacterSelectReq _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ReturnToCharacterSelectReqDefaultTypeInternal _ReturnToCharacterSelectReq_default_instance_;
 
 inline constexpr CharacterSelectReq::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -57,7 +75,8 @@ inline constexpr CharacterCreateReq::Impl_::Impl_(
         name_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        job_id_{0} {}
+        job_id_{0},
+        appearance_preset_id_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR CharacterCreateReq::CharacterCreateReq(::_pbi::ConstantInitialized)
@@ -177,11 +196,13 @@ const ::uint32_t
         0,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterCreateReq, _impl_._has_bits_),
-        5, // hasbit index offset
+        6, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterCreateReq, _impl_.name_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterCreateReq, _impl_.job_id_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterCreateReq, _impl_.appearance_preset_id_),
         0,
         1,
+        2,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterCreateRes, _impl_._has_bits_),
         6, // hasbit index offset
@@ -207,15 +228,17 @@ const ::uint32_t
         0,
         1,
         3,
+        0x000, // bitmap
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, sizeof(::GamePacket::CharacterListNtf)},
         {5, sizeof(::GamePacket::CharacterCreateReq)},
-        {12, sizeof(::GamePacket::CharacterCreateRes)},
-        {21, sizeof(::GamePacket::CharacterSelectReq)},
-        {26, sizeof(::GamePacket::CharacterSelectRes)},
+        {14, sizeof(::GamePacket::CharacterCreateRes)},
+        {23, sizeof(::GamePacket::CharacterSelectReq)},
+        {28, sizeof(::GamePacket::CharacterSelectRes)},
+        {39, sizeof(::GamePacket::ReturnToCharacterSelectReq)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::GamePacket::_CharacterListNtf_default_instance_._instance,
@@ -223,22 +246,25 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::GamePacket::_CharacterCreateRes_default_instance_._instance,
     &::GamePacket::_CharacterSelectReq_default_instance_._instance,
     &::GamePacket::_CharacterSelectRes_default_instance_._instance,
+    &::GamePacket::_ReturnToCharacterSelectReq_default_instance_._instance,
 };
 const char descriptor_table_protodef_GamePacket_2fcharacter_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n!GamePacket/character_packet.proto\022\nGam"
     "ePacket\032\036DataStructures/character.proto\""
     "A\n\020CharacterListNtf\022-\n\ncharacters\030\001 \003(\0132"
-    "\031.DataStructures.Character\"2\n\022CharacterC"
-    "reateReq\022\014\n\004name\030\001 \001(\t\022\016\n\006job_id\030\002 \001(\005\"n"
-    "\n\022CharacterCreateRes\022\023\n\013result_code\030\001 \001("
-    "\005\022\021\n\terror_msg\030\002 \001(\t\0220\n\rnew_character\030\003 "
-    "\001(\0132\031.DataStructures.Character\"*\n\022Charac"
-    "terSelectReq\022\024\n\014character_id\030\001 \001(\003\"\216\001\n\022C"
-    "haracterSelectRes\022\023\n\013result_code\030\001 \001(\005\022\021"
-    "\n\terror_msg\030\002 \001(\t\022,\n\tcharacter\030\n \001(\0132\031.D"
-    "ataStructures.Character\022\026\n\016stage_data_ke"
-    "y\030\t \001(\005J\004\010\003\020\004J\004\010\004\020\tb\006proto3"
+    "\031.DataStructures.Character\"P\n\022CharacterC"
+    "reateReq\022\014\n\004name\030\001 \001(\t\022\016\n\006job_id\030\002 \001(\005\022\034"
+    "\n\024appearance_preset_id\030\003 \001(\005\"n\n\022Characte"
+    "rCreateRes\022\023\n\013result_code\030\001 \001(\005\022\021\n\terror"
+    "_msg\030\002 \001(\t\0220\n\rnew_character\030\003 \001(\0132\031.Data"
+    "Structures.Character\"*\n\022CharacterSelectR"
+    "eq\022\024\n\014character_id\030\001 \001(\003\"\216\001\n\022CharacterSe"
+    "lectRes\022\023\n\013result_code\030\001 \001(\005\022\021\n\terror_ms"
+    "g\030\002 \001(\t\022,\n\tcharacter\030\n \001(\0132\031.DataStructu"
+    "res.Character\022\026\n\016stage_data_key\030\t \001(\005J\004\010"
+    "\003\020\004J\004\010\004\020\t\"\034\n\032ReturnToCharacterSelectReqb"
+    "\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_GamePacket_2fcharacter_5fpacket_2eproto_deps[1] = {
@@ -248,13 +274,13 @@ static ::absl::once_flag descriptor_table_GamePacket_2fcharacter_5fpacket_2eprot
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fcharacter_5fpacket_2eproto = {
     false,
     false,
-    507,
+    567,
     descriptor_table_protodef_GamePacket_2fcharacter_5fpacket_2eproto,
     "GamePacket/character_packet.proto",
     &descriptor_table_GamePacket_2fcharacter_5fpacket_2eproto_once,
     descriptor_table_GamePacket_2fcharacter_5fpacket_2eproto_deps,
     1,
-    5,
+    6,
     schemas,
     file_default_instances,
     TableStruct_GamePacket_2fcharacter_5fpacket_2eproto::offsets,
@@ -592,7 +618,13 @@ CharacterCreateReq::CharacterCreateReq(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  _impl_.job_id_ = from._impl_.job_id_;
+  ::memcpy(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, job_id_),
+           reinterpret_cast<const char*>(&from._impl_) +
+               offsetof(Impl_, job_id_),
+           offsetof(Impl_, appearance_preset_id_) -
+               offsetof(Impl_, job_id_) +
+               sizeof(Impl_::appearance_preset_id_));
 
   // @@protoc_insertion_point(copy_constructor:GamePacket.CharacterCreateReq)
 }
@@ -604,7 +636,12 @@ PROTOBUF_NDEBUG_INLINE CharacterCreateReq::Impl_::Impl_(
 
 inline void CharacterCreateReq::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.job_id_ = {};
+  ::memset(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, job_id_),
+           0,
+           offsetof(Impl_, appearance_preset_id_) -
+               offsetof(Impl_, job_id_) +
+               sizeof(Impl_::appearance_preset_id_));
 }
 CharacterCreateReq::~CharacterCreateReq() {
   // @@protoc_insertion_point(destructor:GamePacket.CharacterCreateReq)
@@ -664,16 +701,16 @@ CharacterCreateReq::GetClassData() const {
   return CharacterCreateReq_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<1, 2, 0, 42, 2>
+const ::_pbi::TcParseTable<2, 3, 0, 42, 2>
 CharacterCreateReq::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(CharacterCreateReq, _impl_._has_bits_),
     0, // no _extensions_
-    2, 8,  // max_field_number, fast_idx_mask
+    3, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967292,  // skipmap
+    4294967288,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    2,  // num_field_entries
+    3,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     CharacterCreateReq_class_data_.base(),
@@ -683,14 +720,19 @@ CharacterCreateReq::_table_ = {
     ::_pbi::TcParser::GetTable<::GamePacket::CharacterCreateReq>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // int32 job_id = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CharacterCreateReq, _impl_.job_id_), 1>(),
-     {16, 1, 0,
-      PROTOBUF_FIELD_OFFSET(CharacterCreateReq, _impl_.job_id_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // string name = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 0, 0,
       PROTOBUF_FIELD_OFFSET(CharacterCreateReq, _impl_.name_)}},
+    // int32 job_id = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CharacterCreateReq, _impl_.job_id_), 1>(),
+     {16, 1, 0,
+      PROTOBUF_FIELD_OFFSET(CharacterCreateReq, _impl_.job_id_)}},
+    // int32 appearance_preset_id = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CharacterCreateReq, _impl_.appearance_preset_id_), 2>(),
+     {24, 2, 0,
+      PROTOBUF_FIELD_OFFSET(CharacterCreateReq, _impl_.appearance_preset_id_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -698,6 +740,8 @@ CharacterCreateReq::_table_ = {
     {PROTOBUF_FIELD_OFFSET(CharacterCreateReq, _impl_.name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // int32 job_id = 2;
     {PROTOBUF_FIELD_OFFSET(CharacterCreateReq, _impl_.job_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int32 appearance_preset_id = 3;
+    {PROTOBUF_FIELD_OFFSET(CharacterCreateReq, _impl_.appearance_preset_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
@@ -717,7 +761,11 @@ PROTOBUF_NOINLINE void CharacterCreateReq::Clear() {
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
     _impl_.name_.ClearNonDefaultToEmpty();
   }
-  _impl_.job_id_ = 0;
+  if (BatchCheckHasBit(cached_has_bits, 0x00000006U)) {
+    ::memset(&_impl_.job_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.appearance_preset_id_) -
+        reinterpret_cast<char*>(&_impl_.job_id_)) + sizeof(_impl_.appearance_preset_id_));
+  }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -760,6 +808,15 @@ PROTOBUF_NOINLINE void CharacterCreateReq::Clear() {
     }
   }
 
+  // int32 appearance_preset_id = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (this_._internal_appearance_preset_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<3>(
+              stream, this_._internal_appearance_preset_id(), target);
+    }
+  }
+
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -785,7 +842,7 @@ PROTOBUF_NOINLINE void CharacterCreateReq::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
     // string name = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (!this_._internal_name().empty()) {
@@ -798,6 +855,13 @@ PROTOBUF_NOINLINE void CharacterCreateReq::Clear() {
       if (this_._internal_job_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_job_id());
+      }
+    }
+    // int32 appearance_preset_id = 3;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (this_._internal_appearance_preset_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_appearance_preset_id());
       }
     }
   }
@@ -819,7 +883,7 @@ void CharacterCreateReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (!from._internal_name().empty()) {
         _this->_internal_set_name(from._internal_name());
@@ -832,6 +896,11 @@ void CharacterCreateReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
       if (from._internal_job_id() != 0) {
         _this->_impl_.job_id_ = from._impl_.job_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (from._internal_appearance_preset_id() != 0) {
+        _this->_impl_.appearance_preset_id_ = from._impl_.appearance_preset_id_;
       }
     }
   }
@@ -855,7 +924,12 @@ void CharacterCreateReq::InternalSwap(CharacterCreateReq* PROTOBUF_RESTRICT PROT
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
-  swap(_impl_.job_id_, other->_impl_.job_id_);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(CharacterCreateReq, _impl_.appearance_preset_id_)
+      + sizeof(CharacterCreateReq::_impl_.appearance_preset_id_)
+      - PROTOBUF_FIELD_OFFSET(CharacterCreateReq, _impl_.job_id_)>(
+          reinterpret_cast<char*>(&_impl_.job_id_),
+          reinterpret_cast<char*>(&other->_impl_.job_id_));
 }
 
 ::google::protobuf::Metadata CharacterCreateReq::GetMetadata() const {
@@ -1868,6 +1942,115 @@ void CharacterSelectRes::InternalSwap(CharacterSelectRes* PROTOBUF_RESTRICT PROT
 
 ::google::protobuf::Metadata CharacterSelectRes::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class ReturnToCharacterSelectReq::_Internal {
+ public:
+};
+
+ReturnToCharacterSelectReq::ReturnToCharacterSelectReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::internal::ZeroFieldsBase(arena, ReturnToCharacterSelectReq_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::internal::ZeroFieldsBase(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(arena_constructor:GamePacket.ReturnToCharacterSelectReq)
+}
+ReturnToCharacterSelectReq::ReturnToCharacterSelectReq(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const ReturnToCharacterSelectReq& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::internal::ZeroFieldsBase(arena, ReturnToCharacterSelectReq_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::internal::ZeroFieldsBase(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  ReturnToCharacterSelectReq* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+
+  // @@protoc_insertion_point(copy_constructor:GamePacket.ReturnToCharacterSelectReq)
+}
+
+inline void* PROTOBUF_NONNULL ReturnToCharacterSelectReq::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) ReturnToCharacterSelectReq(arena);
+}
+constexpr auto ReturnToCharacterSelectReq::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(ReturnToCharacterSelectReq),
+                                            alignof(ReturnToCharacterSelectReq));
+}
+constexpr auto ReturnToCharacterSelectReq::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_ReturnToCharacterSelectReq_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &ReturnToCharacterSelectReq::MergeImpl,
+          ::google::protobuf::internal::ZeroFieldsBase::GetNewImpl<ReturnToCharacterSelectReq>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &ReturnToCharacterSelectReq::SharedDtor,
+          ::google::protobuf::internal::ZeroFieldsBase::GetClearImpl<ReturnToCharacterSelectReq>(), &ReturnToCharacterSelectReq::ByteSizeLong,
+              &ReturnToCharacterSelectReq::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(ReturnToCharacterSelectReq, _impl_._cached_size_),
+          false,
+      },
+      &ReturnToCharacterSelectReq::kDescriptorMethods,
+      &descriptor_table_GamePacket_2fcharacter_5fpacket_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull ReturnToCharacterSelectReq_class_data_ =
+        ReturnToCharacterSelectReq::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+ReturnToCharacterSelectReq::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&ReturnToCharacterSelectReq_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(ReturnToCharacterSelectReq_class_data_.tc_table);
+  return ReturnToCharacterSelectReq_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 0, 0, 0, 2>
+ReturnToCharacterSelectReq::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    0, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967295,  // skipmap
+    offsetof(decltype(_table_), field_names),  // no field_entries
+    0,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    ReturnToCharacterSelectReq_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::GamePacket::ReturnToCharacterSelectReq>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, // no field_entries, or aux_entries
+  {{
+  }},
+};
+
+
+
+
+
+
+
+::google::protobuf::Metadata ReturnToCharacterSelectReq::GetMetadata() const {
+  return ::google::protobuf::internal::ZeroFieldsBase::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace GamePacket

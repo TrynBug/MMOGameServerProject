@@ -41,7 +41,8 @@ inline constexpr Character::Impl_::Impl_(
         pos_x_{0},
         pos_y_{0},
         yaw_{0},
-        pos_z_{0} {}
+        pos_z_{0},
+        appearance_preset_id_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR Character::Character(::_pbi::ConstantInitialized)
@@ -72,7 +73,7 @@ const ::uint32_t
         protodesc_cold) = {
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_._has_bits_),
-        14, // hasbit index offset
+        15, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.character_id_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.owner_account_id_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.name_),
@@ -84,6 +85,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.pos_y_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.yaw_),
         PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.pos_z_),
+        PROTOBUF_FIELD_OFFSET(::DataStructures::Character, _impl_.appearance_preset_id_),
         1,
         2,
         0,
@@ -95,6 +97,7 @@ const ::uint32_t
         8,
         9,
         10,
+        11,
 };
 
 static const ::_pbi::MigrationSchema
@@ -107,18 +110,19 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_DataStructures_2fcharacter_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\036DataStructures/character.proto\022\016DataSt"
-    "ructures\"\306\001\n\tCharacter\022\024\n\014character_id\030\001"
+    "ructures\"\344\001\n\tCharacter\022\024\n\014character_id\030\001"
     " \001(\003\022\030\n\020owner_account_id\030\002 \001(\003\022\014\n\004name\030\003"
     " \001(\t\022\016\n\006job_id\030\004 \001(\005\022\r\n\005level\030\005 \001(\005\022\013\n\003e"
     "xp\030\006 \001(\003\022\025\n\rlast_stage_id\030\013 \001(\003\022\r\n\005pos_x"
     "\030\014 \001(\002\022\r\n\005pos_y\030\r \001(\002\022\013\n\003yaw\030\016 \001(\002\022\r\n\005po"
-    "s_z\030\017 \001(\002b\006proto3"
+    "s_z\030\017 \001(\002\022\034\n\024appearance_preset_id\030\020 \001(\005b"
+    "\006proto3"
 };
 static ::absl::once_flag descriptor_table_DataStructures_2fcharacter_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_DataStructures_2fcharacter_2eproto = {
     false,
     false,
-    257,
+    287,
     descriptor_table_protodef_DataStructures_2fcharacter_2eproto,
     "DataStructures/character.proto",
     &descriptor_table_DataStructures_2fcharacter_2eproto_once,
@@ -176,9 +180,9 @@ Character::Character(
                offsetof(Impl_, character_id_),
            reinterpret_cast<const char*>(&from._impl_) +
                offsetof(Impl_, character_id_),
-           offsetof(Impl_, pos_z_) -
+           offsetof(Impl_, appearance_preset_id_) -
                offsetof(Impl_, character_id_) +
-               sizeof(Impl_::pos_z_));
+               sizeof(Impl_::appearance_preset_id_));
 
   // @@protoc_insertion_point(copy_constructor:DataStructures.Character)
 }
@@ -193,9 +197,9 @@ inline void Character::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   ::memset(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, character_id_),
            0,
-           offsetof(Impl_, pos_z_) -
+           offsetof(Impl_, appearance_preset_id_) -
                offsetof(Impl_, character_id_) +
-               sizeof(Impl_::pos_z_));
+               sizeof(Impl_::appearance_preset_id_));
 }
 Character::~Character() {
   // @@protoc_insertion_point(destructor:DataStructures.Character)
@@ -255,16 +259,16 @@ Character::GetClassData() const {
   return Character_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<4, 11, 0, 45, 2>
+const ::_pbi::TcParseTable<4, 12, 0, 45, 2>
 Character::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(Character, _impl_._has_bits_),
     0, // no _extensions_
-    15, 120,  // max_field_number, fast_idx_mask
+    16, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294935488,  // skipmap
+    4294902720,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    11,  // num_field_entries
+    12,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     Character_class_data_.base(),
@@ -274,7 +278,10 @@ Character::_table_ = {
     ::_pbi::TcParser::GetTable<::DataStructures::Character>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
+    // int32 appearance_preset_id = 16;
+    {::_pbi::TcParser::FastV32S2,
+     {384, 11, 0,
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.appearance_preset_id_)}},
     // int64 character_id = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Character, _impl_.character_id_), 1>(),
      {8, 1, 0,
@@ -348,6 +355,8 @@ Character::_table_ = {
     {PROTOBUF_FIELD_OFFSET(Character, _impl_.yaw_), _Internal::kHasBitsOffset + 9, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
     // float pos_z = 15;
     {PROTOBUF_FIELD_OFFSET(Character, _impl_.pos_z_), _Internal::kHasBitsOffset + 10, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // int32 appearance_preset_id = 16;
+    {PROTOBUF_FIELD_OFFSET(Character, _impl_.appearance_preset_id_), _Internal::kHasBitsOffset + 11, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
@@ -372,10 +381,10 @@ PROTOBUF_NOINLINE void Character::Clear() {
         reinterpret_cast<char*>(&_impl_.pos_x_) -
         reinterpret_cast<char*>(&_impl_.character_id_)) + sizeof(_impl_.pos_x_));
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x00000700U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x00000f00U)) {
     ::memset(&_impl_.pos_y_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.pos_z_) -
-        reinterpret_cast<char*>(&_impl_.pos_y_)) + sizeof(_impl_.pos_z_));
+        reinterpret_cast<char*>(&_impl_.appearance_preset_id_) -
+        reinterpret_cast<char*>(&_impl_.pos_y_)) + sizeof(_impl_.appearance_preset_id_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -500,6 +509,15 @@ PROTOBUF_NOINLINE void Character::Clear() {
     }
   }
 
+  // int32 appearance_preset_id = 16;
+  if (CheckHasBit(cached_has_bits, 0x00000800U)) {
+    if (this_._internal_appearance_preset_id() != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+          16, this_._internal_appearance_preset_id(), target);
+    }
+  }
+
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -582,7 +600,7 @@ PROTOBUF_NOINLINE void Character::Clear() {
       }
     }
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x00000700U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x00000f00U)) {
     // float pos_y = 13;
     if (CheckHasBit(cached_has_bits, 0x00000100U)) {
       if (::absl::bit_cast<::uint32_t>(this_._internal_pos_y()) != 0) {
@@ -599,6 +617,13 @@ PROTOBUF_NOINLINE void Character::Clear() {
     if (CheckHasBit(cached_has_bits, 0x00000400U)) {
       if (::absl::bit_cast<::uint32_t>(this_._internal_pos_z()) != 0) {
         total_size += 5;
+      }
+    }
+    // int32 appearance_preset_id = 16;
+    if (CheckHasBit(cached_has_bits, 0x00000800U)) {
+      if (this_._internal_appearance_preset_id() != 0) {
+        total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                        this_._internal_appearance_preset_id());
       }
     }
   }
@@ -666,7 +691,7 @@ void Character::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x00000700U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x00000f00U)) {
     if (CheckHasBit(cached_has_bits, 0x00000100U)) {
       if (::absl::bit_cast<::uint32_t>(from._internal_pos_y()) != 0) {
         _this->_impl_.pos_y_ = from._impl_.pos_y_;
@@ -680,6 +705,11 @@ void Character::MergeImpl(::google::protobuf::MessageLite& to_msg,
     if (CheckHasBit(cached_has_bits, 0x00000400U)) {
       if (::absl::bit_cast<::uint32_t>(from._internal_pos_z()) != 0) {
         _this->_impl_.pos_z_ = from._impl_.pos_z_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000800U)) {
+      if (from._internal_appearance_preset_id() != 0) {
+        _this->_impl_.appearance_preset_id_ = from._impl_.appearance_preset_id_;
       }
     }
   }
@@ -704,8 +734,8 @@ void Character::InternalSwap(Character* PROTOBUF_RESTRICT PROTOBUF_NONNULL other
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Character, _impl_.pos_z_)
-      + sizeof(Character::_impl_.pos_z_)
+      PROTOBUF_FIELD_OFFSET(Character, _impl_.appearance_preset_id_)
+      + sizeof(Character::_impl_.appearance_preset_id_)
       - PROTOBUF_FIELD_OFFSET(Character, _impl_.character_id_)>(
           reinterpret_cast<char*>(&_impl_.character_id_),
           reinterpret_cast<char*>(&other->_impl_.character_id_));

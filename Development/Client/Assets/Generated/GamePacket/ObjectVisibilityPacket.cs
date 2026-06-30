@@ -27,33 +27,34 @@ namespace GamePacket {
             "CilHYW1lUGFja2V0L29iamVjdF92aXNpYmlsaXR5X3BhY2tldC5wcm90bxIK",
             "R2FtZVBhY2tldCJRChBCdWZmU25hcHNob3RJbmZvEhAKCGJ1ZmZfa2V5GAEg",
             "ASgFEhMKC3N0YWNrX2NvdW50GAIgASgFEhYKDnJlbWFpbl90aW1lX21zGAMg",
-            "ASgFIo0CChJDaGFyYWN0ZXJTcGF3bkluZm8SEQoJb2JqZWN0X2lkGAEgASgD",
+            "ASgFIqsCChJDaGFyYWN0ZXJTcGF3bkluZm8SEQoJb2JqZWN0X2lkGAEgASgD",
             "EhgKEG93bmVyX2FjY291bnRfaWQYAiABKAMSDAoEbmFtZRgDIAEoCRIOCgZq",
             "b2JfaWQYBCABKAUSDQoFbGV2ZWwYBSABKAUSCgoCaHAYBiABKAESDgoGbWF4",
             "X2hwGAcgASgBEgoKAm1wGAggASgBEg4KBm1heF9tcBgJIAEoARINCgVwb3Nf",
             "eBgKIAEoAhINCgVwb3NfeRgLIAEoAhINCgVwb3NfehgMIAEoAhILCgN5YXcY",
             "DSABKAISKwoFYnVmZnMYDiADKAsyHC5HYW1lUGFja2V0LkJ1ZmZTbmFwc2hv",
-            "dEluZm8i0gEKEE1vbnN0ZXJTcGF3bkluZm8SEQoJb2JqZWN0X2lkGAEgASgD",
-            "EhMKC21vbnN0ZXJfa2V5GAIgASgFEg0KBXBvc194GAMgASgCEg0KBXBvc195",
-            "GAQgASgCEg0KBXBvc196GAUgASgCEgsKA3lhdxgGIAEoAhIrCgVidWZmcxgH",
-            "IAMoCzIcLkdhbWVQYWNrZXQuQnVmZlNuYXBzaG90SW5mbxIPCgdpc19kZWFk",
-            "GAggASgIEg4KBmN1cl9ocBgJIAEoARIOCgZtYXhfaHAYCiABKAEifQoNUHJv",
-            "cFNwYXduSW5mbxIRCglvYmplY3RfaWQYASABKAMSEAoIcHJvcF9rZXkYAiAB",
-            "KAUSDQoFcG9zX3gYAyABKAISDQoFcG9zX3kYBCABKAISDQoFcG9zX3oYBSAB",
-            "KAISCwoDeWF3GAYgASgCEg0KBXN0YXRlGAcgASgFIsoBChNPYmplY3RWaXNp",
-            "YmlsaXR5TnRmEjgKEGNoYXJhY3Rlcl9zcGF3bnMYASADKAsyHi5HYW1lUGFj",
-            "a2V0LkNoYXJhY3RlclNwYXduSW5mbxI0Cg5tb25zdGVyX3NwYXducxgCIAMo",
-            "CzIcLkdhbWVQYWNrZXQuTW9uc3RlclNwYXduSW5mbxIuCgtwcm9wX3NwYXdu",
-            "cxgDIAMoCzIZLkdhbWVQYWNrZXQuUHJvcFNwYXduSW5mbxITCgtkZXNwYXdu",
-            "X2lkcxgKIAMoAyJJCgxQcm9wU3RhdGVOdGYSEQoJb2JqZWN0X2lkGAEgASgD",
-            "Eg0KBXN0YXRlGAIgASgFEhcKD2FjdG9yX29iamVjdF9pZBgDIAEoAyI9Cg5P",
-            "YmplY3REZWF0aE50ZhIRCglvYmplY3RfaWQYASABKAMSGAoQa2lsbGVyX29i",
-            "amVjdF9pZBgCIAEoA2IGcHJvdG8z"));
+            "dEluZm8SHAoUYXBwZWFyYW5jZV9wcmVzZXRfaWQYDyABKAUi0gEKEE1vbnN0",
+            "ZXJTcGF3bkluZm8SEQoJb2JqZWN0X2lkGAEgASgDEhMKC21vbnN0ZXJfa2V5",
+            "GAIgASgFEg0KBXBvc194GAMgASgCEg0KBXBvc195GAQgASgCEg0KBXBvc196",
+            "GAUgASgCEgsKA3lhdxgGIAEoAhIrCgVidWZmcxgHIAMoCzIcLkdhbWVQYWNr",
+            "ZXQuQnVmZlNuYXBzaG90SW5mbxIPCgdpc19kZWFkGAggASgIEg4KBmN1cl9o",
+            "cBgJIAEoARIOCgZtYXhfaHAYCiABKAEifQoNUHJvcFNwYXduSW5mbxIRCglv",
+            "YmplY3RfaWQYASABKAMSEAoIcHJvcF9rZXkYAiABKAUSDQoFcG9zX3gYAyAB",
+            "KAISDQoFcG9zX3kYBCABKAISDQoFcG9zX3oYBSABKAISCwoDeWF3GAYgASgC",
+            "Eg0KBXN0YXRlGAcgASgFIsoBChNPYmplY3RWaXNpYmlsaXR5TnRmEjgKEGNo",
+            "YXJhY3Rlcl9zcGF3bnMYASADKAsyHi5HYW1lUGFja2V0LkNoYXJhY3RlclNw",
+            "YXduSW5mbxI0Cg5tb25zdGVyX3NwYXducxgCIAMoCzIcLkdhbWVQYWNrZXQu",
+            "TW9uc3RlclNwYXduSW5mbxIuCgtwcm9wX3NwYXducxgDIAMoCzIZLkdhbWVQ",
+            "YWNrZXQuUHJvcFNwYXduSW5mbxITCgtkZXNwYXduX2lkcxgKIAMoAyJJCgxQ",
+            "cm9wU3RhdGVOdGYSEQoJb2JqZWN0X2lkGAEgASgDEg0KBXN0YXRlGAIgASgF",
+            "EhcKD2FjdG9yX29iamVjdF9pZBgDIAEoAyI9Cg5PYmplY3REZWF0aE50ZhIR",
+            "CglvYmplY3RfaWQYASABKAMSGAoQa2lsbGVyX29iamVjdF9pZBgCIAEoA2IG",
+            "cHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.BuffSnapshotInfo), global::GamePacket.BuffSnapshotInfo.Parser, new[]{ "BuffKey", "StackCount", "RemainTimeMs" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSpawnInfo), global::GamePacket.CharacterSpawnInfo.Parser, new[]{ "ObjectId", "OwnerAccountId", "Name", "JobId", "Level", "Hp", "MaxHp", "Mp", "MaxMp", "PosX", "PosY", "PosZ", "Yaw", "Buffs" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSpawnInfo), global::GamePacket.CharacterSpawnInfo.Parser, new[]{ "ObjectId", "OwnerAccountId", "Name", "JobId", "Level", "Hp", "MaxHp", "Mp", "MaxMp", "PosX", "PosY", "PosZ", "Yaw", "Buffs", "AppearancePresetId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.MonsterSpawnInfo), global::GamePacket.MonsterSpawnInfo.Parser, new[]{ "ObjectId", "MonsterKey", "PosX", "PosY", "PosZ", "Yaw", "Buffs", "IsDead", "CurHp", "MaxHp" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.PropSpawnInfo), global::GamePacket.PropSpawnInfo.Parser, new[]{ "ObjectId", "PropKey", "PosX", "PosY", "PosZ", "Yaw", "State" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ObjectVisibilityNtf), global::GamePacket.ObjectVisibilityNtf.Parser, new[]{ "CharacterSpawns", "MonsterSpawns", "PropSpawns", "DespawnIds" }, null, null, null, null),
@@ -400,6 +401,7 @@ namespace GamePacket {
       posZ_ = other.posZ_;
       yaw_ = other.yaw_;
       buffs_ = other.buffs_.Clone();
+      appearancePresetId_ = other.appearancePresetId_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -603,6 +605,21 @@ namespace GamePacket {
       get { return buffs_; }
     }
 
+    /// <summary>Field number for the "appearance_preset_id" field.</summary>
+    public const int AppearancePresetIdFieldNumber = 15;
+    private int appearancePresetId_;
+    /// <summary>
+    /// 외형 프리셋 인덱스 (0-base). job_id 와 함께 외형 결정.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int AppearancePresetId {
+      get { return appearancePresetId_; }
+      set {
+        appearancePresetId_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -632,6 +649,7 @@ namespace GamePacket {
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Yaw, other.Yaw)) return false;
       if(!buffs_.Equals(other.buffs_)) return false;
+      if (AppearancePresetId != other.AppearancePresetId) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -653,6 +671,7 @@ namespace GamePacket {
       if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
       if (Yaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Yaw);
       hash ^= buffs_.GetHashCode();
+      if (AppearancePresetId != 0) hash ^= AppearancePresetId.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -724,6 +743,10 @@ namespace GamePacket {
         output.WriteFloat(Yaw);
       }
       buffs_.WriteTo(output, _repeated_buffs_codec);
+      if (AppearancePresetId != 0) {
+        output.WriteRawTag(120);
+        output.WriteInt32(AppearancePresetId);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -787,6 +810,10 @@ namespace GamePacket {
         output.WriteFloat(Yaw);
       }
       buffs_.WriteTo(ref output, _repeated_buffs_codec);
+      if (AppearancePresetId != 0) {
+        output.WriteRawTag(120);
+        output.WriteInt32(AppearancePresetId);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -837,6 +864,9 @@ namespace GamePacket {
         size += 1 + 4;
       }
       size += buffs_.CalculateSize(_repeated_buffs_codec);
+      if (AppearancePresetId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(AppearancePresetId);
+      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -889,6 +919,9 @@ namespace GamePacket {
         Yaw = other.Yaw;
       }
       buffs_.Add(other.buffs_);
+      if (other.AppearancePresetId != 0) {
+        AppearancePresetId = other.AppearancePresetId;
+      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -964,6 +997,10 @@ namespace GamePacket {
             buffs_.AddEntriesFrom(input, _repeated_buffs_codec);
             break;
           }
+          case 120: {
+            AppearancePresetId = input.ReadInt32();
+            break;
+          }
         }
       }
     #endif
@@ -1037,6 +1074,10 @@ namespace GamePacket {
           }
           case 114: {
             buffs_.AddEntriesFrom(ref input, _repeated_buffs_codec);
+            break;
+          }
+          case 120: {
+            AppearancePresetId = input.ReadInt32();
             break;
           }
         }

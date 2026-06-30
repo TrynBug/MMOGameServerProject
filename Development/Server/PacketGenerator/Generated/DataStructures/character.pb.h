@@ -223,6 +223,7 @@ class Character final : public ::google::protobuf::Message
     kPosYFieldNumber = 13,
     kYawFieldNumber = 14,
     kPosZFieldNumber = 15,
+    kAppearancePresetIdFieldNumber = 16,
   };
   // string name = 3;
   void clear_name() ;
@@ -339,11 +340,21 @@ class Character final : public ::google::protobuf::Message
   void _internal_set_pos_z(float value);
 
   public:
+  // int32 appearance_preset_id = 16;
+  void clear_appearance_preset_id() ;
+  ::int32_t appearance_preset_id() const;
+  void set_appearance_preset_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_appearance_preset_id() const;
+  void _internal_set_appearance_preset_id(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:DataStructures.Character)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<4, 11,
+  static const ::google::protobuf::internal::TcParseTable<4, 12,
                                    0, 45,
                                    2>
       _table_;
@@ -376,6 +387,7 @@ class Character final : public ::google::protobuf::Message
     float pos_y_;
     float yaw_;
     float pos_z_;
+    ::int32_t appearance_preset_id_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -713,6 +725,31 @@ inline float Character::_internal_pos_z() const {
 inline void Character::_internal_set_pos_z(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pos_z_ = value;
+}
+
+// int32 appearance_preset_id = 16;
+inline void Character::clear_appearance_preset_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.appearance_preset_id_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000800U);
+}
+inline ::int32_t Character::appearance_preset_id() const {
+  // @@protoc_insertion_point(field_get:DataStructures.Character.appearance_preset_id)
+  return _internal_appearance_preset_id();
+}
+inline void Character::set_appearance_preset_id(::int32_t value) {
+  _internal_set_appearance_preset_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000800U);
+  // @@protoc_insertion_point(field_set:DataStructures.Character.appearance_preset_id)
+}
+inline ::int32_t Character::_internal_appearance_preset_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.appearance_preset_id_;
+}
+inline void Character::_internal_set_appearance_preset_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.appearance_preset_id_ = value;
 }
 
 #ifdef __GNUC__

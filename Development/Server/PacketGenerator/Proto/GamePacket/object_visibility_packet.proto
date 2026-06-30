@@ -40,6 +40,7 @@ message CharacterSpawnInfo {
     float  pos_z          = 12;  // 평면 깊이축
     float  yaw            = 13;  // Y축 회전, degree 단위
     repeated BuffSnapshotInfo buffs = 14;  // 현재 보유 버프 (UI 뱃지용)
+    int32  appearance_preset_id = 15;  // 외형 프리셋 인덱스 (0-base). job_id 와 함께 외형 결정.
 }
 
 // 몬스터 spawn 정보. 클라이언트는 monster_key 로 몬스터 게임데이터를 조회해

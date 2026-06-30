@@ -25,6 +25,7 @@ message CharacterListNtf {
 message CharacterCreateReq {
     string name = 1;     // 캐릭터 이름
     int32 job_id = 2;    // 직업 ID (GameData로 관리)
+    int32 appearance_preset_id = 3;  // 외형 프리셋 인덱스 (0-base)
 }
 
 // 캐릭터 생성 결과 (게임서버 -> 클라)
@@ -55,4 +56,10 @@ message CharacterSelectRes {
     string error_msg = 2;        // 실패 시 사유 메시지 (성공 시 빈 문자열)
     DataStructures.Character character = 10;  // 선택된 캐릭터 전체 데이터 (서버가 진실의 원천)
     int32 stage_data_key = 9;    // 입장할 Stage 데이터 Key (클라가 로딩할 맵 리소스 식별)
+}
+
+// 게임 중 캐릭터 선택 화면으로 복귀 요청 (클라 -> 게임서버)
+// 서버는 현재 Stage 에서 퇴장 → SystemStage 복귀 후 CharacterListNtf 를 재전송한다.
+// (별도 Res 없이 CharacterListNtf 수신이 성공 신호. 클라는 받으면 CharacterSelection 씬으로 전환)
+message ReturnToCharacterSelectReq {
 }

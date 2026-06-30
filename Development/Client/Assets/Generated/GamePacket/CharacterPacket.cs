@@ -27,23 +27,25 @@ namespace GamePacket {
             "CiFHYW1lUGFja2V0L2NoYXJhY3Rlcl9wYWNrZXQucHJvdG8SCkdhbWVQYWNr",
             "ZXQaHkRhdGFTdHJ1Y3R1cmVzL2NoYXJhY3Rlci5wcm90byJBChBDaGFyYWN0",
             "ZXJMaXN0TnRmEi0KCmNoYXJhY3RlcnMYASADKAsyGS5EYXRhU3RydWN0dXJl",
-            "cy5DaGFyYWN0ZXIiMgoSQ2hhcmFjdGVyQ3JlYXRlUmVxEgwKBG5hbWUYASAB",
-            "KAkSDgoGam9iX2lkGAIgASgFIm4KEkNoYXJhY3RlckNyZWF0ZVJlcxITCgty",
-            "ZXN1bHRfY29kZRgBIAEoBRIRCgllcnJvcl9tc2cYAiABKAkSMAoNbmV3X2No",
-            "YXJhY3RlchgDIAEoCzIZLkRhdGFTdHJ1Y3R1cmVzLkNoYXJhY3RlciIqChJD",
-            "aGFyYWN0ZXJTZWxlY3RSZXESFAoMY2hhcmFjdGVyX2lkGAEgASgDIo4BChJD",
-            "aGFyYWN0ZXJTZWxlY3RSZXMSEwoLcmVzdWx0X2NvZGUYASABKAUSEQoJZXJy",
-            "b3JfbXNnGAIgASgJEiwKCWNoYXJhY3RlchgKIAEoCzIZLkRhdGFTdHJ1Y3R1",
-            "cmVzLkNoYXJhY3RlchIWCg5zdGFnZV9kYXRhX2tleRgJIAEoBUoECAMQBEoE",
-            "CAQQCWIGcHJvdG8z"));
+            "cy5DaGFyYWN0ZXIiUAoSQ2hhcmFjdGVyQ3JlYXRlUmVxEgwKBG5hbWUYASAB",
+            "KAkSDgoGam9iX2lkGAIgASgFEhwKFGFwcGVhcmFuY2VfcHJlc2V0X2lkGAMg",
+            "ASgFIm4KEkNoYXJhY3RlckNyZWF0ZVJlcxITCgtyZXN1bHRfY29kZRgBIAEo",
+            "BRIRCgllcnJvcl9tc2cYAiABKAkSMAoNbmV3X2NoYXJhY3RlchgDIAEoCzIZ",
+            "LkRhdGFTdHJ1Y3R1cmVzLkNoYXJhY3RlciIqChJDaGFyYWN0ZXJTZWxlY3RS",
+            "ZXESFAoMY2hhcmFjdGVyX2lkGAEgASgDIo4BChJDaGFyYWN0ZXJTZWxlY3RS",
+            "ZXMSEwoLcmVzdWx0X2NvZGUYASABKAUSEQoJZXJyb3JfbXNnGAIgASgJEiwK",
+            "CWNoYXJhY3RlchgKIAEoCzIZLkRhdGFTdHJ1Y3R1cmVzLkNoYXJhY3RlchIW",
+            "Cg5zdGFnZV9kYXRhX2tleRgJIAEoBUoECAMQBEoECAQQCSIcChpSZXR1cm5U",
+            "b0NoYXJhY3RlclNlbGVjdFJlcWIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::DataStructures.CharacterReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterListNtf), global::GamePacket.CharacterListNtf.Parser, new[]{ "Characters" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterCreateReq), global::GamePacket.CharacterCreateReq.Parser, new[]{ "Name", "JobId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterCreateReq), global::GamePacket.CharacterCreateReq.Parser, new[]{ "Name", "JobId", "AppearancePresetId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterCreateRes), global::GamePacket.CharacterCreateRes.Parser, new[]{ "ResultCode", "ErrorMsg", "NewCharacter" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSelectReq), global::GamePacket.CharacterSelectReq.Parser, new[]{ "CharacterId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSelectRes), global::GamePacket.CharacterSelectRes.Parser, new[]{ "ResultCode", "ErrorMsg", "Character", "StageDataKey" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.CharacterSelectRes), global::GamePacket.CharacterSelectRes.Parser, new[]{ "ResultCode", "ErrorMsg", "Character", "StageDataKey" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ReturnToCharacterSelectReq), global::GamePacket.ReturnToCharacterSelectReq.Parser, null, null, null, null, null)
           }));
     }
     #endregion
@@ -282,6 +284,7 @@ namespace GamePacket {
     public CharacterCreateReq(CharacterCreateReq other) : this() {
       name_ = other.name_;
       jobId_ = other.jobId_;
+      appearancePresetId_ = other.appearancePresetId_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -321,6 +324,21 @@ namespace GamePacket {
       }
     }
 
+    /// <summary>Field number for the "appearance_preset_id" field.</summary>
+    public const int AppearancePresetIdFieldNumber = 3;
+    private int appearancePresetId_;
+    /// <summary>
+    /// 외형 프리셋 인덱스 (0-base)
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int AppearancePresetId {
+      get { return appearancePresetId_; }
+      set {
+        appearancePresetId_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -338,6 +356,7 @@ namespace GamePacket {
       }
       if (Name != other.Name) return false;
       if (JobId != other.JobId) return false;
+      if (AppearancePresetId != other.AppearancePresetId) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -347,6 +366,7 @@ namespace GamePacket {
       int hash = 1;
       if (Name.Length != 0) hash ^= Name.GetHashCode();
       if (JobId != 0) hash ^= JobId.GetHashCode();
+      if (AppearancePresetId != 0) hash ^= AppearancePresetId.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -373,6 +393,10 @@ namespace GamePacket {
         output.WriteRawTag(16);
         output.WriteInt32(JobId);
       }
+      if (AppearancePresetId != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(AppearancePresetId);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -391,6 +415,10 @@ namespace GamePacket {
         output.WriteRawTag(16);
         output.WriteInt32(JobId);
       }
+      if (AppearancePresetId != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(AppearancePresetId);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -406,6 +434,9 @@ namespace GamePacket {
       }
       if (JobId != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(JobId);
+      }
+      if (AppearancePresetId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(AppearancePresetId);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -424,6 +455,9 @@ namespace GamePacket {
       }
       if (other.JobId != 0) {
         JobId = other.JobId;
+      }
+      if (other.AppearancePresetId != 0) {
+        AppearancePresetId = other.AppearancePresetId;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -452,6 +486,10 @@ namespace GamePacket {
             JobId = input.ReadInt32();
             break;
           }
+          case 24: {
+            AppearancePresetId = input.ReadInt32();
+            break;
+          }
         }
       }
     #endif
@@ -477,6 +515,10 @@ namespace GamePacket {
           }
           case 16: {
             JobId = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            AppearancePresetId = input.ReadInt32();
             break;
           }
         }
@@ -1315,6 +1357,172 @@ namespace GamePacket {
             input.ReadMessage(Character);
             break;
           }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// 게임 중 캐릭터 선택 화면으로 복귀 요청 (클라 -> 게임서버)
+  /// 서버는 현재 Stage 에서 퇴장 → SystemStage 복귀 후 CharacterListNtf 를 재전송한다.
+  /// (별도 Res 없이 CharacterListNtf 수신이 성공 신호. 클라는 받으면 CharacterSelection 씬으로 전환)
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ReturnToCharacterSelectReq : pb::IMessage<ReturnToCharacterSelectReq>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ReturnToCharacterSelectReq> _parser = new pb::MessageParser<ReturnToCharacterSelectReq>(() => new ReturnToCharacterSelectReq());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ReturnToCharacterSelectReq> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::GamePacket.CharacterPacketReflection.Descriptor.MessageTypes[5]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ReturnToCharacterSelectReq() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ReturnToCharacterSelectReq(ReturnToCharacterSelectReq other) : this() {
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ReturnToCharacterSelectReq Clone() {
+      return new ReturnToCharacterSelectReq(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ReturnToCharacterSelectReq);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ReturnToCharacterSelectReq other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ReturnToCharacterSelectReq other) {
+      if (other == null) {
+        return;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
         }
       }
     }

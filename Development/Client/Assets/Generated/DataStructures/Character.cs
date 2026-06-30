@@ -25,15 +25,16 @@ namespace DataStructures {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Ch5EYXRhU3RydWN0dXJlcy9jaGFyYWN0ZXIucHJvdG8SDkRhdGFTdHJ1Y3R1",
-            "cmVzIsYBCglDaGFyYWN0ZXISFAoMY2hhcmFjdGVyX2lkGAEgASgDEhgKEG93",
+            "cmVzIuQBCglDaGFyYWN0ZXISFAoMY2hhcmFjdGVyX2lkGAEgASgDEhgKEG93",
             "bmVyX2FjY291bnRfaWQYAiABKAMSDAoEbmFtZRgDIAEoCRIOCgZqb2JfaWQY",
             "BCABKAUSDQoFbGV2ZWwYBSABKAUSCwoDZXhwGAYgASgDEhUKDWxhc3Rfc3Rh",
             "Z2VfaWQYCyABKAMSDQoFcG9zX3gYDCABKAISDQoFcG9zX3kYDSABKAISCwoD",
-            "eWF3GA4gASgCEg0KBXBvc196GA8gASgCYgZwcm90bzM="));
+            "eWF3GA4gASgCEg0KBXBvc196GA8gASgCEhwKFGFwcGVhcmFuY2VfcHJlc2V0",
+            "X2lkGBAgASgFYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::DataStructures.Character), global::DataStructures.Character.Parser, new[]{ "CharacterId", "OwnerAccountId", "Name", "JobId", "Level", "Exp", "LastStageId", "PosX", "PosY", "Yaw", "PosZ" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::DataStructures.Character), global::DataStructures.Character.Parser, new[]{ "CharacterId", "OwnerAccountId", "Name", "JobId", "Level", "Exp", "LastStageId", "PosX", "PosY", "Yaw", "PosZ", "AppearancePresetId" }, null, null, null, null)
           }));
     }
     #endregion
@@ -93,6 +94,7 @@ namespace DataStructures {
       posY_ = other.posY_;
       yaw_ = other.yaw_;
       posZ_ = other.posZ_;
+      appearancePresetId_ = other.appearancePresetId_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -259,6 +261,21 @@ namespace DataStructures {
       }
     }
 
+    /// <summary>Field number for the "appearance_preset_id" field.</summary>
+    public const int AppearancePresetIdFieldNumber = 16;
+    private int appearancePresetId_;
+    /// <summary>
+    /// 외형 프리셋 인덱스 (직업당 사전조립 프리팹 선택용). 0-base. 직업과 함께 외형을 결정.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int AppearancePresetId {
+      get { return appearancePresetId_; }
+      set {
+        appearancePresetId_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -285,6 +302,7 @@ namespace DataStructures {
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Yaw, other.Yaw)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosZ, other.PosZ)) return false;
+      if (AppearancePresetId != other.AppearancePresetId) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -303,6 +321,7 @@ namespace DataStructures {
       if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
       if (Yaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Yaw);
       if (PosZ != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosZ);
+      if (AppearancePresetId != 0) hash ^= AppearancePresetId.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -365,6 +384,10 @@ namespace DataStructures {
         output.WriteRawTag(125);
         output.WriteFloat(PosZ);
       }
+      if (AppearancePresetId != 0) {
+        output.WriteRawTag(128, 1);
+        output.WriteInt32(AppearancePresetId);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -419,6 +442,10 @@ namespace DataStructures {
         output.WriteRawTag(125);
         output.WriteFloat(PosZ);
       }
+      if (AppearancePresetId != 0) {
+        output.WriteRawTag(128, 1);
+        output.WriteInt32(AppearancePresetId);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -461,6 +488,9 @@ namespace DataStructures {
       }
       if (PosZ != 0F) {
         size += 1 + 4;
+      }
+      if (AppearancePresetId != 0) {
+        size += 2 + pb::CodedOutputStream.ComputeInt32Size(AppearancePresetId);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -506,6 +536,9 @@ namespace DataStructures {
       }
       if (other.PosZ != 0F) {
         PosZ = other.PosZ;
+      }
+      if (other.AppearancePresetId != 0) {
+        AppearancePresetId = other.AppearancePresetId;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -570,6 +603,10 @@ namespace DataStructures {
             PosZ = input.ReadFloat();
             break;
           }
+          case 128: {
+            AppearancePresetId = input.ReadInt32();
+            break;
+          }
         }
       }
     #endif
@@ -631,6 +668,10 @@ namespace DataStructures {
           }
           case 125: {
             PosZ = input.ReadFloat();
+            break;
+          }
+          case 128: {
+            AppearancePresetId = input.ReadInt32();
             break;
           }
         }
