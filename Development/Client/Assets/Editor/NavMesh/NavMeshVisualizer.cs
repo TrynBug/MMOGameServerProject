@@ -98,9 +98,34 @@ namespace MMO.Client.Navigation.Editor
         // - 활성 씬 이름이 마지막 로드 시점과 다를 때
         // - 마지막 로드 결과가 null (이전 시도 실패)
         // ---------------------------------------------------------------------
+        // Game 씬(스테이지 프리팹을 런타임에 동적 로드하는 실제 게임플레이 씬)의 이름.
+        private const string GameSceneName = "Game";
+
         private static void ReloadIfNeeded(bool verbose = false)
         {
             string stage = EditorSceneManager.GetActiveScene().name;
+
+            // Game 씬 특례:
+            // Game 씬은 스테이지를 런타임에 프리팹으로 동적 로드하므로, 씬 이름("Game")에
+            // 해당하는 .bin 은 존재하지 않는다. 이 경우 NavMeshService 에 "현재 로드된 스테이지"
+            // 의 NavMesh(= 동적 로드된 스테이지에 대응하는 NavMesh)를 시각화한다.
+            // 플레이 중 스테이지에 진입해 NavMesh 가 로드된 뒤에만 표시된다.
+            if (stage == GameSceneName)
+            {
+                if (NavMeshService.IsLoaded)
+                {
+                    stage = NavMeshService.CurrentStageName;
+                }
+                else
+                {
+                    if (verbose)
+                        Debug.Log("[NavMeshVisualizer] Game 씬: 아직 로드된 스테이지 NavMesh 가 없습니다. 플레이 중 스테이지에 진입한 뒤 표시됩니다.");
+                    s_navMesh = null;
+                    s_loadedStage = null;
+                    return;
+                }
+            }
+
             if (string.IsNullOrEmpty(stage))
             {
                 if (verbose) Debug.LogWarning("[NavMeshVisualizer] 활성 씬 이름이 비어있습니다.");

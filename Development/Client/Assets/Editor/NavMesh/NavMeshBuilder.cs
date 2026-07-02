@@ -341,20 +341,29 @@ namespace MMO.Client.Navigation.Editor
                 if (src == null || !src.gameObject.activeInHierarchy)
                     continue;
 
+                // -- 수집은 Collider 로 일원화 --
+                // NavMeshSource 하위의 Collider(Box/Sphere/Capsule/Mesh) 및 TerrainCollider 를 수집한다.
+                // 규칙: 비활성 GameObject/Collider 제외, isTrigger 제외, layerMask 로 레이어 필터.
+                // 콜라이더 없는 시각 전용 오브젝트(풀/꽃 등)는 자연히 제외된다.
+                Collider[] cols;
                 if (src.includeChildren)
                 {
-                    // 자식 트리 전체의 MeshFilter 수집.
-                    // 두 번째 인자 false = 비활성 오브젝트 제외.
-                    var mfs = src.GetComponentsInChildren<MeshFilter>(false);
-                    foreach (var mf in mfs)
-                        AppendMeshFilter(mf, verts, inds);
+                    // 두 번째 인자 false = 비활성 GameObject 제외.
+                    cols = src.GetComponentsInChildren<Collider>(false);
                 }
                 else
                 {
-                    // 자기 자신만
-                    var mf = src.GetComponent<MeshFilter>();
-                    if (mf != null)
-                        AppendMeshFilter(mf, verts, inds);
+                    var self = src.GetComponent<Collider>();
+                    cols = self != null ? new[] { self } : System.Array.Empty<Collider>();
+                }
+
+                foreach (var col in cols)
+                {
+                    if (col == null || !col.enabled) continue;   // 비활성 콜라이더 제외
+                    if (col.isTrigger) continue;                 // 트리거는 물리적 차단이 아니므로 제외
+                    // 레이어 필터: layerMask 에 포함된 레이어의 콜라이더만
+                    if ((src.layerMask.value & (1 << col.gameObject.layer)) == 0) continue;
+                    AppendCollider(col, verts, inds);
                 }
             }
 
@@ -362,7 +371,7 @@ namespace MMO.Client.Navigation.Editor
             {
                 vertices = null;
                 indices = null;
-                message = "NavMeshSource 는 있지만 수집된 메시 데이터가 0 입니다. MeshFilter 가 자식에 있는지 확인하세요.";
+                message = "NavMeshSource 는 있지만 수집된 지오메트리가 0 입니다. 하위에 (비활성/트리거가 아닌) Collider 나 TerrainCollider 가 있는지, layerMask 가 너무 좁지 않은지 확인하세요.";
                 return false;
             }
 
@@ -381,13 +390,11 @@ namespace MMO.Client.Navigation.Editor
         ///   (각 메시의 인덱스는 자기 정점 배열 기준 0부터 시작하기 때문)
         /// - 서브메시(머티리얼별로 분리된 삼각형 묶음)도 모두 합쳐서 수집한다.
         /// </summary>
-        private static void AppendMeshFilter(MeshFilter mf, List<float> verts, List<int> inds)
+        private static void AppendMesh(Mesh mesh, Transform tr, List<float> verts, List<int> inds)
         {
-            if (mf == null || mf.sharedMesh == null)
+            if (mesh == null || tr == null)
                 return;
 
-            Mesh mesh = mf.sharedMesh;
-            Transform tr = mf.transform;
             // 현재까지 누적된 정점의 인덱스 시작점. 이 메시의 인덱스에 더해줘야 한다.
             int baseIndex = verts.Count / 3;
 
@@ -408,6 +415,131 @@ namespace MMO.Client.Navigation.Editor
                 int[] tris = mesh.GetTriangles(sub);
                 for (int i = 0; i < tris.Length; i++)
                     inds.Add(tris[i] + baseIndex);
+            }
+        }
+
+        /// <summary>
+        /// Collider 를 삼각형 지오메트리로 변환해 누적한다.
+        /// - MeshCollider: sharedMesh 를 그대로 사용 (가장 정확).
+        /// - Box/Sphere/Capsule: 박스로 근사 (nav 장애물 카빙엔 충분하고 빌드가 가볍다).
+        /// - TerrainCollider 등 그 외 타입: 스킵 (Terrain 은 AppendTerrain 에서 처리).
+        /// </summary>
+        private static void AppendCollider(Collider col, List<float> verts, List<int> inds)
+        {
+            if (col == null)
+                return;
+
+            switch (col)
+            {
+                case MeshCollider mc:
+                    if (mc.sharedMesh != null)
+                        AppendMesh(mc.sharedMesh, mc.transform, verts, inds);
+                    break;
+
+                case BoxCollider bc:
+                    AppendLocalBox(bc.transform, bc.center, bc.size, verts, inds);
+                    break;
+
+                case SphereCollider sc:
+                    // 구 → 지름 정육면체로 근사
+                    AppendLocalBox(sc.transform, sc.center, Vector3.one * (sc.radius * 2f), verts, inds);
+                    break;
+
+                case CapsuleCollider cc:
+                {
+                    // 캡슐 → 축 방향 박스로 근사. direction: 0=X, 1=Y, 2=Z.
+                    float d = cc.radius * 2f;
+                    Vector3 size =
+                        cc.direction == 0 ? new Vector3(cc.height, d, d) :
+                        cc.direction == 2 ? new Vector3(d, d, cc.height) :
+                                            new Vector3(d, cc.height, d);
+                    AppendLocalBox(cc.transform, cc.center, size, verts, inds);
+                    break;
+                }
+
+                case TerrainCollider tc:
+                    // 지면. TerrainCollider 도 Collider 의 한 종류로 일원화해서 처리한다.
+                    if (tc.terrainData != null)
+                        AppendTerrain(tc.terrainData, tc.transform.position, verts, inds);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 로컬 공간의 박스(center, size)를 월드 삼각형으로 변환해 누적한다.
+        /// 8개 코너를 Transform.TransformPoint 로 월드화(스케일/회전 반영)하고 6면 12삼각형을 만든다.
+        /// </summary>
+        private static void AppendLocalBox(Transform tr, Vector3 center, Vector3 size, List<float> verts, List<int> inds)
+        {
+            if (tr == null)
+                return;
+
+            Vector3 h = size * 0.5f;
+            int b = verts.Count / 3;
+
+            // 코너 순서: k = (sx01<<2)|(sy01<<1)|(sz01), sx01∈{0,1}
+            for (int sx = 0; sx <= 1; sx++)
+                for (int sy = 0; sy <= 1; sy++)
+                    for (int sz = 0; sz <= 1; sz++)
+                    {
+                        Vector3 local = center + new Vector3(
+                            (sx == 0 ? -h.x : h.x),
+                            (sy == 0 ? -h.y : h.y),
+                            (sz == 0 ? -h.z : h.z));
+                        Vector3 w = tr.TransformPoint(local);
+                        verts.Add(w.x); verts.Add(w.y); verts.Add(w.z);
+                    }
+
+            int Idx(int sx, int sy, int sz) => b + ((sx << 2) | (sy << 1) | sz);
+            void Quad(int a, int b2, int c2, int d2)
+            {
+                inds.Add(a); inds.Add(b2); inds.Add(c2);
+                inds.Add(a); inds.Add(c2); inds.Add(d2);
+            }
+
+            Quad(Idx(0,0,0), Idx(0,1,0), Idx(0,1,1), Idx(0,0,1)); // -X
+            Quad(Idx(1,0,0), Idx(1,0,1), Idx(1,1,1), Idx(1,1,0)); // +X
+            Quad(Idx(0,0,0), Idx(0,0,1), Idx(1,0,1), Idx(1,0,0)); // -Y
+            Quad(Idx(0,1,0), Idx(1,1,0), Idx(1,1,1), Idx(0,1,1)); // +Y
+            Quad(Idx(0,0,0), Idx(1,0,0), Idx(1,1,0), Idx(0,1,0)); // -Z
+            Quad(Idx(0,0,1), Idx(0,1,1), Idx(1,1,1), Idx(1,0,1)); // +Z
+        }
+
+        /// <summary>
+        /// Unity Terrain 표면을 res×res 그리드로 샘플링해 삼각형 메시로 누적한다.
+        /// 완전 정밀할 필요는 없다(Recast 가 cellSize 로 재래스터화). ~1m 간격이면 충분.
+        /// </summary>
+        private static void AppendTerrain(TerrainData td, Vector3 pos, List<float> verts, List<int> inds)
+        {
+            if (td == null)
+                return;
+
+            const int res = 129; // 128 셀 = 130m 지형이면 약 1m 간격
+            int b = verts.Count / 3;
+
+            for (int zi = 0; zi < res; zi++)
+            {
+                float v = zi / (float)(res - 1);
+                for (int xi = 0; xi < res; xi++)
+                {
+                    float u = xi / (float)(res - 1);
+                    float wy = pos.y + td.GetInterpolatedHeight(u, v);
+                    verts.Add(pos.x + u * td.size.x);
+                    verts.Add(wy);
+                    verts.Add(pos.z + v * td.size.z);
+                }
+            }
+
+            for (int zi = 0; zi < res - 1; zi++)
+            {
+                for (int xi = 0; xi < res - 1; xi++)
+                {
+                    int a = b + zi * res + xi;
+                    int r = a + res;
+                    // 위(+Y)를 향하는 winding = walkable 지면
+                    inds.Add(a); inds.Add(r); inds.Add(a + 1);
+                    inds.Add(a + 1); inds.Add(r); inds.Add(r + 1);
+                }
             }
         }
 
