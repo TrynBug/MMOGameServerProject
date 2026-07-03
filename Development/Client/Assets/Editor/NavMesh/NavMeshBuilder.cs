@@ -99,6 +99,10 @@ namespace MMO.Client.Navigation.Editor
             // =================================================================
             var geom = new RcSampleInputGeomProvider(vertices, indices);
 
+            // 사용자가 지정한 진입불가 볼륨(NavMeshBlockVolume)을 Recast convex volume(area=NULL)로 추가.
+            // RcBuilder 가 빌드 중 MarkConvexPolyArea 로 적용 → 해당 영역의 walkable 이 제거된다.
+            AddBlockVolumes(geom);
+
             // =================================================================
             // 3. RcConfig (Recast 빌드 설정) 구성
             // -----------------------------------------------------------------
@@ -308,6 +312,62 @@ namespace MMO.Client.Navigation.Editor
         }
 
         // =====================================================================
+        // 진입불가 볼륨 적용
+        // ---------------------------------------------------------------------
+        // 씬의 활성 NavMeshBlockVolume 들을 Recast convex volume(area = RC_NULL_AREA)로
+        // geom 에 추가한다. RcBuilder.BuildTiles 가 빌드 중 이 볼륨들을
+        // MarkConvexPolyArea 로 적용해서, 해당 영역의 walkable 을 NavMesh 에서 제거한다.
+        //
+        // 박스는 transform 의 회전/스케일을 따른다. footprint(XZ) 4모서리 + 높이[hmin,hmax]로
+        // convex volume 을 구성한다(Y축 회전까지 정확, X/Z 틸트는 근사).
+        // =====================================================================
+        private static void AddBlockVolumes(RcSampleInputGeomProvider geom)
+        {
+            var volumes = UnityEngine.Object.FindObjectsByType<NavMeshBlockVolume>(FindObjectsInactive.Exclude);
+            if (volumes == null || volumes.Length == 0)
+                return;
+
+            int applied = 0;
+            foreach (var vol in volumes)
+            {
+                if (vol == null || !vol.gameObject.activeInHierarchy)
+                    continue;
+
+                Transform t = vol.transform;
+                Vector3 c = vol.center;
+                Vector3 h = vol.size * 0.5f;
+
+                // footprint 4모서리(월드). center 높이에서 로컬 XZ 사각형을 월드로 변환.
+                Vector3 c0 = t.TransformPoint(c + new Vector3(-h.x, 0f, -h.z));
+                Vector3 c1 = t.TransformPoint(c + new Vector3( h.x, 0f, -h.z));
+                Vector3 c2 = t.TransformPoint(c + new Vector3( h.x, 0f,  h.z));
+                Vector3 c3 = t.TransformPoint(c + new Vector3(-h.x, 0f,  h.z));
+
+                // 높이 범위(월드 Y). 박스 상/하면 중심의 Y 로 구한다.
+                float yb = t.TransformPoint(c + new Vector3(0f, -h.y, 0f)).y;
+                float yt = t.TransformPoint(c + new Vector3(0f,  h.y, 0f)).y;
+                float hmin = Mathf.Min(yb, yt);
+                float hmax = Mathf.Max(yb, yt);
+
+                // MarkConvexPolyArea 는 verts[i*3+0]=x, verts[i*3+2]=z 를 쓰고 y 는 hmin/hmax 로 대체.
+                float[] verts =
+                {
+                    c0.x, 0f, c0.z,
+                    c1.x, 0f, c1.z,
+                    c2.x, 0f, c2.z,
+                    c3.x, 0f, c3.z,
+                };
+
+                // area = 0 (RC_NULL_AREA) → 이 영역의 walkable 은 제거됨.
+                geom.AddConvexVolume(verts, hmin, hmax, new RcAreaModification(0));
+                applied++;
+            }
+
+            if (applied > 0)
+                Debug.Log($"[NavMesh] 진입불가 볼륨 {applied}개 적용(NavMeshBlockVolume).");
+        }
+
+        // =====================================================================
         // 씬에서 메시 데이터 수집
         // ---------------------------------------------------------------------
         // 활성 씬에서 NavMeshSource 컴포넌트가 붙은 게임오브젝트들을 찾아
@@ -446,16 +506,11 @@ namespace MMO.Client.Navigation.Editor
                     break;
 
                 case CapsuleCollider cc:
-                {
-                    // 캡슐 → 축 방향 박스로 근사. direction: 0=X, 1=Y, 2=Z.
-                    float d = cc.radius * 2f;
-                    Vector3 size =
-                        cc.direction == 0 ? new Vector3(cc.height, d, d) :
-                        cc.direction == 2 ? new Vector3(d, d, cc.height) :
-                                            new Vector3(d, cc.height, d);
-                    AppendLocalBox(cc.transform, cc.center, size, verts, inds);
+                    // 캡슐 → 원통(n-gon)으로 근사. direction: 0=X, 1=Y, 2=Z.
+                    // 박스 근사보다 훨씬 타이트하고(모서리 과다차단 없음), 회전 대칭이라
+                    // 오브젝트 yaw 에 상관없이 발자국이 일정하다(랜덤 회전 나무에 중요).
+                    AppendLocalCylinder(cc.transform, cc.center, cc.radius, cc.height, cc.direction, verts, inds);
                     break;
-                }
 
                 case TerrainCollider tc:
                     // 지면. TerrainCollider 도 Collider 의 한 종류로 일원화해서 처리한다.
@@ -506,6 +561,63 @@ namespace MMO.Client.Navigation.Editor
         }
 
         /// <summary>
+        /// 로컬 공간의 원통(center, radius, height, axis)을 월드 삼각형으로 변환해 누적한다.
+        /// 캡슐 콜라이더를 이 원통으로 근사하면 (1)박스 근사의 모서리 과다 차단이 사라지고
+        /// (2)회전 대칭이라 오브젝트 yaw 와 무관하게 발자국이 일정하다(랜덤 회전 나무에 중요).
+        /// axis: 0=X, 1=Y, 2=Z (Unity CapsuleCollider.direction 과 동일).
+        /// </summary>
+        private static void AppendLocalCylinder(Transform tr, Vector3 center, float radius, float height, int axis, List<float> verts, List<int> inds)
+        {
+            if (tr == null) return;
+
+            const int seg = 12;         // 원통 분할 수 (12면 충분히 원형)
+            float half = height * 0.5f;
+            int b = verts.Count / 3;
+
+            // axis 방향을 along, 나머지 두 축을 (cu, cv) 원 평면으로 배치
+            System.Func<float, float, float, Vector3> makeLocal = (along, cu, cv) =>
+            {
+                switch (axis)
+                {
+                    case 0:  return center + new Vector3(along, cu, cv); // X축
+                    case 2:  return center + new Vector3(cu, cv, along); // Z축
+                    default: return center + new Vector3(cu, along, cv); // Y축(기본)
+                }
+            };
+
+            // 링 정점: ring0=bottom(-half), ring1=top(+half)
+            for (int ring = 0; ring < 2; ring++)
+            {
+                float along = ring == 0 ? -half : half;
+                for (int i = 0; i < seg; i++)
+                {
+                    float ang = (i / (float)seg) * Mathf.PI * 2f;
+                    Vector3 w = tr.TransformPoint(makeLocal(along, Mathf.Cos(ang) * radius, Mathf.Sin(ang) * radius));
+                    verts.Add(w.x); verts.Add(w.y); verts.Add(w.z);
+                }
+            }
+            // 캡 중심점 2개
+            Vector3 bcW = tr.TransformPoint(makeLocal(-half, 0f, 0f));
+            Vector3 tcW = tr.TransformPoint(makeLocal(half, 0f, 0f));
+            int bcIdx = verts.Count / 3; verts.Add(bcW.x); verts.Add(bcW.y); verts.Add(bcW.z);
+            int tcIdx = verts.Count / 3; verts.Add(tcW.x); verts.Add(tcW.y); verts.Add(tcW.z);
+
+            int bottom0 = b, top0 = b + seg;
+            for (int i = 0; i < seg; i++)
+            {
+                int inext = (i + 1) % seg;
+                int b0 = bottom0 + i, b1 = bottom0 + inext;
+                int t0 = top0 + i, t1 = top0 + inext;
+                // 측벽(두 삼각형) — 발자국을 만드는 핵심
+                inds.Add(b0); inds.Add(t0); inds.Add(b1);
+                inds.Add(b1); inds.Add(t0); inds.Add(t1);
+                // 바닥/천장 캡
+                inds.Add(bcIdx); inds.Add(b1); inds.Add(b0);
+                inds.Add(tcIdx); inds.Add(t0); inds.Add(t1);
+            }
+        }
+
+        /// <summary>
         /// Unity Terrain 표면을 res×res 그리드로 샘플링해 삼각형 메시로 누적한다.
         /// 완전 정밀할 필요는 없다(Recast 가 cellSize 로 재래스터화). ~1m 간격이면 충분.
         /// </summary>
@@ -514,7 +626,9 @@ namespace MMO.Client.Navigation.Editor
             if (td == null)
                 return;
 
-            const int res = 129; // 128 셀 = 130m 지형이면 약 1m 간격
+            // 지형 크기에 맞춰 ~1m 간격이 되도록 해상도를 정한다 (129~513 클램프).
+            // 고정 129 는 130m 지형 기준이라 400m 급 지형에서 3m 간격으로 뭉개지는 문제가 있었음.
+            int res = Mathf.Clamp(Mathf.CeilToInt(Mathf.Max(td.size.x, td.size.z)) + 1, 129, 513);
             int b = verts.Count / 3;
 
             for (int zi = 0; zi < res; zi++)
