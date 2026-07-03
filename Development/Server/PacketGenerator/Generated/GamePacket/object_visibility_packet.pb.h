@@ -69,6 +69,10 @@ class ObjectDeathNtf;
 struct ObjectDeathNtfDefaultTypeInternal;
 extern ObjectDeathNtfDefaultTypeInternal _ObjectDeathNtf_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull ObjectDeathNtf_class_data_;
+class ObjectReviveNtf;
+struct ObjectReviveNtfDefaultTypeInternal;
+extern ObjectReviveNtfDefaultTypeInternal _ObjectReviveNtf_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ObjectReviveNtf_class_data_;
 class ObjectVisibilityNtf;
 struct ObjectVisibilityNtfDefaultTypeInternal;
 extern ObjectVisibilityNtfDefaultTypeInternal _ObjectVisibilityNtf_default_instance_;
@@ -568,6 +572,268 @@ class PropSpawnInfo final : public ::google::protobuf::Message
 };
 
 extern const ::google::protobuf::internal::ClassDataFull PropSpawnInfo_class_data_;
+// -------------------------------------------------------------------
+
+class ObjectReviveNtf final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.ObjectReviveNtf) */ {
+ public:
+  inline ObjectReviveNtf() : ObjectReviveNtf(nullptr) {}
+  ~ObjectReviveNtf() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ObjectReviveNtf* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ObjectReviveNtf));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ObjectReviveNtf(::google::protobuf::internal::ConstantInitialized);
+
+  inline ObjectReviveNtf(const ObjectReviveNtf& from) : ObjectReviveNtf(nullptr, from) {}
+  inline ObjectReviveNtf(ObjectReviveNtf&& from) noexcept
+      : ObjectReviveNtf(nullptr, ::std::move(from)) {}
+  inline ObjectReviveNtf& operator=(const ObjectReviveNtf& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ObjectReviveNtf& operator=(ObjectReviveNtf&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ObjectReviveNtf& default_instance() {
+    return *reinterpret_cast<const ObjectReviveNtf*>(
+        &_ObjectReviveNtf_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 7;
+  friend void swap(ObjectReviveNtf& a, ObjectReviveNtf& b) { a.Swap(&b); }
+  inline void Swap(ObjectReviveNtf* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ObjectReviveNtf* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ObjectReviveNtf* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ObjectReviveNtf>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ObjectReviveNtf& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ObjectReviveNtf& from) { ObjectReviveNtf::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ObjectReviveNtf* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.ObjectReviveNtf"; }
+
+  explicit ObjectReviveNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ObjectReviveNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ObjectReviveNtf& from);
+  ObjectReviveNtf(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ObjectReviveNtf&& from) noexcept
+      : ObjectReviveNtf(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kObjectIdFieldNumber = 1,
+    kPosXFieldNumber = 2,
+    kPosYFieldNumber = 3,
+    kPosZFieldNumber = 4,
+    kYawFieldNumber = 5,
+    kHpFieldNumber = 6,
+    kMpFieldNumber = 7,
+  };
+  // int64 object_id = 1;
+  void clear_object_id() ;
+  ::int64_t object_id() const;
+  void set_object_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_object_id() const;
+  void _internal_set_object_id(::int64_t value);
+
+  public:
+  // float pos_x = 2;
+  void clear_pos_x() ;
+  float pos_x() const;
+  void set_pos_x(float value);
+
+  private:
+  float _internal_pos_x() const;
+  void _internal_set_pos_x(float value);
+
+  public:
+  // float pos_y = 3;
+  void clear_pos_y() ;
+  float pos_y() const;
+  void set_pos_y(float value);
+
+  private:
+  float _internal_pos_y() const;
+  void _internal_set_pos_y(float value);
+
+  public:
+  // float pos_z = 4;
+  void clear_pos_z() ;
+  float pos_z() const;
+  void set_pos_z(float value);
+
+  private:
+  float _internal_pos_z() const;
+  void _internal_set_pos_z(float value);
+
+  public:
+  // float yaw = 5;
+  void clear_yaw() ;
+  float yaw() const;
+  void set_yaw(float value);
+
+  private:
+  float _internal_yaw() const;
+  void _internal_set_yaw(float value);
+
+  public:
+  // double hp = 6;
+  void clear_hp() ;
+  double hp() const;
+  void set_hp(double value);
+
+  private:
+  double _internal_hp() const;
+  void _internal_set_hp(double value);
+
+  public:
+  // double mp = 7;
+  void clear_mp() ;
+  double mp() const;
+  void set_mp(double value);
+
+  private:
+  double _internal_mp() const;
+  void _internal_set_mp(double value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.ObjectReviveNtf)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<3, 7,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ObjectReviveNtf& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int64_t object_id_;
+    float pos_x_;
+    float pos_y_;
+    float pos_z_;
+    float yaw_;
+    double hp_;
+    double mp_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fobject_5fvisibility_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ObjectReviveNtf_class_data_;
 // -------------------------------------------------------------------
 
 class ObjectDeathNtf final : public ::google::protobuf::Message
@@ -1448,6 +1714,7 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
     kPosZFieldNumber = 12,
     kYawFieldNumber = 13,
     kAppearancePresetIdFieldNumber = 15,
+    kIsDeadFieldNumber = 16,
   };
   // repeated .GamePacket.BuffSnapshotInfo buffs = 14;
   int buffs_size() const;
@@ -1611,12 +1878,22 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
   void _internal_set_appearance_preset_id(::int32_t value);
 
   public:
+  // bool is_dead = 16;
+  void clear_is_dead() ;
+  bool is_dead() const;
+  void set_is_dead(bool value);
+
+  private:
+  bool _internal_is_dead() const;
+  void _internal_set_is_dead(bool value);
+
+  public:
   // @@protoc_insertion_point(class_scope:GamePacket.CharacterSpawnInfo)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<4, 15,
-                                   1, 50,
+  static const ::google::protobuf::internal::TcParseTable<4, 16,
+                                   1, 58,
                                    2>
       _table_;
 
@@ -1652,6 +1929,7 @@ class CharacterSpawnInfo final : public ::google::protobuf::Message
     float pos_z_;
     float yaw_;
     ::int32_t appearance_preset_id_;
+    bool is_dead_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -2455,6 +2733,31 @@ inline ::int32_t CharacterSpawnInfo::_internal_appearance_preset_id() const {
 inline void CharacterSpawnInfo::_internal_set_appearance_preset_id(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.appearance_preset_id_ = value;
+}
+
+// bool is_dead = 16;
+inline void CharacterSpawnInfo::clear_is_dead() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_dead_ = false;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00008000U);
+}
+inline bool CharacterSpawnInfo::is_dead() const {
+  // @@protoc_insertion_point(field_get:GamePacket.CharacterSpawnInfo.is_dead)
+  return _internal_is_dead();
+}
+inline void CharacterSpawnInfo::set_is_dead(bool value) {
+  _internal_set_is_dead(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00008000U);
+  // @@protoc_insertion_point(field_set:GamePacket.CharacterSpawnInfo.is_dead)
+}
+inline bool CharacterSpawnInfo::_internal_is_dead() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.is_dead_;
+}
+inline void CharacterSpawnInfo::_internal_set_is_dead(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_dead_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -3274,6 +3577,185 @@ inline ::int64_t ObjectDeathNtf::_internal_killer_object_id() const {
 inline void ObjectDeathNtf::_internal_set_killer_object_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.killer_object_id_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ObjectReviveNtf
+
+// int64 object_id = 1;
+inline void ObjectReviveNtf::clear_object_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.object_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::int64_t ObjectReviveNtf::object_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectReviveNtf.object_id)
+  return _internal_object_id();
+}
+inline void ObjectReviveNtf::set_object_id(::int64_t value) {
+  _internal_set_object_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_set:GamePacket.ObjectReviveNtf.object_id)
+}
+inline ::int64_t ObjectReviveNtf::_internal_object_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.object_id_;
+}
+inline void ObjectReviveNtf::_internal_set_object_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.object_id_ = value;
+}
+
+// float pos_x = 2;
+inline void ObjectReviveNtf::clear_pos_x() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_x_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline float ObjectReviveNtf::pos_x() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectReviveNtf.pos_x)
+  return _internal_pos_x();
+}
+inline void ObjectReviveNtf::set_pos_x(float value) {
+  _internal_set_pos_x(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:GamePacket.ObjectReviveNtf.pos_x)
+}
+inline float ObjectReviveNtf::_internal_pos_x() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_x_;
+}
+inline void ObjectReviveNtf::_internal_set_pos_x(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_x_ = value;
+}
+
+// float pos_y = 3;
+inline void ObjectReviveNtf::clear_pos_y() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_y_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline float ObjectReviveNtf::pos_y() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectReviveNtf.pos_y)
+  return _internal_pos_y();
+}
+inline void ObjectReviveNtf::set_pos_y(float value) {
+  _internal_set_pos_y(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:GamePacket.ObjectReviveNtf.pos_y)
+}
+inline float ObjectReviveNtf::_internal_pos_y() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_y_;
+}
+inline void ObjectReviveNtf::_internal_set_pos_y(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_y_ = value;
+}
+
+// float pos_z = 4;
+inline void ObjectReviveNtf::clear_pos_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline float ObjectReviveNtf::pos_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectReviveNtf.pos_z)
+  return _internal_pos_z();
+}
+inline void ObjectReviveNtf::set_pos_z(float value) {
+  _internal_set_pos_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:GamePacket.ObjectReviveNtf.pos_z)
+}
+inline float ObjectReviveNtf::_internal_pos_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_z_;
+}
+inline void ObjectReviveNtf::_internal_set_pos_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = value;
+}
+
+// float yaw = 5;
+inline void ObjectReviveNtf::clear_yaw() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.yaw_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000010U);
+}
+inline float ObjectReviveNtf::yaw() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectReviveNtf.yaw)
+  return _internal_yaw();
+}
+inline void ObjectReviveNtf::set_yaw(float value) {
+  _internal_set_yaw(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
+  // @@protoc_insertion_point(field_set:GamePacket.ObjectReviveNtf.yaw)
+}
+inline float ObjectReviveNtf::_internal_yaw() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.yaw_;
+}
+inline void ObjectReviveNtf::_internal_set_yaw(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.yaw_ = value;
+}
+
+// double hp = 6;
+inline void ObjectReviveNtf::clear_hp() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.hp_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000020U);
+}
+inline double ObjectReviveNtf::hp() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectReviveNtf.hp)
+  return _internal_hp();
+}
+inline void ObjectReviveNtf::set_hp(double value) {
+  _internal_set_hp(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
+  // @@protoc_insertion_point(field_set:GamePacket.ObjectReviveNtf.hp)
+}
+inline double ObjectReviveNtf::_internal_hp() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.hp_;
+}
+inline void ObjectReviveNtf::_internal_set_hp(double value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.hp_ = value;
+}
+
+// double mp = 7;
+inline void ObjectReviveNtf::clear_mp() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.mp_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000040U);
+}
+inline double ObjectReviveNtf::mp() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectReviveNtf.mp)
+  return _internal_mp();
+}
+inline void ObjectReviveNtf::set_mp(double value) {
+  _internal_set_mp(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
+  // @@protoc_insertion_point(field_set:GamePacket.ObjectReviveNtf.mp)
+}
+inline double ObjectReviveNtf::_internal_mp() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.mp_;
+}
+inline void ObjectReviveNtf::_internal_set_mp(double value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.mp_ = value;
 }
 
 #ifdef __GNUC__

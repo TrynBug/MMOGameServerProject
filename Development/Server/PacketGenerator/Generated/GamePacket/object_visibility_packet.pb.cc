@@ -84,6 +84,37 @@ struct PropSpawnInfoDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PropSpawnInfoDefaultTypeInternal _PropSpawnInfo_default_instance_;
 
+inline constexpr ObjectReviveNtf::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        object_id_{::int64_t{0}},
+        pos_x_{0},
+        pos_y_{0},
+        pos_z_{0},
+        yaw_{0},
+        hp_{0},
+        mp_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ObjectReviveNtf::ObjectReviveNtf(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(ObjectReviveNtf_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ObjectReviveNtfDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ObjectReviveNtfDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ObjectReviveNtfDefaultTypeInternal() {}
+  union {
+    ObjectReviveNtf _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ObjectReviveNtfDefaultTypeInternal _ObjectReviveNtf_default_instance_;
+
 inline constexpr ObjectDeathNtf::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -190,7 +221,8 @@ inline constexpr CharacterSpawnInfo::Impl_::Impl_(
         pos_y_{0},
         pos_z_{0},
         yaw_{0},
-        appearance_preset_id_{0} {}
+        appearance_preset_id_{0},
+        is_dead_{false} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR CharacterSpawnInfo::CharacterSpawnInfo(::_pbi::ConstantInitialized)
@@ -259,7 +291,7 @@ const ::uint32_t
         2,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_._has_bits_),
-        18, // hasbit index offset
+        19, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.object_id_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.owner_account_id_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.name_),
@@ -275,6 +307,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.yaw_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.buffs_),
         PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.appearance_preset_id_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::CharacterSpawnInfo, _impl_.is_dead_),
         2,
         3,
         1,
@@ -290,6 +323,7 @@ const ::uint32_t
         13,
         0,
         14,
+        15,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::MonsterSpawnInfo, _impl_._has_bits_),
         13, // hasbit index offset
@@ -357,17 +391,35 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectDeathNtf, _impl_.killer_object_id_),
         0,
         1,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectReviveNtf, _impl_._has_bits_),
+        10, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectReviveNtf, _impl_.object_id_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectReviveNtf, _impl_.pos_x_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectReviveNtf, _impl_.pos_y_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectReviveNtf, _impl_.pos_z_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectReviveNtf, _impl_.yaw_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectReviveNtf, _impl_.hp_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ObjectReviveNtf, _impl_.mp_),
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, sizeof(::GamePacket::BuffSnapshotInfo)},
         {9, sizeof(::GamePacket::CharacterSpawnInfo)},
-        {42, sizeof(::GamePacket::MonsterSpawnInfo)},
-        {65, sizeof(::GamePacket::PropSpawnInfo)},
-        {82, sizeof(::GamePacket::ObjectVisibilityNtf)},
-        {93, sizeof(::GamePacket::PropStateNtf)},
-        {102, sizeof(::GamePacket::ObjectDeathNtf)},
+        {44, sizeof(::GamePacket::MonsterSpawnInfo)},
+        {67, sizeof(::GamePacket::PropSpawnInfo)},
+        {84, sizeof(::GamePacket::ObjectVisibilityNtf)},
+        {95, sizeof(::GamePacket::PropStateNtf)},
+        {104, sizeof(::GamePacket::ObjectDeathNtf)},
+        {111, sizeof(::GamePacket::ObjectReviveNtf)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::GamePacket::_BuffSnapshotInfo_default_instance_._instance,
@@ -377,13 +429,14 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::GamePacket::_ObjectVisibilityNtf_default_instance_._instance,
     &::GamePacket::_PropStateNtf_default_instance_._instance,
     &::GamePacket::_ObjectDeathNtf_default_instance_._instance,
+    &::GamePacket::_ObjectReviveNtf_default_instance_._instance,
 };
 const char descriptor_table_protodef_GamePacket_2fobject_5fvisibility_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n)GamePacket/object_visibility_packet.pr"
     "oto\022\nGamePacket\"Q\n\020BuffSnapshotInfo\022\020\n\010b"
     "uff_key\030\001 \001(\005\022\023\n\013stack_count\030\002 \001(\005\022\026\n\016re"
-    "main_time_ms\030\003 \001(\005\"\253\002\n\022CharacterSpawnInf"
+    "main_time_ms\030\003 \001(\005\"\274\002\n\022CharacterSpawnInf"
     "o\022\021\n\tobject_id\030\001 \001(\003\022\030\n\020owner_account_id"
     "\030\002 \001(\003\022\014\n\004name\030\003 \001(\t\022\016\n\006job_id\030\004 \001(\005\022\r\n\005"
     "level\030\005 \001(\005\022\n\n\002hp\030\006 \001(\001\022\016\n\006max_hp\030\007 \001(\001\022"
@@ -391,36 +444,39 @@ const char descriptor_table_protodef_GamePacket_2fobject_5fvisibility_5fpacket_2
     "(\002\022\r\n\005pos_y\030\013 \001(\002\022\r\n\005pos_z\030\014 \001(\002\022\013\n\003yaw\030"
     "\r \001(\002\022+\n\005buffs\030\016 \003(\0132\034.GamePacket.BuffSn"
     "apshotInfo\022\034\n\024appearance_preset_id\030\017 \001(\005"
-    "\"\322\001\n\020MonsterSpawnInfo\022\021\n\tobject_id\030\001 \001(\003"
-    "\022\023\n\013monster_key\030\002 \001(\005\022\r\n\005pos_x\030\003 \001(\002\022\r\n\005"
-    "pos_y\030\004 \001(\002\022\r\n\005pos_z\030\005 \001(\002\022\013\n\003yaw\030\006 \001(\002\022"
-    "+\n\005buffs\030\007 \003(\0132\034.GamePacket.BuffSnapshot"
-    "Info\022\017\n\007is_dead\030\010 \001(\010\022\016\n\006cur_hp\030\t \001(\001\022\016\n"
-    "\006max_hp\030\n \001(\001\"}\n\rPropSpawnInfo\022\021\n\tobject"
-    "_id\030\001 \001(\003\022\020\n\010prop_key\030\002 \001(\005\022\r\n\005pos_x\030\003 \001"
-    "(\002\022\r\n\005pos_y\030\004 \001(\002\022\r\n\005pos_z\030\005 \001(\002\022\013\n\003yaw\030"
-    "\006 \001(\002\022\r\n\005state\030\007 \001(\005\"\312\001\n\023ObjectVisibilit"
-    "yNtf\0228\n\020character_spawns\030\001 \003(\0132\036.GamePac"
-    "ket.CharacterSpawnInfo\0224\n\016monster_spawns"
-    "\030\002 \003(\0132\034.GamePacket.MonsterSpawnInfo\022.\n\013"
-    "prop_spawns\030\003 \003(\0132\031.GamePacket.PropSpawn"
-    "Info\022\023\n\013despawn_ids\030\n \003(\003\"I\n\014PropStateNt"
-    "f\022\021\n\tobject_id\030\001 \001(\003\022\r\n\005state\030\002 \001(\005\022\027\n\017a"
-    "ctor_object_id\030\003 \001(\003\"=\n\016ObjectDeathNtf\022\021"
-    "\n\tobject_id\030\001 \001(\003\022\030\n\020killer_object_id\030\002 "
-    "\001(\003b\006proto3"
+    "\022\017\n\007is_dead\030\020 \001(\010\"\322\001\n\020MonsterSpawnInfo\022\021"
+    "\n\tobject_id\030\001 \001(\003\022\023\n\013monster_key\030\002 \001(\005\022\r"
+    "\n\005pos_x\030\003 \001(\002\022\r\n\005pos_y\030\004 \001(\002\022\r\n\005pos_z\030\005 "
+    "\001(\002\022\013\n\003yaw\030\006 \001(\002\022+\n\005buffs\030\007 \003(\0132\034.GamePa"
+    "cket.BuffSnapshotInfo\022\017\n\007is_dead\030\010 \001(\010\022\016"
+    "\n\006cur_hp\030\t \001(\001\022\016\n\006max_hp\030\n \001(\001\"}\n\rPropSp"
+    "awnInfo\022\021\n\tobject_id\030\001 \001(\003\022\020\n\010prop_key\030\002"
+    " \001(\005\022\r\n\005pos_x\030\003 \001(\002\022\r\n\005pos_y\030\004 \001(\002\022\r\n\005po"
+    "s_z\030\005 \001(\002\022\013\n\003yaw\030\006 \001(\002\022\r\n\005state\030\007 \001(\005\"\312\001"
+    "\n\023ObjectVisibilityNtf\0228\n\020character_spawn"
+    "s\030\001 \003(\0132\036.GamePacket.CharacterSpawnInfo\022"
+    "4\n\016monster_spawns\030\002 \003(\0132\034.GamePacket.Mon"
+    "sterSpawnInfo\022.\n\013prop_spawns\030\003 \003(\0132\031.Gam"
+    "ePacket.PropSpawnInfo\022\023\n\013despawn_ids\030\n \003"
+    "(\003\"I\n\014PropStateNtf\022\021\n\tobject_id\030\001 \001(\003\022\r\n"
+    "\005state\030\002 \001(\005\022\027\n\017actor_object_id\030\003 \001(\003\"=\n"
+    "\016ObjectDeathNtf\022\021\n\tobject_id\030\001 \001(\003\022\030\n\020ki"
+    "ller_object_id\030\002 \001(\003\"v\n\017ObjectReviveNtf\022"
+    "\021\n\tobject_id\030\001 \001(\003\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos"
+    "_y\030\003 \001(\002\022\r\n\005pos_z\030\004 \001(\002\022\013\n\003yaw\030\005 \001(\002\022\n\n\002"
+    "hp\030\006 \001(\001\022\n\n\002mp\030\007 \001(\001b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto = {
     false,
     false,
-    1131,
+    1268,
     descriptor_table_protodef_GamePacket_2fobject_5fvisibility_5fpacket_2eproto,
     "GamePacket/object_visibility_packet.proto",
     &descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto_once,
     nullptr,
     0,
-    7,
+    8,
     schemas,
     file_default_instances,
     TableStruct_GamePacket_2fobject_5fvisibility_5fpacket_2eproto::offsets,
@@ -794,9 +850,9 @@ CharacterSpawnInfo::CharacterSpawnInfo(
                offsetof(Impl_, object_id_),
            reinterpret_cast<const char*>(&from._impl_) +
                offsetof(Impl_, object_id_),
-           offsetof(Impl_, appearance_preset_id_) -
+           offsetof(Impl_, is_dead_) -
                offsetof(Impl_, object_id_) +
-               sizeof(Impl_::appearance_preset_id_));
+               sizeof(Impl_::is_dead_));
 
   // @@protoc_insertion_point(copy_constructor:GamePacket.CharacterSpawnInfo)
 }
@@ -812,9 +868,9 @@ inline void CharacterSpawnInfo::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena
   ::memset(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, object_id_),
            0,
-           offsetof(Impl_, appearance_preset_id_) -
+           offsetof(Impl_, is_dead_) -
                offsetof(Impl_, object_id_) +
-               sizeof(Impl_::appearance_preset_id_));
+               sizeof(Impl_::is_dead_));
 }
 CharacterSpawnInfo::~CharacterSpawnInfo() {
   // @@protoc_insertion_point(destructor:GamePacket.CharacterSpawnInfo)
@@ -886,16 +942,16 @@ CharacterSpawnInfo::GetClassData() const {
   return CharacterSpawnInfo_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<4, 15, 1, 50, 2>
+const ::_pbi::TcParseTable<4, 16, 1, 58, 2>
 CharacterSpawnInfo::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_._has_bits_),
     0, // no _extensions_
-    15, 120,  // max_field_number, fast_idx_mask
+    16, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294934528,  // skipmap
+    4294901760,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    15,  // num_field_entries
+    16,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     CharacterSpawnInfo_class_data_.base(),
@@ -905,7 +961,10 @@ CharacterSpawnInfo::_table_ = {
     ::_pbi::TcParser::GetTable<::GamePacket::CharacterSpawnInfo>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
+    // bool is_dead = 16;
+    {::_pbi::TcParser::FastV8S2,
+     {384, 15, 0,
+      PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.is_dead_)}},
     // int64 object_id = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(CharacterSpawnInfo, _impl_.object_id_), 2>(),
      {8, 2, 0,
@@ -999,12 +1058,14 @@ CharacterSpawnInfo::_table_ = {
     {PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.buffs_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
     // int32 appearance_preset_id = 15;
     {PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.appearance_preset_id_), _Internal::kHasBitsOffset + 14, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // bool is_dead = 16;
+    {PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.is_dead_), _Internal::kHasBitsOffset + 15, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
   }},
   {{
       {::_pbi::TcParser::GetTable<::GamePacket::BuffSnapshotInfo>()},
   }},
   {{
-    "\35\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0"
+    "\35\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
     "GamePacket.CharacterSpawnInfo"
     "name"
   }},
@@ -1030,10 +1091,10 @@ PROTOBUF_NOINLINE void CharacterSpawnInfo::Clear() {
         reinterpret_cast<char*>(&_impl_.max_hp_) -
         reinterpret_cast<char*>(&_impl_.object_id_)) + sizeof(_impl_.max_hp_));
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x00007f00U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000ff00U)) {
     ::memset(&_impl_.mp_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.appearance_preset_id_) -
-        reinterpret_cast<char*>(&_impl_.mp_)) + sizeof(_impl_.appearance_preset_id_));
+        reinterpret_cast<char*>(&_impl_.is_dead_) -
+        reinterpret_cast<char*>(&_impl_.mp_)) + sizeof(_impl_.is_dead_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -1198,6 +1259,15 @@ PROTOBUF_NOINLINE void CharacterSpawnInfo::Clear() {
     }
   }
 
+  // bool is_dead = 16;
+  if (CheckHasBit(cached_has_bits, 0x00008000U)) {
+    if (this_._internal_is_dead() != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteBoolToArray(
+          16, this_._internal_is_dead(), target);
+    }
+  }
+
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -1279,7 +1349,7 @@ PROTOBUF_NOINLINE void CharacterSpawnInfo::Clear() {
       }
     }
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x00007f00U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000ff00U)) {
     // double mp = 8;
     if (CheckHasBit(cached_has_bits, 0x00000100U)) {
       if (::absl::bit_cast<::uint64_t>(this_._internal_mp()) != 0) {
@@ -1321,6 +1391,12 @@ PROTOBUF_NOINLINE void CharacterSpawnInfo::Clear() {
       if (this_._internal_appearance_preset_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_appearance_preset_id());
+      }
+    }
+    // bool is_dead = 16;
+    if (CheckHasBit(cached_has_bits, 0x00008000U)) {
+      if (this_._internal_is_dead() != 0) {
+        total_size += 3;
       }
     }
   }
@@ -1389,7 +1465,7 @@ void CharacterSpawnInfo::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x00007f00U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000ff00U)) {
     if (CheckHasBit(cached_has_bits, 0x00000100U)) {
       if (::absl::bit_cast<::uint64_t>(from._internal_mp()) != 0) {
         _this->_impl_.mp_ = from._impl_.mp_;
@@ -1425,6 +1501,11 @@ void CharacterSpawnInfo::MergeImpl(::google::protobuf::MessageLite& to_msg,
         _this->_impl_.appearance_preset_id_ = from._impl_.appearance_preset_id_;
       }
     }
+    if (CheckHasBit(cached_has_bits, 0x00008000U)) {
+      if (from._internal_is_dead() != 0) {
+        _this->_impl_.is_dead_ = from._impl_.is_dead_;
+      }
+    }
   }
   _this->_impl_._has_bits_[0] |= cached_has_bits;
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
@@ -1448,8 +1529,8 @@ void CharacterSpawnInfo::InternalSwap(CharacterSpawnInfo* PROTOBUF_RESTRICT PROT
   _impl_.buffs_.InternalSwap(&other->_impl_.buffs_);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.appearance_preset_id_)
-      + sizeof(CharacterSpawnInfo::_impl_.appearance_preset_id_)
+      PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.is_dead_)
+      + sizeof(CharacterSpawnInfo::_impl_.is_dead_)
       - PROTOBUF_FIELD_OFFSET(CharacterSpawnInfo, _impl_.object_id_)>(
           reinterpret_cast<char*>(&_impl_.object_id_),
           reinterpret_cast<char*>(&other->_impl_.object_id_));
@@ -3464,6 +3545,429 @@ void ObjectDeathNtf::InternalSwap(ObjectDeathNtf* PROTOBUF_RESTRICT PROTOBUF_NON
 }
 
 ::google::protobuf::Metadata ObjectDeathNtf::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class ObjectReviveNtf::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<ObjectReviveNtf>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_._has_bits_);
+};
+
+ObjectReviveNtf::ObjectReviveNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ObjectReviveNtf_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:GamePacket.ObjectReviveNtf)
+}
+ObjectReviveNtf::ObjectReviveNtf(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ObjectReviveNtf& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ObjectReviveNtf_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(from._impl_) {
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+PROTOBUF_NDEBUG_INLINE ObjectReviveNtf::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0} {}
+
+inline void ObjectReviveNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, object_id_),
+           0,
+           offsetof(Impl_, mp_) -
+               offsetof(Impl_, object_id_) +
+               sizeof(Impl_::mp_));
+}
+ObjectReviveNtf::~ObjectReviveNtf() {
+  // @@protoc_insertion_point(destructor:GamePacket.ObjectReviveNtf)
+  SharedDtor(*this);
+}
+inline void ObjectReviveNtf::SharedDtor(MessageLite& self) {
+  ObjectReviveNtf& this_ = static_cast<ObjectReviveNtf&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL ObjectReviveNtf::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) ObjectReviveNtf(arena);
+}
+constexpr auto ObjectReviveNtf::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(ObjectReviveNtf),
+                                            alignof(ObjectReviveNtf));
+}
+constexpr auto ObjectReviveNtf::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_ObjectReviveNtf_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &ObjectReviveNtf::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<ObjectReviveNtf>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &ObjectReviveNtf::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<ObjectReviveNtf>(), &ObjectReviveNtf::ByteSizeLong,
+              &ObjectReviveNtf::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_._cached_size_),
+          false,
+      },
+      &ObjectReviveNtf::kDescriptorMethods,
+      &descriptor_table_GamePacket_2fobject_5fvisibility_5fpacket_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull ObjectReviveNtf_class_data_ =
+        ObjectReviveNtf::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+ObjectReviveNtf::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&ObjectReviveNtf_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(ObjectReviveNtf_class_data_.tc_table);
+  return ObjectReviveNtf_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<3, 7, 0, 0, 2>
+ObjectReviveNtf::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_._has_bits_),
+    0, // no _extensions_
+    7, 56,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967168,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    7,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    ObjectReviveNtf_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::GamePacket::ObjectReviveNtf>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int64 object_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(ObjectReviveNtf, _impl_.object_id_), 0>(),
+     {8, 0, 0,
+      PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.object_id_)}},
+    // float pos_x = 2;
+    {::_pbi::TcParser::FastF32S1,
+     {21, 1, 0,
+      PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.pos_x_)}},
+    // float pos_y = 3;
+    {::_pbi::TcParser::FastF32S1,
+     {29, 2, 0,
+      PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.pos_y_)}},
+    // float pos_z = 4;
+    {::_pbi::TcParser::FastF32S1,
+     {37, 3, 0,
+      PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.pos_z_)}},
+    // float yaw = 5;
+    {::_pbi::TcParser::FastF32S1,
+     {45, 4, 0,
+      PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.yaw_)}},
+    // double hp = 6;
+    {::_pbi::TcParser::FastF64S1,
+     {49, 5, 0,
+      PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.hp_)}},
+    // double mp = 7;
+    {::_pbi::TcParser::FastF64S1,
+     {57, 6, 0,
+      PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.mp_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int64 object_id = 1;
+    {PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.object_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // float pos_x = 2;
+    {PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.pos_x_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float pos_y = 3;
+    {PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.pos_y_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float pos_z = 4;
+    {PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.pos_z_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // float yaw = 5;
+    {PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.yaw_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // double hp = 6;
+    {PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.hp_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kDouble)},
+    // double mp = 7;
+    {PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.mp_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kDouble)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+PROTOBUF_NOINLINE void ObjectReviveNtf::Clear() {
+// @@protoc_insertion_point(message_clear_start:GamePacket.ObjectReviveNtf)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
+    ::memset(&_impl_.object_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.mp_) -
+        reinterpret_cast<char*>(&_impl_.object_id_)) + sizeof(_impl_.mp_));
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL ObjectReviveNtf::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const ObjectReviveNtf& this_ = static_cast<const ObjectReviveNtf&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL ObjectReviveNtf::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const ObjectReviveNtf& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:GamePacket.ObjectReviveNtf)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // int64 object_id = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (this_._internal_object_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
+              stream, this_._internal_object_id(), target);
+    }
+  }
+
+  // float pos_x = 2;
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_pos_x()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          2, this_._internal_pos_x(), target);
+    }
+  }
+
+  // float pos_y = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_pos_y()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          3, this_._internal_pos_y(), target);
+    }
+  }
+
+  // float pos_z = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_pos_z()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          4, this_._internal_pos_z(), target);
+    }
+  }
+
+  // float yaw = 5;
+  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (::absl::bit_cast<::uint32_t>(this_._internal_yaw()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          5, this_._internal_yaw(), target);
+    }
+  }
+
+  // double hp = 6;
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (::absl::bit_cast<::uint64_t>(this_._internal_hp()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteDoubleToArray(
+          6, this_._internal_hp(), target);
+    }
+  }
+
+  // double mp = 7;
+  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+    if (::absl::bit_cast<::uint64_t>(this_._internal_mp()) != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteDoubleToArray(
+          7, this_._internal_mp(), target);
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:GamePacket.ObjectReviveNtf)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t ObjectReviveNtf::ByteSizeLong(const MessageLite& base) {
+  const ObjectReviveNtf& this_ = static_cast<const ObjectReviveNtf&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t ObjectReviveNtf::ByteSizeLong() const {
+  const ObjectReviveNtf& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:GamePacket.ObjectReviveNtf)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+  cached_has_bits = this_._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
+    // int64 object_id = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (this_._internal_object_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_object_id());
+      }
+    }
+    // float pos_x = 2;
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_pos_x()) != 0) {
+        total_size += 5;
+      }
+    }
+    // float pos_y = 3;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_pos_y()) != 0) {
+        total_size += 5;
+      }
+    }
+    // float pos_z = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_pos_z()) != 0) {
+        total_size += 5;
+      }
+    }
+    // float yaw = 5;
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (::absl::bit_cast<::uint32_t>(this_._internal_yaw()) != 0) {
+        total_size += 5;
+      }
+    }
+    // double hp = 6;
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (::absl::bit_cast<::uint64_t>(this_._internal_hp()) != 0) {
+        total_size += 9;
+      }
+    }
+    // double mp = 7;
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (::absl::bit_cast<::uint64_t>(this_._internal_mp()) != 0) {
+        total_size += 9;
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void ObjectReviveNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<ObjectReviveNtf*>(&to_msg);
+  auto& from = static_cast<const ObjectReviveNtf&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.ObjectReviveNtf)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (from._internal_object_id() != 0) {
+        _this->_impl_.object_id_ = from._impl_.object_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_pos_x()) != 0) {
+        _this->_impl_.pos_x_ = from._impl_.pos_x_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_pos_y()) != 0) {
+        _this->_impl_.pos_y_ = from._impl_.pos_y_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_pos_z()) != 0) {
+        _this->_impl_.pos_z_ = from._impl_.pos_z_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (::absl::bit_cast<::uint32_t>(from._internal_yaw()) != 0) {
+        _this->_impl_.yaw_ = from._impl_.yaw_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (::absl::bit_cast<::uint64_t>(from._internal_hp()) != 0) {
+        _this->_impl_.hp_ = from._impl_.hp_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (::absl::bit_cast<::uint64_t>(from._internal_mp()) != 0) {
+        _this->_impl_.mp_ = from._impl_.mp_;
+      }
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void ObjectReviveNtf::CopyFrom(const ObjectReviveNtf& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.ObjectReviveNtf)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void ObjectReviveNtf::InternalSwap(ObjectReviveNtf* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.mp_)
+      + sizeof(ObjectReviveNtf::_impl_.mp_)
+      - PROTOBUF_FIELD_OFFSET(ObjectReviveNtf, _impl_.object_id_)>(
+          reinterpret_cast<char*>(&_impl_.object_id_),
+          reinterpret_cast<char*>(&other->_impl_.object_id_));
+}
+
+::google::protobuf::Metadata ObjectReviveNtf::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)

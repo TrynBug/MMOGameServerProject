@@ -41,6 +41,7 @@ message CharacterSpawnInfo {
     float  yaw            = 13;  // Y축 회전, degree 단위
     repeated BuffSnapshotInfo buffs = 14;  // 현재 보유 버프 (UI 뱃지용)
     int32  appearance_preset_id = 15;  // 외형 프리셋 인덱스 (0-base). job_id 와 함께 외형 결정.
+    bool   is_dead        = 16;  // 사망 상태. 부활 대기 중 시야 진입한 관전자가 사망 포즈로 표시한다. (MonsterSpawnInfo.is_dead 와 동일)
 }
 
 // 몬스터 spawn 정보. 클라이언트는 monster_key 로 몬스터 게임데이터를 조회해
@@ -102,4 +103,16 @@ message PropStateNtf {
 message ObjectDeathNtf {
     int64 object_id        = 1;   // 사망한 오브젝트
     int64 killer_object_id = 2;   // 처치자 (없으면 0)
+}
+
+// 오브젝트 부활 알림 (서버 -> 클라). ObjectDeathNtf 의 짝.
+// 사망했던 오브젝트가 부활한 시점에 주변 AOI 유저들에게 통보한다.
+message ObjectReviveNtf {
+    int64  object_id = 1;   // 부활한 오브젝트
+    float  pos_x     = 2;   // 부활 위치 (리스폰 지점일 수 있음)
+    float  pos_y     = 3;   // 높이
+    float  pos_z     = 4;   // 평면 깊이축
+    float  yaw       = 5;   // Y축 회전, degree 단위
+    double hp        = 6;   // 부활 후 현재 HP
+    double mp        = 7;   // 부활 후 현재 MP
 }
