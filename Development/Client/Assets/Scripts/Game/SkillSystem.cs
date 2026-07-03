@@ -43,7 +43,9 @@ namespace Client.Game
         // 투사체 비주얼의 Y 오프셋 (지면에 반쯤 묻히지 않도록). XZ 판정에는 영향 없음.
         [SerializeField] private float m_projectileHeight = 0.5f;
 
-        // 시전 클립의 기본 길이(초). CastSpeed = 이 값 / ActionLock초 로 시전 애니를 ActionLock 에 맞춘다.
+        // 시전 클립의 기본 길이(초). CastSpeed = min(1.0, 이 값 / ActionLock초).
+        // '절대 안 빨라짐' 정책: 시전시간이 클립보다 짧아도 배속을 올리지 않고 1.0(원래속도)로 재생하며,
+        // 긴 시전에서만 1.0 미만으로 느리게(루프 채널링) 재생한다.
         // v1 은 모든 스킬이 같은 시전 클립을 공유한다고 보고 하나로 둔다.
         // 스킬마다 시전 클립이 달라지면 Skill 데이터에 client 전용 CastAnimLength 컴럼으로 옮긴다.
         [SerializeField] private float m_castClipBaseLength = 0.8f;
@@ -255,22 +257,19 @@ namespace Client.Game
 
             // 시전 애니메이션 재생 (CastAnim 이 있으면).
             float actionLockSec = skill.ActionLockMs / 1000f;
+            // '절대 안 빨라짐': 최대 1.0 으로 클램프. 짧은 시전은 원래속도(부분 재생), 긴 시전만 느려진다.
             float castSpeed = (m_castClipBaseLength > 0f && actionLockSec > 0.01f)
-                ? m_castClipBaseLength / actionLockSec
+                ? Mathf.Min(1f, m_castClipBaseLength / actionLockSec)
                 : 1f;
 
-            if (skill.CastClass == ESkillCastClass.Mobile)
-            {
-                // 이동시전: 상반신만 시전, 다리는 locomotion 유지 (이동 잠금 없음).
-                caster.PlayCastUpperBody(castSpeed, actionLockSec);
-            }
-            else
-            {
-                // 그 외(Stationary 등): 전신 시전. Stationary 는 시전 동안 이동 잠금.
-                caster.PlayCastAnimation(skill.CastAnim, castSpeed);
-                if (skill.CastClass == ESkillCastClass.Stationary)
-                    caster.LockMovement(actionLockSec);
-            }
+            // 캐스팅(홀드): 직업/클래스 무관하게 스킬 데이터 CastAnim 상태로 진입(마지막 프레임에서 대기).
+            caster.PlayCast(skill.CastAnim, castSpeed);
+            // 발동(FireAnim): CastDelay 경과(발동 순간)에 재생 → 종료 시 Locomotion 복귀.
+            StartCoroutine(playFireAnimAfterDelay(caster, skill, castSpeed));
+
+            // Stationary 는 시전 동안 이동 잠금. (Mobile 은 이동 유지 → 잠그지 않음)
+            if (skill.CastClass == ESkillCastClass.Stationary)
+                caster.LockMovement(actionLockSec);
 
             // 액션락 설정 (다음 시전까지 잠금).
             m_actionLockUntil = Time.time + skill.ActionLockMs / 1000f;
@@ -314,6 +313,16 @@ namespace Client.Game
             Vector3 fwd = caster.transform.forward;
             fwd.y = 0f;
             return (fwd.sqrMagnitude > 0.0001f) ? fwd.normalized : Vector3.forward;
+        }
+
+        // 발동 애니메이션(FireAnim)을 CastDelay 경과 후(발동 순간) 재생. 캐스팅(CastAnim, 홀드) → 발동 모션 전환.
+        // FireAnim 이 비어있으면 PlayFire 내부에서 무시된다.
+        private IEnumerator playFireAnimAfterDelay(PlayerCharacter caster, GameData_Skill skill, float castSpeed)
+        {
+            if (skill.CastDelayMs > 0)
+                yield return new WaitForSeconds(skill.CastDelayMs / 1000f);
+            if (caster != null)
+                caster.PlayFire(skill.FireAnim, castSpeed);
         }
 
         private IEnumerator spawnProjectilesAfterDelay(SkillProjectileGroup group, GameData_Skill skill, Vector3 origin, Vector3 dir)
@@ -869,6 +878,11 @@ namespace Client.Game
                 HitFlash.Trigger(hitMonster);
                 HitStop.Trigger(hitMonster, ntf.IsDuplicate ? 50f : 100f);
                 ScalePop.Play(hitMonster);
+                hitMonster.PlayHitReaction();   // 피격 애니 (드라이버가 Locomotion 중 + 쓰로틀 게이트)
+            }
+            else if (target is PlayerCharacter hitPlayer)
+            {
+                hitPlayer.PlayHit();            // 로컬/원격 플레이어 피격 애니 (동일 게이트)
             }
 
             // 본인(LocalPlayer)이 맞았으면 피격 피드백: 공격자 방향 표식 + 카메라 셰이크(타격감).

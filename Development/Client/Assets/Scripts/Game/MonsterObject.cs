@@ -117,6 +117,12 @@ namespace Client.Game
             m_actorAnimator?.PlaySkill();
         }
 
+        // 피격 반응 애니메이션. 드라이버(AnimatorActorAnimator)가 'Locomotion 중 + 쓰로틀' 게이트를 적용한다.
+        public void PlayHitReaction()
+        {
+            m_actorAnimator?.PlayHit();
+        }
+
         // ─── 사망 처리 ────────────────────────────────────────────────────
 
         // 사망 처리: 사망 애니메이션. 이미 사망 상태면 멱등.

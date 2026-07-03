@@ -81,7 +81,73 @@ namespace Client.Game
 
             // CastSpeed 를 먼저 세팅한 뒤 트리거 → cast 스테이트가 첫 프레임부터 맞는 속도로 재생.
             m_animator.SetFloat(s_paramCastSpeed, Mathf.Max(0.01f, castSpeed));
-            m_animator.SetTrigger(triggerName);
+            // 트리거 파라미터가 있을 때만 발동(신형 by-name 컨트롤러엔 트리거가 없어 경고 방지).
+            if (AnimPlay.HasParam(m_animator, Animator.StringToHash(triggerName)))
+                m_animator.SetTrigger(triggerName);
+        }
+
+        // ─── 원샷/감정표현/전투 재생 (LayerLabCharacter.controller, by-name) ────
+        // 새 캐릭터 컨트롤러의 상태를 이름으로 재생한다. 상태가 없으면(구 컨트롤러/모델 없음) 조용히 무시.
+        // 로컬/원격 공용: 로컬은 입력·예측으로, 원격은 서버 이벤트로 호출한다.
+
+        private string m_activeOneShot;      // 현재 재생 중 원샷 상태명(null=없음)
+        private bool m_oneShotCancelOnMove;  // 이동 시작 시 취소할지
+        private bool m_stunned;
+        private float m_lastHitTime = -999f; // 피격 애니 쓰로틀용
+        private const float k_hitThrottleSec = 0.4f;
+
+        // 점프. 이동 중에도 위치는 Mover 가 계속 움직이므로 "점프 모션 + 이동" 이 동시에 표현된다(이동해도 취소 안 함).
+        public void PlayJump() => playOneShot(AnimStates.Jump, cancelOnMove: false);
+
+        // 감정표현(Dance/Emoji). idle 에서만 호출 권장. 이동 시작 시 자동 취소.
+        public void PlayEmote(string emoteState) => playOneShot(emoteState, cancelOnMove: true);
+
+        // 피격. Idle/Walk/Run(Locomotion) 중일 때만 재생하고, 쓰로틀로 연속 피격 시 반복을 억제한다.
+        // (캐스팅/점프/공격/스턴/사망 중에는 Locomotion 이 아니므로 자동 스킵 → 시전/동작이 안 끊긴다.)
+        public void PlayHit()
+        {
+            if (m_animator == null) return;
+            if (Time.time - m_lastHitTime < k_hitThrottleSec) return;
+            if (!AnimPlay.IsCurrent(m_animator, AnimStates.Locomotion)) return;
+            m_lastHitTime = Time.time;
+            playOneShot(AnimStates.GetHit, cancelOnMove: false);
+        }
+
+        // 캐스팅(홀드): castSpeed 로 시전길이에 맞춘 뒤 Cast 상태 진입(마지막 프레임 정지).
+        public void PlayCast(string castState, float castSpeed)
+        {
+            if (m_animator == null || string.IsNullOrEmpty(castState)) return;
+            AnimPlay.SetFloatSafe(m_animator, AnimStates.HCastSpeed, Mathf.Max(0.01f, castSpeed));
+            AnimPlay.CrossFade(m_animator, castState);
+            m_activeOneShot = null;
+        }
+
+        // 발동(원샷 → 복귀).
+        public void PlayFire(string fireState, float castSpeed)
+        {
+            if (m_animator == null || string.IsNullOrEmpty(fireState)) return;
+            AnimPlay.SetFloatSafe(m_animator, AnimStates.HCastSpeed, Mathf.Max(0.01f, castSpeed));
+            playOneShot(fireState, cancelOnMove: false);
+        }
+
+        // 스턴/속박 on/off. on: Stun 루프 진입, off: Locomotion 복귀.
+        public void SetStunned(bool stunned)
+        {
+            if (m_animator == null || m_stunned == stunned) return;
+            m_stunned = stunned;
+            AnimPlay.CrossFade(m_animator, stunned ? AnimStates.Stun : AnimStates.Locomotion);
+        }
+
+        // 사망 연출 재생 / 끝포즈 고정.
+        public void PlayDeadState() { if (m_animator != null) AnimPlay.CrossFade(m_animator, AnimStates.Dead); }
+        public void SetDeadPose()   { if (m_animator != null) AnimPlay.PlayPose(m_animator, AnimStates.Dead, 1f); }
+
+        private void playOneShot(string state, bool cancelOnMove)
+        {
+            if (m_animator == null) return;
+            if (!AnimPlay.CrossFade(m_animator, state)) return;
+            m_activeOneShot = state;
+            m_oneShotCancelOnMove = cancelOnMove;
         }
 
         // 이동시전(Mobile): 상반신 레이어 가중치를 올리고 상반신 시전 트리거를 쏜다.
@@ -270,6 +336,10 @@ namespace Client.Game
             if (NetClock.IsReady)
                 m_reconciler.RecordPrediction(NetClock.EstServerNowMs(), transform.position);
 
+            // (로컬) 점프 입력 — 이동과 무관하게 점프 모션만 재생한다. 위치는 Mover 가 계속 구동하므로 점프하며 이동한다.
+            if (Input.GetKeyDown(KeyCode.Space))
+                PlayJump();
+
             // Animator 갱신은 정지 전환(true -> false)도 잡아야 하므로 매 프레임 호출.
             updateAnimator();
         }
@@ -285,6 +355,22 @@ namespace Client.Game
             bool isMoving = IsLocalPlayer ? m_mover.IsMoving : m_remoteMoving;
             float target = isMoving ? 1f : 0f;
             m_animator.SetFloat(s_paramSpeed, target, k_speedDampTime, Time.deltaTime);
+
+            // 원샷(감정표현 등) 이동취소 / 자연종료 추적.
+            if (m_activeOneShot != null)
+            {
+                if (m_oneShotCancelOnMove && isMoving)
+                {
+                    // 이동 시작 → 감정표현 등 취소하고 Locomotion 복귀.
+                    AnimPlay.CrossFade(m_animator, AnimStates.Locomotion);
+                    m_activeOneShot = null;
+                }
+                else if (AnimPlay.IsCurrent(m_animator, AnimStates.Locomotion))
+                {
+                    // 원샷이 Has Exit Time 으로 자연 복귀 완료 → 추적 해제.
+                    m_activeOneShot = null;
+                }
+            }
         }
     }
 }

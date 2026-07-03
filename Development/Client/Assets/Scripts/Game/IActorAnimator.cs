@@ -16,8 +16,12 @@ namespace Client.Game
         // 이동/정지 전환. true 면 이동(walk/run), false 면 정지(idle).
         void SetMoving(bool isMoving);
 
+        // 이동속도(정규화 0~1)를 직접 지정. 0=idle, 0.5=walk, 1=run 블렌드.
+        // SetMoving 보다 세밀한 제어(가감속)가 필요할 때 사용. 구현체가 Speed 파라미터가 없으면 무시한다.
+        void SetSpeed(float speed01);
+
         // 사망 연출 1회 재생. 사망 시점(ObjectDeathNtf)에 호출한다 — 사망 애니메이션을 처음부터 재생.
-        // 구현체가 Animator 에 사망 트리거가 없으면 조용히 무시한다.
+        // 구현체가 Animator 에 사망 트리거/상태가 없으면 조용히 무시한다.
         void PlayDead();
 
         // 사망 끝 포즈로 즉시 고정. corpse 상태로 늦게 spawn 될 때 호출한다 — 애니메이션 재생 없이 마지막 프레임(쓰러진 포즈)부터 표시.
@@ -28,7 +32,20 @@ namespace Client.Game
         // 구현체가 Animator 에 시전 트리거가 없으면 조용히 무시한다.
         void PlaySkill();
 
-        // (추후) 피격(one-shot) 은 해당 기능이 실제로 들어올 때 추가한다.
-        //   void PlayHit();
+        // 임의의 원샷 상태를 이름으로 재생(Jump/공격/감정표현 등). cancelOnMove=true 면 이동 시작 시 자동으로 Locomotion 복귀.
+        // 구현체가 해당 상태를 갖고 있지 않으면 무시한다.
+        void PlayOneShot(string stateName, bool cancelOnMove);
+
+        // 피격(one-shot) 재생.
+        void PlayHit();
+
+        // 스턴/속박 on/off. on 이면 Stun 루프 진입, off 면 Locomotion 복귀.
+        void SetStunned(bool stunned);
+
+        // 캐스팅(홀드) 진입. castSpeed 로 재생속도를 스킬 캐스팅시간에 맞춘 뒤 castState 로 CrossFade.
+        void PlayCast(string castState, float castSpeed);
+
+        // 발동(원샷) 재생. castSpeed 로 재생속도 스케일 후 fireState 로 CrossFade → 종료 시 Locomotion 복귀.
+        void PlayFire(string fireState, float castSpeed);
     }
 }
