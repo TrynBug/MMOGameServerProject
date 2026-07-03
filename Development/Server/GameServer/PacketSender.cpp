@@ -320,6 +320,21 @@ void PacketSender::SendObjectDeathNtf(std::span<const int64> accountIds, int64 o
     SendToUsers(accountIds, Common::GAME_PACKET_ID_OBJECT_DEATH_NTF, ntf);
 }
 
+void PacketSender::SendObjectReviveNtf(std::span<const int64> accountIds, int64 objectId,
+                                       float posX, float posY, float posZ, float yaw, double hp, double mp)
+{
+    GamePacket::ObjectReviveNtf ntf;
+    ntf.set_object_id(objectId);
+    ntf.set_pos_x(posX);
+    ntf.set_pos_y(posY);
+    ntf.set_pos_z(posZ);
+    ntf.set_yaw(yaw);
+    ntf.set_hp(hp);
+    ntf.set_mp(mp);
+
+    SendToUsers(accountIds, Common::GAME_PACKET_ID_OBJECT_REVIVE_NTF, ntf);
+}
+
 void PacketSender::SendStageNoticeNtf(std::span<const int64> accountIds, const std::string& message, int32 durationMs)
 {
     GamePacket::StageNoticeNtf ntf;

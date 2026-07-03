@@ -303,6 +303,9 @@ public:
     // 디스폰(시체 제거)은 corpse 시간 경과 후 DespawnMonster(ObjectVisibilityNtf despawn)로 별도 처리된다.
     void BroadcastObjectDeathNtf(const ActorObject& actor, int64 killerObjectId);
 
+    // 오브젝트 부활을 주변 AOI 유저들에게 통보(ObjectReviveNtf). 위치/HP/MP 를 실어 보낸다. 클라 부활 연출/상태복원용.
+    void BroadcastObjectReviveNtf(const ActorObject& actor);
+
     // 스킬 투사체 묶음(1회 시전 분)을 월드에 등록한다. 발급된 effectId 를 리턴한다 (시전 Ntf 에 실을 용도).
     // dirs: 부채꼴 전개된 투사체별 방향. SkillComponent 가 계산해 넘긴다.
     int64 SpawnSkillProjectileGroup(const EffectParams& params, const std::vector<Vector3>& dirs);
@@ -497,6 +500,9 @@ private:
 
     // m_characterObjects 순회하면서 Character::Update 호출 + sector 갱신.
     void updateCharacters(int64 deltaMs);
+
+    // 사망한 캐릭터를 부활시킨다. HP/MP 복원 + 기본 시작위치 재배치 + ObjectReviveNtf broadcast.
+    void respawnCharacter(Character& character);
 
     // m_monsterObjects 순회하면서 Monster::Update(FSM) 호출.
     // (이동 시 sector 갱신은 Monster 내부에서 한다. 컨텐츠 스레드 전용.)

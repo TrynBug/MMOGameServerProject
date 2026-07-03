@@ -81,6 +81,9 @@ namespace Client.Game
         // MouseInputHandler 가 매 프레임 호출 (마우스를 누르고 있는 동안).
         public void RequestMoveTo(Vector3 worldPoint)
         {
+            // 사망 중이면 예측 이동/서버 송신 모두 차단.
+            if (Character.IsDead) return;
+
             // 1) 캐릭터에게 즉시 알림 (클라이언트 응답성)
             Character.SetMoveDestination(worldPoint);
 

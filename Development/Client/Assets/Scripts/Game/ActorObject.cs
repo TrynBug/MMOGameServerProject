@@ -62,6 +62,16 @@ namespace Client.Game
             IsDead = true;
         }
 
+        // 부활. 사망 상태를 해제하고 자원(HP/MP)을 복원한다. ObjectReviveNtf 수신 시 호출된다.
+        // 위치는 호출측(부활 핸들러)이 별도로 세팅한다(스폰과 동일 규약).
+        // 파생(PlayerCharacter)은 애니 복귀를 덧붙인다. 입력 차단은 IsDead 게이트라 여기서 false 가 되면 자동 재개된다.
+        public virtual void Revive(double hp, double mp)
+        {
+            IsDead = false;
+            SetCurHp(hp);
+            SetCurMp(mp);
+        }
+
         // value 를 [0, maxValue] 로 clamp. maxValue 가 음수면 0 으로 본다.
         private static double clampToRange(double value, double maxValue)
         {

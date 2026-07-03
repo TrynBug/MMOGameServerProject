@@ -102,6 +102,17 @@ void Character::ApplyActionLock(int64 lockMs)
     m_mover.Stop();
 }
 
+bool Character::AdvanceRespawnTimer(int64 deltaMs)
+{
+    m_respawnElapsedMs += deltaMs;
+    if (m_respawnElapsedMs >= k_respawnDelayMs)
+    {
+        m_respawnElapsedMs = 0;
+        return true;
+    }
+    return false;
+}
+
 void Character::Update(int64 deltaMs)
 {
     // 시전 액션락 카운트다운. >0 인 동안은 이동하지 않는다(handleMoveIntentReq 가 이동 입력도 무시).

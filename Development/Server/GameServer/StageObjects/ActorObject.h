@@ -102,24 +102,14 @@ public:
 
     // 사망으로 전환한다. 이미 사망 상태면 아무것도 하지 않고 false (중복 사망 방지).
     // 이번 호출에서 처음 사망 전환했으면 true (호출자가 사망 통보를 1회만 보내도록).
-    bool MarkDead(int64 killerObjectId)
-    {
-        if (m_isDead)
-            return false;
-        m_isDead         = true;
-        m_killerObjectId = killerObjectId;
-        return true;
-    }
+    bool MarkDead(int64 killerObjectId);
+
+    // 부활: 사망 상태를 해제한다. HP/MP 복원·위치 재배치는 호출측(Stage::respawnCharacter)이 한다.
+    void MarkAlive();
 
 private:
     // value 를 [0, maxValue] 로 clamp. maxValue 가 음수면 0 으로 본다.
-    static double clampToRange(double value, double maxValue)
-    {
-        const double hi = (maxValue > 0.0) ? maxValue : 0.0;
-        if (value < 0.0)   return 0.0;
-        if (value > hi)    return hi;
-        return value;
-    }
+    static double clampToRange(double value, double maxValue);
 
 private:
     // 현재 HP / MP. 최대치는 GetMaxHp()/GetMaxMp() 로 얻는다.

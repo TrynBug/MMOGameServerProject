@@ -71,6 +71,7 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<BuffNtf>(GamePacketId.BuffNtf, onBuffNtf);
             PacketDispatcher.Instance.Register<BuffRemoveNtf>(GamePacketId.BuffRemoveNtf, onBuffRemoveNtf);
             PacketDispatcher.Instance.Register<ObjectDeathNtf>(GamePacketId.ObjectDeathNtf, onObjectDeathNtf);
+            PacketDispatcher.Instance.Register<ObjectReviveNtf>(GamePacketId.ObjectReviveNtf, onObjectReviveNtf);
             PacketDispatcher.Instance.Register<StageNoticeNtf>(GamePacketId.StageNoticeNtf, onStageNoticeNtf);
             PacketDispatcher.Instance.Register<PropStateNtf>(GamePacketId.PropStateNtf, onPropStateNtf);
 
@@ -302,6 +303,10 @@ namespace Client.Game
                     remoteCharacter.SetCurMp(characterSpawnInfo.Mp);
 
                     applyBuffSnapshot(remoteCharacter.Buffs, characterSpawnInfo.Buffs);
+
+                    // 사망 상태로 스폰(부활 대기 중 시야 진입): 사망 끝포즈로 고정 + IsDead 세팅. (몬스터 SpawnAsCorpse 와 동일)
+                    if (characterSpawnInfo.IsDead)
+                        remoteCharacter.SpawnAsCorpse();
                 }
 
                 Debug.Log($"[StageManager] ObjectVisibilityNtf: CharacterSpawn characterId={characterSpawnInfo.ObjectId}");
@@ -371,6 +376,30 @@ namespace Client.Game
 
             actor.OnDeath();
             Debug.Log($"[StageManager] ObjectDeathNtf: ObjectId={ntf.ObjectId} killer={ntf.KillerObjectId}");
+        }
+
+        // 오브젝트 부활 알림 (자동 리스폰). 사망했던 액터를 부활 상태로 전환한다.
+        // 서버가 사망 N초 후 부활 위치/자원을 결정해 보낸다. 클라는 받은 대로 적용만 한다.
+        //   - IsDead 해제 + HP/MP 복원 (PlayerCharacter 는 Locomotion 애니 복귀, 입력 게이트 자동 재개)
+        //   - 리스폰 위치 재배치 (플레이어는 SetPosition 으로 예측/화해 히스토리까지 리셋)
+        private void onObjectReviveNtf(ObjectReviveNtf ntf)
+        {
+            ActorObject actor = FindActor(ntf.ObjectId);
+            if (actor == null)
+            {
+                Debug.LogWarning($"[StageManager] ObjectReviveNtf: actor not found. ObjectId={ntf.ObjectId}");
+                return;
+            }
+
+            actor.Revive(ntf.Hp, ntf.Mp);
+
+            Vector3 pos = new Vector3(ntf.PosX, ntf.PosY, ntf.PosZ);
+            if (actor is PlayerCharacter pc)
+                pc.SetPosition(pos, ntf.Yaw);
+            else
+                actor.transform.SetPositionAndRotation(pos, Quaternion.Euler(0f, ntf.Yaw, 0f));
+
+            Debug.Log($"[StageManager] ObjectReviveNtf: ObjectId={ntf.ObjectId} pos={pos} hp={ntf.Hp}");
         }
 
         // 서버 Stage 스크립트의 Notice() 가 보낸 화면 공지 배너.

@@ -183,6 +183,10 @@ namespace Client.Game
             if (caster == null)
                 return;
 
+            // 사망 중이면 시전 불가 (입력 차단).
+            if (caster.IsDead)
+                return;
+
             // 마나 선체크 (클라가 먼저 막음. 서버도 검증 — 5c).
             if (caster.CurMp < skill.ManaCost)
                 return;

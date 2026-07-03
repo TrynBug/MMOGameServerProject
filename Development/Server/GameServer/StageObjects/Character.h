@@ -145,6 +145,11 @@ public:
     // 시전 액션락 중인지. handleMoveIntentReq 가 이동 입력 무시 판정에 사용.
     bool IsActionLocked() const { return m_actionLockRemainingMs > 0; }
 
+    // ── 자동 리스폰 ──────────────────────────────────────────
+    // 사망(IsDead) 중일 때만 Stage::updateCharacters 가 매 tick 호출한다.
+    // 사망 후 경과를 누적하고 리스폰 지연을 넘기면 1회 true 를 리턴한 뒤 리셋한다(다음 사망 대비).
+    bool AdvanceRespawnTimer(int64 deltaMs);
+
 private:
     // Initialize 에서 호출. JobBase 게임데이터의 기본스탯을 m_statComponent 에 적용한다.
     bool applyJobBaseStats();
@@ -167,6 +172,10 @@ private:
 
     // 시전 액션락 잔여시간(ms). >0 이면 이동 입력 무시. Update 에서 deltaMs 만큼 감소.
     int64 m_actionLockRemainingMs = 0;
+
+    // 자동 리스폰 대기시간(ms) 및 사망 후 누적 경과. 사망 시점에 0 에서 시작(부활 시 리셋됨).
+    static constexpr int64 k_respawnDelayMs = 5000;   // 사망 5초 후 자동 부활
+    int64 m_respawnElapsedMs = 0;
 
     // ── DB 저장 관련 ─────────────────────────────────────
 

@@ -142,6 +142,36 @@ namespace Client.Game
         public void PlayDeadState() { if (m_animator != null) AnimPlay.CrossFade(m_animator, AnimStates.Dead); }
         public void SetDeadPose()   { if (m_animator != null) AnimPlay.PlayPose(m_animator, AnimStates.Dead, 1f); }
 
+        // 사망 처리. 서버 ObjectDeathNtf 수신 시 StageManager 가 호출한다(로컬/원격 공용).
+        // 사망 애니메이션 재생 + (로컬) 예측 이동 중단. 입력 차단은 행동 메서드(SetMoveDestination/tryCast/점프)가 IsDead 로 막는다.
+        // 부활은 서버 부활 패킷 미구현 상태라 현재는 사망 상태로 유지된다(추후 Revive 배선).
+        public override void OnDeath()
+        {
+            if (IsDead) return;      // 멱등
+            base.OnDeath();          // IsDead = true (ActorObject)
+            if (IsLocalPlayer)
+                StopMove();          // 예측 이동 즉시 중단
+            PlayDeadState();         // Dead 상태로 CrossFade
+        }
+
+        // 부활. 사망 해제 + 자원 복원(base) + 애니 Locomotion 복귀. 입력은 IsDead 게이트가 자동 재개.
+        // 위치 재배치는 부활 핸들러가 SetPosition 으로 별도 적용한다(예측/화해 히스토리 리셋 포함).
+        public override void Revive(double hp, double mp)
+        {
+            base.Revive(hp, mp);     // IsDead = false, HP/MP 복원
+            if (m_animator != null)
+                AnimPlay.CrossFade(m_animator, AnimStates.Locomotion);
+        }
+
+        // corpse 상태로 늦게 시야 진입(원격 캐릭터가 부활 대기 중)한 경우: 사망 상태로 들어가되 애니 재생 없이 끝 포즈로 고정.
+        // MonsterObject.SpawnAsCorpse 와 동형. IsDead 를 세팅한다.
+        public void SpawnAsCorpse()
+        {
+            if (IsDead) return;
+            base.OnDeath();   // IsDead = true (ActorObject). PlayerCharacter.OnDeath 와 달리 애니는 처음부터 안 틀고,
+            SetDeadPose();    // 끝 포즈(쓰러진 자세)로 고정한다.
+        }
+
         private void playOneShot(string state, bool cancelOnMove)
         {
             if (m_animator == null) return;
@@ -299,6 +329,7 @@ namespace Client.Game
         // 목적지 설정. 마우스 누르고 있는 동안 매 프레임 갱신됨.
         public void SetMoveDestination(Vector3 dest)
         {
+            if (IsDead) return;   // 사망 중 이동 입력 차단
             m_mover.SetDestination(dest);
         }
 
@@ -337,7 +368,7 @@ namespace Client.Game
                 m_reconciler.RecordPrediction(NetClock.EstServerNowMs(), transform.position);
 
             // (로컬) 점프 입력 — 이동과 무관하게 점프 모션만 재생한다. 위치는 Mover 가 계속 구동하므로 점프하며 이동한다.
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (!IsDead && Input.GetKeyDown(KeyCode.Space))
                 PlayJump();
 
             // Animator 갱신은 정지 전환(true -> false)도 잡아야 하므로 매 프레임 호출.

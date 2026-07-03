@@ -73,7 +73,7 @@ namespace
         info.set_max_hp(character.GetMaxHp());
         info.set_mp(character.GetCurMp());
         info.set_max_mp(character.GetMaxMp());
-        // 좌표는 런타임이 진실의 원천. StageObject에서 가져온다.
+        info.set_is_dead(character.IsDead());
         info.set_pos_x(character.GetPosX());
         info.set_pos_y(character.GetPosY());
         info.set_pos_z(character.GetPosZ());
@@ -1887,6 +1887,14 @@ void Stage::updateCharacters(int64 deltaMs)
         if (!pCharacter->AdvanceUpdateClock(deltaMs, elapsedMs))
             continue;
 
+        // 사망한 캐릭터: 이동/스킬/버프 정지. 리스폰 타이머만 매 tick 진행하고, 만료되면 자동 부활.
+        if (pCharacter->IsDead())
+        {
+            if (pCharacter->AdvanceRespawnTimer(deltaMs))
+                respawnCharacter(*pCharacter);
+            continue;
+        }
+
         // Update 전 sector 좌표 캐치 (sector 변경 감지용).
         const int32 oldSectorX = pCharacter->GetCurSectorX();
         const int32 oldSectorZ = pCharacter->GetCurSectorZ();
@@ -1911,6 +1919,57 @@ void Stage::updateCharacters(int64 deltaMs)
         }
 
     }
+}
+
+// 사망한 캐릭터를 부활시킨다. 기본 시작위치(StageStartPosition Default)로 재배치 +
+// HP/MP 전체 복원 + 사망상태 해제 후 주변 AOI 에 ObjectReviveNtf 통보. 클라는 받은 대로 상태/위치를 복원한다.
+void Stage::respawnCharacter(Character& character)
+{
+    // 부활 위치 = 스테이지 기본 시작위치. 없으면 현재 위치 유지. (스폰과 동일하게 NavMesh 스냅 보정)
+    float posX = character.GetPosX();
+    float posY = character.GetPosY();
+    float posZ = character.GetPosZ();
+    float yaw  = character.GetYaw();
+
+    const GameData_StageStartPosition* pPosData =
+        GameDataTable_StageStartPosition::FindByStageAndType(GetStageDataKey(), EStagePositionType::Default);
+    if (pPosData)
+    {
+        posX = static_cast<float>(pPosData->PosX);
+        posY = static_cast<float>(pPosData->PosY);
+        posZ = static_cast<float>(pPosData->PosZ);
+        yaw  = static_cast<float>(pPosData->Yaw);
+
+        float snapX = 0.f, snapY = 0.f, snapZ = 0.f;
+        if (SampleNavMeshPosition(posX, posY, posZ, 5.f, 5.f, 5.f, snapX, snapY, snapZ))
+        {
+            posX = snapX; posY = snapY; posZ = snapZ;
+        }
+    }
+
+    // 상태 복원: 사망 해제 + HP/MP 전체 회복.
+    character.MarkAlive();
+    character.FillHp();
+    character.FillMp();
+
+    // 위치 재배치 + 이동 정지. 리스폰 지점이 사망 지점과 멀면 sector 가 크게 바뀐다.
+    const int32 oldSectorX = character.GetCurSectorX();
+    const int32 oldSectorZ = character.GetCurSectorZ();
+
+    character.StopAt(posX, posY, posZ, yaw);
+    UpdateObjectSector(&character);
+
+    // sector 가 바뀌었으면 가시성(AOI) 갱신: 사망지점 주변 오브젝트를 despawn, 리스폰지점 주변을 spawn.
+    const int32 newSectorX = character.GetCurSectorX();
+    const int32 newSectorZ = character.GetCurSectorZ();
+    if (oldSectorX != newSectorX || oldSectorZ != newSectorZ)
+        updateVisibilityOnSectorChange(character, oldSectorX, oldSectorZ, newSectorX, newSectorZ);
+
+    // 주변 AOI 에 부활 통보 (클라 상태/위치 복원 + 부활 연출).
+    BroadcastObjectReviveNtf(character);
+
+    LOG_WRITE(LogLevel::Info, std::format("respawn character. stageId={} objectId={} pos=({},{},{})",
+        m_stageId, character.GetObjectId(), posX, posY, posZ));
 }
 
 // ─────────────────────────────────────────────────────────────

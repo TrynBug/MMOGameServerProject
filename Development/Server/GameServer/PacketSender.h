@@ -126,6 +126,10 @@ public:
     // 오브젝트 사망 알림 전송 (ObjectDeathNtf). Stage 가 사망한 대상 주변 AOI 유저들에게 broadcast. 클라 사망 연출용.
     void SendObjectDeathNtf(std::span<const int64> accountIds, int64 objectId, int64 killerObjectId);
 
+    // 오브젝트 부활 알림 전송 (ObjectReviveNtf). Stage 가 부활한 대상 주변 AOI 유저들에게 broadcast. 클라 부활 연출/상태복원용.
+    void SendObjectReviveNtf(std::span<const int64> accountIds, int64 objectId,
+                             float posX, float posY, float posZ, float yaw, double hp, double mp);
+
     // Stage 공지 배너 전송 (StageNoticeNtf). Stage 로직 스크립트의 Notice() 가 발생. 클라는 화면 배너 표시.
     void SendStageNoticeNtf(std::span<const int64> accountIds, const std::string& message, int32 durationMs);
 
