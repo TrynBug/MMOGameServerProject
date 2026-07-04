@@ -31,6 +31,25 @@ message MoveIntentReq {
     float yaw    = 7;            // 바라보는 방향 hint (권위 아님)
 }
 
+// ──────────────────────────────────────────────
+// 캐릭터 코스메틱 액션 (점프 / 감정표현)
+// ──────────────────────────────────────────────
+// 게임 로직(위치/전투)과 무관한 시각 연출. 로컬은 즉시 재생하고 Req 를 보내며, 서버는 AOI 에 relay 만 한다.
+// action_id: 1=Jump, 2=Emote. param: Emote 상태명(예: "Dance_1"), Jump 는 빈 문자열.
+
+// 클라 -> 서버: 코스메틱 액션 발생 통보.
+message ActorActionReq {
+    int32  action_id = 1;
+    string param     = 2;
+}
+
+// 서버 -> 클라(AOI): 어떤 액터가 코스메틱 액션을 했음. 관전자가 원격 캐릭터에 재생.
+message ActorActionNtf {
+    int64  actor_object_id = 1;
+    int32  action_id       = 2;
+    string param           = 3;
+}
+
 // (과거 MoveNtf 메시지 자리. SnapshotNtf 스냅샷 스트리밍으로 대체되어 제거됨.)
 
 // 위치 보정 알림 (서버 -> 해당 클라만 unicast)

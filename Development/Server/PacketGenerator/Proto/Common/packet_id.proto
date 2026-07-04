@@ -32,6 +32,8 @@ enum GamePacketId {
     GAME_PACKET_ID_MOVE_POS_CORRECT_NTF = 1004;   // 서버 -> 클라: 위치 보정 (클라 위치와 서버 위치가 너무 어깄났을 때)
     GAME_PACKET_ID_SNAPSHOT_NTF         = 1005;   // 서버 -> 클라: AOI 객체 상태 스냅샷 스트림 (매 tick 주기 송신. 이동 복제의 중심)
     GAME_PACKET_ID_TIME_SYNC_NTF        = 1006;   // 서버 -> 클라: NetClock 시각 동기 (저빈도 주기 push). SnapshotNtf 와 독립.
+    GAME_PACKET_ID_ACTOR_ACTION_REQ     = 1007;   // 클라 -> 서버: 캐릭터 코스메틱 액션(점프/감정표현) 발생. 서버가 AOI relay.
+    GAME_PACKET_ID_ACTOR_ACTION_NTF     = 1008;   // 서버 -> 클라(AOI): 캐릭터 코스메틱 액션. 관전자가 원격 캐릭터에 재생.
 
     // 2000~2999: 아이템
     GAME_PACKET_ID_ITEM_USE_REQ = 2001;   // 클라 -> 서버: 아이템 사용 요청

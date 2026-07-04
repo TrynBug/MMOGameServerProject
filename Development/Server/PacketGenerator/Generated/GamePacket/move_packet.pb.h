@@ -56,6 +56,14 @@ extern const ::google::protobuf::internal::DescriptorTable descriptor_table_Game
 namespace GamePacket {
 enum EMoveIntent : int;
 extern const uint32_t EMoveIntent_internal_data_[];
+class ActorActionNtf;
+struct ActorActionNtfDefaultTypeInternal;
+extern ActorActionNtfDefaultTypeInternal _ActorActionNtf_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ActorActionNtf_class_data_;
+class ActorActionReq;
+struct ActorActionReqDefaultTypeInternal;
+extern ActorActionReqDefaultTypeInternal _ActorActionReq_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ActorActionReq_class_data_;
 class ActorStateInfo;
 struct ActorStateInfoDefaultTypeInternal;
 extern ActorStateInfoDefaultTypeInternal _ActorStateInfo_default_instance_;
@@ -184,7 +192,7 @@ class TimeSyncNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const TimeSyncNtf*>(
         &_TimeSyncNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 4;
+  static constexpr int kIndexInFileMessages = 6;
   friend void swap(TimeSyncNtf& a, TimeSyncNtf& b) { a.Swap(&b); }
   inline void Swap(TimeSyncNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -374,7 +382,7 @@ class MovePosCorrectNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const MovePosCorrectNtf*>(
         &_MovePosCorrectNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 3;
   friend void swap(MovePosCorrectNtf& a, MovePosCorrectNtf& b) { a.Swap(&b); }
   inline void Swap(MovePosCorrectNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -862,7 +870,7 @@ class ActorStateInfo final : public ::google::protobuf::Message
     return *reinterpret_cast<const ActorStateInfo*>(
         &_ActorStateInfo_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 2;
+  static constexpr int kIndexInFileMessages = 4;
   friend void swap(ActorStateInfo& a, ActorStateInfo& b) { a.Swap(&b); }
   inline void Swap(ActorStateInfo* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -1033,6 +1041,432 @@ class ActorStateInfo final : public ::google::protobuf::Message
 extern const ::google::protobuf::internal::ClassDataFull ActorStateInfo_class_data_;
 // -------------------------------------------------------------------
 
+class ActorActionReq final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.ActorActionReq) */ {
+ public:
+  inline ActorActionReq() : ActorActionReq(nullptr) {}
+  ~ActorActionReq() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ActorActionReq* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ActorActionReq));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ActorActionReq(::google::protobuf::internal::ConstantInitialized);
+
+  inline ActorActionReq(const ActorActionReq& from) : ActorActionReq(nullptr, from) {}
+  inline ActorActionReq(ActorActionReq&& from) noexcept
+      : ActorActionReq(nullptr, ::std::move(from)) {}
+  inline ActorActionReq& operator=(const ActorActionReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ActorActionReq& operator=(ActorActionReq&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ActorActionReq& default_instance() {
+    return *reinterpret_cast<const ActorActionReq*>(
+        &_ActorActionReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 1;
+  friend void swap(ActorActionReq& a, ActorActionReq& b) { a.Swap(&b); }
+  inline void Swap(ActorActionReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ActorActionReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ActorActionReq* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ActorActionReq>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ActorActionReq& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ActorActionReq& from) { ActorActionReq::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ActorActionReq* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.ActorActionReq"; }
+
+  explicit ActorActionReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ActorActionReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ActorActionReq& from);
+  ActorActionReq(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ActorActionReq&& from) noexcept
+      : ActorActionReq(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kParamFieldNumber = 2,
+    kActionIdFieldNumber = 1,
+  };
+  // string param = 2;
+  void clear_param() ;
+  const ::std::string& param() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_param(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_param();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_param();
+  void set_allocated_param(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_param() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_param(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_param();
+
+  public:
+  // int32 action_id = 1;
+  void clear_action_id() ;
+  ::int32_t action_id() const;
+  void set_action_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_action_id() const;
+  void _internal_set_action_id(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.ActorActionReq)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<1, 2,
+                                   0, 39,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ActorActionReq& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr param_;
+    ::int32_t action_id_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fmove_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ActorActionReq_class_data_;
+// -------------------------------------------------------------------
+
+class ActorActionNtf final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.ActorActionNtf) */ {
+ public:
+  inline ActorActionNtf() : ActorActionNtf(nullptr) {}
+  ~ActorActionNtf() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ActorActionNtf* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ActorActionNtf));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ActorActionNtf(::google::protobuf::internal::ConstantInitialized);
+
+  inline ActorActionNtf(const ActorActionNtf& from) : ActorActionNtf(nullptr, from) {}
+  inline ActorActionNtf(ActorActionNtf&& from) noexcept
+      : ActorActionNtf(nullptr, ::std::move(from)) {}
+  inline ActorActionNtf& operator=(const ActorActionNtf& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ActorActionNtf& operator=(ActorActionNtf&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ActorActionNtf& default_instance() {
+    return *reinterpret_cast<const ActorActionNtf*>(
+        &_ActorActionNtf_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 2;
+  friend void swap(ActorActionNtf& a, ActorActionNtf& b) { a.Swap(&b); }
+  inline void Swap(ActorActionNtf* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ActorActionNtf* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ActorActionNtf* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ActorActionNtf>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ActorActionNtf& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ActorActionNtf& from) { ActorActionNtf::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ActorActionNtf* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.ActorActionNtf"; }
+
+  explicit ActorActionNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ActorActionNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ActorActionNtf& from);
+  ActorActionNtf(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ActorActionNtf&& from) noexcept
+      : ActorActionNtf(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kParamFieldNumber = 3,
+    kActorObjectIdFieldNumber = 1,
+    kActionIdFieldNumber = 2,
+  };
+  // string param = 3;
+  void clear_param() ;
+  const ::std::string& param() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_param(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_param();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_param();
+  void set_allocated_param(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_param() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_param(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_param();
+
+  public:
+  // int64 actor_object_id = 1;
+  void clear_actor_object_id() ;
+  ::int64_t actor_object_id() const;
+  void set_actor_object_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_actor_object_id() const;
+  void _internal_set_actor_object_id(::int64_t value);
+
+  public:
+  // int32 action_id = 2;
+  void clear_action_id() ;
+  ::int32_t action_id() const;
+  void set_action_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_action_id() const;
+  void _internal_set_action_id(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.ActorActionNtf)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 3,
+                                   0, 39,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ActorActionNtf& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr param_;
+    ::int64_t actor_object_id_;
+    ::int32_t action_id_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fmove_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ActorActionNtf_class_data_;
+// -------------------------------------------------------------------
+
 class SnapshotNtf final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:GamePacket.SnapshotNtf) */ {
  public:
@@ -1088,7 +1522,7 @@ class SnapshotNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const SnapshotNtf*>(
         &_SnapshotNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 3;
+  static constexpr int kIndexInFileMessages = 5;
   friend void swap(SnapshotNtf& a, SnapshotNtf& b) { a.Swap(&b); }
   inline void Swap(SnapshotNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -1442,6 +1876,219 @@ inline float MoveIntentReq::_internal_yaw() const {
 inline void MoveIntentReq::_internal_set_yaw(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.yaw_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ActorActionReq
+
+// int32 action_id = 1;
+inline void ActorActionReq::clear_action_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.action_id_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline ::int32_t ActorActionReq::action_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ActorActionReq.action_id)
+  return _internal_action_id();
+}
+inline void ActorActionReq::set_action_id(::int32_t value) {
+  _internal_set_action_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:GamePacket.ActorActionReq.action_id)
+}
+inline ::int32_t ActorActionReq::_internal_action_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.action_id_;
+}
+inline void ActorActionReq::_internal_set_action_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.action_id_ = value;
+}
+
+// string param = 2;
+inline void ActorActionReq::clear_param() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.param_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline const ::std::string& ActorActionReq::param() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:GamePacket.ActorActionReq.param)
+  return _internal_param();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ActorActionReq::set_param(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  _impl_.param_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:GamePacket.ActorActionReq.param)
+}
+inline ::std::string* PROTOBUF_NONNULL ActorActionReq::mutable_param()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  ::std::string* _s = _internal_mutable_param();
+  // @@protoc_insertion_point(field_mutable:GamePacket.ActorActionReq.param)
+  return _s;
+}
+inline const ::std::string& ActorActionReq::_internal_param() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.param_.Get();
+}
+inline void ActorActionReq::_internal_set_param(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.param_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ActorActionReq::_internal_mutable_param() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.param_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ActorActionReq::release_param() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:GamePacket.ActorActionReq.param)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000001U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  auto* released = _impl_.param_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.param_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ActorActionReq::set_allocated_param(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  }
+  _impl_.param_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.param_.IsDefault()) {
+    _impl_.param_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:GamePacket.ActorActionReq.param)
+}
+
+// -------------------------------------------------------------------
+
+// ActorActionNtf
+
+// int64 actor_object_id = 1;
+inline void ActorActionNtf::clear_actor_object_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.actor_object_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline ::int64_t ActorActionNtf::actor_object_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ActorActionNtf.actor_object_id)
+  return _internal_actor_object_id();
+}
+inline void ActorActionNtf::set_actor_object_id(::int64_t value) {
+  _internal_set_actor_object_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:GamePacket.ActorActionNtf.actor_object_id)
+}
+inline ::int64_t ActorActionNtf::_internal_actor_object_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.actor_object_id_;
+}
+inline void ActorActionNtf::_internal_set_actor_object_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.actor_object_id_ = value;
+}
+
+// int32 action_id = 2;
+inline void ActorActionNtf::clear_action_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.action_id_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline ::int32_t ActorActionNtf::action_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ActorActionNtf.action_id)
+  return _internal_action_id();
+}
+inline void ActorActionNtf::set_action_id(::int32_t value) {
+  _internal_set_action_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:GamePacket.ActorActionNtf.action_id)
+}
+inline ::int32_t ActorActionNtf::_internal_action_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.action_id_;
+}
+inline void ActorActionNtf::_internal_set_action_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.action_id_ = value;
+}
+
+// string param = 3;
+inline void ActorActionNtf::clear_param() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.param_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline const ::std::string& ActorActionNtf::param() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:GamePacket.ActorActionNtf.param)
+  return _internal_param();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ActorActionNtf::set_param(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  _impl_.param_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:GamePacket.ActorActionNtf.param)
+}
+inline ::std::string* PROTOBUF_NONNULL ActorActionNtf::mutable_param()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  ::std::string* _s = _internal_mutable_param();
+  // @@protoc_insertion_point(field_mutable:GamePacket.ActorActionNtf.param)
+  return _s;
+}
+inline const ::std::string& ActorActionNtf::_internal_param() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.param_.Get();
+}
+inline void ActorActionNtf::_internal_set_param(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.param_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ActorActionNtf::_internal_mutable_param() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.param_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ActorActionNtf::release_param() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:GamePacket.ActorActionNtf.param)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000001U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  auto* released = _impl_.param_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.param_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ActorActionNtf::set_allocated_param(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  }
+  _impl_.param_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.param_.IsDefault()) {
+    _impl_.param_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:GamePacket.ActorActionNtf.param)
 }
 
 // -------------------------------------------------------------------
