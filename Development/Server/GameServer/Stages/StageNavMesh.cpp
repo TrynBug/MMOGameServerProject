@@ -87,8 +87,16 @@ bool StageNavMesh::FindPath(float startX, float startY, float startZ,
     status = m_pNavQuery->findNearestPoly(endPos, halfExtents, m_pNavFilter, &endRef, nearestEnd);
     if (dtStatusFailed(status) || endRef == 0)
     {
-        LOG_WRITE(LogLevel::Warn, std::format("findNearestPoly(end) failed. end=({},{},{})", endX, endY, endZ));
-        return false;
+        // 목적지가 NavMesh 밖(절벽 사면/장애물 클릭 등)이면 넓은 박스로 재시도해서
+        // "가장 가까운 걸을 수 있는 지점"으로 스냅한다. Y를 크게 잡는 이유:
+        // 절벽 상단을 클릭해도 아래 통로의 폴리곤으로 내려 잡히게 하기 위함.
+        const float wideExtents[3] = { 8.0f, 30.0f, 8.0f };
+        status = m_pNavQuery->findNearestPoly(endPos, wideExtents, m_pNavFilter, &endRef, nearestEnd);
+        if (dtStatusFailed(status) || endRef == 0)
+        {
+            LOG_WRITE(LogLevel::Warn, std::format("findNearestPoly(end) failed. end=({},{},{})", endX, endY, endZ));
+            return false;
+        }
     }
 
     // 폴리곤 시퀀스 (corridor) 찾기

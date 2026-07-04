@@ -37,18 +37,20 @@ void WaypointMover::SetDestination(StageObject& obj, float destX, float destY, f
 
     if (!pathFound || m_waypoints.size() < 3)
     {
+        // NavMesh 경로가 없으면 이동하지 않는다.
+        // (예전의 직선 fallback 은 NavMesh 를 무시하고 목적지로 직진해서
+        //  절벽 등반/벽 관통의 원인이었음 — 서버 위치권위 원칙 위반.
+        //  도달 불가 목적지는 FindPath 쪽에서 가장 가까운 walkable 로 스냅되므로,
+        //  여기까지 실패했다는 건 정말 갈 수 없는 곳이다.)
         if (logFallback)
         {
-            LOG_WRITE(LogLevel::Warn, std::format("FindPath failed, using straight-line fallback. objectId={} from=({},{},{}) to=({},{},{})",
+            LOG_WRITE(LogLevel::Warn, std::format("FindPath failed, move ignored. objectId={} from=({},{},{}) to=({},{},{})",
                 obj.GetObjectId(),
                 obj.GetPosX(), obj.GetPosY(), obj.GetPosZ(),
                 destX, destY, destZ));
         }
-
-        m_waypoints.clear();
-        m_waypoints.push_back(destX);
-        m_waypoints.push_back(destY);
-        m_waypoints.push_back(destZ);
+        Stop();
+        return;
     }
 
     // findStraightPath 의 첫 점은 시작 위치 자체일 수 있음 — 현재 위치와 거의 같은 선두 waypoint 스킵.
