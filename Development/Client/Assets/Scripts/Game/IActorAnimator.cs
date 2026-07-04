@@ -47,5 +47,8 @@ namespace Client.Game
 
         // 발동(원샷) 재생. castSpeed 로 재생속도 스케일 후 fireState 로 CrossFade → 종료 시 Locomotion 복귀.
         void PlayFire(string fireState, float castSpeed);
+
+        // 강제로 Locomotion(이동 블렌드)으로 복귀. 부활 등에서 Dead/특수 상태를 벗어날 때 사용.
+        void ReturnToLocomotion();
     }
 }

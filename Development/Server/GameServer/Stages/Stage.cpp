@@ -1301,6 +1301,7 @@ const Stage::UserPacketHandlerMap& Stage::getUserPacketHandlerMap() const
 {
     static const UserPacketHandlerMap sm_handlers = {
         { Common::GAME_PACKET_ID_MOVE_INTENT_REQ,          &Stage::handleMoveIntentReq },
+        { Common::GAME_PACKET_ID_ACTOR_ACTION_REQ,         &Stage::handleActorActionReq },
         { Common::GAME_PACKET_ID_SKILL_CAST_REQ,           &Stage::handleSkillCastReq },
         { Common::GAME_PACKET_ID_SKILL_PROJECTILE_HIT_REQ, &Stage::handleSkillProjectileHitReq },
         { Common::GAME_PACKET_ID_STAGE_MOVE_REQ,           &Stage::handleStageMoveReq },
@@ -1367,6 +1368,21 @@ void Stage::handleMoveIntentReq(const UserPtr& spUser, const netlib::PacketPtr& 
         break;
     }
     // 이동 복제는 buildAndSendSnapshots 가 매 tick 처리한다.
+}
+
+// 코스메틱 액션(점프/감정표현) 요청. 게임 로직(위치/전투) 영향 없이 AOI 에 relay 만 한다.
+void Stage::handleActorActionReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+{
+    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+    if (!spCharacter || spCharacter->GetStage() != this)
+        return;
+
+    GamePacket::ActorActionReq req;
+    if (!deserializeUserPacket(spUser, spPacket, req))
+        return;
+
+    // 그대로 AOI 에 중계(연출 전용). action_id/param 검증은 클라 재생 측이 상태 존재여부로 흡수한다.
+    BroadcastActorActionNtf(*spCharacter, req.action_id(), req.param());
 }
 
 void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)

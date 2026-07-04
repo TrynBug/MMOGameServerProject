@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Client.Game
 {
-    // LayerLabCharacter.controller 의 파라미터/상태 이름 계약. (설계: Document/애니메이션.md)
+    // LayerLabCharacter.controller 의 파라미터/상태 이름 계약. (설계: Document/클라이언트.md 의 "애니메이션" 절)
     //
     // 원샷/캐스팅/감정표현은 파라미터가 아니라 "상태 이름으로 직접 재생(by-name CrossFade)" 한다.
     // 따라서 여기의 문자열이 곧 컨트롤러의 상태명이며, 오타 방지를 위해 한 곳에서 상수로 관리한다.
@@ -86,9 +86,22 @@ namespace Client.Game
             if (HasParam(a, paramHash)) a.SetFloat(paramHash, v);
         }
 
+        // 매 프레임 호출용. dampTime 동안 목표값으로 보간(idle↔walk↔run 블렌드 부드럽게).
+        public static void SetFloatDamped(Animator a, int paramHash, float value, float dampTime, float deltaTime)
+        {
+            if (HasParam(a, paramHash)) a.SetFloat(paramHash, value, dampTime, deltaTime);
+        }
+
         // 현재 Base 레이어 상태가 stateName 인지.
         public static bool IsCurrent(Animator a, string stateName)
             => a != null && a.runtimeAnimatorController != null
                && a.GetCurrentAnimatorStateInfo(k_baseLayer).IsName(stateName);
+    }
+
+    // 코스메틱 액션 id (ActorActionReq/Ntf.action_id). 로컬이 하면 서버가 AOI relay → 원격 재생.
+    public static class ActorAction
+    {
+        public const int Jump  = 1;
+        public const int Emote = 2;
     }
 }

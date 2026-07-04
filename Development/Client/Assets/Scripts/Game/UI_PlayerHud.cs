@@ -24,6 +24,7 @@ namespace Client.Game
         private enum Images { HpFill, MpFill }
         private enum Texts { HpText, MpText }
         private enum Objects { SkillSlotContainer }
+        private enum Buttons { EmoteButton }
 
         private Image m_hpFill;
         private Image m_mpFill;
@@ -43,11 +44,17 @@ namespace Client.Game
             Bind<Image>(typeof(Images));
             Bind<TextMeshProUGUI>(typeof(Texts));
             Bind<GameObject>(typeof(Objects));
+            Bind<Button>(typeof(Buttons));
 
             m_hpFill = Get<Image>((int)Images.HpFill);
             m_mpFill = Get<Image>((int)Images.MpFill);
             m_hpText = Get<TextMeshProUGUI>((int)Texts.HpText);
             m_mpText = Get<TextMeshProUGUI>((int)Texts.MpText);
+
+            // 감정표현 패널 열기 버튼. 클릭 시 UI_EmotePanel 팝업을 띄운다.
+            Button emoteBtn = Get<Button>((int)Buttons.EmoteButton);
+            if (emoteBtn != null)
+                emoteBtn.gameObject.BindEvent(_ => Managers.Managers.UI.ShowPopupUI<UI_EmotePanel>());
 
             buildSkillSlots();
         }

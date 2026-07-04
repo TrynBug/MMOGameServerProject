@@ -306,6 +306,9 @@ public:
     // 오브젝트 부활을 주변 AOI 유저들에게 통보(ObjectReviveNtf). 위치/HP/MP 를 실어 보낸다. 클라 부활 연출/상태복원용.
     void BroadcastObjectReviveNtf(const ActorObject& actor);
 
+    // 코스메틱 액션(점프/감정표현)을 주변 AOI 유저들에게 relay(ActorActionNtf). 연출 전용.
+    void BroadcastActorActionNtf(const ActorObject& actor, int32 actionId, const std::string& param);
+
     // 스킬 투사체 묶음(1회 시전 분)을 월드에 등록한다. 발급된 effectId 를 리턴한다 (시전 Ntf 에 실을 용도).
     // dirs: 부채꼴 전개된 투사체별 방향. SkillComponent 가 계산해 넘긴다.
     int64 SpawnSkillProjectileGroup(const EffectParams& params, const std::vector<Vector3>& dirs);
@@ -445,6 +448,7 @@ protected:
 
     // 개별 패킷 핸들러. getUserPacketHandlerMap 테이블에 등록되어 OnUserPacket 이 호출한다.
     void handleMoveIntentReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+    void handleActorActionReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
     void handleSkillCastReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
     void handleSkillProjectileHitReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
 

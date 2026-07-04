@@ -335,6 +335,16 @@ void PacketSender::SendObjectReviveNtf(std::span<const int64> accountIds, int64 
     SendToUsers(accountIds, Common::GAME_PACKET_ID_OBJECT_REVIVE_NTF, ntf);
 }
 
+void PacketSender::SendActorActionNtf(std::span<const int64> accountIds, int64 actorObjectId, int32 actionId, const std::string& param)
+{
+    GamePacket::ActorActionNtf ntf;
+    ntf.set_actor_object_id(actorObjectId);
+    ntf.set_action_id(actionId);
+    ntf.set_param(param);
+
+    SendToUsers(accountIds, Common::GAME_PACKET_ID_ACTOR_ACTION_NTF, ntf);
+}
+
 void PacketSender::SendStageNoticeNtf(std::span<const int64> accountIds, const std::string& message, int32 durationMs)
 {
     GamePacket::StageNoticeNtf ntf;

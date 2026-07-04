@@ -72,6 +72,7 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<BuffRemoveNtf>(GamePacketId.BuffRemoveNtf, onBuffRemoveNtf);
             PacketDispatcher.Instance.Register<ObjectDeathNtf>(GamePacketId.ObjectDeathNtf, onObjectDeathNtf);
             PacketDispatcher.Instance.Register<ObjectReviveNtf>(GamePacketId.ObjectReviveNtf, onObjectReviveNtf);
+            PacketDispatcher.Instance.Register<ActorActionNtf>(GamePacketId.ActorActionNtf, onActorActionNtf);
             PacketDispatcher.Instance.Register<StageNoticeNtf>(GamePacketId.StageNoticeNtf, onStageNoticeNtf);
             PacketDispatcher.Instance.Register<PropStateNtf>(GamePacketId.PropStateNtf, onPropStateNtf);
 
@@ -400,6 +401,22 @@ namespace Client.Game
                 actor.transform.SetPositionAndRotation(pos, Quaternion.Euler(0f, ntf.Yaw, 0f));
 
             Debug.Log($"[StageManager] ObjectReviveNtf: ObjectId={ntf.ObjectId} pos={pos} hp={ntf.Hp}");
+        }
+
+        // 코스메틱 액션 알림 (점프/감정표현). 원격 캐릭터에 해당 모션을 재생한다. 연출 전용.
+        // 내 액션(로컬)은 이미 입력 시점에 재생했으므로 무시(중복 방지). 액터가 몬스터/미존재면 무시.
+        private void onActorActionNtf(ActorActionNtf ntf)
+        {
+            if (LocalPlayer != null && ntf.ActorObjectId == LocalPlayer.ObjectId)
+                return;
+            if (!(FindActor(ntf.ActorObjectId) is PlayerCharacter player))
+                return;
+
+            switch (ntf.ActionId)
+            {
+                case ActorAction.Jump:  player.PlayJump();          break;
+                case ActorAction.Emote: player.PlayEmote(ntf.Param); break;
+            }
         }
 
         // 서버 Stage 스크립트의 Notice() 가 보낸 화면 공지 배너.

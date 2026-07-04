@@ -1,6 +1,7 @@
-using System.Collections;
 using UnityEngine;
 using Client.Network;
+using Common;
+using GamePacket;
 
 namespace Client.Game
 {
@@ -41,117 +42,73 @@ namespace Client.Game
         private readonly ISnapshotMotionDriver m_motion = new SnapshotInterpolator();
         private bool m_remoteMoving;
 
-        // ─── Animator ────────────────────────────────────────────────
-        // Visual 하위에 부착된 Animator. Awake 에서 찾아둠.
-        // prefab 에 모델이 없거나 Animator 가 없으면 null 일 수 있음 (이 경우 애니메이션 없이 동작).
-        private Animator m_animator;
-        // Animator 파라미터 hash. 문자열 lookup 을 피해 성능 약간 좋음.
-        private static readonly int s_paramSpeed = Animator.StringToHash("Speed");
-        // Speed 파라미터 보간 시간(초). 이 시간 동안 idle↔walk↔run 블렌드를 거친다.
-        private const float k_speedDampTime = 0.12f;
-        // 시전 애니 재생속도 멀티플라이어. cast 스테이트의 Speed 가 이 파라미터를 Multiplier 로 써야 적용됨.
-        private static readonly int s_paramCastSpeed = Animator.StringToHash("CastSpeed");
-        // 이동시전(Mobile)용 상반신 오버라이드 레이어 이름/트리거. (베이스 Cast 트리거와 분리)
-        private const string k_upperBodyLayerName = "UpperBody";
-        private const string k_castUpperTrigger = "CastUpper";
-        private int m_upperBodyLayer = -2;   // -2 = 미해결, -1 = 레이어 없음
-        private Coroutine m_upperFade;
+        // ─── Animator (공용 드라이버 위임) ───────────────────────────
+        // 애니 재생은 공용 드라이버 AnimatorActorAnimator(IActorAnimator)에 위임한다(몬스터와 동일 드라이버 — 로직 중복 제거).
+        // PlayerCharacter 는 "이동 여부"만 계산해 넘기고 의미 메서드(PlayJump/PlayCast/…)로 호출한다.
+        // Awake 에서 Animator 가 있으면 드라이버를 부착. 모델/Animator 가 없으면 null(애니 없이 동작).
+        private IActorAnimator m_actorAnimator;
 
         private void Awake()
         {
-            // Visual 하위 어딘가에 있는 Animator 를 찾음. prefab 구조상 PlayerCharacter > Visual > Kiki-v2 에 부착되어 있음.
-            m_animator = GetComponentInChildren<Animator>();
-            if (m_animator == null)
+            // Visual 하위의 Animator 를 찾아 공용 애니 드라이버를 부착(없으면 애니 없이 동작).
+            m_actorAnimator = GetComponentInChildren<IActorAnimator>();
+            if (m_actorAnimator == null)
             {
-                Debug.LogWarning($"[PlayerCharacter] Animator 를 찾지 못했습니다. 애니메이션 없이 동작합니다.");
+                Animator anim = GetComponentInChildren<Animator>();
+                if (anim != null)
+                    m_actorAnimator = gameObject.AddComponent<AnimatorActorAnimator>();
+                else
+                    Debug.LogWarning($"[PlayerCharacter] Animator 를 찾지 못했습니다. 애니메이션 없이 동작합니다.");
             }
 
             m_mover = new LocalPlayerMover(transform, m_rotateSpeedDeg);
             m_reconciler = new PlayerReconciler();
         }
 
-        // 스킬 시전 애니메이션 1회 재생. triggerName = Animator 의 Trigger 파라미터 이름(Skill 데이터 CastAnim).
-        // 빈 문자열이거나 Animator 가 없으면 무시한다.
-        // castSpeed(= 시전클립 기본길이 / ActionLock초)를 받아 CastSpeed 파라미터에 넣어
-        // 시전 애니가 ActionLock 길이에 맞게 재생되도록 한다.
-        public void PlayCastAnimation(string triggerName, float castSpeed)
-        {
-            if (m_animator == null || string.IsNullOrEmpty(triggerName))
-                return;
-
-            // CastSpeed 를 먼저 세팅한 뒤 트리거 → cast 스테이트가 첫 프레임부터 맞는 속도로 재생.
-            m_animator.SetFloat(s_paramCastSpeed, Mathf.Max(0.01f, castSpeed));
-            // 트리거 파라미터가 있을 때만 발동(신형 by-name 컨트롤러엔 트리거가 없어 경고 방지).
-            if (AnimPlay.HasParam(m_animator, Animator.StringToHash(triggerName)))
-                m_animator.SetTrigger(triggerName);
-        }
-
-        // ─── 원샷/감정표현/전투 재생 (LayerLabCharacter.controller, by-name) ────
-        // 새 캐릭터 컨트롤러의 상태를 이름으로 재생한다. 상태가 없으면(구 컨트롤러/모델 없음) 조용히 무시.
-        // 로컬/원격 공용: 로컬은 입력·예측으로, 원격은 서버 이벤트로 호출한다.
-
-        private string m_activeOneShot;      // 현재 재생 중 원샷 상태명(null=없음)
-        private bool m_oneShotCancelOnMove;  // 이동 시작 시 취소할지
-        private bool m_stunned;
-        private float m_lastHitTime = -999f; // 피격 애니 쓰로틀용
-        private const float k_hitThrottleSec = 0.4f;
+        // ─── 애니 재생 (드라이버 위임) ─────────────────────────────────
+        // 로컬은 입력·예측으로, 원격은 서버 이벤트로 호출한다. (SkillSystem/StageManager/UI 에서 사용)
+        // 게이트(피격 Locomotion/감정), 쓰로틀, 이동취소, 캐스팅 홀드, 원샷 자연종료 추적은 전부 드라이버가 처리.
 
         // 점프. 이동 중에도 위치는 Mover 가 계속 움직이므로 "점프 모션 + 이동" 이 동시에 표현된다(이동해도 취소 안 함).
-        public void PlayJump() => playOneShot(AnimStates.Jump, cancelOnMove: false);
+        public void PlayJump() => m_actorAnimator?.PlayOneShot(AnimStates.Jump, cancelOnMove: false);
 
-        // 감정표현(Dance/Emoji). idle 에서만 호출 권장. 이동 시작 시 자동 취소.
-        public void PlayEmote(string emoteState) => playOneShot(emoteState, cancelOnMove: true);
+        // 감정표현(Dance/Emoji). 순수 재생(원격 재생 겸용). 로컬 입력은 LocalEmote 로 서버에도 통보.
+        public void PlayEmote(string emoteState) => m_actorAnimator?.PlayOneShot(emoteState, cancelOnMove: true);
 
-        // 피격. Idle/Walk/Run(Locomotion) 중일 때만 재생하고, 쓰로틀로 연속 피격 시 반복을 억제한다.
-        // (캐스팅/점프/공격/스턴/사망 중에는 Locomotion 이 아니므로 자동 스킵 → 시전/동작이 안 끊긴다.)
-        public void PlayHit()
+        // (로컬) 감정표현 시작: 재생 + 서버 통보(관전자 relay).
+        public void LocalEmote(string emoteState)
         {
-            if (m_animator == null) return;
-            if (Time.time - m_lastHitTime < k_hitThrottleSec) return;
-            if (!AnimPlay.IsCurrent(m_animator, AnimStates.Locomotion)) return;
-            m_lastHitTime = Time.time;
-            playOneShot(AnimStates.GetHit, cancelOnMove: false);
+            PlayEmote(emoteState);
+            sendActorAction(ActorAction.Emote, emoteState);
         }
 
-        // 캐스팅(홀드): castSpeed 로 시전길이에 맞춘 뒤 Cast 상태 진입(마지막 프레임 정지).
-        public void PlayCast(string castState, float castSpeed)
+        // 코스메틱 액션(점프/감정)을 서버에 통보 → 서버가 AOI relay → 원격 클라 재생. 로컬 전용.
+        private void sendActorAction(int actionId, string param)
         {
-            if (m_animator == null || string.IsNullOrEmpty(castState)) return;
-            AnimPlay.SetFloatSafe(m_animator, AnimStates.HCastSpeed, Mathf.Max(0.01f, castSpeed));
-            AnimPlay.CrossFade(m_animator, castState);
-            m_activeOneShot = null;
+            NetworkManager net = NetworkManager.Instance;
+            if (net == null || !net.IsConnected) return;
+            net.Send(GamePacketId.ActorActionReq, new ActorActionReq { ActionId = actionId, Param = param ?? "" });
         }
 
-        // 발동(원샷 → 복귀).
-        public void PlayFire(string fireState, float castSpeed)
-        {
-            if (m_animator == null || string.IsNullOrEmpty(fireState)) return;
-            AnimPlay.SetFloatSafe(m_animator, AnimStates.HCastSpeed, Mathf.Max(0.01f, castSpeed));
-            playOneShot(fireState, cancelOnMove: false);
-        }
-
-        // 스턴/속박 on/off. on: Stun 루프 진입, off: Locomotion 복귀.
-        public void SetStunned(bool stunned)
-        {
-            if (m_animator == null || m_stunned == stunned) return;
-            m_stunned = stunned;
-            AnimPlay.CrossFade(m_animator, stunned ? AnimStates.Stun : AnimStates.Locomotion);
-        }
+        // 피격 / 시전(캐스팅→발동) / 스턴 — 드라이버 위임.
+        public void PlayHit() => m_actorAnimator?.PlayHit();
+        public void PlayCast(string castState, float castSpeed) => m_actorAnimator?.PlayCast(castState, castSpeed);
+        public void PlayFire(string fireState, float castSpeed) => m_actorAnimator?.PlayFire(fireState, castSpeed);
+        public void SetStunned(bool stunned) => m_actorAnimator?.SetStunned(stunned);
 
         // 사망 연출 재생 / 끝포즈 고정.
-        public void PlayDeadState() { if (m_animator != null) AnimPlay.CrossFade(m_animator, AnimStates.Dead); }
-        public void SetDeadPose()   { if (m_animator != null) AnimPlay.PlayPose(m_animator, AnimStates.Dead, 1f); }
+        public void PlayDeadState() => m_actorAnimator?.PlayDead();
+        public void SetDeadPose()   => m_actorAnimator?.SetDeadPose();
 
-        // 사망 처리. 서버 ObjectDeathNtf 수신 시 StageManager 가 호출한다(로컬/원격 공용).
-        // 사망 애니메이션 재생 + (로컬) 예측 이동 중단. 입력 차단은 행동 메서드(SetMoveDestination/tryCast/점프)가 IsDead 로 막는다.
-        // 부활은 서버 부활 패킷 미구현 상태라 현재는 사망 상태로 유지된다(추후 Revive 배선).
+        // 사망 처리. 서버 ObjectDeathNtf 수신 시 StageManager 가 호출(로컬/원격 공용).
+        // 사망 애니 + (로컬) 예측 이동 중단. 입력 차단은 행동 메서드가 IsDead 로 막는다.
         public override void OnDeath()
         {
             if (IsDead) return;      // 멱등
             base.OnDeath();          // IsDead = true (ActorObject)
             if (IsLocalPlayer)
                 StopMove();          // 예측 이동 즉시 중단
-            PlayDeadState();         // Dead 상태로 CrossFade
+            m_actorAnimator?.PlayDead();
         }
 
         // 부활. 사망 해제 + 자원 복원(base) + 애니 Locomotion 복귀. 입력은 IsDead 게이트가 자동 재개.
@@ -159,72 +116,16 @@ namespace Client.Game
         public override void Revive(double hp, double mp)
         {
             base.Revive(hp, mp);     // IsDead = false, HP/MP 복원
-            if (m_animator != null)
-                AnimPlay.CrossFade(m_animator, AnimStates.Locomotion);
+            m_actorAnimator?.ReturnToLocomotion();
         }
 
-        // corpse 상태로 늦게 시야 진입(원격 캐릭터가 부활 대기 중)한 경우: 사망 상태로 들어가되 애니 재생 없이 끝 포즈로 고정.
+        // corpse 상태로 늦게 시야 진입(원격 캐릭터가 부활 대기 중)한 경우: 사망 상태로 들어가되 애니 없이 끝 포즈 고정.
         // MonsterObject.SpawnAsCorpse 와 동형. IsDead 를 세팅한다.
         public void SpawnAsCorpse()
         {
             if (IsDead) return;
-            base.OnDeath();   // IsDead = true (ActorObject). PlayerCharacter.OnDeath 와 달리 애니는 처음부터 안 틀고,
-            SetDeadPose();    // 끝 포즈(쓰러진 자세)로 고정한다.
-        }
-
-        private void playOneShot(string state, bool cancelOnMove)
-        {
-            if (m_animator == null) return;
-            if (!AnimPlay.CrossFade(m_animator, state)) return;
-            m_activeOneShot = state;
-            m_oneShotCancelOnMove = cancelOnMove;
-        }
-
-        // 이동시전(Mobile): 상반신 레이어 가중치를 올리고 상반신 시전 트리거를 쏜다.
-        // 베이스 레이어는 locomotion 을 유지하므로 다리는 계속 달린다. durationSec 뒤 가중치를 0 으로 페이드.
-        public void PlayCastUpperBody(float castSpeed, float durationSec)
-        {
-            if (m_animator == null)
-                return;
-
-            m_animator.SetFloat(s_paramCastSpeed, Mathf.Max(0.01f, castSpeed));
-
-            int layer = resolveUpperBodyLayer();
-            if (layer < 0)
-                return;   // 상반신 레이어 없음 → 미구성. (이동시전 스킬엔 UpperBody 레이어가 필요)
-
-            m_animator.SetLayerWeight(layer, 1f);
-            m_animator.SetTrigger(k_castUpperTrigger);
-
-            if (m_upperFade != null)
-                StopCoroutine(m_upperFade);
-            m_upperFade = StartCoroutine(fadeUpperBodyOut(layer, durationSec));
-        }
-
-        private int resolveUpperBodyLayer()
-        {
-            if (m_upperBodyLayer == -2 && m_animator != null)
-                m_upperBodyLayer = m_animator.GetLayerIndex(k_upperBodyLayerName);
-            return m_upperBodyLayer;
-        }
-
-        // durationSec 동안 유지 후 상반신 레이어 가중치를 0 으로 부드럽게 내린다.
-        private IEnumerator fadeUpperBodyOut(int layer, float holdSec)
-        {
-            if (holdSec > 0f)
-                yield return new WaitForSeconds(holdSec);
-
-            const float fadeSec = 0.15f;
-            float start = m_animator.GetLayerWeight(layer);
-            float t = 0f;
-            while (t < fadeSec)
-            {
-                t += Time.deltaTime;
-                m_animator.SetLayerWeight(layer, Mathf.Lerp(start, 0f, t / fadeSec));
-                yield return null;
-            }
-            m_animator.SetLayerWeight(layer, 0f);
-            m_upperFade = null;
+            base.OnDeath();       // IsDead = true (ActorObject)
+            m_actorAnimator?.SetDeadPose();
         }
 
         // 이동을 seconds 동안 잠그고(Stationary 시전), 현재 이동도 즉시 멈춘다.
@@ -367,41 +268,23 @@ namespace Client.Game
             if (NetClock.IsReady)
                 m_reconciler.RecordPrediction(NetClock.EstServerNowMs(), transform.position);
 
-            // (로컬) 점프 입력 — 이동과 무관하게 점프 모션만 재생한다. 위치는 Mover 가 계속 구동하므로 점프하며 이동한다.
+            // (로컬) 점프 입력 — 점프 모션 재생 + 서버 통보(관전자 relay). 위치는 Mover 가 계속 구동하므로 점프하며 이동한다.
             if (!IsDead && Input.GetKeyDown(KeyCode.Space))
+            {
                 PlayJump();
+                sendActorAction(ActorAction.Jump, "");
+            }
 
             // Animator 갱신은 정지 전환(true -> false)도 잡아야 하므로 매 프레임 호출.
             updateAnimator();
         }
 
-        // Animator 의 Speed(float) 파라미터를 이동 상태와 동기화.
-        // 이동 여부를 0/1 목표값으로 두고 damping 으로 보간 → 가/감속 구간에서 walk 블렌드를
-        // 거쳐 run 으로 자연스럽게 전환된다. (블렌드 트리: idle=0, walk=0.5, run=1)
+        // 이동 여부를 드라이버에 전달. Speed 블렌드 damping + 감정표현 이동취소/자연종료 추적은 드라이버가 처리한다.
+        // 본인은 예측 이동상태, 원격은 보간 스냅샷의 이동 플래그를 쓴다.
         private void updateAnimator()
         {
-            if (m_animator == null) return;
-
-            // 본인은 예측 이동상태, 원격은 보간 스냅샷의 이동 플래그를 쓴다.
             bool isMoving = IsLocalPlayer ? m_mover.IsMoving : m_remoteMoving;
-            float target = isMoving ? 1f : 0f;
-            m_animator.SetFloat(s_paramSpeed, target, k_speedDampTime, Time.deltaTime);
-
-            // 원샷(감정표현 등) 이동취소 / 자연종료 추적.
-            if (m_activeOneShot != null)
-            {
-                if (m_oneShotCancelOnMove && isMoving)
-                {
-                    // 이동 시작 → 감정표현 등 취소하고 Locomotion 복귀.
-                    AnimPlay.CrossFade(m_animator, AnimStates.Locomotion);
-                    m_activeOneShot = null;
-                }
-                else if (AnimPlay.IsCurrent(m_animator, AnimStates.Locomotion))
-                {
-                    // 원샷이 Has Exit Time 으로 자연 복귀 완료 → 추적 해제.
-                    m_activeOneShot = null;
-                }
-            }
+            m_actorAnimator?.SetMoving(isMoving);
         }
     }
 }

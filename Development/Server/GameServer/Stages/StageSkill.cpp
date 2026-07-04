@@ -255,6 +255,16 @@ void Stage::BroadcastObjectReviveNtf(const ActorObject& actor)
         actor.GetCurHp(), actor.GetCurMp());
 }
 
+// 코스메틱 액션(점프/감정표현)을 주변 AOI 유저들에게 relay(ActorActionNtf). 연출 전용, 게임 로직 무관.
+void Stage::BroadcastActorActionNtf(const ActorObject& actor, int32 actionId, const std::string& param)
+{
+    m_aoiUserScratch.clear();
+    ForEachUserInAoi(actor.GetCurSectorX(), actor.GetCurSectorZ(),
+        [&](int64 accountId) { m_aoiUserScratch.push_back(accountId); });
+
+    GameServer::Instance().GetPacketSender().SendActorActionNtf(m_aoiUserScratch, actor.GetObjectId(), actionId, param);
+}
+
 // SkillComponent 가 bake 한 EffectParams + 부채꼴 방향으로 투사체 그룹을 생성/등록하고, 발급된 effectId 를 리턴한다.
 int64 Stage::SpawnSkillProjectileGroup(const EffectParams& params, const std::vector<Vector3>& dirs)
 {

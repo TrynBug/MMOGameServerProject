@@ -3,6 +3,7 @@ using Client.Network;
 using Common;
 using GamePacket;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace Client.Game
@@ -78,6 +79,11 @@ namespace Client.Game
             // 마우스 좌클릭이 눌려있지 않으면 할 일 없음.
             // (송신이나 정지 처리는 PlayerMoveController 가 자기 상태로 알아서 함.)
             if (!input.IsMouseClickHeld) return;
+
+            // UI(감정표현 패널 등) 위를 클릭 중이면 월드 이동을 하지 않는다.
+            // UI 버튼/딤 배경이 raycastTarget 이면 EventSystem 이 이를 감지한다.
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                return;
 
             PlayerMoveController mover = findLocalMoveController();
             if (mover == null) return;

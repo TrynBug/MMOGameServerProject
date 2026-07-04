@@ -597,8 +597,24 @@ namespace Client.Game
                 return;
             }
 
-            // 다른 캐스터: 비주얼 전용 투사체 재현 (보고 안 함).
+            // 다른 캐스터(플레이어): 발동(fire) 모션 재생. SkillCastNtf 는 CastDelay 경과(발동) 시점이라 즉시 발동 모션.
+            // (몬스터는 as PlayerCharacter 실패로 skip — 몬스터 시전연출은 AbilityCastNtf 가 담당.)
+            PlayerCharacter remoteCaster = StageManager.Instance?.FindActor(ntf.CasterObjectId) as PlayerCharacter;
+            GameData_Skill castSkill = GameDataTable_Skill.FindData(ntf.SkillKey);
+            if (remoteCaster != null && castSkill != null)
+                remoteCaster.PlayFire(castSkill.FireAnim, computeCastSpeed(castSkill));
+
+            // 비주얼 전용 투사체/효과 재현 (보고 안 함).
             spawnRemoteVisual(ntf);
+        }
+
+        // 시전/발동 애니 재생속도 계산. '절대 안 빨라짐' 정책(최대 1.0 클램프)과 동일.
+        private float computeCastSpeed(GameData_Skill skill)
+        {
+            float actionLockSec = skill.ActionLockMs / 1000f;
+            return (m_castClipBaseLength > 0f && actionLockSec > 0.01f)
+                ? Mathf.Min(1f, m_castClipBaseLength / actionLockSec)
+                : 1f;
         }
 
         // ─── AbilityCastNtf (몬스터/NPC 시전 "시작") ──────────────────
@@ -609,20 +625,25 @@ namespace Client.Game
         {
             Vector3 dir = new Vector3(ntf.DirX, 0f, ntf.DirZ);
 
-            // 시전자(몬스터/NPC) 윈드업 모션 + 회전.
             ActorObject caster = StageManager.Instance != null ? StageManager.Instance.FindActor(ntf.CasterObjectId) : null;
-            if (caster is MonsterObject monster)
-                monster.PlayAbilityCast(dir);
 
-            // 바닥 텔레그래프(예고). 데이터 모양/크기로 windup_ms 동안 채운다.
-            if (ntf.WindupMs > 0)
+            if (caster is MonsterObject monster)
             {
+                // 몬스터/NPC: 윈드업 모션 + 회전 + 바닥 텔레그래프(예고).
+                monster.PlayAbilityCast(dir);
+                if (ntf.WindupMs > 0)
+                {
+                    GameData_Skill skill = GameDataTable_Skill.FindData(ntf.SkillKey);
+                    if (skill != null)
+                        MonsterTelegraph.Spawn(skill, new Vector3(ntf.OriginX, ntf.OriginY, ntf.OriginZ), dir, ntf.WindupMs);
+                }
+            }
+            else if (caster is PlayerCharacter player)
+            {
+                // 원격 플레이어: 캐스팅(윈드업) 모션. 발동은 뒤따르는 SkillCastNtf 가 PlayFire 로 재생한다. (텔레그래프 없음)
                 GameData_Skill skill = GameDataTable_Skill.FindData(ntf.SkillKey);
                 if (skill != null)
-                {
-                    Vector3 origin = new Vector3(ntf.OriginX, ntf.OriginY, ntf.OriginZ);
-                    MonsterTelegraph.Spawn(skill, origin, dir, ntf.WindupMs);
-                }
+                    player.PlayCast(skill.CastAnim, computeCastSpeed(skill));
             }
         }
 

@@ -130,6 +130,9 @@ public:
     void SendObjectReviveNtf(std::span<const int64> accountIds, int64 objectId,
                              float posX, float posY, float posZ, float yaw, double hp, double mp);
 
+    // 코스메틱 액션 알림 전송 (ActorActionNtf). Stage 가 점프/감정표현을 주변 AOI 에 relay. 연출 전용.
+    void SendActorActionNtf(std::span<const int64> accountIds, int64 actorObjectId, int32 actionId, const std::string& param);
+
     // Stage 공지 배너 전송 (StageNoticeNtf). Stage 로직 스크립트의 Notice() 가 발생. 클라는 화면 배너 표시.
     void SendStageNoticeNtf(std::span<const int64> accountIds, const std::string& message, int32 durationMs);
 
