@@ -102,6 +102,11 @@ D4식 3박자를 명시적으로 드러내도록 `Casting` 을 **윈드업/타�
 - 캔슬은 **CC(스턴/넉백/빙결)와 사망**만. 캔슬 시 자원 환불 없음(우리 `스킬.md` 규칙과 동일). v1에서 몬스터 CC가 아직 없으면 사망만 처리하고 CC 캔슬은 훅만 남겨둔다.
 - Recovery 의 길이 = `GameData_Skill.ActionLockMs`. 이 값이 플레이어의 반격 창을 만든다.
 
+**시야(LoS) 게이트:**
+- Chase→Attack 진입(inAttackBand)과 Attack 유지(needReposition) 판정에 몬스터→타겟 LoS 를 검사한다. 벽/절벽 너머면 공격하지 않고 접근/재배치로 전환한다(길찾기가 벽을 돌아감). 거리 조건을 통과했을 때만 raycast(성능).
+- 원리·공용 프리미티브(`StageNavMesh::IsLineOfSight` / `Stage::HasLineOfSight`)와 폭발/범위 LoS 는 게임서버.md "시야(LoS) 검증" 참조.
+- 한계: NavMesh raycast 는 지표 2D 판정(평지형 전용). 원거리 몬스터는 LoS 얻는 위치를 스마트하게 잡진 못함(v1 허용).
+
 ---
 
 ## 4. 패킷 설계

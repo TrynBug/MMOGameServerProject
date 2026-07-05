@@ -88,6 +88,13 @@ public:
 - 초기화 파라미터:
     - bUseNagle : Nagle 알고리즘 사용 여부
 
+# 소켓 옵션 (TCP_NODELAY / Nagle)
+- 소켓 옵션은 NetServer/NetClient의 `setSocketOptions(SOCKET)`에서 일괄 설정합니다.
+- **Nagle 제어**: 초기화 파라미터 `bUseNagle`로 켜고 끕니다. 내부적으로 `TCP_NODELAY` 옵션으로 구현됩니다. `bUseNagle == false` 이면 TCP_NODELAY가 켜져(Nagle off) 작은 패킷을 즉시 전송합니다.
+- **현재 설정 상태**: `bUseNagle`의 기본값은 false 이고(NetConfig 기본값), ServerBase의 클라이언트용 설정과 RegistryClient도 명시적으로 false로 둡니다. 따라서 **모든 서버의 모든 연결에서 Nagle은 꺼져 있고 TCP_NODELAY가 켜져 있는 상태**입니다. (실시간 게임 트래픽의 저지연을 위함)
+- **Nagle off로 인한 패킷 수 증가 우려**: NetLib는 send 시 `m_sendQueue`에 쌓인 패킷을 한 번의 WSASend에 최대 `SEND_WSABUF_MAX_SIZE`개까지 묶어 보내는 scatter-gather 방식이라(Session의 Send 참조), 여러 패킷이 한 송신버퍼에서 MSS 단위로 세그먼트화됩니다. 그래서 Nagle을 꺼도 "패킷 1개 = TCP 세그먼트 1개"로 쪼개지지 않아 헤더 오버헤드 증가가 완화됩니다.
+- **SO_LINGER**: TCP_NODELAY와 함께 `setSocketOptions()`에서 설정합니다. l_onoff=1, l_linger=0 으로 두어 소켓 종료 시 4-way handshake 없이 RST로 즉시 끊습니다.
+
 # ISession 인터페이스
 - NetLib가 사용자에게 노출하는 Session 클래스 입니다.
 - Send, Disconnect, GetIP, GetPort 등의 순수가상함수만 가집니다.
