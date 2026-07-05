@@ -118,6 +118,30 @@ namespace Client.Managers
             return popup;
         }
 
+        // 씬 UI(m_sceneUI) 와 별개로, 항상 떠있는 보조 오버레이 UI 를 생성한다. (예: 우상단 설정 버튼)
+        // 프리팹 경로: Resources/UI/Scene/{name}
+        //
+        // ShowSceneUI 와 달리 m_sceneUI 슬롯을 차지하지 않으므로, 이미 씬 UI 가 떠 있어도 함께 놓을 수 있다.
+        // sorting order 는 프리팹에 구운 Canvas 값을 그대로 쓴다(SetCanvas 미호출) — 씬 UI(0) 위, popup(10+) 아래로 세팅해 둘 것.
+        // 씬 전환 시 @UI_Root 가 씬과 함께 파괴되므로 이 오버레이도 자동 정리된다.
+        public T ShowOverlayUI<T>(string name = null) where T : UI_Base
+        {
+            if (string.IsNullOrEmpty(name)) name = typeof(T).Name;
+
+            ensureEventSystem();
+
+            GameObject go = Managers.Resource.Instantiate($"UI/Scene/{name}");
+            if (go == null) return null;
+
+            T ui = go.GetComponent<T>();
+            if (ui == null) ui = go.AddComponent<T>();
+
+            go.transform.SetParent(Root.transform, worldPositionStays: false);
+            ui.Init();
+
+            return ui;
+        }
+
         // UI 안에 들어가는 subitem (예: 인벤토리의 슬롯 1개) 생성.
         // 프리팹 경로: Resources/UI/SubItem/{name}
         // parent 가 지정되면 그 transform 아래로, 아니면 떠있는 상태.

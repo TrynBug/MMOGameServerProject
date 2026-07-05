@@ -34,6 +34,9 @@ namespace Client.Game
                 return;
             }
 
+            // 우상단 환경설정 버튼 (씬 전환 시 자동 정리).
+            Managers.Managers.UI.ShowOverlayUI<UI_SettingsButton>();
+
             // 3D 프리뷰 리그 생성 후 RenderTexture 를 UI 에 연결.
             var rigGo = new GameObject("@CharacterPreviewRig");
             m_preview = rigGo.AddComponent<CharacterPreviewRig>();

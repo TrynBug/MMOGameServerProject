@@ -35,6 +35,9 @@ namespace Client.Game
             // 의존 방향: Game → Packet → Network 유지.
             net.OnPacketReceived += PacketDispatcher.Instance.Dispatch;
 
+            // 4) 화면 좌상단 FPS 표시(모든 씬 위에 항상). 성능 확인용.
+            FpsCounter.Create();
+
             Debug.Log("[GameBootstrap] Initialized: Managers + NetworkManager + PacketDispatcher bound.");
         }
     }

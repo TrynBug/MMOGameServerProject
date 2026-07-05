@@ -68,9 +68,12 @@ namespace Client.Game
 
         // ─── Esc 메뉴 ──────────────────────────────────────────────────
         private UI_GameMenu m_menu;
+        private UI_Settings m_settings;
 
         private void toggleMenu()
         {
+            // 환경설정이 열려 있으면 Esc 는 그것부터 닫는다(메뉴는 아래에 유지).
+            if (m_settings != null) { closeSettings(); return; }
             if (m_menu != null) closeMenu();
             else openMenu();
         }
@@ -80,6 +83,7 @@ namespace Client.Game
             m_menu = Managers.Managers.UI.ShowPopupUI<UI_GameMenu>();
             if (m_menu == null) return;
             m_menu.OnResume += onResume;
+            m_menu.OnSettings += openSettings;
             m_menu.OnCharacterSelect += onCharacterSelect;
             m_menu.OnLogout += onLogout;
 
@@ -91,6 +95,7 @@ namespace Client.Game
         {
             if (m_menu == null) return;
             m_menu.OnResume -= onResume;
+            m_menu.OnSettings -= openSettings;
             m_menu.OnCharacterSelect -= onCharacterSelect;
             m_menu.OnLogout -= onLogout;
             Managers.Managers.UI.ClosePopupUI(m_menu);
@@ -101,6 +106,24 @@ namespace Client.Game
         }
 
         private void onResume() => closeMenu();
+
+        // ─── 환경설정 ──────────────────────────────────────────────────
+        // 메뉴 위에 팝업으로 띄운다(메뉴는 스택 아래에 그대로 유지).
+        private void openSettings()
+        {
+            if (m_settings != null) return;
+            m_settings = Managers.Managers.UI.ShowPopupUI<UI_Settings>();
+            if (m_settings == null) return;
+            m_settings.OnClose += closeSettings;
+        }
+
+        private void closeSettings()
+        {
+            if (m_settings == null) return;
+            m_settings.OnClose -= closeSettings;
+            Managers.Managers.UI.ClosePopupUI(m_settings);
+            m_settings = null;
+        }
 
         // 로그인으로 돌아가기: 연결 끊고 캐시 비우고 Login 씬으로.
         private void onLogout()

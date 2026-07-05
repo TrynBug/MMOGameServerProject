@@ -35,6 +35,13 @@ namespace Client.Managers
         private SceneManagerEx m_scene;
         public static SceneManagerEx Scene => s_instance != null ? s_instance.m_scene : null;
 
+        // 사운드(마스터 볼륨) / 화면·렌더 설정. 부팅 시 저장값 로드+적용.
+        private SoundManager m_sound;
+        public static SoundManager Sound => s_instance != null ? s_instance.m_sound : null;
+
+        private SettingsManager m_settings;
+        public static SettingsManager Settings => s_instance != null ? s_instance.m_settings : null;
+
         // ─── 초기화 / 정리 ─────────────────────────────────────────────
 
         // GameBootstrap 에서 호출. 한 번만 호출되어야 함.
@@ -69,6 +76,13 @@ namespace Client.Managers
 
             m_scene = new SceneManagerEx();
             // SceneManagerEx 는 별도 Init() 없음. 무상태.
+
+            // 사운드/화면 설정: 저장된 값을 로드해 즉시 적용(볼륨·해상도·창모드·프레임·VSync).
+            m_sound = new SoundManager();
+            m_sound.Init();
+
+            m_settings = new SettingsManager();
+            m_settings.Init();
         }
 
         // 씬 전환 시 매니저 상태를 초기화하고 싶을 때 사용.

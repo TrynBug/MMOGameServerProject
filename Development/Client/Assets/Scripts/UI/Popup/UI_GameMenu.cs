@@ -9,9 +9,10 @@ namespace Client.UI
     // 책임이 아닌 것: 실제 동작(연결 끊기, 씬 전환, 패킷 송신) — GameScene 이 처리.
     public class UI_GameMenu : UI_Popup
     {
-        private enum Buttons { ResumeButton, CharacterSelectButton, LogoutButton }
+        private enum Buttons { ResumeButton, SettingsButton, CharacterSelectButton, LogoutButton }
 
         public event Action OnResume;            // 계속하기 (메뉴 닫기)
+        public event Action OnSettings;          // 환경설정 열기
         public event Action OnCharacterSelect;   // 캐릭터 선택으로 돌아가기
         public event Action OnLogout;            // 로그인으로 돌아가기
 
@@ -21,6 +22,7 @@ namespace Client.UI
 
             Bind<Button>(typeof(Buttons));
             GetButton((int)Buttons.ResumeButton).gameObject.BindEvent(_ => OnResume?.Invoke());
+            GetButton((int)Buttons.SettingsButton).gameObject.BindEvent(_ => OnSettings?.Invoke());
             GetButton((int)Buttons.CharacterSelectButton).gameObject.BindEvent(_ => OnCharacterSelect?.Invoke());
             GetButton((int)Buttons.LogoutButton).gameObject.BindEvent(_ => OnLogout?.Invoke());
         }

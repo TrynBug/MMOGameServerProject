@@ -1,4 +1,5 @@
 using Client.Managers;
+using Client.UI;
 using UnityEngine;
 
 namespace Client.Game
@@ -15,6 +16,10 @@ namespace Client.Game
         protected override void Init()
         {
             Debug.Log("[LoginScene] Init");
+
+            // 우상단 환경설정 버튼 (씬 전환 시 자동 정리).
+            Managers.Managers.UI.ShowOverlayUI<UI_SettingsButton>();
+
             // 추후: 로그인 BGM 재생, 마우스 커서 기본 모양 등이 들어갈 자리
         }
 
