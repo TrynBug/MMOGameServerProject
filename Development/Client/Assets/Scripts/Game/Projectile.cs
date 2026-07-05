@@ -56,7 +56,7 @@ namespace Client.Game
 
             // 지형·정적 장애물 차단: 이전→현 세그먼트가 벽(지형 둔덕/바위 등)을 물면 그 자리에서 소멸(벽 통과 방지).
             // QueryTriggerInteraction.Ignore 로 자기/타 투사체·몬스터 트리거는 무시하고 solid 지오메트리만 검사한다.
-            // 서버엔 보고하지 않는다 → 벽 너머 대미지 없음. (서버 권위 LoS 검증은 별도 작업)
+            // 충돌 위치를 서버에 exploded_on_terrain 으로 보고 → 서버가 그 자리에 폭발을 발동(적중은 서버 판정).
             if (Physics.Raycast(prev, m_dir, out RaycastHit hit, step, GameLayers.ProjectileBlockerMask, QueryTriggerInteraction.Ignore))
             {
                 endBlockedByTerrain(hit.point);
@@ -86,12 +86,12 @@ namespace Client.Game
             Destroy(gameObject);
         }
 
-        // 지형/정적 장애물에 막혀 종료. 그룹 부기만 감소시키고 서버엔 보고하지 않는다(벽 너머 대미지 방지).
-        // 소멸 위치에 적중 비주얼/사운드만 낸다(대미지·폭발 적중은 서버 권위이므로 여기선 시각만).
+        // 지형/정적 장애물에 막혀 종료. 충돌 위치를 그룹에 보고(exploded_on_terrain)하고 적중 비주얼/사운드를 낸다.
+        // 서버는 그 위치에 OnHit 폭발을 발동하고 폭발 적중을 판정한다(폭발 중심=벽 위치라 벽 너머 딜 없음).
         private void endBlockedByTerrain(Vector3 p)
         {
             m_ended = true;
-            m_group?.ReportBlocked(m_index);
+            m_group?.ReportBlocked(m_index, p.x, p.z);
             SkillSystem.Instance?.SpawnHitExplosionVisual(m_sourceSkillKey, m_onHitSkillKey, p, m_dir);
             Destroy(gameObject);
         }

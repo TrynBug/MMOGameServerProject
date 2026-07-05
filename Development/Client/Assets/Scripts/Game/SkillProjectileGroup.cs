@@ -55,10 +55,20 @@ namespace Client.Game
             });
         }
 
-        // 지형/정적 장애물에 막혀 종료. 서버로 보낼 hit 이 없다(벽 너머 대미지 방지) — 생존 카운트만 감소.
-        public void ReportBlocked(int index)
+        // 지형/정적 장애물에 막혀 종료. 서버가 위치를 모르므로 충돌 위치(hitX/Z)를 실어 보고한다.
+        // 서버는 exploded_on_terrain 을 받아 그 위치에 OnHit 폭발(AreaEffect)을 발동한다(적중은 서버 판정).
+        // 폭발 중심이 벽 위치이므로 벽 너머 딜은 없다.
+        public void ReportBlocked(int index, float hitX, float hitZ)
         {
             --m_aliveCount;
+            m_pending.Add(new SkillHitItem
+            {
+                ProjectileIndex = index,
+                TargetObjectId = 0,
+                ExplodedOnTerrain = true,
+                HitX = hitX,
+                HitZ = hitZ,
+            });
         }
 
         // 최대사거리 종료 보고 (직격 대상 없음. 폭발 적중은 서버가 판정).
