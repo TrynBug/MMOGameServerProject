@@ -247,6 +247,10 @@ public:
     bool SampleRandomNavPoint(float cx, float cy, float cz, float radius,
                               float& outX, float& outY, float& outZ) const;
 
+    // (from)→(to) 시야 판정. NavMesh 표면이 끊긴 곳(벽/절벽/차단볼륨)에서 막히면 false.
+    // NavMesh 미설정/시작점 off-mesh 시 fail-open(true). StageNavMesh 에 위임. (상세: StageNavMesh::IsLineOfSight)
+    bool HasLineOfSight(float fromX, float fromY, float fromZ, float toX, float toY, float toZ) const;
+
     // 외부 스레드에서 시스템 메시지를 push (thread-safe).
     // 다음 OnUpdate에서 처리된다.
     void      EnqueueMessage(StageMessage msg);
@@ -283,8 +287,10 @@ public:
     // 진영 규칙(v1): casterType 이 Monster 면 User(캐릭터)들을, 그 외(User 등)면 Monster 들을 대상으로 한다.
     // casterType 을 값으로 받는 이유: 효과가 지속되는 동안 시전자 객체가 사라져도 안전하게 하기 위함.
     // shape 의 bounding 반경으로 후보 섹터를 추린 뒤 정밀 판정한다. outEnemies 는 먼저 clear 된다.
+    // requireLineOfSight=true 면 centerPos→대상 시야가 막힌(벽 너머) 대상은 제외한다(폭발/범위가 벽을 못 넘음).
     // 비소유 raw 포인터 — 해당 tick 내 사용 (컨텐츠 스레드 전용).
-    void QueryEnemiesInShape(EObjectType casterType, const Vector3& centerPos, const EffectShape& shape, std::vector<StageObject*>& outEnemies);
+    void QueryEnemiesInShape(EObjectType casterType, const Vector3& centerPos, const EffectShape& shape,
+                             std::vector<StageObject*>& outEnemies, bool requireLineOfSight = true);
 
     // 스킬 효과(범위 대미지) 하나를 월드에 시작시킨다. SkillComponent 가 bake 한 EffectParams 를 넘긴다.
     // (투사체=ProjectileGroup 은 별도 경로. 이 함수는 Area 효과 전용.)

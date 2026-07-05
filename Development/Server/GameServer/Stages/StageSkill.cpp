@@ -30,7 +30,8 @@ namespace
 
 // (centerPos 를 중심으로) shape 범위 안의 "적" StageObject 들을 outEnemies 에 채운다. (X-Z 평면)
 // 진영 규칙(v1): Monster 시전자는 User(캐릭터)를, 그 외(User 등) 시전자는 Monster 를 대상으로 한다.
-void Stage::QueryEnemiesInShape(EObjectType casterType, const Vector3& centerPos, const EffectShape& shape, std::vector<StageObject*>& outEnemies)
+void Stage::QueryEnemiesInShape(EObjectType casterType, const Vector3& centerPos, const EffectShape& shape,
+                                std::vector<StageObject*>& outEnemies, bool requireLineOfSight)
 {
     outEnemies.clear();
 
@@ -61,8 +62,14 @@ void Stage::QueryEnemiesInShape(EObjectType casterType, const Vector3& centerPos
                 if (static_cast<ActorObject*>(pObject)->IsDead())
                     continue;
                 const Vector3 objPos(pObject->GetPosX(), pObject->GetPosY(), pObject->GetPosZ());
-                if (shape.Contains(centerPos, objPos))
-                    outEnemies.push_back(pObject);
+                if (!shape.Contains(centerPos, objPos))
+                    continue;
+                // 벽 너머(시야 차단) 대상 제외 — 폭발/범위가 벽을 넘지 못하게 한다.
+                // shape 판정을 통과한 대상에만 raycast 하므로 비용은 실제 범위 내 후보 수에 비례.
+                if (requireLineOfSight
+                    && !HasLineOfSight(centerPos.x, centerPos.y, centerPos.z, objPos.x, objPos.y, objPos.z))
+                    continue;
+                outEnemies.push_back(pObject);
             }
         });
 }

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Components/MonsterFsmAI.h"
 #include "StageObjects/Monster.h"
+#include "Stages/Stage.h"
 
 #include <cmath>
 
@@ -28,6 +29,17 @@ namespace
     constexpr float k_attackSlotAngleJitter = 0.15f; // 각도 지터 최대치 (rad)
     constexpr float k_attackSlotRadiusJitter = 0.25f; // 반지름 지터 최대치 (유닛)
     constexpr float k_twoPi = 6.2831853f;
+
+    // 몬스터→타겟 시야 판정. 벽/절벽 너머면 false → 공격 불가(계속 접근/재배치).
+    // Stage 가 없으면 true(가시). NavMesh raycast 라 지표 2D 판정(입체지형 부정확).
+    bool hasLineOfSightToTarget(const Monster& monster, const StageObject& target)
+    {
+        const Stage* pStage = monster.GetStage();
+        if (pStage == nullptr)
+            return true;
+        return pStage->HasLineOfSight(monster.GetPosX(), monster.GetPosY(), monster.GetPosZ(),
+                                      target.GetPosX(),  target.GetPosY(),  target.GetPosZ());
+    }
 }
 
 void MonsterFsmAI::Update(Monster& monster, int64 deltaMs)
@@ -91,9 +103,13 @@ void MonsterFsmAI::updateChase(Monster& monster, int64 deltaMs)
     const float dist = std::sqrt(dx * dx + dz * dz);
 
     // 공격 가능 위치 판정 (근접/원거리 구분).
-    const bool inAttackBand = monster.IsRanged()
+    bool inAttackBand = monster.IsRanged()
         ? (dist <= monster.GetCombat().GetMaxAttackRange() && dist >= monster.GetDesiredRange() * k_rangedBandRatio)
         : (dist <= monster.GetCombat().GetMaxAttackRange());
+    // 사거리 안이어도 벽 너머면 공격 불가 → 계속 접근/재배치(길찾기가 벽을 돌아가게 함).
+    // (거리 조건을 통과한 경우에만 raycast 하므로 원거리 추격 내내 쏘지 않는다.)
+    if (inAttackBand && !hasLineOfSightToTarget(monster, *pTarget))
+        inAttackBand = false;
     if (inAttackBand)
     {
         monster.StopMoving();
@@ -178,6 +194,10 @@ void MonsterFsmAI::updateAttack(Monster& monster, int64 /*deltaMs*/)
     // 미세 떨림(재배치 반복)을 막는다.
     bool needReposition = (dist > monster.GetCombat().GetMaxAttackRange() + k_attackLeaveMargin);
     if (monster.IsRanged() && dist < monster.GetDesiredRange() * k_rangedBandRatio)
+        needReposition = true;
+
+    // 타겟이 벽 뒤로 들어가 시야가 막히면 재배치(추격)로 전환 → 벽 너머로 공격하지 않는다.
+    if (!needReposition && !hasLineOfSightToTarget(monster, *pTarget))
         needReposition = true;
 
     if (needReposition)

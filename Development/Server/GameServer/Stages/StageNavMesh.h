@@ -64,6 +64,14 @@ public:
     // 리턴: NavMesh 준비됨 + 시작 폴리곤 + 랜덤 폴리곤 찾으면 true(out* 채움), 아니면 false(out* 미변경).
     bool SampleRandomPoint(float cx, float cy, float cz, float radius, float& outX, float& outY, float& outZ) const;
 
+    // (fromX,Y,Z) → (toX,Y,Z) 사이에 NavMesh 표면이 끊긴 곳(벽/절벽/차단볼륨 경계)이 있는지로
+    // 시야(line of sight)를 판정한다. dtNavMeshQuery::raycast 로 표면을 따라 쏴서, 끝점 전에
+    // 벽에 막히면(t<1) 차단으로 본다.
+    // fail-open: NavMesh 미준비 / 시작점 off-mesh / 쿼리 실패 시 true(가시)를 리턴한다
+    //   (스킬/공격이 엉뚱하게 전부 막히는 것을 방지 — 안티치트가 아니라 게임플레이 판정용).
+    // ⚠ NavMesh raycast 는 지표 2D 판정이라 입체 지형(다리/2층)에는 부정확하다(평지형 맵 전용).
+    bool IsLineOfSight(float fromX, float fromY, float fromZ, float toX, float toY, float toZ) const;
+
 private:
     const dtNavMesh* m_pNavMesh  = nullptr;   // 참조만 (소유 안 함)
     dtNavMeshQuery*  m_pNavQuery = nullptr;   // 소유

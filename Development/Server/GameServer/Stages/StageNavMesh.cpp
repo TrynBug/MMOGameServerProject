@@ -199,3 +199,32 @@ bool StageNavMesh::SampleRandomPoint(float cx, float cy, float cz, float radius,
     outZ = randomPt[2];
     return true;
 }
+
+bool StageNavMesh::IsLineOfSight(float fromX, float fromY, float fromZ,
+                                 float toX, float toY, float toZ) const
+{
+    if (!IsReady())
+        return true;   // NavMesh 없는 Stage → 차단 없음(가시).
+
+    // 시작점을 NavMesh 폴리곤으로 스냅. 박스는 FindPath 시작점과 동일(X/Z=2, Y=4).
+    const float halfExtents[3] = { 2.0f, 4.0f, 2.0f };
+    const float fromPos[3] = { fromX, fromY, fromZ };
+    const float toPos[3]   = { toX,   toY,   toZ   };
+
+    dtPolyRef startRef       = 0;
+    float     startNearest[3] = { 0, 0, 0 };
+    dtStatus  status = m_pNavQuery->findNearestPoly(fromPos, halfExtents, m_pNavFilter, &startRef, startNearest);
+    if (dtStatusFailed(status) || startRef == 0)
+        return true;   // 시작점이 NavMesh 밖 → 판정 불가, fail-open(가시).
+
+    // 표면을 따라 startNearest → toPos 로 raycast. 벽에 막히면 t 는 [0,1), 끝까지 도달하면 t=FLT_MAX.
+    float     t            = 0.0f;
+    float     hitNormal[3] = { 0, 0, 0 };
+    dtPolyRef path[16];
+    int       pathCount    = 0;
+    status = m_pNavQuery->raycast(startRef, startNearest, toPos, m_pNavFilter, &t, hitNormal, path, &pathCount, 16);
+    if (dtStatusFailed(status))
+        return true;   // 쿼리 실패 → fail-open.
+
+    return t >= 1.0f;   // 끝점까지 벽 없이 도달 = 가시. t<1 이면 벽에 막힘.
+}

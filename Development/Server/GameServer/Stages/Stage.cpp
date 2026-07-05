@@ -249,6 +249,14 @@ bool Stage::SampleRandomNavPoint(float cx, float cy, float cz, float radius,
     return m_pStageNavMesh->SampleRandomPoint(cx, cy, cz, radius, outX, outY, outZ);
 }
 
+bool Stage::HasLineOfSight(float fromX, float fromY, float fromZ,
+                           float toX, float toY, float toZ) const
+{
+    if (!m_pStageNavMesh)
+        return true;   // NavMesh 없는 Stage → 차단 없음(가시).
+    return m_pStageNavMesh->IsLineOfSight(fromX, fromY, fromZ, toX, toY, toZ);
+}
+
 StageObject* Stage::FindObject(int64 objectId)
 {
     auto it = m_objects.find(objectId);
