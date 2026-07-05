@@ -6,6 +6,7 @@
 
 // 전방선언
 class StageObject;
+class Stage;
 
 // ─────────────────────────────────────────────────────────────
 // WaypointMover : 경로(waypoint) 기반 이동 컴포넌트
@@ -25,8 +26,10 @@ public:
     bool IsMoving() const { return m_isMoving; }
 
     // 목적지로 경로 설정 + 이동 시작. 목적지가 너무 가깝거나 경로가 없으면 정지 상태가 된다.
-    // logFallback : 직선 폴백 시 Warn 로그 출력 여부. Character=true, Monster=false(잦은 repath 로그 스팸 방지).
-    void SetDestination(StageObject& obj, float destX, float destY, float destZ, bool logFallback);
+    // 길찾기 실패 시 직선 이동하지 않고 정지한다.
+    // 단, 대상이 NavMesh 밖(off-mesh)이면 가장 가까운 walkable 로 스냅백한 뒤 한 번 더 시도한다.
+    // logMoveFailure : 길찾기 최종 실패 시 Warn 로그 출력 여부. Character=true, Monster=false(잦은 repath 로그 스팸 방지).
+    void SetDestination(StageObject& obj, float destX, float destY, float destZ, bool logMoveFailure);
 
     // 즉시 정지 + waypoint 비움.
     void Stop();
@@ -38,6 +41,10 @@ public:
 private:
     // 현재 waypoint 를 향해 yaw 갱신 (X-Z 평면, Unity 호환 degree).
     void faceWaypoint(StageObject& obj);
+
+    // 대상이 NavMesh 밖(off-mesh)이면 넓은 박스로 가장 가까운 walkable 위로 위치를 끌어온다.
+    // 실제로 옮겼으면 true (그 후 호출자가 길찾기 재시도). 이미 mesh 위거나 근처에 walkable 없으면 false.
+    bool trySnapBackOntoNavMesh(StageObject& obj, Stage& stage);
 
     // m_isMoving=false 면 다른 멤버는 의미 없음.
     bool               m_isMoving = false;

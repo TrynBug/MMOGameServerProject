@@ -80,8 +80,8 @@ void Character::SetDestination(float destX, float destY, float destZ)
     if (m_skillMoving)
         return;
 
-    // 경로 계산/추적은 공유 컴포넌트가 담당. 직선 폴백 시 Warn 로그 출력(클릭 이동이라 빈도 낮음).
-    m_mover.SetDestination(*this, destX, destY, destZ, /*logFallback*/ true);
+    // 경로 계산/추적은 공유 컴포넌트가 담당. 길찾기 최종 실패 시 Warn 로그 출력(클릭 이동이라 빈도 낮음).
+    m_mover.SetDestination(*this, destX, destY, destZ, /*logMoveFailure*/ true);
 }
 
 void Character::StopAt(float posX, float posY, float posZ, float yaw)

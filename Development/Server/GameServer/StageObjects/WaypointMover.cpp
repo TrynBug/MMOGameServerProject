@@ -15,9 +15,16 @@ namespace
 
     // waypoint 도달 판정 임계값 제곱 (X-Z 평면, 유닛^2). 5cm. 부동소수점 안전망.
     constexpr float k_waypointReachDistSq = 0.0025f;
+
+    // off-mesh 스냅백 검색 박스 반경(각 축). Y 를 크게 잡아 위/아래로 벗어난 경우도 잡는다.
+    // (FindPath 의 목적지 재시도 박스와 동일 크기.)
+    constexpr float k_snapBackExtentXZ = 8.0f;
+    constexpr float k_snapBackExtentY  = 30.0f;
+    // 스냅으로 위치를 실제로 옮겼다고 볼 최소 이동거리 제곱(유닛^2). 이보다 작으면 이미 mesh 위로 간주.
+    constexpr float k_snapBackMinMoveSq = 0.09f;   // 0.3유닛
 }
 
-void WaypointMover::SetDestination(StageObject& obj, float destX, float destY, float destZ, bool logFallback)
+void WaypointMover::SetDestination(StageObject& obj, float destX, float destY, float destZ, bool logMoveFailure)
 {
     // X-Z 평면 거리로 이동 여부 판정. Y(높이) 변화는 이동 트리거에 사용하지 않음.
     const float dx = destX - obj.GetPosX();
@@ -35,14 +42,21 @@ void WaypointMover::SetDestination(StageObject& obj, float destX, float destY, f
     if (pStage != nullptr)
         pathFound = pStage->FindPath(obj.GetPosX(), obj.GetPosY(), obj.GetPosZ(), destX, destY, destZ, m_waypoints);
 
+    // 길찾기 실패 시: 대상이 NavMesh 밖이면 가장 가까운 walkable 로 스냅백하고 한 번 더 시도한다.
+    // (off-mesh 가 되면 findNearestPoly(start) 실패로 이후 모든 이동이 제자리가 되는 것을 방지.
+    //  이미 mesh 위인데 실패한 것이면 스냅백이 no-op(false)이라 그대로 정지 — 진짜 도달 불가 목적지.)
+    if ((!pathFound || m_waypoints.size() < 3) && pStage != nullptr && trySnapBackOntoNavMesh(obj, *pStage))
+    {
+        m_waypoints.clear();
+        pathFound = pStage->FindPath(obj.GetPosX(), obj.GetPosY(), obj.GetPosZ(), destX, destY, destZ, m_waypoints);
+    }
+
     if (!pathFound || m_waypoints.size() < 3)
     {
-        // NavMesh 경로가 없으면 이동하지 않는다.
-        // (예전의 직선 fallback 은 NavMesh 를 무시하고 목적지로 직진해서
-        //  절벽 등반/벽 관통의 원인이었음 — 서버 위치권위 원칙 위반.
-        //  도달 불가 목적지는 FindPath 쪽에서 가장 가까운 walkable 로 스냅되므로,
-        //  여기까지 실패했다는 건 정말 갈 수 없는 곳이다.)
-        if (logFallback)
+        // NavMesh 경로가 없으면 이동하지 않는다. 
+        // 도달 불가 목적지는 FindPath 가 가장 가까운 walkable 로 스냅하고, 위에서 스냅백까지
+        // 했는데도 실패했다는 건 정말 갈 수 없는 곳이다.
+        if (logMoveFailure)
         {
             LOG_WRITE(LogLevel::Warn, std::format("FindPath failed, move ignored. objectId={} from=({},{},{}) to=({},{},{})",
                 obj.GetObjectId(),
@@ -155,4 +169,30 @@ void WaypointMover::faceWaypoint(StageObject& obj)
         return;   // 너무 가까우면 yaw 유지.
     // Unity 호환: dirY_deg = atan2(dx, dz) * 180/PI (+Z 정면, 시계방향)
     obj.SetYaw(std::atan2(dx, dz) * k_radToDeg);
+}
+
+bool WaypointMover::trySnapBackOntoNavMesh(StageObject& obj, Stage& stage)
+{
+    const float fromX = obj.GetPosX();
+    const float fromY = obj.GetPosY();
+    const float fromZ = obj.GetPosZ();
+
+    float sx = 0.f, sy = 0.f, sz = 0.f;
+    if (!stage.SampleNavMeshPosition(fromX, fromY, fromZ,
+                                     k_snapBackExtentXZ, k_snapBackExtentY, k_snapBackExtentXZ,
+                                     sx, sy, sz))
+    {
+        return false;   // 넓은 박스 안에도 walkable 이 없음(드묾) — 스냅 불가.
+    }
+
+    const float dx = sx - fromX;
+    const float dy = sy - fromY;
+    const float dz = sz - fromZ;
+    if (dx * dx + dy * dy + dz * dz < k_snapBackMinMoveSq)
+        return false;   // 이미 사실상 mesh 위 → 스냅 불필요(=진짜 도달불가 목적지).
+
+    obj.SetPos(sx, sy, sz);
+    LOG_WRITE(LogLevel::Warn, std::format("snap-back onto NavMesh. objectId={} ({},{},{}) -> ({},{},{})",
+        obj.GetObjectId(), fromX, fromY, fromZ, sx, sy, sz));
+    return true;
 }

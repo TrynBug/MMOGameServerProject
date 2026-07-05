@@ -33,7 +33,7 @@ using UserWPtr = std::weak_ptr<User>;
 //
 // ── 이동 (NavMesh 기반) ──
 // SetDestination 호출 시 Stage::FindPath 로 waypoint 리스트를 얻어 따라간다.
-// 길찾기 실패 시 [목적지] 한 점으로만 채워 직선 이동 fallback.
+// 길찾기 실패 시 이동하지 않는다. off-mesh 면 가장 가까운 walkable 로 스냅백 후 재시도.
 // 서버가 권위 위치를 매 tick SnapshotNtf 로 스트리밍한다(클라 본인은 예측+화해, 원격은 보간).
 class Character : public ActorObject
 {
@@ -114,7 +114,7 @@ public:
 
     // 목적지 설정 + 이동 시작.
     // Stage::FindPath 로 waypoint 리스트를 얻어 따라가기 시작.
-    // 길찾기 실패 시 직선 이동 fallback (waypoint = [목적지] 한 개).
+    // 길찾기 실패 시 이동하지 않는다(off-mesh 면 스냅백 후 재시도).
     // 목적지가 현재 위치와 거의 같으면 이동 시작 안 함.
     // yaw 는 첫 waypoint 방향으로 자동 계산.
     void SetDestination(float destX, float destY, float destZ);

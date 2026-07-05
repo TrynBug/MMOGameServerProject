@@ -172,8 +172,8 @@ void Monster::MoveTo(float destX, float destY, float destZ, int64 deltaMs)
     const float pdz = destZ - m_pathTargetZ;
     if (!m_mover.IsMoving() || !m_hasPathTarget || (pdx * pdx + pdz * pdz) > k_repathDistSq)
     {
-        // Monster 는 매 tick repath 가능하므로 직선 폴백 로그는 끈다(스팸 방지).
-        m_mover.SetDestination(*this, destX, destY, destZ, /*logFallback*/ false);
+        // Monster 는 매 tick repath 가능하므로 이동 실패 로그는 끈다(스팸 방지).
+        m_mover.SetDestination(*this, destX, destY, destZ, /*logMoveFailure*/ false);
         m_pathTargetX  = destX;
         m_pathTargetZ  = destZ;
         m_hasPathTarget = true;
