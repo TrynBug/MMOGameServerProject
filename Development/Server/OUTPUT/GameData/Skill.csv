@@ -1,7 +1,7 @@
 ﻿Key,Name,Job,CastClass,IsPrimaryEligible,OnHitSkillKey,NextSkillKey,NextTriggerTiming,NextTriggerDelayMs,NextOrigin,CasterFrontDistance,CooldownMs,ManaCost,CastDelayMs,ActionLockMs,Rotation,Targeting,Placement,EffectMotion,EffectDamage,EffectShape,DamageCoeff,Radius,ObbWidth,ObbLength,ProjectileSpeed,MaxRange,ProjectileCount,FanAngleDeg,FirstTickDelayMs,TickIntervalMs,LifetimeMs,MoveDistance,MoveDurationMs,ScatterCount,ScatterInnerRadius,ScatterOuterRadius
 1001,Fireball,1,1,true,1002,0,0,0,0,0,0,10,0,300,true,1,1,2,1,0,50,0,0,0,15,15,5,90,0,0,0,0,0,0,0,0
 1002,Fireball_Explosion,1,1,false,0,0,0,0,0,0,0,0,0,0,false,0,0,1,2,1,30,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-1003,IceField,1,1,false,0,0,0,0,0,0,800,30,0,300,true,1,2,1,2,2,15,0,15,15,0,0,0,0,0,1000,2000,0,0,0,0,0
+1003,IceField,1,1,false,0,0,0,0,0,0,2000,30,1000,300,true,1,2,1,2,2,15,0,15,15,0,0,0,0,0,1000,2000,0,0,0,0,0
 1004,Glide,1,3,false,0,1005,2,0,4,0,600,15,0,800,true,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,1000,0,0,0
 1005,Glide_Shockwave,1,1,false,0,0,0,0,0,0,0,0,0,0,false,0,0,1,2,1,20,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 1006,Blaze,1,1,false,0,1007,2,0,3,0,20000,80,500,2000,true,1,3,1,2,2,40,5,5,50,0,0,0,0,0,300,3000,0,0,0,0,0

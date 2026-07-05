@@ -1,3 +1,8 @@
 ﻿Key,Name,MonsterKey1,MonsterCount1,MonsterKey2,MonsterCount2,MonsterKey3,MonsterCount3,ScatterRadius
-1,SlimePack,51,3,0,0,0,0,3
-2,MixedCamp,51,2,50,1,0,0,4
+10,SproutPack,58,2,57,2,0,0,3
+11,SlimeSwarm,50,3,54,2,0,0,3
+12,KingSlimePack,51,1,50,3,0,0,4
+13,GoblinCamp,68,2,69,1,0,0,4
+14,ArmoredSlimePatrol,52,2,53,2,0,0,3
+15,GiantSlime,60,1,59,2,0,0,5
+16,TreasureGuardian,65,1,52,2,53,2,5
