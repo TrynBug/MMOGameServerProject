@@ -1025,38 +1025,43 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     }
 
     // ── 도착 위치 결정 ────────────────────────────────────
-    // 기본값은 캐릭터의 현재 좌표 (positionType == None: 캐릭터 선택 입장 = DB 좌표 복귀).
-    // positionType != None 이면 StageStartPosition 데이터 좌표로 덮어쓰고 NavMesh 스냅 보정.
+    // 스테이지 이동이면 요청한 positionType, 캐릭터 선택 입장(None)이면 Default 위치를 쓴다.
+    // 즉 DB 좌표 복귀가 아니라 항상 스테이지의 지정 스폰(StageStartPosition)으로 입장한다.
     float posX = spCharacter->GetPosX();
     float posY = spCharacter->GetPosY();
     float posZ = spCharacter->GetPosZ();
     float yaw  = spCharacter->GetYaw();
 
     const EStagePositionType positionType = spUser->GetPendingPositionType();
-    if (positionType != EStagePositionType::None)
-    {
-        const GameData_StageStartPosition* pPosData =
-            GameDataTable_StageStartPosition::FindByStageAndType(GetStageDataKey(), positionType);
-        if (pPosData)
-        {
-            posX = static_cast<float>(pPosData->PosX);
-            posY = static_cast<float>(pPosData->PosY);
-            posZ = static_cast<float>(pPosData->PosZ);
-            yaw  = static_cast<float>(pPosData->Yaw);
 
-            // NavMesh 위로 스냅 (Y 보정 + walkable 보장). 실패 시 데이터 좌표 그대로.
-            float snapX = 0.f, snapY = 0.f, snapZ = 0.f;
-            if (SampleNavMeshPosition(posX, posY, posZ, 5.f, 5.f, 5.f, snapX, snapY, snapZ))
-            {
-                posX = snapX; posY = snapY; posZ = snapZ;
-            }
-        }
-        else
+    // 조회 타입: 진입(None)은 Default 로 해석. (원본 positionType 은 아래 OnResolveSpawnTransform 에 그대로 전달.)
+    const EStagePositionType lookupType =
+        (positionType == EStagePositionType::None) ? EStagePositionType::Default : positionType;
+
+    const GameData_StageStartPosition* pPosData =
+        GameDataTable_StageStartPosition::FindByStageAndType(GetStageDataKey(), lookupType);
+    if (pPosData)
+    {
+        posX = static_cast<float>(pPosData->PosX);
+        posY = static_cast<float>(pPosData->PosY);
+        posZ = static_cast<float>(pPosData->PosZ);
+        yaw  = static_cast<float>(pPosData->Yaw);
+    }
+    else
+    {
+        // StageStartPosition 누락 → 캐릭터 현재 좌표로 fallback (아래 NavMesh 스냅으로 walkable 보정).
+        LOG_WRITE(LogLevel::Error, std::format(
+            "StageStartPosition not found. stageId={} stageDataKey={} positionType={}",
+            m_stageId, GetStageDataKey(), static_cast<int32>(lookupType)));
+    }
+
+    // NavMesh 위로 스냅 (Y 보정 + walkable 보장). 데이터 좌표가 살짝 어긋나거나 off-mesh여도
+    // 넓은 박스(8/30/8)로 가장 가까운 walkable 위로 보정한다. 스냅 실패 시 원좌표 유지.
+    {
+        float snapX = 0.f, snapY = 0.f, snapZ = 0.f;
+        if (SampleNavMeshPosition(posX, posY, posZ, 8.f, 30.f, 8.f, snapX, snapY, snapZ))
         {
-            // 이동 요청 시 검증을 통과했으므로 이론상 도달 불가. 캐릭터 현재 좌표로 진행.
-            LOG_WRITE(LogLevel::Error, std::format(
-                "StageStartPosition not found. stageId={} stageDataKey={} positionType={}",
-                m_stageId, GetStageDataKey(), static_cast<int32>(positionType)));
+            posX = snapX; posY = snapY; posZ = snapZ;
         }
     }
 
