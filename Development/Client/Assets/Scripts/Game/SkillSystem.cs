@@ -748,11 +748,15 @@ namespace Client.Game
                 SphereCollider sc = go.AddComponent<SphereCollider>();
                 sc.radius = 0.3f;
                 sc.isTrigger = true;
+                col = sc;
             }
             else
             {
                 col.isTrigger = true;
             }
+            // 투사체 콜라이더를 Projectile 레이어로. (지형 차단은 코드 레이캐스트로 하고,
+            //  몬스터 hit 은 OnTriggerEnter 로 한다. 레이어 분리로 추후 충돌 매트릭스 최적화 여지.)
+            col.gameObject.layer = GameLayers.Projectile;
 
             Projectile proj = go.AddComponent<Projectile>();
             proj.Launch(group, index, startPos, dir, speed, maxRange, sourceSkillKey, onHitSkillKey, ignoreMonsters);

@@ -776,7 +776,35 @@ namespace Client.Game
             m_currentMapInstance = Instantiate(prefab);
             m_currentMapInstance.name = prefab.name;
 
+            assignMapPhysicsLayers(m_currentMapInstance);
+
             Debug.Log($"[StageManager] 스테이지 맵 교체: {stageData.StagePrefabPath}");
+        }
+
+        // 인스턴스화된 맵의 물리 레이어를 규약(GameLayers)에 맞게 지정한다.
+        // 맵 프리팹은 아트/절차생성 산출물이라 레이어가 Default 로 오는데, 여기서 런타임에 일괄 지정하면
+        // 모든 스테이지에 유지보수 없이 자동 적용되고 맵을 재생성해도 안전하다.
+        //   - Terrain(지형) → Ground : 걷는 바닥 + 둔덕(벽)이 한 콜라이더라 통째로 Ground.
+        //   - 그 외 solid(비트리거) 콜라이더 → Obstacle : 바위/돌담/기둥 등 정적 차단물.
+        //   - 트리거 콜라이더(수면/이벤트영역 등)는 건드리지 않는다.
+        // 투사체는 Ground|Obstacle 을 레이캐스트해 벽에서 소멸한다(Projectile.cs).
+        private static void assignMapPhysicsLayers(GameObject mapRoot)
+        {
+            Terrain[] terrains = mapRoot.GetComponentsInChildren<Terrain>(true);
+            foreach (Terrain t in terrains)
+                t.gameObject.layer = GameLayers.Ground;
+
+            int obstacleCount = 0;
+            Collider[] colliders = mapRoot.GetComponentsInChildren<Collider>(true);
+            foreach (Collider c in colliders)
+            {
+                if (c.isTrigger || c is TerrainCollider)
+                    continue;   // 트리거(수면 등)·지형(위에서 Ground)은 제외.
+                c.gameObject.layer = GameLayers.Obstacle;
+                ++obstacleCount;
+            }
+
+            Debug.Log($"[StageManager] 맵 물리 레이어 지정: Terrain {terrains.Length}개→Ground, Obstacle {obstacleCount}개");
         }
     }
 }

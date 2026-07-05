@@ -52,7 +52,18 @@ namespace Client.Game
                 return;
 
             float step = m_speed * Time.deltaTime;
-            transform.position += m_dir * step;
+            Vector3 prev = transform.position;
+
+            // 지형·정적 장애물 차단: 이전→현 세그먼트가 벽(지형 둔덕/바위 등)을 물면 그 자리에서 소멸(벽 통과 방지).
+            // QueryTriggerInteraction.Ignore 로 자기/타 투사체·몬스터 트리거는 무시하고 solid 지오메트리만 검사한다.
+            // 서버엔 보고하지 않는다 → 벽 너머 대미지 없음. (서버 권위 LoS 검증은 별도 작업)
+            if (Physics.Raycast(prev, m_dir, out RaycastHit hit, step, GameLayers.ProjectileBlockerMask, QueryTriggerInteraction.Ignore))
+            {
+                endBlockedByTerrain(hit.point);
+                return;
+            }
+
+            transform.position = prev + m_dir * step;
             m_traveled += step;
 
             // 몬스터 시전 투사체: 근처 플레이어에 닿으면 그 자리에서 비주얼 종료(서버가 대미지 권위, 몬스터는 무시).
@@ -71,6 +82,16 @@ namespace Client.Game
         private void endVisualAt(Vector3 p)
         {
             m_ended = true;
+            SkillSystem.Instance?.SpawnHitExplosionVisual(m_sourceSkillKey, m_onHitSkillKey, p, m_dir);
+            Destroy(gameObject);
+        }
+
+        // 지형/정적 장애물에 막혀 종료. 그룹 부기만 감소시키고 서버엔 보고하지 않는다(벽 너머 대미지 방지).
+        // 소멸 위치에 적중 비주얼/사운드만 낸다(대미지·폭발 적중은 서버 권위이므로 여기선 시각만).
+        private void endBlockedByTerrain(Vector3 p)
+        {
+            m_ended = true;
+            m_group?.ReportBlocked(m_index);
             SkillSystem.Instance?.SpawnHitExplosionVisual(m_sourceSkillKey, m_onHitSkillKey, p, m_dir);
             Destroy(gameObject);
         }

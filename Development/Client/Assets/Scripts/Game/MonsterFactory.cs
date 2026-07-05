@@ -57,12 +57,17 @@ namespace Client.Game
             //    없을 때만 기본 SphereCollider 를 붙인다. (정확한 히트박스는 아트 확정 후 교체)
             //    투사체(트리거 콜라이더 + kinematic Rigidbody) 쪽이 OnTriggerEnter 를 받으므로
             //    몬스터 콜라이더는 trigger 여부와 무관하게 히트 감지에 쓰일 수 있다.
-            if (go.GetComponentInChildren<Collider>() == null)
+            Collider col = go.GetComponentInChildren<Collider>();
+            if (col == null)
             {
-                SphereCollider col = go.AddComponent<SphereCollider>();
-                col.radius = 0.5f;
-                col.center = new Vector3(0f, 0.5f, 0f);
+                SphereCollider sc = go.AddComponent<SphereCollider>();
+                sc.radius = 0.5f;
+                sc.center = new Vector3(0f, 0.5f, 0f);
+                col = sc;
             }
+            // 몬스터 콜라이더를 Monster 레이어로. 투사체 지형 레이캐스트(Ground|Obstacle)가
+            // 몬스터를 벽으로 오인하지 않게 하고, 향후 투사체×몬스터 충돌 매트릭스 최적화 여지를 준다.
+            col.gameObject.layer = GameLayers.Monster;
 
             // 7) 초기화.
             mo.Initialize(objectId, monsterKey, pos, dirY, isDead, curHp, maxHp);

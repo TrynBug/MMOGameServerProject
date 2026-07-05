@@ -55,6 +55,12 @@ namespace Client.Game
             });
         }
 
+        // 지형/정적 장애물에 막혀 종료. 서버로 보낼 hit 이 없다(벽 너머 대미지 방지) — 생존 카운트만 감소.
+        public void ReportBlocked(int index)
+        {
+            --m_aliveCount;
+        }
+
         // 최대사거리 종료 보고 (직격 대상 없음. 폭발 적중은 서버가 판정).
         public void ReportMaxRange(int index, float hitX, float hitZ)
         {
