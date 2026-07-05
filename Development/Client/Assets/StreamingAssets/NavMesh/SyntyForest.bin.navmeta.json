@@ -1,0 +1,13 @@
+{
+  "navmesh_file": "SyntyForest.bin",
+  "bounds": {
+    "min_x": -96,
+    "min_z": -105.59999847412109,
+    "max_x": 110.40000915527344,
+    "max_z": 100.80001068115234
+  },
+  "tiles_count": 669,
+  "walkable_polygons_count": 1448,
+  "generated_at": "2026-07-05T07:03:56Z",
+  "generator_version": "1.0"
+}
