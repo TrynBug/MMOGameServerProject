@@ -42,8 +42,10 @@ namespace Client.Game
             m_cam.nearClipPlane = 0.05f;
             m_cam.farClipPlane = 50f;
             m_cam.targetTexture = m_rt;
-            camGo.transform.position = OFF + new Vector3(0f, 0.85f, 3.0f);
-            camGo.transform.LookAt(OFF + new Vector3(0f, 0.8f, 0f));
+            // 고정 카메라. 캐릭터가 잘리지 않도록 거리를 넉넉히(3.0→4.5) 두고,
+            // 시선 높이는 캐릭터 중심(≈0.95)으로 맞춘다(낮으면 키 큰 캐릭터 머리가 잘림).
+            camGo.transform.position = OFF + new Vector3(0f, 1.0f, 4.5f);
+            camGo.transform.LookAt(OFF + new Vector3(0f, 0.95f, 0f));
 
             var lightGo = new GameObject("PreviewLight");
             lightGo.transform.SetParent(transform, false);
