@@ -8,4 +8,6 @@ AnimatorOverrideController:
   m_PrefabAsset: {fileID: 0}
   m_Name: Goblin_Override
   m_Controller: {fileID: 9100000, guid: ad3b73db55fefac4a92abf61486607bc, type: 2}
-  m_Clips: []
+  m_Clips:
+  - m_OriginalClip: {fileID: 1827226128182048838, guid: 6df69a770397cf84b9b1e86734273b9c, type: 3}
+    m_OverrideClip: {fileID: 345275505875579249, guid: d84bf764b84500a4eb5b2eead4be53fd, type: 3}

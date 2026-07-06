@@ -65,11 +65,33 @@ namespace Client.Game
             return false;
         }
 
-        // 상태명으로 CrossFade. 해당 상태가 없으면 no-op. 재생됐으면 true.
+        // 상태의 클립을 "비활성 sentinel"로 매핑했을 때 그 클립의 이름.
+        // 오버라이드 컨트롤러에서 어떤 상태의 클립을 빈 클립 또는 이름이 "None" 인 클립으로 매핑하면
+        // 그 상태는 재생을 스킵한다(상태 진입 자체를 안 함). 몹별로 특정 원샷(예: GetHit)을 끄고 싶을 때,
+        // 코드/데이터 변경 없이 그 몹의 오버라이드 컨트롤러에서 클립만 sentinel 로 바꾸면 된다.
+        public const string DisabledClipName = "None";
+
+        // 이 상태의 (오버라이드된) 클립이 비활성 sentinel 이면 true → 재생 스킵.
+        // aoc[stateName] 은 "그 이름의 원본 클립에 매핑된 오버라이드 클립"을 돌려준다.
+        // 상태명과 베이스 클립명이 같은 상태에서만 해소된다(예: GetHit 상태의 베이스 클립도 "GetHit").
+        // 그 외 상태는 null 이 돌아와 항상 재생됨(안전 — 오작동으로 끄지 않는다).
+        public static bool IsStateDisabled(Animator a, string stateName)
+        {
+            if (a != null && a.runtimeAnimatorController is AnimatorOverrideController aoc)
+            {
+                AnimationClip c = aoc[stateName];
+                if (c != null && (c.empty || c.name == DisabledClipName))
+                    return true;
+            }
+            return false;
+        }
+
+        // 상태명으로 CrossFade. 해당 상태가 없거나 sentinel(None/빈클립)로 꺼둔 상태면 no-op. 재생됐으면 true.
         public static bool CrossFade(Animator a, string stateName, float fade = 0.12f)
         {
             int h = Animator.StringToHash(stateName);
             if (!HasState(a, h)) return false;
+            if (IsStateDisabled(a, stateName)) return false;
             a.CrossFadeInFixedTime(h, fade);
             return true;
         }
