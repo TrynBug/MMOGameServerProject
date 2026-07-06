@@ -110,6 +110,10 @@ namespace Client.Game
             if (monster == null)
                 return;   // 몬스터가 아니면 통과 (지형/타 투사체 등).
 
+            // 죽은(시체) 몬스터엔 부딪히지 않고 통과한다. 시체 콜라이더는 남아있다(디스폰 전까지)
+            if (monster.IsDead)
+                return;
+
             endOnHit(monster);
         }
 
