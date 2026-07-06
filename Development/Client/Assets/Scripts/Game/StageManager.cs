@@ -192,6 +192,20 @@ namespace Client.Game
         // 현재 스폰된 몬스터 목록 (오토타게팅용 읽기 전용 뷰).
         public IReadOnlyDictionary<long, MonsterObject> Monsters => m_monsters;
 
+        // 현재 스폰된 캐릭터 목록 (LocalPlayer 포함. 미니맵 등 읽기 전용 뷰).
+        // LocalPlayer 를 제외하려면 순회 시 IsLocalPlayer 또는 ObjectId 로 거른다.
+        public IReadOnlyDictionary<long, PlayerCharacter> Characters => m_characters;
+
+        // 현재 스테이지의 월드 X/Z 경계 (StageLoadCompleteRes 로 수신. 미니맵 좌표변환용).
+        // 수신 전에는 안전 기본값(±2048)이다.
+        public float WorldMinX => m_worldMinX;
+        public float WorldMaxX => m_worldMaxX;
+        public float WorldMinZ => m_worldMinZ;
+        public float WorldMaxZ => m_worldMaxZ;
+
+        // 현재 스테이지 맵 이름 (NavMeshFileName, 예: "SyntyForest"). 미니맵 텍스처 경로 결정용. 미로드 시 null.
+        public string CurrentMapName { get; private set; }
+
         // pos 의 X-Z 반경 내 가장 가까운 캐릭터(플레이어)를 찾는다. 없으면 null.
         // 몬스터 투사체가 "플레이어에 닿으면" 비주얼을 종료하는 데 쓴다(플레이어엔 콜라이더가 없어 거리로 판정).
         public PlayerCharacter FindCharacterInRadiusXZ(Vector3 pos, float radius)
@@ -761,6 +775,9 @@ namespace Client.Game
             GameData_Stage stageData = GameDataTable_Stage.FindData(stageDataKey);
             if (stageData == null || string.IsNullOrEmpty(stageData.NavMeshFileName))
                 return;
+
+            // 미니맵 텍스처 경로 결정에 쓰이는 맵 이름 (프리팹 유무와 무관하게 갱신).
+            CurrentMapName = stageData.NavMeshFileName;
 
             GameObject prefab = Resources.Load<GameObject>(stageData.StagePrefabPath);
             if (prefab == null)

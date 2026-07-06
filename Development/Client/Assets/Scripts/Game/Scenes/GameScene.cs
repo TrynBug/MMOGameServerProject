@@ -50,9 +50,10 @@ namespace Client.Game
             // LocalPlayer 는 이후 StageLoadCompleteRes 수신 시 활성화+배치된다.
             StageManager.Instance.BeginStageLoad(CharacterDataCache.Instance.SelectedStageDataKey);
 
-            // 플레이어 HUD (HP/MP 바 + 스킬 슬롯) + 버프 바 표시.
+            // 플레이어 HUD (HP/MP 바 + 스킬 슬롯) + 버프 바 + 미니맵 표시.
             Managers.Managers.UI.ShowSceneUI<UI_PlayerHud>();
             Managers.Managers.UI.ShowSceneUI<UI_BuffBar>();
+            Managers.Managers.UI.ShowSceneUI<UI_Minimap>();
 
             // Esc 메뉴 토글 구독.
             Managers.Managers.Input.OnMenu += toggleMenu;
