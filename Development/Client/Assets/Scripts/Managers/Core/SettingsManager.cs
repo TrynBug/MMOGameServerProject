@@ -75,10 +75,15 @@ namespace Client.Managers
         // 저장된 설정을 로드해 즉시 적용. Managers 생성 시 1회 호출.
         public void Init()
         {
-            // 최초 실행(저장값 없음) 기본값: 현재 모니터 해상도 / 테두리 없는 창 / 60fps / VSync off.
-            Resolution cur = Screen.currentResolution;
-            m_width      = PlayerPrefs.GetInt(k_keyWidth,  cur.width);
-            m_height     = PlayerPrefs.GetInt(k_keyHeight, cur.height);
+            // 최초 실행(저장값 없음) 기본 해상도: 모니터가 FHD 보다 크면 FHD 로 낮추고, 그 이하면 모니터 해상도 그대로.
+            //   (그 외 기본: 테두리 없는 창 / 60fps / VSync off)
+            int monW = Display.main.systemWidth;
+            int monH = Display.main.systemHeight;
+            int defW = monW, defH = monH;
+            if (monW > 1920 || monH > 1080) { defW = 1920; defH = 1080; }
+
+            m_width      = PlayerPrefs.GetInt(k_keyWidth,  defW);
+            m_height     = PlayerPrefs.GetInt(k_keyHeight, defH);
             m_windowMode = (FullScreenMode)PlayerPrefs.GetInt(k_keyWindowMode, (int)FullScreenMode.FullScreenWindow);
             m_frameRate  = PlayerPrefs.GetInt(k_keyFrameRate, 60);
             m_vSync      = PlayerPrefs.GetInt(k_keyVSync, 0) == 1;
