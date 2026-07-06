@@ -937,7 +937,7 @@ P0·P1 은 서로 독립 → 병렬 가능. P5 는 P1 만 끝나면 P2~P4 와 �
 ### 14.3 게임데이터 (실제 형태)
 
 - **`EMonsterAIType`** enum (None/Fsm/BehaviorTree).
-- **`GameData_MonsterAI`** 신규 테이블 — `1001 MeleeRusher`(DesiredRange 0), `1002 RangedKiter`(DesiredRange 7). 컬럼: AIType/AggroRange/LeashRange/DesiredRange/EngagedUpdateIntervalMs.
+- **`GameData_MonsterAI`** 신규 테이블 — `1001 MeleeRusher`(DesiredRange 0), `1002 RangedKiter`(DesiredRange 7). 컬럼: AIType/AggroRange/LeashRange/DesiredRange/EngagedUpdateIntervalMs + **배회(WanderRadius/WanderMinIntervalMs/WanderMaxIntervalMs)**(14.6). 현재값: AggroRange 10/12, **LeashRange 35/38**(카이팅 추격여유 위해 20/22 → 상향), WanderRadius 5(둘 다)·간격 3000~8000ms.
 - **`GameData_Monster`**: `AIKey` + `SkillKey1~2` 컬럼. 테스트 몹 — Key50=원거리(AIKey 1002, SkillKey 9002), Key51=근접(AIKey 1001, SkillKey 9001).
 - **`GameData_Skill`** (몬스터 ability = 스킬 행) — `9001 Mob_Claw`(EffectShape=Obb / EffectDamage=Area / Placement=Forward / CastDelay 350·ActionLock 250), `9002 Mob_Fireball`(Circle / ContactHit / ProjectileSpeed 12·MaxRange 12 / CastDelay 600).
 - **역할별 스킬 배정 규칙**: 근접몹엔 근접스킬만, 원거리몹엔 원거리스킬만. 공격 사거리 = `GetCombat().GetMaxAttackRange()`(보유 스킬 최대 MaxRange) — `m_attackRange` 하드코딩 제거.
@@ -958,7 +958,25 @@ P0·P1 은 서로 독립 → 병렬 가능. P5 는 P1 만 끝나면 P2~P4 와 �
 - **몬스터 투사체 비주얼**: 기존 `SkillCastNtf` 경로 재사용(+`ignoreMonsters`). **플레이어 근접 시 정지** — 플레이어엔 콜라이더가 없어 `StageManager.FindCharacterInRadiusXZ`(거리 판정)으로, 닿으면 그 자리에서 비주얼 종료. 회피하면 maxRange까지 비행 후 소멸.
 - **피격 피드백(본인 피격)**: `SkillDamageNtf` 의 `attacker_object_id` 활용 — **`HitDirectionIndicator`**(발밑에 공격자 방향 붉은 띠, 절차적) + **`CameraFollow.AddShake`**(화면 셰이크, 시간 감쇠). "어디서 맞았는지" 가독성 + 타격감. 본인 피격에만 발동(원격 피격은 데미지 숫자만).
 
-### 14.6 아직 안 된 것 / 다음
+### 14.6 AI 행동 확장 — 피격 반격 + idle 배회 (v1 이후)
+
+설계 3장 FSM 위에 두 가지 비전투/반응 행동을 추가했다. **실제 FSM 상태 = `Idle · Wander · Chase · Attack · Return · Dead`**(캐스트는 상태가 아니라 `MonsterCombatComponent` 페이즈).
+
+**(1) 피격 반격 — 어그로 범위 밖 피격 대응.** 어그로 범위 밖에서 맞으면 `AcquireTarget`(범위 스캔)에 안 잡혀 추격을 시작하지 못하던 문제. 데미지 단일 진입점(`Stage::ApplyEffectDamage`)에서 몬스터 생존 시 `Monster::OnDamagedBy(attackerId)` 호출 → 공격자를 **강제 타겟**(어그로 범위 무시)으로 삼고 두뇌를 `IMonsterAI::OnProvoked` 로 도발. FSM은 비교전(Idle/Wander/Return)이면 즉시 Chase 전환.
+- **정책**: 이미 살아있는 교전 타겟이 있으면 교체 안 함(무교전일 때만 반격 — 다중 피격 thrash 방지). 공격자는 **살아있는 User** 만.
+- **타겟 세터**: `MonsterCombatComponent::SetTarget`(perception 우회). `GetTarget`이 매 tick Stage에서 해소 → 사라진 대상은 자동 nullptr.
+- **구현 함정**: `OnProvoked`가 **Wander도 처리**해야 한다 — 안 그러면 배회 중 범위 밖 피격 시 다음 `updateWander`의 `AcquireTarget`이 강제 타겟을 지워 반격이 무효화된다.
+- **leash 상향(데이터)**: 카이팅으로 조금만 물러나도 복귀하던 문제 → `LeashRange` 20/22 → **35/38**. leash는 **스폰 기준** 반경이라 실질 추격여유 = `LeashRange − 교전거리`. (어그로 탐지=`AggroRange`(몬스터 위치 기준)와 추격상한=`LeashRange`(스폰 기준)는 별개 값.)
+
+**(2) idle 배회 (Wander).** idle 중 일정 간격으로 스폰 주변을 어슬렁거린다. 데이터화(`GameData_MonsterAI`에 server 컬럼 `WanderRadius`/`WanderMinIntervalMs`/`WanderMaxIntervalMs` 추가, **radius 0 = 배회 안 함**).
+- **흐름**: Idle이 배회타이머 카운트다운 → 만료 시 spawn 중심 반경 내 랜덤점(원판 균일분포=sqrt) 선정 → `Wander`(MoveTo 이동, WaypointMover가 이동방향 회전 처리). 도착(1u) 또는 타임아웃(6s, 막힘 대비) 시 다음 배회 랜덤예약 후 Idle. 배회 중에도 `AcquireTarget` → 적 발견 시 즉시 Chase. 복귀(Return→Idle) 시에도 배회타이머 재예약(복귀 직후 즉시 배회 방지).
+- **RNG**: 몬스터별 경량 xorshift(objectId 지연 시드) — FSM이 몬스터별 인스턴스라 상태 보관 안전. 전역 RNG 유틸 없음.
+- **부드러움(중요)**: 배회 **이동 중에만** `SetEngagedTick`(idle 500ms → 100ms)로 승격, 서있는 Idle 복귀 시 `SetIdleTick` 강등. 500ms로는 위치가 500ms마다만 갱신돼 뚝뚝 끊겨 보임(추격이 부드러운 이유 = engaged tick). 서있을 땐 idle 주기 유지라 비용 절감은 그대로.
+- **애니**: 이동 중 moving 플래그 → 클라 run 애니. 느긋한 walk 연출은 클라에 속도 전달 필요(후속).
+
+파일: `Monster`(`OnDamagedBy` + 배회 파라미터 로드/게터), `MonsterFsmAI`(`Wander` 상태·`updateWander`·배회타이머·RNG·`OnProvoked`), `MonsterCombatComponent`(`SetTarget`), `Stage::ApplyEffectDamage`(반격 호출). 데이터 컬럼 추가 절차 = `RunGameDataGenerator`(게임데이터.md).
+
+### 14.7 아직 안 된 것 / 다음
 
 - **클라 아트 의존**: 몬스터 Animator의 "Skill" 트리거(윈드업 모션 클립), 텔레그래프·투사체·피격 표식 아트 prefab — 현재 전부 절차적/placeholder.
 - 피격 표식을 **화면 가장자리 방향 UI** 로 업그레이드 + `source_skill_key` 별 hit VFX/사운드 분기.
