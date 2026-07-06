@@ -16,17 +16,28 @@ namespace Client.Game
     //   - sector 개수: ceil((max - min) / sectorSize). 격자선은 min + k*sectorSize.
     //
     // 사용:
-    //   SectorGridDebug.ShowForStage(navMeshFileName, sectorSize, groundY);  // StageEnterNtf 처리 시
-    //   SectorGridDebug.Hide();
+    //   SectorGridDebug.ShowForStage(navMeshFileName, sectorSize, groundY);  // StageEnterNtf 처리 시(파라미터 캐시)
+    //   SectorGridDebug.SetEnabled(true) / Toggle();                          // 치트 토글로 표시 on/off
+    //
+    // 표시 여부는 정적 토글 s_enabled 로 제어한다. 기본값은 꺼짐(off) — StageEnterNtf 는 파라미터만
+    // 캐시하고, 토글이 켜져 있을 때만 실제로 격자를 그린다. 치트 콘솔의 "sectorgrid" 명령이 토글한다.
     //
     // 한 시점에 하나만 존재(싱글톤). 라인 메시 1개를 MeshRenderer 로 그린다(게임 뷰에서 보임).
-    // 디버그 전용이므로 끄려면 StageManager 의 호출부만 제거하면 된다.
     public class SectorGridDebug : MonoBehaviour
     {
         // 바닥과 z-fighting 안 나도록 살짝 띄우는 높이.
         private const float k_yLift = 0.1f;
 
         private static SectorGridDebug sm_instance;
+
+        // 표시 토글. 기본 꺼짐. 치트 콘솔의 "sectorgrid" 로 켜고 끈다.
+        private static bool s_enabled;
+
+        // 마지막 스테이지 파라미터 캐시. 토글을 켤 때 스테이지 재진입 없이 다시 그리기 위함.
+        private static string s_navMeshFileName;
+        private static double s_sectorSize;
+        private static float s_groundY;
+        private static bool s_hasParams;
 
         private MeshFilter m_meshFilter;
         private Material m_material;
@@ -36,18 +47,53 @@ namespace Client.Game
         [Serializable] private class MetaBounds { public float min_x; public float min_z; public float max_x; public float max_z; }
         [Serializable] private class NavMeta { public string navmesh_file; public MetaBounds bounds; }
 
-        // navMeshFileName 의 메타 bounds 를 읽어 sectorSize 격자를 groundY 높이에 그린다.
-        // 메타/sectorSize 가 유효하지 않으면 경고만 남기고 아무것도 그리지 않는다.
+        public static bool IsEnabled => s_enabled;
+
+        // StageEnterNtf 처리 시 호출. 스테이지 파라미터를 캐시하고, 토글이 켜져 있을 때만 실제로 그린다.
+        // (기본 토글 off 이므로 평소엔 캐시만 하고 아무것도 그리지 않는다.)
         public static void ShowForStage(string navMeshFileName, double sectorSize, float groundY)
         {
-            ensureInstance();
-            sm_instance.show(navMeshFileName, sectorSize, groundY);
+            s_navMeshFileName = navMeshFileName;
+            s_sectorSize = sectorSize;
+            s_groundY = groundY;
+            s_hasParams = true;
+            applyState();
+        }
+
+        // 치트 토글: on/off 명시.
+        public static void SetEnabled(bool enabled)
+        {
+            s_enabled = enabled;
+            applyState();
+        }
+
+        // 치트 토글: 현재 상태를 뒤집고 결과(켜짐 여부)를 반환.
+        public static bool Toggle()
+        {
+            s_enabled = !s_enabled;
+            applyState();
+            return s_enabled;
         }
 
         public static void Hide()
         {
             if (sm_instance != null)
                 sm_instance.clear();
+        }
+
+        // 토글/캐시 상태에 따라 격자를 그리거나 지운다.
+        // 켜짐 + 캐시된 스테이지 파라미터가 있으면 그리고, 아니면 지운다.
+        private static void applyState()
+        {
+            if (s_enabled && s_hasParams)
+            {
+                ensureInstance();
+                sm_instance.show(s_navMeshFileName, s_sectorSize, s_groundY);
+            }
+            else
+            {
+                Hide();
+            }
         }
 
         private static void ensureInstance()

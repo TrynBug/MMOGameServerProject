@@ -117,6 +117,25 @@ namespace Client.Game
                 StageManager.Instance.RequestStageMove(stageDataKey, EStagePositionType.Default, targetGameServerId);
                 Log($"[client] stage move -> stage={stageDataKey} server={targetGameServerId}");
             };
+
+            // sector 격자 디버그 표시 토글. 기본 꺼짐.
+            // usage: sectorgrid [on|off]   (인자 없으면 현재 상태를 뒤집음)
+            m_clientCheats["sectorgrid"] = args =>
+            {
+                bool state;
+                if (args.Length >= 1)
+                {
+                    string a = args[0].ToLowerInvariant();
+                    if (a == "on" || a == "1" || a == "true") { SectorGridDebug.SetEnabled(true); state = true; }
+                    else if (a == "off" || a == "0" || a == "false") { SectorGridDebug.SetEnabled(false); state = false; }
+                    else { Log("usage: sectorgrid [on|off]"); return; }
+                }
+                else
+                {
+                    state = SectorGridDebug.Toggle();
+                }
+                Log($"[client] sector grid {(state ? "ON" : "OFF")}");
+            };
         }
 
         // ─── 입력 라우팅 ─────────────────────────────────────────────────
