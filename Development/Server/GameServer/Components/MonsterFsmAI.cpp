@@ -11,6 +11,10 @@ namespace
     constexpr float k_attackLeaveMargin = 0.5f;  // Attack→Chase 이탈 히스테리시스 여유(유닛). 경계 토글 방지.
     constexpr float k_returnArriveDistSq = 0.25f;   // 스폰지점 0.5유닛 이내면 복귀 완료
 
+    // 배회(Wander).
+    constexpr float k_wanderArriveDistSq = 1.0f;    // 배회 목적지 1유닛 이내면 도착
+    constexpr int64 k_wanderTimeoutMs    = 6000;    // 배회 이동 최대시간(막히면 포기하고 Idle 복귀)
+
     // 근접 추격 시 타겟 한 점으로 몰리는(겹침) 것을 막기 위한 어택 슬롯.
     // 타겟 둘레에 슬롯을 2중 링(안/바깥)으로 배치하고, 몬스터마다 objectId % (총슬롯수) 로
     // 슬롯을 정해 그 좌표를 이동 목적지로 삼는다. 슬롯은 서버 내부 dest 분산용 hint 일 뿐이며
@@ -61,6 +65,7 @@ void MonsterFsmAI::Update(Monster& monster, int64 deltaMs)
     switch (m_state)
     {
     case EMonsterState::Idle:    updateIdle(monster, deltaMs);    break;
+    case EMonsterState::Wander:  updateWander(monster, deltaMs);  break;
     case EMonsterState::Chase:   updateChase(monster, deltaMs);   break;
     case EMonsterState::Attack:  updateAttack(monster, deltaMs);  break;
     case EMonsterState::Return:  updateReturn(monster, deltaMs);  break;
@@ -68,7 +73,23 @@ void MonsterFsmAI::Update(Monster& monster, int64 deltaMs)
     }
 }
 
-void MonsterFsmAI::updateIdle(Monster& monster, int64 /*deltaMs*/)
+void MonsterFsmAI::OnProvoked(Monster& monster)
+{
+    if (m_state == EMonsterState::Dead)
+        return;
+
+    // 비교전(Idle/Wander/Return)이면 즉시 추격 전환 + 업데이트 주기 승격.
+    // ※ Wander 를 포함해야 한다: 배회 중 어그로 범위 밖에서 맞은 경우, 여기서 Chase 로 안 넘기면
+    //   다음 updateWander 의 AcquireTarget 이 (범위 밖이라) 강제 타겟을 지워버려 반격이 무효화된다.
+    if (m_state == EMonsterState::Idle || m_state == EMonsterState::Wander || m_state == EMonsterState::Return)
+    {
+        monster.StopMoving();       // 배회/복귀 이동 중이었으면 멈추고 추격 시작.
+        monster.SetEngagedTick();
+        m_state = EMonsterState::Chase;
+    }
+}
+
+void MonsterFsmAI::updateIdle(Monster& monster, int64 deltaMs)
 {
     // 주변 어그로 타겟 탐색. 찾으면 추격으로 전환.
     monster.GetCombat().AcquireTarget();
@@ -76,7 +97,92 @@ void MonsterFsmAI::updateIdle(Monster& monster, int64 /*deltaMs*/)
     {
         monster.SetEngagedTick();   // 관여 시작 → 업데이트 주기 승격(engaged, 예 100ms).
         m_state = EMonsterState::Chase;
+        return;
     }
+
+    // ── 배회 ── (반경 0 이면 비활성)
+    const float wanderRadius = monster.GetWanderRadius();
+    if (wanderRadius <= 0.0f)
+        return;
+
+    // 첫 진입 시 다음 배회 시각을 랜덤 예약(스폰 직후 일제히 배회하지 않도록).
+    if (m_nextWanderMs < 0)
+    {
+        scheduleNextWander(monster);
+        return;
+    }
+
+    m_nextWanderMs -= deltaMs;
+    if (m_nextWanderMs > 0)
+        return;
+
+    // 배회 시작: spawn 중심 반경 내 랜덤점(원판 균일 분포 → sqrt).
+    const float angle  = rand01(monster) * k_twoPi;
+    const float radius = wanderRadius * std::sqrt(rand01(monster));
+    m_wanderDestX = monster.GetSpawnX() + std::cos(angle) * radius;
+    m_wanderDestZ = monster.GetSpawnZ() + std::sin(angle) * radius;
+    m_wanderElapsedMs = 0;
+    // 배회 이동을 부드럽게 하려고 업데이트 주기를 승격한다(idle 500ms → engaged, 예 100ms).
+    // 500ms 로는 위치가 500ms 간격으로만 갱신돼 뚝뚝 끊겨 보인다(추격이 부드러운 이유 = engaged tick).
+    // 서있는 Idle 로 돌아가면 updateWander 가 다시 SetIdleTick 으로 강등한다.
+    monster.SetEngagedTick();
+    m_state = EMonsterState::Wander;
+}
+
+void MonsterFsmAI::updateWander(Monster& monster, int64 deltaMs)
+{
+    // 배회 중에도 어그로 탐색 — 적 발견 시 즉시 정지 후 교전.
+    monster.GetCombat().AcquireTarget();
+    if (monster.GetCombat().HasTarget())
+    {
+        monster.StopMoving();
+        monster.SetEngagedTick();
+        m_state = EMonsterState::Chase;
+        return;
+    }
+
+    m_wanderElapsedMs += deltaMs;
+
+    const float dx = m_wanderDestX - monster.GetPosX();
+    const float dz = m_wanderDestZ - monster.GetPosZ();
+    const bool arrived = (dx * dx + dz * dz) <= k_wanderArriveDistSq;
+
+    // 도착 또는 (막혀서) 타임아웃 → 정지 + 다음 배회 예약 + Idle 복귀.
+    if (arrived || m_wanderElapsedMs >= k_wanderTimeoutMs)
+    {
+        monster.StopMoving();
+        monster.SetIdleTick();   // 배회 끝(서있음) → 업데이트 주기를 다시 idle(500ms)로 강등.
+        scheduleNextWander(monster);
+        m_state = EMonsterState::Idle;
+        return;
+    }
+
+    monster.MoveTo(m_wanderDestX, monster.GetSpawnY(), m_wanderDestZ, deltaMs);
+}
+
+// 다음 배회까지 남은시간을 [min,max] 랜덤으로 예약.
+void MonsterFsmAI::scheduleNextWander(Monster& monster)
+{
+    int64 lo = monster.GetWanderMinIntervalMs();
+    int64 hi = monster.GetWanderMaxIntervalMs();
+    if (hi < lo) hi = lo;
+    m_nextWanderMs = lo + static_cast<int64>(rand01(monster) * static_cast<float>(hi - lo));
+}
+
+// 몬스터별 경량 RNG(xorshift32). 첫 사용 시 objectId 로 시드(0 회피).
+uint32 MonsterFsmAI::nextRand(Monster& monster)
+{
+    if (m_rngState == 0)
+        m_rngState = static_cast<uint32>(monster.GetObjectId() * 2654435761ULL) | 1u;
+    m_rngState ^= m_rngState << 13;
+    m_rngState ^= m_rngState >> 17;
+    m_rngState ^= m_rngState << 5;
+    return m_rngState;
+}
+
+float MonsterFsmAI::rand01(Monster& monster)
+{
+    return static_cast<float>(nextRand(monster) & 0xFFFFFFu) / static_cast<float>(0x1000000);
 }
 
 void MonsterFsmAI::updateChase(Monster& monster, int64 deltaMs)
@@ -227,6 +333,7 @@ void MonsterFsmAI::updateReturn(Monster& monster, int64 deltaMs)
         monster.FillMp();
         monster.GetCombat().ClearTarget();
         monster.SetIdleTick();   // 비관여 복귀 → 업데이트 주기 강등(idle, 500ms).
+        scheduleNextWander(monster);   // 복귀 직후 곧바로 배회하지 않도록 타이머 재예약.
         m_state = EMonsterState::Idle;
         return;
     }

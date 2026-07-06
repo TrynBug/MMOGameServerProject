@@ -53,6 +53,9 @@ bool Monster::Initialize(int64 objectId, const GameData_Monster* pMonsterData)
         m_leashRange              = pAI->LeashRange;
         m_desiredRange            = pAI->DesiredRange;
         m_engagedUpdateIntervalMs = pAI->EngagedUpdateIntervalMs;
+        m_wanderRadius            = pAI->WanderRadius;
+        m_wanderMinIntervalMs     = pAI->WanderMinIntervalMs;
+        m_wanderMaxIntervalMs     = pAI->WanderMaxIntervalMs;
         // AIType 은 두뇌 선택용(현재 Fsm 만 구현, SpawnMonster 가 주입). BehaviorTree 는 나중.
     }
 
@@ -157,6 +160,33 @@ void Monster::FaceTarget(const StageObject* pTarget)
         return;
     // Unity 호환: yaw_deg = atan2(dx, dz) * 180/PI (+Z 정면).
     SetYaw(std::atan2(dx, dz) * k_radToDeg);
+}
+
+void Monster::OnDamagedBy(int64 attackerObjectId)
+{
+    if (IsDead() || attackerObjectId == 0 || attackerObjectId == GetObjectId())
+        return;
+
+    // 이미 살아있는 교전 타겟이 있으면 교체하지 않는다(무교전일 때만 반격 → 다중 피격 thrash 방지).
+    // GetTarget 은 매 tick Stage 에서 해소하므로, 타겟이 사라진 경우(nullptr)엔 새 공격자에 반응한다.
+    if (m_combat.GetTarget() != nullptr)
+        return;
+
+    Stage* pStage = GetStage();
+    if (pStage == nullptr)
+        return;
+
+    // 공격자가 살아있는 User(캐릭터)일 때만 어그로. 환경/무효/이미 죽은 공격자는 무시.
+    StageObject* pAttacker = pStage->FindObject(attackerObjectId);
+    if (pAttacker == nullptr || pAttacker->GetObjectType() != EObjectType::User)
+        return;
+    if (static_cast<ActorObject*>(pAttacker)->IsDead())
+        return;
+
+    // 공격자를 강제 타겟으로 삼고(어그로 범위 무시) 두뇌를 도발한다.
+    m_combat.SetTarget(attackerObjectId);
+    if (m_ai)
+        m_ai->OnProvoked(*this);
 }
 
 // (스킬 선택 + 캐스트 생애주기(TryBeginCast/advanceCast/onCastStrike/CancelCast) + 효과 발동은

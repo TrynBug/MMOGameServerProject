@@ -213,6 +213,11 @@ void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerOb
     // HP 가 0 이하로 떨어졌으면 이번 호출에서 사망 전환 (1회만 true).
     const bool justDied = (remainingHp <= 0.0) && target.MarkDead(killerObjectId);
 
+    // 몬스터가 피격당하고 생존했으면 공격자에게 반격(어그로). 어그로 범위 밖에서 맞아도 추격하게 한다.
+    // (무교전일 때만 타겟팅하는 정책은 Monster::OnDamagedBy 가 판단.)
+    if (!justDied && target.GetObjectType() == EObjectType::Monster)
+        static_cast<Monster&>(target).OnDamagedBy(killerObjectId);
+
     GameServer& server = GameServer::Instance();
 
     // killerObjectId = 공격자. 클라가 방향 피격표식/연출 분기에 attacker/sourceSkillKey 사용.

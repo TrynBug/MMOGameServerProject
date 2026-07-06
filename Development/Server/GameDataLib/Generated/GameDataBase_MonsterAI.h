@@ -25,6 +25,9 @@ struct GameDataBase_MonsterAI : public GameData
     float                LeashRange           = 0.0f;
     float                DesiredRange         = 0.0f;
     int32_t              EngagedUpdateIntervalMs = 100;
+    float                WanderRadius         = 0.0f;
+    int32_t              WanderMinIntervalMs  = 3000;
+    int32_t              WanderMaxIntervalMs  = 8000;
 };
 
 

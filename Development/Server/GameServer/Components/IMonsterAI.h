@@ -24,4 +24,9 @@ public:
 
     // 매 tick 호출. monster 의 공유 행동 API 를 사용해 1 tick 의사결정/행동을 수행한다.
     virtual void Update(Monster& monster, int64 deltaMs) = 0;
+
+    // 피격 등으로 "도발"됐을 때 호출(이벤트). 두뇌가 즉시 교전 상태로 반응하도록 한다.
+    // 몸체(Monster::OnDamagedBy)가 이미 타겟을 세팅한 뒤 호출하므로, 여기선 상태 전이만 하면 된다.
+    // 기본 무동작 — 대응할 필요 없는 두뇌(단순몹 등)는 오버라이드하지 않아도 된다.
+    virtual void OnProvoked(Monster& monster) { (void)monster; }
 };

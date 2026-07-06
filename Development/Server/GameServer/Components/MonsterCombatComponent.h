@@ -60,6 +60,9 @@ public:
     StageObject* GetTarget() const;
     bool         HasTarget() const { return m_targetObjectId != 0; }
     void         ClearTarget()      { m_targetObjectId = 0; }
+    // 강제 타겟 지정(어그로 범위 무시). 피격 반격 등 perception 외 경로에서 사용.
+    // GetTarget 이 매 tick Stage 에서 해소하므로, 사라진 대상이어도 안전(다음 tick nullptr).
+    void         SetTarget(int64 objectId) { m_targetObjectId = objectId; }
 
     // ── 스킬 보유 (Monster::Initialize 가 채운다) ──
     void                AddSkill(const MonsterSkill& skill) { m_skills.push_back(skill); }

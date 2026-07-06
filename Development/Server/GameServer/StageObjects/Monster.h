@@ -99,9 +99,20 @@ public:
     float GetLeashRange()  const { return m_leashRange; }
     float GetDesiredRange()const { return m_desiredRange; }
 
+    // ── 배회(idle 중 주변 배회) 설정값 ──
+    float GetWanderRadius()        const { return m_wanderRadius; }
+    int64 GetWanderMinIntervalMs() const { return m_wanderMinIntervalMs; }
+    int64 GetWanderMaxIntervalMs() const { return m_wanderMaxIntervalMs; }
+
     // ── 전투(스킬 + 캐스트). 두뇌는 이 컴포넌트를 통해 스킬 선택/시전/사거리 조회한다. ──
     MonsterCombatComponent&       GetCombat()       { return m_combat; }
     const MonsterCombatComponent& GetCombat() const { return m_combat; }
+
+    // ── 피격 반격(도발) ──
+    // attackerObjectId 에게 맞았을 때, 아직 살아있는 교전 타겟이 없으면 그를 강제 타겟으로 삼고
+    // 두뇌를 도발한다(IMonsterAI::OnProvoked). 어그로 범위 밖에서 맞아도 추격하게 하는 진입점.
+    // Stage::ApplyEffectDamage 가 몬스터 생존 시 호출한다.
+    void OnDamagedBy(int64 attackerObjectId);
 
     // ── 적응형 업데이트 주기 (두뇌가 상태 전이 시 호출) ──
     // 관여(Chase/전투) 시 engaged(데이터, 예 100ms)로, 비관여(Idle) 시 idle(500ms)로.
@@ -154,6 +165,11 @@ private:
     float m_desiredRange = 0.0f;    // 원거리 유지 거리(카이팅). 0 이면 근접. (공격 사거리는 GetMaxAttackRange)
     int64 m_engagedUpdateIntervalMs = 100;   // 타겟 관여 중 업데이트 주기(ms). idle 은 k_monsterUpdateIntervalMs.
     // 이동속도는 MoveSpdTotal 스탯에서 읽는다(GetStatTotal(EStatGroup::MoveSpd)). 버프 자동 반영.
+
+    // ── 배회(idle 중 주변 배회) 설정값. Initialize 에서 GameData_MonsterAI 로 로드. ──
+    float m_wanderRadius        = 0.0f;    // spawn 중심 배회 반경. 0 이면 배회 안 함.
+    int64 m_wanderMinIntervalMs = 3000;    // 다음 배회까지 대기시간 최소/최대 (이 사이 랜덤).
+    int64 m_wanderMaxIntervalMs = 8000;
 
     // ── 전투(스킬 + 캐스트 생애주기) 컴포넌트. owner = this. ──
     MonsterCombatComponent m_combat{this};

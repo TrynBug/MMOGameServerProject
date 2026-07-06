@@ -32,6 +32,9 @@ bool GameDataTableBase_MonsterAI::makeGameData(const std::string& line)
     std::getline(ss, field, ','); pData->LeashRange = std::stof(field);
     std::getline(ss, field, ','); pData->DesiredRange = std::stof(field);
     std::getline(ss, field, ','); pData->EngagedUpdateIntervalMs = std::stoi(field);
+    std::getline(ss, field, ','); pData->WanderRadius = std::stof(field);
+    std::getline(ss, field, ','); pData->WanderMinIntervalMs = std::stoi(field);
+    std::getline(ss, field, ','); pData->WanderMaxIntervalMs = std::stoi(field);
 
     if (pData->Key <= 0)
     {
