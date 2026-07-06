@@ -136,6 +136,25 @@ namespace Client.Game
                 }
                 Log($"[client] sector grid {(state ? "ON" : "OFF")}");
             };
+
+            // NavMesh 폴리곤 디버그 표시 토글. 기본 꺼짐.
+            // usage: navmesh [on|off]   (인자 없으면 현재 상태를 뒤집음)
+            m_clientCheats["navmesh"] = args =>
+            {
+                bool state;
+                if (args.Length >= 1)
+                {
+                    string a = args[0].ToLowerInvariant();
+                    if (a == "on" || a == "1" || a == "true") { MMO.Client.Navigation.NavMeshDebugView.SetEnabled(true); state = true; }
+                    else if (a == "off" || a == "0" || a == "false") { MMO.Client.Navigation.NavMeshDebugView.SetEnabled(false); state = false; }
+                    else { Log("usage: navmesh [on|off]"); return; }
+                }
+                else
+                {
+                    state = MMO.Client.Navigation.NavMeshDebugView.Toggle();
+                }
+                Log($"[client] navmesh {(state ? "ON" : "OFF")}");
+            };
         }
 
         // ─── 입력 라우팅 ─────────────────────────────────────────────────
