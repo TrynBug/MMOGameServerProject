@@ -23,13 +23,14 @@ namespace Client.Game
         private int m_sourceSkillKey;          // 투사체 본체 스킬 키. 종료(hit) 위치에서 적중음(SfxHit) 재생에 사용.
         private int m_onHitSkillKey;           // OnHit 폭발 스킬 키 (0=없음). 종료 위치에 폭발 비주얼 표시.
         private bool m_ignoreMonsters;         // true = 몬스터 충돌 무시(몬스터 시전 투사체. 비주얼 전용 + 시전자 자가충돌 방지).
+        private float m_sfxVolumeScale = 1f;   // 적중음(SfxHit) 볼륨 배수. 원격 캐스터 투사체는 <1 로 작게.
 
         // 몬스터 시전 투사체가 "플레이어에 닿았다"고 보는 X-Z 반경. 플레이어엔 콜라이더가 없어 거리로 판정(비주얼 종료용).
         private const float k_monsterHitRadius = 0.7f;
 
         // SkillSystem 이 생성 직후 1회 호출.
         // ignoreMonsters: 몬스터가 쏜 투사체(타겟=플레이어)면 true. OnTriggerEnter 가 몬스터(시전자 포함)에 반응하지 않게 한다.
-        public void Launch(SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int sourceSkillKey, int onHitSkillKey, bool ignoreMonsters = false)
+        public void Launch(SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int sourceSkillKey, int onHitSkillKey, bool ignoreMonsters = false, float sfxVolumeScale = 1f)
         {
             m_group = group;
             m_index = index;
@@ -39,6 +40,7 @@ namespace Client.Game
             m_sourceSkillKey = sourceSkillKey;
             m_onHitSkillKey = onHitSkillKey;
             m_ignoreMonsters = ignoreMonsters;
+            m_sfxVolumeScale = sfxVolumeScale;
             m_traveled = 0f;
             m_ended = false;
             transform.position = startPos;
@@ -82,7 +84,7 @@ namespace Client.Game
         private void endVisualAt(Vector3 p)
         {
             m_ended = true;
-            SkillSystem.Instance?.SpawnHitExplosionVisual(m_sourceSkillKey, m_onHitSkillKey, p, m_dir);
+            SkillSystem.Instance?.SpawnHitExplosionVisual(m_sourceSkillKey, m_onHitSkillKey, p, m_dir, m_sfxVolumeScale);
             Destroy(gameObject);
         }
 
@@ -92,7 +94,7 @@ namespace Client.Game
         {
             m_ended = true;
             m_group?.ReportBlocked(m_index, p.x, p.z);
-            SkillSystem.Instance?.SpawnHitExplosionVisual(m_sourceSkillKey, m_onHitSkillKey, p, m_dir);
+            SkillSystem.Instance?.SpawnHitExplosionVisual(m_sourceSkillKey, m_onHitSkillKey, p, m_dir, m_sfxVolumeScale);
             Destroy(gameObject);
         }
 
@@ -122,7 +124,7 @@ namespace Client.Game
             m_ended = true;
             Vector3 p = transform.position;
             m_group?.ReportHit(m_index, monster.ObjectId, p.x, p.z);
-            SkillSystem.Instance?.SpawnHitExplosionVisual(m_sourceSkillKey, m_onHitSkillKey, p, m_dir);
+            SkillSystem.Instance?.SpawnHitExplosionVisual(m_sourceSkillKey, m_onHitSkillKey, p, m_dir, m_sfxVolumeScale);
             Destroy(gameObject);
         }
 
@@ -131,7 +133,7 @@ namespace Client.Game
             m_ended = true;
             Vector3 p = transform.position;
             m_group?.ReportMaxRange(m_index, p.x, p.z);
-            SkillSystem.Instance?.SpawnHitExplosionVisual(m_sourceSkillKey, m_onHitSkillKey, p, m_dir);
+            SkillSystem.Instance?.SpawnHitExplosionVisual(m_sourceSkillKey, m_onHitSkillKey, p, m_dir, m_sfxVolumeScale);
             Destroy(gameObject);
         }
     }

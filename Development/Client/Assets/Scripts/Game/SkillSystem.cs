@@ -27,21 +27,20 @@ namespace Client.Game
     {
         public static SkillSystem Instance { get; private set; }
 
-        // 마일스톤 1: OnSkill1 = 파이어볼. (스킬 슬롯 매핑은 추후 스킬창/장비에서.)
-        [SerializeField] private int m_skill1Key = 1001;
-
-        // M1(범위 스킬): OnSkill2 = 얼음지대(1003), OnSkill3 = 전격방출(1008).
-        [SerializeField] private int m_skill2Key = 1003;
-        [SerializeField] private int m_skill3Key = 1010;
-
-        // M2(이동 스킬): OnSkill4 = 글라이드(1004). 순간이동(1009) 테스트는 슬롯 키를 인스펙터에서 교체.
-        [SerializeField] private int m_skill4Key = 1004;
+        [SerializeField] private int m_skill1Key = 1001;  // 파이어볼
+        [SerializeField] private int m_skill2Key = 1003;  // 얼음지대
+        [SerializeField] private int m_skill3Key = 1008;  // 불기둥
+        //[SerializeField] private int m_skill4Key = 0;
 
         // 단발(instant) 범위 비주얼의 표시 시간(초). 지속 데이터(LifetimeMs)가 없는 단일 틱 스킬에 사용.
         [SerializeField] private float m_areaInstantDisplaySec = 0.5f;
 
         // 투사체 비주얼의 Y 오프셋 (지면에 반쯤 묻히지 않도록). XZ 판정에는 영향 없음.
         [SerializeField] private float m_projectileHeight = 0.5f;
+
+        // 다른(원격) 캐릭터가 쓴 스킬의 효과음 볼륨 배수(0~1). 내 스킬은 1.0(원래 볼륨), 원격은 이 값으로 줄여 재생.
+        // 발사음(SfxShoot)·지속음(SfxLoop)·투사체 적중음(SfxHit)에 적용.
+        [SerializeField] private float m_remoteSfxVolumeScale = 0.85f;
 
         // 시전 클립의 기본 길이(초). CastSpeed = min(1.0, 이 값 / ActionLock초).
         // '절대 안 빨라짐' 정책: 시전시간이 클립보다 짧아도 배속을 올리지 않고 1.0(원래속도)로 재생하며,
@@ -117,7 +116,7 @@ namespace Client.Game
         private void castSkill1() => tryCast(m_skill1Key);
         private void castSkill2() => tryCast(m_skill2Key);
         private void castSkill3() => tryCast(m_skill3Key);
-        private void castSkill4() => tryCast(m_skill4Key);
+        //private void castSkill4() => tryCast(m_skill4Key);
 
         // ─── HUD 조회 API (UI_PlayerHud 가 폴링) ─────────────────────
         // 스킬 슬롯 개수 (입력 OnSkill1~4 에 대응). 슬롯 키 매핑이 늘면 여기와 GetSlotSkillKey 를 함께 늘린다.
@@ -131,7 +130,7 @@ namespace Client.Game
                 case 0:  return m_skill1Key;
                 case 1:  return m_skill2Key;
                 case 2:  return m_skill3Key;
-                case 3:  return m_skill4Key;
+                //case 3:  return m_skill4Key;
                 default: return 0;
             }
         }
@@ -672,8 +671,13 @@ namespace Client.Game
             Vector3 dir = new Vector3(ntf.DirX, 0f, ntf.DirZ);
             dir = (dir.sqrMagnitude > 0.0001f) ? dir.normalized : Vector3.forward;
 
+            // 효과음 볼륨 배수: '다른 플레이어(원격)' 스킬만 줄이고, 몬스터 스킬은 원래 볼륨 유지(피격 예고/피드백 중요).
+            // (내 시전은 onSkillCastNtf 초입에서 이미 return 되므로 여기 오는 건 원격 플레이어 또는 몬스터.)
+            bool casterIsMonster = StageManager.Instance?.FindActor(ntf.CasterObjectId) is MonsterObject;
+            float sfxScale = casterIsMonster ? 1f : m_remoteSfxVolumeScale;
+
             // 발동음 (클라 전용). 원격 캐스터의 발동(서버 CastNtf=CastDelay 경과) 순간 SfxShoot 재생. 모든 타입 공용·entry 1회.
-            SfxPlayer.Play(skill.SfxShoot, origin);
+            SfxPlayer.Play(skill.SfxShoot, origin, sfxScale);
 
             // 위치표시(telegraph) VFX (클라 전용). 원격은 발동(CastNtf)부터 임팩트(FirstTickDelay)까지.
             spawnTelegraph(skill, origin, skill.FirstTickDelayMs / 1000f);
@@ -682,13 +686,12 @@ namespace Client.Game
             if (skill.EffectDamage == ESkillEffectDamage.ContactHit)
             {
                 // 몬스터가 쏜 투사체면 몬스터 충돌 무시(시전자 자가충돌 방지 + 서버 권위 판정).
-                bool casterIsMonster = StageManager.Instance?.FindActor(ntf.CasterObjectId) is MonsterObject;
-                spawnFan(group: null, skill, origin, dir, ignoreMonsters: casterIsMonster);   // group=null → 비주얼 전용.
+                spawnFan(group: null, skill, origin, dir, ignoreMonsters: casterIsMonster, sfxVolumeScale: sfxScale);   // group=null → 비주얼 전용.
             }
             else if (skill.EffectDamage == ESkillEffectDamage.Area)
             {
-                // 지속음 (클라 전용). 원격 entry 페이즈 지속시간 동안 루프.
-                SfxPlayer.PlayLoop(skill.SfxLoop, origin, areaPhaseDurationSec(skill));
+                // 지속음 (클라 전용). 원격 entry 페이즈 지속시간 동안 루프. 원격 캐스터라 볼륨 감소.
+                SfxPlayer.PlayLoop(skill.SfxLoop, origin, areaPhaseDurationSec(skill), sfxScale);
                 spawnAreaChainPhase(skill, origin, dir);
             }
             // 이동 스킬: 원격 캐스터를 서버가 실제 사용한 거리(move_distance)로 동일하게 이동시킨다.
@@ -709,7 +712,7 @@ namespace Client.Game
         }
 
         // ─── 투사체 발사 (로컬/원격 공용) ────────────────────────────
-        private void spawnFan(SkillProjectileGroup group, GameData_Skill skill, Vector3 origin, Vector3 dir, bool ignoreMonsters = false)
+        private void spawnFan(SkillProjectileGroup group, GameData_Skill skill, Vector3 origin, Vector3 dir, bool ignoreMonsters = false, float sfxVolumeScale = 1f)
         {
             // 투사체 prefab 을 1회 로드 (실패 시 ResourceManager 가 에러 로그 1회). 폴백 없음 — 데이터가 맞아야 동작.
             GameObject prefab = Managers.Managers.Resource.Load<GameObject>(skill.ProjectilePrefabPath);
@@ -724,12 +727,12 @@ namespace Client.Game
 
             Vector3 startPos = origin + Vector3.up * m_projectileHeight;   // 비주얼 높이 (XZ 판정엔 영향 없음).
             for (int i = 0; i < dirs.Count; ++i)
-                spawnOneProjectile(prefab, group, i, startPos, dirs[i], (float)skill.ProjectileSpeed, (float)skill.MaxRange, skill.Key, skill.OnHitSkillKey, ignoreMonsters);
+                spawnOneProjectile(prefab, group, i, startPos, dirs[i], (float)skill.ProjectileSpeed, (float)skill.MaxRange, skill.Key, skill.OnHitSkillKey, ignoreMonsters, sfxVolumeScale);
 
             group?.MarkLaunched(dirs.Count);
         }
 
-        private void spawnOneProjectile(GameObject prefab, SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int sourceSkillKey, int onHitSkillKey, bool ignoreMonsters = false)
+        private void spawnOneProjectile(GameObject prefab, SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int sourceSkillKey, int onHitSkillKey, bool ignoreMonsters = false, float sfxVolumeScale = 1f)
         {
             GameObject go = Instantiate(prefab);
             go.name = "Projectile";
@@ -759,19 +762,19 @@ namespace Client.Game
             col.gameObject.layer = GameLayers.Projectile;
 
             Projectile proj = go.AddComponent<Projectile>();
-            proj.Launch(group, index, startPos, dir, speed, maxRange, sourceSkillKey, onHitSkillKey, ignoreMonsters);
+            proj.Launch(group, index, startPos, dir, speed, maxRange, sourceSkillKey, onHitSkillKey, ignoreMonsters, sfxVolumeScale);
         }
 
         // 투사체 종료(hit) 위치에서 적중음(클라 0지연) + OnHit 폭발 비주얼을 낸다. Projectile 이 종료 시 호출(시전 클라/원격 공용).
         // 폭발 적중/대미지는 서버가 판정해 SkillDamageNtf 로 통보 — 여기서는 비주얼/사운드만.
-        public void SpawnHitExplosionVisual(int sourceSkillKey, int explosionSkillKey, Vector3 pos, Vector3 dir)
+        public void SpawnHitExplosionVisual(int sourceSkillKey, int explosionSkillKey, Vector3 pos, Vector3 dir, float sfxVolumeScale = 1f)
         {
             // 적중음 (클라 전용). 투사체 hit 은 클라가 판정하므로 서버 SkillDamageNtf 를 기다리지 않고
             // hit 판정 순간에 0지연으로 source 스킬(투사체 본체)의 SfxHit 을 재생한다. (onSkillDamageNtf 에선 중복 재생 안 함.)
             // 단, 스킬 사용 직후 SfxHitIgnoreMs 동안은 억제한다(선행음과 겹침 방지).
             GameData_Skill source = GameDataTable_Skill.FindData(sourceSkillKey);
             if (source != null && !isHitSfxSuppressed(source))
-                SfxPlayer.Play(source.SfxHit, pos);
+                SfxPlayer.Play(source.SfxHit, pos, sfxVolumeScale);
 
             // OnHit 폭발 비주얼 (있으면).
             if (explosionSkillKey == 0)

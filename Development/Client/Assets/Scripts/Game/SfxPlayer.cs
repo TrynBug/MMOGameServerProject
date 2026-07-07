@@ -22,6 +22,10 @@ namespace Client.Game
         private const float k_clusterAddVolume = 0.07f;  // 윈도우 내 추가 적중마다 더할 볼륨(무게감)
         private const float k_clusterMaxVolume = 1.0f;   // 뭉친 적중의 최대 볼륨(AudioSource 상한)
 
+        // 거리 감쇠(2D 유지, 로컬 플레이어 기준 XZ 거리). 이 안은 원래 볼륨, 이 밖은 무음, 사이는 선형.
+        private const float k_fullVolumeDist = 8f;    // 이 거리 이내는 감쇠 없음(원래 볼륨)
+        private const float k_silenceDist    = 35f;   // 이 거리 이상은 무음(0)
+
         private static SfxPlayer s_inst;
 
         private AudioSource[] m_pool;
@@ -40,25 +44,26 @@ namespace Client.Game
         // path = Resources 기준 클립 1개의 정확한 경로(확장자 없음).
         //   예: "Sounds/Ultimate Magic Spells/Target Hits/Target Hit - Fire (1)"
         // 비어있으면(해당 슬롯 사운드 없음) 아무것도 안 한다.
-        public static void Play(string path, Vector3 pos)
+        // volumeScale: 기본 1.0(원래 볼륨). 원격 캐스터의 스킬음처럼 작게 재생하려면 <1 로 넘긴다.
+        public static void Play(string path, Vector3 pos, float volumeScale = 1f)
         {
             if (string.IsNullOrEmpty(path))
                 return;
             ensureInstance();
-            s_inst.play(path, pos);
+            s_inst.play(path, pos, volumeScale);
         }
 
         // path 의 클립을 durationSec 동안 루프 재생 후 정지한다(지속음 — 예: 운석 낙하).
         // 전용 AudioSource 를 하나 만들어 재생하고 durationSec 후 컴포넌트째 제거(=정지)한다. one-shot 풀과 분리.
-        public static void PlayLoop(string path, Vector3 pos, float durationSec)
+        public static void PlayLoop(string path, Vector3 pos, float durationSec, float volumeScale = 1f)
         {
             if (string.IsNullOrEmpty(path) || durationSec <= 0f)
                 return;
             ensureInstance();
-            s_inst.playLoop(path, pos, durationSec);
+            s_inst.playLoop(path, pos, durationSec, volumeScale);
         }
 
-        private void playLoop(string path, Vector3 pos, float durationSec)
+        private void playLoop(string path, Vector3 pos, float durationSec, float volumeScale)
         {
             AudioClip clip = getClip(path);
             if (clip == null)
@@ -69,7 +74,7 @@ namespace Client.Game
             src.spatialBlend = 0f;   // 2D (v1)
             src.loop = true;
             src.clip = clip;
-            src.volume = k_volume;
+            src.volume = k_volume * Mathf.Clamp01(volumeScale) * distanceScale(pos);
             src.Play();
             Destroy(src, durationSec);   // durationSec 후 컴포넌트 제거 → 재생 정지
         }
@@ -97,12 +102,15 @@ namespace Client.Game
             }
         }
 
-        private void play(string path, Vector3 pos)
+        private void play(string path, Vector3 pos, float volumeScale)
         {
             AudioClip clip = getClip(path);
             if (clip == null)
                 return;
 
+            float vol = k_volume * Mathf.Clamp01(volumeScale) * distanceScale(pos);   // 원격 배수 × 거리 감쇠.
+            if (vol <= 0.001f)
+                return;   // 사거리 밖 → 재생 안 함(보이스 낭비 방지).
             float now = Time.unscaledTime;
 
             // 뭉친 타격(대표 1회 + 약간 크게): 같은 클립이 짧은 윈도우 내에 또 적중하면 새 보이스를 만들지 않고
@@ -124,7 +132,7 @@ namespace Client.Game
             src.transform.position = pos;
             src.clip = clip;
             src.pitch = 1f + Random.Range(-k_pitchVar, k_pitchVar);
-            src.volume = k_volume;
+            src.volume = vol;
             src.Play();
 
             if (c == null)
@@ -134,7 +142,25 @@ namespace Client.Game
             }
             c.StartTime = now;
             c.Src = src;
-            c.Volume = k_volume;
+            c.Volume = vol;
+        }
+
+        // 거리 감쇠 배수(0~1). 로컬 플레이어에서 소리 위치까지 XZ 거리 기준(높이 무시 — 쿼터뷰).
+        //   k_fullVolumeDist 이내 = 1.0, k_silenceDist 이상 = 0, 사이는 선형.
+        //   로컬 플레이어가 없으면(메뉴/스폰 전 등) 감쇠하지 않는다(1.0).
+        // 주의: playLoop 는 생성 시점에 1회만 적용 → 재생 중 플레이어가 이동해도 볼륨이 갱신되진 않는다(v1).
+        private float distanceScale(Vector3 pos)
+        {
+            PlayerCharacter lp = (StageManager.Instance != null) ? StageManager.Instance.LocalPlayer : null;
+            if (lp == null)
+                return 1f;
+
+            Vector3 d = pos - lp.transform.position;
+            d.y = 0f;
+            float dist = d.magnitude;
+            if (dist <= k_fullVolumeDist) return 1f;
+            if (dist >= k_silenceDist)    return 0f;
+            return 1f - (dist - k_fullVolumeDist) / (k_silenceDist - k_fullVolumeDist);
         }
 
         // 경로의 클립을 1회 Resources.Load 후 캐시한다. 없으면 1회 경고하고 null 을 캐시한다.
