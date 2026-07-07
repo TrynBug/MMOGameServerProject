@@ -26,6 +26,16 @@ void SkillComponent::TryCast(int32 skillKey, const Vector3& origin, const Vector
     m_castTargetPos = targetPos;
     m_castSeed  = seed;
 
+    // Rotation=true 스킬이면 시전 방향으로 캐스터를 회전(서버 권위 yaw).
+    // 원격 캐릭터 회전은 스냅샷 yaw 로만 구동되므로(클라 PlayerCharacter.updateRemoteInterpolation),
+    // 서버가 여기서 yaw 를 확정해야 관전 클라에서도 시전 방향으로 돈다.
+    // (로컬 캐스터는 SkillSystem.tryCast 가 클라 예측으로 이미 즉시 회전 → 서버가 같은 yaw 로 정합.)
+    if (pSkill->Rotation && (dir.x != 0.0f || dir.z != 0.0f))
+    {
+        constexpr float k_radToDeg = 57.2957795f;
+        m_pOwner->SetYaw(std::atan2(dir.x, dir.z) * k_radToDeg);   // Unity 호환: +Z 정면
+    }
+
     // entry 페이즈는 선딜레이(CastDelayMs) 후 발동. origin 은 호출자 지정값.
     m_pendingSkillKey   = skillKey;
     m_pendingFireAtMs   = pSkill->CastDelayMs;
