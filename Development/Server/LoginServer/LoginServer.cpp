@@ -67,7 +67,7 @@ void LoginServer::OnServerInfoUpdated(const ServerInfo& info)
 
     if (info.status == ServerStatus::Running)
     {
-        connectToGateway(info.serverId, info.ip, info.internalPort);
+        connectToGateway(info.serverId, info.privateIp, info.internalPort);
     }
     else if (info.status == ServerStatus::Disconnected)
     {
@@ -203,7 +203,7 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     upsertLoginEntry(accountId, gateway->serverId);
     sendLoginSuccess(spSession, accountId, authToken, *gateway);
 
-    LOG_WRITE(LogLevel::Info, std::format("login success. accountId={} gateway={}:{}", accountId, gateway->ip, gateway->internalPort));
+    LOG_WRITE(LogLevel::Info, std::format("login success. accountId={} gateway={}:{}", accountId, gateway->privateIp, gateway->internalPort));
 }
 
 // 게이트웨이서버로부터 HandshakeRes를 받음
@@ -241,7 +241,7 @@ void LoginServer::sendLoginSuccess(const netlib::ISessionPtr& spSession, int64 a
     res.set_success(true);
     res.set_account_id(accountId);
     res.set_auth_token(authToken);
-    res.set_gateway_ip(gatewayInfo.ip);
+    res.set_gateway_ip(gatewayInfo.publicIp);   // 클라이언트는 외부접속 주소(PublicIP)로 게이트웨이에 접속한다
     res.set_gateway_port(gatewayInfo.clientPort);
 
     auto spPacket = SerializePacket(Common::GAME_PACKET_ID_LOGIN_RES, res);

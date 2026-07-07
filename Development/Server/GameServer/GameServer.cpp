@@ -164,7 +164,7 @@ void GameServer::OnServerInfoUpdated(const ServerInfo& info)
     // (이미 접속해 있는 유저들의 트래픽을 처리해야 하기 때문)
     if (info.status == ServerStatus::Running || info.status == ServerStatus::ShuttingDown)
     {
-        connectToGateway(info.serverId, info.ip, info.internalPort);
+        connectToGateway(info.serverId, info.privateIp, info.internalPort);
     }
     else if (info.status == ServerStatus::Disconnected)
     {

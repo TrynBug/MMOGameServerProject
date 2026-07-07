@@ -27,7 +27,8 @@ int main()
     serverbase::ServerBaseConfig config;
     config.serverType = ServerType::Login;
     config.serverId = configParser.GetInt32("Server", "Id", 0);
-    config.serverIp = configParser.GetString("Server", "IP", "0.0.0.0");
+    config.privateIp = configParser.GetString("Server", "PrivateIP", "");
+    config.publicIp  = configParser.GetString("Server", "PublicIP", "");
 
     config.registryIp = configParser.GetString("Registry", "IP", "127.0.0.1");
     config.registryPort = static_cast<uint16>(configParser.GetInt32("Registry", "Port", 10001));
@@ -44,7 +45,7 @@ int main()
 
     // 클라이언트가 직접 접속 (Listen 서버 사용)
     config.useClientListenServer = true;
-    config.clientListenServerConfig.ip = config.serverIp;
+    config.clientListenServerConfig.ip = config.privateIp;
     config.clientListenServerConfig.port = static_cast<uint16>(configParser.GetInt32("Server", "ClientPort", -1));
 
     config.useInternalListenServer = false; // 내부서버 접속 없음

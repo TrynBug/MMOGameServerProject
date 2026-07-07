@@ -175,9 +175,10 @@ void RegistryClient::sendRegisterReq()
     ServerPacket::RegistryRegisterReq req;
     req.set_server_type(static_cast<ServerPacket::ServerType>(m_config.myServerType));
     req.set_server_id(m_config.myServerId);
-    req.set_ip(m_config.myIp);
+    req.set_private_ip(m_config.myPrivateIp);
     req.set_client_port(m_config.myClientPort);
     req.set_internal_port(m_config.myInternalPort);
+    req.set_public_ip(m_config.myPublicIp);
 
     auto spPacket = m_pServerBase->SerializePacket(Common::SERVER_PACKET_ID_REGISTRY_REGISTER_REQ, req);
 
@@ -329,7 +330,8 @@ void RegistryClient::handleServerInfoNtf(const netlib::Packet& packet)
     info.serverId   = msgInfo.server_id();
     info.serverType = static_cast<ServerType>(msgInfo.server_type());
     info.status     = static_cast<ServerStatus>(msgInfo.status());
-    info.ip         = msgInfo.ip();
+    info.privateIp  = msgInfo.private_ip();
+    info.publicIp   = msgInfo.public_ip();
     info.clientPort = static_cast<uint16>(msgInfo.client_port());
     info.internalPort = static_cast<uint16>(msgInfo.internal_port());
     info.userCount  = msgInfo.user_count();
@@ -353,7 +355,8 @@ void RegistryClient::handlePollRes(const netlib::Packet& packet)
         info.serverId   = msgInfo.server_id();
         info.serverType = static_cast<ServerType>(msgInfo.server_type());
         info.status     = static_cast<ServerStatus>(msgInfo.status());
-        info.ip         = msgInfo.ip();
+        info.privateIp  = msgInfo.private_ip();
+        info.publicIp   = msgInfo.public_ip();
         info.clientPort = static_cast<uint16>(msgInfo.client_port());
         info.internalPort = static_cast<uint16>(msgInfo.internal_port());
         info.userCount  = msgInfo.user_count();

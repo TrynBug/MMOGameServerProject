@@ -19,7 +19,8 @@ struct ServerBaseConfig
     // 서버
     ServerType serverType = ServerType::Unknown;
     int32 serverId = 0;   // 서버 ID (1~999)
-    std::string serverIp;
+    std::string privateIp;   // 서버간 내부통신 및 리슨소켓 bind 주소 (VPC 프라이빗 IP). 필수, 시작 시 검증됨
+    std::string publicIp;    // 클라이언트용 외부접속 주소 (Elastic IP)
 
     // 레지스트리 서버 접속정보
     std::string registryIp;

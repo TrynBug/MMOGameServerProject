@@ -28,7 +28,8 @@ int main()
     serverbase::ServerBaseConfig config;
     config.serverType = ServerType::Game;
     config.serverId   = configParser.GetInt32("Server", "Id", 200);
-    config.serverIp   = configParser.GetString("Server", "IP", "0.0.0.0");
+    config.privateIp = configParser.GetString("Server", "PrivateIP", "");
+    config.publicIp  = configParser.GetString("Server", "PublicIP", "");
 
     config.registryIp   = configParser.GetString("Registry", "IP", "127.0.0.1");
     config.registryPort = static_cast<uint16>(configParser.GetInt32("Registry", "Port", 10001));
@@ -48,7 +49,7 @@ int main()
 
     // 내부 서버용 포트 (채팅서버 등이 게임서버로 connect)
     config.useInternalListenServer = true;
-    config.internalListenServerConfig.ip   = config.serverIp;
+    config.internalListenServerConfig.ip   = config.privateIp;
     config.internalListenServerConfig.port = static_cast<uint16>(configParser.GetInt32("Server", "InternalPort", -1));
 
     // 컨텐츠 스레드

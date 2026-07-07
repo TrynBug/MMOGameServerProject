@@ -10,7 +10,8 @@ struct ServerEntry
     int32        serverId   = 0;
     ServerType   serverType = ServerType::Unknown;
     ServerStatus status     = ServerStatus::Unknown;
-    std::string  ip;
+    std::string  privateIp;   // 서버간 내부통신 및 bind 주소
+    std::string  publicIp;    // 클라이언트용 외부접속 주소
     uint16       clientPort = 0;   // 클라 통신용 포트
     uint16       internalPort = 0; // 서버간 통신용 포트
     int32        userCount  = 0;
@@ -28,7 +29,8 @@ struct ServerEntry
         info.serverId   = serverId;
         info.serverType = serverType;
         info.status     = status;
-        info.ip         = ip;
+        info.privateIp  = privateIp;
+        info.publicIp   = publicIp;
         info.clientPort = clientPort;
         info.internalPort = internalPort;
         info.userCount  = userCount;

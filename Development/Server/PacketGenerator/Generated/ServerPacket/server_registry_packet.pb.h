@@ -755,27 +755,43 @@ class ServerInfoMsg final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kIpFieldNumber = 4,
+    kPublicIpFieldNumber = 4,
+    kPrivateIpFieldNumber = 5,
     kServerIdFieldNumber = 1,
     kServerTypeFieldNumber = 2,
     kStatusFieldNumber = 3,
-    kClientPortFieldNumber = 5,
-    kInternalPortFieldNumber = 6,
-    kUserCountFieldNumber = 7,
+    kClientPortFieldNumber = 6,
+    kInternalPortFieldNumber = 7,
+    kUserCountFieldNumber = 8,
   };
-  // string ip = 4;
-  void clear_ip() ;
-  const ::std::string& ip() const;
+  // string public_ip = 4;
+  void clear_public_ip() ;
+  const ::std::string& public_ip() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
-  void set_ip(Arg_&& arg, Args_... args);
-  ::std::string* PROTOBUF_NONNULL mutable_ip();
-  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_ip();
-  void set_allocated_ip(::std::string* PROTOBUF_NULLABLE value);
+  void set_public_ip(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_public_ip();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_public_ip();
+  void set_allocated_public_ip(::std::string* PROTOBUF_NULLABLE value);
 
   private:
-  const ::std::string& _internal_ip() const;
-  PROTOBUF_ALWAYS_INLINE void _internal_set_ip(const ::std::string& value);
-  ::std::string* PROTOBUF_NONNULL _internal_mutable_ip();
+  const ::std::string& _internal_public_ip() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_public_ip(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_public_ip();
+
+  public:
+  // string private_ip = 5;
+  void clear_private_ip() ;
+  const ::std::string& private_ip() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_private_ip(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_private_ip();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_private_ip();
+  void set_allocated_private_ip(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_private_ip() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_private_ip(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_private_ip();
 
   public:
   // int32 server_id = 1;
@@ -808,7 +824,7 @@ class ServerInfoMsg final : public ::google::protobuf::Message
   void _internal_set_status(::ServerPacket::ServerStatus value);
 
   public:
-  // int32 client_port = 5;
+  // int32 client_port = 6;
   void clear_client_port() ;
   ::int32_t client_port() const;
   void set_client_port(::int32_t value);
@@ -818,7 +834,7 @@ class ServerInfoMsg final : public ::google::protobuf::Message
   void _internal_set_client_port(::int32_t value);
 
   public:
-  // int32 internal_port = 6;
+  // int32 internal_port = 7;
   void clear_internal_port() ;
   ::int32_t internal_port() const;
   void set_internal_port(::int32_t value);
@@ -828,7 +844,7 @@ class ServerInfoMsg final : public ::google::protobuf::Message
   void _internal_set_internal_port(::int32_t value);
 
   public:
-  // int32 user_count = 7;
+  // int32 user_count = 8;
   void clear_user_count() ;
   ::int32_t user_count() const;
   void set_user_count(::int32_t value);
@@ -842,8 +858,8 @@ class ServerInfoMsg final : public ::google::protobuf::Message
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 7,
-                                   0, 37,
+  static const ::google::protobuf::internal::TcParseTable<3, 8,
+                                   0, 62,
                                    2>
       _table_;
 
@@ -864,7 +880,8 @@ class ServerInfoMsg final : public ::google::protobuf::Message
         const ServerInfoMsg& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::google::protobuf::internal::ArenaStringPtr ip_;
+    ::google::protobuf::internal::ArenaStringPtr public_ip_;
+    ::google::protobuf::internal::ArenaStringPtr private_ip_;
     ::int32_t server_id_;
     int server_type_;
     int status_;
@@ -1565,25 +1582,41 @@ class RegistryRegisterReq final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kIpFieldNumber = 3,
+    kPublicIpFieldNumber = 3,
+    kPrivateIpFieldNumber = 4,
     kServerTypeFieldNumber = 1,
     kServerIdFieldNumber = 2,
-    kClientPortFieldNumber = 4,
-    kInternalPortFieldNumber = 5,
+    kClientPortFieldNumber = 5,
+    kInternalPortFieldNumber = 6,
   };
-  // string ip = 3;
-  void clear_ip() ;
-  const ::std::string& ip() const;
+  // string public_ip = 3;
+  void clear_public_ip() ;
+  const ::std::string& public_ip() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
-  void set_ip(Arg_&& arg, Args_... args);
-  ::std::string* PROTOBUF_NONNULL mutable_ip();
-  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_ip();
-  void set_allocated_ip(::std::string* PROTOBUF_NULLABLE value);
+  void set_public_ip(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_public_ip();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_public_ip();
+  void set_allocated_public_ip(::std::string* PROTOBUF_NULLABLE value);
 
   private:
-  const ::std::string& _internal_ip() const;
-  PROTOBUF_ALWAYS_INLINE void _internal_set_ip(const ::std::string& value);
-  ::std::string* PROTOBUF_NONNULL _internal_mutable_ip();
+  const ::std::string& _internal_public_ip() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_public_ip(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_public_ip();
+
+  public:
+  // string private_ip = 4;
+  void clear_private_ip() ;
+  const ::std::string& private_ip() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_private_ip(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_private_ip();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_private_ip();
+  void set_allocated_private_ip(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_private_ip() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_private_ip(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_private_ip();
 
   public:
   // .ServerPacket.ServerType server_type = 1;
@@ -1606,7 +1639,7 @@ class RegistryRegisterReq final : public ::google::protobuf::Message
   void _internal_set_server_id(::int32_t value);
 
   public:
-  // int32 client_port = 4;
+  // int32 client_port = 5;
   void clear_client_port() ;
   ::int32_t client_port() const;
   void set_client_port(::int32_t value);
@@ -1616,7 +1649,7 @@ class RegistryRegisterReq final : public ::google::protobuf::Message
   void _internal_set_client_port(::int32_t value);
 
   public:
-  // int32 internal_port = 5;
+  // int32 internal_port = 6;
   void clear_internal_port() ;
   ::int32_t internal_port() const;
   void set_internal_port(::int32_t value);
@@ -1630,8 +1663,8 @@ class RegistryRegisterReq final : public ::google::protobuf::Message
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 5,
-                                   0, 43,
+  static const ::google::protobuf::internal::TcParseTable<3, 6,
+                                   0, 60,
                                    2>
       _table_;
 
@@ -1652,7 +1685,8 @@ class RegistryRegisterReq final : public ::google::protobuf::Message
         const RegistryRegisterReq& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::google::protobuf::internal::ArenaStringPtr ip_;
+    ::google::protobuf::internal::ArenaStringPtr public_ip_;
+    ::google::protobuf::internal::ArenaStringPtr private_ip_;
     int server_type_;
     ::int32_t server_id_;
     ::int32_t client_port_;
@@ -2806,7 +2840,7 @@ inline void ServerInfoMsg::clear_server_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.server_id_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000002U);
+                  0x00000004U);
 }
 inline ::int32_t ServerInfoMsg::server_id() const {
   // @@protoc_insertion_point(field_get:ServerPacket.ServerInfoMsg.server_id)
@@ -2814,7 +2848,7 @@ inline ::int32_t ServerInfoMsg::server_id() const {
 }
 inline void ServerInfoMsg::set_server_id(::int32_t value) {
   _internal_set_server_id(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   // @@protoc_insertion_point(field_set:ServerPacket.ServerInfoMsg.server_id)
 }
 inline ::int32_t ServerInfoMsg::_internal_server_id() const {
@@ -2831,7 +2865,7 @@ inline void ServerInfoMsg::clear_server_type() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.server_type_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000008U);
 }
 inline ::ServerPacket::ServerType ServerInfoMsg::server_type() const {
   // @@protoc_insertion_point(field_get:ServerPacket.ServerInfoMsg.server_type)
@@ -2839,7 +2873,7 @@ inline ::ServerPacket::ServerType ServerInfoMsg::server_type() const {
 }
 inline void ServerInfoMsg::set_server_type(::ServerPacket::ServerType value) {
   _internal_set_server_type(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   // @@protoc_insertion_point(field_set:ServerPacket.ServerInfoMsg.server_type)
 }
 inline ::ServerPacket::ServerType ServerInfoMsg::_internal_server_type() const {
@@ -2856,7 +2890,7 @@ inline void ServerInfoMsg::clear_status() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.status_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000008U);
+                  0x00000010U);
 }
 inline ::ServerPacket::ServerStatus ServerInfoMsg::status() const {
   // @@protoc_insertion_point(field_get:ServerPacket.ServerInfoMsg.status)
@@ -2864,7 +2898,7 @@ inline ::ServerPacket::ServerStatus ServerInfoMsg::status() const {
 }
 inline void ServerInfoMsg::set_status(::ServerPacket::ServerStatus value) {
   _internal_set_status(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
   // @@protoc_insertion_point(field_set:ServerPacket.ServerInfoMsg.status)
 }
 inline ::ServerPacket::ServerStatus ServerInfoMsg::_internal_status() const {
@@ -2876,77 +2910,142 @@ inline void ServerInfoMsg::_internal_set_status(::ServerPacket::ServerStatus val
   _impl_.status_ = value;
 }
 
-// string ip = 4;
-inline void ServerInfoMsg::clear_ip() {
+// string public_ip = 4;
+inline void ServerInfoMsg::clear_public_ip() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.ip_.ClearToEmpty();
+  _impl_.public_ip_.ClearToEmpty();
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline const ::std::string& ServerInfoMsg::ip() const
+inline const ::std::string& ServerInfoMsg::public_ip() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:ServerPacket.ServerInfoMsg.ip)
-  return _internal_ip();
+  // @@protoc_insertion_point(field_get:ServerPacket.ServerInfoMsg.public_ip)
+  return _internal_public_ip();
 }
 template <typename Arg_, typename... Args_>
-PROTOBUF_ALWAYS_INLINE void ServerInfoMsg::set_ip(Arg_&& arg, Args_... args) {
+PROTOBUF_ALWAYS_INLINE void ServerInfoMsg::set_public_ip(Arg_&& arg, Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  _impl_.ip_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:ServerPacket.ServerInfoMsg.ip)
+  _impl_.public_ip_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.ServerInfoMsg.public_ip)
 }
-inline ::std::string* PROTOBUF_NONNULL ServerInfoMsg::mutable_ip()
+inline ::std::string* PROTOBUF_NONNULL ServerInfoMsg::mutable_public_ip()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  ::std::string* _s = _internal_mutable_ip();
-  // @@protoc_insertion_point(field_mutable:ServerPacket.ServerInfoMsg.ip)
+  ::std::string* _s = _internal_mutable_public_ip();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.ServerInfoMsg.public_ip)
   return _s;
 }
-inline const ::std::string& ServerInfoMsg::_internal_ip() const {
+inline const ::std::string& ServerInfoMsg::_internal_public_ip() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.ip_.Get();
+  return _impl_.public_ip_.Get();
 }
-inline void ServerInfoMsg::_internal_set_ip(const ::std::string& value) {
+inline void ServerInfoMsg::_internal_set_public_ip(const ::std::string& value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.ip_.Set(value, GetArena());
+  _impl_.public_ip_.Set(value, GetArena());
 }
-inline ::std::string* PROTOBUF_NONNULL ServerInfoMsg::_internal_mutable_ip() {
+inline ::std::string* PROTOBUF_NONNULL ServerInfoMsg::_internal_mutable_public_ip() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.ip_.Mutable( GetArena());
+  return _impl_.public_ip_.Mutable( GetArena());
 }
-inline ::std::string* PROTOBUF_NULLABLE ServerInfoMsg::release_ip() {
+inline ::std::string* PROTOBUF_NULLABLE ServerInfoMsg::release_public_ip() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:ServerPacket.ServerInfoMsg.ip)
+  // @@protoc_insertion_point(field_release:ServerPacket.ServerInfoMsg.public_ip)
   if (!CheckHasBit(_impl_._has_bits_[0], 0x00000001U)) {
     return nullptr;
   }
   ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
-  auto* released = _impl_.ip_.Release();
+  auto* released = _impl_.public_ip_.Release();
   if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
-    _impl_.ip_.Set("", GetArena());
+    _impl_.public_ip_.Set("", GetArena());
   }
   return released;
 }
-inline void ServerInfoMsg::set_allocated_ip(::std::string* PROTOBUF_NULLABLE value) {
+inline void ServerInfoMsg::set_allocated_public_ip(::std::string* PROTOBUF_NULLABLE value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (value != nullptr) {
     SetHasBit(_impl_._has_bits_[0], 0x00000001U);
   } else {
     ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
   }
-  _impl_.ip_.SetAllocated(value, GetArena());
-  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.ip_.IsDefault()) {
-    _impl_.ip_.Set("", GetArena());
+  _impl_.public_ip_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.public_ip_.IsDefault()) {
+    _impl_.public_ip_.Set("", GetArena());
   }
-  // @@protoc_insertion_point(field_set_allocated:ServerPacket.ServerInfoMsg.ip)
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.ServerInfoMsg.public_ip)
 }
 
-// int32 client_port = 5;
+// string private_ip = 5;
+inline void ServerInfoMsg::clear_private_ip() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.private_ip_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline const ::std::string& ServerInfoMsg::private_ip() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:ServerPacket.ServerInfoMsg.private_ip)
+  return _internal_private_ip();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ServerInfoMsg::set_private_ip(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  _impl_.private_ip_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.ServerInfoMsg.private_ip)
+}
+inline ::std::string* PROTOBUF_NONNULL ServerInfoMsg::mutable_private_ip()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  ::std::string* _s = _internal_mutable_private_ip();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.ServerInfoMsg.private_ip)
+  return _s;
+}
+inline const ::std::string& ServerInfoMsg::_internal_private_ip() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.private_ip_.Get();
+}
+inline void ServerInfoMsg::_internal_set_private_ip(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.private_ip_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ServerInfoMsg::_internal_mutable_private_ip() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.private_ip_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ServerInfoMsg::release_private_ip() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:ServerPacket.ServerInfoMsg.private_ip)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000002U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  auto* released = _impl_.private_ip_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.private_ip_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ServerInfoMsg::set_allocated_private_ip(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  }
+  _impl_.private_ip_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.private_ip_.IsDefault()) {
+    _impl_.private_ip_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.ServerInfoMsg.private_ip)
+}
+
+// int32 client_port = 6;
 inline void ServerInfoMsg::clear_client_port() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.client_port_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000010U);
+                  0x00000020U);
 }
 inline ::int32_t ServerInfoMsg::client_port() const {
   // @@protoc_insertion_point(field_get:ServerPacket.ServerInfoMsg.client_port)
@@ -2954,7 +3053,7 @@ inline ::int32_t ServerInfoMsg::client_port() const {
 }
 inline void ServerInfoMsg::set_client_port(::int32_t value) {
   _internal_set_client_port(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
   // @@protoc_insertion_point(field_set:ServerPacket.ServerInfoMsg.client_port)
 }
 inline ::int32_t ServerInfoMsg::_internal_client_port() const {
@@ -2966,12 +3065,12 @@ inline void ServerInfoMsg::_internal_set_client_port(::int32_t value) {
   _impl_.client_port_ = value;
 }
 
-// int32 internal_port = 6;
+// int32 internal_port = 7;
 inline void ServerInfoMsg::clear_internal_port() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.internal_port_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000020U);
+                  0x00000040U);
 }
 inline ::int32_t ServerInfoMsg::internal_port() const {
   // @@protoc_insertion_point(field_get:ServerPacket.ServerInfoMsg.internal_port)
@@ -2979,7 +3078,7 @@ inline ::int32_t ServerInfoMsg::internal_port() const {
 }
 inline void ServerInfoMsg::set_internal_port(::int32_t value) {
   _internal_set_internal_port(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
   // @@protoc_insertion_point(field_set:ServerPacket.ServerInfoMsg.internal_port)
 }
 inline ::int32_t ServerInfoMsg::_internal_internal_port() const {
@@ -2991,12 +3090,12 @@ inline void ServerInfoMsg::_internal_set_internal_port(::int32_t value) {
   _impl_.internal_port_ = value;
 }
 
-// int32 user_count = 7;
+// int32 user_count = 8;
 inline void ServerInfoMsg::clear_user_count() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.user_count_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000040U);
+                  0x00000080U);
 }
 inline ::int32_t ServerInfoMsg::user_count() const {
   // @@protoc_insertion_point(field_get:ServerPacket.ServerInfoMsg.user_count)
@@ -3004,7 +3103,7 @@ inline ::int32_t ServerInfoMsg::user_count() const {
 }
 inline void ServerInfoMsg::set_user_count(::int32_t value) {
   _internal_set_user_count(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000080U);
   // @@protoc_insertion_point(field_set:ServerPacket.ServerInfoMsg.user_count)
 }
 inline ::int32_t ServerInfoMsg::_internal_user_count() const {
@@ -3025,7 +3124,7 @@ inline void RegistryRegisterReq::clear_server_type() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.server_type_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000002U);
+                  0x00000004U);
 }
 inline ::ServerPacket::ServerType RegistryRegisterReq::server_type() const {
   // @@protoc_insertion_point(field_get:ServerPacket.RegistryRegisterReq.server_type)
@@ -3033,7 +3132,7 @@ inline ::ServerPacket::ServerType RegistryRegisterReq::server_type() const {
 }
 inline void RegistryRegisterReq::set_server_type(::ServerPacket::ServerType value) {
   _internal_set_server_type(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   // @@protoc_insertion_point(field_set:ServerPacket.RegistryRegisterReq.server_type)
 }
 inline ::ServerPacket::ServerType RegistryRegisterReq::_internal_server_type() const {
@@ -3050,7 +3149,7 @@ inline void RegistryRegisterReq::clear_server_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.server_id_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000008U);
 }
 inline ::int32_t RegistryRegisterReq::server_id() const {
   // @@protoc_insertion_point(field_get:ServerPacket.RegistryRegisterReq.server_id)
@@ -3058,7 +3157,7 @@ inline ::int32_t RegistryRegisterReq::server_id() const {
 }
 inline void RegistryRegisterReq::set_server_id(::int32_t value) {
   _internal_set_server_id(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   // @@protoc_insertion_point(field_set:ServerPacket.RegistryRegisterReq.server_id)
 }
 inline ::int32_t RegistryRegisterReq::_internal_server_id() const {
@@ -3070,77 +3169,142 @@ inline void RegistryRegisterReq::_internal_set_server_id(::int32_t value) {
   _impl_.server_id_ = value;
 }
 
-// string ip = 3;
-inline void RegistryRegisterReq::clear_ip() {
+// string public_ip = 3;
+inline void RegistryRegisterReq::clear_public_ip() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.ip_.ClearToEmpty();
+  _impl_.public_ip_.ClearToEmpty();
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline const ::std::string& RegistryRegisterReq::ip() const
+inline const ::std::string& RegistryRegisterReq::public_ip() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:ServerPacket.RegistryRegisterReq.ip)
-  return _internal_ip();
+  // @@protoc_insertion_point(field_get:ServerPacket.RegistryRegisterReq.public_ip)
+  return _internal_public_ip();
 }
 template <typename Arg_, typename... Args_>
-PROTOBUF_ALWAYS_INLINE void RegistryRegisterReq::set_ip(Arg_&& arg, Args_... args) {
+PROTOBUF_ALWAYS_INLINE void RegistryRegisterReq::set_public_ip(Arg_&& arg, Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  _impl_.ip_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:ServerPacket.RegistryRegisterReq.ip)
+  _impl_.public_ip_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.RegistryRegisterReq.public_ip)
 }
-inline ::std::string* PROTOBUF_NONNULL RegistryRegisterReq::mutable_ip()
+inline ::std::string* PROTOBUF_NONNULL RegistryRegisterReq::mutable_public_ip()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  ::std::string* _s = _internal_mutable_ip();
-  // @@protoc_insertion_point(field_mutable:ServerPacket.RegistryRegisterReq.ip)
+  ::std::string* _s = _internal_mutable_public_ip();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.RegistryRegisterReq.public_ip)
   return _s;
 }
-inline const ::std::string& RegistryRegisterReq::_internal_ip() const {
+inline const ::std::string& RegistryRegisterReq::_internal_public_ip() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.ip_.Get();
+  return _impl_.public_ip_.Get();
 }
-inline void RegistryRegisterReq::_internal_set_ip(const ::std::string& value) {
+inline void RegistryRegisterReq::_internal_set_public_ip(const ::std::string& value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.ip_.Set(value, GetArena());
+  _impl_.public_ip_.Set(value, GetArena());
 }
-inline ::std::string* PROTOBUF_NONNULL RegistryRegisterReq::_internal_mutable_ip() {
+inline ::std::string* PROTOBUF_NONNULL RegistryRegisterReq::_internal_mutable_public_ip() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.ip_.Mutable( GetArena());
+  return _impl_.public_ip_.Mutable( GetArena());
 }
-inline ::std::string* PROTOBUF_NULLABLE RegistryRegisterReq::release_ip() {
+inline ::std::string* PROTOBUF_NULLABLE RegistryRegisterReq::release_public_ip() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:ServerPacket.RegistryRegisterReq.ip)
+  // @@protoc_insertion_point(field_release:ServerPacket.RegistryRegisterReq.public_ip)
   if (!CheckHasBit(_impl_._has_bits_[0], 0x00000001U)) {
     return nullptr;
   }
   ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
-  auto* released = _impl_.ip_.Release();
+  auto* released = _impl_.public_ip_.Release();
   if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
-    _impl_.ip_.Set("", GetArena());
+    _impl_.public_ip_.Set("", GetArena());
   }
   return released;
 }
-inline void RegistryRegisterReq::set_allocated_ip(::std::string* PROTOBUF_NULLABLE value) {
+inline void RegistryRegisterReq::set_allocated_public_ip(::std::string* PROTOBUF_NULLABLE value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (value != nullptr) {
     SetHasBit(_impl_._has_bits_[0], 0x00000001U);
   } else {
     ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
   }
-  _impl_.ip_.SetAllocated(value, GetArena());
-  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.ip_.IsDefault()) {
-    _impl_.ip_.Set("", GetArena());
+  _impl_.public_ip_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.public_ip_.IsDefault()) {
+    _impl_.public_ip_.Set("", GetArena());
   }
-  // @@protoc_insertion_point(field_set_allocated:ServerPacket.RegistryRegisterReq.ip)
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.RegistryRegisterReq.public_ip)
 }
 
-// int32 client_port = 4;
+// string private_ip = 4;
+inline void RegistryRegisterReq::clear_private_ip() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.private_ip_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline const ::std::string& RegistryRegisterReq::private_ip() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:ServerPacket.RegistryRegisterReq.private_ip)
+  return _internal_private_ip();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void RegistryRegisterReq::set_private_ip(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  _impl_.private_ip_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.RegistryRegisterReq.private_ip)
+}
+inline ::std::string* PROTOBUF_NONNULL RegistryRegisterReq::mutable_private_ip()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  ::std::string* _s = _internal_mutable_private_ip();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.RegistryRegisterReq.private_ip)
+  return _s;
+}
+inline const ::std::string& RegistryRegisterReq::_internal_private_ip() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.private_ip_.Get();
+}
+inline void RegistryRegisterReq::_internal_set_private_ip(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.private_ip_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL RegistryRegisterReq::_internal_mutable_private_ip() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.private_ip_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE RegistryRegisterReq::release_private_ip() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:ServerPacket.RegistryRegisterReq.private_ip)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000002U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  auto* released = _impl_.private_ip_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.private_ip_.Set("", GetArena());
+  }
+  return released;
+}
+inline void RegistryRegisterReq::set_allocated_private_ip(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  }
+  _impl_.private_ip_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.private_ip_.IsDefault()) {
+    _impl_.private_ip_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.RegistryRegisterReq.private_ip)
+}
+
+// int32 client_port = 5;
 inline void RegistryRegisterReq::clear_client_port() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.client_port_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000008U);
+                  0x00000010U);
 }
 inline ::int32_t RegistryRegisterReq::client_port() const {
   // @@protoc_insertion_point(field_get:ServerPacket.RegistryRegisterReq.client_port)
@@ -3148,7 +3312,7 @@ inline ::int32_t RegistryRegisterReq::client_port() const {
 }
 inline void RegistryRegisterReq::set_client_port(::int32_t value) {
   _internal_set_client_port(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
   // @@protoc_insertion_point(field_set:ServerPacket.RegistryRegisterReq.client_port)
 }
 inline ::int32_t RegistryRegisterReq::_internal_client_port() const {
@@ -3160,12 +3324,12 @@ inline void RegistryRegisterReq::_internal_set_client_port(::int32_t value) {
   _impl_.client_port_ = value;
 }
 
-// int32 internal_port = 5;
+// int32 internal_port = 6;
 inline void RegistryRegisterReq::clear_internal_port() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.internal_port_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000010U);
+                  0x00000020U);
 }
 inline ::int32_t RegistryRegisterReq::internal_port() const {
   // @@protoc_insertion_point(field_get:ServerPacket.RegistryRegisterReq.internal_port)
@@ -3173,7 +3337,7 @@ inline ::int32_t RegistryRegisterReq::internal_port() const {
 }
 inline void RegistryRegisterReq::set_internal_port(::int32_t value) {
   _internal_set_internal_port(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
   // @@protoc_insertion_point(field_set:ServerPacket.RegistryRegisterReq.internal_port)
 }
 inline ::int32_t RegistryRegisterReq::_internal_internal_port() const {

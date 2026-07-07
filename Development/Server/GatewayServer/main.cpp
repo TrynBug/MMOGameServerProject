@@ -30,7 +30,8 @@ int main()
     serverbase::ServerBaseConfig config;
     config.serverType = ServerType::Gateway;
     config.serverId = configParser.GetInt32("Server", "Id", -1);
-    config.serverIp = configParser.GetString("Server", "IP", "0.0.0.0");
+    config.privateIp = configParser.GetString("Server", "PrivateIP", "");
+    config.publicIp  = configParser.GetString("Server", "PublicIP", "");
 
     config.registryIp = configParser.GetString("Registry", "IP", "127.0.0.1");
     config.registryPort = static_cast<uint16>(configParser.GetInt32("Registry", "Port", 10001));
@@ -47,12 +48,12 @@ int main()
 
     // 클라이언트용 포트 (외부 인터넷에서 접속)
     config.useClientListenServer = true;
-    config.clientListenServerConfig.ip   = config.serverIp;
+    config.clientListenServerConfig.ip   = config.privateIp;
     config.clientListenServerConfig.port = static_cast<uint16>(configParser.GetInt32("Server", "ClientPort", -1));;
 
     // 내부 서버용 포트 (게임서버/로그인서버 접속. 방화벽으로 외부 차단 권장)
     config.useInternalListenServer = true;
-    config.internalListenServerConfig.ip   = config.serverIp;
+    config.internalListenServerConfig.ip   = config.privateIp;
     config.internalListenServerConfig.port = static_cast<uint16>(configParser.GetInt32("Server", "InternalPort", -1));
 
     // 컨텐츠 스레드

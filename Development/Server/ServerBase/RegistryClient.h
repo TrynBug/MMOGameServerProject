@@ -37,7 +37,8 @@ public:
 
         ServerType   myServerType        = ServerType::Unknown;
         int32        myServerId          = 0; 
-        std::string  myIp;
+        std::string  myPrivateIp;
+        std::string  myPublicIp;
         uint16       myClientPort        = 0;
         uint16       myInternalPort      = 0;
 

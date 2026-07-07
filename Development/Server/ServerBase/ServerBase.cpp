@@ -11,6 +11,25 @@
 namespace serverbase
 {
 
+namespace
+{
+    // 구체적인 IPv4 리터럴인지 검사한다. 빈값 / "0.0.0.0" / 도메인명 / 형식오류는 모두 false.
+    bool IsConcreteIPv4(const std::string& ip)
+    {
+        if (ip.empty())
+            return false;
+
+        in_addr addr{};
+        if (::inet_pton(AF_INET, ip.c_str(), &addr) != 1)
+            return false;
+
+        if (addr.s_addr == INADDR_ANY)   // 0.0.0.0
+            return false;
+
+        return true;
+    }
+}
+
 bool ServerBase::Initialize(const ServerBaseConfig& config)
 {
     m_config = config;
@@ -38,6 +57,32 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
     }
 
     m_serverId = config.serverId;
+
+    // 네트워크 IP 설정 검증
+    if (!IsConcreteIPv4(config.privateIp))
+    {
+        LOG_WRITE(LogLevel::Error, std::format("invalid PrivateIP in config : '{}' (구체적인 IPv4 주소여야 함. 빈값/0.0.0.0/도메인명 불가)", config.privateIp));
+        return false;
+    }
+
+    if (config.serverType == ServerType::Gateway)
+    {
+        // 게이트웨이는 클라이언트에게 접속주소(PublicIP)를 주어야 하므로 필수
+        if (!IsConcreteIPv4(config.publicIp))
+        {
+            LOG_WRITE(LogLevel::Error, std::format("invalid PublicIP in config : '{}' (게이트웨이는 클라이언트 광고용 PublicIP가 필수)", config.publicIp));
+            return false;
+        }
+    }
+    else
+    {
+        // 그 외 서버는 PublicIP 없어도됨. 값이 지정된 경우에만 형식을 검증한다.
+        if (!config.publicIp.empty() && !IsConcreteIPv4(config.publicIp))
+        {
+            LOG_WRITE(LogLevel::Error, std::format("invalid PublicIP in config : '{}'", config.publicIp));
+            return false;
+        }
+    }
 
     // ObjectIdGenerator 초기화
     m_objectIdGenerator.Initialize(m_serverId);
@@ -128,7 +173,8 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
         regConfig.registryPort      = config.registryPort;
         regConfig.myServerType      = config.serverType;
         regConfig.myServerId        = m_serverId;            // config에서 로드한 ID 전달
-        regConfig.myIp              = config.serverIp;
+        regConfig.myPrivateIp       = config.privateIp;
+        regConfig.myPublicIp        = config.publicIp;
         regConfig.myClientPort      = config.clientListenServerConfig.port;
         regConfig.myInternalPort    = config.internalListenServerConfig.port;
         regConfig.pollTargetTypes   = config.pollTargetTypes;

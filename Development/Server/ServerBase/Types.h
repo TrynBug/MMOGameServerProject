@@ -42,7 +42,8 @@ struct ServerInfo
     int32        serverId   = 0;
     ServerType   serverType = ServerType::Unknown;
     ServerStatus status     = ServerStatus::Unknown;
-    std::string  ip;
+    std::string  privateIp;   // 서버간 내부통신 및 bind 주소
+    std::string  publicIp;    // 클라이언트용 외부접속 주소
     uint16       clientPort = 0;
     uint16       internalPort = 0;
     int32        userCount  = 0;   // 접속자 수 (게이트웨이, 게임서버만 유효)
