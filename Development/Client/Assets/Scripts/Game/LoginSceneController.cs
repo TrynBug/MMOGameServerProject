@@ -32,9 +32,10 @@ namespace Client.Game
     //   7. CharacterSelection 씬으로 무조건 이동
     public class LoginSceneController : MonoBehaviour
     {
-        [Header("Login Server")]
-        [SerializeField] private string m_loginIp = "127.0.0.1";
-        [SerializeField] private int m_loginPort = 8001;
+        // 로그인서버 접속정보는 StreamingAssets/serverconfig.json 에서 로드한다.
+        // (씬/인스펙터에 하드코딩하지 않음 — 환경별로 재빌드 없이 교체 가능)
+        private string m_loginHost;
+        private int m_loginPort;
 
         [Header("Timeouts (seconds)")]
         [SerializeField] private float m_connectTimeoutSec = 10f;
@@ -84,6 +85,17 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<GameEnterNtf>(GamePacketId.GameEnterNtf, onGameEnterNtf);
             PacketDispatcher.Instance.Register<CharacterListNtf>(GamePacketId.CharacterListNtf, onCharacterListNtf);
             PacketDispatcher.Instance.Register<ForceDisconnectNtf>(GamePacketId.ForceDisconnectNtf, onForceDisconnectNtf);
+
+            // 서버 접속설정 로드 (StreamingAssets/serverconfig.json). 없거나 잘못되면 로그인 불가(폴백 없음).
+            ServerConfig serverConfig = ServerConfigLoader.Load();
+            if (serverConfig == null)
+            {
+                m_uiLogin.SetStatus("서버 설정 로드 실패 (serverconfig.json 확인)");
+                m_uiLogin.SetLoginButtonInteractable(false);
+                return;
+            }
+            m_loginHost = serverConfig.loginHost;
+            m_loginPort = serverConfig.loginPort;
 
             m_uiLogin.SetStatus("ID와 비밀번호를 입력하세요");
         }
@@ -142,7 +154,7 @@ namespace Client.Game
             {
                 // 1. 로그인서버 connect
                 m_uiLogin.SetStatus("로그인서버 접속 중...");
-                if (!await connectAsync(m_loginIp, m_loginPort))
+                if (!await connectAsync(m_loginHost, m_loginPort))
                 {
                     fail("로그인서버 접속 실패");
                     return;
