@@ -30,7 +30,7 @@ namespace Client.Game
         [SerializeField] private int m_skill1Key = 1001;  // 파이어볼
         [SerializeField] private int m_skill2Key = 1003;  // 얼음지대
         [SerializeField] private int m_skill3Key = 1008;  // 불기둥
-        //[SerializeField] private int m_skill4Key = 0;
+        [SerializeField] private int m_skill4Key = 0;
 
         // 단발(instant) 범위 비주얼의 표시 시간(초). 지속 데이터(LifetimeMs)가 없는 단일 틱 스킬에 사용.
         [SerializeField] private float m_areaInstantDisplaySec = 0.5f;
@@ -116,7 +116,7 @@ namespace Client.Game
         private void castSkill1() => tryCast(m_skill1Key);
         private void castSkill2() => tryCast(m_skill2Key);
         private void castSkill3() => tryCast(m_skill3Key);
-        //private void castSkill4() => tryCast(m_skill4Key);
+        private void castSkill4() => tryCast(m_skill4Key);
 
         // ─── HUD 조회 API (UI_PlayerHud 가 폴링) ─────────────────────
         // 스킬 슬롯 개수 (입력 OnSkill1~4 에 대응). 슬롯 키 매핑이 늘면 여기와 GetSlotSkillKey 를 함께 늘린다.
@@ -130,7 +130,7 @@ namespace Client.Game
                 case 0:  return m_skill1Key;
                 case 1:  return m_skill2Key;
                 case 2:  return m_skill3Key;
-                //case 3:  return m_skill4Key;
+                case 3:  return m_skill4Key;
                 default: return 0;
             }
         }
@@ -164,6 +164,9 @@ namespace Client.Game
 
         private void tryCast(int skillKey)
         {
+            if (skillKey <= 0)
+                return;
+
             if (Time.time < m_actionLockUntil)
                 return;   // 이전 시전 애니메이션(액션락) 중.
 
