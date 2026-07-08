@@ -27,11 +27,11 @@ namespace Client.Game
 
             m_text = gameObject.AddComponent<TextMesh>();
             m_text.text = Mathf.RoundToInt(damage).ToString();
-            m_text.fontSize = 48;
+            m_text.fontSize = 80;
             m_text.characterSize = 0.05f;
             m_text.anchor = TextAnchor.MiddleCenter;
             m_text.alignment = TextAlignment.Center;
-            m_text.color = isDuplicate ? new Color(0.7f, 0.7f, 0.7f) : Color.yellow;
+            m_text.color = isDuplicate ? new Color(0.7f, 0.7f, 0.7f) : Color.red;
 
             // TextMesh 는 폰트가 없으면 렌더되지 않으므로 빌트인 폰트를 명시적으로 지정한다.
             Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
