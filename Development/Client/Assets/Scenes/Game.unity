@@ -690,9 +690,10 @@ MonoBehaviour:
   m_skill1Key: 1001
   m_skill2Key: 1003
   m_skill3Key: 1008
-  m_skill4Key: 1004
+  m_skill4Key: 0
   m_areaInstantDisplaySec: 0.5
   m_projectileHeight: 0.5
+  m_remoteSfxVolumeScale: 0.85
   m_castClipBaseLength: 0.8
   m_areaTargetRange: 30
   m_areaCastFallbackDistance: 10
