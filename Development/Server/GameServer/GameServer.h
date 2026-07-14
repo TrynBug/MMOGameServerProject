@@ -48,19 +48,16 @@ public:
     PacketSender&       GetPacketSender()       { return m_packetSender; }
     const PacketSender& GetPacketSender() const { return m_packetSender; }
 
-    // NavMesh 데이터에 접근. Stage 가 자신의 NavMesh 를 설정할 때 사용.
+    // ── 매니저 접근 ──────────────────────────────────────────────
     NavMeshManager&       GetNavMeshManager()       { return m_navMeshManager; }
     const NavMeshManager& GetNavMeshManager() const { return m_navMeshManager; }
 
     StageAssetManager&       GetStageAssetManager()       { return m_stageAssetManager; }
     const StageAssetManager& GetStageAssetManager() const { return m_stageAssetManager; }
 
-    // StageManager 접근. Stage 가 이동 대상 Stage 를 해석(FindStagesByDataKey)할 때 사용.
     StageManager&       GetStageManager()       { return m_stageManager; }
     const StageManager& GetStageManager() const { return m_stageManager; }
 
-    // CheatManager 접근. Stage::handleCheatReq 가 치트 실행을 위임할 때, 그리고
-    // 다른 시스템이 치트 플래그(예: IsGodMode)를 조회할 때 사용. (개발용)
     CheatManager&       GetCheatManager()       { return m_cheatManager; }
     const CheatManager& GetCheatManager() const { return m_cheatManager; }
 

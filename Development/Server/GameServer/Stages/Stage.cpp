@@ -1532,26 +1532,21 @@ bool Stage::executeLocalStageMove(const UserPtr& spUser, const CharacterPtr& spC
     GameServer& server = GameServer::Instance();
     const int64 accountId = spUser->GetAccountId();
 
-    // 대상 Stage 해석. 인스턴스 선택 정책 v1: 정적 스테이지는 dataKey당 정확히 1개.
-    // (채널/인스턴스 던전 도입 시 이 지점에 선택 정책이 들어간다.)
-    std::vector<StagePtr> targets = server.GetStageManager().FindStagesByDataKey(targetStageDataKey);
-    if (targets.empty())
+    // 같은 스테이지로의 이동은 거부한다.
+    // 반드시 dataKey 로 검사해야 한다 — 채널이 여러 개면 SelectChannel 이 "같은 스테이지의 다른 채널"을
+    // 돌려줄 수 있어서, 대상 포인터가 this 인지 보는 방식으로는 통과해버린다. 채널은 클라에 비공개이므로
+    // 유저가 채널 이동을 요청하는 경우는 존재하지 않는다.
+    if (targetStageDataKey == GetStageDataKey())
     {
-        outFailReason = "target stage not found";
-        return false;
-    }
-    if (targets.size() > 1)
-    {
-        LOG_WRITE(LogLevel::Error, std::format("multiple instances for static stage. dataKey={} count={}",
-            targetStageDataKey, targets.size()));
-        outFailReason = "ambiguous target stage";
+        outFailReason = "already in target stage";
         return false;
     }
 
-    StagePtr spTarget = targets[0];
-    if (spTarget.get() == this)
+    // 대상 Stage 해석 = 채널 선택. 정책은 StageManager::SelectChannel 에 일원화되어 있다.
+    StagePtr spTarget = server.GetStageManager().SelectChannel(targetStageDataKey);
+    if (!spTarget)
     {
-        outFailReason = "already in target stage";
+        outFailReason = "target stage not found";
         return false;
     }
 
@@ -1584,8 +1579,9 @@ bool Stage::executeLocalStageMove(const UserPtr& spUser, const CharacterPtr& spC
     // 4) 성공 응답 → 클라는 로딩 시작, 완료 시 StageLoadCompleteReq.
     server.GetPacketSender().SendStageMoveRes(accountId, EResultCode::Success, "", targetStageDataKey);
 
-    LOG_WRITE(LogLevel::Info, std::format("moving. accountId={} from stageId={} to stageId={} (dataKey={}) positionType={}",
-        accountId, m_stageId, spTarget->GetStageId(), targetStageDataKey, static_cast<int32>(positionType)));
+    LOG_WRITE(LogLevel::Info, std::format("moving. accountId={} from stageId={}(ch{}) to stageId={}(ch{}) (dataKey={}) positionType={}",
+        accountId, m_stageId, m_channelNo, spTarget->GetStageId(), spTarget->GetChannelNo(),
+        targetStageDataKey, static_cast<int32>(positionType)));
     return true;
 }
 

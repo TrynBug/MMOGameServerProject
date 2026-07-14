@@ -671,8 +671,8 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 accountId, Game
     LOG_WRITE(LogLevel::Info, std::format("character selected. accountId={} characterId={} name='{}'",
         accountId, character.character_id(), character.name()));
 
-    // ── 5) Town 확인 ─────────────────────────────────────────────────────
-    TownPtr spTown = m_stageManager.GetTown();
+    // ── 5) Town 채널 선택 ────────────────────────────────────────────────
+    StagePtr spTown = m_stageManager.SelectChannel(k_townStageDataKey);
     if (!spTown)
     {
         LOG_WRITE(LogLevel::Error, std::format("CharacterSelect - Town is null. accountId={}", accountId));
@@ -696,6 +696,9 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 accountId, Game
         spSystemStage->EnqueueMessage(StageMsg_UserLeave{accountId});
     }
     spTown->EnqueueMessage(StageMsg_UserEnter{spUser});
+
+    LOG_WRITE(LogLevel::Info, std::format("CharacterSelect - entering town. accountId={} stageId={}(ch{})",
+        accountId, spTown->GetStageId(), spTown->GetChannelNo()));
 }
 
 // 캐릭터 목록을 DB에서 로드해 CharacterListNtf 전송. (전송 시점 일원화)
@@ -723,8 +726,7 @@ db::AwaitableCoTask<std::vector<DataStructures::Character>> GameServer::loadAllC
     loadBatch->LoadMany<DataStructures::Character>(accountId, /*characterId*/ 0);
 
     // 후속작업(전송)을 호출자가 지정한 스레드에서 재개 (SystemStage 컨텐츠 스레드).
-    db::DbLoadResult loaded = co_await db::DbLoadExecutor::Load(
-        GetDB(), loadBatch, db::EDBType::Game, gameDbIndex, pResumeExecutor);
+    db::DbLoadResult loaded = co_await db::DbLoadExecutor::Load(GetDB(), loadBatch, db::EDBType::Game, gameDbIndex, pResumeExecutor);
 
     if (!loaded.success)
     {
@@ -924,7 +926,8 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
     {
         LOG_WRITE(LogLevel::Error, std::format("reroute - account load failed. accountId={}", accountId));
         m_packetSender.SendStageMoveRes(accountId, EResultCode::Fail, "server error: account", targetStageDataKey);
-        UserPtr removed; m_safeUsers.EraseAndGet(accountId, removed);
+        UserPtr removed; 
+        m_safeUsers.EraseAndGet(accountId, removed);
         co_return;
     }
     const int32 gameDbIndex = accountOpt->game_db_index();
@@ -932,7 +935,8 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
     {
         LOG_WRITE(LogLevel::Error, std::format("reroute - invalid GameDB shard. accountId={} idx={}", accountId, gameDbIndex));
         m_packetSender.SendStageMoveRes(accountId, EResultCode::Fail, "server error: shard", targetStageDataKey);
-        UserPtr removed; m_safeUsers.EraseAndGet(accountId, removed);
+        UserPtr removed; 
+        m_safeUsers.EraseAndGet(accountId, removed);
         co_return;
     }
     spUser->SetAccount(*accountOpt);
@@ -941,21 +945,22 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
     if (!spCharacter)
     {
         m_packetSender.SendStageMoveRes(accountId, EResultCode::Fail, "character load failed", targetStageDataKey);
-        UserPtr removed; m_safeUsers.EraseAndGet(accountId, removed);
+        UserPtr removed; 
+        m_safeUsers.EraseAndGet(accountId, removed);
         co_return;
     }
 
-    // ── 대상 Stage 해석 (정적 스테이지는 dataKey당 정확히 1개) ──
-    std::vector<StagePtr> targets = m_stageManager.FindStagesByDataKey(targetStageDataKey);
-    if (targets.size() != 1)
+    // ── 대상 Stage 해석 = 채널 선택 (정책은 StageManager::SelectChannel 에 일원화) ──
+    StagePtr spTarget = m_stageManager.SelectChannel(targetStageDataKey);
+    if (!spTarget)
     {
-        LOG_WRITE(LogLevel::Error, std::format("reroute - target stage resolve failed. accountId={} stageKey={} count={}",
-            accountId, targetStageDataKey, targets.size()));
+        LOG_WRITE(LogLevel::Error, std::format("reroute - target stage resolve failed. accountId={} stageKey={}",
+            accountId, targetStageDataKey));
         m_packetSender.SendStageMoveRes(accountId, EResultCode::Fail, "target stage not found", targetStageDataKey);
-        UserPtr removed; m_safeUsers.EraseAndGet(accountId, removed);
+        UserPtr removed; 
+        m_safeUsers.EraseAndGet(accountId, removed);
         co_return;
     }
-    StagePtr spTarget = targets[0];
 
     // ── 2단계 입장 시작 (로컬 이동과 동일). 도착 위치타입 보관 + Moving 전환 → 유저만 입장 ──
     spUser->SetPendingPositionType(positionType);

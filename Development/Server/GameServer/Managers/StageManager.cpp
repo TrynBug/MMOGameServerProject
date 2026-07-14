@@ -25,6 +25,7 @@ void StageManager::Clear()
     {
         std::lock_guard<std::mutex> lock(m_dataKeyIndexMutex);
         m_stageIdsByDataKey.clear();
+        m_nextChannelNoByDataKey.clear();
     }
 
     for (auto& [stageId, spStage] : snapshot)
@@ -36,7 +37,6 @@ void StageManager::Clear()
     }
 
     m_spSystemStage.reset();
-    m_spTown.reset();
 }
 
 SystemStagePtr StageManager::CreateSystemStage(int64 stageId, int32 stageDataKey)
@@ -76,9 +76,9 @@ TownPtr StageManager::CreateTown(int64 stageId, int32 stageDataKey)
     spStage->SetNavMesh(pNavMesh);
     if (!registerStage(stageId, stageDataKey, spStage))
         return nullptr;
-    m_spTown = spStage;
 
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} stageDataKey={}", stageId, stageDataKey));
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} stageDataKey={} channelNo={}",
+        stageId, stageDataKey, spStage->GetChannelNo()));
 
     return spStage;
 }
@@ -95,7 +95,8 @@ FieldPtr StageManager::CreateField(int64 stageId, int32 stageDataKey)
     if (!registerStage(stageId, stageDataKey, spStage))
         return nullptr;
 
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} stageDataKey={}", stageId, stageDataKey));
+    LOG_WRITE(LogLevel::Info, std::format("stageId={} stageDataKey={} channelNo={}",
+        stageId, stageDataKey, spStage->GetChannelNo()));
 
     return spStage;
 }
@@ -171,6 +172,15 @@ bool StageManager::registerStage(int64 stageId, int32 stageDataKey, const StageP
         return false;
     }
 
+    // 채널 번호 부여 (1-based, dataKey별 단조 증가)
+    // 조회 측이 채널 번호 없는 Stage를 보지 않도록 m_safeStages.Insert 전에 주입한다.
+    int32 channelNo = 0;
+    {
+        std::lock_guard<std::mutex> lock(m_dataKeyIndexMutex);
+        channelNo = ++m_nextChannelNoByDataKey[stageDataKey];
+    }
+    spStage->SetChannelNo(channelNo);
+
     GameServer::Instance().AssignContents(threadIdx, spStage);
 
     // 이 Stage에서 시작하는 DB 코루틴의 후속작업이 배정된 컨텐츠 스레드에서 재개되도록 resume executor 주입.
@@ -212,6 +222,39 @@ std::vector<StagePtr> StageManager::FindStagesByDataKey(int32 stageDataKey) cons
             stages.push_back(std::move(spStage));
     }
     return stages;
+}
+
+StagePtr StageManager::SelectChannel(int32 stageDataKey) const
+{
+    std::vector<StagePtr> channels = FindStagesByDataKey(stageDataKey);
+    if (channels.empty())
+        return nullptr;
+
+    // [v1] 아직 ChannelCount/ChannelSoftCap 게임데이터가 없어 채널은 dataKey당 1개뿐이다.
+    //      유저수가 가장 적은 채널(동점이면 번호가 작은 채널)을 고른다 — 채널이 1개면 그 채널을
+    //      그대로 고르는 것과 같으므로 이 단계에서는 동작이 바뀌지 않는다.
+    // [다음] ChannelSoftCap 도입 시 fill-first로 교체한다: 유저수 < softCap 인 채널 중 번호가 가장
+    //      작은 것을 고르고, 전부 캡 이상이면 아래 최소 유저수 채널로 폴백한다.
+    //      (최소 유저수만 보면 저인구에 유저가 전 채널로 흩어져 마을이 썰렁해진다.
+    //       fill-first는 부하가 있을 때만 분산한다.)
+    StagePtr spBest;
+    for (const StagePtr& spChannel : channels)
+    {
+        if (!spBest)
+        {
+            spBest = spChannel;
+            continue;
+        }
+
+        const int32 curCount  = spChannel->GetUserCountHint();
+        const int32 bestCount = spBest->GetUserCountHint();
+        if (curCount < bestCount ||
+            (curCount == bestCount && spChannel->GetChannelNo() < spBest->GetChannelNo()))
+        {
+            spBest = spChannel;
+        }
+    }
+    return spBest;
 }
 
 int32 StageManager::computeStageThreadIndex(int64 stageId) const

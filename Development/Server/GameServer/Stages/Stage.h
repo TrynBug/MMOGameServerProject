@@ -178,6 +178,15 @@ public:
     int32 	   GetStageDataKey() const { return m_pStageData->Key; }
 	const GameData_Stage* pGetStageData() const { return m_pStageData; }
 
+    // ── 채널 ────────────────────────────────────────────────
+    // 채널 = 같은 stageDataKey 를 갖는 Stage 인스턴스. 유저는 채널을 지정할 수 없고 StageManager::SelectChannel 이 배정한다.
+    int32 GetChannelNo() const { return m_channelNo; }
+    void  SetChannelNo(int32 channelNo) { m_channelNo = channelNo; }
+
+    // 채널 선택용 유저수 힌트. StageManager::SelectChannel 전용.
+    // 주의: m_users.size() 만 외부 스레드에서 읽기를 예외적으로 허용하고, find()/begin()/순회 등은 반드시 Stage 자신 스레드에서만 해야한다.
+    int32 GetUserCountHint() const { return static_cast<int32>(m_users.size()); }
+
     // 이 Stage가 배정된 컨텐츠 스레드의 resume executor (StageManager가 등록 시 주입, 소유하지 않음).
     // Stage에서 시작한 DB 코루틴의 후속작업을 이 Stage의 스레드에서 재개시키기 위해 ExecuteAsync에 넘긴다.
     void                 SetResumeExecutor(db::IResumeExecutor* p) { m_pResumeExecutor = p; }
@@ -590,6 +599,9 @@ private:
     EStageType m_stageType = EStageType::None;
 	const GameData_Stage* m_pStageData = nullptr;   // 현재 Stage의 데이터. 반드시 null이 아님.
 
+    // 같은 dataKey 내 채널 번호 (1-based). StageManager::registerStage 가 주입.
+    int32 m_channelNo = 1;
+
     // 배정된 컨텐츠 스레드의 resume executor (StageManager가 등록 시 주입). 소유하지 않음(스레드는 ServerBase 소유).
     db::IResumeExecutor* m_pResumeExecutor = nullptr;
 
@@ -629,6 +641,8 @@ private:
 
     // ── 유저 컨테이너 (컨텐츠 스레드 전용 접근) ──
     // Stage가 유저를 소유 (shared_ptr).
+    // 예외: size() 만 GetUserCountHint() 를 통해 외부 스레드가 읽는다(채널 선택). 근거·한계는 그 함수 주석 참조.
+    // 그 외 모든 접근(find/begin/순회/변경)은 반드시 이 Stage 의 컨텐츠 스레드에서만 한다.
     std::unordered_map<int64, UserPtr> m_users;
 
     // AOI 브로드캐스트 시 수신자 accountId 를 모으는 재사용 버퍼 (컨텐츠 스레드 전용, 호출마다 clear).
