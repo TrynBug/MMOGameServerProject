@@ -26,6 +26,8 @@ struct GameDataBase_Stage : public GameData
     std::string          ScriptName1          = "";
     std::string          ScriptName2          = "";
     std::string          ScriptName3          = "";
+    int32_t              ChannelCount         = 1;
+    int32_t              ChannelSoftCap       = 50;
 
     int32_t GetScriptNameCount() const { return 3; }
     std::string GetScriptName(int32_t index) const

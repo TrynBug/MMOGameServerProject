@@ -121,12 +121,11 @@ bool GameServer::OnInitialize()
         return false;
     }
 
-    const int64 townStageId = GenerateObjectId();
-    if (!m_stageManager.CreateTown(townStageId, k_townStageDataKey))
-    {
-        LOG_WRITE(LogLevel::Error, std::format("failed to create Town. stageId={}, stageKey={}", townStageId, k_townStageDataKey));
+    // Town/Field 는 GameData_Stage 의 ChannelCount 만큼 채널(=같은 dataKey 의 Stage 인스턴스)을 만든다.
+    // 채널은 클라에 비공개이며 StageManager::SelectChannel 이 유저를 배정한다.
+    // stageId 를 매번 새로 발급하므로 채널들이 서로 다른 컨텐츠 스레드에 배정된다(stageId % 스레드수).
+    if (!createStageChannels(k_townStageDataKey))
         return false;
-    }
 
     // Field 타입 Stage는 GameData_Stage 데이터 기준으로 전부 생성 (데이터 추가만으로 필드 확장).
     for (const auto& [stageDataKey, pStageData] : GameDataTable_Stage::GetDataMap())
@@ -134,15 +133,62 @@ bool GameServer::OnInitialize()
         if (pStageData->StageType != EStageType::Field)
             continue;
 
-        const int64 fieldStageId = GenerateObjectId();
-        if (!m_stageManager.CreateField(fieldStageId, stageDataKey))
+        if (!createStageChannels(stageDataKey))
+            return false;
+    }
+
+    LOG_WRITE(LogLevel::Info, std::format("complete. serverId={}", GetServerId()));
+    return true;
+}
+
+bool GameServer::createStageChannels(int32 stageDataKey)
+{
+    const GameData_Stage* pStageData = GameDataTable_Stage::FindData(stageDataKey);
+    if (!pStageData)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("createStageChannels - GameData_Stage not found. stageKey={}", stageDataKey));
+        return false;
+    }
+
+    // 오류체크: ChannelCount 가 0 이하면 그 Stage 로 아무도 입장할 수 없으므로 오류
+    const int32 channelCount = pStageData->ChannelCount;
+    if (channelCount <= 0)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("createStageChannels - invalid ChannelCount. stageKey={} channelCount={}",
+            stageDataKey, channelCount));
+        return false;
+    }
+
+    const EStageType stageType = pStageData->StageType;
+    for (int32 i = 0; i < channelCount; ++i)
+    {
+        const int64 stageId = GenerateObjectId();
+
+        bool created = false;
+        switch (stageType)
         {
-            LOG_WRITE(LogLevel::Error, std::format("failed to create Field. stageId={}, stageKey={}", fieldStageId, stageDataKey));
+        case EStageType::Town:  
+            created = (m_stageManager.CreateTown(stageId, stageDataKey) != nullptr);  
+            break;
+        case EStageType::Field: 
+            created = (m_stageManager.CreateField(stageId, stageDataKey) != nullptr); 
+            break;
+        default:
+            LOG_WRITE(LogLevel::Error, std::format("createStageChannels - unsupported stage type. stageKey={} stageType={}",
+                stageDataKey, static_cast<int32>(stageType)));
+            return false;
+        }
+
+        if (!created)
+        {
+            LOG_WRITE(LogLevel::Error, std::format("createStageChannels - failed. stageId={} stageKey={} channel={}/{}",
+                stageId, stageDataKey, i + 1, channelCount));
             return false;
         }
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("complete. serverId={}", GetServerId()));
+    LOG_WRITE(LogLevel::Info, std::format("createStageChannels - stageKey={} channelCount={} softCap={}",
+        stageDataKey, channelCount, pStageData->ChannelSoftCap));
     return true;
 }
 

@@ -99,6 +99,10 @@ protected:
     netlib::FuncEventHandler* GetInternalListenEventHandler() override { return &m_internalListenEventHandler; }
 
 private:
+    // 지정 Stage 의 채널을 GameData_Stage::ChannelCount 만큼 생성한다 (OnInitialize 전용).
+    // Town/Field 만 지원 — SystemStage 는 채널 개념이 없고(항상 1개), Dungeon 은 미구현.
+    bool createStageChannels(int32 stageDataKey);
+
     // ── 내부 서버 네트워크 이벤트 핸들러 (채팅서버 등이 게임서버로 connect) ─────
     bool onInternalAccept(const netlib::ISessionPtr& spSession);
     void onInternalDisconnect(const netlib::ISessionPtr& spSession);

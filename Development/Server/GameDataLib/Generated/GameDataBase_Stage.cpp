@@ -33,6 +33,8 @@ bool GameDataTableBase_Stage::makeGameData(const std::string& line)
     std::getline(ss, field, ','); pData->ScriptName1 = field;
     std::getline(ss, field, ','); pData->ScriptName2 = field;
     std::getline(ss, field, ','); pData->ScriptName3 = field;
+    std::getline(ss, field, ','); pData->ChannelCount = std::stoi(field);
+    std::getline(ss, field, ','); pData->ChannelSoftCap = std::stoi(field);
 
     if (pData->Key <= 0)
     {

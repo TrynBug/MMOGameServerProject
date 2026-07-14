@@ -226,35 +226,44 @@ std::vector<StagePtr> StageManager::FindStagesByDataKey(int32 stageDataKey) cons
 
 StagePtr StageManager::SelectChannel(int32 stageDataKey) const
 {
+    const GameData_Stage* pStageData = GameDataTable_Stage::FindData(stageDataKey);
+    if (!pStageData)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("SelectChannel - GameData_Stage not found. stageDataKey={}", stageDataKey));
+        return nullptr;
+    }
+    const int32 softCap = pStageData->ChannelSoftCap;
+
     std::vector<StagePtr> channels = FindStagesByDataKey(stageDataKey);
     if (channels.empty())
         return nullptr;
 
-    // [v1] 아직 ChannelCount/ChannelSoftCap 게임데이터가 없어 채널은 dataKey당 1개뿐이다.
-    //      유저수가 가장 적은 채널(동점이면 번호가 작은 채널)을 고른다 — 채널이 1개면 그 채널을
-    //      그대로 고르는 것과 같으므로 이 단계에서는 동작이 바뀌지 않는다.
-    // [다음] ChannelSoftCap 도입 시 fill-first로 교체한다: 유저수 < softCap 인 채널 중 번호가 가장
-    //      작은 것을 고르고, 전부 캡 이상이면 아래 최소 유저수 채널로 폴백한다.
-    //      (최소 유저수만 보면 저인구에 유저가 전 채널로 흩어져 마을이 썰렁해진다.
-    //       fill-first는 부하가 있을 때만 분산한다.)
-    StagePtr spBest;
+    // 정책: fill-first + 소프트캡.
+    //  - 유저수 < softCap 인 채널 중 번호가 가장 작은 것을 고른다. 유저가 얼마 없을때는 채널1 에만 모여서
+    //    채널이 1개인 것처럼 동작하고, soft cap을 넘겨야 채널2 로 입장한다.
+    //  - 전 채널이 softCap 이상이면 유저수가 가장 적은 채널로 입장한다.
+    StagePtr spFill;          // fill-first 후보: softCap 미만 중 최소 번호
+    StagePtr spLeast;         // 최소 유저 Stage(동점이면 최소 번호)
+    int32    leastCount = 0;
+
     for (const StagePtr& spChannel : channels)
     {
-        if (!spBest)
-        {
-            spBest = spChannel;
-            continue;
-        }
+        const int32 count     = spChannel->GetUserCountHint();
+        const int32 channelNo = spChannel->GetChannelNo();
 
-        const int32 curCount  = spChannel->GetUserCountHint();
-        const int32 bestCount = spBest->GetUserCountHint();
-        if (curCount < bestCount ||
-            (curCount == bestCount && spChannel->GetChannelNo() < spBest->GetChannelNo()))
+        if (count < softCap && (!spFill || channelNo < spFill->GetChannelNo()))
+            spFill = spChannel;
+
+        if (!spLeast || 
+            count < leastCount ||
+            (count == leastCount && channelNo < spLeast->GetChannelNo()))
         {
-            spBest = spChannel;
+            spLeast    = spChannel;
+            leastCount = count;
         }
     }
-    return spBest;
+
+    return spFill ? spFill : spLeast;
 }
 
 int32 StageManager::computeStageThreadIndex(int64 stageId) const
