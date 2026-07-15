@@ -59,6 +59,7 @@ enum GamePacketId {
     GAME_PACKET_ID_OBJECT_INTERACT_REQ     = 4014; // 클라 -> 서버: 오브젝트(prop) 상호작용 요청 (근접+키, 서버가 위치 검증 후 상태전이/OnObjectInteract)
     GAME_PACKET_ID_PROP_STATE_NTF          = 4015; // 서버 -> 클라: prop 상태 변경 알림 (상호작용/스크립트로 상태 전이 시 AOI broadcast)
     GAME_PACKET_ID_OBJECT_REVIVE_NTF       = 4016; // 서버 -> 클라: 오브젝트 부활 알림 (사망 해제 + 위치/자원 복원 + 애니 복귀). ObjectDeathNtf 의 짝.
+    GAME_PACKET_ID_OBJECT_INTERACT_RES     = 4017; // 서버 -> 클라: prop 상호작용 요청 결과 (실패 사유 전달. 성공 시 상태변화는 PropStateNtf, 포탈이동은 StageMoveRes 로 별도 통보)
 
     // 5000~5999: 던전
     GAME_PACKET_ID_PUBLIC_DUNGEON_LIST_REQ  = 5001;   // 클라 -> 서버: 공용던전 목록 요청

@@ -105,3 +105,15 @@ message ObjectInteractReq {
     float pos_y     = 3;
     float pos_z     = 4;
 }
+
+// ──────────────────────────────────────────────
+// 오브젝트(prop) 상호작용 요청 결과 (서버 -> 클라)
+// ──────────────────────────────────────────────
+// result_code 는 EResultCode (1=Success, 2=Fail).
+// 실패 사유(사거리/쿨다운/한도/포탈 목적지 오류 등)를 error_msg 로 돌려준다. 
+// 성공 시 상태 변화는 PropStateNtf 로, 포탈 이동은 StageMoveRes 로 각각 별도 통보된다.
+message ObjectInteractRes {
+    int32 result_code = 1;   // EResultCode 값
+    string error_msg  = 2;   // 실패 사유 (성공 시 빈 문자열)
+    int64 object_id   = 3;   // 요청 대상 prop 의 ObjectId (클라 매칭용)
+}
