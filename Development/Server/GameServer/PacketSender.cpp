@@ -174,6 +174,16 @@ void PacketSender::SendPropStateNtf(std::span<const int64> accountIds, int64 obj
         accountIds.size(), objectId, state, actorObjectId));
 }
 
+void PacketSender::SendObjectInteractRes(int64 accountId, EResultCode resultCode, const std::string& errorMsg, int64 objectId)
+{
+    GamePacket::ObjectInteractRes res;
+    res.set_result_code(static_cast<int32>(resultCode));
+    res.set_error_msg(errorMsg);
+    res.set_object_id(objectId);
+
+    SendToUser(accountId, Common::GAME_PACKET_ID_OBJECT_INTERACT_RES, res);
+}
+
 void PacketSender::SendMovePosCorrectNtf(int64 accountId, float posX, float posY, float posZ, float yaw)
 {
     GamePacket::MovePosCorrectNtf ntf;

@@ -86,6 +86,10 @@ public:
     // actorObjectId: 상호작용을 유발한 액터(없으면 0, 예: 스크립트 SetPropState).
     void SendPropStateNtf(std::span<const int64> accountIds, int64 objectId, int32 state, int64 actorObjectId);
 
+    // prop 상호작용 요청 결과 전송 (ObjectInteractRes). 요청한 유저에게만 unicast.
+    // 실패 사유를 클라가 알 수 있게 해 배치/데이터 오류(목적지 없음, 사거리, 쿨다운 등)를 자가진단 가능하게 한다.
+    void SendObjectInteractRes(int64 accountId, EResultCode resultCode, const std::string& errorMsg, int64 objectId);
+
     // 위치 보정 알림 전송 (MovePosCorrectNtf). 서버가 클라/서버 위치 오차가 크다고 판단했을 때 unicast.
     void SendMovePosCorrectNtf(int64 accountId, float posX, float posY, float posZ, float yaw);
 

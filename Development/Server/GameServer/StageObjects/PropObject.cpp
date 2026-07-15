@@ -38,13 +38,22 @@ PropObject::InteractResult PropObject::TryInteract(int64 nowMs)
 
     // ── 게이팅 ──────────────────────────────────────────────
     if (!IsInteractable())                                   // 데이터 미설정 / Interactable=false / 디스폰 예약됨
+    {
+        result.reject = ERejectReason::NotInteractable;
         return result;
+    }
 
     if (m_pPropData->MaxInteract > 0 && m_interactCount >= m_pPropData->MaxInteract)
-        return result;                                       // 상호작용 횟수 한도 초과
+    {
+        result.reject = ERejectReason::MaxReached;           // 상호작용 횟수 한도 초과
+        return result;
+    }
 
     if (m_pPropData->CooldownMs > 0 && nowMs < m_cooldownUntilMs)
-        return result;                                       // 쿨다운 중
+    {
+        result.reject = ERejectReason::Cooldown;             // 쿨다운 중
+        return result;
+    }
 
     // ── 수락 ────────────────────────────────────────────────
     result.accepted = true;

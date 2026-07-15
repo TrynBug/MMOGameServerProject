@@ -794,11 +794,14 @@ void Stage::broadcastPropState(const PropObject& prop, int64 actorObjectId)
         GameServer::Instance().GetPacketSender().SendPropStateNtf(recipients, prop.GetObjectId(), prop.GetState(), actorObjectId);
 }
 
-void Stage::triggerPropBehavior(const PropObject& prop, const UserPtr& spUser, const CharacterPtr& spCharacter)
+bool Stage::triggerPropBehavior(const PropObject& prop, const UserPtr& spUser, const CharacterPtr& spCharacter, std::string& outError)
 {
     const GameData_Prop* pData = prop.GetPropData();
     if (!pData)
-        return;
+    {
+        outError = "prop data missing";
+        return false;
+    }
 
     switch (pData->Behavior)
     {
@@ -816,14 +819,16 @@ void Stage::triggerPropBehavior(const PropObject& prop, const UserPtr& spUser, c
         {
             LOG_WRITE(LogLevel::Warn, std::format("portal prop without target stage. stageId={} propObjectId={} placementKey={}",
                 m_stageId, prop.GetObjectId(), prop.GetPlacementKey()));
-            return;
+            outError = std::format("portal has no target stage (placementKey={})", prop.GetPlacementKey());
+            return false;
         }
 
         // 이동 가드: 전환 중복/async 진행 중이면 스킵(클라 재시도).
         if (spUser->GetStageState() != EUserStageState::InStage || spCharacter->HasPendingAsync())
         {
             LOG_WRITE(LogLevel::Warn, std::format("portal move skipped (busy). stageId={} accountId={}", m_stageId, spUser->GetAccountId()));
-            return;
+            outError = "busy (stage transition in progress)";
+            return false;
         }
 
         // v1: 같은 서버 이동만 지원. executeLocalStageMove 가 성공 시 StageMoveRes(성공)까지 송신한다.
@@ -832,12 +837,14 @@ void Stage::triggerPropBehavior(const PropObject& prop, const UserPtr& spUser, c
         {
             LOG_WRITE(LogLevel::Warn, std::format("portal move failed. stageId={} accountId={} targetStageKey={} reason={}",
                 m_stageId, spUser->GetAccountId(), targetStageKey, failReason));
+            outError = std::format("portal move failed (targetStageKey={}): {}", targetStageKey, failReason);
+            return false;
         }
-        break;
+        return true;
     }
     case EPropBehavior::None:
     default:
-        break;
+        return true;   // 할 일 없음 = 성공
     }
 }
 
@@ -1848,18 +1855,29 @@ void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketP
     const int64 accountId = spUser->GetAccountId();
     const int64 objectId  = req.object_id();
 
+    // 실패는 모두 ObjectInteractRes 로 사유를 돌려준다. (로그만 남기면 클라는 "눌렀는데 무반응" 만 보게 되어
+    // 프리팹 누락 / 사거리 / 쿨다운 / 목적지 오류를 구분할 수 없다.)
+    auto fail = [&](const std::string& reason)
+    {
+        GameServer::Instance().GetPacketSender().SendObjectInteractRes(accountId, EResultCode::Fail, reason, objectId);
+    };
+
     // 1) 유효 prop 엔티티인지(이 Stage 에 존재).
     PropObject* pProp = FindProp(objectId);
     if (!pProp)
     {
         LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq unknown prop. stageId={} accountId={} objectId={}",
             m_stageId, accountId, objectId));
+        fail("prop not found in this stage");
         return;
     }
 
     CharacterPtr spCharacter = spUser->GetCurrentCharacter();
     if (!spCharacter || spCharacter->GetStage() != this)
+    {
+        fail("character not in this stage");
         return;
+    }
 
     // 2) 검증 (EventArea 와 동일 결) — 보고 위치가 prop 상호작용 범위 안인지 + 권위 위치와의 괴리 제한.
     const float rx = req.pos_x();
@@ -1877,6 +1895,7 @@ void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketP
     {
         LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq out of range. stageId={} accountId={} objectId={}",
             m_stageId, accountId, objectId));
+        fail(std::format("out of range (reach={:.1f}m)", reach));
         return;
     }
 
@@ -1889,13 +1908,24 @@ void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketP
     {
         LOG_WRITE(LogLevel::Warn, std::format("ObjectInteractReq reported pos too far from authoritative. stageId={} accountId={} objectId={}",
             m_stageId, accountId, objectId));
+        fail("reported position mismatch");
         return;
     }
 
     // 3) 상태머신 전이(데이터 기반, 서버 권위). 게이팅(Interactable/MaxInteract/쿨다운) 미통과면 무시.
     const PropObject::InteractResult result = pProp->TryInteract(m_stageClockMs);
     if (!result.accepted)
-        return;   // 한도초과/쿨다운/비상호작용 — 조용히 무시(클라가 재시도 가능).
+    {
+        // 한도초과/쿨다운/비상호작용 — 상태는 안 바뀌지만 사유는 알려준다(클라 재시도 판단용).
+        switch (result.reject)
+        {
+        case PropObject::ERejectReason::NotInteractable: fail("not interactable"); break;
+        case PropObject::ERejectReason::MaxReached:      fail("max interact count reached"); break;
+        case PropObject::ERejectReason::Cooldown:        fail("on cooldown"); break;
+        default:                                         fail("interact rejected"); break;
+        }
+        return;
+    }
 
     const int64 actorObjectId = spCharacter->GetObjectId();
 
@@ -1904,8 +1934,16 @@ void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketP
         broadcastPropState(*pProp, actorObjectId);
 
     // 5) 선언형 동작(Portal 등) 발동. (Portal 은 Stage 이동을 일으키므로 이후 스크립트/디스폰보다 먼저.)
+    //    동작 실패해도 상태전이는 이미 일어났으므로 스크립트 훅은 기존대로 태운다. Res 만 실패로 보고.
+    std::string behaviorError;
+    bool behaviorOk = true;
     if (pProp->GetBehavior() != EPropBehavior::None)
-        triggerPropBehavior(*pProp, spUser, spCharacter);
+        behaviorOk = triggerPropBehavior(*pProp, spUser, spCharacter, behaviorError);
+
+    if (behaviorOk)
+        GameServer::Instance().GetPacketSender().SendObjectInteractRes(accountId, EResultCode::Success, "", objectId);
+    else
+        fail(behaviorError);
 
     // 6) 효과(게임플레이) 스크립트 훅. 배치키(placementKey)로 분기, 전이 후 상태(newState) 전달.
     if (m_pScript)

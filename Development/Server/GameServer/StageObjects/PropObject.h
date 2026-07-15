@@ -60,11 +60,21 @@ public:
     // ── 상호작용 ──────────────────────────────────────────────
     // 상호작용 1회 시도. 게이팅(Interactable / MaxInteract / 쿨다운) 통과 시 accepted=true 이며
     // StateMode 에 따라 상태를 전이한다. nowMs 는 Stage 단조시계(쿨다운 판정 기준).
+    // 게이팅 거부 사유. accepted=false 일 때만 유효.
+    enum class ERejectReason
+    {
+        None = 0,          // 거부 아님(accepted=true)
+        NotInteractable,   // 데이터 미설정 / Interactable=false / 디스폰 예약됨
+        MaxReached,        // MaxInteract 한도 초과
+        Cooldown,          // 쿨다운 중
+    };
+
     struct InteractResult
     {
         bool  accepted     = false;   // 게이팅 통과(상호작용 허용). false 면 무시(거짓보고/한도초과/쿨다운).
         bool  stateChanged = false;   // 상태가 실제로 바뀜 → PropStateNtf 송신 필요.
         int32 newState     = 0;       // 전이 후 상태(= GetState()).
+        ERejectReason reject = ERejectReason::None;   // accepted=false 일 때의 사유.
     };
     InteractResult TryInteract(int64 nowMs);
 

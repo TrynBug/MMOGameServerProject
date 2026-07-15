@@ -552,7 +552,8 @@ private:
 
     // prop 의 선언형 동작(Behavior=Portal 등)을 발동한다. 상호작용이 수락된 직후 호출.
     // 같은 서버 Stage 이동만 지원(v1). 목적지는 데이터 PortalStageKey(placement param0 override).
-    void triggerPropBehavior(const PropObject& prop, const UserPtr& spUser, const CharacterPtr& spCharacter);
+    // 실패 시 false + outError(클라 ObjectInteractRes 로 전달). Behavior=None 은 할 일이 없으므로 true.
+    bool triggerPropBehavior(const PropObject& prop, const UserPtr& spUser, const CharacterPtr& spCharacter, std::string& outError);
 
     // 진행 중인 스킬 효과(AreaEffect)들을 tick 하고 만료된 것을 제거한다. OnUpdate 에서 매 tick 호출.
     void updateSkillEffects(int64 deltaMs);

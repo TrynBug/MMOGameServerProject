@@ -75,6 +75,7 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<ActorActionNtf>(GamePacketId.ActorActionNtf, onActorActionNtf);
             PacketDispatcher.Instance.Register<StageNoticeNtf>(GamePacketId.StageNoticeNtf, onStageNoticeNtf);
             PacketDispatcher.Instance.Register<PropStateNtf>(GamePacketId.PropStateNtf, onPropStateNtf);
+            PacketDispatcher.Instance.Register<ObjectInteractRes>(GamePacketId.ObjectInteractRes, onObjectInteractRes);
 
             // 이벤트영역 진입/이탈 감지기(로컬 플레이어 위치로 매 프레임 판정 → Req 송신).
             gameObject.AddComponent<EventAreaDetector>();
@@ -376,6 +377,19 @@ namespace Client.Game
                 prop.SetState(ntf.State);
                 Debug.Log($"[StageManager] PropStateNtf: objectId={ntf.ObjectId} state={ntf.State}");
             }
+        }
+
+        // prop 상호작용 결과
+        // 성공 시 상태변화는 PropStateNtf, 포탈 이동은 StageMoveRes 로 각각 따로 온다.
+        private void onObjectInteractRes(ObjectInteractRes res)
+        {
+            if ((EResultCode)res.ResultCode != EResultCode.Success)
+            {
+                Debug.LogWarning($"[StageManager] ObjectInteractRes 실패: {res.ErrorMsg} (objectId={res.ObjectId})");
+                return;
+            }
+
+            Debug.Log($"[StageManager] ObjectInteractRes OK. objectId={res.ObjectId}");
         }
 
         // 오브젝트 사망 알림. 해당 액터를 사망 상태로 전환한다(이동 정지 + 사망 애니메이션).
