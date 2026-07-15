@@ -24,8 +24,7 @@ public:
 protected:
     void OnStageUpdate(int64 deltaMs) override;
 
-    // 마을 시작 시 1회 호출. [임시] 테스트용 몬스터를 하드코딩으로 스폰한다.
-    // (추후 스폰 데이터 테이블/스포너 시스템으로 대체 예정.)
+    // 마을 시작 시 1회 호출.
     void OnStart() override;
 };
 

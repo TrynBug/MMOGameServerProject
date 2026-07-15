@@ -45,7 +45,10 @@ class ActorObject;
 // 코루틴 resume executor 전방선언 (포인터 멤버/접근자에만 사용).
 namespace db { class IResumeExecutor; }
 
+// Stage 클래스
 class Stage;
+using StagePtr  = std::shared_ptr<Stage>;
+using StageWPtr = std::weak_ptr<Stage>;
 
 // 코루틴 후속작업 동안 Stage와 (선택적으로) Character를 고정하는 RAII 핀.
 //   - 생성: 코루틴 prologue(첫 co_await 이전, Stage 스레드)에서 카운터 증가.
@@ -182,6 +185,13 @@ public:
     // 채널 = 같은 stageDataKey 를 갖는 Stage 인스턴스. 유저는 채널을 지정할 수 없고 StageManager::SelectChannel 이 배정한다.
     int32 GetChannelNo() const { return m_channelNo; }
     void  SetChannelNo(int32 channelNo) { m_channelNo = channelNo; }
+
+    // 이 Stage 와 같은 stageDataKey 의 지정 채널로 유저를 옮긴다. 실패 시 false + 사유(outFailReason).
+    // 퇴장 가드(canLeaveStage)와 실제 이동(moveUserToStage)은 스테이지 이동과 동일한 함수를 쓰므로,
+    // 클라 입장에서는 일반 스테이지 이동과 똑같이 보인다(2단계 입장 골격 공유).
+    // 채널 배정은 원래 StageManager::SelectChannel 에서 자동으로 하지만, 이 함수는 치트 등에서 채널을 명시적으로 지정해야 할때 사용함.
+    // 스레드: 이 Stage 의 컨텐츠 스레드에서만 호출할 것 (canLeaveStage/OnUserLeave 가 그 전제).
+    bool MoveToChannel(const UserPtr& spUser, int32 targetChannelNo, std::string& outFailReason);
 
     // 채널 선택용 유저수 힌트. StageManager::SelectChannel 전용.
     // 주의: m_users.size() 만 외부 스레드에서 읽기를 예외적으로 허용하고, find()/begin()/순회 등은 반드시 Stage 자신 스레드에서만 해야한다.
@@ -488,6 +498,12 @@ protected:
                                int32 targetStageDataKey, EStagePositionType positionType,
                                std::string& outFailReason);
 
+    // 대상 Stage 가 이미 확정된 뒤의 이동 실행부 (타입/도착위치 검증 + 퇴장 + 대상 입장 + 성공 Res).
+    // executeLocalStageMove 가 채널을 고른 뒤 호출한다.
+    // 호출 전에 canLeaveStage 를 통과시켜야 하는 것은 호출부 책임.
+    bool moveUserToStage(const UserPtr& spUser, const StagePtr& spTarget,
+                         EStagePositionType positionType, std::string& outFailReason);
+
     // 클라 맵 로딩 완료 보고. target Stage(=this)의 컨텐츠 스레드에서 실행된다.
     // Moving 상태의 유저면 spawnPendingCharacter로 스폰한다.
     void handleStageLoadCompleteReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
@@ -697,5 +713,3 @@ private:
     std::vector<std::unique_ptr<MonsterProjectile>> m_monsterProjectiles;
 };
 
-using StagePtr  = std::shared_ptr<Stage>;
-using StageWPtr = std::weak_ptr<Stage>;

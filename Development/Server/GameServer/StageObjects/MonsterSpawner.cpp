@@ -133,6 +133,9 @@ bool MonsterSpawner::isActive(const ActiveSpawner& s) const
 
 bool MonsterSpawner::isPlayerNear(const ActiveSpawner& s) const
 {
+    if (m_pStage->GetUserCountHint() == 0)
+        return false;
+
     int32 cx = 0, cz = 0;
     if (!m_pStage->GetSectorIndex(s.centerX, s.centerZ, cx, cz))
         return false;

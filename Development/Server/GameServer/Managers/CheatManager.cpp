@@ -17,6 +17,7 @@ CheatManager::CheatManager()
         { "netdelay",     &CheatManager::cheatNetDelay },
         { "savechar",     &CheatManager::cheatSaveChar },
 #ifdef _DEBUG
+        { "channel",      &CheatManager::cheatChannel },
         { "dbgstat",      &CheatManager::cheatDbgStat },
         { "dbgmon",       &CheatManager::cheatDbgMon  },
 #endif
@@ -124,6 +125,48 @@ CheatResult CheatManager::cheatSaveChar(Stage& stage, const UserPtr& spUser,
 
     GameServer::Instance().SaveCharacterFromStage(&stage, spChar);
     return { true, "savechar launched. check server logs for [savechar] lines." };
+}
+
+// channel [no]: 인자 없으면 채널 현황 보고, 번호를 주면 그 채널로 이동.
+// 채널은 클라에 비공개 + fill-first 자동 배정이라, 저인구 개발환경에서는 전원이 채널1 로만 들어간다.
+// 채널이 실제로 갈라지는지(다른 채널 유저가 서로 안 보이는지) 확인하려면 강제 이동 수단이 있어야 한다.
+CheatResult CheatManager::cheatChannel(Stage& stage, const UserPtr& spUser,
+                                       const std::vector<std::string>& args)
+{
+    if (!spUser)
+        return { false, "no user context" };
+
+    const int32 stageDataKey = stage.GetStageDataKey();
+
+    // 인자 없음 → 현황 보고.
+    if (args.empty())
+    {
+        std::vector<StagePtr> channels = GameServer::Instance().GetStageManager().FindStagesByDataKey(stageDataKey);
+
+        // 채널 번호 순으로 보여준다 (FindStagesByDataKey 는 순서를 보장하지 않는다).
+        std::sort(channels.begin(), channels.end(),
+            [](const StagePtr& a, const StagePtr& b) { return a->GetChannelNo() < b->GetChannelNo(); });
+
+        std::string msg = std::format("stageKey={} myChannel={} channels={}",
+            stageDataKey, stage.GetChannelNo(), channels.size());
+        for (const StagePtr& spChannel : channels)
+        {
+            msg += std::format("\n  ch{}: users={} stageId={}{}",
+                spChannel->GetChannelNo(), spChannel->GetUserCountHint(), spChannel->GetStageId(),
+                (spChannel.get() == &stage) ? "  <- me" : "");
+        }
+        return { true, msg };
+    }
+
+    const int32 targetChannelNo = std::atoi(args[0].c_str());
+    if (targetChannelNo <= 0)
+        return { false, std::format("invalid channel no: {}", args[0]) };
+
+    std::string failReason;
+    if (!stage.MoveToChannel(spUser, targetChannelNo, failReason))
+        return { false, failReason };
+
+    return { true, std::format("moving to channel {} (stageKey={})", targetChannelNo, stageDataKey) };
 }
 
 // 공통 토글: 현재 모드가 level 이면 끄고(None), 아니면 level 로 켠다.

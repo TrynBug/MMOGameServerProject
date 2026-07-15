@@ -1006,8 +1006,8 @@ void Stage::OnUserEnter(const UserPtr& spUser)
     // 유저가 Moving 상태로 pendingCharacter를 들고 있으면, 클라의 StageLoadCompleteReq
     // 수신 시 spawnPendingCharacter가 스폰한다. SystemStage는 캐릭터가 없으므로 여기서 끝.
     // 스크립트 OnPlayerEnter 콜백은 세션 입장이 아니라 캐릭터 스폰 완료 후(spawnPendingCharacter)에 발동한다.
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} accountId={} stageState={} totalUsers={}",
-        m_stageId, accountId, static_cast<int32>(spUser->GetStageState()), m_users.size()));
+    LOG_WRITE(LogLevel::Info, std::format("stageId={}(ch{}) accountId={} stageState={} totalUsers={}",
+        m_stageId, m_channelNo, accountId, static_cast<int32>(spUser->GetStageState()), m_users.size()));
 }
 
 void Stage::spawnPendingCharacter(const UserPtr& spUser)
@@ -1258,8 +1258,8 @@ void Stage::OnUserLeave(int64 accountId)
 
     m_users.erase(iter);
 
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} accountId={} totalUsers={} totalObjects={}",
-        m_stageId, accountId, m_users.size(), m_objects.size()));
+    LOG_WRITE(LogLevel::Info, std::format("stageId={}(ch{}) accountId={} totalUsers={} totalObjects={}",
+        m_stageId, m_channelNo, accountId, m_users.size(), m_objects.size()));
 
     // 스크립트 OnPlayerLeave 콜백 — 스폰됐던 캐릭터의 objectId. 캐릭터 없이 떠난 경우 0.
     if (m_pScript)
@@ -1550,6 +1550,16 @@ bool Stage::executeLocalStageMove(const UserPtr& spUser, const CharacterPtr& spC
         return false;
     }
 
+    return moveUserToStage(spUser, spTarget, positionType, outFailReason);
+}
+
+bool Stage::moveUserToStage(const UserPtr& spUser, const StagePtr& spTarget,
+                            EStagePositionType positionType, std::string& outFailReason)
+{
+    GameServer& server = GameServer::Instance();
+    const int64 accountId = spUser->GetAccountId();
+    const int32 targetStageDataKey = spTarget->GetStageDataKey();
+
     const EStageType targetType = spTarget->GetStageType();
     if (targetType != EStageType::Town && targetType != EStageType::Field)
     {
@@ -1583,6 +1593,39 @@ bool Stage::executeLocalStageMove(const UserPtr& spUser, const CharacterPtr& spC
         accountId, m_stageId, m_channelNo, spTarget->GetStageId(), spTarget->GetChannelNo(),
         targetStageDataKey, static_cast<int32>(positionType)));
     return true;
+}
+
+bool Stage::MoveToChannel(const UserPtr& spUser, int32 targetChannelNo, std::string& outFailReason)
+{
+    if (targetChannelNo == m_channelNo)
+    {
+        outFailReason = std::format("already in channel {}", targetChannelNo);
+        return false;
+    }
+
+    // 스테이지 이동과 동일한 퇴장 가드 (InStage + 이 Stage 소속 + async 미진행).
+    CharacterPtr spCharacter;
+    if (!canLeaveStage(spUser, spCharacter, outFailReason))
+        return false;
+
+    // 같은 dataKey 의 채널 중 번호가 일치하는 것을 찾는다.
+    StagePtr spTarget;
+    for (const StagePtr& spChannel : GameServer::Instance().GetStageManager().FindStagesByDataKey(GetStageDataKey()))
+    {
+        if (spChannel->GetChannelNo() == targetChannelNo)
+        {
+            spTarget = spChannel;
+            break;
+        }
+    }
+    if (!spTarget)
+    {
+        outFailReason = std::format("channel {} not found in stageKey={}", targetChannelNo, GetStageDataKey());
+        return false;
+    }
+
+    // 맵은 같지만 클라는 일반 스테이지 이동과 똑같이 재로딩한다(2단계 입장 골격 공유). 도착은 기본 스폰 위치.
+    return moveUserToStage(spUser, spTarget, EStagePositionType::Default, outFailReason);
 }
 
 void Stage::handleStageLoadCompleteReq(const UserPtr& spUser, const netlib::PacketPtr& /*spPacket*/)
