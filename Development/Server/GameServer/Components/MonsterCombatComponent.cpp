@@ -255,6 +255,9 @@ void MonsterCombatComponent::executeSkill(int32 index, StageObject* pTarget)
         EffectParams p = BakeSkillEffectParams(*pSkill, EObjectType::Monster, m_pOwner->GetObjectId(), origin, dir, /*seed*/ 0);
         p.damageAmount = skill.damage;   // 스탯 결합 대미지(Initialize 계산)로 덮어쓴다 (bake 는 DamageCoeff flat).
         pStage->SpawnSkillAreaEffect(p);
+        // 발동 통보 → 다른 클라(플레이어)/몬스터들이 EffectPrefabPath VFX 를 발동 시점에 재현한다.
+        // (대미지는 서버 AreaEffect 가 SkillDamageNtf 로 구동. 이 Ntf 는 비주얼 전용.)
+        pStage->BroadcastSkillCastNtf(*m_pOwner, skill.skillId, /*effectId*/ 0, origin, dir, /*seed*/ 0, /*moveDistance*/ 0.0f);
         return;
     }
 

@@ -12,7 +12,7 @@ namespace Client.Game
     // ※ 임시 비주얼: 프리미티브(원=Cylinder, OBB=Cube) + 단색. 아트가 붙으면 데칼 prefab 으로 교체 예정.
     public class MonsterTelegraph : MonoBehaviour
     {
-        private const float k_groundY   = 0.02f;   // z-fighting 방지용 약간 띄움
+        private const float k_groundLift = 0.02f;   // z-fighting 방지용 지면에서 살짝 띄우는 높이
         private const float k_thickness = 0.05f;   // 바닥 데칼 두께(Y)
         private const float k_startFill = 0.15f;   // 시작 채움 비율
 
@@ -43,7 +43,7 @@ namespace Client.Game
             }
 
             GameObject root = new GameObject("MonsterTelegraph");
-            root.transform.position = new Vector3(origin.x, k_groundY, origin.z);
+            root.transform.position = new Vector3(origin.x, origin.y + k_groundLift, origin.z);
             if (dir.sqrMagnitude > 0.0001f)
                 root.transform.rotation = Quaternion.LookRotation(new Vector3(dir.x, 0f, dir.z));
 

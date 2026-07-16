@@ -109,12 +109,21 @@ namespace Client.Game
 
         // 서버 AbilityCastNtf 수신 시 호출(SkillSystem). 시전 방향으로 즉시 회전 + 윈드업 모션 재생.
         // 텔레그래프(바닥 예고)는 SkillSystem 이 별도로 spawn 한다(월드 고정 오브젝트라 몬스터에 붙이지 않음).
-        public void PlayAbilityCast(Vector3 dir)
+        //
+        // skill 의 CastAnim 이 지정돼 있으면 그 상태를 재생한다(보스처럼 스킬마다 모션이 다른 경우).
+        // 비어있으면 기존대로 공용 공격 모션(PlaySkill)
+        public void PlayAbilityCast(Vector3 dir, GameData_Skill skill = null)
         {
             if (dir.sqrMagnitude > 0.0001f)
                 transform.rotation = Quaternion.LookRotation(new Vector3(dir.x, 0f, dir.z));
 
-            m_actorAnimator?.PlaySkill();
+            if (m_actorAnimator == null)
+                return;
+
+            if (skill != null && !string.IsNullOrEmpty(skill.CastAnim))
+                m_actorAnimator.PlayOneShot(skill.CastAnim, cancelOnMove: false);
+            else
+                m_actorAnimator.PlaySkill();
         }
 
         // 피격 반응 애니메이션. 드라이버(AnimatorActorAnimator)가 'Locomotion 중 + 쓰로틀' 게이트를 적용한다.

@@ -632,13 +632,10 @@ namespace Client.Game
             if (caster is MonsterObject monster)
             {
                 // 몬스터/NPC: 윈드업 모션 + 회전 + 바닥 텔레그래프(예고).
-                monster.PlayAbilityCast(dir);
-                if (ntf.WindupMs > 0)
-                {
-                    GameData_Skill skill = GameDataTable_Skill.FindData(ntf.SkillKey);
-                    if (skill != null)
-                        MonsterTelegraph.Spawn(skill, new Vector3(ntf.OriginX, ntf.OriginY, ntf.OriginZ), dir, ntf.WindupMs);
-                }
+                GameData_Skill skill = GameDataTable_Skill.FindData(ntf.SkillKey);
+                monster.PlayAbilityCast(dir, skill);
+                if (ntf.WindupMs > 0 && skill != null)
+                    MonsterTelegraph.Spawn(skill, new Vector3(ntf.OriginX, ntf.OriginY, ntf.OriginZ), dir, ntf.WindupMs);
             }
             else if (caster is PlayerCharacter player)
             {
