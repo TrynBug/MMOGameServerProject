@@ -12,7 +12,7 @@ void Sector::AddObject(StageObject* pObject)
 
     switch (objectType)
     {
-    case EObjectType::User:
+    case EObjectType::Character:
         m_users[objectId] = pObject;
         break;
     case EObjectType::Monster:
@@ -40,7 +40,7 @@ void Sector::RemoveObject(StageObject* pObject)
 
     switch (objectType)
     {
-    case EObjectType::User:
+    case EObjectType::Character:
         m_users.erase(objectId);
         break;
     case EObjectType::Monster:

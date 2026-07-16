@@ -272,7 +272,7 @@ void MonsterCombatComponent::executeSkill(int32 index, StageObject* pTarget)
     }
 
     // ── None: 커밋된 단일 대상에 직격 (형태/투사체 없는 단순 공격).
-    if (pTarget == nullptr || pTarget->GetObjectType() != EObjectType::User)
+    if (pTarget == nullptr || pTarget->GetObjectType() != EObjectType::Character)
         return;
     ActorObject* pTargetActor = static_cast<ActorObject*>(pTarget);
     if (pTargetActor->IsDead())

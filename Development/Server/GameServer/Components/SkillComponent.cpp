@@ -45,9 +45,9 @@ void SkillComponent::TryCast(int32 skillKey, const Vector3& origin, const Vector
     m_prevEnd           = origin;
 
     // 플레이어 시전 "시작"을 AOI 에 통보(윈드업 모션). 관전자 클라는 onAbilityCastNtf 에서 시전자 PlayCast 를 재생한다.
-    // - 몬스터는 별도 경로(MonsterCombatComponent)가 이미 AbilityCastNtf 를 보내므로 여기서는 User(플레이어)만.
+    // - 몬스터는 별도 경로(MonsterCombatComponent)가 이미 AbilityCastNtf 를 보내므로 여기서는 Character(플레이어)만.
     // - CastDelay(윈드업 구간)가 있는 스킬만. 발동 모션은 CastDelay 경과 후 BroadcastSkillCastNtf 가 트리거한다.
-    if (m_pOwner->GetObjectType() == EObjectType::User && pSkill->CastDelayMs > 0)
+    if (m_pOwner->GetObjectType() == EObjectType::Character && pSkill->CastDelayMs > 0)
     {
         if (Stage* pStage = m_pOwner->GetStage())
             pStage->BroadcastAbilityCastNtf(*m_pOwner, skillKey, /*targetObjectId*/ 0,

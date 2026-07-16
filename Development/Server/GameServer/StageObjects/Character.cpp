@@ -15,7 +15,7 @@ namespace
 
 bool Character::Initialize(const DataStructures::Character& protoData)
 {
-    if (!ActorObject::Initialize(protoData.character_id(), EObjectType::User))
+    if (!ActorObject::Initialize(protoData.character_id(), EObjectType::Character))
         return false;
 
     m_protoData = protoData;

@@ -31,11 +31,12 @@ std::string JobToString(EJob v);
 enum class EObjectType : int
 {
     None                 = 0,
-    User                 = 1,  // 유저
+    Character            = 1,  // 캐릭터
     Monster              = 2,  // 몬스터
     Prop                 = 3,  // 프랍
     Drop                 = 4,  // 드롭아이템
     EventArea            = 5,  // 이벤트영역
+    NPC                  = 6,  // NPC
     Max                 
 };
 

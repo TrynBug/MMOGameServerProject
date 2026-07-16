@@ -1982,7 +1982,7 @@ void Stage::processUserPackets()
 void Stage::updateCharacters(int64 deltaMs)
 {
     // m_characterObjects의 모든 Character를 이동 시뮬레이션 한 다음 sector 소속 갱신.
-    // 현재 m_characterObjects에 들어가는 객체는 모두 Character (EObjectType::User)이므로 static_cast 안전.
+    // 현재 m_characterObjects에 들어가는 객체는 모두 Character (EObjectType::Character)이므로 static_cast 안전.
     for (auto& [objectId, spObject] : m_characterObjects)
     {
         Character* pCharacter = static_cast<Character*>(spObject.get());

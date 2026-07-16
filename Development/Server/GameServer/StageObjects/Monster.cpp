@@ -176,9 +176,9 @@ void Monster::OnDamagedBy(int64 attackerObjectId)
     if (pStage == nullptr)
         return;
 
-    // 공격자가 살아있는 User(캐릭터)일 때만 어그로. 환경/무효/이미 죽은 공격자는 무시.
+    // 공격자가 살아있는 Character(캐릭터)일 때만 어그로. 환경/무효/이미 죽은 공격자는 무시.
     StageObject* pAttacker = pStage->FindObject(attackerObjectId);
-    if (pAttacker == nullptr || pAttacker->GetObjectType() != EObjectType::User)
+    if (pAttacker == nullptr || pAttacker->GetObjectType() != EObjectType::Character)
         return;
     if (static_cast<ActorObject*>(pAttacker)->IsDead())
         return;

@@ -29,7 +29,7 @@ namespace
 }
 
 // (centerPos 를 중심으로) shape 범위 안의 "적" StageObject 들을 outEnemies 에 채운다. (X-Z 평면)
-// 진영 규칙(v1): Monster 시전자는 User(캐릭터)를, 그 외(User 등) 시전자는 Monster 를 대상으로 한다.
+// 진영 규칙(v1): Monster 시전자는 Character를, 그 외(Character 등) 시전자는 Monster 를 대상으로 한다.
 void Stage::QueryEnemiesInShape(EObjectType casterType, const Vector3& centerPos, const EffectShape& shape,
                                 std::vector<StageObject*>& outEnemies, bool requireLineOfSight)
 {
@@ -39,7 +39,7 @@ void Stage::QueryEnemiesInShape(EObjectType casterType, const Vector3& centerPos
         return;
 
     // 적 타입 결정 (v1 진영 규칙).
-    const EObjectType enemyType = (casterType == EObjectType::Monster) ? EObjectType::User : EObjectType::Monster;
+    const EObjectType enemyType = (casterType == EObjectType::Monster) ? EObjectType::Character : EObjectType::Monster;
 
     // center 가 속한 섹터 + 모양의 bounding 반경으로 검사할 섹터 range 를 정한다.
     int32 centerSectorX = 0;
@@ -346,7 +346,7 @@ void Stage::OnSkillProjectileHit(int64 effectId, int32 projectileIndex, int64 ta
 
         // 직격 대미지: 보고된 타겟이 적 타입일 때만 (진영 검증 + 안전한 캐스팅).
         const EObjectType enemyType =
-            (params.casterObjectType == EObjectType::Monster) ? EObjectType::User : EObjectType::Monster;
+            (params.casterObjectType == EObjectType::Monster) ? EObjectType::Character : EObjectType::Monster;
         if (StageObject* pTargetObj = FindObject(targetId))
         {
             if (pTargetObj->GetObjectType() == enemyType)
