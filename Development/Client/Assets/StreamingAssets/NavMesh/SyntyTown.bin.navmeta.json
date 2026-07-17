@@ -1,0 +1,13 @@
+{
+  "navmesh_file": "SyntyTown.bin",
+  "bounds": {
+    "min_x": -70,
+    "min_z": -70,
+    "max_x": 74.000007629394531,
+    "max_z": 74.000007629394531
+  },
+  "tiles_count": 199,
+  "walkable_polygons_count": 326,
+  "generated_at": "2026-07-15T13:21:39Z",
+  "generator_version": "1.0"
+}

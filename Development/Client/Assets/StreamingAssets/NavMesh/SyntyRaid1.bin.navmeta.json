@@ -1,0 +1,13 @@
+{
+  "navmesh_file": "SyntyRaid1.bin",
+  "bounds": {
+    "min_x": -80,
+    "min_z": -80,
+    "max_x": 83.20001220703125,
+    "max_z": 83.20001220703125
+  },
+  "tiles_count": 384,
+  "walkable_polygons_count": 734,
+  "generated_at": "2026-07-15T14:12:55Z",
+  "generator_version": "1.0"
+}
