@@ -167,8 +167,8 @@ Shader "Toon/Toon 3D as 2D Shadow (URP)"{
             float4 _HighlightTex_ST;
 
             #include "ObjectTransform.hlsl"
-            #include "ShapeLight2D.hlsl"
-            #include "../UTSLighting.hlsl"
+            #include "Packages/com.unity.toonshader/Runtime/Shaders/URP/ShapeLight2D.hlsl"
+            #include "Packages/com.unity.toonshader/Runtime/Shaders/UTSLighting.hlsl"
 
             //_HDREmulationScale declaration
             #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/ShapeLightVariables.hlsl" 
@@ -398,7 +398,7 @@ Shader "Toon/Toon 3D as 2D Shadow (URP)"{
             CBUFFER_END
 
             #include "ObjectTransform.hlsl"
-            #include "ShapeLight2D.hlsl"
+            #include "Packages/com.unity.toonshader/Runtime/Shaders/URP/ShapeLight2D.hlsl"
             
             OutlineVertexOutput OutlineVertex(OutlineVertexInput v) {
                 OutlineVertexOutput o = (OutlineVertexOutput) 0;
