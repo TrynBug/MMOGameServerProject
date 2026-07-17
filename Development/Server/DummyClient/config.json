@@ -1,0 +1,42 @@
+{
+  "//": "더미 클라이언트 설정. loginIp/Port 는 로그인서버(게이트웨이는 LoginRes 가 알려줌).",
+
+  "loginIp": "127.0.0.1",
+  "loginPort": 8001,
+
+  "//maxClients": "최대 접속 클라이언트 수(상한). 0=무제한(계정 범위 전체). 실제 봇 수 = min(계정범위, maxClients).",
+  "maxClients": 1,
+
+  "//account": "계정 id = prefix+N (N: start..end). 비밀번호는 id 와 동일. 계정 풀 크기 = end-start+1.",
+  "account": { "prefix": "dummy", "start": 1, "end": 20 },
+
+  "//spawn": "초당 몇 개의 봇을 새로 접속시킬지 (한꺼번에 몰리지 않게).",
+  "spawn": { "rampPerSec": 10 },
+
+  "//move": "sendIntervalMs=MoveIntentReq 주기(실클라 100ms). moveSpeed=StatUpdateNtf 수신 전 폴백값(수신 후엔 서버 MoveSpdTotal 사용).",
+  "move": { "sendIntervalMs": 100, "moveSpeed": 10.0, "arriveDistance": 0.6, "repickDelayMs": 500 },
+
+  "//stageKeys": "봇이 사용할 스테이지 키 목록(스테이지 이동 대상).",
+  "stageKeys": [100, 101, 102, 103],
+
+  "//create": "캐릭터 생성 시 무작위로 고를 직업(1=Mage,2=Warrior). 현재 스킬은 Mage만 존재.",
+  "create": { "jobIds": [1] },
+
+  "//skill": "detectRange 내 적 발견→전투. range 내면 멈춰서 useIntervalMs 마다 skillKeys 를 순서대로(로테이션) 계속 시전. 적 전멸 시 이동 재개.",
+  "skill": { "useIntervalMs": 700, "range": 12.0, "detectRange": 16.0, "skillKeys": [1001, 1006, 1012] },
+
+  "//stageMove": "intervalMs 마다 probability 확률로 stageKeys 중 하나로 스테이지 이동.",
+  "stageMove": { "intervalMs": 45000, "probability": 0.6 },
+
+  "//disconnect": "checkIntervalMs 마다 probability 확률로 연결을 끊음(이후 reconnect 설정 따름).",
+  "disconnect": { "checkIntervalMs": 15000, "probability": 0.03 },
+
+  "//paths": "서버 OUTPUT 기준. 상대경로는 실행파일 위치 기준으로 해석됨.",
+  "navMeshDir": "../../../../OUTPUT/Map/NavMesh",
+  "stageDataCsv": "../../../../OUTPUT/GameData/Stage.csv",
+
+  "tickRateHz": 20,
+  "statusPrintIntervalMs": 1000,
+
+  "reconnect": { "enabled": true, "delayMs": 3000 }
+}
