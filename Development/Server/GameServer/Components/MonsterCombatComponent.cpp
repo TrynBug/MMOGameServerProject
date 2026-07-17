@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Components/MonsterCombatComponent.h"
 
+#include "GameServer.h"
 #include "StageObjects/Monster.h"                      // owner 완전타입 (위치/objectId/Stage/회전/이동 접근)
 #include "Stages/Stage.h"
 #include "Stages/Sector.h"                       // AcquireTarget 의 sector 순회
@@ -147,16 +148,18 @@ bool MonsterCombatComponent::TryBeginCast(int32 skillIndex, StageObject* pTarget
     float originX = m_pOwner->GetPosX(), originY = m_pOwner->GetPosY(), originZ = m_pOwner->GetPosZ();
     if (const GameData_Skill* pSkill = GameDataTable_Skill::FindData(skill.skillId))
     {
+        // Placement는 효과 중심의 기준점만 정한다. 앵커와 전방 중심 보정은 모든 효과 타입에서 같은 규칙을 쓴다.
         switch (pSkill->Placement)
         {
-        case ESkillPlacement::Forward:
+        case ESkillPlacement::SkillCastOrigin:
         {
-            // 캐스터 전방으로 offset. CasterFrontDistance>0 이면 그 값, 아니면 OBB 길이의 절반(빔이 앞으로 뻗게).
-            const float offset = (pSkill->CasterFrontDistance > 0.0f)
-                ? pSkill->CasterFrontDistance
-                : static_cast<float>(pSkill->ObbLength) * 0.5f;
-            originX += dirX * offset;
-            originZ += dirZ * offset;
+            const GameData_Monster* pMonsterData = m_pOwner->GetMonsterData();
+            const Vector3 offset = pMonsterData != nullptr
+                ? GameServer::Instance().GetCastAnchorRegistry().GetMonsterLocalOffset(pMonsterData->PrefabPath)
+                : Vector3();
+            originX += dirZ * offset.x + dirX * offset.z;
+            originY += offset.y;
+            originZ += -dirX * offset.x + dirZ * offset.z;
             break;
         }
         case ESkillPlacement::Target:
@@ -167,6 +170,9 @@ bool MonsterCombatComponent::TryBeginCast(int32 skillIndex, StageObject* pTarget
         default:
             break;   // Caster / None: 캐스터 위치 그대로
         }
+
+        originX += dirX * pSkill->EffectCenterForwardOffset;
+        originZ += dirZ * pSkill->EffectCenterForwardOffset;
     }
 
     // Windup 진입. 발동/쿨다운/회복은 advanceCast 가 처리한다.

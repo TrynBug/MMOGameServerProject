@@ -96,6 +96,13 @@ bool GameServer::OnInitialize()
         return false;
     }
 
+	// Unity의 몬스터/캐릭터 프리팹의 SkillCastOrigin을 export 한 것을 로드해서 CastAnchorRegistry에 등록한다. (스킬 시전 위치를 이 데이터를 사용하는 스킬이 있음)
+    if (!m_castAnchorRegistry.Load())
+    {
+        LOG_WRITE(LogLevel::Error, "failed to initialize CastAnchorRegistry.");
+        return false;
+    }
+
     // StageAssetManager 초기화 (모든 Stage 의 레이아웃 + 스크립트 바이트코드 선로드/검증).
     // 명시된 스크립트 파일 누락/컴파일 실패 시 fail-fast.
     if (!m_stageAssetManager.LoadAll())

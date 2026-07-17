@@ -37,6 +37,7 @@ struct GameDataBase_Skill : public GameData
     bool                 Rotation             = true;
     ETargetingMode       Targeting            = ETargetingMode::None;
     ESkillPlacement      Placement            = ESkillPlacement::None;
+    float                EffectCenterForwardOffset = 0.0f;
     ESkillEffectMotion   EffectMotion         = ESkillEffectMotion::None;
     ESkillEffectDamage   EffectDamage         = ESkillEffectDamage::None;
     ESkillEffectShape    EffectShape          = ESkillEffectShape::None;

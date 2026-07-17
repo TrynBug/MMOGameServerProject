@@ -73,13 +73,13 @@ namespace GameData
         Max                 
     }
 
-    /* 스킬 효과의 위치를 어디에 둘지 정한다. */
+    /* 스킬 효과 중심의 기준점을 정한다. */
     public enum ESkillPlacement
     {
         None                 = 0,
-        Caster               = 1,  // 캐스터 위치    // 투사체 발사점 / 캐스터 중심 범위
-        Target               = 2,  // 타겟 위치에 OBB/Circle 생성
-        Forward              = 3,  // 캐스터 전방에서 시작해 타겟 방향으로 OBB
+        Caster               = 1,  // 캐스터 중심    // 시전자 루트/중심을 효과 중심 기준점으로 사용
+        SkillCastOrigin      = 2,  // 스킬 시전 앵커    // 시전자 프리팹의 SkillCastOrigin을 효과 중심 기준점으로 사용
+        Target               = 3,  // 타겟 위치    // 타겟 위치를 효과 중심 기준점으로 사용
         Max                 
     }
 }

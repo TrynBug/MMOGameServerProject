@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "DotRecast",
-        "NavMesh"
+        "NavMesh",
+        "Game"
     ],
     "includePlatforms": [
         "Editor"

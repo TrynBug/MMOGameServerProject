@@ -26,6 +26,7 @@ bool GameDataTableBase_Monster::makeGameData(const std::string& line)
 
     // 컬럼 순서대로 파싱
     std::getline(ss, field, ','); pData->Key = std::stoi(field);
+    std::getline(ss, field, ','); pData->PrefabPath = field;
     std::getline(ss, field, ','); pData->ItemDropGroup = std::stoi(field);
     std::getline(ss, field, ','); pData->IsItemDrop = StringToBool(field);
     std::getline(ss, field, ','); pData->Exp = std::stod(field);

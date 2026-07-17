@@ -249,13 +249,18 @@ namespace Client.Game
                             : caster.transform.position + dir * m_areaCastFallbackDistance;
                         targetPos = origin;
                         break;
-                    case ESkillPlacement.Forward:
-                        // 캐스터 전방에서 타겟 방향으로 OBB: 중심을 정면으로 ObbLength/2 만큼 밀어 빔이 앞으로 뻗게.
-                        origin = caster.transform.position + dir * (float)(skill.ObbLength * 0.5);
+                    case ESkillPlacement.SkillCastOrigin:
+                    {
+                        // 프리팹 앵커가 효과 중심의 기준점이다.
+                        origin = caster.ResolveSkillCastOrigin(dir);
                         break;
+                    }
                     // None / Caster: origin = 캐스터 위치 (투사체 발사점 / 캐스터 중심). 그대로 둔다.
                 }
             }
+
+            // Placement 기준점에서 효과 중심까지 전방 보정한다. OBB 빔의 시작점을 앵커에 맞추려면 길이의 절반을 사용한다.
+            origin += dir * skill.EffectCenterForwardOffset;
 
             // 캐릭터 즉시 회전 (Rotation=true 인 스킬).
             if (skill.Rotation)
@@ -299,7 +304,7 @@ namespace Client.Game
             {
                 SkillProjectileGroup group = new SkillProjectileGroup(skillKey);
                 m_groups.Add(group);
-                StartCoroutine(spawnProjectilesAfterDelay(group, skill, origin, dir));
+                StartCoroutine(spawnProjectilesAfterDelay(group, skill, origin, dir, caster));
             }
             // 범위 스킬이면 CastDelay 후 비주얼만 예측 표시. 대미지는 서버 SkillDamageNtf 가 구동한다.
             else if (skill.EffectDamage == ESkillEffectDamage.Area)
@@ -331,14 +336,14 @@ namespace Client.Game
                 caster.PlayFire(skill.FireAnim, castSpeed);
         }
 
-        private IEnumerator spawnProjectilesAfterDelay(SkillProjectileGroup group, GameData_Skill skill, Vector3 origin, Vector3 dir)
+        private IEnumerator spawnProjectilesAfterDelay(SkillProjectileGroup group, GameData_Skill skill, Vector3 origin, Vector3 dir, ActorObject visualCaster = null)
         {
             if (skill.CastDelayMs > 0)
                 yield return new WaitForSeconds(skill.CastDelayMs / 1000f);
 
             // 발동음 (클라 전용). 시전 발동(CastDelay 경과) 순간 SfxShoot 재생.
             SfxPlayer.Play(skill.SfxShoot, origin);
-            spawnFan(group, skill, origin, dir);
+            spawnFan(group, skill, origin, dir, visualCaster: visualCaster);
         }
 
         // 범위 스킬 비주얼을 CastDelay 후에 표시한다 (로컬 예측). 대미지는 서버가 구동.
@@ -673,7 +678,8 @@ namespace Client.Game
 
             // 효과음 볼륨 배수: '다른 플레이어(원격)' 스킬만 줄이고, 몬스터 스킬은 원래 볼륨 유지(피격 예고/피드백 중요).
             // (내 시전은 onSkillCastNtf 초입에서 이미 return 되므로 여기 오는 건 원격 플레이어 또는 몬스터.)
-            bool casterIsMonster = StageManager.Instance?.FindActor(ntf.CasterObjectId) is MonsterObject;
+            ActorObject caster = StageManager.Instance?.FindActor(ntf.CasterObjectId);
+            bool casterIsMonster = caster is MonsterObject;
             float sfxScale = casterIsMonster ? 1f : m_remoteSfxVolumeScale;
 
             // 발동음 (클라 전용). 원격 캐스터의 발동(서버 CastNtf=CastDelay 경과) 순간 SfxShoot 재생. 모든 타입 공용·entry 1회.
@@ -686,7 +692,7 @@ namespace Client.Game
             if (skill.EffectDamage == ESkillEffectDamage.ContactHit)
             {
                 // 몬스터가 쏜 투사체면 몬스터 충돌 무시(시전자 자가충돌 방지 + 서버 권위 판정).
-                spawnFan(group: null, skill, origin, dir, ignoreMonsters: casterIsMonster, sfxVolumeScale: sfxScale);   // group=null → 비주얼 전용.
+                spawnFan(group: null, skill, origin, dir, ignoreMonsters: casterIsMonster, sfxVolumeScale: sfxScale, visualCaster: caster);   // group=null → 비주얼 전용.
             }
             else if (skill.EffectDamage == ESkillEffectDamage.Area)
             {
@@ -697,12 +703,12 @@ namespace Client.Game
             // 이동 스킬: 원격 캐스터를 서버가 실제 사용한 거리(move_distance)로 동일하게 이동시킨다.
             else if (skill.EffectDamage == ESkillEffectDamage.None && skill.MoveDistance > 0.0)
             {
-                PlayerCharacter caster = StageManager.Instance?.FindActor(ntf.CasterObjectId) as PlayerCharacter;
-                if (caster != null)
+                PlayerCharacter playerCaster = caster as PlayerCharacter;
+                if (playerCaster != null)
                 {
                     float distance = ntf.MoveDistance;
                     float durationSec = skill.MoveDurationMs / 1000f;
-                    caster.StartSkillMove(dir, distance, durationSec);
+                    playerCaster.StartSkillMove(dir, distance, durationSec);
 
                     // 글라이드 등: 이동 종료 후 충격파(Area) 페이즈 비주얼 재생.
                     if (skill.NextSkillKey != 0 && skill.NextTriggerTiming != ENextSkillTiming.None)
@@ -712,7 +718,7 @@ namespace Client.Game
         }
 
         // ─── 투사체 발사 (로컬/원격 공용) ────────────────────────────
-        private void spawnFan(SkillProjectileGroup group, GameData_Skill skill, Vector3 origin, Vector3 dir, bool ignoreMonsters = false, float sfxVolumeScale = 1f)
+        private void spawnFan(SkillProjectileGroup group, GameData_Skill skill, Vector3 origin, Vector3 dir, bool ignoreMonsters = false, float sfxVolumeScale = 1f, ActorObject visualCaster = null)
         {
             // 투사체 prefab 을 1회 로드 (실패 시 ResourceManager 가 에러 로그 1회). 폴백 없음 — 데이터가 맞아야 동작.
             GameObject prefab = Managers.Managers.Resource.Load<GameObject>(skill.ProjectilePrefabPath);
@@ -725,7 +731,9 @@ namespace Client.Game
             int count = Mathf.Max(1, (int)skill.ProjectileCount);
             List<Vector3> dirs = computeFanDirs(dir, count, (float)skill.FanAngleDeg);
 
-            Vector3 startPos = origin + Vector3.up * m_projectileHeight;   // 비주얼 높이 (XZ 판정엔 영향 없음).
+            Vector3 startPos = visualCaster != null && visualCaster.SkillCastOrigin != null
+                ? origin
+                : origin + Vector3.up * m_projectileHeight;   // XZ는 서버 권위 origin, Y만 프리팹 연출로 보정.
             for (int i = 0; i < dirs.Count; ++i)
                 spawnOneProjectile(prefab, group, i, startPos, dirs[i], (float)skill.ProjectileSpeed, (float)skill.MaxRange, skill.Key, skill.OnHitSkillKey, ignoreMonsters, sfxVolumeScale);
 

@@ -12,6 +12,7 @@
 #include "StageObjects/EventArea.h"
 #include "StageObjects/PropObject.h"
 #include "Generated/GameData_Prop.h"
+#include "Generated/GameData_Skill.h"
 #include "Skills/EffectShape.h"
 #include "Skills/EffectParams.h"
 #include "Skills/AreaEffect.h"
@@ -1684,10 +1685,40 @@ void Stage::handleSkillCastReq(const UserPtr& spUser, const netlib::PacketPtr& s
     if (!deserializeUserPacket(spUser, spPacket, req))
         return;
 
-    const Vector3 origin(req.origin_x(), req.origin_y(), req.origin_z());
-    const Vector3 dir(req.dir_x(), 0.0f, req.dir_z());
-    // target_pos: 즉시이동(블링크) 거리 클램프에 사용. target_object_id 는 아직 검증용(미사용).
-    const Vector3 targetPos(req.target_pos_x(), 0.0f, req.target_pos_z());
+    Vector3 dir(req.dir_x(), 0.0f, req.dir_z());
+    const float dirLength = std::sqrt(dir.x * dir.x + dir.z * dir.z);
+    if (dirLength <= 0.0001f)
+        return;
+    dir.x /= dirLength;
+    dir.z /= dirLength;
+    // target_pos: 즉시이동 거리 클램프와 Target Placement의 기준점에 사용한다.
+    const Vector3 targetPos(req.target_pos_x(), spCharacter->GetPosY(), req.target_pos_z());
+    // 클라이언트 origin은 신뢰하지 않는다. 서버가 Placement와 Unity export 앵커로 권위 효과 중심을 계산한다.
+    Vector3 origin(spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ());
+    if (const GameData_Skill* pSkill = GameDataTable_Skill::FindData(req.skill_key()); pSkill != nullptr)
+    {
+        switch (pSkill->Placement)
+        {
+        case ESkillPlacement::SkillCastOrigin:
+        {
+            const DataStructures::Character& proto = spCharacter->GetProto();
+            const Vector3 offset = GameServer::Instance().GetCastAnchorRegistry().GetPlayerLocalOffset(
+                proto.job_id(), proto.appearance_preset_id());
+            origin.x += dir.z * offset.x + dir.x * offset.z;
+            origin.y += offset.y;
+            origin.z += -dir.x * offset.x + dir.z * offset.z;
+            break;
+        }
+        case ESkillPlacement::Target:
+            origin = targetPos;
+            break;
+        default:
+            break;
+        }
+
+        origin += dir * pSkill->EffectCenterForwardOffset;
+    }
+
     spCharacter->GetSkillComponent().TryCast(req.skill_key(), origin, dir, targetPos, req.seed());
 }
 
@@ -2440,5 +2471,3 @@ void Stage::BroadcastBuffRemoveNtf(const ActorObject& actor, int32 buffKey)
 
     GameServer::Instance().GetPacketSender().SendBuffRemoveNtf(m_aoiUserScratch, actor.GetObjectId(), buffKey);
 }
-
-

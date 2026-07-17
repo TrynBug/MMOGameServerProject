@@ -109,6 +109,7 @@
     <ClInclude Include="GameServer.h" />
     <ClInclude Include="GameServerDefine.h" />
     <ClInclude Include="Managers\CheatManager.h" />
+    <ClInclude Include="Managers\CastAnchorRegistry.h" />
     <ClInclude Include="Managers\NavMeshManager.h" />
     <ClInclude Include="Managers\StageAssetManager.h" />
     <ClInclude Include="Managers\StageManager.h" />
@@ -149,6 +150,7 @@
     <ClCompile Include="Components\StatComponentBase.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="Managers\CheatManager.cpp" />
+    <ClCompile Include="Managers\CastAnchorRegistry.cpp" />
     <ClCompile Include="Managers\NavMeshManager.cpp" />
     <ClCompile Include="Managers\StageAssetManager.cpp" />
     <ClCompile Include="Managers\StageManager.cpp" />

@@ -150,8 +150,8 @@ ESkillPlacement StringToSkillPlacement(const std::string& v)
 {
     if (v == "None") return ESkillPlacement::None;
     if (v == "Caster") return ESkillPlacement::Caster;
+    if (v == "SkillCastOrigin") return ESkillPlacement::SkillCastOrigin;
     if (v == "Target") return ESkillPlacement::Target;
-    if (v == "Forward") return ESkillPlacement::Forward;
     return ESkillPlacement::None;
 }
 
@@ -161,8 +161,8 @@ std::string SkillPlacementToString(ESkillPlacement v)
     {
     case ESkillPlacement::None: return "None";
     case ESkillPlacement::Caster: return "Caster";
+    case ESkillPlacement::SkillCastOrigin: return "SkillCastOrigin";
     case ESkillPlacement::Target: return "Target";
-    case ESkillPlacement::Forward: return "Forward";
     default: return "None";
     }
 }

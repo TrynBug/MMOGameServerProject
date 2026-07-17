@@ -28,6 +28,20 @@ namespace Client.Game
     // (최대치가 0인 상태에서 현재HP 를 받으면 0으로 clamp 되어버린다.)
     public abstract class ActorObject : MonoBehaviour
     {
+        // 프리팹 Root 직속 SkillCastOrigin Transform 캐시.
+        private Transform m_skillCastOrigin;
+
+        // 프리팹 Root 직속 이름 규약으로 SkillCastOrigin을 1회 조회 후 캐시한다.
+        public Transform SkillCastOrigin
+        {
+            get
+            {
+                if (m_skillCastOrigin == null)
+                    m_skillCastOrigin = CastOriginUtility.Find(transform);
+                return m_skillCastOrigin;
+            }
+        }
+
         // 서버가 내려준 합성 스탯 보관소. 최대HP/MP, 이동속도, 공격속도 등을 여기서 읽는다.
         public StatHolder Stats { get; } = new StatHolder();
 
@@ -51,6 +65,12 @@ namespace Client.Game
         // 현재 HP/MP 를 각각의 최대치로 채운다.
         public void FillHp() { CurHp = MaxHp; }
         public void FillMp() { CurMp = MaxMp; }
+
+        // SkillCastOrigin의 local XYZ를 시전 방향 기준 월드 좌표로 변환한다.
+        public Vector3 ResolveSkillCastOrigin(Vector3 castDirection)
+        {
+            return CastOriginUtility.Resolve(transform, SkillCastOrigin, castDirection);
+        }
 
         // 사망 여부. 서버와 동일하게 명시적 상태이다(HP 0 파생 아님). OnDeath() 로 1회 전환된다.
         // ObjectDeathNtf 수신 시, 또는 corpse 상태로 spawn 될 때 설정된다.

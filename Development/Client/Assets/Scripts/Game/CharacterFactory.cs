@@ -22,6 +22,20 @@ namespace Client.Game
     //   예) Mage_0, Mage_1, Warrior_0, Warrior_1.
     public static class CharacterFactory
     {
+        public readonly struct PrefabProfile
+        {
+            public int JobId { get; }
+            public int PresetId { get; }
+            public string PrefabPath { get; }
+
+            public PrefabProfile(int jobId, int presetId, string prefabPath)
+            {
+                JobId = jobId;
+                PresetId = presetId;
+                PrefabPath = prefabPath;
+            }
+        }
+
         // 폴백 prefab (잘못된 job/preset 또는 로드 실패 시).
         private const string k_fallbackPrefabPath = "Prefabs/Characters/Mage_0";
 
@@ -43,6 +57,15 @@ namespace Client.Game
 
             int preset = Mathf.Clamp(presetId, 0, k_presetCount - 1);
             return $"Prefabs/Characters/{job}_{preset}";
+        }
+
+        /// <summary>에디터 export가 모든 플레이어 외형 프리팹을 순회할 때 사용하는 목록입니다.</summary>
+        public static System.Collections.Generic.IEnumerable<PrefabProfile> GetSupportedPrefabProfiles()
+        {
+            int[] jobs = { (int)GameData.EJob.Mage, (int)GameData.EJob.Warrior };
+            foreach (int jobId in jobs)
+            for (int presetId = 0; presetId < k_presetCount; ++presetId)
+                yield return new PrefabProfile(jobId, presetId, ResolvePrefabPath(jobId, presetId));
         }
 
         // jobId/presetId 를 받아 해당 직업/프리셋 prefab 으로 생성한다.

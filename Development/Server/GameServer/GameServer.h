@@ -12,6 +12,7 @@
 #include "ThreadSafeUnorderedMap.h"
 #include "PacketSender.h"
 #include "Managers/CheatManager.h"
+#include "Managers/CastAnchorRegistry.h"
 
 // GameServer는 게임로직(Stage, 유저, 전투, 스킬 등)을 처리하는 서버이다.
 // - 클라이언트와 직접 연결되지 않는다. 게이트웨이서버를 통해 클라이언트와 통신한다.
@@ -60,6 +61,9 @@ public:
 
     CheatManager&       GetCheatManager()       { return m_cheatManager; }
     const CheatManager& GetCheatManager() const { return m_cheatManager; }
+
+    CastAnchorRegistry&       GetCastAnchorRegistry()       { return m_castAnchorRegistry; }
+    const CastAnchorRegistry& GetCastAnchorRegistry() const { return m_castAnchorRegistry; }
 
     // 특정 게이트웨이로 서버패킷 전송. 해당 게이트웨이 세션이 없으면 false. (netdelay 치트 등 내부 제어용)
     bool SendToGateway(int32 gatewayId, const netlib::PacketPtr& spPacket);
@@ -192,6 +196,9 @@ private:
     // 치트 처리 + 치트 상태(플래그 등) 보관. 개발용.
     // (CHEAT_REQ 패킷 수신은 _DEBUG 한정이지만, 플래그 조회를 위해 클래스는 항상 존재한다.)
     CheatManager m_cheatManager;
+
+    // Caster의 스킬 시전 위치 Anchor를 보관해두는 컴포넌트.
+    CastAnchorRegistry m_castAnchorRegistry;
 
     // ── 내부 서버용 이벤트 핸들러, 패킷 디스패처 ───────────────────
     netlib::FuncEventHandler     m_internalListenEventHandler;
