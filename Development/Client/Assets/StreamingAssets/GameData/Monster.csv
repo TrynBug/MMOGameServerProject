@@ -1,21 +1,22 @@
-﻿Key,Name,PrefabPath,Grade,SkillKey1,SkillKey2,Stat1,StatValue1,Stat2,StatValue2,Stat3,StatValue3,Stat4,StatValue4,Stat5,StatValue5,Stat6,StatValue6,Stat7,StatValue7,Stat8,StatValue8
-50,슬라임,Prefabs/Monsters/Slime_01,1,9002,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-51,킹 슬라임,Prefabs/Monsters/Slime_01_King,1,9001,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-52,헬멧 슬라임,Prefabs/Monsters/Slime_01_MeltalHelmet,1,9001,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-53,바이킹 슬라임,Prefabs/Monsters/Slime_01_Viking,1,9001,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-54,슬라임,Prefabs/Monsters/Slime_02,1,9001,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-55,슬라임,Prefabs/Monsters/Slime_03,1,9002,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-56,킹 슬라임,Prefabs/Monsters/Slime_03 King,1,9002,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-57,리프 슬라임,Prefabs/Monsters/Slime_03 Leaf,1,9002,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-58,새싹 슬라임,Prefabs/Monsters/Slime_03 Sprout,1,9002,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-59,거대 슬라임,Prefabs/Monsters/Slime_01_big,1,9002,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-60,거대 킹 슬라임,Prefabs/Monsters/Slime_01_King_big,1,9001,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-61,거대 헬멧 슬라임,Prefabs/Monsters/Slime_01_MeltalHelmet_big,1,9002,9001,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-62,거대 바이킹 슬라임,Prefabs/Monsters/Slime_01_Viking_big,1,9002,9001,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-63,거대 슬라임,Prefabs/Monsters/Slime_02_big,1,9002,9001,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-64,거대 슬라임,Prefabs/Monsters/Slime_03_big,1,9002,9001,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-65,거대 킹 슬라임,Prefabs/Monsters/Slime_03 King_big,1,9001,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-66,거대 리프 슬라임,Prefabs/Monsters/Slime_03 Leaf_big,1,9002,9001,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-67,거대 새싹 슬라임,Prefabs/Monsters/Slime_03 Sprout_big,1,9002,9001,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-68,고블린 전사,Prefabs/Monsters/Goblin_Warrior,1,9001,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
-69,고블린 마법사,Prefabs/Monsters/Goblin_Mage,1,9002,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
+﻿Key,Name,PrefabPath,Grade,SkillKey1,SkillKey2,SkillKey3,SkillKey4,Stat1,StatValue1,Stat2,StatValue2,Stat3,StatValue3,Stat4,StatValue4,Stat5,StatValue5,Stat6,StatValue6,Stat7,StatValue7,Stat8,StatValue8
+50,슬라임,Prefabs/Monsters/Slime_01,1,9002,0,0,0,31,5,1,10,6,10,11,200,16,100,21,10,26,10,36,1
+51,킹 슬라임,Prefabs/Monsters/Slime_01_King,1,9001,0,0,0,31,5,1,10,6,10,11,200,16,100,21,10,26,10,36,1
+52,헬멧 슬라임,Prefabs/Monsters/Slime_01_MeltalHelmet,1,9001,0,0,0,31,5,1,10,6,10,11,200,16,100,21,10,26,10,36,1
+53,바이킹 슬라임,Prefabs/Monsters/Slime_01_Viking,1,9001,0,0,0,31,5,1,10,6,10,11,200,16,100,21,10,26,10,36,1
+54,슬라임,Prefabs/Monsters/Slime_02,1,9001,0,0,0,31,5,1,10,6,10,11,200,16,100,21,10,26,10,36,1
+55,슬라임,Prefabs/Monsters/Slime_03,1,9002,0,0,0,31,5,1,10,6,10,11,200,16,100,21,10,26,10,36,1
+56,킹 슬라임,Prefabs/Monsters/Slime_03 King,1,9002,0,0,0,31,5,1,10,6,10,11,200,16,100,21,10,26,10,36,1
+57,리프 슬라임,Prefabs/Monsters/Slime_03 Leaf,1,9002,0,0,0,31,5,1,10,6,10,11,200,16,100,21,10,26,10,36,1
+58,새싹 슬라임,Prefabs/Monsters/Slime_03 Sprout,1,9002,0,0,0,31,5,1,10,6,10,11,200,16,100,21,10,26,10,36,1
+59,거대 슬라임,Prefabs/Monsters/Slime_01_big,1,9002,0,0,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
+60,거대 킹 슬라임,Prefabs/Monsters/Slime_01_King_big,1,9001,0,0,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
+61,거대 헬멧 슬라임,Prefabs/Monsters/Slime_01_MeltalHelmet_big,1,9001,0,0,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
+62,거대 바이킹 슬라임,Prefabs/Monsters/Slime_01_Viking_big,1,9001,0,0,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
+63,거대 슬라임,Prefabs/Monsters/Slime_02_big,1,9001,0,0,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
+64,거대 슬라임,Prefabs/Monsters/Slime_03_big,1,9001,0,0,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
+65,거대 킹 슬라임,Prefabs/Monsters/Slime_03 King_big,1,9001,0,0,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
+66,거대 리프 슬라임,Prefabs/Monsters/Slime_03 Leaf_big,1,9001,0,0,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
+67,거대 새싹 슬라임,Prefabs/Monsters/Slime_03 Sprout_big,1,9001,0,0,0,31,5,1,10,6,10,11,1000,16,100,21,10,26,10,36,1
+68,고블린 전사,Prefabs/Monsters/Goblin_Warrior,1,9001,0,0,0,31,5,1,10,6,10,11,400,16,100,21,10,26,10,36,1
+69,고블린 마법사,Prefabs/Monsters/Goblin_Mage,1,9002,0,0,0,31,5,1,10,6,10,11,400,16,100,21,10,26,10,36,1
+70,찬탈자 드래곤,Prefabs/Monsters/Dragon_Usurper_Red,5,9104,9103,9102,9101,31,4,1,60,6,40,11,30000,16,500,21,60,26,50,36,1

@@ -1,9 +1,5 @@
 ﻿Key,Name,StageType,StagePrefabPath,NavMeshFileName,StageLayoutFileName,sectorSize
 1,캐릭터 선택창,1,,,,100
-100,마을,2,Prefabs/Stages/SyntyForest,SyntyForest,SyntyForest,10
-101,필드1,3,Prefabs/Stages/SyntyForest,SyntyForest,SyntyForest,10
-102,필드2,3,Prefabs/Stages/SyntyForest,SyntyForest,SyntyForest,10
-103,필드3,3,Prefabs/Stages/SyntyForest,SyntyForest,SyntyForest,10
-104,던전1,4,Prefabs/Stages/SyntyForest,SyntyForest,SyntyForest,10
-105,던전2,4,Prefabs/Stages/SyntyForest,SyntyForest,SyntyForest,10
-106,던전3,4,Prefabs/Stages/SyntyForest,SyntyForest,SyntyForest,10
+100,마을,2,Prefabs/Stages/SyntyTown,SyntyTown,SyntyTown,30
+101,필드1,3,Prefabs/Stages/SyntyForest,SyntyForest,SyntyForest,30
+107,레이드1,3,Prefabs/Stages/SyntyRaid1,SyntyRaid1,SyntyRaid1,30
