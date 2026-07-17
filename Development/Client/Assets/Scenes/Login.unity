@@ -550,8 +550,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecb6db1ebb13954419ed09a5f13ddb0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::Client.Game.LoginSceneController
-  m_loginIp: 127.0.0.1
-  m_loginPort: 8001
   m_connectTimeoutSec: 10
   m_packetTimeoutSec: 10
 --- !u!1660057539 &9223372036854775807
