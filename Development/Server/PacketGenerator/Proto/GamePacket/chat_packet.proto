@@ -6,14 +6,38 @@ package GamePacket;
 // 채팅 패킷 (클라이언트 <-> 게임서버)
 // ──────────────────────────────────────────────
 
-// 채팅 전송 요청 (클라 -> 게임서버)
-message ChatSendReq {
-    string message = 1;
+// 채팅 수신 범위. Global/Whisper는 CommunicationServer 단계에서 활성화한다.
+enum ChatType {
+    CHAT_TYPE_UNKNOWN = 0;
+    CHAT_TYPE_STAGE_CHANNEL = 1;
+    CHAT_TYPE_GAME_SERVER = 2;
+    CHAT_TYPE_GLOBAL = 3;
+    CHAT_TYPE_WHISPER = 4;
 }
 
-// 채팅 수신 알림 (게임서버 -> 클라 브로드캐스트)
+// 채팅 전송 요청 (클라 -> 게임서버)
+message ChatSendReq {
+    ChatType chat_type = 1;
+    string message = 2;
+    string target_name = 3; // Whisper에서만 사용
+}
+
+// 채팅 전송 결과 (게임서버 -> 클라)
+// 현재는 귓속말 성공 echo와 실패 시스템 메시지에 사용한다.
+message ChatSendRes {
+    int32 result_code = 1; // EResultCode 값
+    string error_msg = 2;
+    ChatType chat_type = 3;
+    string sender_name = 4;
+    string target_name = 5;
+    string message = 6;
+}
+
+// 채팅 수신 알림 (게임서버 -> 클라)
 message ChatRecvNtf {
-    int64 sender_account_id = 1;
-    string sender_name = 2;
-    string message = 3;
+    ChatType chat_type = 1;
+    int64 sender_character_id = 2;
+    string sender_name = 3;
+    string message = 4;
+    int64 target_character_id = 5; // Whisper에서만 사용
 }

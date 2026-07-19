@@ -29,7 +29,7 @@ enum ServerType {
     SERVER_TYPE_LOGIN    = 2;
     SERVER_TYPE_GATEWAY  = 3;
     SERVER_TYPE_GAME     = 4;
-    SERVER_TYPE_CHAT     = 5;
+    SERVER_TYPE_COMMUNICATION = 5;
 }
 
 // 서버 상태

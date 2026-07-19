@@ -13,18 +13,20 @@
 #include "PacketSender.h"
 #include "Managers/CheatManager.h"
 #include "Managers/CastAnchorRegistry.h"
+#include "Managers/ChatManager.h"
 
 // GameServer는 게임로직(Stage, 유저, 전투, 스킬 등)을 처리하는 서버이다.
 // - 클라이언트와 직접 연결되지 않는다. 게이트웨이서버를 통해 클라이언트와 통신한다.
 // - 모든 게이트웨이서버에 connect 한다. connect 직후 GameServerHandshakeNtf를 전송하여 자신을 식별시킨다.
-// - 채팅서버로부터의 연결을 받는다. (InternalListener)
-// - 레지스트리서버로부터 게이트웨이 정보를 폴링한다.
+// - CommunicationServer로부터의 연결을 받는다. (InternalListener)
+// - 레지스트리서버로부터 게이트웨이와 CommunicationServer 정보를 폴링한다.
 // - GameDB에 캐릭터 데이터를 protobuf JSON으로 저장한다.
 class GameServer : public serverbase::ServerBase
 {
 public:
     GameServer()
         : m_packetSender(*this, m_safeUsers, m_safeGatewaySessions)
+        , m_chatManager(*this, m_safeUsers, m_safeCommunicationSessions, m_packetSender)
     {
         assert(s_pInstance == nullptr);   // 인스턴스는 반드시 1개
         s_pInstance = this;
@@ -65,6 +67,9 @@ public:
     CastAnchorRegistry&       GetCastAnchorRegistry()       { return m_castAnchorRegistry; }
     const CastAnchorRegistry& GetCastAnchorRegistry() const { return m_castAnchorRegistry; }
 
+    ChatManager&       GetChatManager()       { return m_chatManager; }
+    const ChatManager& GetChatManager() const { return m_chatManager; }
+
     // 특정 게이트웨이로 서버패킷 전송. 해당 게이트웨이 세션이 없으면 false. (netdelay 치트 등 내부 제어용)
     bool SendToGateway(int32 gatewayId, const netlib::PacketPtr& spPacket);
 
@@ -99,7 +104,7 @@ protected:
     void OnBeforeShutdown()                          override;
     void OnShutdown()                                override;
 
-    // InternalListener: 채팅서버 등 다른 서버가 게임서버로 connect 할 때 사용
+    // InternalListener: CommunicationServer가 게임서버로 connect 할 때 사용
     netlib::FuncEventHandler* GetInternalListenEventHandler() override { return &m_internalListenEventHandler; }
 
 private:
@@ -107,9 +112,11 @@ private:
     // Town/Field 만 지원 — SystemStage 는 채널 개념이 없고(항상 1개), Dungeon 은 미구현.
     bool createStageChannels(int32 stageDataKey);
 
-    // ── 내부 서버 네트워크 이벤트 핸들러 (채팅서버 등이 게임서버로 connect) ─────
+    // ── 내부 서버 네트워크 이벤트 핸들러 (CommunicationServer가 게임서버로 connect) ─────
     bool onInternalAccept(const netlib::ISessionPtr& spSession);
+    void handleInternalPacket(const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket);
     void onInternalDisconnect(const netlib::ISessionPtr& spSession);
+    void handleCommunicationHandshakeReq(const netlib::ISessionPtr& spSession, const ServerPacket::ServerHandshakeReq& msg);
 
     // ── 게이트웨이서버 네트워크 이벤트 핸들러 (게임서버 -> 게이트웨이서버 connect) ───
     void onGatewayConnect(const netlib::ISessionPtr& spSession);
@@ -204,6 +211,12 @@ private:
     netlib::FuncEventHandler     m_internalListenEventHandler;
     serverbase::PacketDispatcher m_internalPacketDispatcher;
 
+    // CommunicationServer가 connect하는 방향이다. handshake 완료 뒤 채팅/소셜 패킷 수신에 사용한다.
+    SharedThreadSafeUnorderedMap<int32, netlib::ISessionPtr> m_safeCommunicationSessions;
+
+    // Registry에서 확인한 CommunicationServer 목록. incoming handshake의 serverId 검증에 사용한다.
+    SharedThreadSafeUnorderedMap<int32, ServerInfo> m_safeCommunicationInfos;
+
     // ── 게이트웨이서버 연결 관리 ───────────────
     SharedThreadSafeUnorderedMap<int32, netlib::ISessionPtr> m_safeGatewaySessions;
     ExclusiveThreadSafeUnorderedMap<int32, netlib::NetClientPtr> m_safeGatewayClients;
@@ -222,4 +235,8 @@ private:
     // 클라이언트로 나가는 Ntf 송신 전담. m_server(=*this) + 위 두 맵(유저/게이트웨이세션)을 참조로 받는다.
     // 위 두 맵보다 뒤에 선언하여 초기화 순서상 안전하게 참조를 바인딩한다.
     PacketSender m_packetSender;
+
+    // GameServer 범위 이상의 채팅, 귓속말, presence와 CommunicationServer 채팅 패킷을 처리한다.
+    // 참조하는 유저/CommunicationServer 맵과 PacketSender보다 뒤에 선언한다.
+    ChatManager m_chatManager;
 };

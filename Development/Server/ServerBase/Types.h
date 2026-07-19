@@ -24,7 +24,7 @@ enum class ServerType : uint8
     Login       = 2,
     Gateway     = 3,
     Game        = 4,
-    Chat        = 5,
+    Communication = 5,
 };
 
 // 서버 상태

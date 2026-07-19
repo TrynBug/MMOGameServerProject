@@ -108,6 +108,7 @@
     <ClInclude Include="Components\StatComponentBase.h" />
     <ClInclude Include="GameServer.h" />
     <ClInclude Include="GameServerDefine.h" />
+    <ClInclude Include="Managers\ChatManager.h" />
     <ClInclude Include="Managers\CheatManager.h" />
     <ClInclude Include="Managers\CastAnchorRegistry.h" />
     <ClInclude Include="Managers\NavMeshManager.h" />
@@ -149,6 +150,7 @@
     <ClCompile Include="Components\SkillComponent.cpp" />
     <ClCompile Include="Components\StatComponentBase.cpp" />
     <ClCompile Include="GameServer.cpp" />
+    <ClCompile Include="Managers\ChatManager.cpp" />
     <ClCompile Include="Managers\CheatManager.cpp" />
     <ClCompile Include="Managers\CastAnchorRegistry.cpp" />
     <ClCompile Include="Managers\NavMeshManager.cpp" />

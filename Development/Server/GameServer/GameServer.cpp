@@ -35,6 +35,16 @@ namespace packetlog
 bool GameServer::OnInitialize()
 {
     // ── 내부서버용 패킷 디스패처 ────────────────────────────────
+    m_internalPacketDispatcher.Register<ServerPacket::ServerHandshakeReq>(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_REQ,
+        [this](auto& spSession, auto& msg) { handleCommunicationHandshakeReq(spSession, msg); });
+
+    m_internalPacketDispatcher.Register<ServerPacket::ChatBroadcastNtf>(Common::SERVER_PACKET_ID_CHAT_BROADCAST_NTF,
+        [this](auto& spSession, auto& msg) { m_chatManager.HandleCommunicationChatBroadcastNtf(spSession, msg); });
+    m_internalPacketDispatcher.Register<ServerPacket::WhisperNtf>(Common::SERVER_PACKET_ID_WHISPER_NTF,
+        [this](auto& spSession, auto& msg) { m_chatManager.HandleCommunicationWhisperNtf(spSession, msg); });
+    m_internalPacketDispatcher.Register<ServerPacket::WhisperRes>(Common::SERVER_PACKET_ID_WHISPER_RES,
+        [this](auto& spSession, auto& msg) { m_chatManager.HandleCommunicationWhisperRes(spSession, msg); });
+
     m_internalPacketDispatcher.SetUnknownPacketHandler([](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
     {
         LOG_WRITE(LogLevel::Warn, std::format("unknown internal packetId={} sessionId={}", spPacket->GetHeader()->type, spSession->GetId()));
@@ -42,10 +52,7 @@ bool GameServer::OnInitialize()
 
     // ── 내부 서버 네트워크 이벤트 핸들러 등록 ───────────────────
     m_internalListenEventHandler.onAccept     = [this](const netlib::ISessionPtr& spSession) { return onInternalAccept(spSession); };
-    m_internalListenEventHandler.onRecv       = [this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
-    {
-        m_internalPacketDispatcher.Dispatch(spSession, spPacket);
-    };
+    m_internalListenEventHandler.onRecv       = [this](const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket) { handleInternalPacket(spSession, spPacket); };
     m_internalListenEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spSession) { onInternalDisconnect(spSession); };
 
     // ── 게이트웨이서버 패킷 디스패처 ────────────────────────────
@@ -203,6 +210,12 @@ bool GameServer::createStageChannels(int32 stageDataKey)
 // 게이트웨이서버 정보가 갱신되면 connect/disconnect 처리
 void GameServer::OnServerInfoUpdated(const ServerInfo& info)
 {
+    if (info.serverType == ServerType::Communication)
+    {
+        m_safeCommunicationInfos.Insert(info.serverId, info);
+        return;
+    }
+
     if (info.serverType != ServerType::Gateway)
         return;
 
@@ -276,25 +289,100 @@ db::AwaitableCoTask<std::optional<DataStructures::Account>> GameServer::loadAcco
     co_return *spAccount;
 }
 
-// 내부 서버 연결 수락 (채팅서버 등)
+// 내부 서버 연결 수락 (커뮤니케이션 서버 등)
 bool GameServer::onInternalAccept(const netlib::ISessionPtr& spSession)
 {
     if (IsShuttingDown())
         return false;
 
+    spSession->SetUserData(std::make_shared<InternalSessionMeta>());
     LOG_WRITE(LogLevel::Info, std::format("internal server connected. sessionId={}", spSession->GetId()));
     return true;
+}
+
+void GameServer::handleInternalPacket(const netlib::ISessionPtr& spSession, const netlib::PacketPtr& spPacket)
+{
+    InternalSessionMeta* pMeta = getInternalSessionMeta(spSession);
+    if (!pMeta)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("internal session metadata missing. sessionId={}", spSession->GetId()));
+        spSession->Disconnect();
+        return;
+    }
+
+    // accept 직후 첫 패킷은 반드시 handshake여야 한다.
+    // 이 검증 전에는 CommunicationServer 패킷 dispatcher에 진입할 수 없다.
+    if (!pMeta->handshakeDone && spPacket->GetHeader()->type != Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_REQ)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("internal packet before handshake. sessionId={} packetId={}", spSession->GetId(), spPacket->GetHeader()->type));
+        spSession->Disconnect();
+        return;
+    }
+
+    m_internalPacketDispatcher.Dispatch(spSession, spPacket);
 }
 
 // 내부 서버 연결 끊김
 void GameServer::onInternalDisconnect(const netlib::ISessionPtr& spSession)
 {
+    InternalSessionMeta* pMeta = getInternalSessionMeta(spSession);
+    if (pMeta && pMeta->handshakeDone && pMeta->peerServerType == ServerType::Communication)
+    {
+        netlib::ISessionPtr spRegisteredSession;
+        if (m_safeCommunicationSessions.Find(pMeta->peerServerId, spRegisteredSession) && spRegisteredSession == spSession)
+            m_safeCommunicationSessions.Erase(pMeta->peerServerId);
+    }
+
     LOG_WRITE(LogLevel::Info, std::format("internal server disconnected. sessionId={}", spSession->GetId()));
 }
 
-// ──────────────────────────────────────────────────────────────
-// 게이트웨이서버 연결
-// ──────────────────────────────────────────────────────────────
+void GameServer::handleCommunicationHandshakeReq(const netlib::ISessionPtr& spSession, const ServerPacket::ServerHandshakeReq& msg)
+{
+    InternalSessionMeta* pMeta = getInternalSessionMeta(spSession);
+    if (!pMeta || pMeta->handshakeDone)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("invalid internal handshake state. sessionId={}", spSession->GetId()));
+        spSession->Disconnect();
+        return;
+    }
+
+    // Registry에 등록된 Running CommunicationServer만 내부 연결을 만들 수 있다.
+    // server type/id를 모두 확인해 다른 내부 서버의 오접속을 차단한다.
+    const ServerType peerServerType = static_cast<ServerType>(msg.server_type());
+    const int32 peerServerId = msg.server_id();
+    ServerInfo serverInfo;
+    if (peerServerType != ServerType::Communication || peerServerId <= 0 || !m_safeCommunicationInfos.Find(peerServerId, serverInfo) || serverInfo.status != ServerStatus::Running)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("rejected internal handshake. sessionId={} serverType={} serverId={}",
+            spSession->GetId(), msg.server_type(), peerServerId));
+        spSession->Disconnect();
+        return;
+    }
+
+    // 응답 전 세션을 등록한다. 이후 CommunicationServer 패킷의 송수신 기준은 이 serverId다.
+    pMeta->handshakeDone = true;
+    pMeta->peerServerType = peerServerType;
+    pMeta->peerServerId = peerServerId;
+    pMeta->isConnector = false;
+    m_safeCommunicationSessions.Insert(peerServerId, spSession);
+
+    ServerPacket::ServerHandshakeRes res;
+    res.set_success(true);
+    res.set_server_id(m_serverId);
+    netlib::PacketPtr spResponse = SerializePacket(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_RES, res);
+    if (!spResponse)
+    {
+        LOG_WRITE(LogLevel::Error, std::format("failed to serialize internal handshake response. serverId={}", peerServerId));
+        spSession->Disconnect();
+        return;
+    }
+
+    spSession->Send(spResponse);
+
+    // handshake 응답이 같은 TCP 세션에서 먼저 전송되므로 CommunicationServer는 인증 완료 후 snapshot을 처리한다.
+    m_chatManager.SendPresenceSnapshot(spSession, peerServerId);
+    LOG_WRITE(LogLevel::Info, std::format("CommunicationServer handshake complete. serverId={} sessionId={}", peerServerId, spSession->GetId()));
+}
 
 void GameServer::onGatewayConnect(const netlib::ISessionPtr& spSession)
 {
@@ -733,6 +821,9 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 accountId, Game
         co_return;
     }
 
+    // 캐릭터 선택이 확정되면 Stage 로딩 상태와 무관하게 채팅 수신 대상으로 등록한다.
+    m_chatManager.NotifyPresence(character.character_id(), character.name(), true);
+
     // ── 6) 클라에게 CharacterSelectRes(성공) 송신 → 클라는 전체 데이터로 LocalPlayer 데이터모델을 만들고 로딩 시작 ──
     // 스폰을 시작하는 EnqueueMessage 보다 먼저 Res 를 보낸다 (클라가 데이터모델을 먼저 갖춘 뒤 로딩하도록).
     sendCharacterSelectRes(accountId, EResultCode::Success, "", &character, spTown->GetStageDataKey());
@@ -825,6 +916,9 @@ void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSess
         LOG_WRITE(LogLevel::Warn, std::format("user not found on disconnect. accountId={}", accountId));
         return;
     }
+
+    if (CharacterPtr spCharacter = spUser->GetCurrentCharacter())
+        m_chatManager.NotifyPresence(spCharacter->GetProto().character_id(), spCharacter->GetProto().name(), false);
 
     // 유저가 속한 Stage에만 퇴장 메시지 push.
     const int64 currentStageId = spUser->GetCurrentStageId();
@@ -938,6 +1032,9 @@ db::DetachedCoTask GameServer::BeginCrossServerMove(int64 accountId, int32 targe
     }
 
     // ── 3) 확정(point of no return). 이제 출발 Stage에서 퇴장 + 글로벌맵 제거. ──
+    // 목적지 서버가 캐릭터를 로드해 다시 등록할 때까지의 presence 공백은 현재 허용한다.
+    m_chatManager.NotifyPresence(characterId, spCharacter->GetProto().name(), false);
+
     // 퇴장은 출발 Stage 스레드에서 처리되도록 메시지로 큐잉(다음 tick에 OnUserLeave → AOI despawn).
     // 글로벌맵에서 빼도 출발 Stage의 m_users가 다음 tick까지 캐릭터를 살려둔다.
     pSourceStage->EnqueueMessage(StageMsg_UserLeave{ accountId });
@@ -1014,6 +1111,9 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
         m_safeUsers.EraseAndGet(accountId, removed);
         co_return;
     }
+
+    // 목적지 캐릭터 로드가 끝났으므로 Stage 로딩 완료 전이라도 채팅 수신 대상으로 등록한다.
+    m_chatManager.NotifyPresence(spCharacter->GetProto().character_id(), spCharacter->GetProto().name(), true);
 
     // ── 2단계 입장 시작 (로컬 이동과 동일). 도착 위치타입 보관 + Moving 전환 → 유저만 입장 ──
     spUser->SetPendingPositionType(positionType);

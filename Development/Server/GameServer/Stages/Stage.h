@@ -474,6 +474,8 @@ protected:
     // 개별 패킷 핸들러. getUserPacketHandlerMap 테이블에 등록되어 OnUserPacket 이 호출한다.
     void handleMoveIntentReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
     void handleActorActionReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+    // StageChannel/GameServer 채팅 요청. Global/Whisper는 CommunicationServer 단계에서 처리한다.
+    void handleChatSendReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
     void handleSkillCastReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
     void handleSkillProjectileHitReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
 
@@ -713,4 +715,3 @@ private:
     // 진행 중인 서버 권위 몬스터 투사체들. updateSkillEffects 에서 매 tick 전진+충돌 + 만료 sweep.
     std::vector<std::unique_ptr<MonsterProjectile>> m_monsterProjectiles;
 };
-

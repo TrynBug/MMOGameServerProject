@@ -1250,7 +1250,6 @@ void Stage::OnUserLeave(int64 accountId)
         if (spCharacter && spCharacter->GetStage() == this)
         {
             leavingObjectId = spCharacter->GetObjectId();
-
             // 제거 전에 sector 좌표를 캐시 (despawn broadcast 범위 결정용).
             leavingSectorX = spCharacter->GetCurSectorX();
             leavingSectorZ = spCharacter->GetCurSectorZ();
@@ -1323,6 +1322,7 @@ const Stage::UserPacketHandlerMap& Stage::getUserPacketHandlerMap() const
     static const UserPacketHandlerMap sm_handlers = {
         { Common::GAME_PACKET_ID_MOVE_INTENT_REQ,          &Stage::handleMoveIntentReq },
         { Common::GAME_PACKET_ID_ACTOR_ACTION_REQ,         &Stage::handleActorActionReq },
+        { Common::GAME_PACKET_ID_CHAT_SEND_REQ,            &Stage::handleChatSendReq },
         { Common::GAME_PACKET_ID_SKILL_CAST_REQ,           &Stage::handleSkillCastReq },
         { Common::GAME_PACKET_ID_SKILL_PROJECTILE_HIT_REQ, &Stage::handleSkillProjectileHitReq },
         { Common::GAME_PACKET_ID_STAGE_MOVE_REQ,           &Stage::handleStageMoveReq },
@@ -1404,6 +1404,72 @@ void Stage::handleActorActionReq(const UserPtr& spUser, const netlib::PacketPtr&
 
     // 그대로 AOI 에 중계(연출 전용). action_id/param 검증은 클라 재생 측이 상태 존재여부로 흡수한다.
     BroadcastActorActionNtf(*spCharacter, req.action_id(), req.param());
+}
+
+void Stage::handleChatSendReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+{
+    // Stage 스레드에서 처리하므로 현재 Stage의 m_users를 안전하게 순회할 수 있다.
+    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+    if (!spCharacter || spUser->GetStageState() != EUserStageState::InStage || spCharacter->GetStage() != this)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("ChatSendReq rejected: invalid stage state. stageId={} accountId={}",
+            m_stageId, spUser->GetAccountId()));
+        return;
+    }
+
+    GamePacket::ChatSendReq req;
+    if (!deserializeUserPacket(spUser, spPacket, req))
+        return;
+
+    constexpr size_t k_maxChatMessageBytes = 256;
+    if (req.message().empty() || req.message().size() > k_maxChatMessageBytes)
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("ChatSendReq rejected: invalid message size. accountId={} size={}",
+            spUser->GetAccountId(), req.message().size()));
+        return;
+    }
+
+    const DataStructures::Character& characterData = spCharacter->GetProto();
+    switch (req.chat_type())
+    {
+    case GamePacket::CHAT_TYPE_STAGE_CHANNEL:
+    {
+        // Stage 인스턴스 하나가 stageDataKey의 한 채널을 나타낸다.
+        // 이동 중이거나 이미 다른 Stage에 소속된 유저는 수신자에서 제외한다.
+        std::vector<int64> recipientAccountIds;
+        recipientAccountIds.reserve(m_users.size());
+        for (const auto& [accountId, spRecipient] : m_users)
+        {
+            CharacterPtr spRecipientCharacter = spRecipient ? spRecipient->GetCurrentCharacter() : nullptr;
+            if (spRecipient && spRecipient->GetStageState() == EUserStageState::InStage && spRecipientCharacter && spRecipientCharacter->GetStage() == this)
+                recipientAccountIds.push_back(accountId);
+        }
+
+        GameServer::Instance().GetPacketSender().SendChatRecvNtf(recipientAccountIds, GamePacket::CHAT_TYPE_STAGE_CHANNEL,
+                                                                  characterData.character_id(), characterData.name(), req.message());
+        break;
+    }
+
+    case GamePacket::CHAT_TYPE_GAME_SERVER:
+        GameServer::Instance().GetChatManager().BroadcastGameServerChat(characterData.character_id(), characterData.name(), req.message());
+        break;
+
+    case GamePacket::CHAT_TYPE_GLOBAL:
+        GameServer::Instance().GetChatManager().RequestGlobalChat(characterData.character_id(), characterData.name(), req.message());
+        break;
+
+    case GamePacket::CHAT_TYPE_WHISPER:
+        if (!req.target_name().empty())
+            GameServer::Instance().GetChatManager().RequestWhisper(spUser->GetAccountId(), characterData.character_id(), characterData.name(),
+                                                                  req.target_name(), req.message());
+        break;
+
+    default:
+        // Global/Whisper는 CommunicationServer의 presence와 라우팅이 추가되는 다음 단계 전까지 허용하지 않는다.
+        LOG_WRITE(LogLevel::Warn, std::format("ChatSendReq rejected: unsupported chatType. accountId={} chatType={}",
+            spUser->GetAccountId(), static_cast<int32>(req.chat_type())));
+        break;
+    }
 }
 
 void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
@@ -1523,8 +1589,9 @@ void Stage::handleReturnToCharacterSelectReq(const UserPtr& spUser, const netlib
         return;
     }
 
-    // 캐릭터 선택 상태(None)로 되돌리고 현재 Stage(=this)에서 퇴장 (직접 호출 — 이 Stage 스레드).
+    // 활성 캐릭터를 해제한 뒤 캐릭터 선택 상태(None)로 되돌리고 현재 Stage에서 퇴장한다.
     // 캐릭터는 User 가 계속 소유하며, 다음 선택 시 재로드되어 교체된다. (despawn 브로드캐스트는 OnUserLeave 가 처리)
+    server.GetChatManager().NotifyPresence(spCharacter->GetProto().character_id(), spCharacter->GetProto().name(), false);
     spUser->SetStageState(EUserStageState::None);
     OnUserLeave(accountId);
     // SystemStage 입장 → SystemStage::OnUserEnter 가 CharacterListNtf 를 전송한다(전송 시점 일원화).

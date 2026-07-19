@@ -61,6 +61,22 @@ class ChatBroadcastReq;
 struct ChatBroadcastReqDefaultTypeInternal;
 extern ChatBroadcastReqDefaultTypeInternal _ChatBroadcastReq_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull ChatBroadcastReq_class_data_;
+class ChatPresenceNtf;
+struct ChatPresenceNtfDefaultTypeInternal;
+extern ChatPresenceNtfDefaultTypeInternal _ChatPresenceNtf_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ChatPresenceNtf_class_data_;
+class WhisperNtf;
+struct WhisperNtfDefaultTypeInternal;
+extern WhisperNtfDefaultTypeInternal _WhisperNtf_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull WhisperNtf_class_data_;
+class WhisperReq;
+struct WhisperReqDefaultTypeInternal;
+extern WhisperReqDefaultTypeInternal _WhisperReq_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull WhisperReq_class_data_;
+class WhisperRes;
+struct WhisperResDefaultTypeInternal;
+extern WhisperResDefaultTypeInternal _WhisperRes_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull WhisperRes_class_data_;
 }  // namespace ServerPacket
 namespace google {
 namespace protobuf {
@@ -72,6 +88,984 @@ namespace ServerPacket {
 // ===================================================================
 
 
+// -------------------------------------------------------------------
+
+class WhisperRes final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:ServerPacket.WhisperRes) */ {
+ public:
+  inline WhisperRes() : WhisperRes(nullptr) {}
+  ~WhisperRes() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(WhisperRes* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(WhisperRes));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR WhisperRes(::google::protobuf::internal::ConstantInitialized);
+
+  inline WhisperRes(const WhisperRes& from) : WhisperRes(nullptr, from) {}
+  inline WhisperRes(WhisperRes&& from) noexcept
+      : WhisperRes(nullptr, ::std::move(from)) {}
+  inline WhisperRes& operator=(const WhisperRes& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline WhisperRes& operator=(WhisperRes&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const WhisperRes& default_instance() {
+    return *reinterpret_cast<const WhisperRes*>(
+        &_WhisperRes_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 5;
+  friend void swap(WhisperRes& a, WhisperRes& b) { a.Swap(&b); }
+  inline void Swap(WhisperRes* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(WhisperRes* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  WhisperRes* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<WhisperRes>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const WhisperRes& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const WhisperRes& from) { WhisperRes::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(WhisperRes* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "ServerPacket.WhisperRes"; }
+
+  explicit WhisperRes(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  WhisperRes(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const WhisperRes& from);
+  WhisperRes(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, WhisperRes&& from) noexcept
+      : WhisperRes(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kSenderNameFieldNumber = 2,
+    kTargetNameFieldNumber = 3,
+    kMessageFieldNumber = 4,
+    kErrorMsgFieldNumber = 6,
+    kSenderAccountIdFieldNumber = 1,
+    kSuccessFieldNumber = 5,
+  };
+  // string sender_name = 2;
+  void clear_sender_name() ;
+  const ::std::string& sender_name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_sender_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_sender_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_sender_name();
+  void set_allocated_sender_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_sender_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_sender_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_sender_name();
+
+  public:
+  // string target_name = 3;
+  void clear_target_name() ;
+  const ::std::string& target_name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_target_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_target_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_target_name();
+  void set_allocated_target_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_target_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_target_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_target_name();
+
+  public:
+  // string message = 4;
+  void clear_message() ;
+  const ::std::string& message() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_message(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_message();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_message();
+  void set_allocated_message(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_message() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_message(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_message();
+
+  public:
+  // string error_msg = 6;
+  void clear_error_msg() ;
+  const ::std::string& error_msg() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_error_msg(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_error_msg();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_error_msg();
+  void set_allocated_error_msg(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_error_msg() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_error_msg(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_error_msg();
+
+  public:
+  // int64 sender_account_id = 1;
+  void clear_sender_account_id() ;
+  ::int64_t sender_account_id() const;
+  void set_sender_account_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_sender_account_id() const;
+  void _internal_set_sender_account_id(::int64_t value);
+
+  public:
+  // bool success = 5;
+  void clear_success() ;
+  bool success() const;
+  void set_success(bool value);
+
+  private:
+  bool _internal_success() const;
+  void _internal_set_success(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:ServerPacket.WhisperRes)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<3, 6,
+                                   0, 70,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const WhisperRes& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr sender_name_;
+    ::google::protobuf::internal::ArenaStringPtr target_name_;
+    ::google::protobuf::internal::ArenaStringPtr message_;
+    ::google::protobuf::internal::ArenaStringPtr error_msg_;
+    ::int64_t sender_account_id_;
+    bool success_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_ServerPacket_2fchat_5fserver_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull WhisperRes_class_data_;
+// -------------------------------------------------------------------
+
+class WhisperReq final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:ServerPacket.WhisperReq) */ {
+ public:
+  inline WhisperReq() : WhisperReq(nullptr) {}
+  ~WhisperReq() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(WhisperReq* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(WhisperReq));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR WhisperReq(::google::protobuf::internal::ConstantInitialized);
+
+  inline WhisperReq(const WhisperReq& from) : WhisperReq(nullptr, from) {}
+  inline WhisperReq(WhisperReq&& from) noexcept
+      : WhisperReq(nullptr, ::std::move(from)) {}
+  inline WhisperReq& operator=(const WhisperReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline WhisperReq& operator=(WhisperReq&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const WhisperReq& default_instance() {
+    return *reinterpret_cast<const WhisperReq*>(
+        &_WhisperReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 3;
+  friend void swap(WhisperReq& a, WhisperReq& b) { a.Swap(&b); }
+  inline void Swap(WhisperReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(WhisperReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  WhisperReq* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<WhisperReq>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const WhisperReq& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const WhisperReq& from) { WhisperReq::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(WhisperReq* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "ServerPacket.WhisperReq"; }
+
+  explicit WhisperReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  WhisperReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const WhisperReq& from);
+  WhisperReq(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, WhisperReq&& from) noexcept
+      : WhisperReq(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kSenderNameFieldNumber = 2,
+    kTargetNameFieldNumber = 3,
+    kMessageFieldNumber = 4,
+    kSenderCharacterIdFieldNumber = 1,
+    kSenderAccountIdFieldNumber = 5,
+  };
+  // string sender_name = 2;
+  void clear_sender_name() ;
+  const ::std::string& sender_name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_sender_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_sender_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_sender_name();
+  void set_allocated_sender_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_sender_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_sender_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_sender_name();
+
+  public:
+  // string target_name = 3;
+  void clear_target_name() ;
+  const ::std::string& target_name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_target_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_target_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_target_name();
+  void set_allocated_target_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_target_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_target_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_target_name();
+
+  public:
+  // string message = 4;
+  void clear_message() ;
+  const ::std::string& message() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_message(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_message();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_message();
+  void set_allocated_message(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_message() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_message(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_message();
+
+  public:
+  // int64 sender_character_id = 1;
+  void clear_sender_character_id() ;
+  ::int64_t sender_character_id() const;
+  void set_sender_character_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_sender_character_id() const;
+  void _internal_set_sender_character_id(::int64_t value);
+
+  public:
+  // int64 sender_account_id = 5;
+  void clear_sender_account_id() ;
+  ::int64_t sender_account_id() const;
+  void set_sender_account_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_sender_account_id() const;
+  void _internal_set_sender_account_id(::int64_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:ServerPacket.WhisperReq)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<3, 5,
+                                   0, 61,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const WhisperReq& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr sender_name_;
+    ::google::protobuf::internal::ArenaStringPtr target_name_;
+    ::google::protobuf::internal::ArenaStringPtr message_;
+    ::int64_t sender_character_id_;
+    ::int64_t sender_account_id_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_ServerPacket_2fchat_5fserver_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull WhisperReq_class_data_;
+// -------------------------------------------------------------------
+
+class WhisperNtf final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:ServerPacket.WhisperNtf) */ {
+ public:
+  inline WhisperNtf() : WhisperNtf(nullptr) {}
+  ~WhisperNtf() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(WhisperNtf* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(WhisperNtf));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR WhisperNtf(::google::protobuf::internal::ConstantInitialized);
+
+  inline WhisperNtf(const WhisperNtf& from) : WhisperNtf(nullptr, from) {}
+  inline WhisperNtf(WhisperNtf&& from) noexcept
+      : WhisperNtf(nullptr, ::std::move(from)) {}
+  inline WhisperNtf& operator=(const WhisperNtf& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline WhisperNtf& operator=(WhisperNtf&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const WhisperNtf& default_instance() {
+    return *reinterpret_cast<const WhisperNtf*>(
+        &_WhisperNtf_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 4;
+  friend void swap(WhisperNtf& a, WhisperNtf& b) { a.Swap(&b); }
+  inline void Swap(WhisperNtf* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(WhisperNtf* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  WhisperNtf* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<WhisperNtf>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const WhisperNtf& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const WhisperNtf& from) { WhisperNtf::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(WhisperNtf* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "ServerPacket.WhisperNtf"; }
+
+  explicit WhisperNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  WhisperNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const WhisperNtf& from);
+  WhisperNtf(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, WhisperNtf&& from) noexcept
+      : WhisperNtf(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kSenderNameFieldNumber = 2,
+    kMessageFieldNumber = 4,
+    kSenderCharacterIdFieldNumber = 1,
+    kTargetCharacterIdFieldNumber = 3,
+  };
+  // string sender_name = 2;
+  void clear_sender_name() ;
+  const ::std::string& sender_name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_sender_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_sender_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_sender_name();
+  void set_allocated_sender_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_sender_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_sender_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_sender_name();
+
+  public:
+  // string message = 4;
+  void clear_message() ;
+  const ::std::string& message() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_message(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_message();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_message();
+  void set_allocated_message(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_message() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_message(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_message();
+
+  public:
+  // int64 sender_character_id = 1;
+  void clear_sender_character_id() ;
+  ::int64_t sender_character_id() const;
+  void set_sender_character_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_sender_character_id() const;
+  void _internal_set_sender_character_id(::int64_t value);
+
+  public:
+  // int64 target_character_id = 3;
+  void clear_target_character_id() ;
+  ::int64_t target_character_id() const;
+  void set_target_character_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_target_character_id() const;
+  void _internal_set_target_character_id(::int64_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:ServerPacket.WhisperNtf)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
+                                   0, 50,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const WhisperNtf& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr sender_name_;
+    ::google::protobuf::internal::ArenaStringPtr message_;
+    ::int64_t sender_character_id_;
+    ::int64_t target_character_id_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_ServerPacket_2fchat_5fserver_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull WhisperNtf_class_data_;
+// -------------------------------------------------------------------
+
+class ChatPresenceNtf final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:ServerPacket.ChatPresenceNtf) */ {
+ public:
+  inline ChatPresenceNtf() : ChatPresenceNtf(nullptr) {}
+  ~ChatPresenceNtf() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ChatPresenceNtf* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ChatPresenceNtf));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ChatPresenceNtf(::google::protobuf::internal::ConstantInitialized);
+
+  inline ChatPresenceNtf(const ChatPresenceNtf& from) : ChatPresenceNtf(nullptr, from) {}
+  inline ChatPresenceNtf(ChatPresenceNtf&& from) noexcept
+      : ChatPresenceNtf(nullptr, ::std::move(from)) {}
+  inline ChatPresenceNtf& operator=(const ChatPresenceNtf& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ChatPresenceNtf& operator=(ChatPresenceNtf&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ChatPresenceNtf& default_instance() {
+    return *reinterpret_cast<const ChatPresenceNtf*>(
+        &_ChatPresenceNtf_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 2;
+  friend void swap(ChatPresenceNtf& a, ChatPresenceNtf& b) { a.Swap(&b); }
+  inline void Swap(ChatPresenceNtf* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ChatPresenceNtf* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ChatPresenceNtf* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ChatPresenceNtf>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ChatPresenceNtf& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ChatPresenceNtf& from) { ChatPresenceNtf::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ChatPresenceNtf* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "ServerPacket.ChatPresenceNtf"; }
+
+  explicit ChatPresenceNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ChatPresenceNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ChatPresenceNtf& from);
+  ChatPresenceNtf(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ChatPresenceNtf&& from) noexcept
+      : ChatPresenceNtf(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kCharacterNameFieldNumber = 3,
+    kCharacterIdFieldNumber = 1,
+    kOnlineFieldNumber = 2,
+  };
+  // string character_name = 3;
+  void clear_character_name() ;
+  const ::std::string& character_name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_character_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_character_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_character_name();
+  void set_allocated_character_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_character_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_character_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_character_name();
+
+  public:
+  // int64 character_id = 1;
+  void clear_character_id() ;
+  ::int64_t character_id() const;
+  void set_character_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_character_id() const;
+  void _internal_set_character_id(::int64_t value);
+
+  public:
+  // bool online = 2;
+  void clear_online() ;
+  bool online() const;
+  void set_online(bool value);
+
+  private:
+  bool _internal_online() const;
+  void _internal_set_online(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:ServerPacket.ChatPresenceNtf)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 3,
+                                   0, 51,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ChatPresenceNtf& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr character_name_;
+    ::int64_t character_id_;
+    bool online_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_ServerPacket_2fchat_5fserver_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ChatPresenceNtf_class_data_;
 // -------------------------------------------------------------------
 
 class ChatBroadcastReq final : public ::google::protobuf::Message
@@ -218,7 +1212,7 @@ class ChatBroadcastReq final : public ::google::protobuf::Message
   enum : int {
     kSenderNameFieldNumber = 2,
     kMessageFieldNumber = 3,
-    kSenderAccountIdFieldNumber = 1,
+    kSenderCharacterIdFieldNumber = 1,
   };
   // string sender_name = 2;
   void clear_sender_name() ;
@@ -250,14 +1244,14 @@ class ChatBroadcastReq final : public ::google::protobuf::Message
   ::std::string* PROTOBUF_NONNULL _internal_mutable_message();
 
   public:
-  // int64 sender_account_id = 1;
-  void clear_sender_account_id() ;
-  ::int64_t sender_account_id() const;
-  void set_sender_account_id(::int64_t value);
+  // int64 sender_character_id = 1;
+  void clear_sender_character_id() ;
+  ::int64_t sender_character_id() const;
+  void set_sender_character_id(::int64_t value);
 
   private:
-  ::int64_t _internal_sender_account_id() const;
-  void _internal_set_sender_account_id(::int64_t value);
+  ::int64_t _internal_sender_character_id() const;
+  void _internal_set_sender_character_id(::int64_t value);
 
   public:
   // @@protoc_insertion_point(class_scope:ServerPacket.ChatBroadcastReq)
@@ -288,7 +1282,7 @@ class ChatBroadcastReq final : public ::google::protobuf::Message
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr sender_name_;
     ::google::protobuf::internal::ArenaStringPtr message_;
-    ::int64_t sender_account_id_;
+    ::int64_t sender_character_id_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -442,7 +1436,7 @@ class ChatBroadcastNtf final : public ::google::protobuf::Message
   enum : int {
     kSenderNameFieldNumber = 2,
     kMessageFieldNumber = 3,
-    kSenderAccountIdFieldNumber = 1,
+    kSenderCharacterIdFieldNumber = 1,
   };
   // string sender_name = 2;
   void clear_sender_name() ;
@@ -474,14 +1468,14 @@ class ChatBroadcastNtf final : public ::google::protobuf::Message
   ::std::string* PROTOBUF_NONNULL _internal_mutable_message();
 
   public:
-  // int64 sender_account_id = 1;
-  void clear_sender_account_id() ;
-  ::int64_t sender_account_id() const;
-  void set_sender_account_id(::int64_t value);
+  // int64 sender_character_id = 1;
+  void clear_sender_character_id() ;
+  ::int64_t sender_character_id() const;
+  void set_sender_character_id(::int64_t value);
 
   private:
-  ::int64_t _internal_sender_account_id() const;
-  void _internal_set_sender_account_id(::int64_t value);
+  ::int64_t _internal_sender_character_id() const;
+  void _internal_set_sender_character_id(::int64_t value);
 
   public:
   // @@protoc_insertion_point(class_scope:ServerPacket.ChatBroadcastNtf)
@@ -512,7 +1506,7 @@ class ChatBroadcastNtf final : public ::google::protobuf::Message
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr sender_name_;
     ::google::protobuf::internal::ArenaStringPtr message_;
-    ::int64_t sender_account_id_;
+    ::int64_t sender_character_id_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -537,29 +1531,29 @@ extern const ::google::protobuf::internal::ClassDataFull ChatBroadcastNtf_class_
 
 // ChatBroadcastReq
 
-// int64 sender_account_id = 1;
-inline void ChatBroadcastReq::clear_sender_account_id() {
+// int64 sender_character_id = 1;
+inline void ChatBroadcastReq::clear_sender_character_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.sender_account_id_ = ::int64_t{0};
+  _impl_.sender_character_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000004U);
 }
-inline ::int64_t ChatBroadcastReq::sender_account_id() const {
-  // @@protoc_insertion_point(field_get:ServerPacket.ChatBroadcastReq.sender_account_id)
-  return _internal_sender_account_id();
+inline ::int64_t ChatBroadcastReq::sender_character_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.ChatBroadcastReq.sender_character_id)
+  return _internal_sender_character_id();
 }
-inline void ChatBroadcastReq::set_sender_account_id(::int64_t value) {
-  _internal_set_sender_account_id(value);
+inline void ChatBroadcastReq::set_sender_character_id(::int64_t value) {
+  _internal_set_sender_character_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000004U);
-  // @@protoc_insertion_point(field_set:ServerPacket.ChatBroadcastReq.sender_account_id)
+  // @@protoc_insertion_point(field_set:ServerPacket.ChatBroadcastReq.sender_character_id)
 }
-inline ::int64_t ChatBroadcastReq::_internal_sender_account_id() const {
+inline ::int64_t ChatBroadcastReq::_internal_sender_character_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.sender_account_id_;
+  return _impl_.sender_character_id_;
 }
-inline void ChatBroadcastReq::_internal_set_sender_account_id(::int64_t value) {
+inline void ChatBroadcastReq::_internal_set_sender_character_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.sender_account_id_ = value;
+  _impl_.sender_character_id_ = value;
 }
 
 // string sender_name = 2;
@@ -696,29 +1690,29 @@ inline void ChatBroadcastReq::set_allocated_message(::std::string* PROTOBUF_NULL
 
 // ChatBroadcastNtf
 
-// int64 sender_account_id = 1;
-inline void ChatBroadcastNtf::clear_sender_account_id() {
+// int64 sender_character_id = 1;
+inline void ChatBroadcastNtf::clear_sender_character_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.sender_account_id_ = ::int64_t{0};
+  _impl_.sender_character_id_ = ::int64_t{0};
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000004U);
 }
-inline ::int64_t ChatBroadcastNtf::sender_account_id() const {
-  // @@protoc_insertion_point(field_get:ServerPacket.ChatBroadcastNtf.sender_account_id)
-  return _internal_sender_account_id();
+inline ::int64_t ChatBroadcastNtf::sender_character_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.ChatBroadcastNtf.sender_character_id)
+  return _internal_sender_character_id();
 }
-inline void ChatBroadcastNtf::set_sender_account_id(::int64_t value) {
-  _internal_set_sender_account_id(value);
+inline void ChatBroadcastNtf::set_sender_character_id(::int64_t value) {
+  _internal_set_sender_character_id(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000004U);
-  // @@protoc_insertion_point(field_set:ServerPacket.ChatBroadcastNtf.sender_account_id)
+  // @@protoc_insertion_point(field_set:ServerPacket.ChatBroadcastNtf.sender_character_id)
 }
-inline ::int64_t ChatBroadcastNtf::_internal_sender_account_id() const {
+inline ::int64_t ChatBroadcastNtf::_internal_sender_character_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.sender_account_id_;
+  return _impl_.sender_character_id_;
 }
-inline void ChatBroadcastNtf::_internal_set_sender_account_id(::int64_t value) {
+inline void ChatBroadcastNtf::_internal_set_sender_character_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.sender_account_id_ = value;
+  _impl_.sender_character_id_ = value;
 }
 
 // string sender_name = 2;
@@ -849,6 +1843,872 @@ inline void ChatBroadcastNtf::set_allocated_message(::std::string* PROTOBUF_NULL
     _impl_.message_.Set("", GetArena());
   }
   // @@protoc_insertion_point(field_set_allocated:ServerPacket.ChatBroadcastNtf.message)
+}
+
+// -------------------------------------------------------------------
+
+// ChatPresenceNtf
+
+// int64 character_id = 1;
+inline void ChatPresenceNtf::clear_character_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.character_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline ::int64_t ChatPresenceNtf::character_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.ChatPresenceNtf.character_id)
+  return _internal_character_id();
+}
+inline void ChatPresenceNtf::set_character_id(::int64_t value) {
+  _internal_set_character_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:ServerPacket.ChatPresenceNtf.character_id)
+}
+inline ::int64_t ChatPresenceNtf::_internal_character_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.character_id_;
+}
+inline void ChatPresenceNtf::_internal_set_character_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.character_id_ = value;
+}
+
+// bool online = 2;
+inline void ChatPresenceNtf::clear_online() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.online_ = false;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline bool ChatPresenceNtf::online() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.ChatPresenceNtf.online)
+  return _internal_online();
+}
+inline void ChatPresenceNtf::set_online(bool value) {
+  _internal_set_online(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:ServerPacket.ChatPresenceNtf.online)
+}
+inline bool ChatPresenceNtf::_internal_online() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.online_;
+}
+inline void ChatPresenceNtf::_internal_set_online(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.online_ = value;
+}
+
+// string character_name = 3;
+inline void ChatPresenceNtf::clear_character_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.character_name_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline const ::std::string& ChatPresenceNtf::character_name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:ServerPacket.ChatPresenceNtf.character_name)
+  return _internal_character_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ChatPresenceNtf::set_character_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  _impl_.character_name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.ChatPresenceNtf.character_name)
+}
+inline ::std::string* PROTOBUF_NONNULL ChatPresenceNtf::mutable_character_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  ::std::string* _s = _internal_mutable_character_name();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.ChatPresenceNtf.character_name)
+  return _s;
+}
+inline const ::std::string& ChatPresenceNtf::_internal_character_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.character_name_.Get();
+}
+inline void ChatPresenceNtf::_internal_set_character_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.character_name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ChatPresenceNtf::_internal_mutable_character_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.character_name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ChatPresenceNtf::release_character_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:ServerPacket.ChatPresenceNtf.character_name)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000001U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  auto* released = _impl_.character_name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.character_name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ChatPresenceNtf::set_allocated_character_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  }
+  _impl_.character_name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.character_name_.IsDefault()) {
+    _impl_.character_name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.ChatPresenceNtf.character_name)
+}
+
+// -------------------------------------------------------------------
+
+// WhisperReq
+
+// int64 sender_character_id = 1;
+inline void WhisperReq::clear_sender_character_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_character_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline ::int64_t WhisperReq::sender_character_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperReq.sender_character_id)
+  return _internal_sender_character_id();
+}
+inline void WhisperReq::set_sender_character_id(::int64_t value) {
+  _internal_set_sender_character_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperReq.sender_character_id)
+}
+inline ::int64_t WhisperReq::_internal_sender_character_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.sender_character_id_;
+}
+inline void WhisperReq::_internal_set_sender_character_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_character_id_ = value;
+}
+
+// string sender_name = 2;
+inline void WhisperReq::clear_sender_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_name_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline const ::std::string& WhisperReq::sender_name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperReq.sender_name)
+  return _internal_sender_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void WhisperReq::set_sender_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  _impl_.sender_name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperReq.sender_name)
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperReq::mutable_sender_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  ::std::string* _s = _internal_mutable_sender_name();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.WhisperReq.sender_name)
+  return _s;
+}
+inline const ::std::string& WhisperReq::_internal_sender_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.sender_name_.Get();
+}
+inline void WhisperReq::_internal_set_sender_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperReq::_internal_mutable_sender_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.sender_name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE WhisperReq::release_sender_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:ServerPacket.WhisperReq.sender_name)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000001U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  auto* released = _impl_.sender_name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.sender_name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void WhisperReq::set_allocated_sender_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  }
+  _impl_.sender_name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.sender_name_.IsDefault()) {
+    _impl_.sender_name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.WhisperReq.sender_name)
+}
+
+// string target_name = 3;
+inline void WhisperReq::clear_target_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.target_name_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline const ::std::string& WhisperReq::target_name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperReq.target_name)
+  return _internal_target_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void WhisperReq::set_target_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  _impl_.target_name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperReq.target_name)
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperReq::mutable_target_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  ::std::string* _s = _internal_mutable_target_name();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.WhisperReq.target_name)
+  return _s;
+}
+inline const ::std::string& WhisperReq::_internal_target_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.target_name_.Get();
+}
+inline void WhisperReq::_internal_set_target_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.target_name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperReq::_internal_mutable_target_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.target_name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE WhisperReq::release_target_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:ServerPacket.WhisperReq.target_name)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000002U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  auto* released = _impl_.target_name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.target_name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void WhisperReq::set_allocated_target_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  }
+  _impl_.target_name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.target_name_.IsDefault()) {
+    _impl_.target_name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.WhisperReq.target_name)
+}
+
+// string message = 4;
+inline void WhisperReq::clear_message() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.message_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline const ::std::string& WhisperReq::message() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperReq.message)
+  return _internal_message();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void WhisperReq::set_message(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  _impl_.message_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperReq.message)
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperReq::mutable_message()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  ::std::string* _s = _internal_mutable_message();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.WhisperReq.message)
+  return _s;
+}
+inline const ::std::string& WhisperReq::_internal_message() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.message_.Get();
+}
+inline void WhisperReq::_internal_set_message(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.message_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperReq::_internal_mutable_message() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.message_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE WhisperReq::release_message() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:ServerPacket.WhisperReq.message)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000004U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
+  auto* released = _impl_.message_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.message_.Set("", GetArena());
+  }
+  return released;
+}
+inline void WhisperReq::set_allocated_message(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
+  }
+  _impl_.message_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.message_.IsDefault()) {
+    _impl_.message_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.WhisperReq.message)
+}
+
+// int64 sender_account_id = 5;
+inline void WhisperReq::clear_sender_account_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_account_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000010U);
+}
+inline ::int64_t WhisperReq::sender_account_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperReq.sender_account_id)
+  return _internal_sender_account_id();
+}
+inline void WhisperReq::set_sender_account_id(::int64_t value) {
+  _internal_set_sender_account_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperReq.sender_account_id)
+}
+inline ::int64_t WhisperReq::_internal_sender_account_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.sender_account_id_;
+}
+inline void WhisperReq::_internal_set_sender_account_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_account_id_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// WhisperNtf
+
+// int64 sender_character_id = 1;
+inline void WhisperNtf::clear_sender_character_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_character_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline ::int64_t WhisperNtf::sender_character_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperNtf.sender_character_id)
+  return _internal_sender_character_id();
+}
+inline void WhisperNtf::set_sender_character_id(::int64_t value) {
+  _internal_set_sender_character_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperNtf.sender_character_id)
+}
+inline ::int64_t WhisperNtf::_internal_sender_character_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.sender_character_id_;
+}
+inline void WhisperNtf::_internal_set_sender_character_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_character_id_ = value;
+}
+
+// string sender_name = 2;
+inline void WhisperNtf::clear_sender_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_name_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline const ::std::string& WhisperNtf::sender_name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperNtf.sender_name)
+  return _internal_sender_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void WhisperNtf::set_sender_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  _impl_.sender_name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperNtf.sender_name)
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperNtf::mutable_sender_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  ::std::string* _s = _internal_mutable_sender_name();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.WhisperNtf.sender_name)
+  return _s;
+}
+inline const ::std::string& WhisperNtf::_internal_sender_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.sender_name_.Get();
+}
+inline void WhisperNtf::_internal_set_sender_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperNtf::_internal_mutable_sender_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.sender_name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE WhisperNtf::release_sender_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:ServerPacket.WhisperNtf.sender_name)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000001U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  auto* released = _impl_.sender_name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.sender_name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void WhisperNtf::set_allocated_sender_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  }
+  _impl_.sender_name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.sender_name_.IsDefault()) {
+    _impl_.sender_name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.WhisperNtf.sender_name)
+}
+
+// int64 target_character_id = 3;
+inline void WhisperNtf::clear_target_character_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.target_character_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline ::int64_t WhisperNtf::target_character_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperNtf.target_character_id)
+  return _internal_target_character_id();
+}
+inline void WhisperNtf::set_target_character_id(::int64_t value) {
+  _internal_set_target_character_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperNtf.target_character_id)
+}
+inline ::int64_t WhisperNtf::_internal_target_character_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.target_character_id_;
+}
+inline void WhisperNtf::_internal_set_target_character_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.target_character_id_ = value;
+}
+
+// string message = 4;
+inline void WhisperNtf::clear_message() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.message_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline const ::std::string& WhisperNtf::message() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperNtf.message)
+  return _internal_message();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void WhisperNtf::set_message(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  _impl_.message_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperNtf.message)
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperNtf::mutable_message()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  ::std::string* _s = _internal_mutable_message();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.WhisperNtf.message)
+  return _s;
+}
+inline const ::std::string& WhisperNtf::_internal_message() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.message_.Get();
+}
+inline void WhisperNtf::_internal_set_message(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.message_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperNtf::_internal_mutable_message() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.message_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE WhisperNtf::release_message() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:ServerPacket.WhisperNtf.message)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000002U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  auto* released = _impl_.message_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.message_.Set("", GetArena());
+  }
+  return released;
+}
+inline void WhisperNtf::set_allocated_message(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  }
+  _impl_.message_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.message_.IsDefault()) {
+    _impl_.message_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.WhisperNtf.message)
+}
+
+// -------------------------------------------------------------------
+
+// WhisperRes
+
+// int64 sender_account_id = 1;
+inline void WhisperRes::clear_sender_account_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_account_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000010U);
+}
+inline ::int64_t WhisperRes::sender_account_id() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperRes.sender_account_id)
+  return _internal_sender_account_id();
+}
+inline void WhisperRes::set_sender_account_id(::int64_t value) {
+  _internal_set_sender_account_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperRes.sender_account_id)
+}
+inline ::int64_t WhisperRes::_internal_sender_account_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.sender_account_id_;
+}
+inline void WhisperRes::_internal_set_sender_account_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_account_id_ = value;
+}
+
+// string sender_name = 2;
+inline void WhisperRes::clear_sender_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_name_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline const ::std::string& WhisperRes::sender_name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperRes.sender_name)
+  return _internal_sender_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void WhisperRes::set_sender_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  _impl_.sender_name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperRes.sender_name)
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperRes::mutable_sender_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  ::std::string* _s = _internal_mutable_sender_name();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.WhisperRes.sender_name)
+  return _s;
+}
+inline const ::std::string& WhisperRes::_internal_sender_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.sender_name_.Get();
+}
+inline void WhisperRes::_internal_set_sender_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperRes::_internal_mutable_sender_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.sender_name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE WhisperRes::release_sender_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:ServerPacket.WhisperRes.sender_name)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000001U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  auto* released = _impl_.sender_name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.sender_name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void WhisperRes::set_allocated_sender_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  }
+  _impl_.sender_name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.sender_name_.IsDefault()) {
+    _impl_.sender_name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.WhisperRes.sender_name)
+}
+
+// string target_name = 3;
+inline void WhisperRes::clear_target_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.target_name_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline const ::std::string& WhisperRes::target_name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperRes.target_name)
+  return _internal_target_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void WhisperRes::set_target_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  _impl_.target_name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperRes.target_name)
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperRes::mutable_target_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  ::std::string* _s = _internal_mutable_target_name();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.WhisperRes.target_name)
+  return _s;
+}
+inline const ::std::string& WhisperRes::_internal_target_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.target_name_.Get();
+}
+inline void WhisperRes::_internal_set_target_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.target_name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperRes::_internal_mutable_target_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.target_name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE WhisperRes::release_target_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:ServerPacket.WhisperRes.target_name)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000002U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  auto* released = _impl_.target_name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.target_name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void WhisperRes::set_allocated_target_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  }
+  _impl_.target_name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.target_name_.IsDefault()) {
+    _impl_.target_name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.WhisperRes.target_name)
+}
+
+// string message = 4;
+inline void WhisperRes::clear_message() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.message_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline const ::std::string& WhisperRes::message() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperRes.message)
+  return _internal_message();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void WhisperRes::set_message(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  _impl_.message_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperRes.message)
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperRes::mutable_message()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  ::std::string* _s = _internal_mutable_message();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.WhisperRes.message)
+  return _s;
+}
+inline const ::std::string& WhisperRes::_internal_message() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.message_.Get();
+}
+inline void WhisperRes::_internal_set_message(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.message_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperRes::_internal_mutable_message() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.message_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE WhisperRes::release_message() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:ServerPacket.WhisperRes.message)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000004U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
+  auto* released = _impl_.message_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.message_.Set("", GetArena());
+  }
+  return released;
+}
+inline void WhisperRes::set_allocated_message(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
+  }
+  _impl_.message_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.message_.IsDefault()) {
+    _impl_.message_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.WhisperRes.message)
+}
+
+// bool success = 5;
+inline void WhisperRes::clear_success() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.success_ = false;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000020U);
+}
+inline bool WhisperRes::success() const {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperRes.success)
+  return _internal_success();
+}
+inline void WhisperRes::set_success(bool value) {
+  _internal_set_success(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperRes.success)
+}
+inline bool WhisperRes::_internal_success() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.success_;
+}
+inline void WhisperRes::_internal_set_success(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.success_ = value;
+}
+
+// string error_msg = 6;
+inline void WhisperRes::clear_error_msg() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.error_msg_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline const ::std::string& WhisperRes::error_msg() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:ServerPacket.WhisperRes.error_msg)
+  return _internal_error_msg();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void WhisperRes::set_error_msg(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  _impl_.error_msg_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:ServerPacket.WhisperRes.error_msg)
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperRes::mutable_error_msg()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  ::std::string* _s = _internal_mutable_error_msg();
+  // @@protoc_insertion_point(field_mutable:ServerPacket.WhisperRes.error_msg)
+  return _s;
+}
+inline const ::std::string& WhisperRes::_internal_error_msg() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.error_msg_.Get();
+}
+inline void WhisperRes::_internal_set_error_msg(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.error_msg_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL WhisperRes::_internal_mutable_error_msg() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.error_msg_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE WhisperRes::release_error_msg() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:ServerPacket.WhisperRes.error_msg)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000008U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000008U);
+  auto* released = _impl_.error_msg_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.error_msg_.Set("", GetArena());
+  }
+  return released;
+}
+inline void WhisperRes::set_allocated_error_msg(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000008U);
+  }
+  _impl_.error_msg_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.error_msg_.IsDefault()) {
+    _impl_.error_msg_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:ServerPacket.WhisperRes.error_msg)
 }
 
 #ifdef __GNUC__

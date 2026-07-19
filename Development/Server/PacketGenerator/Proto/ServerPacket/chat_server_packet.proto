@@ -3,21 +3,51 @@ syntax = "proto3";
 package ServerPacket;
 
 // ──────────────────────────────────────────────
-// 채팅서버 <-> 게임서버
+// 커뮤니케이션 서버 <-> 게임서버
 // ──────────────────────────────────────────────
 
-// 채팅 브로드캐스트 요청 (게임서버 -> 채팅서버)
-// 게임서버가 클라로부터 채팅 패킷을 받으면 채팅서버로 전달
+// 채팅 브로드캐스트 요청 (게임서버 -> 커뮤니케이션 서버)
+// 게임서버가 클라로부터 채팅 패킷을 받으면 커뮤니케이션 서버로 전달
 message ChatBroadcastReq {
-    int64 sender_account_id = 1;
+    int64 sender_character_id = 1;
     string sender_name = 2;
     string message = 3;
 }
 
-// 채팅 브로드캐스트 알림 (채팅서버 -> 게임서버들)
-// 채팅서버가 모든 게임서버에게 전달, 게임서버는 자기 서버 유저들에게 브로드캐스트
+// 채팅 브로드캐스트 알림 (커뮤니케이션 서버 -> 게임서버들)
+// 커뮤니케이션 서버가 모든 게임서버에게 전달, 게임서버는 자기 서버 유저들에게 브로드캐스트
 message ChatBroadcastNtf {
-    int64 sender_account_id = 1;
+    int64 sender_character_id = 1;
     string sender_name = 2;
     string message = 3;
+}
+
+message ChatPresenceNtf { 
+    int64 character_id = 1; 
+    bool online = 2; 
+    string character_name = 3; 
+}
+
+message WhisperReq { 
+    int64 sender_character_id = 1; 
+    string sender_name = 2; 
+    string target_name = 3; 
+    string message = 4; 
+    int64 sender_account_id = 5; 
+}
+
+message WhisperNtf { 
+    int64 sender_character_id = 1; 
+    string sender_name = 2; 
+    int64 target_character_id = 3; 
+    string message = 4; 
+}
+
+message WhisperRes { 
+    int64 sender_account_id = 1; 
+    string sender_name = 2;
+    string target_name = 3; 
+    string message = 4; 
+    bool success = 5; 
+    string error_msg = 6; 
 }

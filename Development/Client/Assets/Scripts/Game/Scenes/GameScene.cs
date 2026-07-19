@@ -54,6 +54,7 @@ namespace Client.Game
             Managers.Managers.UI.ShowSceneUI<UI_PlayerHud>();
             Managers.Managers.UI.ShowSceneUI<UI_BuffBar>();
             Managers.Managers.UI.ShowSceneUI<UI_Minimap>();
+            Managers.Managers.UI.ShowSceneUI<UI_Chat>();
 
             // Esc 메뉴 토글 구독.
             Managers.Managers.Input.OnMenu += toggleMenu;

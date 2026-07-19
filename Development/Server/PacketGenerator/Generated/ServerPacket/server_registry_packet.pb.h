@@ -126,7 +126,7 @@ enum ServerType : int {
   SERVER_TYPE_LOGIN = 2,
   SERVER_TYPE_GATEWAY = 3,
   SERVER_TYPE_GAME = 4,
-  SERVER_TYPE_CHAT = 5,
+  SERVER_TYPE_COMMUNICATION = 5,
   ServerType_INT_MIN_SENTINEL_DO_NOT_USE_ =
       ::std::numeric_limits<::int32_t>::min(),
   ServerType_INT_MAX_SENTINEL_DO_NOT_USE_ =

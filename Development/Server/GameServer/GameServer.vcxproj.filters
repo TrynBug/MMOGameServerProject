@@ -57,6 +57,9 @@
     <ClCompile Include="Managers\CheatManager.cpp">
       <Filter>소스 파일\Managers</Filter>
     </ClCompile>
+    <ClCompile Include="Managers\ChatManager.cpp">
+      <Filter>소스 파일\Managers</Filter>
+    </ClCompile>
     <ClCompile Include="Managers\CastAnchorRegistry.cpp">
       <Filter>소스 파일\Managers</Filter>
     </ClCompile>
@@ -162,6 +165,9 @@
       <Filter>소스 파일\Components</Filter>
     </ClInclude>
     <ClInclude Include="Managers\CheatManager.h">
+      <Filter>소스 파일\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Managers\ChatManager.h">
       <Filter>소스 파일\Managers</Filter>
     </ClInclude>
     <ClInclude Include="Managers\CastAnchorRegistry.h">

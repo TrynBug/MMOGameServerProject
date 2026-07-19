@@ -42,7 +42,7 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
     case ServerType::Login:    serverTypeName = "LoginServer";    break;
     case ServerType::Gateway:  serverTypeName = "GatewayServer";  break;
     case ServerType::Game:     serverTypeName = "GameServer";     break;
-    case ServerType::Chat:     serverTypeName = "ChatServer";     break;
+    case ServerType::Communication: serverTypeName = "CommunicationServer"; break;
     default:                   serverTypeName = "Server";         break;
     }
 

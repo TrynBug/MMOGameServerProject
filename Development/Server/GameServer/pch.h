@@ -34,6 +34,7 @@
 #include "Generated/DataStructures/account_currency.pb.h"
 #include "Generated/DataStructures/item.pb.h"
 #include "Generated/GamePacket/character_packet.pb.h"
+#include "Generated/GamePacket/chat_packet.pb.h"
 #include "Generated/GamePacket/session_packet.pb.h"
 #include "Generated/GamePacket/stage_packet.pb.h"
 #include "Generated/GamePacket/object_visibility_packet.pb.h"
@@ -46,6 +47,7 @@
 #include "Generated/GamePacket/debug_packet.pb.h"
 #include "Generated/ServerPacket/gateway_user_packet.pb.h"
 #include "Generated/ServerPacket/gateway_game_packet.pb.h"
+#include "Generated/ServerPacket/chat_server_packet.pb.h"
 
 // GameDataLib enum
 #include "Enum/GameEnum_Common.h"

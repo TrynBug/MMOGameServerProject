@@ -42,6 +42,7 @@ enum GamePacketId {
     // 3000~3999: 채팅
     GAME_PACKET_ID_CHAT_SEND_REQ = 3001;   // 클라 -> 서버: 채팅 전송 요청
     GAME_PACKET_ID_CHAT_RECV_NTF = 3002;   // 서버 -> 클라: 채팅 수신 알림 (브로드캐스트)
+    GAME_PACKET_ID_CHAT_SEND_RES = 3003;   // 서버 -> 클라: 채팅 전송 결과
 
     // 4000~4999: Stage / 주변 캐릭터
     // 4001: 과거 STAGE_ENTER_NTF 자리. STAGE_LOAD_COMPLETE_RES로 통합되어 제거됨.
@@ -124,9 +125,13 @@ enum ServerPacketId {
     SERVER_PACKET_ID_LOGIN_AUTH_TOKEN_NTF = 2001;          // 로그인서버 -> 게이트웨이: 인증 토큰 사전 전달
     SERVER_PACKET_ID_LOGIN_DUPLICATE_NTF = 2002;           // 로그인서버 -> 게이트웨이: 중복 로그인 알림
 
-    // 3000~3999: 채팅 서버 관련 (게임서버 <-> 채팅서버)
-    SERVER_PACKET_ID_CHAT_BROADCAST_REQ = 3001;   // 게임서버 -> 채팅서버: 채팅 브로드캐스트 요청
-    SERVER_PACKET_ID_CHAT_BROADCAST_NTF = 3002;   // 채팅서버 -> 게임서버: 채팅 브로드캐스트 알림
+    // 3000~3999: CommunicationServer 관련 (게임서버 <-> CommunicationServer)
+    SERVER_PACKET_ID_CHAT_BROADCAST_REQ = 3001;   // 게임서버 -> CommunicationServer: 채팅 브로드캐스트 요청
+    SERVER_PACKET_ID_CHAT_BROADCAST_NTF = 3002;   // CommunicationServer -> 게임서버: 채팅 브로드캐스트 알림
+    SERVER_PACKET_ID_CHAT_PRESENCE_NTF = 3003;    // 게임서버 -> CommunicationServer: InStage 캐릭터 presence 변경
+    SERVER_PACKET_ID_WHISPER_REQ = 3004;          // 게임서버 -> CommunicationServer: 귓속말 라우팅 요청
+    SERVER_PACKET_ID_WHISPER_NTF = 3005;          // CommunicationServer -> 게임서버: 귓속말 전달
+    SERVER_PACKET_ID_WHISPER_RES = 3006;          // CommunicationServer -> 게임서버: 귓속말 라우팅 결과
 
     // 9000~9999: 레지스트리 서버 관련
     SERVER_PACKET_ID_REGISTRY_REGISTER_REQ = 9001;       // 서버 -> 레지스트리: 등록 요청

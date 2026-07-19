@@ -501,20 +501,21 @@ const char descriptor_table_protodef_ServerPacket_2fserver_5fregistry_5fpacket_2
     "\014timestamp_ms\030\001 \001(\003\",\n\024RegistryHeartbeat"
     "Res\022\024\n\014timestamp_ms\030\001 \001(\003\"*\n\024RegistryUse"
     "rCountNtf\022\022\n\nuser_count\030\001 \001(\005\"\025\n\023Registr"
-    "yShutdownReq*\233\001\n\nServerType\022\027\n\023SERVER_TY"
+    "yShutdownReq*\244\001\n\nServerType\022\027\n\023SERVER_TY"
     "PE_UNKNOWN\020\000\022\030\n\024SERVER_TYPE_REGISTRY\020\001\022\025"
     "\n\021SERVER_TYPE_LOGIN\020\002\022\027\n\023SERVER_TYPE_GAT"
-    "EWAY\020\003\022\024\n\020SERVER_TYPE_GAME\020\004\022\024\n\020SERVER_T"
-    "YPE_CHAT\020\005*\205\001\n\014ServerStatus\022\031\n\025SERVER_ST"
-    "ATUS_UNKNOWN\020\000\022\031\n\025SERVER_STATUS_RUNNING\020"
-    "\001\022\037\n\033SERVER_STATUS_SHUTTING_DOWN\020\002\022\036\n\032SE"
-    "RVER_STATUS_DISCONNECTED\020\003b\006proto3"
+    "EWAY\020\003\022\024\n\020SERVER_TYPE_GAME\020\004\022\035\n\031SERVER_T"
+    "YPE_COMMUNICATION\020\005*\205\001\n\014ServerStatus\022\031\n\025"
+    "SERVER_STATUS_UNKNOWN\020\000\022\031\n\025SERVER_STATUS"
+    "_RUNNING\020\001\022\037\n\033SERVER_STATUS_SHUTTING_DOW"
+    "N\020\002\022\036\n\032SERVER_STATUS_DISCONNECTED\020\003b\006pro"
+    "to3"
 };
 static ::absl::once_flag descriptor_table_ServerPacket_2fserver_5fregistry_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2fserver_5fregistry_5fpacket_2eproto = {
     false,
     false,
-    1314,
+    1323,
     descriptor_table_protodef_ServerPacket_2fserver_5fregistry_5fpacket_2eproto,
     "ServerPacket/server_registry_packet.proto",
     &descriptor_table_ServerPacket_2fserver_5fregistry_5fpacket_2eproto_once,

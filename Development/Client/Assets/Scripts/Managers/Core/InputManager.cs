@@ -29,6 +29,16 @@ namespace Client.Managers
         private bool m_gameplayBlocked;
         public void SetGameplayBlocked(bool blocked) { m_gameplayBlocked = blocked; }
 
+        // 채팅 입력처럼 키보드 단축키만 막고 마우스 이동은 유지해야 할 때 사용한다.
+        // 전체 입력 차단과 분리해, 입력창 포커스 중에도 MouseClick 액션은 계속 동작한다.
+        private bool m_keyboardGameplayBlocked;
+        public void SetKeyboardGameplayBlocked(bool blocked) { m_keyboardGameplayBlocked = blocked; }
+
+        // 채팅창처럼 Esc를 먼저 소비해야 하는 UI가 열려 있을 때 게임 메뉴 토글만 막는다.
+        // 키보드 단축키와 마우스 게임 입력에는 영향을 주지 않는다.
+        private bool m_menuInputBlocked;
+        public void SetMenuInputBlocked(bool blocked) { m_menuInputBlocked = blocked; }
+
         // ─── 외부 노출 이벤트 (Rookiss 스타일 Action 델리게이트) ──────────
         //
         // performed 시점에 한 번 호출. 즉 Q를 누른 순간에 한 번.
@@ -97,18 +107,27 @@ namespace Client.Managers
             m_gameInput.Gameplay.MouseClick.started   += onMouseClickStarted;
             m_gameInput.Gameplay.MouseClick.canceled  += onMouseClickCanceled;
 
-            m_gameInput.Gameplay.Skill1.performed        += _ => { if (!m_gameplayBlocked) OnSkill1?.Invoke(); };
-            m_gameInput.Gameplay.Skill2.performed        += _ => { if (!m_gameplayBlocked) OnSkill2?.Invoke(); };
-            m_gameInput.Gameplay.Skill3.performed        += _ => { if (!m_gameplayBlocked) OnSkill3?.Invoke(); };
-            m_gameInput.Gameplay.Skill4.performed        += _ => { if (!m_gameplayBlocked) OnSkill4?.Invoke(); };
+            m_gameInput.Gameplay.Skill1.performed        += _ => { if (isKeyboardGameplayAllowed()) OnSkill1?.Invoke(); };
+            m_gameInput.Gameplay.Skill2.performed        += _ => { if (isKeyboardGameplayAllowed()) OnSkill2?.Invoke(); };
+            m_gameInput.Gameplay.Skill3.performed        += _ => { if (isKeyboardGameplayAllowed()) OnSkill3?.Invoke(); };
+            m_gameInput.Gameplay.Skill4.performed        += _ => { if (isKeyboardGameplayAllowed()) OnSkill4?.Invoke(); };
 
-            m_gameInput.Gameplay.Inventory.performed     += _ => { if (!m_gameplayBlocked) OnInventory?.Invoke(); };
-            m_gameInput.Gameplay.CharacterMenu.performed += _ => { if (!m_gameplayBlocked) OnCharacterMenu?.Invoke(); };
-            m_gameInput.Gameplay.Menu.performed          += _ => OnMenu?.Invoke();   // Esc 는 차단하지 않음 (메뉴 토글)
-            m_gameInput.Gameplay.Interact.performed      += _ => { if (!m_gameplayBlocked) OnInteract?.Invoke(); };
+            m_gameInput.Gameplay.Inventory.performed     += _ => { if (isKeyboardGameplayAllowed()) OnInventory?.Invoke(); };
+            m_gameInput.Gameplay.CharacterMenu.performed += _ => { if (isKeyboardGameplayAllowed()) OnCharacterMenu?.Invoke(); };
+            m_gameInput.Gameplay.Menu.performed          += _ =>
+            {
+                if (!m_keyboardGameplayBlocked && !m_menuInputBlocked)
+                    OnMenu?.Invoke();
+            };
+            m_gameInput.Gameplay.Interact.performed      += _ => { if (isKeyboardGameplayAllowed()) OnInteract?.Invoke(); };
 
             // 시작은 Gameplay 액션맵부터
             m_gameInput.Gameplay.Enable();
+        }
+
+        private bool isKeyboardGameplayAllowed()
+        {
+            return !m_gameplayBlocked && !m_keyboardGameplayBlocked;
         }
 
         private void onMouseClickStarted(InputAction.CallbackContext ctx)

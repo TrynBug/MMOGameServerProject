@@ -363,3 +363,30 @@ void PacketSender::SendStageNoticeNtf(std::span<const int64> accountIds, const s
 
     SendToUsers(accountIds, Common::GAME_PACKET_ID_STAGE_NOTICE_NTF, ntf);
 }
+
+void PacketSender::SendChatRecvNtf(std::span<const int64> accountIds, GamePacket::ChatType chatType, int64 senderCharacterId,
+                                   const std::string& senderName, const std::string& message, int64 targetCharacterId)
+{
+    GamePacket::ChatRecvNtf ntf;
+    ntf.set_chat_type(chatType);
+    ntf.set_sender_character_id(senderCharacterId);
+    ntf.set_sender_name(senderName);
+    ntf.set_message(message);
+    ntf.set_target_character_id(targetCharacterId);
+
+    SendToUsers(accountIds, Common::GAME_PACKET_ID_CHAT_RECV_NTF, ntf);
+}
+
+void PacketSender::SendChatSendRes(int64 accountId, EResultCode resultCode, const std::string& errorMsg, GamePacket::ChatType chatType,
+                                   const std::string& senderName, const std::string& targetName, const std::string& message)
+{
+    GamePacket::ChatSendRes res;
+    res.set_result_code(static_cast<int32>(resultCode));
+    res.set_error_msg(errorMsg);
+    res.set_chat_type(chatType);
+    res.set_sender_name(senderName);
+    res.set_target_name(targetName);
+    res.set_message(message);
+
+    SendToUser(accountId, Common::GAME_PACKET_ID_CHAT_SEND_RES, res);
+}

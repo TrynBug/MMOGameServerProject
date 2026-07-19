@@ -140,6 +140,14 @@ public:
     // Stage 공지 배너 전송 (StageNoticeNtf). Stage 로직 스크립트의 Notice() 가 발생. 클라는 화면 배너 표시.
     void SendStageNoticeNtf(std::span<const int64> accountIds, const std::string& message, int32 durationMs);
 
+    // 채팅 수신 알림 전송. Stage/서버 범위 모두 같은 Gateway 묶음 송신 경로를 사용한다.
+    void SendChatRecvNtf(std::span<const int64> accountIds, GamePacket::ChatType chatType, int64 senderCharacterId,
+                         const std::string& senderName, const std::string& message, int64 targetCharacterId = 0);
+
+    // 채팅 전송 결과. 현재 귓속말 성공 echo와 실패 시스템 메시지에 사용한다.
+    void SendChatSendRes(int64 accountId, EResultCode resultCode, const std::string& errorMsg, GamePacket::ChatType chatType,
+                         const std::string& senderName, const std::string& targetName, const std::string& message);
+
 private:
     // message 를 클라용 패킷 [Header(packetType)][payload] 의 버퍼에 직접 직렬화하고(중간 std::string 없음),
     // 수신자 accountId 목록을 sidecar 로 붙여 게이트웨이 세션으로 전송한다. accountId 수가 많아 패킷 최대크기(uint16)를

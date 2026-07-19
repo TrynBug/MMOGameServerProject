@@ -26,6 +26,140 @@ namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 namespace ServerPacket {
 
+inline constexpr WhisperRes::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        sender_name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        target_name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        message_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        error_msg_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        sender_account_id_{::int64_t{0}},
+        success_{false} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR WhisperRes::WhisperRes(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(WhisperRes_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct WhisperResDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR WhisperResDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~WhisperResDefaultTypeInternal() {}
+  union {
+    WhisperRes _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 WhisperResDefaultTypeInternal _WhisperRes_default_instance_;
+
+inline constexpr WhisperReq::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        sender_name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        target_name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        message_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        sender_character_id_{::int64_t{0}},
+        sender_account_id_{::int64_t{0}} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR WhisperReq::WhisperReq(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(WhisperReq_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct WhisperReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR WhisperReqDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~WhisperReqDefaultTypeInternal() {}
+  union {
+    WhisperReq _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 WhisperReqDefaultTypeInternal _WhisperReq_default_instance_;
+
+inline constexpr WhisperNtf::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        sender_name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        message_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        sender_character_id_{::int64_t{0}},
+        target_character_id_{::int64_t{0}} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR WhisperNtf::WhisperNtf(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(WhisperNtf_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct WhisperNtfDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR WhisperNtfDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~WhisperNtfDefaultTypeInternal() {}
+  union {
+    WhisperNtf _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 WhisperNtfDefaultTypeInternal _WhisperNtf_default_instance_;
+
+inline constexpr ChatPresenceNtf::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        character_name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        character_id_{::int64_t{0}},
+        online_{false} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ChatPresenceNtf::ChatPresenceNtf(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(ChatPresenceNtf_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ChatPresenceNtfDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ChatPresenceNtfDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ChatPresenceNtfDefaultTypeInternal() {}
+  union {
+    ChatPresenceNtf _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatPresenceNtfDefaultTypeInternal _ChatPresenceNtf_default_instance_;
+
 inline constexpr ChatBroadcastReq::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -35,7 +169,7 @@ inline constexpr ChatBroadcastReq::Impl_::Impl_(
         message_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        sender_account_id_{::int64_t{0}} {}
+        sender_character_id_{::int64_t{0}} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR ChatBroadcastReq::ChatBroadcastReq(::_pbi::ConstantInitialized)
@@ -66,7 +200,7 @@ inline constexpr ChatBroadcastNtf::Impl_::Impl_(
         message_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        sender_account_id_{::int64_t{0}} {}
+        sender_character_id_{::int64_t{0}} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR ChatBroadcastNtf::ChatBroadcastNtf(::_pbi::ConstantInitialized)
@@ -98,7 +232,7 @@ const ::uint32_t
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatBroadcastReq, _impl_._has_bits_),
         6, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatBroadcastReq, _impl_.sender_account_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatBroadcastReq, _impl_.sender_character_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatBroadcastReq, _impl_.sender_name_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatBroadcastReq, _impl_.message_),
         2,
@@ -107,43 +241,111 @@ const ::uint32_t
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatBroadcastNtf, _impl_._has_bits_),
         6, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatBroadcastNtf, _impl_.sender_account_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatBroadcastNtf, _impl_.sender_character_id_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatBroadcastNtf, _impl_.sender_name_),
         PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatBroadcastNtf, _impl_.message_),
         2,
         0,
         1,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatPresenceNtf, _impl_._has_bits_),
+        6, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatPresenceNtf, _impl_.character_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatPresenceNtf, _impl_.online_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::ChatPresenceNtf, _impl_.character_name_),
+        1,
+        2,
+        0,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperReq, _impl_._has_bits_),
+        8, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperReq, _impl_.sender_character_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperReq, _impl_.sender_name_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperReq, _impl_.target_name_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperReq, _impl_.message_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperReq, _impl_.sender_account_id_),
+        3,
+        0,
+        1,
+        2,
+        4,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperNtf, _impl_._has_bits_),
+        7, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperNtf, _impl_.sender_character_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperNtf, _impl_.sender_name_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperNtf, _impl_.target_character_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperNtf, _impl_.message_),
+        2,
+        0,
+        3,
+        1,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperRes, _impl_._has_bits_),
+        9, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperRes, _impl_.sender_account_id_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperRes, _impl_.sender_name_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperRes, _impl_.target_name_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperRes, _impl_.message_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperRes, _impl_.success_),
+        PROTOBUF_FIELD_OFFSET(::ServerPacket::WhisperRes, _impl_.error_msg_),
+        4,
+        0,
+        1,
+        2,
+        5,
+        3,
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, sizeof(::ServerPacket::ChatBroadcastReq)},
         {9, sizeof(::ServerPacket::ChatBroadcastNtf)},
+        {18, sizeof(::ServerPacket::ChatPresenceNtf)},
+        {27, sizeof(::ServerPacket::WhisperReq)},
+        {40, sizeof(::ServerPacket::WhisperNtf)},
+        {51, sizeof(::ServerPacket::WhisperRes)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::ServerPacket::_ChatBroadcastReq_default_instance_._instance,
     &::ServerPacket::_ChatBroadcastNtf_default_instance_._instance,
+    &::ServerPacket::_ChatPresenceNtf_default_instance_._instance,
+    &::ServerPacket::_WhisperReq_default_instance_._instance,
+    &::ServerPacket::_WhisperNtf_default_instance_._instance,
+    &::ServerPacket::_WhisperRes_default_instance_._instance,
 };
 const char descriptor_table_protodef_ServerPacket_2fchat_5fserver_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n%ServerPacket/chat_server_packet.proto\022"
-    "\014ServerPacket\"S\n\020ChatBroadcastReq\022\031\n\021sen"
-    "der_account_id\030\001 \001(\003\022\023\n\013sender_name\030\002 \001("
-    "\t\022\017\n\007message\030\003 \001(\t\"S\n\020ChatBroadcastNtf\022\031"
-    "\n\021sender_account_id\030\001 \001(\003\022\023\n\013sender_name"
-    "\030\002 \001(\t\022\017\n\007message\030\003 \001(\tb\006proto3"
+    "\014ServerPacket\"U\n\020ChatBroadcastReq\022\033\n\023sen"
+    "der_character_id\030\001 \001(\003\022\023\n\013sender_name\030\002 "
+    "\001(\t\022\017\n\007message\030\003 \001(\t\"U\n\020ChatBroadcastNtf"
+    "\022\033\n\023sender_character_id\030\001 \001(\003\022\023\n\013sender_"
+    "name\030\002 \001(\t\022\017\n\007message\030\003 \001(\t\"O\n\017ChatPrese"
+    "nceNtf\022\024\n\014character_id\030\001 \001(\003\022\016\n\006online\030\002"
+    " \001(\010\022\026\n\016character_name\030\003 \001(\t\"\177\n\nWhisperR"
+    "eq\022\033\n\023sender_character_id\030\001 \001(\003\022\023\n\013sende"
+    "r_name\030\002 \001(\t\022\023\n\013target_name\030\003 \001(\t\022\017\n\007mes"
+    "sage\030\004 \001(\t\022\031\n\021sender_account_id\030\005 \001(\003\"l\n"
+    "\nWhisperNtf\022\033\n\023sender_character_id\030\001 \001(\003"
+    "\022\023\n\013sender_name\030\002 \001(\t\022\033\n\023target_characte"
+    "r_id\030\003 \001(\003\022\017\n\007message\030\004 \001(\t\"\206\001\n\nWhisperR"
+    "es\022\031\n\021sender_account_id\030\001 \001(\003\022\023\n\013sender_"
+    "name\030\002 \001(\t\022\023\n\013target_name\030\003 \001(\t\022\017\n\007messa"
+    "ge\030\004 \001(\t\022\017\n\007success\030\005 \001(\010\022\021\n\terror_msg\030\006"
+    " \001(\tb\006proto3"
 };
 static ::absl::once_flag descriptor_table_ServerPacket_2fchat_5fserver_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_ServerPacket_2fchat_5fserver_5fpacket_2eproto = {
     false,
     false,
-    231,
+    692,
     descriptor_table_protodef_ServerPacket_2fchat_5fserver_5fpacket_2eproto,
     "ServerPacket/chat_server_packet.proto",
     &descriptor_table_ServerPacket_2fchat_5fserver_5fpacket_2eproto_once,
     nullptr,
     0,
-    2,
+    6,
     schemas,
     file_default_instances,
     TableStruct_ServerPacket_2fchat_5fserver_5fpacket_2eproto::offsets,
@@ -192,7 +394,7 @@ ChatBroadcastReq::ChatBroadcastReq(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  _impl_.sender_account_id_ = from._impl_.sender_account_id_;
+  _impl_.sender_character_id_ = from._impl_.sender_character_id_;
 
   // @@protoc_insertion_point(copy_constructor:ServerPacket.ChatBroadcastReq)
 }
@@ -205,7 +407,7 @@ PROTOBUF_NDEBUG_INLINE ChatBroadcastReq::Impl_::Impl_(
 
 inline void ChatBroadcastReq::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.sender_account_id_ = {};
+  _impl_.sender_character_id_ = {};
 }
 ChatBroadcastReq::~ChatBroadcastReq() {
   // @@protoc_insertion_point(destructor:ServerPacket.ChatBroadcastReq)
@@ -286,10 +488,10 @@ ChatBroadcastReq::_table_ = {
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // int64 sender_account_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(ChatBroadcastReq, _impl_.sender_account_id_), 2>(),
+    // int64 sender_character_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(ChatBroadcastReq, _impl_.sender_character_id_), 2>(),
      {8, 2, 0,
-      PROTOBUF_FIELD_OFFSET(ChatBroadcastReq, _impl_.sender_account_id_)}},
+      PROTOBUF_FIELD_OFFSET(ChatBroadcastReq, _impl_.sender_character_id_)}},
     // string sender_name = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 0, 0,
@@ -301,8 +503,8 @@ ChatBroadcastReq::_table_ = {
   }}, {{
     65535, 65535
   }}, {{
-    // int64 sender_account_id = 1;
-    {PROTOBUF_FIELD_OFFSET(ChatBroadcastReq, _impl_.sender_account_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 sender_character_id = 1;
+    {PROTOBUF_FIELD_OFFSET(ChatBroadcastReq, _impl_.sender_character_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // string sender_name = 2;
     {PROTOBUF_FIELD_OFFSET(ChatBroadcastReq, _impl_.sender_name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // string message = 3;
@@ -332,7 +534,7 @@ PROTOBUF_NOINLINE void ChatBroadcastReq::Clear() {
       _impl_.message_.ClearNonDefaultToEmpty();
     }
   }
-  _impl_.sender_account_id_ = ::int64_t{0};
+  _impl_.sender_character_id_ = ::int64_t{0};
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -356,12 +558,12 @@ PROTOBUF_NOINLINE void ChatBroadcastReq::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 sender_account_id = 1;
+  // int64 sender_character_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-    if (this_._internal_sender_account_id() != 0) {
+    if (this_._internal_sender_character_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_sender_account_id(), target);
+              stream, this_._internal_sender_character_id(), target);
     }
   }
 
@@ -425,11 +627,11 @@ PROTOBUF_NOINLINE void ChatBroadcastReq::Clear() {
                                         this_._internal_message());
       }
     }
-    // int64 sender_account_id = 1;
+    // int64 sender_character_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (this_._internal_sender_account_id() != 0) {
+      if (this_._internal_sender_character_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_sender_account_id());
+            this_._internal_sender_character_id());
       }
     }
   }
@@ -471,8 +673,8 @@ void ChatBroadcastReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (from._internal_sender_account_id() != 0) {
-        _this->_impl_.sender_account_id_ = from._impl_.sender_account_id_;
+      if (from._internal_sender_character_id() != 0) {
+        _this->_impl_.sender_character_id_ = from._impl_.sender_character_id_;
       }
     }
   }
@@ -497,7 +699,7 @@ void ChatBroadcastReq::InternalSwap(ChatBroadcastReq* PROTOBUF_RESTRICT PROTOBUF
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.sender_name_, &other->_impl_.sender_name_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, &other->_impl_.message_, arena);
-  swap(_impl_.sender_account_id_, other->_impl_.sender_account_id_);
+  swap(_impl_.sender_character_id_, other->_impl_.sender_character_id_);
 }
 
 ::google::protobuf::Metadata ChatBroadcastReq::GetMetadata() const {
@@ -544,7 +746,7 @@ ChatBroadcastNtf::ChatBroadcastNtf(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  _impl_.sender_account_id_ = from._impl_.sender_account_id_;
+  _impl_.sender_character_id_ = from._impl_.sender_character_id_;
 
   // @@protoc_insertion_point(copy_constructor:ServerPacket.ChatBroadcastNtf)
 }
@@ -557,7 +759,7 @@ PROTOBUF_NDEBUG_INLINE ChatBroadcastNtf::Impl_::Impl_(
 
 inline void ChatBroadcastNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.sender_account_id_ = {};
+  _impl_.sender_character_id_ = {};
 }
 ChatBroadcastNtf::~ChatBroadcastNtf() {
   // @@protoc_insertion_point(destructor:ServerPacket.ChatBroadcastNtf)
@@ -638,10 +840,10 @@ ChatBroadcastNtf::_table_ = {
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // int64 sender_account_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(ChatBroadcastNtf, _impl_.sender_account_id_), 2>(),
+    // int64 sender_character_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(ChatBroadcastNtf, _impl_.sender_character_id_), 2>(),
      {8, 2, 0,
-      PROTOBUF_FIELD_OFFSET(ChatBroadcastNtf, _impl_.sender_account_id_)}},
+      PROTOBUF_FIELD_OFFSET(ChatBroadcastNtf, _impl_.sender_character_id_)}},
     // string sender_name = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 0, 0,
@@ -653,8 +855,8 @@ ChatBroadcastNtf::_table_ = {
   }}, {{
     65535, 65535
   }}, {{
-    // int64 sender_account_id = 1;
-    {PROTOBUF_FIELD_OFFSET(ChatBroadcastNtf, _impl_.sender_account_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // int64 sender_character_id = 1;
+    {PROTOBUF_FIELD_OFFSET(ChatBroadcastNtf, _impl_.sender_character_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // string sender_name = 2;
     {PROTOBUF_FIELD_OFFSET(ChatBroadcastNtf, _impl_.sender_name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // string message = 3;
@@ -684,7 +886,7 @@ PROTOBUF_NOINLINE void ChatBroadcastNtf::Clear() {
       _impl_.message_.ClearNonDefaultToEmpty();
     }
   }
-  _impl_.sender_account_id_ = ::int64_t{0};
+  _impl_.sender_character_id_ = ::int64_t{0};
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -708,12 +910,12 @@ PROTOBUF_NOINLINE void ChatBroadcastNtf::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int64 sender_account_id = 1;
+  // int64 sender_character_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-    if (this_._internal_sender_account_id() != 0) {
+    if (this_._internal_sender_character_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
-              stream, this_._internal_sender_account_id(), target);
+              stream, this_._internal_sender_character_id(), target);
     }
   }
 
@@ -777,11 +979,11 @@ PROTOBUF_NOINLINE void ChatBroadcastNtf::Clear() {
                                         this_._internal_message());
       }
     }
-    // int64 sender_account_id = 1;
+    // int64 sender_character_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (this_._internal_sender_account_id() != 0) {
+      if (this_._internal_sender_character_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-            this_._internal_sender_account_id());
+            this_._internal_sender_character_id());
       }
     }
   }
@@ -823,8 +1025,8 @@ void ChatBroadcastNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (from._internal_sender_account_id() != 0) {
-        _this->_impl_.sender_account_id_ = from._impl_.sender_account_id_;
+      if (from._internal_sender_character_id() != 0) {
+        _this->_impl_.sender_character_id_ = from._impl_.sender_character_id_;
       }
     }
   }
@@ -849,10 +1051,1684 @@ void ChatBroadcastNtf::InternalSwap(ChatBroadcastNtf* PROTOBUF_RESTRICT PROTOBUF
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.sender_name_, &other->_impl_.sender_name_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, &other->_impl_.message_, arena);
-  swap(_impl_.sender_account_id_, other->_impl_.sender_account_id_);
+  swap(_impl_.sender_character_id_, other->_impl_.sender_character_id_);
 }
 
 ::google::protobuf::Metadata ChatBroadcastNtf::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class ChatPresenceNtf::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<ChatPresenceNtf>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(ChatPresenceNtf, _impl_._has_bits_);
+};
+
+ChatPresenceNtf::ChatPresenceNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ChatPresenceNtf_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:ServerPacket.ChatPresenceNtf)
+}
+PROTOBUF_NDEBUG_INLINE ChatPresenceNtf::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::ServerPacket::ChatPresenceNtf& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        character_name_(arena, from.character_name_) {}
+
+ChatPresenceNtf::ChatPresenceNtf(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const ChatPresenceNtf& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ChatPresenceNtf_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  ChatPresenceNtf* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, character_id_),
+           reinterpret_cast<const char*>(&from._impl_) +
+               offsetof(Impl_, character_id_),
+           offsetof(Impl_, online_) -
+               offsetof(Impl_, character_id_) +
+               sizeof(Impl_::online_));
+
+  // @@protoc_insertion_point(copy_constructor:ServerPacket.ChatPresenceNtf)
+}
+PROTOBUF_NDEBUG_INLINE ChatPresenceNtf::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        character_name_(arena) {}
+
+inline void ChatPresenceNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, character_id_),
+           0,
+           offsetof(Impl_, online_) -
+               offsetof(Impl_, character_id_) +
+               sizeof(Impl_::online_));
+}
+ChatPresenceNtf::~ChatPresenceNtf() {
+  // @@protoc_insertion_point(destructor:ServerPacket.ChatPresenceNtf)
+  SharedDtor(*this);
+}
+inline void ChatPresenceNtf::SharedDtor(MessageLite& self) {
+  ChatPresenceNtf& this_ = static_cast<ChatPresenceNtf&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.character_name_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL ChatPresenceNtf::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) ChatPresenceNtf(arena);
+}
+constexpr auto ChatPresenceNtf::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(ChatPresenceNtf),
+                                            alignof(ChatPresenceNtf));
+}
+constexpr auto ChatPresenceNtf::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_ChatPresenceNtf_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &ChatPresenceNtf::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<ChatPresenceNtf>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &ChatPresenceNtf::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<ChatPresenceNtf>(), &ChatPresenceNtf::ByteSizeLong,
+              &ChatPresenceNtf::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(ChatPresenceNtf, _impl_._cached_size_),
+          false,
+      },
+      &ChatPresenceNtf::kDescriptorMethods,
+      &descriptor_table_ServerPacket_2fchat_5fserver_5fpacket_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull ChatPresenceNtf_class_data_ =
+        ChatPresenceNtf::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+ChatPresenceNtf::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&ChatPresenceNtf_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(ChatPresenceNtf_class_data_.tc_table);
+  return ChatPresenceNtf_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 3, 0, 51, 2>
+ChatPresenceNtf::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(ChatPresenceNtf, _impl_._has_bits_),
+    0, // no _extensions_
+    3, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967288,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    3,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    ChatPresenceNtf_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::ServerPacket::ChatPresenceNtf>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int64 character_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(ChatPresenceNtf, _impl_.character_id_), 1>(),
+     {8, 1, 0,
+      PROTOBUF_FIELD_OFFSET(ChatPresenceNtf, _impl_.character_id_)}},
+    // bool online = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(ChatPresenceNtf, _impl_.online_), 2>(),
+     {16, 2, 0,
+      PROTOBUF_FIELD_OFFSET(ChatPresenceNtf, _impl_.online_)}},
+    // string character_name = 3;
+    {::_pbi::TcParser::FastUS1,
+     {26, 0, 0,
+      PROTOBUF_FIELD_OFFSET(ChatPresenceNtf, _impl_.character_name_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int64 character_id = 1;
+    {PROTOBUF_FIELD_OFFSET(ChatPresenceNtf, _impl_.character_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // bool online = 2;
+    {PROTOBUF_FIELD_OFFSET(ChatPresenceNtf, _impl_.online_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
+    // string character_name = 3;
+    {PROTOBUF_FIELD_OFFSET(ChatPresenceNtf, _impl_.character_name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\34\0\0\16\0\0\0\0"
+    "ServerPacket.ChatPresenceNtf"
+    "character_name"
+  }},
+};
+PROTOBUF_NOINLINE void ChatPresenceNtf::Clear() {
+// @@protoc_insertion_point(message_clear_start:ServerPacket.ChatPresenceNtf)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    _impl_.character_name_.ClearNonDefaultToEmpty();
+  }
+  if (BatchCheckHasBit(cached_has_bits, 0x00000006U)) {
+    ::memset(&_impl_.character_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.online_) -
+        reinterpret_cast<char*>(&_impl_.character_id_)) + sizeof(_impl_.online_));
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL ChatPresenceNtf::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const ChatPresenceNtf& this_ = static_cast<const ChatPresenceNtf&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL ChatPresenceNtf::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const ChatPresenceNtf& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:ServerPacket.ChatPresenceNtf)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // int64 character_id = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    if (this_._internal_character_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
+              stream, this_._internal_character_id(), target);
+    }
+  }
+
+  // bool online = 2;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (this_._internal_online() != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteBoolToArray(
+          2, this_._internal_online(), target);
+    }
+  }
+
+  // string character_name = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (!this_._internal_character_name().empty()) {
+      const ::std::string& _s = this_._internal_character_name();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "ServerPacket.ChatPresenceNtf.character_name");
+      target = stream->WriteStringMaybeAliased(3, _s, target);
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:ServerPacket.ChatPresenceNtf)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t ChatPresenceNtf::ByteSizeLong(const MessageLite& base) {
+  const ChatPresenceNtf& this_ = static_cast<const ChatPresenceNtf&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t ChatPresenceNtf::ByteSizeLong() const {
+  const ChatPresenceNtf& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:ServerPacket.ChatPresenceNtf)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+  cached_has_bits = this_._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+    // string character_name = 3;
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!this_._internal_character_name().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_character_name());
+      }
+    }
+    // int64 character_id = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (this_._internal_character_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_character_id());
+      }
+    }
+    // bool online = 2;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (this_._internal_online() != 0) {
+        total_size += 2;
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void ChatPresenceNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<ChatPresenceNtf*>(&to_msg);
+  auto& from = static_cast<const ChatPresenceNtf&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(class_specific_merge_from_start:ServerPacket.ChatPresenceNtf)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!from._internal_character_name().empty()) {
+        _this->_internal_set_character_name(from._internal_character_name());
+      } else {
+        if (_this->_impl_.character_name_.IsDefault()) {
+          _this->_internal_set_character_name("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (from._internal_character_id() != 0) {
+        _this->_impl_.character_id_ = from._impl_.character_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (from._internal_online() != 0) {
+        _this->_impl_.online_ = from._impl_.online_;
+      }
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void ChatPresenceNtf::CopyFrom(const ChatPresenceNtf& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:ServerPacket.ChatPresenceNtf)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void ChatPresenceNtf::InternalSwap(ChatPresenceNtf* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.character_name_, &other->_impl_.character_name_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(ChatPresenceNtf, _impl_.online_)
+      + sizeof(ChatPresenceNtf::_impl_.online_)
+      - PROTOBUF_FIELD_OFFSET(ChatPresenceNtf, _impl_.character_id_)>(
+          reinterpret_cast<char*>(&_impl_.character_id_),
+          reinterpret_cast<char*>(&other->_impl_.character_id_));
+}
+
+::google::protobuf::Metadata ChatPresenceNtf::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class WhisperReq::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<WhisperReq>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_._has_bits_);
+};
+
+WhisperReq::WhisperReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, WhisperReq_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:ServerPacket.WhisperReq)
+}
+PROTOBUF_NDEBUG_INLINE WhisperReq::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::ServerPacket::WhisperReq& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        sender_name_(arena, from.sender_name_),
+        target_name_(arena, from.target_name_),
+        message_(arena, from.message_) {}
+
+WhisperReq::WhisperReq(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const WhisperReq& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, WhisperReq_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  WhisperReq* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, sender_character_id_),
+           reinterpret_cast<const char*>(&from._impl_) +
+               offsetof(Impl_, sender_character_id_),
+           offsetof(Impl_, sender_account_id_) -
+               offsetof(Impl_, sender_character_id_) +
+               sizeof(Impl_::sender_account_id_));
+
+  // @@protoc_insertion_point(copy_constructor:ServerPacket.WhisperReq)
+}
+PROTOBUF_NDEBUG_INLINE WhisperReq::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        sender_name_(arena),
+        target_name_(arena),
+        message_(arena) {}
+
+inline void WhisperReq::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, sender_character_id_),
+           0,
+           offsetof(Impl_, sender_account_id_) -
+               offsetof(Impl_, sender_character_id_) +
+               sizeof(Impl_::sender_account_id_));
+}
+WhisperReq::~WhisperReq() {
+  // @@protoc_insertion_point(destructor:ServerPacket.WhisperReq)
+  SharedDtor(*this);
+}
+inline void WhisperReq::SharedDtor(MessageLite& self) {
+  WhisperReq& this_ = static_cast<WhisperReq&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.sender_name_.Destroy();
+  this_._impl_.target_name_.Destroy();
+  this_._impl_.message_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL WhisperReq::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) WhisperReq(arena);
+}
+constexpr auto WhisperReq::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(WhisperReq),
+                                            alignof(WhisperReq));
+}
+constexpr auto WhisperReq::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_WhisperReq_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &WhisperReq::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<WhisperReq>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &WhisperReq::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<WhisperReq>(), &WhisperReq::ByteSizeLong,
+              &WhisperReq::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_._cached_size_),
+          false,
+      },
+      &WhisperReq::kDescriptorMethods,
+      &descriptor_table_ServerPacket_2fchat_5fserver_5fpacket_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull WhisperReq_class_data_ =
+        WhisperReq::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+WhisperReq::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&WhisperReq_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(WhisperReq_class_data_.tc_table);
+  return WhisperReq_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<3, 5, 0, 61, 2>
+WhisperReq::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_._has_bits_),
+    0, // no _extensions_
+    5, 56,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967264,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    5,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    WhisperReq_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::ServerPacket::WhisperReq>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int64 sender_character_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(WhisperReq, _impl_.sender_character_id_), 3>(),
+     {8, 3, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_.sender_character_id_)}},
+    // string sender_name = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 0, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_.sender_name_)}},
+    // string target_name = 3;
+    {::_pbi::TcParser::FastUS1,
+     {26, 1, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_.target_name_)}},
+    // string message = 4;
+    {::_pbi::TcParser::FastUS1,
+     {34, 2, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_.message_)}},
+    // int64 sender_account_id = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(WhisperReq, _impl_.sender_account_id_), 4>(),
+     {40, 4, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_.sender_account_id_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int64 sender_character_id = 1;
+    {PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_.sender_character_id_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // string sender_name = 2;
+    {PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_.sender_name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string target_name = 3;
+    {PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_.target_name_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string message = 4;
+    {PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_.message_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int64 sender_account_id = 5;
+    {PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_.sender_account_id_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+  }},
+  // no aux_entries
+  {{
+    "\27\0\13\13\7\0\0\0"
+    "ServerPacket.WhisperReq"
+    "sender_name"
+    "target_name"
+    "message"
+  }},
+};
+PROTOBUF_NOINLINE void WhisperReq::Clear() {
+// @@protoc_insertion_point(message_clear_start:ServerPacket.WhisperReq)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      _impl_.sender_name_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      _impl_.target_name_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      _impl_.message_.ClearNonDefaultToEmpty();
+    }
+  }
+  if (BatchCheckHasBit(cached_has_bits, 0x00000018U)) {
+    ::memset(&_impl_.sender_character_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.sender_account_id_) -
+        reinterpret_cast<char*>(&_impl_.sender_character_id_)) + sizeof(_impl_.sender_account_id_));
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL WhisperReq::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const WhisperReq& this_ = static_cast<const WhisperReq&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL WhisperReq::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const WhisperReq& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:ServerPacket.WhisperReq)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // int64 sender_character_id = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (this_._internal_sender_character_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
+              stream, this_._internal_sender_character_id(), target);
+    }
+  }
+
+  // string sender_name = 2;
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (!this_._internal_sender_name().empty()) {
+      const ::std::string& _s = this_._internal_sender_name();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "ServerPacket.WhisperReq.sender_name");
+      target = stream->WriteStringMaybeAliased(2, _s, target);
+    }
+  }
+
+  // string target_name = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    if (!this_._internal_target_name().empty()) {
+      const ::std::string& _s = this_._internal_target_name();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "ServerPacket.WhisperReq.target_name");
+      target = stream->WriteStringMaybeAliased(3, _s, target);
+    }
+  }
+
+  // string message = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (!this_._internal_message().empty()) {
+      const ::std::string& _s = this_._internal_message();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "ServerPacket.WhisperReq.message");
+      target = stream->WriteStringMaybeAliased(4, _s, target);
+    }
+  }
+
+  // int64 sender_account_id = 5;
+  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (this_._internal_sender_account_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<5>(
+              stream, this_._internal_sender_account_id(), target);
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:ServerPacket.WhisperReq)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t WhisperReq::ByteSizeLong(const MessageLite& base) {
+  const WhisperReq& this_ = static_cast<const WhisperReq&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t WhisperReq::ByteSizeLong() const {
+  const WhisperReq& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:ServerPacket.WhisperReq)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+  cached_has_bits = this_._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
+    // string sender_name = 2;
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!this_._internal_sender_name().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_sender_name());
+      }
+    }
+    // string target_name = 3;
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (!this_._internal_target_name().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_target_name());
+      }
+    }
+    // string message = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (!this_._internal_message().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_message());
+      }
+    }
+    // int64 sender_character_id = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (this_._internal_sender_character_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_sender_character_id());
+      }
+    }
+    // int64 sender_account_id = 5;
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (this_._internal_sender_account_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_sender_account_id());
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void WhisperReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<WhisperReq*>(&to_msg);
+  auto& from = static_cast<const WhisperReq&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(class_specific_merge_from_start:ServerPacket.WhisperReq)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!from._internal_sender_name().empty()) {
+        _this->_internal_set_sender_name(from._internal_sender_name());
+      } else {
+        if (_this->_impl_.sender_name_.IsDefault()) {
+          _this->_internal_set_sender_name("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (!from._internal_target_name().empty()) {
+        _this->_internal_set_target_name(from._internal_target_name());
+      } else {
+        if (_this->_impl_.target_name_.IsDefault()) {
+          _this->_internal_set_target_name("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (!from._internal_message().empty()) {
+        _this->_internal_set_message(from._internal_message());
+      } else {
+        if (_this->_impl_.message_.IsDefault()) {
+          _this->_internal_set_message("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (from._internal_sender_character_id() != 0) {
+        _this->_impl_.sender_character_id_ = from._impl_.sender_character_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (from._internal_sender_account_id() != 0) {
+        _this->_impl_.sender_account_id_ = from._impl_.sender_account_id_;
+      }
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void WhisperReq::CopyFrom(const WhisperReq& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:ServerPacket.WhisperReq)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void WhisperReq::InternalSwap(WhisperReq* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.sender_name_, &other->_impl_.sender_name_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.target_name_, &other->_impl_.target_name_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, &other->_impl_.message_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_.sender_account_id_)
+      + sizeof(WhisperReq::_impl_.sender_account_id_)
+      - PROTOBUF_FIELD_OFFSET(WhisperReq, _impl_.sender_character_id_)>(
+          reinterpret_cast<char*>(&_impl_.sender_character_id_),
+          reinterpret_cast<char*>(&other->_impl_.sender_character_id_));
+}
+
+::google::protobuf::Metadata WhisperReq::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class WhisperNtf::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<WhisperNtf>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(WhisperNtf, _impl_._has_bits_);
+};
+
+WhisperNtf::WhisperNtf(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, WhisperNtf_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:ServerPacket.WhisperNtf)
+}
+PROTOBUF_NDEBUG_INLINE WhisperNtf::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::ServerPacket::WhisperNtf& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        sender_name_(arena, from.sender_name_),
+        message_(arena, from.message_) {}
+
+WhisperNtf::WhisperNtf(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const WhisperNtf& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, WhisperNtf_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  WhisperNtf* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, sender_character_id_),
+           reinterpret_cast<const char*>(&from._impl_) +
+               offsetof(Impl_, sender_character_id_),
+           offsetof(Impl_, target_character_id_) -
+               offsetof(Impl_, sender_character_id_) +
+               sizeof(Impl_::target_character_id_));
+
+  // @@protoc_insertion_point(copy_constructor:ServerPacket.WhisperNtf)
+}
+PROTOBUF_NDEBUG_INLINE WhisperNtf::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        sender_name_(arena),
+        message_(arena) {}
+
+inline void WhisperNtf::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, sender_character_id_),
+           0,
+           offsetof(Impl_, target_character_id_) -
+               offsetof(Impl_, sender_character_id_) +
+               sizeof(Impl_::target_character_id_));
+}
+WhisperNtf::~WhisperNtf() {
+  // @@protoc_insertion_point(destructor:ServerPacket.WhisperNtf)
+  SharedDtor(*this);
+}
+inline void WhisperNtf::SharedDtor(MessageLite& self) {
+  WhisperNtf& this_ = static_cast<WhisperNtf&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.sender_name_.Destroy();
+  this_._impl_.message_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL WhisperNtf::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) WhisperNtf(arena);
+}
+constexpr auto WhisperNtf::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(WhisperNtf),
+                                            alignof(WhisperNtf));
+}
+constexpr auto WhisperNtf::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_WhisperNtf_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &WhisperNtf::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<WhisperNtf>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &WhisperNtf::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<WhisperNtf>(), &WhisperNtf::ByteSizeLong,
+              &WhisperNtf::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(WhisperNtf, _impl_._cached_size_),
+          false,
+      },
+      &WhisperNtf::kDescriptorMethods,
+      &descriptor_table_ServerPacket_2fchat_5fserver_5fpacket_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull WhisperNtf_class_data_ =
+        WhisperNtf::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+WhisperNtf::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&WhisperNtf_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(WhisperNtf_class_data_.tc_table);
+  return WhisperNtf_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 4, 0, 50, 2>
+WhisperNtf::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(WhisperNtf, _impl_._has_bits_),
+    0, // no _extensions_
+    4, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967280,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    4,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    WhisperNtf_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::ServerPacket::WhisperNtf>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // string message = 4;
+    {::_pbi::TcParser::FastUS1,
+     {34, 1, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperNtf, _impl_.message_)}},
+    // int64 sender_character_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(WhisperNtf, _impl_.sender_character_id_), 2>(),
+     {8, 2, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperNtf, _impl_.sender_character_id_)}},
+    // string sender_name = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 0, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperNtf, _impl_.sender_name_)}},
+    // int64 target_character_id = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(WhisperNtf, _impl_.target_character_id_), 3>(),
+     {24, 3, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperNtf, _impl_.target_character_id_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int64 sender_character_id = 1;
+    {PROTOBUF_FIELD_OFFSET(WhisperNtf, _impl_.sender_character_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // string sender_name = 2;
+    {PROTOBUF_FIELD_OFFSET(WhisperNtf, _impl_.sender_name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int64 target_character_id = 3;
+    {PROTOBUF_FIELD_OFFSET(WhisperNtf, _impl_.target_character_id_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // string message = 4;
+    {PROTOBUF_FIELD_OFFSET(WhisperNtf, _impl_.message_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\27\0\13\0\7\0\0\0"
+    "ServerPacket.WhisperNtf"
+    "sender_name"
+    "message"
+  }},
+};
+PROTOBUF_NOINLINE void WhisperNtf::Clear() {
+// @@protoc_insertion_point(message_clear_start:ServerPacket.WhisperNtf)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      _impl_.sender_name_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      _impl_.message_.ClearNonDefaultToEmpty();
+    }
+  }
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000cU)) {
+    ::memset(&_impl_.sender_character_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.target_character_id_) -
+        reinterpret_cast<char*>(&_impl_.sender_character_id_)) + sizeof(_impl_.target_character_id_));
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL WhisperNtf::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const WhisperNtf& this_ = static_cast<const WhisperNtf&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL WhisperNtf::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const WhisperNtf& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:ServerPacket.WhisperNtf)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // int64 sender_character_id = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (this_._internal_sender_character_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
+              stream, this_._internal_sender_character_id(), target);
+    }
+  }
+
+  // string sender_name = 2;
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (!this_._internal_sender_name().empty()) {
+      const ::std::string& _s = this_._internal_sender_name();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "ServerPacket.WhisperNtf.sender_name");
+      target = stream->WriteStringMaybeAliased(2, _s, target);
+    }
+  }
+
+  // int64 target_character_id = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (this_._internal_target_character_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<3>(
+              stream, this_._internal_target_character_id(), target);
+    }
+  }
+
+  // string message = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    if (!this_._internal_message().empty()) {
+      const ::std::string& _s = this_._internal_message();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "ServerPacket.WhisperNtf.message");
+      target = stream->WriteStringMaybeAliased(4, _s, target);
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:ServerPacket.WhisperNtf)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t WhisperNtf::ByteSizeLong(const MessageLite& base) {
+  const WhisperNtf& this_ = static_cast<const WhisperNtf&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t WhisperNtf::ByteSizeLong() const {
+  const WhisperNtf& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:ServerPacket.WhisperNtf)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+  cached_has_bits = this_._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+    // string sender_name = 2;
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!this_._internal_sender_name().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_sender_name());
+      }
+    }
+    // string message = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (!this_._internal_message().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_message());
+      }
+    }
+    // int64 sender_character_id = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (this_._internal_sender_character_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_sender_character_id());
+      }
+    }
+    // int64 target_character_id = 3;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (this_._internal_target_character_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_target_character_id());
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void WhisperNtf::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<WhisperNtf*>(&to_msg);
+  auto& from = static_cast<const WhisperNtf&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(class_specific_merge_from_start:ServerPacket.WhisperNtf)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!from._internal_sender_name().empty()) {
+        _this->_internal_set_sender_name(from._internal_sender_name());
+      } else {
+        if (_this->_impl_.sender_name_.IsDefault()) {
+          _this->_internal_set_sender_name("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (!from._internal_message().empty()) {
+        _this->_internal_set_message(from._internal_message());
+      } else {
+        if (_this->_impl_.message_.IsDefault()) {
+          _this->_internal_set_message("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (from._internal_sender_character_id() != 0) {
+        _this->_impl_.sender_character_id_ = from._impl_.sender_character_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (from._internal_target_character_id() != 0) {
+        _this->_impl_.target_character_id_ = from._impl_.target_character_id_;
+      }
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void WhisperNtf::CopyFrom(const WhisperNtf& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:ServerPacket.WhisperNtf)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void WhisperNtf::InternalSwap(WhisperNtf* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.sender_name_, &other->_impl_.sender_name_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, &other->_impl_.message_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(WhisperNtf, _impl_.target_character_id_)
+      + sizeof(WhisperNtf::_impl_.target_character_id_)
+      - PROTOBUF_FIELD_OFFSET(WhisperNtf, _impl_.sender_character_id_)>(
+          reinterpret_cast<char*>(&_impl_.sender_character_id_),
+          reinterpret_cast<char*>(&other->_impl_.sender_character_id_));
+}
+
+::google::protobuf::Metadata WhisperNtf::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class WhisperRes::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<WhisperRes>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_._has_bits_);
+};
+
+WhisperRes::WhisperRes(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, WhisperRes_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:ServerPacket.WhisperRes)
+}
+PROTOBUF_NDEBUG_INLINE WhisperRes::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::ServerPacket::WhisperRes& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        sender_name_(arena, from.sender_name_),
+        target_name_(arena, from.target_name_),
+        message_(arena, from.message_),
+        error_msg_(arena, from.error_msg_) {}
+
+WhisperRes::WhisperRes(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const WhisperRes& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, WhisperRes_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  WhisperRes* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, sender_account_id_),
+           reinterpret_cast<const char*>(&from._impl_) +
+               offsetof(Impl_, sender_account_id_),
+           offsetof(Impl_, success_) -
+               offsetof(Impl_, sender_account_id_) +
+               sizeof(Impl_::success_));
+
+  // @@protoc_insertion_point(copy_constructor:ServerPacket.WhisperRes)
+}
+PROTOBUF_NDEBUG_INLINE WhisperRes::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        sender_name_(arena),
+        target_name_(arena),
+        message_(arena),
+        error_msg_(arena) {}
+
+inline void WhisperRes::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, sender_account_id_),
+           0,
+           offsetof(Impl_, success_) -
+               offsetof(Impl_, sender_account_id_) +
+               sizeof(Impl_::success_));
+}
+WhisperRes::~WhisperRes() {
+  // @@protoc_insertion_point(destructor:ServerPacket.WhisperRes)
+  SharedDtor(*this);
+}
+inline void WhisperRes::SharedDtor(MessageLite& self) {
+  WhisperRes& this_ = static_cast<WhisperRes&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.sender_name_.Destroy();
+  this_._impl_.target_name_.Destroy();
+  this_._impl_.message_.Destroy();
+  this_._impl_.error_msg_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL WhisperRes::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) WhisperRes(arena);
+}
+constexpr auto WhisperRes::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(WhisperRes),
+                                            alignof(WhisperRes));
+}
+constexpr auto WhisperRes::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_WhisperRes_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &WhisperRes::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<WhisperRes>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &WhisperRes::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<WhisperRes>(), &WhisperRes::ByteSizeLong,
+              &WhisperRes::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_._cached_size_),
+          false,
+      },
+      &WhisperRes::kDescriptorMethods,
+      &descriptor_table_ServerPacket_2fchat_5fserver_5fpacket_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull WhisperRes_class_data_ =
+        WhisperRes::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+WhisperRes::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&WhisperRes_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(WhisperRes_class_data_.tc_table);
+  return WhisperRes_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<3, 6, 0, 70, 2>
+WhisperRes::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_._has_bits_),
+    0, // no _extensions_
+    6, 56,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967232,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    6,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    WhisperRes_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::ServerPacket::WhisperRes>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int64 sender_account_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(WhisperRes, _impl_.sender_account_id_), 4>(),
+     {8, 4, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.sender_account_id_)}},
+    // string sender_name = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 0, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.sender_name_)}},
+    // string target_name = 3;
+    {::_pbi::TcParser::FastUS1,
+     {26, 1, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.target_name_)}},
+    // string message = 4;
+    {::_pbi::TcParser::FastUS1,
+     {34, 2, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.message_)}},
+    // bool success = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(WhisperRes, _impl_.success_), 5>(),
+     {40, 5, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.success_)}},
+    // string error_msg = 6;
+    {::_pbi::TcParser::FastUS1,
+     {50, 3, 0,
+      PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.error_msg_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int64 sender_account_id = 1;
+    {PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.sender_account_id_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // string sender_name = 2;
+    {PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.sender_name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string target_name = 3;
+    {PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.target_name_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string message = 4;
+    {PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.message_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // bool success = 5;
+    {PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.success_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
+    // string error_msg = 6;
+    {PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.error_msg_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\27\0\13\13\7\0\11\0"
+    "ServerPacket.WhisperRes"
+    "sender_name"
+    "target_name"
+    "message"
+    "error_msg"
+  }},
+};
+PROTOBUF_NOINLINE void WhisperRes::Clear() {
+// @@protoc_insertion_point(message_clear_start:ServerPacket.WhisperRes)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      _impl_.sender_name_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      _impl_.target_name_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      _impl_.message_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      _impl_.error_msg_.ClearNonDefaultToEmpty();
+    }
+  }
+  if (BatchCheckHasBit(cached_has_bits, 0x00000030U)) {
+    ::memset(&_impl_.sender_account_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.success_) -
+        reinterpret_cast<char*>(&_impl_.sender_account_id_)) + sizeof(_impl_.success_));
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL WhisperRes::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const WhisperRes& this_ = static_cast<const WhisperRes&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL WhisperRes::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const WhisperRes& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:ServerPacket.WhisperRes)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // int64 sender_account_id = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (this_._internal_sender_account_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
+              stream, this_._internal_sender_account_id(), target);
+    }
+  }
+
+  // string sender_name = 2;
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (!this_._internal_sender_name().empty()) {
+      const ::std::string& _s = this_._internal_sender_name();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "ServerPacket.WhisperRes.sender_name");
+      target = stream->WriteStringMaybeAliased(2, _s, target);
+    }
+  }
+
+  // string target_name = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    if (!this_._internal_target_name().empty()) {
+      const ::std::string& _s = this_._internal_target_name();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "ServerPacket.WhisperRes.target_name");
+      target = stream->WriteStringMaybeAliased(3, _s, target);
+    }
+  }
+
+  // string message = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (!this_._internal_message().empty()) {
+      const ::std::string& _s = this_._internal_message();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "ServerPacket.WhisperRes.message");
+      target = stream->WriteStringMaybeAliased(4, _s, target);
+    }
+  }
+
+  // bool success = 5;
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (this_._internal_success() != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteBoolToArray(
+          5, this_._internal_success(), target);
+    }
+  }
+
+  // string error_msg = 6;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (!this_._internal_error_msg().empty()) {
+      const ::std::string& _s = this_._internal_error_msg();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "ServerPacket.WhisperRes.error_msg");
+      target = stream->WriteStringMaybeAliased(6, _s, target);
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:ServerPacket.WhisperRes)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t WhisperRes::ByteSizeLong(const MessageLite& base) {
+  const WhisperRes& this_ = static_cast<const WhisperRes&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t WhisperRes::ByteSizeLong() const {
+  const WhisperRes& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:ServerPacket.WhisperRes)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+  cached_has_bits = this_._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
+    // string sender_name = 2;
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!this_._internal_sender_name().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_sender_name());
+      }
+    }
+    // string target_name = 3;
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (!this_._internal_target_name().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_target_name());
+      }
+    }
+    // string message = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (!this_._internal_message().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_message());
+      }
+    }
+    // string error_msg = 6;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (!this_._internal_error_msg().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_error_msg());
+      }
+    }
+    // int64 sender_account_id = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (this_._internal_sender_account_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_sender_account_id());
+      }
+    }
+    // bool success = 5;
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (this_._internal_success() != 0) {
+        total_size += 2;
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void WhisperRes::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<WhisperRes*>(&to_msg);
+  auto& from = static_cast<const WhisperRes&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(class_specific_merge_from_start:ServerPacket.WhisperRes)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!from._internal_sender_name().empty()) {
+        _this->_internal_set_sender_name(from._internal_sender_name());
+      } else {
+        if (_this->_impl_.sender_name_.IsDefault()) {
+          _this->_internal_set_sender_name("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (!from._internal_target_name().empty()) {
+        _this->_internal_set_target_name(from._internal_target_name());
+      } else {
+        if (_this->_impl_.target_name_.IsDefault()) {
+          _this->_internal_set_target_name("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (!from._internal_message().empty()) {
+        _this->_internal_set_message(from._internal_message());
+      } else {
+        if (_this->_impl_.message_.IsDefault()) {
+          _this->_internal_set_message("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (!from._internal_error_msg().empty()) {
+        _this->_internal_set_error_msg(from._internal_error_msg());
+      } else {
+        if (_this->_impl_.error_msg_.IsDefault()) {
+          _this->_internal_set_error_msg("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (from._internal_sender_account_id() != 0) {
+        _this->_impl_.sender_account_id_ = from._impl_.sender_account_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (from._internal_success() != 0) {
+        _this->_impl_.success_ = from._impl_.success_;
+      }
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void WhisperRes::CopyFrom(const WhisperRes& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:ServerPacket.WhisperRes)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void WhisperRes::InternalSwap(WhisperRes* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.sender_name_, &other->_impl_.sender_name_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.target_name_, &other->_impl_.target_name_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, &other->_impl_.message_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.error_msg_, &other->_impl_.error_msg_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.success_)
+      + sizeof(WhisperRes::_impl_.success_)
+      - PROTOBUF_FIELD_OFFSET(WhisperRes, _impl_.sender_account_id_)>(
+          reinterpret_cast<char*>(&_impl_.sender_account_id_),
+          reinterpret_cast<char*>(&other->_impl_.sender_account_id_));
+}
+
+::google::protobuf::Metadata WhisperRes::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)

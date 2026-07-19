@@ -35,8 +35,8 @@ int main()
     config.registryPort = static_cast<uint16>(configParser.GetInt32("Registry", "Port", 10001));
     config.useRegistry  = true;
 
-    // 게임서버는 게이트웨이 정보를 폴링한다
-    config.pollTargetTypes   = { ServerType::Gateway };
+    // 게임서버는 게이트웨이와 커뮤니케이션서버 정보를 폴링한다.
+    config.pollTargetTypes   = { ServerType::Gateway, ServerType::Communication };
     config.userCountReportMs = configParser.GetInt32("Network", "UserCountReportMs", 10000);
 
     config.ioContextConfig.numConcurrentThread = configParser.GetInt32("Network", "NumConcurrentThread", 0);
@@ -47,7 +47,7 @@ int main()
     // 게임서버는 클라이언트와 직접 통신하지 않음
     config.useClientListenServer = false;
 
-    // 내부 서버용 포트 (채팅서버 등이 게임서버로 connect)
+    // 내부 서버용 포트 (커뮤니케이션서버 등이 게임서버로 connect)
     config.useInternalListenServer = true;
     config.internalListenServerConfig.ip   = config.privateIp;
     config.internalListenServerConfig.port = static_cast<uint16>(configParser.GetInt32("Server", "InternalPort", -1));
