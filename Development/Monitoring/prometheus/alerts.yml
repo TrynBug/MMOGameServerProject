@@ -1,0 +1,131 @@
+groups:
+  - name: mmo-server-availability
+    rules:
+      - alert: MmoServerDown
+        expr: up{job="mmo-servers"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MMO server endpoint is down"
+          description: "{{ $labels.server_type }} server {{ $labels.instance }} has not been scraped for 1 minute."
+
+      - alert: MmoServerNotReady
+        expr: mmo_server_ready == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MMO server is not ready"
+          description: "{{ $labels.instance }} is running but has remained not-ready for 2 minutes."
+
+      - alert: RegistryServerDisconnected
+        expr: mmo_registry_registered_servers{status="disconnected"} > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Registry contains disconnected servers"
+          description: "Registry reports {{ $value }} disconnected server entries."
+
+  - name: mmo-server-performance
+    rules:
+      - alert: ContentsThreadBacklog
+        expr: mmo_contents_task_oldest_age_seconds > 1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "ContentsThread task backlog"
+          description: "Thread {{ $labels.thread }} on {{ $labels.instance }} has a task older than 1 second."
+
+      - alert: ContentsThreadTickOverrun
+        expr: rate(mmo_contents_tick_overrun_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "ContentsThread repeatedly exceeds its tick budget"
+          description: "Thread {{ $labels.thread }} on {{ $labels.instance }} exceeds 0.1 overruns/sec."
+
+      - alert: DatabaseBacklog
+        expr: mmo_db_queue_oldest_age_seconds > 1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database queue backlog"
+          description: "The oldest DB request on {{ $labels.instance }} has waited more than 1 second."
+
+      - alert: DatabaseErrors
+        expr: sum by (instance) (rate(mmo_db_results_total{result="db_error"}[5m])) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database requests are failing"
+          description: "DB errors are occurring on {{ $labels.instance }}."
+
+      - alert: NetworkUnknownErrors
+        expr: sum by (instance) (rate(mmo_net_recv_errors_total{reason="unknown"}[5m]) + rate(mmo_net_send_errors_total{reason="unknown"}[5m])) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unknown network errors"
+          description: "Unknown send/receive errors are occurring on {{ $labels.instance }}."
+
+      - alert: NetworkSendBacklog
+        expr: mmo_net_send_queue_bytes > 67108864
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Network send queue exceeds 64 MiB"
+          description: "{{ $labels.instance }} has {{ $value | humanize1024 }} queued for send."
+
+      - alert: PacketPoolAllocationFailure
+        expr: increase(mmo_packet_pool_alloc_fail_total[5m]) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "PacketPool allocation failed"
+          description: "{{ $labels.instance }} rejected a packet allocation in the last 5 minutes."
+
+      - alert: StageMonitoringSnapshotStale
+        expr: (increase(mmo_stage_metric_snapshots_total[2m]) == 0) and on(instance) (mmo_game_stages{stage_type="all"} > 0)
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Stage monitoring snapshot is stale"
+          description: "Stages on {{ $labels.instance }} have not published a snapshot."
+
+      - alert: GameStageUserCountMismatch
+        expr: abs(mmo_game_users - mmo_game_stage_user_hint_total) > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "GameServer and Stage user counts differ"
+          description: "{{ $labels.instance }} has a persistent user-count difference greater than 5."
+
+  - name: windows-native
+    rules:
+      - alert: WindowsMetricsCollectionErrors
+        expr: increase(mmo_windows_metrics_collection_errors_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Windows API metric collection is failing"
+          description: "{{ $labels.instance }} failed to collect {{ $labels.scope }} metrics through Windows API."
+
+      - alert: WindowsLowAvailableMemory
+        expr: mmo_host_memory_available_bytes < 1073741824
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Windows host has less than 1 GiB available memory"
+          description: "{{ $labels.instance }} has {{ $value | humanize1024 }} available."

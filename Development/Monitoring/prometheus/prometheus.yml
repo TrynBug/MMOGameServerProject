@@ -1,0 +1,37 @@
+global:
+  scrape_interval: 15s
+  scrape_timeout: 5s
+  evaluation_interval: 15s
+  external_labels:
+    environment: local
+
+rule_files:
+  - alerts.yml
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["127.0.0.1:9090"]
+
+  - job_name: mmo-servers
+    static_configs:
+      - targets: ["127.0.0.1:19001"]
+        labels:
+          server_type: registry
+          server_id: "1"
+      - targets: ["127.0.0.1:19010"]
+        labels:
+          server_type: login
+          server_id: "10"
+      - targets: ["127.0.0.1:19020"]
+        labels:
+          server_type: communication
+          server_id: "20"
+      - targets: ["127.0.0.1:19100"]
+        labels:
+          server_type: gateway
+          server_id: "100"
+      - targets: ["127.0.0.1:19201"]
+        labels:
+          server_type: game
+          server_id: "201"
