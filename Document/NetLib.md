@@ -191,5 +191,10 @@ IoContext는 패킷(패킷버퍼) pool을 제공합니다. 패킷할당 함수�
 	- **반납(free)**: free하는 스레드가 아니라 **alloc했던 스레드의 home 샤드**로 되돌립니다. 그래야 그 스레드의 다음 Alloc이 자기 샤드에서 바로 hit하여 cross-shard 스캔이 드물어집니다. (deleter에 alloc 시점 home 샤드 인덱스를 캡처)
 - **통계**: `GetStats()`가 버킷별 스냅샷(`BucketStats`)을 반환합니다. capacity, allocCount, freeCount, newCount(pool miss), scanMissCount(스캔 중 빈 샤드 probe 수), held(현재 보유 수), shardHeld[](샤드별 보유 분포). 카운터는 모두 각 샤드 락 안에서만 갱신되어 추가 atomic·공유 캐시라인이 없습니다.
 
+# 모니터링 통계
+- `NetLibStats`는 스레드별 relaxed atomic 배열에 완료 IO byte/packet, posted/completed/error와 현재 active session, recv buffer, send queue/in-flight 합계를 기록합니다. hot path에서는 문자열 생성이나 metric registry 탐색을 하지 않습니다.
+- ServerBase의 `/metrics` scrape가 스레드별 배열을 합산해 `mmo_net_*` metric으로 발행합니다.
+- PacketPool은 shard lock 획득 비용을 제한하기 위해 첫 scrape 후 30초마다만 `GetStats()`를 호출하고, 그 사이 scrape에는 마지막 snapshot을 사용합니다.
+
 # 패킷 암호화
 - 암호화는 넣어야 하는데 아직 개발되지는 않았습니다. (암호화 알고리즘 후보: ChaCha20)

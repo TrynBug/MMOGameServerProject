@@ -237,3 +237,9 @@ Document/etc
 /temp
 /Rookiss
 /Blender
+
+# Local monitoring runtime/downloads
+/Development/Monitoring/.tools/
+/Development/Monitoring/data/
+/Development/Monitoring/results/
+/Development/Monitoring/.env
