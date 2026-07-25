@@ -57,6 +57,7 @@ public:
     void ForEachBuff(const std::function<void(int32 buffKey, int32 stackCount, int32 remainMs)>& callback) const;
 
     bool Empty() const { return m_buffs.empty(); }
+    size_t GetBuffCount() const { return m_buffs.size(); }
 
 private:
     // 버프 1개의 스탯 효과를 적용/역적용. stacksDelta>0 이면 그만큼 스택을 ApplyStat,

@@ -4,6 +4,30 @@
 
 bool GatewayServer::OnInitialize()
 {
+    if (IsMetricsEnabled())
+    {
+        auto& registry = GetMetricsRegistry();
+        // container/session 크기는 scrape 직전에 안전한 Size()로 읽는 현재 상태 Gauge다.
+        // auth/route/reroute 결과는 event 처리 지점에서 증가하는 Counter이며 direction/result는 가능한 값이 고정된 label이다.
+        bool registered = true;
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Gateway_Users, "mmo_gateway_users", "Current authenticated Gateway users.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Gateway_AuthTokens, "mmo_gateway_auth_tokens", "Unconsumed authentication tokens.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Gateway_PreviousGameServerCache, "mmo_gateway_prev_server_cache", "Cached previous GameServer routes.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Gateway_GameServerConnections, "mmo_gateway_game_server_connections", "Authenticated GameServer connections.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Gateway_KnownGameServers, "mmo_gateway_known_game_servers", "GameServers currently known from Registry.");
+        registered &= registry.AddCounter(serverbase::CounterMetric::Gateway_AuthSuccess, "mmo_gateway_auth_total", "Gateway authentication results.", { { "result", "success" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Gateway_AuthFailure, "mmo_gateway_auth_total", "Gateway authentication results.", { { "result", "failure" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Gateway_DuplicateLogin, "mmo_gateway_duplicate_login_total", "Duplicate-login notifications and authenticated reconnects.");
+        registered &= registry.AddCounter(serverbase::CounterMetric::Gateway_ClientToGameRouteSuccess, "mmo_gateway_route_total", "Gateway routing results.", { { "direction", "client_to_game" }, { "result", "success" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Gateway_ClientToGameRouteMissing, "mmo_gateway_route_total", "Gateway routing results.", { { "direction", "client_to_game" }, { "result", "missing_route" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Gateway_GameToClientRouteSuccess, "mmo_gateway_route_total", "Gateway routing results.", { { "direction", "game_to_client" }, { "result", "success" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Gateway_GameToClientRouteMissingUser, "mmo_gateway_route_total", "Gateway routing results.", { { "direction", "game_to_client" }, { "result", "missing_user" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Gateway_RerouteSuccess, "mmo_gateway_reroute_total", "Cross-GameServer reroute results.", { { "result", "success" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Gateway_RerouteFailure, "mmo_gateway_reroute_total", "Cross-GameServer reroute results.", { { "result", "failure" } });
+        if (!registered)
+            return false;
+    }
+
     // 클라이언트 패킷 디스패처 등록
     m_clientDispatcher.Register<GamePacket::GatewayAuthReq>(Common::GAME_PACKET_ID_GATEWAY_AUTH_REQ,
         [this](auto& spClientSession, auto& msg) { handleAuthReq(spClientSession, msg); });
@@ -77,6 +101,18 @@ bool GatewayServer::OnInitialize()
 
     LOG_WRITE(LogLevel::Info, "complete");
     return true;
+}
+
+void GatewayServer::OnMetricsCollect()
+{
+    // monitoring worker가 container 내부를 순회하지 않고 thread-safe Size()만 읽어 scrape 비용을 현재 사용자 수와 무관하게 유지한다.
+    // known GameServer와 authenticated connection을 분리해 Registry 발견 문제와 실제 연결 문제를 구분한다.
+    auto& registry = GetMetricsRegistry();
+    registry.Set(serverbase::GaugeMetric::Gateway_Users, static_cast<double>(m_safeUsers.Size()));
+    registry.Set(serverbase::GaugeMetric::Gateway_AuthTokens, static_cast<double>(m_safeAuthTokens.Size()));
+    registry.Set(serverbase::GaugeMetric::Gateway_PreviousGameServerCache, static_cast<double>(m_safePrevGameServer.Size()));
+    registry.Set(serverbase::GaugeMetric::Gateway_GameServerConnections, static_cast<double>(m_safeGameServerSessions.Size()));
+    registry.Set(serverbase::GaugeMetric::Gateway_KnownGameServers, static_cast<double>(m_safeGameServerInfos.Size()));
 }
 
 // 레지스트리서버로부터 다른서버 정보를받음
@@ -270,6 +306,7 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
     SessionMetaInfo* pMeta = getSessionMeta(spClientSession);
     if (!pMeta || pMeta->accountId != 0)
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_AuthFailure);
         LOG_WRITE(LogLevel::Warn, std::format("auth req on already authenticated session. sessionId={}", spClientSession->GetId()));
         spClientSession->Disconnect();
         return;
@@ -280,6 +317,7 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
 
     if (!consumeAuthToken(accountId, authToken))
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_AuthFailure);
         LOG_WRITE(LogLevel::Warn, std::format("auth failed. accountId={}, sessionId={}", accountId, spClientSession->GetId()));
         spClientSession->Disconnect();
         return;
@@ -289,6 +327,7 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
     GatewayUserPtr spExisting;
     if (m_safeUsers.Find(accountId, spExisting))
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_DuplicateLogin);
         LOG_WRITE(LogLevel::Info, std::format("duplicate connection. accountId={} disconnecting old session.", accountId));
         spExisting->spClientSession->Disconnect();
     }
@@ -297,6 +336,7 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
     auto gameServer = selectGameServer(accountId);
     if (!gameServer.has_value())
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_AuthFailure);
         LOG_WRITE(LogLevel::Warn, std::format("no available game server for accountId={}", accountId));
         spClientSession->Disconnect();
         return;
@@ -309,6 +349,7 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
     spUser->spClientSession = spClientSession;
 
     m_safeUsers.Insert(accountId, spUser);
+    GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_AuthSuccess);
 
     pMeta->accountId = accountId;
     pMeta->routedGameServerId = gameServer->serverId;
@@ -337,21 +378,29 @@ void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spClientSession
 {
     SessionMetaInfo* pMeta = getSessionMeta(spClientSession);
     if (!pMeta || pMeta->accountId == 0 || pMeta->routedGameServerId == 0)
+    {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_ClientToGameRouteMissing);
         return;
+    }
 
     netlib::ISessionPtr spGameSession;
     if (!m_safeGameServerSessions.Find(pMeta->routedGameServerId, spGameSession))
+    {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_ClientToGameRouteMissing);
         return;
+    }
 
     // 원본 클라 패킷에 accountId를 Sidecar로 추가해서 그대로 게임서버로 전송한다.
     int64 accountId = pMeta->accountId;
     if (!spPacket->SetSidecar(&accountId, sizeof(accountId)))
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_ClientToGameRouteMissing);
         LOG_WRITE(LogLevel::Error, std::format("SetSidecar failed. accountId={} packetType={}", accountId, spPacket->GetHeader()->type));
         return;
     }
 
     spGameSession->Send(spPacket);
+    GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_ClientToGameRouteSuccess);
 }
 
 
@@ -406,6 +455,7 @@ void GatewayServer::handleLoginAuthTokenNtf(const netlib::ISessionPtr& /*spLogin
 
 void GatewayServer::handleLoginDuplicateNtf(const netlib::ISessionPtr& /*spLoginSession*/, const ServerPacket::LoginDuplicateNtf& msg)
 {
+    GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_DuplicateLogin);
     int64 accountId = msg.account_id();
     LOG_WRITE(LogLevel::Info, std::format("duplicate login notified. accountId={}", accountId));
     forceDisconnectUser(accountId, "Duplicate login");
@@ -452,9 +502,13 @@ void GatewayServer::forwardClientPacket(const netlib::PacketPtr& spPacket)
     {
         GatewayUserPtr spUser;
         if (!m_safeUsers.Find(accountId, spUser) || !spUser->spClientSession)
+        {
+            GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_GameToClientRouteMissingUser);
             continue;
+        }
 
         spUser->spClientSession->Send(spPacket);
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_GameToClientRouteSuccess);
     }
 }
 
@@ -504,11 +558,15 @@ void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spGa
 
     GatewayUserPtr spUser;
     if (!m_safeUsers.Find(accountId, spUser))
+    {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_RerouteFailure);
         return;
+    }
 
     netlib::ISessionPtr spTargetSession;
     if (!m_safeGameServerSessions.Find(targetGameServerId, spTargetSession))
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_RerouteFailure);
         LOG_WRITE(LogLevel::Warn, std::format("target game server not found. targetGameServerId={}, accountId={}", targetGameServerId, accountId));
 
         ServerPacket::UserMoveToGameServerFailNtf failNtf;
@@ -544,7 +602,14 @@ void GatewayServer::handleUserMoveToGameServer(const netlib::ISessionPtr& /*spGa
 
     auto spReroutePacket = SerializePacket(Common::SERVER_PACKET_ID_USER_REROUTE_NTF, rerouteNtf);
     if (spReroutePacket)
+    {
         spTargetSession->Send(spReroutePacket);
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_RerouteSuccess);
+    }
+    else
+    {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_RerouteFailure);
+    }
 }
 
 // 게임서버의 netdelay 치트에 의한 클라 연결 지연 설정 (개발용)

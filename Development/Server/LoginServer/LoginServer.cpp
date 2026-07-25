@@ -6,6 +6,26 @@
 
 bool LoginServer::OnInitialize()
 {
+    if (IsMetricsEnabled())
+    {
+        auto& registry = GetMetricsRegistry();
+        // 사용자/route/session container 크기는 OnMetricsCollect에서 갱신하는 Gauge다.
+        // 로그인 결과는 요청 처리 시 Counter로 누적해 invalid input, credential 실패, DB 오류, Gateway 부족을 서로 구분한다.
+        bool registered = true;
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Login_LoggedInUsers, "mmo_login_users", "Users tracked as logged in.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Login_PreviousGatewayCache, "mmo_login_prev_gateway_cache", "Cached previous Gateway routes.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Login_GatewayConnections, "mmo_login_gateway_connections", "Authenticated Gateway connections.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Login_KnownGateways, "mmo_login_known_gateways", "Gateways currently known from Registry.");
+        registered &= registry.AddCounter(serverbase::CounterMetric::Login_RequestSuccess, "mmo_login_requests_total", "Login request results.", { { "result", "success" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Login_RequestInvalidInput, "mmo_login_requests_total", "Login request results.", { { "result", "invalid_input" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Login_RequestInvalidCredentials, "mmo_login_requests_total", "Login request results.", { { "result", "invalid_credentials" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Login_RequestAccountError, "mmo_login_requests_total", "Login request results.", { { "result", "account_error" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Login_RequestNoGateway, "mmo_login_requests_total", "Login request results.", { { "result", "no_gateway" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Login_DuplicateLogin, "mmo_login_duplicate_total", "Duplicate login requests detected.");
+        if (!registered)
+            return false;
+    }
+
     // 클라이언트 패킷의 패킷핸들러 등록
     m_packetDispatcher.Register<GamePacket::LoginReq>(Common::GAME_PACKET_ID_LOGIN_REQ,
         [this](auto& spSession, auto& msg) { handleLoginReq(spSession, msg); });
@@ -51,6 +71,17 @@ bool LoginServer::OnInitialize()
 
     LOG_WRITE(LogLevel::Info, "complete");
     return true;
+}
+
+void LoginServer::OnMetricsCollect()
+{
+    // 이전 Gateway cache는 재접속 routing을 위한 임시 상태이므로 계속 증가하면 TTL cleanup 이상을 의심할 수 있다.
+    // known Gateway와 authenticated connection을 함께 보면 Registry 정보와 실제 연결 상태의 차이를 확인할 수 있다.
+    auto& registry = GetMetricsRegistry();
+    registry.Set(serverbase::GaugeMetric::Login_LoggedInUsers, static_cast<double>(m_safeLoginMap.Size()));
+    registry.Set(serverbase::GaugeMetric::Login_PreviousGatewayCache, static_cast<double>(m_safePrevGatewayMap.Size()));
+    registry.Set(serverbase::GaugeMetric::Login_GatewayConnections, static_cast<double>(m_safeGatewaySessions.Size()));
+    registry.Set(serverbase::GaugeMetric::Login_KnownGateways, static_cast<double>(m_safeGatewayInfos.Size()));
 }
 
 // 레지스트리 서버에서 다른서버 정보를 받음
@@ -137,6 +168,7 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
 
     if (loginId.empty() || password.empty())
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Login_RequestInvalidInput);
         sendLoginFailed(spSession, "Invalid input");
         co_return;
     }
@@ -152,6 +184,7 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
 
     if (!result.success || result.IsEmpty())
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Login_RequestInvalidCredentials);
         LOG_WRITE(LogLevel::Info, std::format("login failed - account not found. loginId={}", loginId));
         sendLoginFailed(spSession, "Invalid ID or password");
         co_return;
@@ -162,6 +195,7 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     const std::string dataJson = result.GetString(0, "data");
     if (!packet::ProtoJsonSerializer::FromJson(dataJson, account))
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Login_RequestAccountError);
         LOG_WRITE(LogLevel::Error, std::format("failed to parse account JSON. loginId={}", loginId));
         co_return;
     }
@@ -173,6 +207,7 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     // TODO: 실제 해시 검증으로 교체 (bcrypt 등)
     if (password != account.login_password_hash())
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Login_RequestInvalidCredentials);
         LOG_WRITE(LogLevel::Info, std::format("login failed - wrong password. loginId={}", loginId));
         sendLoginFailed(spSession, "Invalid ID or password");
         co_return;
@@ -182,6 +217,7 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     auto existingEntry = findLoginEntry(accountId);
     if (existingEntry.has_value())
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Login_DuplicateLogin);
         LOG_WRITE(LogLevel::Info, std::format("duplicate login detected. accountId={} existing gatewayId={}", accountId, existingEntry->gatewayServerId));
         sendDuplicateLoginToGateway(existingEntry->gatewayServerId, accountId);
     }
@@ -190,6 +226,7 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     auto gateway = selectGateway(accountId);
     if (!gateway.has_value())
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Login_RequestNoGateway);
         LOG_WRITE(LogLevel::Warn, std::format("no available gateway for accountId={}", accountId));
         sendLoginFailed(spSession, "Server is busy. Please try again later.");
         co_return;
@@ -202,6 +239,7 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     sendAuthTokenToGateway(gateway->serverId, accountId, authToken, expireTimeMs);
     upsertLoginEntry(accountId, gateway->serverId);
     sendLoginSuccess(spSession, accountId, authToken, *gateway);
+    GetMetricsRegistry().Inc(serverbase::CounterMetric::Login_RequestSuccess);
 
     LOG_WRITE(LogLevel::Info, std::format("login success. accountId={} gateway={}:{}", accountId, gateway->privateIp, gateway->internalPort));
 }

@@ -1,0 +1,230 @@
+#pragma once
+
+namespace serverbase
+{
+
+// Metric enum은 Prometheus name이 아니라 서버 코드에서 하나의 고정 series를 식별하는 key다.
+// 이름이 길어지더라도 소유 subsystem과 측정값의 의미가 드러나도록 작성한다.
+// 같은 family라도 고정 label 조합이 다르면 서로 다른 enum 값으로 선언한다.
+enum class GaugeMetric
+{
+    ServerBase_Info,
+    ServerBase_Ready,
+    ServerBase_ShuttingDown,
+    ServerBase_UptimeSeconds,
+    MetricsHttp_ResponseBytes,
+
+    Db_AccountQuery_QueueDepth,
+    Db_AccountQuery_ActiveRequests,
+    Db_AccountTransaction_QueueDepth,
+    Db_AccountTransaction_ActiveRequests,
+    Db_GameQuery_QueueDepth,
+    Db_GameQuery_ActiveRequests,
+    Db_GameTransaction_QueueDepth,
+    Db_GameTransaction_ActiveRequests,
+    Db_OldestQueueAgeSeconds,
+
+    Net_ActiveSessions,
+    Net_RecvBufferUsedBytes,
+    Net_SendQueuePackets,
+    Net_SendQueueBytes,
+    Net_SendInFlightPackets,
+    Net_SendInFlightBytes,
+    PacketPool_Held,
+    PacketPool_InUse,
+    PacketPool_HitRatio,
+    PacketPool_ShardImbalanceRatio,
+
+    Windows_ProcessCpuSeconds,
+    Windows_ProcessWorkingSetBytes,
+    Windows_ProcessPeakWorkingSetBytes,
+    Windows_ProcessPrivateBytes,
+    Windows_ProcessHandleCount,
+    Windows_HostCpuIdleSeconds,
+    Windows_HostCpuSystemSeconds,
+    Windows_HostCpuUserSeconds,
+    Windows_HostMemoryTotalBytes,
+    Windows_HostMemoryAvailableBytes,
+
+    ContentsThreads_ContentsTotal,
+    ContentsThreads_PendingAddTotal,
+    ContentsThreads_PendingRemoveTotal,
+    ContentsThreads_TaskQueueDepthTotal,
+    ContentsThreads_TaskOldestAgeSecondsMax,
+
+    Communication_GameServerConnections,
+    Communication_KnownGameServers,
+    Communication_PresenceUsers,
+
+    Gateway_Users,
+    Gateway_AuthTokens,
+    Gateway_PreviousGameServerCache,
+    Gateway_GameServerConnections,
+    Gateway_KnownGameServers,
+
+    Login_LoggedInUsers,
+    Login_PreviousGatewayCache,
+    Login_GatewayConnections,
+    Login_KnownGateways,
+
+    Registry_RegisteredServersRunning,
+    Registry_RegisteredServersShuttingDown,
+    Registry_RegisteredServersDisconnected,
+    Registry_ReportedUsers,
+
+    Game_Users,
+    Game_GatewayConnections,
+    Game_CommunicationConnections,
+    Game_StagesAll,
+    Game_StagesSystem,
+    Game_StagesTown,
+    Game_StagesField,
+    Game_StagesDungeon,
+    Game_StageUserHintTotal,
+    Game_StageObjectsTotal,
+    Game_StageCharacterObjectsTotal,
+    Game_StageMonsterObjectsTotal,
+    Game_StagePropObjectsTotal,
+    Game_StageDropObjectsTotal,
+    Game_StagePendingMessagesTotal,
+    Game_StagePendingLeavesTotal,
+    Game_StageInFlightAsyncOperationsTotal,
+    Game_StageEventAreasTotal,
+    Game_StageAreaEffectsTotal,
+    Game_StageProjectileGroupsTotal,
+    Game_StagePlayerProjectilesTotal,
+    Game_StageMonsterProjectilesTotal,
+    Game_StageCharacterActiveCastsTotal,
+    Game_StageMonsterActiveCastsTotal,
+    Game_StageCharacterActiveBuffsTotal,
+    Game_StageMonsterActiveBuffsTotal,
+    Game_StageMonsterSkillsTotal,
+    Game_StageSectorsTotal,
+    Game_StageNonEmptySectorsTotal,
+    Game_StageMaxSectorObjects,
+
+    _End
+};
+
+enum class CounterMetric
+{
+    MetricsHttp_ScrapesTotal,
+    MetricsHttp_ScrapeErrorsTotal,
+
+    Db_AccountQuery_Requests,
+    Db_AccountQuery_CompletedSuccess,
+    Db_AccountQuery_CompletedBusinessFailure,
+    Db_AccountQuery_CompletedDbError,
+    Db_AccountQuery_Rejected,
+    Db_AccountTransaction_Requests,
+    Db_AccountTransaction_CompletedSuccess,
+    Db_AccountTransaction_CompletedBusinessFailure,
+    Db_AccountTransaction_CompletedDbError,
+    Db_AccountTransaction_Rejected,
+    Db_GameQuery_Requests,
+    Db_GameQuery_CompletedSuccess,
+    Db_GameQuery_CompletedBusinessFailure,
+    Db_GameQuery_CompletedDbError,
+    Db_GameQuery_Rejected,
+    Db_GameTransaction_Requests,
+    Db_GameTransaction_CompletedSuccess,
+    Db_GameTransaction_CompletedBusinessFailure,
+    Db_GameTransaction_CompletedDbError,
+    Db_GameTransaction_Rejected,
+
+    Net_AcceptedConnections,
+    Net_SessionsCreated,
+    Net_SessionsDestroyed,
+    Net_GracefulDisconnects,
+    Net_AbnormalDisconnects,
+    Net_InvalidPacketHeaders,
+    Net_PacketPoolAllocationFailures,
+    Net_RecvOperationsPosted,
+    Net_RecvOperationsCompleted,
+    Net_RecvKnownErrors,
+    Net_RecvUnknownErrors,
+    Net_RecvBufferFullDisconnects,
+    Net_SendOperationsPosted,
+    Net_SendOperationsCompleted,
+    Net_SendKnownErrors,
+    Net_SendUnknownErrors,
+    Net_ConnectOperationsPosted,
+    Net_ConnectOperationsCompleted,
+    Net_ConnectOperationsFailed,
+    Net_RecvBytes,
+    Net_RecvPackets,
+    Net_SendBytes,
+    Net_SendPackets,
+    PacketPool_Allocations,
+    PacketPool_Frees,
+    PacketPool_CreatedPackets,
+    PacketPool_ScanMisses,
+
+    Windows_ProcessIoReadBytes,
+    Windows_ProcessIoWriteBytes,
+    Windows_ProcessIoOtherBytes,
+    Windows_ProcessCollectionErrors,
+    Windows_HostCollectionErrors,
+
+    ContentsThreads_TasksPosted,
+    ContentsThreads_TasksProcessed,
+    ContentsThreads_TaskExceptions,
+    ContentsThreads_UpdateExceptions,
+    ContentsThreads_TickOverruns,
+    ContentsThreads_Ticks,
+
+    Communication_ChatSuccess,
+    Communication_ChatRejected,
+    Communication_ChatFanoutRecipients,
+    Communication_WhisperSuccess,
+    Communication_WhisperInvalid,
+    Communication_WhisperOffline,
+    Communication_WhisperUnavailable,
+
+    Gateway_AuthSuccess,
+    Gateway_AuthFailure,
+    Gateway_DuplicateLogin,
+    Gateway_ClientToGameRouteSuccess,
+    Gateway_ClientToGameRouteMissing,
+    Gateway_GameToClientRouteSuccess,
+    Gateway_GameToClientRouteMissingUser,
+    Gateway_RerouteSuccess,
+    Gateway_RerouteFailure,
+
+    Login_RequestSuccess,
+    Login_RequestInvalidInput,
+    Login_RequestInvalidCredentials,
+    Login_RequestAccountError,
+    Login_RequestNoGateway,
+    Login_DuplicateLogin,
+
+    Registry_RegisterSuccess,
+    Registry_RegisterRejected,
+    Registry_PollRequests,
+    Registry_HeartbeatResponses,
+    Registry_HeartbeatTimeouts,
+    Registry_ServerDisconnects,
+
+    Game_StageMetricSnapshots,
+
+    _End
+};
+
+enum class HistogramMetric
+{
+    MetricsHttp_ScrapeDurationSeconds,
+    Db_AccountQuery_QueueWaitSeconds,
+    Db_AccountQuery_ExecutionSeconds,
+    Db_AccountTransaction_QueueWaitSeconds,
+    Db_AccountTransaction_ExecutionSeconds,
+    Db_GameQuery_QueueWaitSeconds,
+    Db_GameQuery_ExecutionSeconds,
+    Db_GameTransaction_QueueWaitSeconds,
+    Db_GameTransaction_ExecutionSeconds,
+    ContentsThreads_TickDurationSeconds,
+    ContentsThreads_TickDelaySeconds,
+
+    _End
+};
+
+} // namespace serverbase

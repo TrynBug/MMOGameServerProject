@@ -2,6 +2,7 @@
 #include "NetLibStats.h"
 
 #include <array>
+#include <atomic>
 #include <cstdio>
 #include <memory>
 #include <mutex>
@@ -11,6 +12,7 @@ namespace netlib
 {
 
 constexpr size_t StatCounterEnd = static_cast<size_t>(StatCounter::_End);
+constexpr size_t StatGaugeEnd = static_cast<size_t>(StatGauge::_End);
 
 // 카테고리 이름
 // StatCounter enum 순서와 정확히 일치해야 함.
@@ -34,13 +36,29 @@ const char* s_counterNames[StatCounterEnd] = {
     "ConnectPosted",
     "ConnectCompleted",
     "ConnectFailed",
+    "RecvBytes",
+    "RecvPackets",
+    "SendBytes",
+    "SendPackets",
 };
 static_assert(sizeof(s_counterNames) / sizeof(s_counterNames[0]) == StatCounterEnd, "s_counterNames must match StatCounter enum size");
 
-// TLS 카운터. 각 스레드마다 하나씩 존재
+const char* s_gaugeNames[StatGaugeEnd] = {
+    "ActiveSessions",
+    "RecvBufferUsedBytes",
+    "SendQueuePackets",
+    "SendQueueBytes",
+    "SendInFlightPackets",
+    "SendInFlightBytes",
+};
+static_assert(sizeof(s_gaugeNames) / sizeof(s_gaugeNames[0]) == StatGaugeEnd, "s_gaugeNames must match StatGauge enum size");
+
+// TLS 카운터. 각 스레드마다 하나씩 존재한다.
+// Inc는 현재 스레드만 수행하지만 통계 수집 스레드가 동시에 읽으므로 atomic이 필요하다.
 struct alignas(64) PerThreadCounters  // cache line 정렬로 false sharing 방지
 {
-    std::array<uint64, StatCounterEnd> values{};
+    std::array<std::atomic<uint64>, StatCounterEnd> values{};
+    std::array<std::atomic<int64>, StatGaugeEnd> gauges{};
     // alignas(64)에 의해 뒤쪽은 자동으로 패딩됨
 };
 
@@ -80,7 +98,11 @@ public:
         // 값을 orphan에 누적
         for (size_t i = 0; i < StatCounterEnd; ++i)
         {
-            m_orphanTotals[i] += pCounter->values[i];
+            m_orphanTotals[i] += pCounter->values[i].load(std::memory_order_relaxed);
+        }
+        for (size_t i = 0; i < StatGaugeEnd; ++i)
+        {
+            m_orphanGauges[i] += pCounter->gauges[i].load(std::memory_order_relaxed);
         }
 
         // alive에서 제거
@@ -92,6 +114,19 @@ public:
                 break;
             }
         }
+    }
+
+    int64 Sum(StatGauge gauge) const
+    {
+        const size_t idx = static_cast<size_t>(gauge);
+        if (idx >= StatGaugeEnd)
+            return 0;
+
+        std::lock_guard<std::mutex> lock(m_mutex);
+        int64 sum = m_orphanGauges[idx];
+        for (const auto& p : m_alive)
+            sum += p->gauges[idx].load(std::memory_order_relaxed);
+        return sum;
     }
 
     // 특정 카운터의 총합 반환
@@ -106,9 +141,20 @@ public:
         uint64 sum = m_orphanTotals[idx];
         for (const auto& p : m_alive)
         {
-            sum += p->values[idx];
+            sum += p->values[idx].load(std::memory_order_relaxed);
         }
         return sum;
+    }
+
+    void SumAll(std::array<int64, StatGaugeEnd>& out) const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        out = m_orphanGauges;
+        for (const auto& p : m_alive)
+        {
+            for (size_t i = 0; i < StatGaugeEnd; ++i)
+                out[i] += p->gauges[i].load(std::memory_order_relaxed);
+        }
     }
 
     // 모든 카운터 스냅샷
@@ -123,7 +169,7 @@ public:
         {
             for (size_t i = 0; i < StatCounterEnd; ++i)
             {
-                out[i] += p->values[i];
+                out[i] += p->values[i].load(std::memory_order_relaxed);
             }
         }
     }
@@ -140,9 +186,12 @@ public:
         {
             for (size_t i = 0; i < StatCounterEnd; ++i)
             {
-                p->values[i] = 0;
+                p->values[i].store(0, std::memory_order_relaxed);
             }
+            for (size_t i = 0; i < StatGaugeEnd; ++i)
+                p->gauges[i].store(0, std::memory_order_relaxed);
         }
+        m_orphanGauges.fill(0);
     }
 
 private:
@@ -151,6 +200,7 @@ private:
     mutable std::mutex                              m_mutex;
     std::vector<std::unique_ptr<PerThreadCounters>> m_alive;
     std::array<uint64, StatCounterEnd>               m_orphanTotals{};
+    std::array<int64, StatGaugeEnd>                   m_orphanGauges{};
 };
 
 // TLS 카운터 포인터 관리
@@ -196,8 +246,17 @@ void NetLibStats::Inc(StatCounter counter, uint64 delta)
     // 현재 스레드의 TlsCounter 얻기
     PerThreadCounters* pCounter = GetOrInitTlsCounters();
 
-    // 값 증가
-    pCounter->values[idx] += delta;
+    // 이 카운터를 갱신하는 스레드는 하나지만 통계 수집 스레드가 동시에 읽을 수 있다.
+    pCounter->values[idx].fetch_add(delta, std::memory_order_relaxed);
+}
+
+void NetLibStats::Add(StatGauge gauge, int64 delta)
+{
+    const size_t idx = static_cast<size_t>(gauge);
+    if (idx >= StatGaugeEnd || delta == 0)
+        return;
+
+    GetOrInitTlsCounters()->gauges[idx].fetch_add(delta, std::memory_order_relaxed);
 }
 
 // 현재 카운터값 얻기
@@ -217,6 +276,17 @@ void NetLibStats::GetAllCount(std::array<uint64, StatCounterEnd>& outCounts)
     CounterRegistry::Instance().SumAll(outCounts);
 }
 
+int64 NetLibStats::GetGauge(StatGauge gauge)
+{
+    return CounterRegistry::Instance().Sum(gauge);
+}
+
+void NetLibStats::GetAllGauges(std::array<int64, StatGaugeEnd>& outGauges)
+{
+    outGauges.fill(0);
+    CounterRegistry::Instance().SumAll(outGauges);
+}
+
 // Counter 이름 얻기
 const char* NetLibStats::GetCounterName(StatCounter counter)
 {
@@ -226,6 +296,12 @@ const char* NetLibStats::GetCounterName(StatCounter counter)
         return "Unknown";
     }
     return s_counterNames[idx];
+}
+
+const char* NetLibStats::GetGaugeName(StatGauge gauge)
+{
+    const size_t idx = static_cast<size_t>(gauge);
+    return idx < StatGaugeEnd ? s_gaugeNames[idx] : "Unknown";
 }
 
 void NetLibStats::LogSnapshot()
@@ -238,6 +314,10 @@ void NetLibStats::LogSnapshot()
     {
         std::printf(" %s=%llu", s_counterNames[i], static_cast<unsigned long long>(counts[i]));
     }
+    std::array<int64, StatGaugeEnd> gauges{};
+    GetAllGauges(gauges);
+    for (size_t i = 0; i < StatGaugeEnd; ++i)
+        std::printf(" %s=%lld", s_gaugeNames[i], static_cast<long long>(gauges[i]));
     std::printf("\n");
 }
 

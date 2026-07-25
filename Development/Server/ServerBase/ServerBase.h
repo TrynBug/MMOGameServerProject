@@ -7,6 +7,11 @@
 #include "ObjectIdGenerator.h"
 #include "ContentsThread.h"
 #include "RegistryClient.h"
+#include "MetricsRegistry.h"
+#include "MetricsHttpServer.h"
+#include "NetMetricsPublisher.h"
+#include "DbMetricsPublisher.h"
+#include "WindowsMetricsPublisher.h"
 #include "ThreadSafeUnorderedMap.h"
 #include "DBConnectorLib.h"  
 
@@ -52,6 +57,11 @@ struct ServerBaseConfig
     std::string logDir = "Logs";
     LogLevel logLevel = LogLevel::Debug;
 
+    // Prometheus 형식 상태 모니터링 endpoint
+    bool metricsEnabled = false;
+    std::string metricsIp = "127.0.0.1";
+    uint16 metricsPort = 0;
+
     // ── DB (선택) ───────────────────────────────────────────────
     // 서버의 main 함수에서 LoadDBConfigFromIni()로 채운다. ServerBase가 Initialize 때 알아서 연결한다.
     //   - [AccountDB] Host 있으면 useAccountDB=true (Host/Port/User/Password/DBName)
@@ -66,6 +76,9 @@ struct ServerBaseConfig
 // ini의 [AccountDB]/[GameDB] 섹션을 읽어 ServerBaseConfig의 DB 필드를 채운다.
 // (각 서버 main에서 ServerBaseConfig를 만들 때 호출)
 void LoadDBConfigFromIni(ServerBaseConfig& config, ConfigParser& parser);
+
+// ini의 [Monitoring] 섹션을 읽어 ServerBaseConfig의 metrics 설정을 채운다.
+void LoadMetricsConfigFromIni(ServerBaseConfig& config, ConfigParser& parser);
 
 // 코루틴이 await 후 재시작될 때 IOCP Worker 스레드에서 재시작되도록 IOCP message 큐에 함수를 post 해주는 컴포넌트
 class CoroutineResumeExecutor : public db::IResumeExecutor
@@ -133,11 +146,13 @@ public:
     ServerType GetServerType()  const { return m_config.serverType; }
     bool       IsRunning()      const { return m_bRunning.load(); }
     bool       IsShuttingDown() const { return m_bShuttingDown.load(); }
+    bool       IsMetricsEnabled() const { return m_config.metricsEnabled; }
 
     int64 GenerateObjectId() { return m_objectIdGenerator.Generate(); }
 
     Timer&            GetTimer()          { return m_timer; }
     RegistryClient*   GetRegistryClient() { return m_spRegistryClient.get(); }
+    MetricsRegistry&  GetMetricsRegistry() { return m_metricsRegistry; }
     netlib::PacketPtr AllocPacket()       { return m_ioContext.GetPacketPool().Alloc(); }
     netlib::IoContext& GetIoContext()     { return m_ioContext; }
 
@@ -188,6 +203,10 @@ protected:
     // Initialize 완료 직후 호출됨. 서브클래스 초기화, 핸들러 콜백 등록
     virtual bool OnInitialize() { return true; }
 
+    // /metrics 수집 직전에 호출한다. 다른 thread가 소유한 일반 container에는 접근하지 말고,
+    // atomic snapshot 또는 thread-safe container만 조회해야 한다.
+    virtual void OnMetricsCollect() {}
+
     // 다른 서버 정보가 갱신됐을 때 호출됨. 서버간 연결 시작/해제 로직을 여기에 구현
     virtual void OnServerInfoUpdated(const ServerInfo& info) {}
 
@@ -209,12 +228,14 @@ private:
 
     // ServerBaseConfig의 DB 설정에 따라 AccountDB/GameDB 샤드를 m_dbQueue에 연다. DB 안 쓰면 그냥 true.
     bool initializeDatabases();
+    void publishContentsThreadMetrics();
     // AccountDB의 GameDBRegistry(status='active')를 읽어 GameDB 샤드 등록정보를 entries에 추가한다.
     bool loadGameShards(std::vector<db::AsyncDBQueue::OpenEntry>& entries);
 
 protected:
     ServerBaseConfig m_config;
     int32 m_serverId = 0;
+    std::chrono::steady_clock::time_point m_serverStartTime;
 
     // 서버의 모든 DB(AccountDB + GameDB 샤드)를 관리하는 단일 큐.
     db::AsyncDBQueue m_dbQueue;
@@ -240,6 +261,13 @@ protected:
     std::condition_variable m_shutdownCv;
 
     CoroutineResumeExecutor m_coroutineResumeExecutor { m_ioContext };  // co_await resume 전용 executor
+
+    // ── 모니터링 metrics ───────────────────────────
+    MetricsRegistry m_metricsRegistry;
+    DbMetricsPublisher m_dbMetricsPublisher;
+    MetricsHttpServer m_metricsHttpServer;
+    NetMetricsPublisher m_netMetricsPublisher;
+    WindowsMetricsPublisher m_windowsMetricsPublisher;
 };
 
 } // namespace serverbase

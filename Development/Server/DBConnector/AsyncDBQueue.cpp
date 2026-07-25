@@ -292,9 +292,12 @@ void AsyncDBQueue::Close()
     }
 
     m_workers.clear();
-    m_accountDb.reset();
-    m_gameDbs.clear();
-    m_queue.clear();
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_accountDb.reset();
+        m_gameDbs.clear();
+        m_queue.clear();
+    }
 }
 
 AsyncDBQueue::DbState* AsyncDBQueue::getDbState(EDBType type, int index)
@@ -321,14 +324,18 @@ const AsyncDBQueue::DbState* AsyncDBQueue::getDbState(EDBType type, int index) c
     return const_cast<AsyncDBQueue*>(this)->getDbState(type, index);
 }
 
-void AsyncDBQueue::enqueueJob(EDBType type, int index, DbJob job, Callback callback)
+void AsyncDBQueue::enqueueJob(EDBType type, int index, DbJob job, Callback callback, bool transaction)
 {
     bool enqueued = false;
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         if (getDbState(type, index) != nullptr)
         {
-            m_queue.push_back(Request{ type, index, std::move(job), std::move(callback) });
+            IAsyncDBMetricsSink* pSink = m_pMetricsSink.load(std::memory_order_acquire);
+            const auto enqueuedAt = pSink != nullptr ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point{};
+            m_queue.push_back(Request{ type, index, std::move(job), std::move(callback), transaction, enqueuedAt });
+            if (pSink != nullptr)
+                pSink->OnEnqueued(type, transaction);
             enqueued = true;
         }
     }
@@ -342,6 +349,8 @@ void AsyncDBQueue::enqueueJob(EDBType type, int index, DbJob job, Callback callb
     // 미등록 DB: 호출부가 HasDatabase로 걸러야 정상. 방어적으로 즉시 실패 콜백 → 코루틴이 영원히 멈추지 않게 한다.
     DBResult errorResult;
     errorResult.errorMsg = std::format("unknown db (type={} index={})", static_cast<int>(type), index);
+    if (IAsyncDBMetricsSink* pSink = m_pMetricsSink.load(std::memory_order_acquire))
+        pSink->OnRejected(type, transaction);
     if (callback)
     {
         callback(std::move(errorResult));
@@ -359,7 +368,7 @@ DBResultAwaitable AsyncDBQueue::ExecuteAsync(EDBType dbType, int dbIndex, const 
                 {
                     return connection.Execute(capturedQuery, capturedParams);
                 },
-                std::move(callback));
+                std::move(callback), false);
         },
         pExecutor
     );
@@ -376,7 +385,7 @@ DBResultAwaitable AsyncDBQueue::TransactionAsync(EDBType dbType, int dbIndex, Tx
                 {
                     return runTransaction(connection, config, capturedBody, options);
                 },
-                std::move(callback));
+                std::move(callback), true);
         },
         pExecutor
     );
@@ -386,6 +395,14 @@ bool AsyncDBQueue::HasDatabase(EDBType dbType, int dbIndex) const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     return getDbState(dbType, dbIndex) != nullptr;
+}
+
+double AsyncDBQueue::GetOldestQueueAgeSeconds() const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (m_queue.empty())
+        return 0.0;
+    return std::chrono::duration<double>(std::chrono::steady_clock::now() - m_queue.front().enqueuedAt).count();
 }
 
 void AsyncDBQueue::workerProc()
@@ -421,8 +438,21 @@ void AsyncDBQueue::workerProc()
             config = state.config;
         }
 
+        IAsyncDBMetricsSink* pMetricsSink = m_pMetricsSink.load(std::memory_order_acquire);
+        if (pMetricsSink != nullptr)
+        {
+            const double queueWaitSeconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - request.enqueuedAt).count();
+            pMetricsSink->OnStarted(request.type, request.transaction, queueWaitSeconds);
+        }
+
         // ── 블로킹 실행 (락 밖). job = 단발 쿼리 또는 트랜잭션. ──
+        const auto executionStart = pMetricsSink != nullptr ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point{};
         DBResult result = request.job(*connection, *config);
+        if (pMetricsSink != nullptr)
+        {
+            const double executionSeconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - executionStart).count();
+            pMetricsSink->OnCompleted(request.type, request.transaction, executionSeconds, result);
+        }
         const unsigned int resultErrorCode = result.errorCode;   // 콜백이 result를 move하기 전에 보관
         if (request.callback)
         {

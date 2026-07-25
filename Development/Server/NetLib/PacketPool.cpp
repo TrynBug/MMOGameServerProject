@@ -4,6 +4,7 @@
 #include "Packet.h"
 
 #include "PacketPool.h"
+#include "NetLibStats.h"
 
 namespace netlib
 {
@@ -61,6 +62,7 @@ PacketPtr PacketPool::Alloc(int32 size)
     if (bucket == nullptr)
     {
         // size가 너무 커서 버킷을 못찾음
+        NetLibStats::Inc(StatCounter::PacketPoolAllocFail);
         return nullptr;
     }
 

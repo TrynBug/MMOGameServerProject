@@ -47,7 +47,7 @@ public:
 
     void SetIp(const std::string& ip)   { m_ip = ip; }
     void SetPort(uint16 port)           { m_port = port; }
-    void SetConnected(bool connected)   { m_bConnected.store(connected); }
+    void SetConnected(bool connected);
 
     /* Network */
     void        StartRecv();
@@ -74,6 +74,8 @@ private:
 
     // sendQueue 에 패킷을 넣고, send 진행중이 아니면 송신을 시작한다. (Send 의 실제 송신 부분)
     void        enqueueAndKickSend(const PacketPtr& spPacket);
+    void        clearSendingPackets();
+    void        clearSendQueue();
 
     /* 네트워크 지연 시뮬레이션 */
     // 송신/수신을 순서 보존하며 지연 후 처리하도록 스케줄한다. (네트워크 지연 파이프 활성 상태에서만 호출)

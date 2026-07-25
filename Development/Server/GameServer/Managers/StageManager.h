@@ -30,6 +30,37 @@
 class StageManager
 {
 public:
+    struct MetricsSnapshot
+    {
+        size_t total = 0;
+        size_t system = 0;
+        size_t town = 0;
+        size_t field = 0;
+        size_t dungeon = 0;
+        int64 userCountHintTotal = 0;
+        size_t objectsTotal = 0;
+        size_t characterObjects = 0;
+        size_t monsterObjects = 0;
+        size_t propObjects = 0;
+        size_t dropObjects = 0;
+        size_t pendingMessages = 0;
+        size_t pendingLeaves = 0;
+        size_t inFlightAsyncOperations = 0;
+        size_t eventAreas = 0;
+        size_t areaEffects = 0;
+        size_t projectileGroups = 0;
+        size_t playerProjectiles = 0;
+        size_t monsterProjectiles = 0;
+        size_t characterActiveCasts = 0;
+        size_t monsterActiveCasts = 0;
+        size_t characterActiveBuffs = 0;
+        size_t monsterActiveBuffs = 0;
+        size_t monsterSkills = 0;
+        size_t sectors = 0;
+        size_t nonEmptySectors = 0;
+        size_t maxSectorObjects = 0;
+    };
+
     StageManager() = default;
     ~StageManager() = default;
 
@@ -70,6 +101,9 @@ public:
 
     // SystemStage는 Initialize 후 readonly. SystemStage는 채널 개념이 없어(항상 1개) 캐시를 유지한다.
     SystemStagePtr GetSystemStage() const { return m_spSystemStage; }
+
+    // exporter thread에서 사용할 수 있는 bounded snapshot. Stage container 대신 각 Stage의 저빈도 snapshot만 읽는다.
+    MetricsSnapshot CollectMetricsSnapshot() const;
 
 private:
     // stageId를 컨텐츠 스레드 인덱스로 매핑.

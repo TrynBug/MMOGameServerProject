@@ -22,6 +22,7 @@ public:
 protected:
     // ServerBase 훅
     bool OnInitialize() override;
+    void OnMetricsCollect() override;
     void OnBeforeShutdown() override;
     netlib::FuncEventHandler* GetInternalListenEventHandler() override { return &m_listenEventHandler; }
 

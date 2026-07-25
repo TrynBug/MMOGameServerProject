@@ -36,6 +36,11 @@ using CharacterPtr = std::shared_ptr<Character>;
 // Monster forward declaration (SpawnMonster 리턴 타입). 완전타입은 Stage.cpp 에서 include.
 class Monster;
 
+namespace serverbase
+{
+class MetricsRegistry;
+}
+
 // PropObject forward declaration (SpawnProp/FindProp 리턴 타입). 완전타입은 Stage.cpp 에서 include.
 class PropObject;
 
@@ -193,9 +198,37 @@ public:
     // 스레드: 이 Stage 의 컨텐츠 스레드에서만 호출할 것 (canLeaveStage/OnUserLeave 가 그 전제).
     bool MoveToChannel(const UserPtr& spUser, int32 targetChannelNo, std::string& outFailReason);
 
-    // 채널 선택용 유저수 힌트. StageManager::SelectChannel 전용.
-    // 주의: m_users.size() 만 외부 스레드에서 읽기를 예외적으로 허용하고, find()/begin()/순회 등은 반드시 Stage 자신 스레드에서만 해야한다.
-    int32 GetUserCountHint() const { return static_cast<int32>(m_users.size()); }
+    // 유저수 힌트
+    int32 GetUserCountHint() const { return m_userCountHint.load(std::memory_order_relaxed); }
+
+    struct MetricsSnapshot
+    {
+        size_t objectsTotal = 0;
+        size_t characterObjects = 0;
+        size_t monsterObjects = 0;
+        size_t propObjects = 0;
+        size_t dropObjects = 0;
+        size_t pendingMessages = 0;
+        size_t pendingLeaves = 0;
+        size_t inFlightAsyncOperations = 0;
+        size_t eventAreas = 0;
+        size_t areaEffects = 0;
+        size_t projectileGroups = 0;
+        size_t playerProjectiles = 0;
+        size_t monsterProjectiles = 0;
+        size_t characterActiveCasts = 0;
+        size_t monsterActiveCasts = 0;
+        size_t characterActiveBuffs = 0;
+        size_t monsterActiveBuffs = 0;
+        size_t monsterSkills = 0;
+        size_t sectors = 0;
+        size_t nonEmptySectors = 0;
+        size_t maxSectorObjects = 0;
+    };
+
+    // 모니터링이 활성화된 경우에만 저빈도 상태 snapshot 생성을 켠다.
+    void EnableMetrics(serverbase::MetricsRegistry& registry);
+    MetricsSnapshot GetMetricsSnapshot() const;
 
     // 이 Stage가 배정된 컨텐츠 스레드의 resume executor (StageManager가 등록 시 주입, 소유하지 않음).
     // Stage에서 시작한 DB 코루틴의 후속작업을 이 Stage의 스레드에서 재개시키기 위해 ExecuteAsync에 넘긴다.
@@ -613,6 +646,10 @@ private:
     // OnUpdate 시작부에서 매 tick 호출.
     void processPendingLeaves();
 
+    // Stage-owned container는 exporter thread에서 읽지 않고 소유 thread가 저빈도 snapshot으로 게시한다.
+    void publishMetricsSnapshot();
+    void clearMetricsSnapshot();
+
 private:
     int64      m_stageId   = 0;
     EStageType m_stageType = EStageType::None;
@@ -660,9 +697,9 @@ private:
 
     // ── 유저 컨테이너 (컨텐츠 스레드 전용 접근) ──
     // Stage가 유저를 소유 (shared_ptr).
-    // 예외: size() 만 GetUserCountHint() 를 통해 외부 스레드가 읽는다(채널 선택). 근거·한계는 그 함수 주석 참조.
-    // 그 외 모든 접근(find/begin/순회/변경)은 반드시 이 Stage 의 컨텐츠 스레드에서만 한다.
+    // 모든 접근(find/begin/순회/변경)은 반드시 이 Stage 의 컨텐츠 스레드에서만 한다.
     std::unordered_map<int64, UserPtr> m_users;
+    std::atomic<int32> m_userCountHint { 0 };
 
     // AOI 브로드캐스트 시 수신자 accountId 를 모으는 재사용 버퍼 (컨텐츠 스레드 전용, 호출마다 clear).
     // 매 브로드캐스트마다 vector 를 새로 만들지 않기 위함. 브로드캐스트는 tick 내에서 순차 호출되어 재진입 없음.
@@ -714,4 +751,15 @@ private:
 
     // 진행 중인 서버 권위 몬스터 투사체들. updateSkillEffects 에서 매 tick 전진+충돌 + 만료 sweep.
     std::vector<std::unique_ptr<MonsterProjectile>> m_monsterProjectiles;
+
+    // ── 모니터링 metrics ───────────────────────────
+    // Stage owner thread가 상세 container를 순회하는 주기다. HTTP scrape와 분리해 scrape 폭주가 game tick 비용을 늘리지 않게 한다.
+    static constexpr int64 k_metricsSnapshotIntervalMs = 5000;
+    int64 m_nextMetricsSnapshotAtMs = 0;
+
+    // Stage owner thread가 만든 snapshot만 외부 thread에 공개한다.
+    // MetricsRegistry 포인터는 모니터링 활성 여부와 snapshot Counter 기록에 사용하며 소유하지 않는다.
+    serverbase::MetricsRegistry* m_pMetricsRegistry = nullptr;
+    mutable std::mutex m_metricsSnapshotMutex;
+    MetricsSnapshot m_metricsSnapshot;
 };

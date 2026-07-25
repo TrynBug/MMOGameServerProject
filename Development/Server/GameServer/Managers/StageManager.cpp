@@ -181,6 +181,9 @@ bool StageManager::registerStage(int64 stageId, int32 stageDataKey, const StageP
     }
     spStage->SetChannelNo(channelNo);
 
+    if (GameServer::Instance().IsMetricsEnabled())
+        spStage->EnableMetrics(GameServer::Instance().GetMetricsRegistry());
+
     GameServer::Instance().AssignContents(threadIdx, spStage);
 
     // 이 Stage에서 시작하는 DB 코루틴의 후속작업이 배정된 컨텐츠 스레드에서 재개되도록 resume executor 주입.
@@ -193,6 +196,47 @@ bool StageManager::registerStage(int64 stageId, int32 stageDataKey, const StageP
         m_stageIdsByDataKey[stageDataKey].push_back(stageId);
     }
     return true;
+}
+
+StageManager::MetricsSnapshot StageManager::CollectMetricsSnapshot() const
+{
+    MetricsSnapshot snapshot;
+    m_safeStages.ForEach([&snapshot](int64, const StagePtr& spStage)
+    {
+        ++snapshot.total;
+        snapshot.userCountHintTotal += spStage->GetUserCountHint();
+        const Stage::MetricsSnapshot stage = spStage->GetMetricsSnapshot();
+        snapshot.objectsTotal += stage.objectsTotal;
+        snapshot.characterObjects += stage.characterObjects;
+        snapshot.monsterObjects += stage.monsterObjects;
+        snapshot.propObjects += stage.propObjects;
+        snapshot.dropObjects += stage.dropObjects;
+        snapshot.pendingMessages += stage.pendingMessages;
+        snapshot.pendingLeaves += stage.pendingLeaves;
+        snapshot.inFlightAsyncOperations += stage.inFlightAsyncOperations;
+        snapshot.eventAreas += stage.eventAreas;
+        snapshot.areaEffects += stage.areaEffects;
+        snapshot.projectileGroups += stage.projectileGroups;
+        snapshot.playerProjectiles += stage.playerProjectiles;
+        snapshot.monsterProjectiles += stage.monsterProjectiles;
+        snapshot.characterActiveCasts += stage.characterActiveCasts;
+        snapshot.monsterActiveCasts += stage.monsterActiveCasts;
+        snapshot.characterActiveBuffs += stage.characterActiveBuffs;
+        snapshot.monsterActiveBuffs += stage.monsterActiveBuffs;
+        snapshot.monsterSkills += stage.monsterSkills;
+        snapshot.sectors += stage.sectors;
+        snapshot.nonEmptySectors += stage.nonEmptySectors;
+        snapshot.maxSectorObjects = std::max(snapshot.maxSectorObjects, stage.maxSectorObjects);
+        switch (spStage->GetStageType())
+        {
+        case EStageType::System:  ++snapshot.system;  break;
+        case EStageType::Town:    ++snapshot.town;    break;
+        case EStageType::Field:   ++snapshot.field;   break;
+        case EStageType::Dungeon: ++snapshot.dungeon; break;
+        default: break;
+        }
+    });
+    return snapshot;
 }
 
 StagePtr StageManager::Find(int64 stageId) const

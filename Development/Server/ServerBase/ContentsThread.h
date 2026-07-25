@@ -3,6 +3,7 @@
 #include "pch.h"
 #include "Contents.h"
 #include "DBTask.h"
+#include "MetricsRegistry.h"
 
 namespace serverbase
 {
@@ -29,6 +30,15 @@ private:
 class ContentsThread
 {
 public:
+    struct MetricsSnapshot
+    {
+        int64 contentsCount = 0;
+        int64 pendingAdd = 0;
+        int64 pendingRemove = 0;
+        int64 taskQueueDepth = 0;
+        double taskOldestAgeSeconds = 0.0;
+    };
+
     // @updateIntervalMs : Contents::Update 호출 주기(ms)
     explicit ContentsThread(int64 updateIntervalMs = 50);
     ~ContentsThread();
@@ -39,6 +49,10 @@ public:
 public:
     // 스레드 시작
     void Start();
+
+    // Start 전에 호출한다. 첫 ContentsThread만 공용 합계 series를 등록하고 나머지는 같은 Registry에 값을 누적한다.
+    bool InitializeMetrics(MetricsRegistry& registry, bool registerMetrics);
+    MetricsSnapshot GetMetricsSnapshot() const;
 
     // 스레드 종료 (모든 Contents::OnStop 호출 후 스레드 join)
     void Stop();
@@ -63,6 +77,13 @@ public:
 private:
     void threadProc();
 
+    // 이 스레드에서 실행할 태스크(코루틴 resume 등)
+    struct TaskEntry
+    {
+        std::function<void()> fn;   // task
+        std::chrono::steady_clock::time_point enqueuedAt;  // task가 큐에 추가된 시간
+    };
+
 private:
     int64 m_updateIntervalMs;
     std::thread m_thread;
@@ -78,10 +99,18 @@ private:
 
     // 이 스레드에서 실행할 태스크(코루틴 resume 등) 큐. Post()가 추가, threadProc가 매 tick drain.
     std::mutex m_taskMutex;
-    std::vector<std::function<void()>> m_tasks;
+    std::vector<TaskEntry> m_tasks;
 
     // db::IResumeExecutor 인터페이스를 제공하는 컴포넌트(상속 대신 합성). Post를 이 스레드의 태스크 큐로 위임.
     ContentsThreadResumeExecutor m_resumeExecutor { *this };
+
+    // ── 모니터링 metrics ───────────────────────────
+    MetricsRegistry* m_pMetricsRegistry = nullptr;
+    std::atomic<int64> m_metricContentsCount{ 0 };
+    std::atomic<int64> m_metricPendingAdd{ 0 };
+    std::atomic<int64> m_metricPendingRemove{ 0 };
+    std::atomic<int64> m_metricTaskQueueDepth{ 0 };
+    std::atomic<double> m_metricTaskOldestAgeSeconds{ 0.0 };
 };
 
 using ContentsThreadPtr = std::shared_ptr<ContentsThread>;

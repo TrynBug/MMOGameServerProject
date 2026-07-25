@@ -21,6 +21,7 @@ public:
 protected:
     // ServerBase 훅
     bool OnInitialize()                              override;
+    void OnMetricsCollect()                          override;
     void OnServerInfoUpdated(const ServerInfo& info) override;
     void OnBeforeShutdown()                          override;
     netlib::FuncEventHandler* GetClientListenEventHandler() override { return &m_listenEventHandler; }

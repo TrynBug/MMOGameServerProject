@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\Metrics">
+      <UniqueIdentifier>{99af5919-6017-49c9-b80d-028d06f368b0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConfigParser.h">
@@ -22,6 +25,9 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="ContentsThread.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowsMetricsPublisher.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="ObjectIdGenerator.h">
@@ -51,6 +57,21 @@
     <ClInclude Include="PacketDispatcher.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
+    <ClInclude Include="DbMetricsPublisher.h">
+      <Filter>소스 파일\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="MetricEnums.h">
+      <Filter>소스 파일\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="MetricsHttpServer.h">
+      <Filter>소스 파일\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="MetricsRegistry.h">
+      <Filter>소스 파일\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="NetMetricsPublisher.h">
+      <Filter>소스 파일\Metrics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -63,6 +84,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="ContentsThread.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowsMetricsPublisher.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="RegistryClient.cpp">
@@ -82,6 +106,18 @@
     </ClCompile>
     <ClCompile Include="PacketDispatcher.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DbMetricsPublisher.cpp">
+      <Filter>소스 파일\Metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="MetricsHttpServer.cpp">
+      <Filter>소스 파일\Metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="MetricsRegistry.cpp">
+      <Filter>소스 파일\Metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="NetMetricsPublisher.cpp">
+      <Filter>소스 파일\Metrics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

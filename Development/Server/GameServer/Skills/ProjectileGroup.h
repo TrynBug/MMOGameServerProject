@@ -46,6 +46,7 @@ public:
     bool TryConsume(int32 projectileIndex);
 
     bool IsExpired(int64 nowMs) const { return nowMs >= m_expireTimeMs; }
+    size_t GetActiveProjectileCount() const { return static_cast<size_t>(std::count(m_consumed.begin(), m_consumed.end(), false)); }
 
 private:
     EffectParams                     m_params;

@@ -64,6 +64,8 @@ int main()
     config.logDir = configParser.GetString("Log", "Dir", "Logs");
     config.logLevel = Logger::StringToLogLevel(configParser.GetString("Log", "Level", "Debug"));
 
+    serverbase::LoadMetricsConfigFromIni(config, configParser);
+
     // 서버 시작
     GatewayServer server;
     g_pServer = &server;

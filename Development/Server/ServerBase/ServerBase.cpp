@@ -28,11 +28,25 @@ namespace
 
         return true;
     }
+
+    const char* GetMetricServerTypeName(ServerType serverType)
+    {
+        switch (serverType)
+        {
+        case ServerType::Registry:      return "registry";
+        case ServerType::Login:         return "login";
+        case ServerType::Gateway:       return "gateway";
+        case ServerType::Game:          return "game";
+        case ServerType::Communication: return "communication";
+        default:                        return "unknown";
+        }
+    }
 }
 
 bool ServerBase::Initialize(const ServerBaseConfig& config)
 {
     m_config = config;
+    m_serverStartTime = std::chrono::steady_clock::now();
 
     // Logger 초기화
     std::string serverTypeName;
@@ -84,6 +98,15 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
         }
     }
 
+    if (config.metricsEnabled)
+    {
+        if (!IsConcreteIPv4(config.metricsIp) || config.metricsPort == 0)
+        {
+            LOG_WRITE(LogLevel::Error, std::format("invalid Monitoring config. IP='{}' Port={}", config.metricsIp, config.metricsPort));
+            return false;
+        }
+    }
+
     // ObjectIdGenerator 초기화
     m_objectIdGenerator.Initialize(m_serverId);
 
@@ -106,6 +129,16 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
     }
 
     LOG_WRITE(LogLevel::Info, "IoContext initialized");
+
+    if (config.metricsEnabled)
+    {
+        // DB metric sink는 DB queue가 요청을 받기 전에 연결한다. 이후 enqueue/worker callback이 Counter와 Gauge를 직접 갱신한다.
+        if (!m_dbMetricsPublisher.Initialize(m_metricsRegistry, m_dbQueue))
+        {
+            LOG_WRITE(LogLevel::Error, "failed to register DB metrics");
+            return false;
+        }
+    }
 
 	// 클라이언트 Listen용 NetServer 초기화
     if (config.useClientListenServer)
@@ -155,6 +188,11 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
         for (int32 i = 0; i < config.numContentsThreads; ++i)
         {
             auto spThread = std::make_shared<ContentsThread>(config.contentsUpdateMs);
+            if (config.metricsEnabled && !spThread->InitializeMetrics(m_metricsRegistry, i == 0))
+            {
+                LOG_WRITE(LogLevel::Error, std::format("failed to register ContentsThread metrics. thread={}", i));
+                return false;
+            }
             spThread->Start();
             m_contentsThreads.push_back(std::move(spThread));
         }
@@ -217,9 +255,100 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
         return false;
     }
 
+    if (config.metricsEnabled)
+    {
+        // server_info는 값 자체보다 server_type/server_id label을 제공하는 정보성 metric이다.
+        // ready와 shutting_down을 분리해 "프로세스는 살아 있지만 아직 준비 안 됨"과 graceful shutdown 상태를 구분한다.
+        bool lifecycleMetricsRegistered = true;
+        lifecycleMetricsRegistered &= m_metricsRegistry.AddGauge(GaugeMetric::ServerBase_Info,
+            "mmo_server_info", "Static information about this server process.",
+            { { "server_type", GetMetricServerTypeName(config.serverType) }, { "server_id", std::to_string(m_serverId) } });
+        lifecycleMetricsRegistered &= m_metricsRegistry.AddGauge(GaugeMetric::ServerBase_Ready,
+            "mmo_server_ready", "Whether the server completed initialization and can process work.");
+        lifecycleMetricsRegistered &= m_metricsRegistry.AddGauge(GaugeMetric::ServerBase_ShuttingDown,
+            "mmo_server_shutting_down", "Whether graceful shutdown has started.");
+        lifecycleMetricsRegistered &= m_metricsRegistry.AddGauge(GaugeMetric::ServerBase_UptimeSeconds,
+            "mmo_server_uptime_seconds", "Seconds elapsed since server initialization started.");
+        if (!lifecycleMetricsRegistered)
+        {
+            LOG_WRITE(LogLevel::Error, "failed to register common server metrics");
+            return false;
+        }
+
+        m_metricsRegistry.Set(GaugeMetric::ServerBase_Info, 1.0);
+        m_metricsRegistry.Set(GaugeMetric::ServerBase_Ready, 0.0);
+        m_metricsRegistry.Set(GaugeMetric::ServerBase_ShuttingDown, 0.0);
+
+        // IoContext/PacketPool 초기화가 끝난 뒤 등록해야 실제 capacity bucket 목록을 고정 label로 만들 수 있다.
+        if (!m_netMetricsPublisher.Initialize(m_metricsRegistry, m_ioContext))
+        {
+            LOG_WRITE(LogLevel::Error, "failed to register NetLib metrics");
+            return false;
+        }
+
+        // process metric은 모든 서버가 게시한다. 같은 Windows host 값이 서버 수만큼 중복되지 않도록 host metric은 Registry만 게시한다.
+        if (!m_windowsMetricsPublisher.Initialize(m_metricsRegistry, config.serverType == ServerType::Registry))
+        {
+            LOG_WRITE(LogLevel::Error, "failed to register Windows process/host metrics");
+            return false;
+        }
+
+        // 모든 publisher와 서버별 metric 등록이 끝난 뒤 endpoint를 연다.
+        // 이 순서로 시작해야 첫 Prometheus scrape부터 완전한 family 목록을 반환한다.
+        MetricsHttpServerConfig metricsConfig;
+        metricsConfig.ip = config.metricsIp;
+        metricsConfig.port = config.metricsPort;
+
+        std::string metricsError;
+        if (!m_metricsHttpServer.Start(metricsConfig, m_metricsRegistry, [this]()
+            {
+                // 이 callback은 /metrics를 처리하는 monitoring worker에서 실행된다.
+                // publisher는 각 subsystem의 atomic/저비용 snapshot만 Registry에 복사하고, 마지막에 서버별 snapshot hook을 호출한다.
+                const double uptimeSeconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - m_serverStartTime).count();
+                m_metricsRegistry.Set(GaugeMetric::ServerBase_UptimeSeconds, uptimeSeconds);
+                m_netMetricsPublisher.Publish();
+                m_dbMetricsPublisher.Publish();
+                m_windowsMetricsPublisher.Publish();
+                publishContentsThreadMetrics();
+                OnMetricsCollect();
+            }, metricsError))
+        {
+            LOG_WRITE(LogLevel::Error, std::format("metrics HTTP server start failed. {}", metricsError));
+            return false;
+        }
+
+        LOG_WRITE(LogLevel::Info, std::format("metrics HTTP server listening on {}:{}", config.metricsIp, config.metricsPort));
+    }
+
     m_bRunning = true;
+    // HTTP endpoint가 성공적으로 열린 뒤에만 ready=1로 바꾼다. Prometheus가 초기화 도중 target을 정상 서비스로 오인하지 않게 한다.
+    m_metricsRegistry.Set(GaugeMetric::ServerBase_Ready, 1.0);
     LOG_WRITE(LogLevel::Info, std::format("{} initialized successfully", serverTypeName));
     return true;
+}
+
+void ServerBase::publishContentsThreadMetrics()
+{
+    int64 contentsCount = 0;
+    int64 pendingAdd = 0;
+    int64 pendingRemove = 0;
+    int64 taskQueueDepth = 0;
+    double taskOldestAgeSeconds = 0.0;
+    for (const ContentsThreadPtr& spThread : m_contentsThreads)
+    {
+        const ContentsThread::MetricsSnapshot snapshot = spThread->GetMetricsSnapshot();
+        contentsCount += snapshot.contentsCount;
+        pendingAdd += snapshot.pendingAdd;
+        pendingRemove += snapshot.pendingRemove;
+        taskQueueDepth += snapshot.taskQueueDepth;
+        taskOldestAgeSeconds = std::max(taskOldestAgeSeconds, snapshot.taskOldestAgeSeconds);
+    }
+
+    m_metricsRegistry.Set(GaugeMetric::ContentsThreads_ContentsTotal, static_cast<double>(contentsCount));
+    m_metricsRegistry.Set(GaugeMetric::ContentsThreads_PendingAddTotal, static_cast<double>(pendingAdd));
+    m_metricsRegistry.Set(GaugeMetric::ContentsThreads_PendingRemoveTotal, static_cast<double>(pendingRemove));
+    m_metricsRegistry.Set(GaugeMetric::ContentsThreads_TaskQueueDepthTotal, static_cast<double>(taskQueueDepth));
+    m_metricsRegistry.Set(GaugeMetric::ContentsThreads_TaskOldestAgeSecondsMax, taskOldestAgeSeconds);
 }
 
 // ServerBaseConfig의 DB 설정에 따라 AccountDB/GameDB 샤드를 m_dbQueue에 연다.
@@ -333,6 +462,14 @@ void LoadDBConfigFromIni(ServerBaseConfig& config, ConfigParser& parser)
     config.useGameDB = parser.GetBool("GameDB", "Enabled", false);
 }
 
+void LoadMetricsConfigFromIni(ServerBaseConfig& config, ConfigParser& parser)
+{
+    config.metricsEnabled = parser.GetBool("Monitoring", "Enabled", false);
+    config.metricsIp = parser.GetString("Monitoring", "IP", "127.0.0.1");
+    const int32 metricsPort = parser.GetInt32("Monitoring", "Port", 0);
+    config.metricsPort = (metricsPort > 0 && metricsPort <= 65535) ? static_cast<uint16>(metricsPort) : 0;
+}
+
 bool ServerBase::StartAccept()
 {
     bool started = false;
@@ -399,6 +536,9 @@ void ServerBase::RequestShutdown()
         return;  // 이미 종료 진행 중
 
     LOG_WRITE(LogLevel::Info, "graceful shutdown requested");
+
+    m_metricsRegistry.Set(GaugeMetric::ServerBase_Ready, 0.0);
+    m_metricsRegistry.Set(GaugeMetric::ServerBase_ShuttingDown, 1.0);
 
     // 레지스트리에 종료 알림
     if (m_spRegistryClient && m_spRegistryClient->IsRegistered())
@@ -484,6 +624,12 @@ void ServerBase::shutdownInternal()
 
     // 서브클래스 훅
     OnShutdown();
+
+    if (m_metricsHttpServer.IsRunning())
+    {
+        m_metricsHttpServer.Stop();
+        LOG_WRITE(LogLevel::Info, "metrics HTTP server stopped");
+    }
 
     LOG_WRITE(LogLevel::Info, "complete");
 

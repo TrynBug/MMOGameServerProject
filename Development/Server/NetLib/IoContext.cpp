@@ -240,6 +240,7 @@ void IoContext::workerThreadProc()
 
             if (spSession != nullptr)
             {
+                pOverlapped->spSession.reset();
                 spSession->CloseSocket();
             }
             continue;
@@ -251,6 +252,7 @@ void IoContext::workerThreadProc()
             NetLibStats::Inc(StatCounter::GracefulDisconnect);
             if (spSession != nullptr)
             {
+                pOverlapped->spSession.reset();
                 spSession->CloseSocket();
             }
             continue;

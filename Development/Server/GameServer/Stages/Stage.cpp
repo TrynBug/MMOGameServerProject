@@ -206,6 +206,106 @@ Stage::~Stage()
     // StageNavMesh 의 완전타입을 .cpp 에서만 알 수 있으므로 destructor 는 여기에 있어야 한다.
 }
 
+void Stage::EnableMetrics(serverbase::MetricsRegistry& registry)
+{
+    m_pMetricsRegistry = &registry;
+}
+
+Stage::MetricsSnapshot Stage::GetMetricsSnapshot() const
+{
+    std::lock_guard<std::mutex> lock(m_metricsSnapshotMutex);
+    return m_metricsSnapshot;
+}
+
+void Stage::publishMetricsSnapshot()
+{
+    // 이 함수는 Stage owner ContentsThread의 Update 경로에서 호출된다.
+    // 전체 container 순회 비용을 Prometheus scrape 주기와 분리하기 위해 k_metricsSnapshotIntervalMs마다만 새 snapshot을 만든다.
+    // HTTP worker는 여기서 복사한 작은 snapshot만 읽으므로 Stage container를 cross-thread로 순회하지 않는다.
+    if (m_pMetricsRegistry == nullptr || m_stageClockMs < m_nextMetricsSnapshotAtMs)
+        return;
+    m_nextMetricsSnapshotAtMs = m_stageClockMs + k_metricsSnapshotIntervalMs;
+
+    size_t pendingMessages = 0;
+    {
+        std::lock_guard<std::mutex> lock(m_pendingMessagesMutex);
+        pendingMessages = m_pendingMessages.size();
+    }
+
+    // cast/buff/skill은 별도 aggregate counter가 없으므로 owner thread에서 현재 actor container를 한 번씩 순회해 합산한다.
+    size_t characterCasts = 0;
+    size_t characterBuffs = 0;
+    for (const auto& [objectId, spObject] : m_characterObjects)
+    {
+        const Character* pCharacter = static_cast<const Character*>(spObject.get());
+        characterCasts += pCharacter->GetSkillComponent().IsCasting() ? 1 : 0;
+        characterBuffs += pCharacter->GetBuffComponent().GetBuffCount();
+    }
+
+    size_t monsterCasts = 0;
+    size_t monsterBuffs = 0;
+    size_t monsterSkills = 0;
+    for (const auto& [objectId, spObject] : m_monsterObjects)
+    {
+        const Monster* pMonster = static_cast<const Monster*>(spObject.get());
+        monsterCasts += pMonster->GetCombat().IsCasting() ? 1 : 0;
+        monsterBuffs += pMonster->GetBuffComponent().GetBuffCount();
+        monsterSkills += static_cast<size_t>(pMonster->GetCombat().GetSkillCount());
+    }
+
+    // player projectile은 group 안에 여러 projectile이 있어 group 수와 실제 projectile 수를 별도로 게시한다.
+    size_t playerProjectiles = 0;
+    for (const auto& [effectId, spGroup] : m_skillProjectileGroups)
+        playerProjectiles += spGroup->GetActiveProjectileCount();
+
+    // sector별 상세 series는 cardinality가 크므로 만들지 않는다. 전체/비어 있지 않은 수와 최댓값만 집계한다.
+    size_t nonEmptySectors = 0;
+    size_t maxSectorObjects = 0;
+    for (const Sector& sector : m_sectors)
+    {
+        const size_t objectCount = sector.GetTotalCount();
+        nonEmptySectors += objectCount > 0 ? 1 : 0;
+        maxSectorObjects = std::max(maxSectorObjects, objectCount);
+    }
+
+    MetricsSnapshot snapshot;
+    snapshot.objectsTotal = m_objects.size();
+    snapshot.characterObjects = m_characterObjects.size();
+    snapshot.monsterObjects = m_monsterObjects.size();
+    snapshot.propObjects = m_propObjects.size();
+    snapshot.dropObjects = m_dropObjects.size();
+    snapshot.pendingMessages = pendingMessages;
+    snapshot.pendingLeaves = m_pendingLeaves.size();
+    snapshot.inFlightAsyncOperations = static_cast<size_t>(m_inFlightAsync);
+    snapshot.eventAreas = m_eventAreas.size();
+    snapshot.areaEffects = m_skillAreaEffects.size();
+    snapshot.projectileGroups = m_skillProjectileGroups.size();
+    snapshot.playerProjectiles = playerProjectiles;
+    snapshot.monsterProjectiles = m_monsterProjectiles.size();
+    snapshot.characterActiveCasts = characterCasts;
+    snapshot.monsterActiveCasts = monsterCasts;
+    snapshot.characterActiveBuffs = characterBuffs;
+    snapshot.monsterActiveBuffs = monsterBuffs;
+    snapshot.monsterSkills = monsterSkills;
+    snapshot.sectors = m_sectors.size();
+    snapshot.nonEmptySectors = nonEmptySectors;
+    snapshot.maxSectorObjects = maxSectorObjects;
+    {
+        std::lock_guard<std::mutex> lock(m_metricsSnapshotMutex);
+        m_metricsSnapshot = snapshot;
+    }
+    m_pMetricsRegistry->Inc(serverbase::CounterMetric::Game_StageMetricSnapshots);
+}
+
+void Stage::clearMetricsSnapshot()
+{
+    // Stage 제거와 scrape가 겹쳐도 마지막 상태가 합계에 남지 않도록 공개 snapshot을 비운다.
+    if (m_pMetricsRegistry == nullptr)
+        return;
+    std::lock_guard<std::mutex> lock(m_metricsSnapshotMutex);
+    m_metricsSnapshot = {};
+}
+
 void Stage::SetNavMesh(const dtNavMesh* pNavMesh)
 {
     // 이전것 정리 후 새로 생성.
@@ -501,6 +601,8 @@ void Stage::OnStart()
         m_pScript->Load(*this, scriptNames);
         m_pScript->CallOnStageStart();
     }
+
+    publishMetricsSnapshot();
 }
 
 void Stage::OnUpdate(int64 deltaMs)
@@ -556,6 +658,8 @@ void Stage::OnUpdate(int64 deltaMs)
     // [디버그 UI] 구독 중인 유저에게 디버그 패킷 주기 push (개발용).
     sendDebugSubscriptions();
 #endif
+
+    publishMetricsSnapshot();
 }
 
 void Stage::OnStop()
@@ -565,6 +669,8 @@ void Stage::OnStop()
 
     // 남아있는 유저들은 그대로 두고 종료. GameServer 종료 흐름에서 별도 처리됨.
     m_users.clear();
+    m_userCountHint.store(0, std::memory_order_relaxed);
+    clearMetricsSnapshot();
 }
 
 void Stage::EnqueueMessage(StageMessage msg)
@@ -1008,6 +1114,7 @@ void Stage::OnUserEnter(const UserPtr& spUser)
 
     const int64 accountId = spUser->GetAccountId();
     m_users[accountId] = spUser;
+    m_userCountHint.store(static_cast<int32>(m_users.size()), std::memory_order_relaxed);
     spUser->SetCurrentStageId(m_stageId);
 
     // 캐릭터 스폰은 별도 단계 (2단계 입장).
@@ -1264,6 +1371,7 @@ void Stage::OnUserLeave(int64 accountId)
     }
 
     m_users.erase(iter);
+    m_userCountHint.store(static_cast<int32>(m_users.size()), std::memory_order_relaxed);
 
     LOG_WRITE(LogLevel::Info, std::format("stageId={}(ch{}) accountId={} totalUsers={} totalObjects={}",
         m_stageId, m_channelNo, accountId, m_users.size(), m_objects.size()));

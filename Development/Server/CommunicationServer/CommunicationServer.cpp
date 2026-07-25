@@ -3,6 +3,26 @@
 
 bool CommunicationServer::OnInitialize()
 {
+    if (IsMetricsEnabled())
+    {
+        auto& r = GetMetricsRegistry();
+        // 연결/Registry 정보/presence는 OnMetricsCollect에서 갱신하는 현재 상태 Gauge다.
+        // chat/whisper Counter는 요청 결과별 처리량과 실패 원인을, fanout recipients는 실제 전파 규모를 누적한다.
+        bool registered = true;
+        registered &= r.AddGauge(serverbase::GaugeMetric::Communication_GameServerConnections, "mmo_communication_game_server_connections", "Authenticated GameServer connections.");
+        registered &= r.AddGauge(serverbase::GaugeMetric::Communication_KnownGameServers, "mmo_communication_known_game_servers", "GameServers currently known from Registry.");
+        registered &= r.AddGauge(serverbase::GaugeMetric::Communication_PresenceUsers, "mmo_communication_presence_users", "Characters currently in chat presence.");
+        registered &= r.AddCounter(serverbase::CounterMetric::Communication_ChatSuccess, "mmo_communication_chat_total", "Global chat request results.", { { "result", "success" } });
+        registered &= r.AddCounter(serverbase::CounterMetric::Communication_ChatRejected, "mmo_communication_chat_total", "Global chat request results.", { { "result", "rejected" } });
+        registered &= r.AddCounter(serverbase::CounterMetric::Communication_ChatFanoutRecipients, "mmo_communication_chat_fanout_recipients_total", "Cumulative GameServer recipients of global chat.");
+        registered &= r.AddCounter(serverbase::CounterMetric::Communication_WhisperSuccess, "mmo_communication_whisper_total", "Whisper routing results.", { { "result", "success" } });
+        registered &= r.AddCounter(serverbase::CounterMetric::Communication_WhisperInvalid, "mmo_communication_whisper_total", "Whisper routing results.", { { "result", "invalid" } });
+        registered &= r.AddCounter(serverbase::CounterMetric::Communication_WhisperOffline, "mmo_communication_whisper_total", "Whisper routing results.", { { "result", "offline" } });
+        registered &= r.AddCounter(serverbase::CounterMetric::Communication_WhisperUnavailable, "mmo_communication_whisper_total", "Whisper routing results.", { { "result", "unavailable" } });
+        if (!registered)
+            return false;
+    }
+
     // handshake가 끝나기 전에는 이 응답만 허용한다.
     m_gameServerDispatcher.Register<ServerPacket::ServerHandshakeRes>(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_RES,
         [this](auto& spSession, auto& msg) { handleGameServerHandshakeRes(spSession, msg); });
@@ -25,6 +45,16 @@ bool CommunicationServer::OnInitialize()
     m_gameServerEventHandler.onDisconnect = [this](const netlib::ISessionPtr& spSession) { onGameServerDisconnect(spSession); };
 
     return true;
+}
+
+void CommunicationServer::OnMetricsCollect()
+{
+    // known GameServer와 handshake 완료 session을 분리해 Registry에는 보이지만 연결되지 않은 서버를 찾을 수 있다.
+    // presence는 채팅 routing 대상 character 수이며 GameServer user 수와 완전히 같은 의미는 아니다.
+    auto& registry = GetMetricsRegistry();
+    registry.Set(serverbase::GaugeMetric::Communication_GameServerConnections, static_cast<double>(m_safeGameServerSessions.Size()));
+    registry.Set(serverbase::GaugeMetric::Communication_KnownGameServers, static_cast<double>(m_safeGameServerInfos.Size()));
+    registry.Set(serverbase::GaugeMetric::Communication_PresenceUsers, static_cast<double>(m_safeCharacterPresences.Size()));
 }
 
 void CommunicationServer::OnServerInfoUpdated(const ServerInfo& info)
@@ -165,6 +195,7 @@ void CommunicationServer::handleGameServerChatBroadcastReq(const netlib::ISessio
     netlib::ISessionPtr spRegisteredSession;
     if (!pGameServerId || *pGameServerId == 0 || !m_safeGameServerSessions.Find(*pGameServerId, spRegisteredSession) || spRegisteredSession != spSession)
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Communication_ChatRejected);
         LOG_WRITE(LogLevel::Warn, std::format("GlobalChat request rejected: unregistered GameServer session. sessionId={}", spSession->GetId()));
         spSession->Disconnect();
         return;
@@ -173,6 +204,7 @@ void CommunicationServer::handleGameServerChatBroadcastReq(const netlib::ISessio
     constexpr size_t k_maxChatMessageBytes = 256;
     if (msg.message().empty() || msg.message().size() > k_maxChatMessageBytes)
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Communication_ChatRejected);
         LOG_WRITE(LogLevel::Warn, std::format("GlobalChat request rejected: invalid message size. gameServerId={} size={}",
             *pGameServerId, msg.message().size()));
         return;
@@ -186,16 +218,23 @@ void CommunicationServer::handleGameServerChatBroadcastReq(const netlib::ISessio
     netlib::PacketPtr spPacket = SerializePacket(Common::SERVER_PACKET_ID_CHAT_BROADCAST_NTF, ntf);
     if (!spPacket)
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Communication_ChatRejected);
         LOG_WRITE(LogLevel::Error, "GlobalChat failed to serialize ChatBroadcastNtf.");
         return;
     }
 
     // 인증된 모든 GameServer에 같은 패킷을 보내 각 서버가 로컬 유저에게 전달한다.
-    m_safeGameServerSessions.ForEach([&spPacket](const int32&, const netlib::ISessionPtr& spGameServerSession)
+    uint64 recipients = 0;
+    m_safeGameServerSessions.ForEach([&spPacket, &recipients](const int32&, const netlib::ISessionPtr& spGameServerSession)
     {
         if (spGameServerSession)
+        {
             spGameServerSession->Send(spPacket);
+            ++recipients;
+        }
     });
+    GetMetricsRegistry().Inc(serverbase::CounterMetric::Communication_ChatSuccess);
+    GetMetricsRegistry().Inc(serverbase::CounterMetric::Communication_ChatFanoutRecipients, recipients);
 }
 
 void CommunicationServer::handleGameServerChatPresenceNtf(const netlib::ISessionPtr& spSession, const ServerPacket::ChatPresenceNtf& msg)
@@ -234,6 +273,7 @@ void CommunicationServer::handleGameServerWhisperReq(const netlib::ISessionPtr& 
     netlib::ISessionPtr spRegisteredSession;
     if (!pGameServerId || *pGameServerId == 0 || !m_safeGameServerSessions.Find(*pGameServerId, spRegisteredSession) || spRegisteredSession != spSession)
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Communication_WhisperInvalid);
         LOG_WRITE(LogLevel::Warn, std::format("Whisper rejected: unregistered GameServer session. sessionId={}", spSession->GetId()));
         spSession->Disconnect();
         return;
@@ -242,6 +282,7 @@ void CommunicationServer::handleGameServerWhisperReq(const netlib::ISessionPtr& 
     constexpr size_t k_maxChatMessageBytes = 256;
     if (msg.sender_account_id() <= 0 || msg.sender_character_id() <= 0 || msg.target_name().empty() || msg.message().empty() || msg.message().size() > k_maxChatMessageBytes)
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Communication_WhisperInvalid);
         LOG_WRITE(LogLevel::Warn, std::format("Whisper rejected: invalid request. gameServerId={} senderAccountId={} senderCharacterId={} targetName='{}' size={}",
             *pGameServerId, msg.sender_account_id(), msg.sender_character_id(), msg.target_name(), msg.message().size()));
         if (msg.sender_account_id() > 0)
@@ -253,6 +294,7 @@ void CommunicationServer::handleGameServerWhisperReq(const netlib::ISessionPtr& 
     CharacterChatPresence targetPresence;
     if (!m_safeCharacterPresences.Find(msg.target_name(), targetPresence))
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Communication_WhisperOffline);
         LOG_WRITE(LogLevel::Info, std::format("Whisper target offline. senderCharacterId={} targetName='{}'",
             msg.sender_character_id(), msg.target_name()));
         sendWhisperRes(spSession, msg, false, "대상을 찾을 수 없거나 오프라인 상태입니다.");
@@ -262,6 +304,7 @@ void CommunicationServer::handleGameServerWhisperReq(const netlib::ISessionPtr& 
     netlib::ISessionPtr spTargetGameServerSession;
     if (!m_safeGameServerSessions.Find(targetPresence.gameServerId, spTargetGameServerSession) || !spTargetGameServerSession)
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Communication_WhisperUnavailable);
         LOG_WRITE(LogLevel::Warn, std::format("Whisper target GameServer unavailable. targetName='{}' gameServerId={}",
             msg.target_name(), targetPresence.gameServerId));
         sendWhisperRes(spSession, msg, false, "대상 서버에 연결할 수 없습니다.");
@@ -278,6 +321,7 @@ void CommunicationServer::handleGameServerWhisperReq(const netlib::ISessionPtr& 
     netlib::PacketPtr spPacket = SerializePacket(Common::SERVER_PACKET_ID_WHISPER_NTF, ntf);
     if (!spPacket)
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Communication_WhisperUnavailable);
         LOG_WRITE(LogLevel::Error, "Whisper failed to serialize WhisperNtf.");
         sendWhisperRes(spSession, msg, false, "귓속말 전달에 실패했습니다.");
         return;
@@ -285,6 +329,7 @@ void CommunicationServer::handleGameServerWhisperReq(const netlib::ISessionPtr& 
 
     spTargetGameServerSession->Send(spPacket);
     sendWhisperRes(spSession, msg, true, "");
+    GetMetricsRegistry().Inc(serverbase::CounterMetric::Communication_WhisperSuccess);
 }
 
 void CommunicationServer::sendWhisperRes(const netlib::ISessionPtr& spSession, const ServerPacket::WhisperReq& req, bool success, const std::string& errorMsg)

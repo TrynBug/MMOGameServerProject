@@ -12,5 +12,6 @@
 #include "Contents.h"
 #include "ContentsThread.h"
 #include "RegistryClient.h"
+#include "MetricsRegistry.h"
 #include "ServerBase.h"
 #include "PacketDispatcher.h"

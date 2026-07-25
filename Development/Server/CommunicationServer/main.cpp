@@ -44,6 +44,8 @@ int main()
     config.logDir = configParser.GetString("Log", "Dir", "Logs");
     config.logLevel = Logger::StringToLogLevel(configParser.GetString("Log", "Level", "Debug"));
 
+    serverbase::LoadMetricsConfigFromIni(config, configParser);
+
     CommunicationServer server;
     g_pServer = &server;
     SetConsoleCtrlHandler(consoleCtrlHandler, TRUE);

@@ -21,6 +21,7 @@ public:
 
 protected:
     bool OnInitialize() override;
+    void OnMetricsCollect() override;
     void OnServerInfoUpdated(const ServerInfo& info) override;
     void OnBeforeShutdown() override;
 
@@ -54,4 +55,5 @@ private:
 
     // 캐릭터 이름은 전역 유일하다는 전제다. 중복 생성 방지는 캐릭터 생성 정책에서 별도로 처리한다.
     SharedThreadSafeUnorderedMap<std::string, CharacterChatPresence> m_safeCharacterPresences;
+
 };

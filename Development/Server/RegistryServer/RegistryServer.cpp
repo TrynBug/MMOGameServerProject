@@ -7,6 +7,26 @@
 
 bool RegistryServer::OnInitialize()
 {
+    if (IsMetricsEnabled())
+    {
+        auto& registry = GetMetricsRegistry();
+        // 등록 서버 수는 status별 현재 Gauge, register/heartbeat/disconnect는 lifecycle event 누적 Counter다.
+        // server id를 label로 노출하지 않고 상태별 합계만 제공해 서버 증설 시에도 series 수가 일정하게 유지된다.
+        bool registered = true;
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Registry_RegisteredServersRunning, "mmo_registry_registered_servers", "Registered servers by status.", { { "status", "running" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Registry_RegisteredServersShuttingDown, "mmo_registry_registered_servers", "Registered servers by status.", { { "status", "shutting_down" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Registry_RegisteredServersDisconnected, "mmo_registry_registered_servers", "Registered servers by status.", { { "status", "disconnected" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Registry_ReportedUsers, "mmo_registry_reported_users", "Sum of user counts reported by registered servers.");
+        registered &= registry.AddCounter(serverbase::CounterMetric::Registry_RegisterSuccess, "mmo_registry_register_total", "Server registration results.", { { "result", "success" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Registry_RegisterRejected, "mmo_registry_register_total", "Server registration results.", { { "result", "rejected" } });
+        registered &= registry.AddCounter(serverbase::CounterMetric::Registry_PollRequests, "mmo_registry_poll_requests_total", "Registry server-list poll requests.");
+        registered &= registry.AddCounter(serverbase::CounterMetric::Registry_HeartbeatResponses, "mmo_registry_heartbeat_responses_total", "Heartbeat responses received.");
+        registered &= registry.AddCounter(serverbase::CounterMetric::Registry_HeartbeatTimeouts, "mmo_registry_heartbeat_timeouts_total", "Servers disconnected after heartbeat timeout.");
+        registered &= registry.AddCounter(serverbase::CounterMetric::Registry_ServerDisconnects, "mmo_registry_server_disconnect_total", "Registered server disconnects.");
+        if (!registered)
+            return false;
+    }
+
     // 패킷ID와 핸들러 등록
     m_packetDispatcher.Register<ServerPacket::RegistryRegisterReq>(Common::SERVER_PACKET_ID_REGISTRY_REGISTER_REQ,
         [this](auto& spSession, auto& msg) { handleRegisterReq(spSession, msg); });
@@ -62,6 +82,32 @@ bool RegistryServer::OnInitialize()
     return true;
 }
 
+void RegistryServer::OnMetricsCollect()
+{
+    // Registry가 소유한 entry snapshot을 한 번 순회해 status와 각 서버가 마지막으로 보고한 user count를 함께 집계한다.
+    // reportedUsers는 실시간 session count가 아니라 heartbeat/user-count report 시점의 합이므로 짧은 지연이 있을 수 있다.
+    size_t running = 0;
+    size_t shuttingDown = 0;
+    size_t disconnected = 0;
+    int64 reportedUsers = 0;
+    m_safeServerEntries.ForEach([&](const int32&, const ServerEntry& entry)
+    {
+        reportedUsers += entry.userCount;
+        switch (entry.status)
+        {
+        case ServerStatus::Running:      ++running;      break;
+        case ServerStatus::ShuttingDown: ++shuttingDown; break;
+        case ServerStatus::Disconnected: ++disconnected; break;
+        default: break;
+        }
+    });
+    auto& registry = GetMetricsRegistry();
+    registry.Set(serverbase::GaugeMetric::Registry_RegisteredServersRunning, static_cast<double>(running));
+    registry.Set(serverbase::GaugeMetric::Registry_RegisteredServersShuttingDown, static_cast<double>(shuttingDown));
+    registry.Set(serverbase::GaugeMetric::Registry_RegisteredServersDisconnected, static_cast<double>(disconnected));
+    registry.Set(serverbase::GaugeMetric::Registry_ReportedUsers, static_cast<double>(reportedUsers));
+}
+
 void RegistryServer::OnBeforeShutdown()
 {
     LOG_WRITE(LogLevel::Info, "RegistryServer::OnBeforeShutdown");
@@ -98,6 +144,7 @@ void RegistryServer::onDisconnect(const netlib::ISessionPtr& spSession)
     entry.status = ServerStatus::Disconnected;
     entry.spSession = nullptr;
     m_safeServerEntries.Insert(serverId, entry);
+    GetMetricsRegistry().Inc(serverbase::CounterMetric::Registry_ServerDisconnects);
 
     LOG_WRITE(LogLevel::Warn, std::format("server disconnected. serverId={} type={}", serverId, static_cast<int>(entry.serverType)));
 
@@ -124,6 +171,7 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
     std::string errorMsg;
     if (!validateRegistration(serverId, type, privateIp, internalPort, errorMsg))
     {
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Registry_RegisterRejected);
         LOG_WRITE(LogLevel::Error, std::format("registration rejected. serverId={} reason={}", serverId, errorMsg));
 
         ServerPacket::RegistryRegisterRes res;
@@ -152,6 +200,7 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
     serverEntry.lastHeartbeatTime = std::chrono::steady_clock::now();
 
     m_safeServerEntries.Insert(serverId, serverEntry);
+    GetMetricsRegistry().Inc(serverbase::CounterMetric::Registry_RegisterSuccess);
 
     // 세션에 serverId 기록
     ServerSessionMetaInfo* pMeta = getServerSessionMeta(spSession);
@@ -187,6 +236,7 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
 // 하트비트 응답 처리
 void RegistryServer::handleHeartbeatRes(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryHeartbeatRes& msg)
 {
+    GetMetricsRegistry().Inc(serverbase::CounterMetric::Registry_HeartbeatResponses);
     ServerSessionMetaInfo* pMeta = getServerSessionMeta(spSession);
     if (!pMeta || pMeta->serverId == 0)
         return;
@@ -202,6 +252,7 @@ void RegistryServer::handleHeartbeatRes(const netlib::ISessionPtr& spSession, co
 // 서버 목록 폴링 요청 처리
 void RegistryServer::handlePollReq(const netlib::ISessionPtr& spSession, const ServerPacket::RegistryPollReq& req)
 {
+    GetMetricsRegistry().Inc(serverbase::CounterMetric::Registry_PollRequests);
     // 요청한 타입 목록으로 필터링
     std::unordered_map<int, bool> targetTypes;
     for (int i = 0; i < req.target_types_size(); ++i)
@@ -386,6 +437,7 @@ void RegistryServer::checkHeartbeatTimeout()
 
         if (entry.spSession)
         {
+            GetMetricsRegistry().Inc(serverbase::CounterMetric::Registry_HeartbeatTimeouts);
             LOG_WRITE(LogLevel::Warn, std::format("heartbeat timeout. serverId={} disconnecting...", serverId));
             entry.spSession->Disconnect();
         }

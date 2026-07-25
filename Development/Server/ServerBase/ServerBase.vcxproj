@@ -49,14 +49,14 @@
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
-    <ExternalIncludePath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)ThirdParty\cpp-httplib;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)Common;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib\Gemerated;$(SolutionDir)GameDataLib;$(SolutionDir)Logger;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
-    <ExternalIncludePath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)ThirdParty\cpp-httplib;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -103,6 +103,12 @@
     <ClInclude Include="ObjectIdGenerator.h" />
     <ClInclude Include="Contents.h" />
     <ClInclude Include="ContentsThread.h" />
+    <ClInclude Include="DbMetricsPublisher.h" />
+    <ClInclude Include="MetricEnums.h" />
+    <ClInclude Include="MetricsHttpServer.h" />
+    <ClInclude Include="MetricsRegistry.h" />
+    <ClInclude Include="NetMetricsPublisher.h" />
+    <ClInclude Include="WindowsMetricsPublisher.h" />
     <ClInclude Include="RegistryClient.h" />
     <ClInclude Include="ServerBase.h" />
     <ClInclude Include="Utils.h" />
@@ -118,6 +124,11 @@
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="ConfigParser.cpp" />
     <ClCompile Include="ContentsThread.cpp" />
+    <ClCompile Include="DbMetricsPublisher.cpp" />
+    <ClCompile Include="MetricsHttpServer.cpp" />
+    <ClCompile Include="MetricsRegistry.cpp" />
+    <ClCompile Include="NetMetricsPublisher.cpp" />
+    <ClCompile Include="WindowsMetricsPublisher.cpp" />
     <ClCompile Include="RegistryClient.cpp" />
     <ClCompile Include="ServerBase.cpp" />
     <ClCompile Include="Utils.cpp" />

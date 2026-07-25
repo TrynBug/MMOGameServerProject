@@ -34,6 +34,50 @@ namespace packetlog
 
 bool GameServer::OnInitialize()
 {
+    if (IsMetricsEnabled())
+    {
+        auto& registry = GetMetricsRegistry();
+        // user/session/stage 수는 scrape 직전 OnMetricsCollect에서 thread-safe snapshot을 읽어 덮어쓰는 현재 상태 Gauge다.
+        // Stage 상세값은 instance label 없이 서버 전체 합계만 등록한다. 객체 종류처럼 개수가 고정된 분류만 label로 유지한다.
+        bool registered = true;
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_Users, "mmo_game_users", "Current users owned by the GameServer.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_GatewayConnections, "mmo_game_gateway_connections", "Current authenticated GatewayServer connections.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_CommunicationConnections, "mmo_game_communication_connections", "Current authenticated CommunicationServer connections.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StagesAll, "mmo_game_stages", "Current Stage instances by type.", { { "stage_type", "all" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StagesSystem, "mmo_game_stages", "Current Stage instances by type.", { { "stage_type", "system" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StagesTown, "mmo_game_stages", "Current Stage instances by type.", { { "stage_type", "town" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StagesField, "mmo_game_stages", "Current Stage instances by type.", { { "stage_type", "field" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StagesDungeon, "mmo_game_stages", "Current Stage instances by type.", { { "stage_type", "dungeon" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageUserHintTotal, "mmo_game_stage_user_hint_total", "Sum of Stage atomic user-count snapshots.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageObjectsTotal, "mmo_stage_objects_total", "Current objects across all Stages.", { { "object_type", "all" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageCharacterObjectsTotal, "mmo_stage_objects_total", "Current objects across all Stages.", { { "object_type", "character" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageMonsterObjectsTotal, "mmo_stage_objects_total", "Current objects across all Stages.", { { "object_type", "monster" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StagePropObjectsTotal, "mmo_stage_objects_total", "Current objects across all Stages.", { { "object_type", "prop" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageDropObjectsTotal, "mmo_stage_objects_total", "Current objects across all Stages.", { { "object_type", "drop" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StagePendingMessagesTotal, "mmo_stage_pending_messages", "Current pending messages across all Stages.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StagePendingLeavesTotal, "mmo_stage_pending_leaves", "Current pending leaves across all Stages.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageInFlightAsyncOperationsTotal, "mmo_stage_in_flight_async_operations", "Current in-flight async operations across all Stages.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageEventAreasTotal, "mmo_stage_event_areas", "Current event areas across all Stages.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageAreaEffectsTotal, "mmo_stage_area_effects", "Current skill area effects across all Stages.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageProjectileGroupsTotal, "mmo_stage_projectile_groups", "Current projectile groups across all Stages.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StagePlayerProjectilesTotal, "mmo_stage_projectiles", "Current projectiles across all Stages.", { { "owner_type", "player" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageMonsterProjectilesTotal, "mmo_stage_projectiles", "Current projectiles across all Stages.", { { "owner_type", "monster" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageCharacterActiveCastsTotal, "mmo_stage_active_casts", "Current active casts across all Stages.", { { "actor_type", "character" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageMonsterActiveCastsTotal, "mmo_stage_active_casts", "Current active casts across all Stages.", { { "actor_type", "monster" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageCharacterActiveBuffsTotal, "mmo_stage_active_buffs", "Current active buffs across all Stages.", { { "actor_type", "character" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageMonsterActiveBuffsTotal, "mmo_stage_active_buffs", "Current active buffs across all Stages.", { { "actor_type", "monster" } });
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageMonsterSkillsTotal, "mmo_stage_monster_skills", "Current monster skills across all Stages.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageSectorsTotal, "mmo_stage_sectors", "Current sectors across all Stages.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageNonEmptySectorsTotal, "mmo_stage_nonempty_sectors", "Current non-empty sectors across all Stages.");
+        registered &= registry.AddGauge(serverbase::GaugeMetric::Game_StageMaxSectorObjects, "mmo_stage_max_sector_objects", "Maximum object count in one sector across all Stages.");
+        registered &= registry.AddCounter(serverbase::CounterMetric::Game_StageMetricSnapshots, "mmo_stage_metric_snapshots_total", "Stage metric snapshots created across all Stages.");
+        if (!registered)
+        {
+            LOG_WRITE(LogLevel::Error, "failed to register GameServer metrics");
+            return false;
+        }
+    }
+
     // ── 내부서버용 패킷 디스패처 ────────────────────────────────
     m_internalPacketDispatcher.Register<ServerPacket::ServerHandshakeReq>(Common::SERVER_PACKET_ID_SERVER_HANDSHAKE_REQ,
         [this](auto& spSession, auto& msg) { handleCommunicationHandshakeReq(spSession, msg); });
@@ -153,6 +197,44 @@ bool GameServer::OnInitialize()
 
     LOG_WRITE(LogLevel::Info, std::format("complete. serverId={}", GetServerId()));
     return true;
+}
+
+void GameServer::OnMetricsCollect()
+{
+    // HTTP monitoring worker에서 호출되므로 Stage 객체를 직접 순회하지 않고 StageManager가 제공하는 안전한 aggregate snapshot만 읽는다.
+    // userCountHintTotal은 각 Stage가 게시한 atomic hint의 합으로, m_safeUsers와 차이가 크면 입장/퇴장 상태 전이를 점검할 수 있다.
+    const StageManager::MetricsSnapshot stages = m_stageManager.CollectMetricsSnapshot();
+    auto& registry = GetMetricsRegistry();
+    registry.Set(serverbase::GaugeMetric::Game_Users, static_cast<double>(m_safeUsers.Size()));
+    registry.Set(serverbase::GaugeMetric::Game_GatewayConnections, static_cast<double>(m_safeGatewaySessions.Size()));
+    registry.Set(serverbase::GaugeMetric::Game_CommunicationConnections, static_cast<double>(m_safeCommunicationSessions.Size()));
+    registry.Set(serverbase::GaugeMetric::Game_StagesAll, static_cast<double>(stages.total));
+    registry.Set(serverbase::GaugeMetric::Game_StagesSystem, static_cast<double>(stages.system));
+    registry.Set(serverbase::GaugeMetric::Game_StagesTown, static_cast<double>(stages.town));
+    registry.Set(serverbase::GaugeMetric::Game_StagesField, static_cast<double>(stages.field));
+    registry.Set(serverbase::GaugeMetric::Game_StagesDungeon, static_cast<double>(stages.dungeon));
+    registry.Set(serverbase::GaugeMetric::Game_StageUserHintTotal, static_cast<double>(stages.userCountHintTotal));
+    registry.Set(serverbase::GaugeMetric::Game_StageObjectsTotal, static_cast<double>(stages.objectsTotal));
+    registry.Set(serverbase::GaugeMetric::Game_StageCharacterObjectsTotal, static_cast<double>(stages.characterObjects));
+    registry.Set(serverbase::GaugeMetric::Game_StageMonsterObjectsTotal, static_cast<double>(stages.monsterObjects));
+    registry.Set(serverbase::GaugeMetric::Game_StagePropObjectsTotal, static_cast<double>(stages.propObjects));
+    registry.Set(serverbase::GaugeMetric::Game_StageDropObjectsTotal, static_cast<double>(stages.dropObjects));
+    registry.Set(serverbase::GaugeMetric::Game_StagePendingMessagesTotal, static_cast<double>(stages.pendingMessages));
+    registry.Set(serverbase::GaugeMetric::Game_StagePendingLeavesTotal, static_cast<double>(stages.pendingLeaves));
+    registry.Set(serverbase::GaugeMetric::Game_StageInFlightAsyncOperationsTotal, static_cast<double>(stages.inFlightAsyncOperations));
+    registry.Set(serverbase::GaugeMetric::Game_StageEventAreasTotal, static_cast<double>(stages.eventAreas));
+    registry.Set(serverbase::GaugeMetric::Game_StageAreaEffectsTotal, static_cast<double>(stages.areaEffects));
+    registry.Set(serverbase::GaugeMetric::Game_StageProjectileGroupsTotal, static_cast<double>(stages.projectileGroups));
+    registry.Set(serverbase::GaugeMetric::Game_StagePlayerProjectilesTotal, static_cast<double>(stages.playerProjectiles));
+    registry.Set(serverbase::GaugeMetric::Game_StageMonsterProjectilesTotal, static_cast<double>(stages.monsterProjectiles));
+    registry.Set(serverbase::GaugeMetric::Game_StageCharacterActiveCastsTotal, static_cast<double>(stages.characterActiveCasts));
+    registry.Set(serverbase::GaugeMetric::Game_StageMonsterActiveCastsTotal, static_cast<double>(stages.monsterActiveCasts));
+    registry.Set(serverbase::GaugeMetric::Game_StageCharacterActiveBuffsTotal, static_cast<double>(stages.characterActiveBuffs));
+    registry.Set(serverbase::GaugeMetric::Game_StageMonsterActiveBuffsTotal, static_cast<double>(stages.monsterActiveBuffs));
+    registry.Set(serverbase::GaugeMetric::Game_StageMonsterSkillsTotal, static_cast<double>(stages.monsterSkills));
+    registry.Set(serverbase::GaugeMetric::Game_StageSectorsTotal, static_cast<double>(stages.sectors));
+    registry.Set(serverbase::GaugeMetric::Game_StageNonEmptySectorsTotal, static_cast<double>(stages.nonEmptySectors));
+    registry.Set(serverbase::GaugeMetric::Game_StageMaxSectorObjects, static_cast<double>(stages.maxSectorObjects));
 }
 
 bool GameServer::createStageChannels(int32 stageDataKey)

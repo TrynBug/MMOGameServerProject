@@ -23,6 +23,15 @@ Session::Session(INetBase* pNetBase, int64 sessionId, SOCKET socket, const std::
 
 Session::~Session()
 {
+    SetConnected(false);
+
+    const int32 recvBytes = m_recvBuf.GetUseSize();
+    if (recvBytes > 0)
+        NetLibStats::Add(StatGauge::RecvBufferUsedBytes, -static_cast<int64>(recvBytes));
+
+    clearSendingPackets();
+    clearSendQueue();
+
     if (m_socket != INVALID_SOCKET)
     {
         ::closesocket(m_socket);
@@ -30,6 +39,13 @@ Session::~Session()
     }
 
     NetLibStats::Inc(StatCounter::SessionDestroyed);
+}
+
+void Session::SetConnected(bool connected)
+{
+    const bool previous = m_bConnected.exchange(connected);
+    if (previous != connected)
+        NetLibStats::Add(StatGauge::ActiveSessions, connected ? 1 : -1);
 }
 
 // thread-safe 한 Send 함수
@@ -101,6 +117,8 @@ void Session::enqueueAndKickSend(const PacketPtr& spPacket)
         // SendQueue에 패킷을 넣는다.
         std::lock_guard<std::mutex> lock(m_sendMutex);
         m_sendQueue.push(spPacket);
+        NetLibStats::Add(StatGauge::SendQueuePackets, 1);
+        NetLibStats::Add(StatGauge::SendQueueBytes, spPacket->GetTotalSize());
     }
 
     // 다른 send IO가 진행중이 아닐때만 Send를 시도한다.
@@ -126,7 +144,7 @@ void Session::CloseSocket()
         return;
     }
 
-    m_bConnected.store(false);
+    SetConnected(false);
 
     if (m_socket != INVALID_SOCKET)
     {
@@ -230,6 +248,7 @@ bool Session::postRecv()
 void Session::OnRecvCompleted(DWORD bytesTransferred)
 {
     NetLibStats::Inc(StatCounter::RecvCompleted);
+    NetLibStats::Inc(StatCounter::RecvBytes, bytesTransferred);
     m_recvOverlapped.spSession.reset();
 
     if (!m_bConnected.load())
@@ -241,6 +260,7 @@ void Session::OnRecvCompleted(DWORD bytesTransferred)
 
     // 수신버퍼 rear를 뒤로 밀어서 데이터가 있음을 표시한다.
     m_recvBuf.MoveRear(static_cast<int32>(bytesTransferred));
+    NetLibStats::Add(StatGauge::RecvBufferUsedBytes, static_cast<int64>(bytesTransferred));
     m_bRecving.store(false);
 
     // 수신버퍼의 데이터 확인
@@ -294,7 +314,6 @@ void Session::parseReceivedPackets()
         PacketPtr spPacket = m_pNetBase->GetPacketPool().Alloc(header.size);
         if (spPacket == nullptr)
         {
-            NetLibStats::Inc(StatCounter::PacketPoolAllocFail);
             if (handler != nullptr)
             {
                 handler->OnLog(LogLevel::Error, shared_from_this(), "PacketPool alloc failed");
@@ -305,6 +324,8 @@ void Session::parseReceivedPackets()
 
         // 수신버퍼의 데이터를 꺼내서 패킷버퍼에 담는다.
         m_recvBuf.Dequeue(reinterpret_cast<char*>(spPacket->GetRawBuffer()), header.size);
+        NetLibStats::Add(StatGauge::RecvBufferUsedBytes, -static_cast<int64>(header.size));
+        NetLibStats::Inc(StatCounter::RecvPackets);
 
         // 사용자에게 패킷 전달.
         if (handler != nullptr)
@@ -389,7 +410,7 @@ bool Session::postSend()
     }
 
     // sendQueue에서 패킷을 최대 SEND_WSABUF_MAX_SIZE개 까지 꺼낸다.
-    m_sendingPackets.clear();
+    clearSendingPackets();
     WSABUF WSABufs[SEND_WSABUF_MAX_SIZE];
     {
         std::lock_guard<std::mutex> lock(m_sendMutex);
@@ -407,6 +428,10 @@ bool Session::postSend()
             // 큐의 shared_ptr를 곧장 move하여 보관(패킷이 send중 소멸 방지). 복사 refcount 증감을 피함.
             m_sendingPackets.push_back(std::move(spFront));
             m_sendQueue.pop();
+            NetLibStats::Add(StatGauge::SendQueuePackets, -1);
+            NetLibStats::Add(StatGauge::SendQueueBytes, -static_cast<int64>(WSABufs[i].len));
+            NetLibStats::Add(StatGauge::SendInFlightPackets, 1);
+            NetLibStats::Add(StatGauge::SendInFlightBytes, static_cast<int64>(WSABufs[i].len));
         }
     }
 
@@ -448,7 +473,7 @@ bool Session::postSend()
             }
 
             m_sendOverlapped.spSession.reset();
-            m_sendingPackets.clear();
+            clearSendingPackets();
             m_bSending.store(false);
             CloseSocket();
             return false;
@@ -460,11 +485,11 @@ bool Session::postSend()
 // worker 스레드가 send 완료통지 받았을때 호출해주는 콜백함수
 void Session::OnSendCompleted(DWORD bytesTransferred)
 {
-    (void)bytesTransferred;
-
     NetLibStats::Inc(StatCounter::SendCompleted);
+    NetLibStats::Inc(StatCounter::SendBytes, bytesTransferred);
+    NetLibStats::Inc(StatCounter::SendPackets, static_cast<uint64>(m_sendingPackets.size()));
 
-    m_sendingPackets.clear();
+    clearSendingPackets();
     m_sendOverlapped.spSession.reset();
 
     if (!m_bConnected.load())
@@ -480,6 +505,36 @@ void Session::OnSendCompleted(DWORD bytesTransferred)
     }
 
     trySendNext();
+}
+
+void Session::clearSendingPackets()
+{
+    int64 bytes = 0;
+    for (const PacketPtr& spPacket : m_sendingPackets)
+        bytes += spPacket->GetTotalSize();
+
+    if (!m_sendingPackets.empty())
+        NetLibStats::Add(StatGauge::SendInFlightPackets, -static_cast<int64>(m_sendingPackets.size()));
+    if (bytes > 0)
+        NetLibStats::Add(StatGauge::SendInFlightBytes, -bytes);
+    m_sendingPackets.clear();
+}
+
+void Session::clearSendQueue()
+{
+    std::lock_guard<std::mutex> lock(m_sendMutex);
+
+    int64 packets = 0;
+    int64 bytes = 0;
+    while (!m_sendQueue.empty())
+    {
+        bytes += m_sendQueue.front()->GetTotalSize();
+        ++packets;
+        m_sendQueue.pop();
+    }
+
+    NetLibStats::Add(StatGauge::SendQueuePackets, -packets);
+    NetLibStats::Add(StatGauge::SendQueueBytes, -bytes);
 }
 
 // send를 시도한다.
@@ -519,7 +574,7 @@ void Session::OnConnectCompleted(bool success)
     // 설정 안하면 shutdown, getpeername 함수 등이 제대로 작동안함
     ::setsockopt(m_socket, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, nullptr, 0);
 
-    m_bConnected.store(true);
+    SetConnected(true);
 
     // OnConnect 콜백
     if (m_pNetBase != nullptr && m_pNetBase->GetEventHandler() != nullptr)

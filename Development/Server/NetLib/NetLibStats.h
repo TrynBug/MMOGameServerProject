@@ -43,7 +43,25 @@ enum class StatCounter : int32
     ConnectCompleted,         // Connect 완료 통지 처리 횟수 (성공/실패 포함)
     ConnectFailed,            // Connect 실패 횟수
 
+    // 완료된 실제 전송량
+    RecvBytes,
+    RecvPackets,
+    SendBytes,
+    SendPackets,
+
     _End,                     // 끝 표시. 배열 크기로 사용
+};
+
+enum class StatGauge : int32
+{
+    ActiveSessions,
+    RecvBufferUsedBytes,
+    SendQueuePackets,
+    SendQueueBytes,
+    SendInFlightPackets,
+    SendInFlightBytes,
+
+    _End,
 };
 
 
@@ -54,20 +72,27 @@ public:
     // 카운터를 delta만큼 증가한다.
     static void Inc(StatCounter counter, uint64 delta = 1);
 
+    // Gauge를 delta만큼 증감한다. 서로 다른 worker thread에서 증감해도 전체 합은 유지된다.
+    static void Add(StatGauge gauge, int64 delta);
+
     // 현재 카운터값 얻기
     static uint64 GetCount(StatCounter counter);
 
     // 모든 카운터값을 한번에 얻는다. 배열 크기는 StatCounter::_End.
     static void GetAllCount(std::array<uint64, static_cast<size_t>(StatCounter::_End)>& outCounts);
 
+    static int64 GetGauge(StatGauge gauge);
+    static void GetAllGauges(std::array<int64, static_cast<size_t>(StatGauge::_End)>& outGauges);
+
     // StatCounter 이름 얻기
     static const char* GetCounterName(StatCounter counter);
+    static const char* GetGaugeName(StatGauge gauge);
 
 	// 현재 카운터값들 출력(디버깅용)
     static void LogSnapshot();
 
     // 모든 카운터 0 초기화 (테스트/재시작용). 매우 조심해서 써야 함.
-    // 주의: 다른 스레드가 Inc 중일 때 호출하면 race가 있을 수 있음.
+    // 다른 스레드의 Inc와 동시에 호출해도 data race는 없지만, 초기화 시점과 경합한 증가는 결과에서 제외될 수 있음.
     static void ResetAll();
 };
 

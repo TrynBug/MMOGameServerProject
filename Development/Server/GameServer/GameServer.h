@@ -100,6 +100,7 @@ public:
 protected:
     // ServerBase 훅
     bool OnInitialize()                              override;
+    void OnMetricsCollect()                          override;
     void OnServerInfoUpdated(const ServerInfo& info) override;
     void OnBeforeShutdown()                          override;
     void OnShutdown()                                override;

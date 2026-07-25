@@ -18,6 +18,16 @@
 namespace db
 {
 
+class IAsyncDBMetricsSink
+{
+public:
+    virtual ~IAsyncDBMetricsSink() = default;
+    virtual void OnEnqueued(EDBType type, bool transaction) = 0;
+    virtual void OnStarted(EDBType type, bool transaction, double queueWaitSeconds) = 0;
+    virtual void OnCompleted(EDBType type, bool transaction, double executionSeconds, const DBResult& result) = 0;
+    virtual void OnRejected(EDBType type, bool transaction) = 0;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // DBTransaction
 //
@@ -130,6 +140,9 @@ public:
 
     bool IsOpen() const { return m_bRunning.load(); }
 
+    void SetMetricsSink(IAsyncDBMetricsSink* pSink) { m_pMetricsSink.store(pSink, std::memory_order_release); }
+    double GetOldestQueueAgeSeconds() const;
+
     // Open 실패 시 마지막 사유.
     const std::string& GetLastError() const { return m_lastError; }
 
@@ -144,6 +157,8 @@ private:
         int      index;   // Game은 game_db_index. Account는 무시(getDbState가 0으로 정규화).
         DbJob    job;
         Callback callback;
+        bool transaction = false;
+        std::chrono::steady_clock::time_point enqueuedAt;
     };
 
     // DB 1개의 커넥션 풀. 모든 접근은 m_mutex 하에서.
@@ -158,7 +173,7 @@ private:
     void workerProc();
 
     // job을 해당 DB의 전역 큐에 적재하고 worker를 깨운다. 미등록 DB면 즉시 실패 콜백.
-    void enqueueJob(EDBType type, int index, DbJob job, Callback callback);
+    void enqueueJob(EDBType type, int index, DbJob job, Callback callback, bool transaction);
 
     // 등록된 DB의 DbState를 얻는 유일한 접근자. 없으면 nullptr. (m_mutex 하에서)
     //   Account → 싱글톤 m_accountDb (index 무시) / Game → m_gameDbs[index]
@@ -176,6 +191,7 @@ private:
     std::atomic<bool>                m_bRunning { false };
     std::vector<std::thread>         m_workers;
     std::string                      m_lastError;
+    std::atomic<IAsyncDBMetricsSink*> m_pMetricsSink { nullptr };
 };
 
 } // namespace db
