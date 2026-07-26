@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Client.Managers;
@@ -25,6 +26,10 @@ namespace Client.Game
     // 마일스톤 1: 파이어볼 수직 슬라이스만. (쿨타임/마나 게이팅은 클라 선체크 수준, 서버 검증은 5c.)
     public class SkillSystem : MonoBehaviour
     {
+        // 로컬 플레이어가 서버 판정으로 몬스터에게 대미지를 준 순간 통지한다.
+        // 대상 HUD처럼 "내가 실제로 때린 대상"이 필요한 화면에서 사용한다.
+        public event Action<MonsterObject> LocalPlayerDamagedMonster;
+
         public static SkillSystem Instance { get; private set; }
 
         [SerializeField] private int m_skill1Key = 1001;  // 파이어볼
@@ -942,6 +947,10 @@ namespace Client.Game
                 HitStop.Trigger(hitMonster, ntf.IsDuplicate ? 50f : 100f);
                 ScalePop.Play(hitMonster);
                 hitMonster.PlayHitReaction();   // 피격 애니 (드라이버가 Locomotion 중 + 쓰로틀 게이트)
+
+                PlayerCharacter localPlayer = StageManager.Instance.LocalPlayer;
+                if (localPlayer != null && ntf.AttackerObjectId == localPlayer.ObjectId)
+                    LocalPlayerDamagedMonster?.Invoke(hitMonster);
             }
             else if (target is PlayerCharacter hitPlayer)
             {
