@@ -31,6 +31,10 @@ namespace Client.Game
         [SerializeField] private int m_skill2Key = 1003;  // 얼음지대
         [SerializeField] private int m_skill3Key = 1008;  // 불기둥
         [SerializeField] private int m_skill4Key = 0;
+        [SerializeField] private int m_warriorSkill1Key = 2001;  // 전방 좁은 범위
+        [SerializeField] private int m_warriorSkill2Key = 2002;  // 전방 넓은 범위
+        [SerializeField] private int m_warriorSkill3Key = 2003;  // 주변 5연타
+        [SerializeField] private int m_warriorSkill4Key = 0;
 
         // 단발(instant) 범위 비주얼의 표시 시간(초). 지속 데이터(LifetimeMs)가 없는 단일 틱 스킬에 사용.
         [SerializeField] private float m_areaInstantDisplaySec = 0.5f;
@@ -113,10 +117,10 @@ namespace Client.Game
         }
 
         // ─── 시전 ────────────────────────────────────────────────────
-        private void castSkill1() => tryCast(m_skill1Key);
-        private void castSkill2() => tryCast(m_skill2Key);
-        private void castSkill3() => tryCast(m_skill3Key);
-        private void castSkill4() => tryCast(m_skill4Key);
+        private void castSkill1() => tryCast(GetSlotSkillKey(0));
+        private void castSkill2() => tryCast(GetSlotSkillKey(1));
+        private void castSkill3() => tryCast(GetSlotSkillKey(2));
+        private void castSkill4() => tryCast(GetSlotSkillKey(3));
 
         // ─── HUD 조회 API (UI_PlayerHud 가 폴링) ─────────────────────
         // 스킬 슬롯 개수 (입력 OnSkill1~4 에 대응). 슬롯 키 매핑이 늘면 여기와 GetSlotSkillKey 를 함께 늘린다.
@@ -125,6 +129,21 @@ namespace Client.Game
         // 슬롯(0..SkillSlotCount-1)에 매핑된 스킬 키. 범위 밖이면 0.
         public int GetSlotSkillKey(int slot)
         {
+            bool isWarrior = CharacterDataCache.Instance.LocalCharacter != null
+                && CharacterDataCache.Instance.LocalCharacter.JobId == (int)EJob.Warrior;
+
+            if (isWarrior)
+            {
+                switch (slot)
+                {
+                    case 0:  return m_warriorSkill1Key;
+                    case 1:  return m_warriorSkill2Key;
+                    case 2:  return m_warriorSkill3Key;
+                    case 3:  return m_warriorSkill4Key;
+                    default: return 0;
+                }
+            }
+
             switch (slot)
             {
                 case 0:  return m_skill1Key;

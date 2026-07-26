@@ -1866,33 +1866,41 @@ void Stage::handleSkillCastReq(const UserPtr& spUser, const netlib::PacketPtr& s
         return;
     dir.x /= dirLength;
     dir.z /= dirLength;
+    const GameData_Skill* pSkill = GameDataTable_Skill::FindData(req.skill_key());
+    if (pSkill == nullptr)
+        return;
+
+    const DataStructures::Character& characterData = spCharacter->GetProto();
+    if (pSkill->Job != static_cast<EJob>(characterData.job_id()))
+    {
+        LOG_WRITE(LogLevel::Warn, std::format("SkillCastReq rejected: job mismatch. accountId={} characterJob={} skillKey={} skillJob={}",
+            spUser->GetAccountId(), characterData.job_id(), req.skill_key(), static_cast<int32>(pSkill->Job)));
+        return;
+    }
+
     // target_pos: 즉시이동 거리 클램프와 Target Placement의 기준점에 사용한다.
     const Vector3 targetPos(req.target_pos_x(), spCharacter->GetPosY(), req.target_pos_z());
     // 클라이언트 origin은 신뢰하지 않는다. 서버가 Placement와 Unity export 앵커로 권위 효과 중심을 계산한다.
     Vector3 origin(spCharacter->GetPosX(), spCharacter->GetPosY(), spCharacter->GetPosZ());
-    if (const GameData_Skill* pSkill = GameDataTable_Skill::FindData(req.skill_key()); pSkill != nullptr)
+    switch (pSkill->Placement)
     {
-        switch (pSkill->Placement)
-        {
-        case ESkillPlacement::SkillCastOrigin:
-        {
-            const DataStructures::Character& proto = spCharacter->GetProto();
-            const Vector3 offset = GameServer::Instance().GetCastAnchorRegistry().GetPlayerLocalOffset(
-                proto.job_id(), proto.appearance_preset_id());
-            origin.x += dir.z * offset.x + dir.x * offset.z;
-            origin.y += offset.y;
-            origin.z += -dir.x * offset.x + dir.z * offset.z;
-            break;
-        }
-        case ESkillPlacement::Target:
-            origin = targetPos;
-            break;
-        default:
-            break;
-        }
-
-        origin += dir * pSkill->EffectCenterForwardOffset;
+    case ESkillPlacement::SkillCastOrigin:
+    {
+        const Vector3 offset = GameServer::Instance().GetCastAnchorRegistry().GetPlayerLocalOffset(
+            characterData.job_id(), characterData.appearance_preset_id());
+        origin.x += dir.z * offset.x + dir.x * offset.z;
+        origin.y += offset.y;
+        origin.z += -dir.x * offset.x + dir.z * offset.z;
+        break;
     }
+    case ESkillPlacement::Target:
+        origin = targetPos;
+        break;
+    default:
+        break;
+    }
+
+    origin += dir * pSkill->EffectCenterForwardOffset;
 
     spCharacter->GetSkillComponent().TryCast(req.skill_key(), origin, dir, targetPos, req.seed());
 }
