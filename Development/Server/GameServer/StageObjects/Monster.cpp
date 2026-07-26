@@ -52,6 +52,7 @@ bool Monster::Initialize(int64 objectId, const GameData_Monster* pMonsterData)
         m_aggroRange              = pAI->AggroRange;
         m_leashRange              = pAI->LeashRange;
         m_desiredRange            = pAI->DesiredRange;
+        m_ignoreSkillRange        = pAI->IgnoreSkillRange;
         m_engagedUpdateIntervalMs = pAI->EngagedUpdateIntervalMs;
         m_wanderRadius            = pAI->WanderRadius;
         m_wanderMinIntervalMs     = pAI->WanderMinIntervalMs;

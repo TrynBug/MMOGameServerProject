@@ -15,7 +15,7 @@ class Stage;
 // 서버가 직접 매 tick 전진 + 충돌 판정한다. 클라는 SkillCastNtf 로 비주얼만 재현(보고 안 함).
 //
 // 매 tick: origin + dir*speed*t 로 전진 → 현재 위치 hit 반경(shape.radius) 안 적(진영 규칙: Monster→User)
-//   검사 → 적중 시 ApplyEffectDamage (+OnHitSkillKey 폭발) 후 소멸. maxRange 도달 시 (폭발 후) 소멸.
+//   검사 → 비관통은 첫 적중 후 소멸, 관통은 대상별 1회 타격 후 maxRange 도달 시 소멸.
 //
 // Stage 가 소유하며(updateSkillEffects 에서 매 tick Update), 컨텐츠 스레드에서만 접근한다. 락 없음.
 // 시간은 절대 시계가 아니라 spawn 이후 누적 경과시간(deltaMs 누적)으로 다룬다.
@@ -33,6 +33,7 @@ public:
 
 private:
     EffectParams m_params;
+    std::unordered_set<int64> m_hitTargetIds;
     int64        m_elapsedMs = 0;   // spawn 이후 누적 경과시간 (위치 계산 기준)
     bool         m_expired   = false;
 };

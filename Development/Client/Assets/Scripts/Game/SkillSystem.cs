@@ -36,6 +36,10 @@ namespace Client.Game
         [SerializeField] private int m_warriorSkill3Key = 2003;  // 주변 5연타
         [SerializeField] private int m_warriorSkill4Key = 0;
 
+        [Header("전투 표시")]
+        [SerializeField] private bool m_showMonsterTelegraph = false;
+        [SerializeField] private bool m_showHitDirectionIndicator = false;
+
         // 단발(instant) 범위 비주얼의 표시 시간(초). 지속 데이터(LifetimeMs)가 없는 단일 틱 스킬에 사용.
         [SerializeField] private float m_areaInstantDisplaySec = 0.5f;
 
@@ -658,7 +662,7 @@ namespace Client.Game
                 // 몬스터/NPC: 윈드업 모션 + 회전 + 바닥 텔레그래프(예고).
                 GameData_Skill skill = GameDataTable_Skill.FindData(ntf.SkillKey);
                 monster.PlayAbilityCast(dir, skill);
-                if (ntf.WindupMs > 0 && skill != null)
+                if (m_showMonsterTelegraph && ntf.WindupMs > 0 && skill != null)
                     MonsterTelegraph.Spawn(skill, new Vector3(ntf.OriginX, ntf.OriginY, ntf.OriginZ), dir, ntf.WindupMs);
             }
             else if (caster is PlayerCharacter player)
@@ -754,12 +758,12 @@ namespace Client.Game
                 ? origin
                 : origin + Vector3.up * m_projectileHeight;   // XZ는 서버 권위 origin, Y만 프리팹 연출로 보정.
             for (int i = 0; i < dirs.Count; ++i)
-                spawnOneProjectile(prefab, group, i, startPos, dirs[i], (float)skill.ProjectileSpeed, (float)skill.MaxRange, skill.Key, skill.OnHitSkillKey, ignoreMonsters, sfxVolumeScale);
+                spawnOneProjectile(prefab, group, i, startPos, dirs[i], (float)skill.ProjectileSpeed, (float)skill.MaxRange, skill.Key, skill.OnHitSkillKey, skill.ProjectilePierce, ignoreMonsters, sfxVolumeScale);
 
             group?.MarkLaunched(dirs.Count);
         }
 
-        private void spawnOneProjectile(GameObject prefab, SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int sourceSkillKey, int onHitSkillKey, bool ignoreMonsters = false, float sfxVolumeScale = 1f)
+        private void spawnOneProjectile(GameObject prefab, SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int sourceSkillKey, int onHitSkillKey, bool projectilePierce, bool ignoreMonsters = false, float sfxVolumeScale = 1f)
         {
             GameObject go = Instantiate(prefab);
             go.name = "Projectile";
@@ -789,7 +793,7 @@ namespace Client.Game
             col.gameObject.layer = GameLayers.Projectile;
 
             Projectile proj = go.AddComponent<Projectile>();
-            proj.Launch(group, index, startPos, dir, speed, maxRange, sourceSkillKey, onHitSkillKey, ignoreMonsters, sfxVolumeScale);
+            proj.Launch(group, index, startPos, dir, speed, maxRange, sourceSkillKey, onHitSkillKey, projectilePierce, ignoreMonsters, sfxVolumeScale);
         }
 
         // 투사체 종료(hit) 위치에서 적중음(클라 0지연) + OnHit 폭발 비주얼을 낸다. Projectile 이 종료 시 호출(시전 클라/원격 공용).
@@ -951,7 +955,8 @@ namespace Client.Game
                 ActorObject attacker = StageManager.Instance.FindActor(ntf.AttackerObjectId);
                 if (attacker != null)
                 {
-                    HitDirectionIndicator.Spawn(target.transform.position, attacker.transform.position);
+                    if (m_showHitDirectionIndicator)
+                        HitDirectionIndicator.Spawn(target.transform.position, attacker.transform.position);
                     Camera.main?.GetComponent<CameraFollow>()?.AddShake(0.15f);
                 }
             }

@@ -43,6 +43,7 @@ namespace GameData
         public ESkillEffectMotion   EffectMotion         = ESkillEffectMotion.None;
         public ESkillEffectDamage   EffectDamage         = ESkillEffectDamage.None;
         public ESkillEffectShape    EffectShape          = ESkillEffectShape.None;
+        public bool                 ProjectilePierce     = false;
         public double               DamageCoeff          = 0;
         public float                Radius               = 0f;
         public float                ObbWidth             = 0f;
@@ -114,22 +115,23 @@ namespace GameData
             data.EffectMotion = (ESkillEffectMotion)int.Parse(fields[30]);
             data.EffectDamage = (ESkillEffectDamage)int.Parse(fields[31]);
             data.EffectShape = (ESkillEffectShape)int.Parse(fields[32]);
-            data.DamageCoeff = double.Parse(fields[33]);
-            data.Radius = float.Parse(fields[34]);
-            data.ObbWidth = float.Parse(fields[35]);
-            data.ObbLength = float.Parse(fields[36]);
-            data.ProjectileSpeed = float.Parse(fields[37]);
-            data.MaxRange = float.Parse(fields[38]);
-            data.ProjectileCount = int.Parse(fields[39]);
-            data.FanAngleDeg = float.Parse(fields[40]);
-            data.FirstTickDelayMs = int.Parse(fields[41]);
-            data.TickIntervalMs = int.Parse(fields[42]);
-            data.LifetimeMs = int.Parse(fields[43]);
-            data.MoveDistance = float.Parse(fields[44]);
-            data.MoveDurationMs = int.Parse(fields[45]);
-            data.ScatterCount = int.Parse(fields[46]);
-            data.ScatterInnerRadius = float.Parse(fields[47]);
-            data.ScatterOuterRadius = float.Parse(fields[48]);
+            data.ProjectilePierce = GameDataTableBase.StringToBool(fields[33]);
+            data.DamageCoeff = double.Parse(fields[34]);
+            data.Radius = float.Parse(fields[35]);
+            data.ObbWidth = float.Parse(fields[36]);
+            data.ObbLength = float.Parse(fields[37]);
+            data.ProjectileSpeed = float.Parse(fields[38]);
+            data.MaxRange = float.Parse(fields[39]);
+            data.ProjectileCount = int.Parse(fields[40]);
+            data.FanAngleDeg = float.Parse(fields[41]);
+            data.FirstTickDelayMs = int.Parse(fields[42]);
+            data.TickIntervalMs = int.Parse(fields[43]);
+            data.LifetimeMs = int.Parse(fields[44]);
+            data.MoveDistance = float.Parse(fields[45]);
+            data.MoveDurationMs = int.Parse(fields[46]);
+            data.ScatterCount = int.Parse(fields[47]);
+            data.ScatterInnerRadius = float.Parse(fields[48]);
+            data.ScatterOuterRadius = float.Parse(fields[49]);
 
             if (data.Key <= 0)
                 return false;

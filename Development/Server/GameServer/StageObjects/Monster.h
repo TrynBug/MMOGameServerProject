@@ -98,6 +98,7 @@ public:
     float GetAggroRange()  const { return m_aggroRange; }
     float GetLeashRange()  const { return m_leashRange; }
     float GetDesiredRange()const { return m_desiredRange; }
+    bool  IgnoresSkillRange() const { return m_ignoreSkillRange; }
 
     // ── 배회(idle 중 주변 배회) 설정값 ──
     float GetWanderRadius()        const { return m_wanderRadius; }
@@ -163,6 +164,7 @@ private:
     float m_aggroRange   = 10.0f;   // 이 거리 내 유저 감지 → 추격
     float m_leashRange   = 20.0f;   // 스폰에서 이 거리 초과 → 복귀
     float m_desiredRange = 0.0f;    // 원거리 유지 거리(카이팅). 0 이면 근접. (공격 사거리는 GetMaxAttackRange)
+    bool  m_ignoreSkillRange = false; // Attack 상태에서 개별 스킬 MaxRange 검사 무시
     int64 m_engagedUpdateIntervalMs = 100;   // 타겟 관여 중 업데이트 주기(ms). idle 은 k_monsterUpdateIntervalMs.
     // 이동속도는 MoveSpdTotal 스탯에서 읽는다(GetStatTotal(EStatGroup::MoveSpd)). 버프 자동 반영.
 

@@ -22,6 +22,7 @@ namespace Client.Game
         private bool m_ended;
         private int m_sourceSkillKey;          // 투사체 본체 스킬 키. 종료(hit) 위치에서 적중음(SfxHit) 재생에 사용.
         private int m_onHitSkillKey;           // OnHit 폭발 스킬 키 (0=없음). 종료 위치에 폭발 비주얼 표시.
+        private bool m_projectilePierce;       // true면 충돌로 종료하지 않고 최대사거리까지 이동한다.
         private bool m_ignoreMonsters;         // true = 몬스터 충돌 무시(몬스터 시전 투사체. 비주얼 전용 + 시전자 자가충돌 방지).
         private float m_sfxVolumeScale = 1f;   // 적중음(SfxHit) 볼륨 배수. 원격 캐스터 투사체는 <1 로 작게.
 
@@ -30,7 +31,7 @@ namespace Client.Game
 
         // SkillSystem 이 생성 직후 1회 호출.
         // ignoreMonsters: 몬스터가 쏜 투사체(타겟=플레이어)면 true. OnTriggerEnter 가 몬스터(시전자 포함)에 반응하지 않게 한다.
-        public void Launch(SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int sourceSkillKey, int onHitSkillKey, bool ignoreMonsters = false, float sfxVolumeScale = 1f)
+        public void Launch(SkillProjectileGroup group, int index, Vector3 startPos, Vector3 dir, float speed, float maxRange, int sourceSkillKey, int onHitSkillKey, bool projectilePierce, bool ignoreMonsters = false, float sfxVolumeScale = 1f)
         {
             m_group = group;
             m_index = index;
@@ -39,6 +40,7 @@ namespace Client.Game
             m_maxRange = maxRange;
             m_sourceSkillKey = sourceSkillKey;
             m_onHitSkillKey = onHitSkillKey;
+            m_projectilePierce = projectilePierce;
             m_ignoreMonsters = ignoreMonsters;
             m_sfxVolumeScale = sfxVolumeScale;
             m_traveled = 0f;
@@ -59,7 +61,7 @@ namespace Client.Game
             // 지형·정적 장애물 차단: 이전→현 세그먼트가 벽(지형 둔덕/바위 등)을 물면 그 자리에서 소멸(벽 통과 방지).
             // QueryTriggerInteraction.Ignore 로 자기/타 투사체·몬스터 트리거는 무시하고 solid 지오메트리만 검사한다.
             // 충돌 위치를 서버에 exploded_on_terrain 으로 보고 → 서버가 그 자리에 폭발을 발동(적중은 서버 판정).
-            if (Physics.Raycast(prev, m_dir, out RaycastHit hit, step, GameLayers.ProjectileBlockerMask, QueryTriggerInteraction.Ignore))
+            if (!m_projectilePierce && Physics.Raycast(prev, m_dir, out RaycastHit hit, step, GameLayers.ProjectileBlockerMask, QueryTriggerInteraction.Ignore))
             {
                 endBlockedByTerrain(hit.point);
                 return;
@@ -69,7 +71,7 @@ namespace Client.Game
             m_traveled += step;
 
             // 몬스터 시전 투사체: 근처 플레이어에 닿으면 그 자리에서 비주얼 종료(서버가 대미지 권위, 몬스터는 무시).
-            if (m_ignoreMonsters && StageManager.Instance != null
+            if (!m_projectilePierce && m_ignoreMonsters && StageManager.Instance != null
                 && StageManager.Instance.FindCharacterInRadiusXZ(transform.position, k_monsterHitRadius) != null)
             {
                 endVisualAt(transform.position);
@@ -101,6 +103,9 @@ namespace Client.Game
         private void OnTriggerEnter(Collider other)
         {
             if (m_ended)
+                return;
+
+            if (m_projectilePierce)
                 return;
 
             // 몬스터 시전 투사체(타겟=플레이어)는 몬스터 충돌을 무시한다. (서버 권위 판정, 비주얼 전용.)

@@ -41,6 +41,7 @@ struct GameDataBase_Skill : public GameData
     ESkillEffectMotion   EffectMotion         = ESkillEffectMotion::None;
     ESkillEffectDamage   EffectDamage         = ESkillEffectDamage::None;
     ESkillEffectShape    EffectShape          = ESkillEffectShape::None;
+    bool                 ProjectilePierce     = false;
     double               DamageCoeff          = 0;
     float                Radius               = 0.0f;
     float                ObbWidth             = 0.0f;

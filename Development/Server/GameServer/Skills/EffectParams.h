@@ -36,6 +36,7 @@ struct EffectParams
     Vector3            dir;                            // 진행 방향 (Linear). 정규화된 X-Z.
     float              speed    = 0.0f;               // Linear 속도 (units/sec)
     float              maxRange = 0.0f;               // 최대 사거리 (ProjectileGroup 에서 사용)
+    bool               projectilePierce = false;      // true면 대상 적중 후에도 최대사거리까지 이동
 
     // ── 대미지 ──
     ESkillEffectDamage damage       = ESkillEffectDamage::None;

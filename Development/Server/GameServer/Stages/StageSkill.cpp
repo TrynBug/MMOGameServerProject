@@ -152,7 +152,7 @@ void Stage::SpawnMonsterProjectile(const EffectParams& params)
     m_monsterProjectiles.push_back(std::make_unique<MonsterProjectile>(params));
 }
 
-// 몬스터 투사체 1 tick: Linear 전진 → hit 반경 안 적 검사 → 적중/최대사거리 시 (폭발 후) 소멸.
+// 몬스터 투사체 1 tick: Linear 전진 → hit 반경 안 적 검사 → 비관통은 적중 시, 관통은 최대사거리에서 소멸.
 // 정의를 여기 두는 이유: Stage 완전타입 + 효과 파이프라인(QueryEnemiesInShape/ApplyEffectDamage/bake)이 필요.
 bool MonsterProjectile::Update(Stage* pStage, int64 deltaMs)
 {
@@ -170,17 +170,29 @@ bool MonsterProjectile::Update(Stage* pStage, int64 deltaMs)
     std::vector<StageObject*> enemies;
     pStage->QueryEnemiesInShape(m_params.casterObjectType, pos, hit, enemies);
 
-    const bool hitSomething = !enemies.empty();
-    if (hitSomething)
+    bool hitSomething = false;
+    if (m_params.projectilePierce)
     {
-        // 1투사체 1적: 가장 먼저 잡힌 적에게 직격. (QueryEnemiesInShape 가 사망 대상은 이미 제외.)
+        for (StageObject* pEnemy : enemies)
+        {
+            if (!m_hitTargetIds.insert(pEnemy->GetObjectId()).second)
+                continue;
+
+            hitSomething = true;
+            pStage->ApplyEffectDamage(*static_cast<ActorObject*>(pEnemy),
+                                      m_params.damageAmount, m_params.casterObjectId, /*isDuplicate*/ false, m_params.skillKey);
+        }
+    }
+    else if (!enemies.empty())
+    {
+        hitSomething = true;
         pStage->ApplyEffectDamage(*static_cast<ActorObject*>(enemies[0]),
                                   m_params.damageAmount, m_params.casterObjectId, /*isDuplicate*/ false, m_params.skillKey);
     }
 
     const bool reachedMax = (pos - m_params.origin).LengthSqXZ() >= m_params.maxRange * m_params.maxRange;
 
-    if (hitSomething || reachedMax)
+    if ((!m_params.projectilePierce && hitSomething) || reachedMax)
     {
         // 폭발 연계 (OnHitSkillKey): 적중/최대사거리 위치에 폭발 스킬을 발동한다 (적중은 서버 판정).
         if (m_params.onHitSkillKey != 0)

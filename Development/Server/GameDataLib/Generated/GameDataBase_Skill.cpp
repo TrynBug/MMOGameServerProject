@@ -47,6 +47,7 @@ bool GameDataTableBase_Skill::makeGameData(const std::string& line)
     std::getline(ss, field, ','); pData->EffectMotion = static_cast<ESkillEffectMotion>(std::stoi(field));
     std::getline(ss, field, ','); pData->EffectDamage = static_cast<ESkillEffectDamage>(std::stoi(field));
     std::getline(ss, field, ','); pData->EffectShape = static_cast<ESkillEffectShape>(std::stoi(field));
+    std::getline(ss, field, ','); pData->ProjectilePierce = StringToBool(field);
     std::getline(ss, field, ','); pData->DamageCoeff = std::stod(field);
     std::getline(ss, field, ','); pData->Radius = std::stof(field);
     std::getline(ss, field, ','); pData->ObbWidth = std::stof(field);

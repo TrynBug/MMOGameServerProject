@@ -10,6 +10,31 @@
 
 #include <cmath>
 
+namespace
+{
+    std::vector<Vector3> ComputeFanDirs(const Vector3& dir, int32 count, float fanAngleDeg)
+    {
+        if (count <= 1)
+            return { dir };
+
+        std::vector<Vector3> dirs;
+        dirs.reserve(count);
+
+        const float totalRad = fanAngleDeg * 0.01745329f;
+        const float step = totalRad / static_cast<float>(count - 1);
+        const float startRad = -totalRad * 0.5f;
+
+        for (int32 i = 0; i < count; ++i)
+        {
+            const float angle = startRad + step * static_cast<float>(i);
+            const float cs = std::cos(angle);
+            const float sn = std::sin(angle);
+            dirs.emplace_back(dir.x * cs - dir.z * sn, dir.y, dir.x * sn + dir.z * cs);
+        }
+        return dirs;
+    }
+}
+
 // ─────────────────────────────────────────────────────────────
 // 타겟팅(perception)
 // ─────────────────────────────────────────────────────────────
@@ -72,11 +97,12 @@ StageObject* MonsterCombatComponent::GetTarget() const
 // ─────────────────────────────────────────────────────────────
 int32 MonsterCombatComponent::SelectReadySkill(float distToTarget) const
 {
-    // 목록 순서 = 우선순위. 쿨다운 끝 + 사거리 내 첫 스킬을 고른다.
+    // 목록 순서 = 우선순위. 쿨다운 끝 + 사거리 조건을 만족하는 첫 스킬을 고른다.
+    // IgnoreSkillRange AI는 Attack 진입 거리(GetMaxAttackRange)는 유지하고 개별 스킬 거리만 무시한다.
     for (size_t i = 0; i < m_skills.size(); ++i)
     {
         const MonsterSkill& skill = m_skills[i];
-        if (skill.remainingCooldownMs <= 0 && distToTarget <= skill.range)
+        if (skill.remainingCooldownMs <= 0 && (m_pOwner->IgnoresSkillRange() || distToTarget <= skill.range))
             return static_cast<int32>(i);
     }
     return -1;
@@ -128,9 +154,10 @@ bool MonsterCombatComponent::TryBeginCast(int32 skillIndex, StageObject* pTarget
         return false;
 
     // 사거리 재확인 (두뇌가 SelectReadySkill 로 골랐어도 한 번 더 가드).
+    // IgnoreSkillRange AI는 이미 FSM의 최대 공격거리 안에서만 이 함수에 진입한다.
     const float dx = pTarget->GetPosX() - m_pOwner->GetPosX();
     const float dz = pTarget->GetPosZ() - m_pOwner->GetPosZ();
-    if (dx * dx + dz * dz > skill.range * skill.range)
+    if (!m_pOwner->IgnoresSkillRange() && dx * dx + dz * dz > skill.range * skill.range)
         return false;
 
     // 커밋: 타겟 고정 + 그쪽으로 1회 회전 + 이동 정지.
@@ -275,7 +302,15 @@ void MonsterCombatComponent::executeSkill(int32 index, StageObject* pTarget)
         EffectParams p = BakeSkillEffectParams(*pSkill, EObjectType::Monster, m_pOwner->GetObjectId(), origin, dir, /*seed*/ 0);
         p.damageAmount = skill.damage;
         p.motion       = ESkillEffectMotion::Linear;   // 투사체는 본질적으로 직선 이동(데이터 EffectMotion 무관).
-        pStage->SpawnMonsterProjectile(p);
+        const std::vector<Vector3> dirs = ComputeFanDirs(
+            dir, static_cast<int32>(pSkill->ProjectileCount), static_cast<float>(pSkill->FanAngleDeg));
+        for (const Vector3& projectileDir : dirs)
+        {
+            EffectParams projectile = p;
+            projectile.dir = projectileDir;
+            projectile.shape.forward = projectileDir;
+            pStage->SpawnMonsterProjectile(projectile);
+        }
         pStage->BroadcastSkillCastNtf(*m_pOwner, skill.skillId, /*effectId*/ 0, origin, dir, /*seed*/ 0, /*moveDistance*/ 0.0f);
         return;
     }

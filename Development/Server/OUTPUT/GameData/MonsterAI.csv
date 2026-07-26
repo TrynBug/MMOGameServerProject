@@ -1,4 +1,4 @@
-﻿Key,Name,AIType,AggroRange,LeashRange,DesiredRange,EngagedUpdateIntervalMs,WanderRadius,WanderMinIntervalMs,WanderMaxIntervalMs
-1001,MeleeRusher,1,10,35,0,100,5,3000,8000
-1002,RangedKiter,1,12,38,7,100,5,3000,8000
-1003,DragonBoss,1,35,60,0,100,0,0,0
+﻿Key,Name,AIType,AggroRange,LeashRange,DesiredRange,EngagedUpdateIntervalMs,WanderRadius,WanderMinIntervalMs,WanderMaxIntervalMs,IgnoreSkillRange
+1001,MeleeRusher,1,10,35,0,100,5,3000,8000,false
+1002,RangedKiter,1,12,38,7,100,5,3000,8000,false
+1003,DragonBoss,1,35,60,0,100,0,0,0,true

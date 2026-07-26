@@ -77,14 +77,14 @@ public:
             if (s.range > r) r = s.range;
         return r;
     }
-    // 사용 가능한(쿨다운 끝 + 사거리 내) 스킬 중 우선순위(목록 순서) 최상의 인덱스. 없으면 -1.
+    // 사용 가능한(쿨다운 끝 + AI별 사거리 조건) 스킬 중 우선순위(목록 순서) 최상의 인덱스. 없으면 -1.
     int32 SelectReadySkill(float distToTarget) const;
 
     // 매 tick(owner Update 안에서, 두뇌보다 먼저) 호출. 쿨다운 진행 + 캐스트 페이즈 진행.
     void Update(int64 deltaMs);
 
     // ── 캐스트(두뇌의 단일 진입점) ──
-    // skillIndex 시전을 "시작"한다. 캐스트/회복 중·쿨다운 미회복·사거리 밖·인덱스/타겟 무효면 false.
+    // skillIndex 시전을 "시작"한다. 캐스트/회복 중·쿨다운 미회복·AI별 사거리 밖·인덱스/타겟 무효면 false.
     // 성공 시: 타겟/방향/origin 커밋 + owner 회전·정지 + Windup 진입 + AbilityCastNtf 통보.
     [[nodiscard]] bool TryBeginCast(int32 skillIndex, StageObject* pTarget);
     bool IsCasting()    const { return m_castPhase == EMonsterCastPhase::Windup; }

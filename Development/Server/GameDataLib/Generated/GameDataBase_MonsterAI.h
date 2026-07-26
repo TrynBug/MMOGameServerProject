@@ -28,6 +28,7 @@ struct GameDataBase_MonsterAI : public GameData
     float                WanderRadius         = 0.0f;
     int32_t              WanderMinIntervalMs  = 3000;
     int32_t              WanderMaxIntervalMs  = 8000;
+    bool                 IgnoreSkillRange     = false;
 };
 
 

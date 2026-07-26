@@ -24,6 +24,7 @@ EffectParams BakeSkillEffectParams(const GameData_Skill& skill,
     p.dir      = dir;
     p.speed    = static_cast<float>(skill.ProjectileSpeed);
     p.maxRange = static_cast<float>(skill.MaxRange);
+    p.projectilePierce = skill.ProjectilePierce;
 
     // ── 대미지 ──
     p.damage       = skill.EffectDamage;
