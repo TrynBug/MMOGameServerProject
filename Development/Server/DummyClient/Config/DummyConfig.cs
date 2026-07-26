@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -24,6 +25,12 @@ namespace DummyClient.Config
         public int RepickDelayMs { get; set; } = 500;
     }
 
+    public sealed class TownCfg
+    {
+        public int RoamCheckIntervalMs { get; set; } = 10000; // 마을 배회 시도 주기
+        public double RoamProbability { get; set; } = 0.2;   // 주기마다 실제 배회할 확률
+    }
+
     public sealed class ReconnectCfg
     {
         public bool Enabled { get; set; } = true;
@@ -33,22 +40,42 @@ namespace DummyClient.Config
     public sealed class CreateCfg
     {
         // 캐릭터 생성 시 무작위로 고를 직업 목록 (1=Mage, 2=Warrior).
-        // 현재 스킬 게임데이터는 Mage(1)만 존재하므로 기본 [1].
-        public int[] JobIds { get; set; } = { 1 };
+        // 기본값은 현재 스킬 게임데이터에 있는 Mage(1), Warrior(2).
+        public int[] JobIds { get; set; } = { 1, 2 };
+        // CharacterFactory가 지원하는 외형 프리셋 인덱스(현재 직업당 0, 1).
+        public int[] AppearancePresetIds { get; set; } = { 0, 1 };
     }
 
     public sealed class SkillCfg
     {
-        public int UseIntervalMs { get; set; } = 700;   // 연속 스킬 시전 간격(스킬 로테이션)
+        public Dictionary<int, int> UseIntervalMsByStage { get; set; } = new()
+        {
+            [100] = 0,    // Town: 스킬 사용 안 함
+            [101] = 700,  // Field
+            [107] = 2500, // Raid
+        };
         public float Range { get; set; } = 12.0f;       // 이 거리 내면 스킬 시전(사거리)
         public float DetectRange { get; set; } = 16.0f; // 이 거리 내 적 발견 시 전투 개시/추격
-        public int[] SkillKeys { get; set; } = { 1001, 1006, 1012 }; // Mage: Fireball/Blaze/ElectricShock
+        public Dictionary<int, int[]> SkillsByJob { get; set; } = new()
+        {
+            [1] = new[] { 1001, 1003, 1008 }, // Mage: Fireball/IceField/FirePillar
+            [2] = new[] { 2001, 2002, 2003 }, // Warrior: NormalAttack/Whirlwind/HeavyStrike
+        };
+
+        public int[] GetSkillKeys(int jobId)
+            => SkillsByJob != null && SkillsByJob.TryGetValue(jobId, out int[] keys) ? keys : null;
+
+        public int GetUseIntervalMs(int stageKey)
+            => UseIntervalMsByStage != null && UseIntervalMsByStage.TryGetValue(stageKey, out int intervalMs) ? intervalMs : 0;
     }
 
     public sealed class StageMoveCfg
     {
         public int IntervalMs { get; set; } = 45000;   // 스테이지이동 시도 주기
-        public double Probability { get; set; } = 0.6; // 주기마다 실제 이동할 확률
+        public double Probability { get; set; } = 0.15; // 주기마다 실제 이동할 확률
+        public int PortalTimeoutMs { get; set; } = 15000; // 포탈 탐색+접근 제한시간
+        public int ResponseTimeoutMs { get; set; } = 10000; // 상호작용 후 StageMoveRes 제한시간
+        public int LoadTimeoutMs { get; set; } = 15000; // StageLoadCompleteRes 제한시간
     }
 
     public sealed class DisconnectCfg
@@ -69,7 +96,8 @@ namespace DummyClient.Config
         public AccountCfg Account { get; set; } = new();
         public SpawnCfg Spawn { get; set; } = new();
         public MoveCfg Move { get; set; } = new();
-        public int[] StageKeys { get; set; } = { 100 };
+        public TownCfg Town { get; set; } = new();
+        public int[] StageKeys { get; set; } = { 100, 101, 107 };
         public CreateCfg Create { get; set; } = new();
         public SkillCfg Skill { get; set; } = new();
         public StageMoveCfg StageMove { get; set; } = new();
@@ -114,5 +142,74 @@ namespace DummyClient.Config
             var cfg = JsonSerializer.Deserialize<DummyConfig>(File.ReadAllText(path), opt);
             return cfg ?? new DummyConfig();
         }
+
+        public bool Validate(out string error)
+        {
+            if (Account == null || Spawn == null || Move == null || Town == null || Create == null || Skill == null || StageMove == null || Disconnect == null || Reconnect == null)
+            {
+                error = "설정 섹션 중 null 값이 있음";
+                return false;
+            }
+            if (TickRateHz <= 0 || StatusPrintIntervalMs <= 0 || Move.SendIntervalMs <= 0 || Move.RepickDelayMs <= 0)
+            {
+                error = "tick/status/move 간격은 0보다 커야 함";
+                return false;
+            }
+            if (Move.MoveSpeed <= 0f || Move.ArriveDistance <= 0f || Skill.Range <= 0f || Skill.DetectRange < Skill.Range)
+            {
+                error = "이동속도/도착거리/스킬 사거리는 양수이고 detectRange는 range 이상이어야 함";
+                return false;
+            }
+            if (Town.RoamCheckIntervalMs <= 0 || StageMove.IntervalMs <= 0 || StageMove.PortalTimeoutMs <= 0 || StageMove.ResponseTimeoutMs <= 0 || StageMove.LoadTimeoutMs <= 0)
+            {
+                error = "town/stageMove 시간 설정은 0보다 커야 함";
+                return false;
+            }
+            if (Disconnect.CheckIntervalMs <= 0 || Reconnect.DelayMs < 0 || Account.End < Account.Start)
+            {
+                error = "disconnect/reconnect/account 범위 설정이 잘못됨";
+                return false;
+            }
+            if (!isProbability(Town.RoamProbability) || !isProbability(StageMove.Probability) || !isProbability(Disconnect.Probability))
+            {
+                error = "probability 값은 0~1 범위여야 함";
+                return false;
+            }
+            if (StageKeys == null || StageKeys.Length == 0 || Create.JobIds == null || Create.JobIds.Length == 0 || Create.AppearancePresetIds == null || Create.AppearancePresetIds.Length == 0 || Skill.UseIntervalMsByStage == null || Skill.SkillsByJob == null || Skill.SkillsByJob.Count == 0)
+            {
+                error = "stageKeys, create.jobIds, create.appearancePresetIds, skill.useIntervalMsByStage, skill.skillsByJob은 비어 있을 수 없음";
+                return false;
+            }
+            foreach (int stageKey in StageKeys)
+            {
+                if (!Skill.UseIntervalMsByStage.TryGetValue(stageKey, out int intervalMs) || intervalMs < 0)
+                {
+                    error = $"stage별 스킬 시전 간격이 없거나 음수임: stageKey={stageKey}";
+                    return false;
+                }
+            }
+            foreach (int presetId in Create.AppearancePresetIds)
+            {
+                if (presetId < 0)
+                {
+                    error = $"appearancePresetId는 0 이상이어야 함: presetId={presetId}";
+                    return false;
+                }
+            }
+            foreach (int jobId in Create.JobIds)
+            {
+                int[] keys = Skill.GetSkillKeys(jobId);
+                if (jobId <= 0 || keys == null || keys.Length == 0)
+                {
+                    error = $"create.jobIds의 직업에 대한 스킬 설정이 없음: jobId={jobId}";
+                    return false;
+                }
+            }
+
+            error = "";
+            return true;
+        }
+
+        private static bool isProbability(double value) => value >= 0.0 && value <= 1.0;
     }
 }

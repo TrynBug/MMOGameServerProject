@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using DummyClient.Config;
+using DummyClient.Metrics;
 using DummyClient.Nav;
 using DummyClient.Sim;
 
@@ -18,11 +19,14 @@ namespace DummyClient
         private int m_started;
 
         public IReadOnlyList<Bot> Bots => m_bots;
+        public int StartedCount => m_started;
+        public int TargetTickRateHz => m_cfg.TickRateHz;
+        public DummyMetrics Metrics => m_ctx.Metrics;
 
-        public BotManager(DummyConfig cfg, StageCatalog catalog, SkillCatalog skills, string navMeshDir)
+        public BotManager(DummyConfig cfg, StageCatalog catalog, SkillCatalog skills, PropCatalog props, string navMeshDir)
         {
             m_cfg = cfg;
-            m_ctx = new BotContext(cfg, catalog, skills, navMeshDir);
+            m_ctx = new BotContext(cfg, catalog, skills, props, navMeshDir);
 
             for (int i = 0; i < cfg.BotCount; i++)
             {
@@ -36,22 +40,37 @@ namespace DummyClient
         {
             var clock = Stopwatch.StartNew();
             double tickMs = 1000.0 / Math.Max(1, m_cfg.TickRateHz);
+            using var tickTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(tickMs));
             long last = clock.ElapsedMilliseconds;
 
-            while (!ct.IsCancellationRequested)
+            try
             {
-                long now = clock.ElapsedMilliseconds;
-                int dt = (int)(now - last);
-                last = now;
-                m_ctx.NowMs = now;
+                while (!ct.IsCancellationRequested)
+                {
+                    long processingStarted = Stopwatch.GetTimestamp();
+                    long now = clock.ElapsedMilliseconds;
+                    int dt = (int)(now - last);
+                    last = now;
+                    m_ctx.NowMs = now;
 
-                RampSpawn(now);
+                    RampSpawn(now);
 
-                for (int i = 0; i < m_started; i++)
-                    m_bots[i].Tick(now, dt);
+                    for (int i = 0; i < m_started; i++)
+                        m_bots[i].Tick(now, dt);
 
-                try { await Task.Delay((int)tickMs, ct); }
-                catch (TaskCanceledException) { break; }
+                    m_ctx.Metrics.RecordTick(Stopwatch.GetElapsedTime(processingStarted).TotalMilliseconds, tickMs);
+
+                    try
+                    {
+                        if (!await tickTimer.WaitForNextTickAsync(ct)) break;
+                    }
+                    catch (OperationCanceledException) { break; }
+                }
+            }
+            finally
+            {
+                foreach (Bot bot in m_bots)
+                    bot.Stop();
             }
         }
 

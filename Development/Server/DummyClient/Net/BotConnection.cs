@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Client.Network;      // PacketHeaderHelper, RawPacket (클라와 공유하는 순수 C#)
+using DummyClient.Metrics;
 using Google.Protobuf;
 
 namespace DummyClient.Net
@@ -17,17 +18,19 @@ namespace DummyClient.Net
         private NetworkStream m_stream;
         private CancellationTokenSource m_cts;
         private readonly SemaphoreSlim m_sendLock = new(1, 1);
+        private readonly DummyMetrics m_metrics;
         private int m_closed;
 
-        public ConcurrentQueue<RawPacket> RecvQueue { get; } = new();
+        private readonly ConcurrentQueue<RawPacket> m_recvQueue = new();
         public bool IsConnected => m_tcp is { Connected: true } && m_closed == 0;
 
         // 임의 스레드에서 호출될 수 있음. reason==null 이면 정상 종료.
         public event Action<string> OnClosed;
 
-        // 통계
-        public long BytesSent, BytesRecv;
-        public int PacketsSent, PacketsRecv;
+        public BotConnection(DummyMetrics metrics)
+        {
+            m_metrics = metrics;
+        }
 
         public async Task<bool> ConnectAsync(string ip, int port)
         {
@@ -64,8 +67,7 @@ namespace DummyClient.Net
             try
             {
                 await m_stream.WriteAsync(packet).ConfigureAwait(false);
-                Interlocked.Increment(ref PacketsSent);
-                Interlocked.Add(ref BytesSent, packet.Length);
+                m_metrics.RecordSent((ushort)id, packet.Length);
             }
             catch (Exception e)
             {
@@ -95,9 +97,15 @@ namespace DummyClient.Net
                     if (bodyLen > 0 && !await ReadFullAsync(body, bodyLen, ct).ConfigureAwait(false))
                         break;
 
-                    RecvQueue.Enqueue(new RawPacket { Type = type, Flags = flags, Body = body });
-                    Interlocked.Increment(ref PacketsRecv);
-                    Interlocked.Add(ref BytesRecv, size);
+                    if (m_closed != 0) break;
+                    m_recvQueue.Enqueue(new RawPacket { Type = type, Flags = flags, Body = body });
+                    m_metrics.RecordRecv(type, size);
+                    m_metrics.RecordRecvEnqueued();
+                    if (m_closed != 0)
+                    {
+                        while (TryDequeue(out _)) { }
+                        break;
+                    }
                 }
                 Close(null); // 정상 종료 (서버가 끊음 또는 취소)
             }
@@ -125,7 +133,15 @@ namespace DummyClient.Net
             try { m_cts?.Cancel(); } catch { }
             try { m_stream?.Close(); } catch { }
             try { m_tcp?.Close(); } catch { }
+            while (TryDequeue(out _)) { }
             try { OnClosed?.Invoke(reason); } catch { }
+        }
+
+        public bool TryDequeue(out RawPacket packet)
+        {
+            if (!m_recvQueue.TryDequeue(out packet)) return false;
+            m_metrics.RecordRecvDequeued();
+            return true;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace DummyClient.Sim
         WaitSelect,        // CharacterSelectReq 보내고 CharacterSelectRes 대기
         WaitStageLoad,     // StageLoadCompleteReq 보내고 StageLoadCompleteRes 대기
         InStage,           // 플레이 중 (NavMesh 이동)
-        WaitStageMoveRes,  // StageMoveReq 보내고 StageMoveRes 대기 (스테이지 이동 중)
+        WaitStageMoveRes,  // 포탈 상호작용 후 StageMoveRes 대기 (스테이지 이동 중)
         Disconnected,      // 끊김 (reconnect 설정 시 재접속 대기)
     }
 }

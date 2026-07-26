@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 using DummyClient.Config;
+using DummyClient.Metrics;
 using DummyClient.Nav;
 using DummyClient.Net;
 using GamePacket;
@@ -15,6 +16,7 @@ namespace DummyClient.Sim
     public sealed class Bot
     {
         private const int ResultSuccess = 1; // EResultCode.Success
+        private const int TownStageKey = 100;
 
         private readonly BotContext m_ctx;
         public int Index { get; }
@@ -25,8 +27,8 @@ namespace DummyClient.Sim
         private Task<bool> m_connectTask;
 
         public BotState State { get; private set; } = BotState.Idle;
-        public string LastError { get; private set; }
         public int StageDataKey { get; private set; }
+        public int JobId { get; private set; }
 
         // 인증 정보
         private string m_gatewayIp;
@@ -63,21 +65,57 @@ namespace DummyClient.Sim
         private enum Behavior { Roaming, Fighting }
         private Behavior m_behavior = Behavior.Roaming;
         private sealed class Mon { public Vector3 Pos; public bool Dead; }
+        private sealed class Prop { public int PropKey; public Vector3 Pos; }
+        private sealed class PendingProjectileHit
+        {
+            public long DueMs;
+            public SkillHitItem Hit;
+        }
         private readonly Dictionary<long, Mon> m_monsters = new();
+        private readonly Dictionary<long, Prop> m_props = new();
+        private readonly List<PendingProjectileHit> m_pendingProjectileHits = new();
         private long m_nextSkillMs;
         private int m_skillRotation;
         private readonly Dictionary<int, long> m_skillReadyAt = new(); // skillKey → 다음 시전 가능 시각(ms)
         private long m_lastRepathMs;
         private long m_nextStageMoveMs;
         private long m_nextDisconnectMs;
-        private int m_pendingStageKey;
+        private long m_targetPortalId;
+        private bool m_stageChangeRequested;
+        private bool m_directTownReturnPending;
+        private bool m_initialStageSelected;
+        private bool m_isDead;
+        private bool m_stopping;
+        private long m_portalDeadlineMs;
+        private long m_stageMoveResponseDeadlineMs;
+        private long m_stageLoadDeadlineMs;
+        private long m_connectStartedMs = -1;
+        private long m_loginStartedMs = -1;
+        private long m_gatewayAuthStartedMs = -1;
+        private long m_characterCreateStartedMs = -1;
+        private long m_characterSelectStartedMs = -1;
+        private long m_stageLoadStartedMs = -1;
+        private long m_stageMoveStartedMs = -1;
 
         // 통계 접근용
-        public int PacketsSent => m_conn?.PacketsSent ?? 0;
-        public int PacketsRecv => m_conn?.PacketsRecv ?? 0;
+        public bool IsConnected => m_conn?.IsConnected ?? false;
+        public bool IsLoggedIn => m_accountId != 0;
+        public int SkillCastRequests { get; private set; }
         public int SkillsCast { get; private set; }
+        public int ProjectileHitsSent { get; private set; }
         public int StageMoves { get; private set; }
-        public bool IsFighting => State == BotState.InStage && m_behavior == Behavior.Fighting;
+        public int Deaths { get; private set; }
+        public int Revives { get; private set; }
+        public int PortalAttempts { get; private set; }
+        public int PortalFailures { get; private set; }
+        public int PortalTimeouts { get; private set; }
+        public int DirectReturnAttempts { get; private set; }
+        public int DirectReturns { get; private set; }
+        public int DirectReturnFailures { get; private set; }
+        public int StageLoadTimeouts { get; private set; }
+        public int Reconnects { get; private set; }
+        public bool IsFighting => State == BotState.InStage && !m_isDead && m_behavior == Behavior.Fighting;
+        public bool IsDead => State == BotState.InStage && m_isDead;
 
         public Bot(int index, string loginId, BotContext ctx)
         {
@@ -92,6 +130,9 @@ namespace DummyClient.Sim
         {
             DrainRecv();
 
+            if (State == BotState.InStage && !m_isDead)
+                UpdateProjectileHits(nowMs);
+
             switch (State)
             {
                 case BotState.Idle:
@@ -101,8 +142,10 @@ namespace DummyClient.Sim
                 case BotState.ConnectingLogin:
                     if (m_connectTask is { IsCompleted: true })
                     {
+                        RecordLatency(LatencyKind.LoginConnect, ref m_connectStartedMs);
                         if (m_connectTask.Result)
                         {
+                            m_loginStartedMs = m_ctx.NowMs;
                             m_conn.Send(PId.LoginReq, new LoginReq { LoginId = LoginId, Password = Password });
                             State = BotState.WaitLoginRes;
                         }
@@ -117,8 +160,10 @@ namespace DummyClient.Sim
                 case BotState.ConnectingGateway:
                     if (m_connectTask is { IsCompleted: true })
                     {
+                        RecordLatency(LatencyKind.GatewayConnect, ref m_connectStartedMs);
                         if (m_connectTask.Result)
                         {
+                            m_gatewayAuthStartedMs = m_ctx.NowMs;
                             m_conn.Send(PId.GatewayAuthReq,
                                 new GatewayAuthReq { AccountId = m_accountId, AuthToken = m_authToken });
                             State = BotState.WaitCharList;
@@ -130,8 +175,13 @@ namespace DummyClient.Sim
                 case BotState.InStage:
                     UpdateDisconnect(nowMs);
                     if (State != BotState.InStage) break;   // 연결 끊김 처리됨
+                    if (m_isDead) break;
                     UpdateStageMove(nowMs);
-                    if (State != BotState.InStage) break;   // 스테이지 이동 시작됨
+                    if (m_stageChangeRequested || m_targetPortalId != 0)
+                    {
+                        UpdatePortalMove(nowMs, dtMs);
+                        break;
+                    }
                     UpdateBehavior(nowMs, dtMs);            // 배회 ↔ 전투 FSM
                     break;
 
@@ -139,7 +189,30 @@ namespace DummyClient.Sim
                     if (m_ctx.Config.Reconnect.Enabled && nowMs >= m_reconnectAtMs)
                     {
                         ResetForReconnect();
+                        Reconnects++;
                         State = BotState.Idle;
+                    }
+                    break;
+
+                case BotState.WaitStageMoveRes:
+                    if (m_stageMoveResponseDeadlineMs > 0 && nowMs >= m_stageMoveResponseDeadlineMs)
+                    {
+                        if (m_directTownReturnPending)
+                            DirectReturnFailures++;
+                        else
+                        {
+                            PortalFailures++;
+                            PortalTimeouts++;
+                        }
+                        Fail(m_directTownReturnPending ? "direct town return timeout" : "portal StageMoveRes timeout");
+                    }
+                    break;
+
+                case BotState.WaitStageLoad:
+                    if (m_stageLoadDeadlineMs > 0 && nowMs >= m_stageLoadDeadlineMs)
+                    {
+                        StageLoadTimeouts++;
+                        Fail("StageLoadCompleteRes timeout");
                     }
                     break;
 
@@ -151,6 +224,7 @@ namespace DummyClient.Sim
         private void StartLoginConnect()
         {
             m_conn = NewConnection();
+            m_connectStartedMs = m_ctx.NowMs;
             m_connectTask = m_conn.ConnectAsync(m_ctx.Config.LoginIp, m_ctx.Config.LoginPort);
             State = BotState.ConnectingLogin;
         }
@@ -159,13 +233,14 @@ namespace DummyClient.Sim
         {
             m_conn?.Close(null); // 로그인 연결 종료
             m_conn = NewConnection();
+            m_connectStartedMs = m_ctx.NowMs;
             m_connectTask = m_conn.ConnectAsync(m_gatewayIp, m_gatewayPort);
             State = BotState.ConnectingGateway;
         }
 
         private BotConnection NewConnection()
         {
-            var c = new BotConnection();
+            var c = new BotConnection(m_ctx.Metrics);
             c.OnClosed += reason => OnConnClosed(c, reason);
             return c;
         }
@@ -174,6 +249,7 @@ namespace DummyClient.Sim
         {
             // 현재 연결이 아닌(교체된) 연결의 종료 이벤트는 무시
             if (who != m_conn) return;
+            if (m_stopping) return;
             if (State == BotState.Disconnected) return;
             // 게이트웨이로 갈아타려고 로그인 연결을 의도적으로 닫는 경우는 무시
             if (State == BotState.NeedGatewayConnect) return;
@@ -183,9 +259,10 @@ namespace DummyClient.Sim
 
         private void Fail(string reason)
         {
-            LastError = reason;
+            SetError(reason);
             State = BotState.Disconnected;
             m_reconnectAtMs = m_ctx.NowMs + m_ctx.Config.Reconnect.DelayMs;
+            m_conn?.Close(reason);
         }
 
         private void ResetForReconnect()
@@ -196,12 +273,56 @@ namespace DummyClient.Sim
             m_moving = false;
             m_path.Clear();
             m_monsters.Clear();
+            m_props.Clear();
+            m_pendingProjectileHits.Clear();
             m_skillReadyAt.Clear();
             m_skillRotation = 0;
             m_behavior = Behavior.Roaming;
             m_inputSeq = 0;
             m_myObjectId = 0;
+            JobId = 0;
+            m_accountId = 0;
+            m_authToken = 0;
             m_serverMoveSpeed = 0f;
+            m_targetPortalId = 0;
+            m_stageChangeRequested = false;
+            m_directTownReturnPending = false;
+            m_initialStageSelected = false;
+            m_isDead = false;
+            m_portalDeadlineMs = 0;
+            m_stageMoveResponseDeadlineMs = 0;
+            m_stageLoadDeadlineMs = 0;
+            m_connectStartedMs = -1;
+            m_loginStartedMs = -1;
+            m_gatewayAuthStartedMs = -1;
+            m_characterCreateStartedMs = -1;
+            m_characterSelectStartedMs = -1;
+            m_stageLoadStartedMs = -1;
+            m_stageMoveStartedMs = -1;
+        }
+
+        public void Stop()
+        {
+            m_stopping = true;
+            m_conn?.Close(null);
+        }
+
+        private void SendCharacterSelect(long characterId)
+        {
+            m_characterSelectStartedMs = m_ctx.NowMs;
+            m_conn.Send(PId.CharacterSelectReq, new CharacterSelectReq { CharacterId = characterId });
+        }
+
+        private void SetError(string reason)
+        {
+            m_ctx.Metrics.RecordError(reason, m_ctx.NowMs);
+        }
+
+        private void RecordLatency(LatencyKind kind, ref long startedMs)
+        {
+            if (startedMs >= 0)
+                m_ctx.Metrics.RecordLatency(kind, Math.Max(0, m_ctx.NowMs - startedMs));
+            startedMs = -1;
         }
 
         // ── 수신 처리 ────────────────────────────────────────────────────
@@ -209,10 +330,10 @@ namespace DummyClient.Sim
         {
             var conn = m_conn;
             if (conn == null) return;
-            while (conn.RecvQueue.TryDequeue(out var raw))
+            while (conn.TryDequeue(out var raw))
             {
                 try { OnPacket(raw.Type, raw.Body); }
-                catch (Exception e) { LastError = $"parse {raw.Type}: {e.Message}"; }
+                catch (Exception e) { SetError($"parse {raw.Type}: {e.Message}"); }
             }
         }
 
@@ -222,6 +343,7 @@ namespace DummyClient.Sim
             {
                 case PId.LoginRes:
                 {
+                    RecordLatency(LatencyKind.Login, ref m_loginStartedMs);
                     var res = LoginRes.Parser.ParseFrom(body);
                     if (!res.Success) { Fail("login rejected"); return; }
                     m_accountId = res.AccountId;
@@ -235,23 +357,26 @@ namespace DummyClient.Sim
                 case PId.CharacterListNtf:
                 {
                     if (State != BotState.WaitCharList) break;
+                    RecordLatency(LatencyKind.GatewayAuth, ref m_gatewayAuthStartedMs);
                     var ntf = CharacterListNtf.Parser.ParseFrom(body);
                     if (ntf.Characters.Count == 0)
                     {
                         var jobs = m_ctx.Config.Create.JobIds;
                         int jobId = (jobs != null && jobs.Length > 0) ? jobs[m_rng.Next(jobs.Length)] : 1;
+                        var presets = m_ctx.Config.Create.AppearancePresetIds;
+                        int presetId = presets[m_rng.Next(presets.Length)];
+                        m_characterCreateStartedMs = m_ctx.NowMs;
                         m_conn.Send(PId.CharacterCreateReq, new CharacterCreateReq
                         {
                             Name = LoginId,
                             JobId = jobId,
-                            AppearancePresetId = 0,
+                            AppearancePresetId = presetId,
                         });
                         State = BotState.WaitCreate;
                     }
                     else
                     {
-                        m_conn.Send(PId.CharacterSelectReq,
-                            new CharacterSelectReq { CharacterId = ntf.Characters[0].CharacterId });
+                        SendCharacterSelect(ntf.Characters[0].CharacterId);
                         State = BotState.WaitSelect;
                     }
                     break;
@@ -260,14 +385,14 @@ namespace DummyClient.Sim
                 case PId.CharacterCreateRes:
                 {
                     if (State != BotState.WaitCreate) break;
+                    RecordLatency(LatencyKind.CharacterCreate, ref m_characterCreateStartedMs);
                     var res = CharacterCreateRes.Parser.ParseFrom(body);
                     if (res.ResultCode != ResultSuccess || res.NewCharacter == null)
                     {
                         Fail($"create failed: {res.ErrorMsg}");
                         return;
                     }
-                    m_conn.Send(PId.CharacterSelectReq,
-                        new CharacterSelectReq { CharacterId = res.NewCharacter.CharacterId });
+                    SendCharacterSelect(res.NewCharacter.CharacterId);
                     State = BotState.WaitSelect;
                     break;
                 }
@@ -275,12 +400,21 @@ namespace DummyClient.Sim
                 case PId.CharacterSelectRes:
                 {
                     if (State != BotState.WaitSelect) break;
+                    RecordLatency(LatencyKind.CharacterSelect, ref m_characterSelectStartedMs);
                     var res = CharacterSelectRes.Parser.ParseFrom(body);
                     if (res.ResultCode != ResultSuccess) { Fail($"select failed: {res.ErrorMsg}"); return; }
                     m_myObjectId = res.Character?.CharacterId ?? 0; // in-stage object id = character_id
+                    JobId = res.Character?.JobId ?? 0;
+                    if (m_ctx.Config.Skill.GetSkillKeys(JobId) == null)
+                    {
+                        Fail($"skills not configured for job: {JobId}");
+                        return;
+                    }
                     StageDataKey = res.StageDataKey;
                     LoadNavMesh(StageDataKey);
+                    m_stageLoadStartedMs = m_ctx.NowMs;
                     m_conn.Send(PId.StageLoadCompleteReq, new StageLoadCompleteReq());
+                    m_stageLoadDeadlineMs = m_ctx.NowMs + m_ctx.Config.StageMove.LoadTimeoutMs;
                     State = BotState.WaitStageLoad;
                     break;
                 }
@@ -288,6 +422,7 @@ namespace DummyClient.Sim
                 case PId.StageLoadCompleteRes:
                 {
                     if (State != BotState.WaitStageLoad) break;
+                    RecordLatency(LatencyKind.StageLoad, ref m_stageLoadStartedMs);
                     var res = StageLoadCompleteRes.Parser.ParseFrom(body);
                     if (res.ResultCode != ResultSuccess) { Fail($"stageload failed: {res.ErrorMsg}"); return; }
                     StageDataKey = res.StageDataKey;
@@ -298,14 +433,32 @@ namespace DummyClient.Sim
                     m_moving = false;
                     m_path.Clear();
                     m_monsters.Clear();
+                    m_props.Clear();
+                    m_pendingProjectileHits.Clear();
                     m_skillReadyAt.Clear();
                     m_skillRotation = 0;
                     m_behavior = Behavior.Roaming;
+                    m_targetPortalId = 0;
+                    m_stageChangeRequested = false;
+                    m_directTownReturnPending = false;
+                    m_isDead = false;
+                    m_stageLoadDeadlineMs = 0;
                     long t = m_ctx.NowMs;
-                    m_nextRepickMs = t; // 즉시 목적지 선정
-                    m_nextSkillMs = t + m_ctx.Config.Skill.UseIntervalMs;
+                    m_nextRepickMs = m_ctx.Catalog.IsTown(StageDataKey)
+                        ? t + m_ctx.Config.Town.RoamCheckIntervalMs
+                        : t; // 필드는 즉시 목적지 선정
+                    m_nextSkillMs = t + m_ctx.Config.Skill.GetUseIntervalMs(StageDataKey);
                     m_nextStageMoveMs = t + m_ctx.Config.StageMove.IntervalMs;
                     m_nextDisconnectMs = t + m_ctx.Config.Disconnect.CheckIntervalMs;
+
+                    if (!m_initialStageSelected)
+                    {
+                        m_initialStageSelected = true;
+                        var stages = m_ctx.Config.StageKeys;
+                        if (stages != null && stages.Length > 0 && stages[m_rng.Next(stages.Length)] != StageDataKey)
+                            requestStageChange(t);
+                    }
+
                     State = BotState.InStage;
                     break;
                 }
@@ -315,8 +468,19 @@ namespace DummyClient.Sim
                     var ntf = ObjectVisibilityNtf.Parser.ParseFrom(body);
                     foreach (var m in ntf.MonsterSpawns)
                         m_monsters[m.ObjectId] = new Mon { Pos = new Vector3(m.PosX, m.PosY, m.PosZ), Dead = m.IsDead };
+                    foreach (var p in ntf.PropSpawns)
+                        m_props[p.ObjectId] = new Prop { PropKey = p.PropKey, Pos = new Vector3(p.PosX, p.PosY, p.PosZ) };
                     foreach (long id in ntf.DespawnIds)
+                    {
                         m_monsters.Remove(id);
+                        m_props.Remove(id);
+                        if (m_targetPortalId == id)
+                        {
+                            SetError("portal disappeared from AOI");
+                            PortalFailures++;
+                            cancelStageMoveAttempt(m_ctx.NowMs);
+                        }
+                    }
                     break;
                 }
 
@@ -369,30 +533,116 @@ namespace DummyClient.Sim
                 case PId.ObjectDeathNtf:
                 {
                     var ntf = ObjectDeathNtf.Parser.ParseFrom(body);
+                    if (ntf.ObjectId == m_myObjectId)
+                    {
+                        if (!m_isDead)
+                            Deaths++;
+                        m_isDead = true;
+                        m_behavior = Behavior.Roaming;
+                        m_moving = false;
+                        m_path.Clear();
+                        if (State == BotState.InStage)
+                        {
+                            if (m_stageChangeRequested || m_targetPortalId != 0)
+                                PortalFailures++;
+                            m_targetPortalId = 0;
+                            m_stageChangeRequested = false;
+                            m_portalDeadlineMs = 0;
+                            m_nextStageMoveMs = m_ctx.NowMs + m_ctx.Config.StageMove.IntervalMs;
+                        }
+                        m_pendingProjectileHits.Clear();
+                        break;
+                    }
                     if (m_monsters.TryGetValue(ntf.ObjectId, out Mon mon))
                         mon.Dead = true; // 사망 즉시 반영 → 대상에서 제외
+                    break;
+                }
+
+                case PId.ObjectReviveNtf:
+                {
+                    var ntf = ObjectReviveNtf.Parser.ParseFrom(body);
+                    if (ntf.ObjectId != m_myObjectId) break;
+
+                    bool wasDead = m_isDead;
+                    m_isDead = false;
+                    m_pos = new Vector3(ntf.PosX, ntf.PosY, ntf.PosZ);
+                    m_lastYaw = ntf.Yaw;
+                    m_moving = false;
+                    m_path.Clear();
+                    m_pathIdx = 0;
+                    m_behavior = Behavior.Roaming;
+                    long nowMs = m_ctx.NowMs;
+                    m_nextRepickMs = m_ctx.Catalog.IsTown(StageDataKey)
+                        ? nowMs + m_ctx.Config.Town.RoamCheckIntervalMs
+                        : nowMs;
+                    m_nextSkillMs = nowMs + m_ctx.Config.Skill.GetUseIntervalMs(StageDataKey);
+                    if (wasDead)
+                        Revives++;
+                    break;
+                }
+
+                case PId.SkillCastNtf:
+                {
+                    var ntf = SkillCastNtf.Parser.ParseFrom(body);
+                    if (ntf.CasterObjectId != m_myObjectId) break;
+
+                    SkillsCast++;
+                    SkillInfo info = m_ctx.Skills.Get(ntf.SkillKey);
+                    if (info != null && info.IsProjectile && ntf.EffectId != 0)
+                        scheduleProjectileHits(ntf, info, m_ctx.NowMs);
                     break;
                 }
 
                 case PId.StageMoveRes:
                 {
                     if (State != BotState.WaitStageMoveRes) break;
+                    RecordLatency(LatencyKind.StageMove, ref m_stageMoveStartedMs);
                     var res = StageMoveRes.Parser.ParseFrom(body);
                     if (res.ResultCode != ResultSuccess)
                     {
                         // 이동 거부 → 현재 스테이지에서 계속 플레이
+                        SetError($"stage move failed: {res.ErrorMsg}");
+                        if (m_directTownReturnPending)
+                            DirectReturnFailures++;
+                        else
+                            PortalFailures++;
+                        cancelStageMoveAttempt(m_ctx.NowMs);
                         State = BotState.InStage;
                         break;
                     }
                     // 성공: 목적지 NavMesh 로 교체하고 2단계 입장(로딩완료 보고)
-                    StageDataKey = m_pendingStageKey;
+                    if (m_directTownReturnPending)
+                        DirectReturns++;
+                    StageDataKey = res.TargetStageDataKey;
                     m_monsters.Clear();
+                    m_props.Clear();
+                    m_pendingProjectileHits.Clear();
                     m_moving = false;
                     m_path.Clear();
+                    m_targetPortalId = 0;
+                    m_stageChangeRequested = false;
+                    m_directTownReturnPending = false;
+                    m_portalDeadlineMs = 0;
+                    m_stageMoveResponseDeadlineMs = 0;
                     LoadNavMesh(StageDataKey);
+                    m_stageLoadStartedMs = m_ctx.NowMs;
                     m_conn.Send(PId.StageLoadCompleteReq, new StageLoadCompleteReq());
+                    m_stageLoadDeadlineMs = m_ctx.NowMs + m_ctx.Config.StageMove.LoadTimeoutMs;
                     StageMoves++;
                     State = BotState.WaitStageLoad;
+                    break;
+                }
+
+                case PId.ObjectInteractRes:
+                {
+                    var res = ObjectInteractRes.Parser.ParseFrom(body);
+                    if (res.ResultCode != ResultSuccess && State == BotState.WaitStageMoveRes)
+                    {
+                        SetError($"portal interact failed: {res.ErrorMsg}");
+                        PortalFailures++;
+                        cancelStageMoveAttempt(m_ctx.NowMs);
+                        State = BotState.InStage;
+                    }
                     break;
                 }
             }
@@ -414,26 +664,36 @@ namespace DummyClient.Sim
         {
             if (m_nav == null) return;
 
+            if (m_ctx.Catalog.IsTown(StageDataKey))
+            {
+                m_behavior = Behavior.Roaming;
+                RoamTick(nowMs, dtMs, m_ctx.Config.Town.RoamCheckIntervalMs, m_ctx.Config.Town.RoamProbability);
+                return;
+            }
+
             bool hasEnemy = FindNearestEnemy(m_ctx.Config.Skill.DetectRange, out long enemyId, out Vector3 enemyPos);
 
             if (m_behavior == Behavior.Roaming)
             {
                 if (hasEnemy) EnterCombat(nowMs);
-                else { RoamTick(nowMs, dtMs); return; }
+                else { RoamTick(nowMs, dtMs, m_ctx.Config.Move.RepickDelayMs, 1.0); return; }
             }
 
             // ── 전투 중 ──
             if (!hasEnemy) { ExitCombat(nowMs); return; }
 
+            bool hasReadySkill = TrySelectReadySkill(nowMs, out int skillIndex, out int skillKey, out SkillInfo skillInfo);
+            float castRange = hasReadySkill ? GetCastRange(skillInfo) : m_ctx.Config.Skill.Range;
             float dist = MathF.Sqrt(DistSqXZ(m_pos, enemyPos));
-            if (dist > m_ctx.Config.Skill.Range)
+            if (dist > castRange)
             {
                 ChaseTick(nowMs, dtMs, enemyPos);        // 사거리 밖 → 접근
             }
             else
             {
                 if (m_moving) StopMoving(nowMs);          // 사거리 안 → 정지 후
-                CastRotation(nowMs, enemyId, enemyPos);  // 스킬 로테이션 시전
+                if (hasReadySkill)
+                    CastRotation(nowMs, enemyId, enemyPos, skillIndex, skillKey, skillInfo);
             }
         }
 
@@ -451,28 +711,31 @@ namespace DummyClient.Sim
         }
 
         // ── 배회 ──
-        private void RoamTick(long nowMs, int dtMs)
+        private void RoamTick(long nowMs, int dtMs, int repickDelayMs, double repickProbability)
         {
             if (!m_moving)
             {
-                if (nowMs >= m_nextRepickMs) PickRoamDestination(nowMs);
+                if (nowMs < m_nextRepickMs) return;
+                m_nextRepickMs = nowMs + repickDelayMs;
+                if (m_rng.NextDouble() <= repickProbability)
+                    PickRoamDestination(nowMs, repickDelayMs);
                 return;
             }
             if (AdvancePath(nowMs, dtMs)) // 도착
             {
                 StopMoving(nowMs);
-                m_nextRepickMs = nowMs + m_ctx.Config.Move.RepickDelayMs;
+                m_nextRepickMs = nowMs + repickDelayMs;
             }
         }
 
-        private void PickRoamDestination(long nowMs)
+        private void PickRoamDestination(long nowMs, int repickDelayMs)
         {
             float x = Lerp(m_worldMinX, m_worldMaxX, (float)m_rng.NextDouble());
             float z = Lerp(m_worldMinZ, m_worldMaxZ, (float)m_rng.NextDouble());
             if (SetPathTo(new Vector3(x, m_pos.Y, z)))
                 SendMoveIntent(nowMs, EMoveIntent.MoveIntentTo);
             else
-                m_nextRepickMs = nowMs + m_ctx.Config.Move.RepickDelayMs;
+                m_nextRepickMs = nowMs + repickDelayMs;
         }
 
         // ── 추격: 움직이는 적 위치로 주기적 재경로 ──
@@ -572,27 +835,43 @@ namespace DummyClient.Sim
         }
 
         // 스킬 시전: 쿨타임이 돈 스킬을 라운드로빈으로 골라, 배치(Placement)에 맞는 origin 으로 시전.
-        private void CastRotation(long nowMs, long targetId, Vector3 targetPos)
+        private bool TrySelectReadySkill(long nowMs, out int chosen, out int skillKey, out SkillInfo info)
         {
+            chosen = -1;
+            skillKey = 0;
+            info = null;
             // 전역 시전 간격(GCD 유사): 여러 스킬을 같은 순간에 쏘지 않도록.
-            if (nowMs < m_nextSkillMs) return;
+            if (nowMs < m_nextSkillMs) return false;
 
-            var keys = m_ctx.Config.Skill.SkillKeys;
-            if (keys == null || keys.Length == 0) { m_nextSkillMs = nowMs + 1000; return; }
+            int[] keys = m_ctx.Config.Skill.GetSkillKeys(JobId);
+            if (keys == null || keys.Length == 0) return false;
 
             // 라운드로빈: 마지막 시전 다음 인덱스부터 스캔해 "쿨타임이 돈" 첫 스킬 선택.
             // → 쿨 0인 1001 이 앞자리를 독점해 1003/1008 을 굶기는 현상 방지.
-            int chosen = -1;
             for (int i = 0; i < keys.Length; i++)
             {
                 int idx = (m_skillRotation + i) % keys.Length;
                 if (nowMs >= SkillReadyAt(keys[idx])) { chosen = idx; break; }
             }
-            if (chosen < 0) { m_nextSkillMs = nowMs + 100; return; } // 전부 쿨 → 곧 재확인
-            m_skillRotation = chosen + 1;
+            if (chosen < 0) return false;
 
-            int skillKey = keys[chosen];
-            SkillInfo info = m_ctx.Skills?.Get(skillKey);
+            skillKey = keys[chosen];
+            info = m_ctx.Skills?.Get(skillKey);
+            return info != null;
+        }
+
+        private float GetCastRange(SkillInfo info)
+        {
+            if (info.MaxRange > 0f) return info.MaxRange;
+            if (info.Placement == SkillPlacement.Target) return m_ctx.Config.Skill.Range;
+            if (info.ObbLength > 0f) return info.EffectCenterForwardOffset + info.ObbLength * 0.5f;
+            if (info.Radius > 0f) return info.Radius;
+            return m_ctx.Config.Skill.Range;
+        }
+
+        private void CastRotation(long nowMs, long targetId, Vector3 targetPos, int chosen, int skillKey, SkillInfo info)
+        {
+            m_skillRotation = chosen + 1;
 
             // 방향: 캐스터→타겟 (XZ 평면)
             float dx = targetPos.X - m_pos.X, dz = targetPos.Z - m_pos.Z;
@@ -602,17 +881,13 @@ namespace DummyClient.Sim
 
             // 배치(Placement)로 효과 중심 origin 결정 (클라 SkillSystem.cs 와 동일 규칙).
             Vector3 origin;
-            SkillPlacement placement = info?.Placement ?? SkillPlacement.Caster;
+            SkillPlacement placement = info.Placement;
             switch (placement)
             {
                 case SkillPlacement.Target:  // 얼음지대/불기둥 등: 몬스터 위치에 시전
                     origin = targetPos;
                     break;
-                case SkillPlacement.Forward: // 빔류: 캐스터 전방 ObbLength/2
-                    float fwd = (info?.ObbLength ?? 0f) * 0.5f;
-                    origin = new Vector3(m_pos.X + dx * fwd, m_pos.Y, m_pos.Z + dz * fwd);
-                    break;
-                default:                     // Caster/None: 투사체 발사점 = 캐스터
+                default: // Caster/SkillCastOrigin/None: 서버가 권위 앵커 위치를 다시 계산한다.
                     origin = m_pos;
                     break;
             }
@@ -628,42 +903,247 @@ namespace DummyClient.Sim
             });
 
             // 스킬별 쿨타임 등록 + 전역 시전 간격.
-            m_skillReadyAt[skillKey] = nowMs + (info?.CooldownMs ?? 0);
-            SkillsCast++;
-            m_nextSkillMs = nowMs + m_ctx.Config.Skill.UseIntervalMs;
+            m_skillReadyAt[skillKey] = nowMs + info.CooldownMs;
+            SkillCastRequests++;
+            m_nextSkillMs = nowMs + m_ctx.Config.Skill.GetUseIntervalMs(StageDataKey);
+        }
+
+        private void scheduleProjectileHits(SkillCastNtf ntf, SkillInfo info, long nowMs)
+        {
+            Vector3 origin = new Vector3(ntf.OriginX, ntf.OriginY, ntf.OriginZ);
+            Vector3 castDir = new Vector3(ntf.DirX, 0f, ntf.DirZ);
+            if (castDir.LengthSquared() <= 1e-6f)
+                return;
+            castDir = Vector3.Normalize(castDir);
+            int count = Math.Max(1, info.ProjectileCount);
+            List<Vector3> dirs = computeFanDirs(castDir, count, info.FanAngleDeg);
+            const float collisionRadius = 0.75f;
+
+            for (int index = 0; index < dirs.Count; index++)
+            {
+                Vector3 dir = dirs[index];
+                long targetId = 0;
+                float travelDistance = info.MaxRange;
+                Vector3 hitPos = origin + dir * info.MaxRange;
+
+                foreach (var (objectId, monster) in m_monsters)
+                {
+                    if (monster.Dead) continue;
+                    Vector3 to = monster.Pos - origin;
+                    float forward = to.X * dir.X + to.Z * dir.Z;
+                    if (forward < 0f || forward > travelDistance) continue;
+                    float perpendicularSq = to.X * to.X + to.Z * to.Z - forward * forward;
+                    if (perpendicularSq > collisionRadius * collisionRadius) continue;
+
+                    targetId = objectId;
+                    travelDistance = forward;
+                    hitPos = monster.Pos;
+                }
+
+                long flightMs = (long)Math.Ceiling(travelDistance / info.ProjectileSpeed * 1000f);
+                var hit = new SkillHitItem
+                {
+                    EffectId = ntf.EffectId,
+                    ProjectileIndex = index,
+                    TargetObjectId = targetId,
+                    ExplodedAtMaxRange = targetId == 0,
+                    HitX = hitPos.X,
+                    HitZ = hitPos.Z,
+                };
+                m_pendingProjectileHits.Add(new PendingProjectileHit { DueMs = nowMs + flightMs, Hit = hit });
+            }
+        }
+
+        private void UpdateProjectileHits(long nowMs)
+        {
+            SkillProjectileHitReq req = null;
+            for (int i = m_pendingProjectileHits.Count - 1; i >= 0; i--)
+            {
+                PendingProjectileHit pending = m_pendingProjectileHits[i];
+                if (nowMs < pending.DueMs) continue;
+
+                req ??= new SkillProjectileHitReq();
+                req.Hits.Add(pending.Hit);
+                m_pendingProjectileHits.RemoveAt(i);
+            }
+
+            if (req == null || req.Hits.Count == 0) return;
+            m_conn.Send(PId.SkillProjectileHitReq, req);
+            ProjectileHitsSent += req.Hits.Count;
+        }
+
+        private static List<Vector3> computeFanDirs(Vector3 dir, int count, float fanAngleDeg)
+        {
+            var dirs = new List<Vector3>(count);
+            if (count <= 1)
+            {
+                dirs.Add(dir);
+                return dirs;
+            }
+
+            float totalRad = fanAngleDeg * (MathF.PI / 180f);
+            float step = totalRad / (count - 1);
+            float startRad = -totalRad * 0.5f;
+            for (int i = 0; i < count; i++)
+            {
+                float angle = startRad + step * i;
+                float cosine = MathF.Cos(angle);
+                float sine = MathF.Sin(angle);
+                dirs.Add(new Vector3(dir.X * cosine - dir.Z * sine, 0f, dir.X * sine + dir.Z * cosine));
+            }
+            return dirs;
         }
 
         private long SkillReadyAt(int skillKey)
             => m_skillReadyAt.TryGetValue(skillKey, out long t) ? t : 0;
 
-        // ── 스테이지 이동(치트 stage 와 동일 경로) ───────────────────────
+        // ── 스테이지 이동(100은 포탈, 101/107은 100으로 직접 귀환) ─────────
         private void UpdateStageMove(long nowMs)
         {
-            // 전투 중에는 스테이지 이동을 미룬다(타이머도 진행 안 시킴 → 전투 종료 후 시도).
-            if (m_behavior == Behavior.Fighting) return;
+            if (m_stageChangeRequested || m_targetPortalId != 0) return;
             if (nowMs < m_nextStageMoveMs) return;
             m_nextStageMoveMs = nowMs + m_ctx.Config.StageMove.IntervalMs;
 
             if (m_rng.NextDouble() > m_ctx.Config.StageMove.Probability) return;
 
-            var stages = m_ctx.Config.StageKeys;
-            if (stages == null || stages.Length == 0) return;
+            requestStageChange(nowMs);
+        }
 
-            // 현재와 다른 스테이지를 우선 선택 (같은 곳으로 이동해도 서버는 허용하지만 의미 적음)
-            int target = stages[m_rng.Next(stages.Length)];
-            if (stages.Length > 1 && target == StageDataKey)
-                target = stages[(Array.IndexOf(stages, target) + 1) % stages.Length];
+        private void requestStageChange(long nowMs)
+        {
+            if (StageDataKey == 101 || StageDataKey == 107)
+            {
+                requestDirectTownReturn(nowMs);
+                return;
+            }
 
-            m_pendingStageKey = target;
-            m_moving = false;
-            const int positionTypeDefault = 1; // EStagePositionType.Default
+            m_stageChangeRequested = true;
+            m_portalDeadlineMs = nowMs + m_ctx.Config.StageMove.PortalTimeoutMs;
+            PortalAttempts++;
+        }
+
+        private void requestDirectTownReturn(long nowMs)
+        {
+            if (m_moving)
+                StopMoving(nowMs);
+            m_behavior = Behavior.Roaming;
+            m_pendingProjectileHits.Clear();
+            m_directTownReturnPending = true;
+            m_stageMoveStartedMs = nowMs;
             m_conn.Send(PId.StageMoveReq, new StageMoveReq
             {
-                TargetStageDataKey = target,
-                PositionType = positionTypeDefault,
+                TargetStageDataKey = TownStageKey,
+                PositionType = 1, // EStagePositionType.Default
                 TargetGameServerId = 0,
             });
+            m_stageMoveResponseDeadlineMs = nowMs + m_ctx.Config.StageMove.ResponseTimeoutMs;
+            DirectReturnAttempts++;
             State = BotState.WaitStageMoveRes;
+        }
+
+        private void UpdatePortalMove(long nowMs, int dtMs)
+        {
+            if (m_portalDeadlineMs > 0 && nowMs >= m_portalDeadlineMs)
+            {
+                SetError("portal search/move timeout");
+                PortalFailures++;
+                PortalTimeouts++;
+                cancelStageMoveAttempt(nowMs);
+                return;
+            }
+
+            if (m_nav == null)
+            {
+                SetError("portal move failed: NavMesh unavailable");
+                PortalFailures++;
+                cancelStageMoveAttempt(nowMs);
+                return;
+            }
+
+            if (m_targetPortalId == 0)
+            {
+                var portalIds = new List<long>();
+                foreach (var (objectId, prop) in m_props)
+                {
+                    if (m_ctx.Props.IsPortal(prop.PropKey))
+                        portalIds.Add(objectId);
+                }
+
+                if (portalIds.Count == 0)
+                    return; // 초기 AOI 패킷에서 포탈을 받을 때까지 대기
+
+                m_targetPortalId = portalIds[m_rng.Next(portalIds.Count)];
+                m_behavior = Behavior.Roaming;
+                if (m_moving)
+                    StopMoving(nowMs);
+
+                if (!SetPathTo(m_props[m_targetPortalId].Pos))
+                {
+                    SetError("portal move failed: path not found");
+                    PortalFailures++;
+                    cancelStageMoveAttempt(nowMs);
+                    return;
+                }
+                SendMoveIntent(nowMs, EMoveIntent.MoveIntentTo);
+                return;
+            }
+
+            if (!m_props.TryGetValue(m_targetPortalId, out Prop portal))
+            {
+                SetError("portal target unavailable");
+                PortalFailures++;
+                cancelStageMoveAttempt(nowMs);
+                return;
+            }
+
+            float interactRange = MathF.Max(0.5f, m_ctx.Props.GetInteractRange(portal.PropKey) - 0.25f);
+            if (DistSqXZ(m_pos, portal.Pos) <= interactRange * interactRange)
+            {
+                if (m_moving)
+                    StopMoving(nowMs);
+
+                m_conn.Send(PId.ObjectInteractReq, new ObjectInteractReq
+                {
+                    ObjectId = m_targetPortalId,
+                    PosX = m_pos.X,
+                    PosY = m_pos.Y,
+                    PosZ = m_pos.Z,
+                });
+                m_stageChangeRequested = false;
+                m_pendingProjectileHits.Clear();
+                m_stageMoveStartedMs = nowMs;
+                m_stageMoveResponseDeadlineMs = nowMs + m_ctx.Config.StageMove.ResponseTimeoutMs;
+                State = BotState.WaitStageMoveRes;
+                return;
+            }
+
+            if (!m_moving)
+            {
+                if (!SetPathTo(portal.Pos))
+                {
+                    SetError("portal move failed: repath not found");
+                    PortalFailures++;
+                    cancelStageMoveAttempt(nowMs);
+                    return;
+                }
+                SendMoveIntent(nowMs, EMoveIntent.MoveIntentTo);
+            }
+
+            if (m_moving && AdvancePath(nowMs, dtMs))
+                StopMoving(nowMs);
+        }
+
+        private void cancelStageMoveAttempt(long nowMs)
+        {
+            if (m_moving)
+                StopMoving(nowMs);
+            m_targetPortalId = 0;
+            m_stageChangeRequested = false;
+            m_directTownReturnPending = false;
+            m_portalDeadlineMs = 0;
+            m_stageMoveResponseDeadlineMs = 0;
+            m_nextStageMoveMs = nowMs + m_ctx.Config.StageMove.IntervalMs;
+            m_nextRepickMs = nowMs;
         }
 
         // ── 확률적 연결 끊기 ─────────────────────────────────────────────

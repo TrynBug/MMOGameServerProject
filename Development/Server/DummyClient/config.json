@@ -16,17 +16,28 @@
   "//move": "sendIntervalMs=MoveIntentReq 주기(실클라 100ms). moveSpeed=StatUpdateNtf 수신 전 폴백값(수신 후엔 서버 MoveSpdTotal 사용).",
   "move": { "sendIntervalMs": 100, "moveSpeed": 10.0, "arriveDistance": 0.6, "repickDelayMs": 500 },
 
-  "//stageKeys": "봇이 사용할 스테이지 키 목록(스테이지 이동 대상).",
-  "stageKeys": [100, 101, 102, 103],
+  "//town": "마을에서는 전투하지 않는다. roamCheckIntervalMs 마다 roamProbability 확률로만 배회한다.",
+  "town": { "roamCheckIntervalMs": 10000, "roamProbability": 0.2 },
 
-  "//create": "캐릭터 생성 시 무작위로 고를 직업(1=Mage,2=Warrior). 현재 스킬은 Mage만 존재.",
-  "create": { "jobIds": [1] },
+  "//stageKeys": "최초 접속 시 균등 선택할 스테이지 키 목록. 실제 이동은 현재 스테이지의 포탈을 사용한다.",
+  "stageKeys": [100, 101, 107],
 
-  "//skill": "detectRange 내 적 발견→전투. range 내면 멈춰서 useIntervalMs 마다 skillKeys 를 순서대로(로테이션) 계속 시전. 적 전멸 시 이동 재개.",
-  "skill": { "useIntervalMs": 700, "range": 12.0, "detectRange": 16.0, "skillKeys": [1001, 1006, 1012] },
+  "//create": "캐릭터가 없으면 jobIds와 appearancePresetIds에서 각각 무작위로 선택해 생성한다.",
+  "create": { "jobIds": [1, 2], "appearancePresetIds": [0, 1] },
 
-  "//stageMove": "intervalMs 마다 probability 확률로 stageKeys 중 하나로 스테이지 이동.",
-  "stageMove": { "intervalMs": 45000, "probability": 0.6 },
+  "//skill": "useIntervalMsByStage는 Stage별 연속 스킬 시전 간격(ms), 0은 스킬 미사용. detectRange 내 적 발견→전투. 직업별 skillsByJob 로테이션에서 준비된 스킬의 사거리까지 접근해 시전.",
+  "skill": {
+    "useIntervalMsByStage": { "100": 0, "101": 700, "107": 2500 },
+    "range": 12.0,
+    "detectRange": 16.0,
+    "skillsByJob": {
+      "1": [1001, 1003, 1008],
+      "2": [2001, 2002, 2003]
+    }
+  },
+
+  "//stageMove": "intervalMs 마다 probability 확률로 이동한다. 100에서는 포탈, 101/107에서는 StageMoveReq로 100에 직접 귀환한다.",
+  "stageMove": { "intervalMs": 45000, "probability": 0.15, "portalTimeoutMs": 15000, "responseTimeoutMs": 10000, "loadTimeoutMs": 15000 },
 
   "//disconnect": "checkIntervalMs 마다 probability 확률로 연결을 끊음(이후 reconnect 설정 따름).",
   "disconnect": { "checkIntervalMs": 15000, "probability": 0.03 },

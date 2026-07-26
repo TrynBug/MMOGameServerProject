@@ -1,4 +1,5 @@
 using DummyClient.Config;
+using DummyClient.Metrics;
 using DummyClient.Nav;
 
 namespace DummyClient.Sim
@@ -9,16 +10,19 @@ namespace DummyClient.Sim
         public DummyConfig Config { get; }
         public StageCatalog Catalog { get; }
         public SkillCatalog Skills { get; }
+        public PropCatalog Props { get; }
         public string NavMeshDir { get; }
+        public DummyMetrics Metrics { get; } = new();
 
         // 매 틱 매니저가 갱신하는 공유 시각(ms). 봇들이 재접속 예약/타이밍에 사용.
         public long NowMs { get; set; }
 
-        public BotContext(DummyConfig config, StageCatalog catalog, SkillCatalog skills, string navMeshDir)
+        public BotContext(DummyConfig config, StageCatalog catalog, SkillCatalog skills, PropCatalog props, string navMeshDir)
         {
             Config = config;
             Catalog = catalog;
             Skills = skills;
+            Props = props;
             NavMeshDir = navMeshDir;
         }
     }

@@ -13,6 +13,11 @@ string configArg = Array.Find(args, a => !a.StartsWith("--"));
 string configPath = configArg ?? Path.Combine(AppContext.BaseDirectory, "config.json");
 
 DummyConfig cfg = DummyConfig.Load(configPath);
+if (!cfg.Validate(out string configError))
+{
+    Console.Error.WriteLine($"[config] 잘못된 설정: {configError}");
+    return;
+}
 
 string navMeshDir = cfg.ResolvePath(cfg.NavMeshDir);
 string stageCsv = cfg.ResolvePath(cfg.StageDataCsv);
@@ -31,6 +36,67 @@ StageCatalog catalog = StageCatalog.Load(stageCsv);
 string skillCsv = Path.Combine(Path.GetDirectoryName(stageCsv) ?? ".", "Skill.csv");
 SkillCatalog skills = SkillCatalog.Load(skillCsv);
 Console.WriteLine($"[dummy] skillCsv  : {skillCsv}");
+
+string propCsv = Path.Combine(Path.GetDirectoryName(stageCsv) ?? ".", "Prop.csv");
+PropCatalog props = PropCatalog.Load(propCsv);
+Console.WriteLine($"[dummy] propCsv   : {propCsv}");
+
+var uniqueStages = new System.Collections.Generic.HashSet<int>();
+foreach (int stageKey in cfg.StageKeys)
+{
+    if (!uniqueStages.Add(stageKey))
+    {
+        Console.Error.WriteLine($"[config] 중복 stageKey: {stageKey}");
+        return;
+    }
+    if (!catalog.Contains(stageKey))
+    {
+        Console.Error.WriteLine($"[config] Stage.csv에 없는 stageKey: {stageKey}");
+        return;
+    }
+    if (!catalog.IsTown(stageKey) && cfg.Skill.GetUseIntervalMs(stageKey) <= 0)
+    {
+        Console.Error.WriteLine($"[config] 전투 Stage의 스킬 시전 간격은 0보다 커야 함: stage={stageKey}");
+        return;
+    }
+
+    string navName = catalog.GetNavMeshName(stageKey);
+    string navPath = Path.Combine(navMeshDir, navName + ".bin");
+    if (string.IsNullOrEmpty(navName) || !File.Exists(navPath))
+    {
+        Console.Error.WriteLine($"[config] NavMesh 없음: stage={stageKey}, path={navPath}");
+        return;
+    }
+}
+
+foreach (var (jobId, skillKeys) in cfg.Skill.SkillsByJob)
+{
+    if (jobId <= 0 || skillKeys == null || skillKeys.Length == 0)
+    {
+        Console.Error.WriteLine($"[config] 직업별 스킬 목록이 비어 있음: jobId={jobId}");
+        return;
+    }
+    foreach (int skillKey in skillKeys)
+    {
+        SkillInfo info = skills.Get(skillKey);
+        if (info == null)
+        {
+            Console.Error.WriteLine($"[config] Skill.csv에 없는 skillKey: {skillKey}");
+            return;
+        }
+        if (info.Job != jobId)
+        {
+            Console.Error.WriteLine($"[config] 직업-스킬 불일치: jobId={jobId}, skillKey={skillKey}, Skill.csv job={info.Job}");
+            return;
+        }
+    }
+}
+
+if (!props.HasPortal())
+{
+    Console.Error.WriteLine("[config] Prop.csv에 Portal 프랍이 없음");
+    return;
+}
 
 // ── 자가진단: 서버 없이 NavMesh 로드 + 경로탐색 검증 ────────────────────────
 if (Array.Exists(args, a => a == "--navtest"))
@@ -57,7 +123,7 @@ if (Array.Exists(args, a => a == "--navtest"))
     return;
 }
 
-var manager = new BotManager(cfg, catalog, skills, navMeshDir);
+var manager = new BotManager(cfg, catalog, skills, props, navMeshDir);
 
 // Ctrl+C 로 전체 종료 (요구사항 7: 모든 클라 연결 끊기)
 using var cts = new CancellationTokenSource();
@@ -76,7 +142,7 @@ while (!cts.IsCancellationRequested)
 {
     try { await Task.Delay(cfg.StatusPrintIntervalMs, cts.Token); }
     catch (TaskCanceledException) { break; }
-    StatusPrinter.Print(manager.Bots, clock.ElapsedMilliseconds / 1000);
+    StatusPrinter.Print(manager, clock.ElapsedMilliseconds);
 }
 
 await runTask;
