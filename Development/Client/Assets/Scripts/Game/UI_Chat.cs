@@ -354,7 +354,6 @@ namespace Client.Game
             textRect.offsetMax = new Vector2(-18f, 0f);
             textRect.pivot = new Vector2(0.5f, 0.5f);
 
-            m_channelText.font = TMP_Settings.defaultFontAsset;
             m_channelText.fontSize = 15f;
             m_channelText.fontStyle = FontStyles.Bold;
             m_channelText.alignment = TextAlignmentOptions.Center;
@@ -444,7 +443,9 @@ namespace Client.Game
             rect.offsetMax = new Vector2(-10f, -2f);
 
             TextMeshProUGUI text = textObject.GetComponent<TextMeshProUGUI>();
-            text.font = TMP_Settings.defaultFontAsset;
+            text.font = m_channelText != null && m_channelText.font != null
+                ? m_channelText.font
+                : TMP_Settings.defaultFontAsset;
             text.fontSize = 16;
             text.color = color;
             text.text = value;
