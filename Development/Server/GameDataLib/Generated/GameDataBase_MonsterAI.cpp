@@ -36,6 +36,10 @@ bool GameDataTableBase_MonsterAI::makeGameData(const std::string& line)
     std::getline(ss, field, ','); pData->WanderMinIntervalMs = std::stoi(field);
     std::getline(ss, field, ','); pData->WanderMaxIntervalMs = std::stoi(field);
     std::getline(ss, field, ','); pData->IgnoreSkillRange = StringToBool(field);
+    std::getline(ss, field, ','); pData->CombatRepositionIntervalMs = std::stoi(field);
+    std::getline(ss, field, ','); pData->CombatRepositionMinDistance = std::stof(field);
+    std::getline(ss, field, ','); pData->CombatRepositionMaxDistance = std::stof(field);
+    std::getline(ss, field, ','); pData->TargetClusterRadius = std::stof(field);
 
     if (pData->Key <= 0)
     {

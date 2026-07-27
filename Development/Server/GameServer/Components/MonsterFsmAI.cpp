@@ -15,6 +15,12 @@ namespace
     constexpr float k_wanderArriveDistSq = 1.0f;    // 배회 목적지 1유닛 이내면 도착
     constexpr int64 k_wanderTimeoutMs    = 6000;    // 배회 이동 최대시간(막히면 포기하고 Idle 복귀)
 
+    // 전투 중 위치 변경.
+    constexpr float k_repositionArriveDistSq = 1.0f;
+    constexpr int64 k_repositionTimeoutMs = 6000;
+    constexpr int32 k_repositionSampleAttempts = 8;
+    constexpr float k_repositionLeashMargin = 1.0f;
+
     // 근접 추격 시 타겟 한 점으로 몰리는(겹침) 것을 막기 위한 어택 슬롯.
     // 타겟 둘레에 슬롯을 2중 링(안/바깥)으로 배치하고, 몬스터마다 objectId % (총슬롯수) 로
     // 슬롯을 정해 그 좌표를 이동 목적지로 삼는다. 슬롯은 서버 내부 dest 분산용 hint 일 뿐이며
@@ -58,6 +64,16 @@ void MonsterFsmAI::Update(Monster& monster, int64 deltaMs)
         return;
     }
 
+    // 전투 위치 변경 타이머는 시전/후딜 중에도 경과하되, 이동은 잠금이 끝난 후에만 시작한다.
+    if ((m_state == EMonsterState::Chase || m_state == EMonsterState::Attack) &&
+        monster.GetCombatRepositionIntervalMs() > 0)
+    {
+        if (m_combatRepositionRemainingMs < 0)
+            armCombatReposition(monster);
+        else if (m_combatRepositionRemainingMs > 0)
+            m_combatRepositionRemainingMs -= deltaMs;
+    }
+
     // 캐스트(윈드업/회복) 중에는 새 의사결정을 하지 않는다. 진행은 Monster::advanceCast 가 담당(커밋 유지).
     if (monster.GetCombat().IsCastBusy())
         return;
@@ -68,6 +84,7 @@ void MonsterFsmAI::Update(Monster& monster, int64 deltaMs)
     case EMonsterState::Wander:  updateWander(monster, deltaMs);  break;
     case EMonsterState::Chase:   updateChase(monster, deltaMs);   break;
     case EMonsterState::Attack:  updateAttack(monster, deltaMs);  break;
+    case EMonsterState::Reposition: updateReposition(monster, deltaMs); break;
     case EMonsterState::Return:  updateReturn(monster, deltaMs);  break;
     case EMonsterState::Dead:    break;
     }
@@ -85,6 +102,7 @@ void MonsterFsmAI::OnProvoked(Monster& monster)
     {
         monster.StopMoving();       // 배회/복귀 이동 중이었으면 멈추고 추격 시작.
         monster.SetEngagedTick();
+        armCombatReposition(monster);
         m_state = EMonsterState::Chase;
     }
 }
@@ -96,6 +114,7 @@ void MonsterFsmAI::updateIdle(Monster& monster, int64 deltaMs)
     if (monster.GetCombat().HasTarget())
     {
         monster.SetEngagedTick();   // 관여 시작 → 업데이트 주기 승격(engaged, 예 100ms).
+        armCombatReposition(monster);
         m_state = EMonsterState::Chase;
         return;
     }
@@ -183,6 +202,62 @@ uint32 MonsterFsmAI::nextRand(Monster& monster)
 float MonsterFsmAI::rand01(Monster& monster)
 {
     return static_cast<float>(nextRand(monster) & 0xFFFFFFu) / static_cast<float>(0x1000000);
+}
+
+void MonsterFsmAI::armCombatReposition(Monster& monster)
+{
+    m_combatRepositionRemainingMs = monster.GetCombatRepositionIntervalMs();
+}
+
+bool MonsterFsmAI::tryBeginCombatReposition(Monster& monster)
+{
+    Stage* pStage = monster.GetStage();
+    const float minDistance = monster.GetCombatRepositionMinDistance();
+    const float maxDistance = monster.GetCombatRepositionMaxDistance();
+    if (pStage == nullptr || maxDistance <= 0.0f || maxDistance < minDistance)
+    {
+        armCombatReposition(monster);
+        return false;
+    }
+
+    const float leashLimit = monster.GetLeashRange() - k_repositionLeashMargin;
+    if (leashLimit <= 0.0f)
+    {
+        armCombatReposition(monster);
+        return false;
+    }
+
+    const float minDistanceSq = minDistance * minDistance;
+    const float leashLimitSq = leashLimit * leashLimit;
+    for (int32 attempt = 0; attempt < k_repositionSampleAttempts; ++attempt)
+    {
+        float destX = 0.0f, destY = 0.0f, destZ = 0.0f;
+        if (!pStage->SampleRandomNavPoint(monster.GetPosX(), monster.GetPosY(), monster.GetPosZ(),
+                                         maxDistance, destX, destY, destZ))
+            continue;
+
+        const float currentDx = destX - monster.GetPosX();
+        const float currentDz = destZ - monster.GetPosZ();
+        if (currentDx * currentDx + currentDz * currentDz < minDistanceSq)
+            continue;
+
+        const float spawnDx = destX - monster.GetSpawnX();
+        const float spawnDz = destZ - monster.GetSpawnZ();
+        if (spawnDx * spawnDx + spawnDz * spawnDz > leashLimitSq)
+            continue;
+
+        m_repositionDestX = destX;
+        m_repositionDestY = destY;
+        m_repositionDestZ = destZ;
+        m_repositionElapsedMs = 0;
+        monster.StopMoving();
+        m_state = EMonsterState::Reposition;
+        armCombatReposition(monster);
+        return true;
+    }
+
+    armCombatReposition(monster);
+    return false;
 }
 
 void MonsterFsmAI::updateChase(Monster& monster, int64 deltaMs)
@@ -290,6 +365,11 @@ void MonsterFsmAI::updateAttack(Monster& monster, int64 /*deltaMs*/)
         return;
     }
 
+    if (monster.GetCombatRepositionIntervalMs() > 0 &&
+        m_combatRepositionRemainingMs <= 0 &&
+        tryBeginCombatReposition(monster))
+        return;
+
     const float dx = pTarget->GetPosX() - monster.GetPosX();
     const float dz = pTarget->GetPosZ() - monster.GetPosZ();
     const float dist = std::sqrt(dx * dx + dz * dz);
@@ -316,10 +396,60 @@ void MonsterFsmAI::updateAttack(Monster& monster, int64 /*deltaMs*/)
 
     // 사용 가능한 스킬 선택 → 시전 시작. 윈드업/발동/회복/통보는 Monster(몸체)가 단일 지점에서 처리한다.
     // 시전이 시작되면 다음 tick 부터 monster.IsCastBusy() 가 true 라 Update 가 일찍 반환(커밋 유지).
-    const int32 idx = monster.GetCombat().SelectReadySkill(dist);
+    int32 idx = monster.GetCombat().SelectReadySkill(dist);
     if (idx >= 0)
-        (void)monster.GetCombat().TryBeginCast(idx, pTarget);
+    {
+        monster.GetCombat().RetargetForSkill();
+        pTarget = monster.GetCombat().GetTarget();
+        if (pTarget == nullptr)
+            return;
+
+        const float targetDx = pTarget->GetPosX() - monster.GetPosX();
+        const float targetDz = pTarget->GetPosZ() - monster.GetPosZ();
+        const float targetDist = std::sqrt(targetDx * targetDx + targetDz * targetDz);
+        idx = monster.GetCombat().SelectReadySkill(targetDist);
+        if (idx >= 0)
+            (void)monster.GetCombat().TryBeginCast(idx, pTarget);
+    }
     // 쓸 스킬이 없으면 Attack 유지 (쿨다운 회복 대기).
+}
+
+void MonsterFsmAI::updateReposition(Monster& monster, int64 deltaMs)
+{
+    StageObject* pTarget = monster.GetCombat().GetTarget();
+    if (pTarget == nullptr)
+    {
+        monster.StopMoving();
+        m_state = EMonsterState::Return;
+        return;
+    }
+
+    const float leashRange = monster.GetLeashRange();
+    if (monster.DistSqFromSpawn() > leashRange * leashRange)
+    {
+        monster.StopMoving();
+        m_state = EMonsterState::Return;
+        return;
+    }
+
+    m_repositionElapsedMs += deltaMs;
+
+    const float dx = m_repositionDestX - monster.GetPosX();
+    const float dz = m_repositionDestZ - monster.GetPosZ();
+    if (dx * dx + dz * dz <= k_repositionArriveDistSq || m_repositionElapsedMs >= k_repositionTimeoutMs)
+    {
+        monster.StopMoving();
+
+        const float targetDx = pTarget->GetPosX() - monster.GetPosX();
+        const float targetDz = pTarget->GetPosZ() - monster.GetPosZ();
+        const float attackRange = monster.GetCombat().GetMaxAttackRange();
+        m_state = (targetDx * targetDx + targetDz * targetDz <= attackRange * attackRange)
+            ? EMonsterState::Attack
+            : EMonsterState::Chase;
+        return;
+    }
+
+    monster.MoveTo(m_repositionDestX, m_repositionDestY, m_repositionDestZ, deltaMs);
 }
 
 void MonsterFsmAI::updateReturn(Monster& monster, int64 deltaMs)
@@ -334,6 +464,7 @@ void MonsterFsmAI::updateReturn(Monster& monster, int64 deltaMs)
         monster.GetCombat().ClearTarget();
         monster.SetIdleTick();   // 비관여 복귀 → 업데이트 주기 강등(idle, 500ms).
         scheduleNextWander(monster);   // 복귀 직후 곧바로 배회하지 않도록 타이머 재예약.
+        m_combatRepositionRemainingMs = -1;
         m_state = EMonsterState::Idle;
         return;
     }

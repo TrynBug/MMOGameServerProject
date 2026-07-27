@@ -57,6 +57,10 @@ bool Monster::Initialize(int64 objectId, const GameData_Monster* pMonsterData)
         m_wanderRadius            = pAI->WanderRadius;
         m_wanderMinIntervalMs     = pAI->WanderMinIntervalMs;
         m_wanderMaxIntervalMs     = pAI->WanderMaxIntervalMs;
+        m_combatRepositionIntervalMs = pAI->CombatRepositionIntervalMs;
+        m_combatRepositionMinDistance = pAI->CombatRepositionMinDistance;
+        m_combatRepositionMaxDistance = pAI->CombatRepositionMaxDistance;
+        m_targetClusterRadius        = pAI->TargetClusterRadius;
         // AIType 은 두뇌 선택용(현재 Fsm 만 구현, SpawnMonster 가 주입). BehaviorTree 는 나중.
     }
 

@@ -56,6 +56,9 @@ public:
     // ── 타겟팅(perception): 누구와 싸우는가 ──
     // 주변 sector 에서 어그로 범위(owner->GetAggroRange) 내 가장 가까운 유저를 현재 타겟으로 설정(없으면 해제).
     void         AcquireTarget();
+    // 스킬 시전 직전, 주변 캐릭터 수가 가장 많은 캐릭터로 타겟을 갱신한다.
+    // owner의 TargetClusterRadius가 0이면 기존 타겟을 그대로 유지한다.
+    void         RetargetForSkill();
     // 현재 타겟을 Stage 에서 해소. 사라졌거나 없으면 nullptr (despawn 안전 위해 objectId 로 보관).
     StageObject* GetTarget() const;
     bool         HasTarget() const { return m_targetObjectId != 0; }

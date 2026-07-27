@@ -14,6 +14,7 @@
 //   Chase   : 타겟 추격(근접) / 사거리 유지 이동(원거리, 카이팅).
 //   Attack  : 사거리 안에서 사용할 스킬을 선택 → Monster::TryBeginCast 로 시전 시작.
 //             윈드업/발동/회복 잠금은 Monster(몸체)가 처리하므로 FSM 에 Casting 상태가 없다.
+//   Reposition : 전투 중 주기적으로 LeashRange 안의 NavMesh 목적지로 이동.
 //   Return  : 리쉬 초과/타겟 소실 시 스폰지점으로 복귀.
 //   Dead    : 사망. 실제 디스폰/리스폰은 Stage 가 처리.
 enum class EMonsterState
@@ -22,6 +23,7 @@ enum class EMonsterState
     Wander,
     Chase,
     Attack,
+    Reposition,
     Return,
     Dead,
 };
@@ -52,6 +54,7 @@ private:
     void updateWander(Monster& monster, int64 deltaMs);
     void updateChase(Monster& monster, int64 deltaMs);
     void updateAttack(Monster& monster, int64 deltaMs);
+    void updateReposition(Monster& monster, int64 deltaMs);
     void updateReturn(Monster& monster, int64 deltaMs);
     void enterDead(Monster& monster);
 
@@ -59,6 +62,8 @@ private:
     void   scheduleNextWander(Monster& monster);   // 다음 배회까지 남은시간을 [min,max] 랜덤으로 예약.
     uint32 nextRand(Monster& monster);             // 몬스터별 경량 RNG(xorshift, objectId 지연 시드).
     float  rand01(Monster& monster);               // [0,1) 실수.
+    void   armCombatReposition(Monster& monster);
+    bool   tryBeginCombatReposition(Monster& monster);
 
 private:
     EMonsterState m_state = EMonsterState::Idle;
@@ -69,4 +74,11 @@ private:
     float  m_wanderDestX     = 0.0f;    // 현재 배회 목적지.
     float  m_wanderDestZ     = 0.0f;
     uint32 m_rngState        = 0;       // 경량 RNG 상태(첫 사용 시 objectId 로 시드).
+
+    // ── 전투 중 위치 변경 ──
+    int64 m_combatRepositionRemainingMs = -1;
+    int64 m_repositionElapsedMs = 0;
+    float m_repositionDestX = 0.0f;
+    float m_repositionDestY = 0.0f;
+    float m_repositionDestZ = 0.0f;
 };

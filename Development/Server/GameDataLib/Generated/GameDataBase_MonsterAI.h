@@ -29,6 +29,10 @@ struct GameDataBase_MonsterAI : public GameData
     int32_t              WanderMinIntervalMs  = 3000;
     int32_t              WanderMaxIntervalMs  = 8000;
     bool                 IgnoreSkillRange     = false;
+    int32_t              CombatRepositionIntervalMs = 0;
+    float                CombatRepositionMinDistance = 0.0f;
+    float                CombatRepositionMaxDistance = 0.0f;
+    float                TargetClusterRadius  = 0.0f;
 };
 
 

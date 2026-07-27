@@ -105,6 +105,12 @@ public:
     int64 GetWanderMinIntervalMs() const { return m_wanderMinIntervalMs; }
     int64 GetWanderMaxIntervalMs() const { return m_wanderMaxIntervalMs; }
 
+    // ── 전투 중 위치 변경 / 밀집 타겟 설정값 ──
+    int64 GetCombatRepositionIntervalMs() const { return m_combatRepositionIntervalMs; }
+    float GetCombatRepositionMinDistance() const { return m_combatRepositionMinDistance; }
+    float GetCombatRepositionMaxDistance() const { return m_combatRepositionMaxDistance; }
+    float GetTargetClusterRadius()          const { return m_targetClusterRadius; }
+
     // ── 전투(스킬 + 캐스트). 두뇌는 이 컴포넌트를 통해 스킬 선택/시전/사거리 조회한다. ──
     MonsterCombatComponent&       GetCombat()       { return m_combat; }
     const MonsterCombatComponent& GetCombat() const { return m_combat; }
@@ -172,6 +178,12 @@ private:
     float m_wanderRadius        = 0.0f;    // spawn 중심 배회 반경. 0 이면 배회 안 함.
     int64 m_wanderMinIntervalMs = 3000;    // 다음 배회까지 대기시간 최소/최대 (이 사이 랜덤).
     int64 m_wanderMaxIntervalMs = 8000;
+
+    // ── 전투 중 위치 변경 / 밀집 타겟. 0 이면 각 기능 비활성화. ──
+    int64 m_combatRepositionIntervalMs = 0;
+    float m_combatRepositionMinDistance = 0.0f;
+    float m_combatRepositionMaxDistance = 0.0f;
+    float m_targetClusterRadius          = 0.0f;
 
     // ── 전투(스킬 + 캐스트 생애주기) 컴포넌트. owner = this. ──
     MonsterCombatComponent m_combat{this};

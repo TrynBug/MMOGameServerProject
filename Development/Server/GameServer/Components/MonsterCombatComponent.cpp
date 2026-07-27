@@ -92,6 +92,93 @@ StageObject* MonsterCombatComponent::GetTarget() const
     return pStage->FindObject(m_targetObjectId);   // 사라졌으면 nullptr.
 }
 
+void MonsterCombatComponent::RetargetForSkill()
+{
+    const float clusterRadius = m_pOwner->GetTargetClusterRadius();
+    const float attackRange = GetMaxAttackRange();
+    if (clusterRadius <= 0.0f || attackRange <= 0.0f)
+        return;
+
+    Stage* pStage = m_pOwner->GetStage();
+    if (pStage == nullptr)
+        return;
+
+    const double sectorSize = pStage->GetSectorSize();
+    int32 sectorRange = 1;
+    if (sectorSize > 0.0)
+    {
+        sectorRange = static_cast<int32>(std::ceil(attackRange / sectorSize));
+        if (sectorRange < 1)
+            sectorRange = 1;
+    }
+
+    const float myX = m_pOwner->GetPosX();
+    const float myY = m_pOwner->GetPosY();
+    const float myZ = m_pOwner->GetPosZ();
+    const float attackRangeSq = attackRange * attackRange;
+
+    std::vector<StageObject*> candidates;
+    pStage->ForEachAdjacentSector(m_pOwner->GetCurSectorX(), m_pOwner->GetCurSectorZ(), sectorRange,
+        [&](Sector* pSector)
+        {
+            for (const auto& pair : pSector->GetUsers())
+            {
+                StageObject* pUser = pair.second;
+                if (pUser == nullptr || static_cast<ActorObject*>(pUser)->IsDead())
+                    continue;
+
+                const float dx = pUser->GetPosX() - myX;
+                const float dz = pUser->GetPosZ() - myZ;
+                if (dx * dx + dz * dz > attackRangeSq)
+                    continue;
+
+                if (!pStage->HasLineOfSight(myX, myY, myZ,
+                                            pUser->GetPosX(), pUser->GetPosY(), pUser->GetPosZ()))
+                    continue;
+
+                candidates.push_back(pUser);
+            }
+        });
+
+    if (candidates.empty())
+        return;
+
+    const float clusterRadiusSq = clusterRadius * clusterRadius;
+    StageObject* pBest = nullptr;
+    int32 bestClusterCount = -1;
+    float bestDistSq = 0.0f;
+
+    for (StageObject* pCandidate : candidates)
+    {
+        int32 clusterCount = 0;
+        for (const StageObject* pOther : candidates)
+        {
+            const float dx = pOther->GetPosX() - pCandidate->GetPosX();
+            const float dz = pOther->GetPosZ() - pCandidate->GetPosZ();
+            if (dx * dx + dz * dz <= clusterRadiusSq)
+                ++clusterCount;
+        }
+
+        const float dx = pCandidate->GetPosX() - myX;
+        const float dz = pCandidate->GetPosZ() - myZ;
+        const float distSq = dx * dx + dz * dz;
+        const bool candidateIsCurrent = pCandidate->GetObjectId() == m_targetObjectId;
+        const bool bestIsCurrent = pBest != nullptr && pBest->GetObjectId() == m_targetObjectId;
+
+        if (pBest == nullptr || clusterCount > bestClusterCount ||
+            (clusterCount == bestClusterCount && candidateIsCurrent && !bestIsCurrent) ||
+            (clusterCount == bestClusterCount && candidateIsCurrent == bestIsCurrent && distSq < bestDistSq))
+        {
+            pBest = pCandidate;
+            bestClusterCount = clusterCount;
+            bestDistSq = distSq;
+        }
+    }
+
+    if (pBest != nullptr)
+        m_targetObjectId = pBest->GetObjectId();
+}
+
 // ─────────────────────────────────────────────────────────────
 // 스킬 선택
 // ─────────────────────────────────────────────────────────────
