@@ -461,6 +461,9 @@ namespace Client.Game
         // 범위 비주얼 prefab 1개를 pos 에 생성. shape 회전(Obb)·스케일 후 표시시간 뒤 파괴. 대미지는 서버 DamageNtf 담당.
         private void spawnOneAreaVisual(GameData_Skill skill, Vector3 pos, Vector3 dir)
         {
+            if (skill.EffectPrefabPath == "")
+                return;
+
             // 비주얼 prefab 은 스킬 데이터의 EffectPrefabPath 에서 로드 (파이어볼의 ProjectilePrefabPath 와 동일 방식).
             GameObject prefab = Managers.Managers.Resource.Load<GameObject>(skill.EffectPrefabPath);
             if (prefab == null)
@@ -967,8 +970,8 @@ namespace Client.Game
             if (target is MonsterObject hitMonster)
             {
                 HitFlash.Trigger(hitMonster);
-                HitStop.Trigger(hitMonster, ntf.IsDuplicate ? 50f : 100f);
-                ScalePop.Play(hitMonster);
+                // HitStop.Trigger(hitMonster, ntf.IsDuplicate ? 50f : 100f); // HitStop 비활성화함
+                // ScalePop.Play(hitMonster);  // ScalePop 비활성화함
                 hitMonster.PlayHitReaction();   // 피격 애니 (드라이버가 Locomotion 중 + 쓰로틀 게이트)
 
                 PlayerCharacter localPlayer = StageManager.Instance.LocalPlayer;
