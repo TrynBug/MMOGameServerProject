@@ -10,8 +10,8 @@ namespace Client.Game
     // 헬스바 등 루트 부착물까지 같이 커지지 않도록 아트(Animator) 트랜스폼만 스케일한다.
     public class ScalePop : MonoBehaviour
     {
-        private const float k_duration = 0.08f;   // 80ms
-        private const float k_amount = 0.15f;     // +15%
+        private const float k_duration = 0.0f;   // 비활성화 함. 기존 값은 0.08f(80ms) 였음.
+        private const float k_amount = 0.0f;     // 비활성화 함. 기존 값은 0.15f(+15%) 였음.
 
         private Transform m_target;
         private Vector3 m_baseScale;

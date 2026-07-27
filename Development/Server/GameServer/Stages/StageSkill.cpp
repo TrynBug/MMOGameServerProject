@@ -15,7 +15,6 @@
 #include "Generated/GameData_Skill.h"
 
 #include <cmath>
-#include <random>
 
 // ─────────────────────────────────────────────────────────────
 // Stage 의 스킬 효과 서브시스템.
@@ -26,6 +25,28 @@ namespace
 {
     // 투사체 hit 보고 사거리 sanity 검증 여유 (units, X-Z). 정밀 핵검사는 후속.
     constexpr float k_projectileRangeToleranceXZ = 3.0f;
+
+    constexpr uint32 k_scatterZeroSeed = 0xA341316Cu;
+    constexpr float k_uint24ToUnit = 1.0f / 16777216.0f;
+
+    // 서버/C# 클라이언트가 같은 scatter 좌표를 만들기 위한 공유 PRNG.
+    // std::uniform_real_distribution/UnityEngine.Random는 플랫폼 간 수열이 같지 않아 사용하지 않는다.
+    class ScatterRandom
+    {
+    public:
+        explicit ScatterRandom(uint32 seed) : m_state(seed != 0 ? seed : k_scatterZeroSeed) {}
+
+        float Next01()
+        {
+            m_state ^= m_state << 13;
+            m_state ^= m_state >> 17;
+            m_state ^= m_state << 5;
+            return static_cast<float>(m_state & 0x00FFFFFFu) * k_uint24ToUnit;
+        }
+
+    private:
+        uint32 m_state;
+    };
 }
 
 // (centerPos 를 중심으로) shape 범위 안의 "적" StageObject 들을 outEnemies 에 채운다. (X-Z 평면)
@@ -84,17 +105,16 @@ void Stage::SpawnSkillAreaEffect(const EffectParams& params)
         return;
     }
 
-    // [inner, outer] 링 영역에 면적 균등 분포로 scatterCount 개 배치. seed 로 결정론적 재현.
-    std::mt19937 rng(params.seed);
-    std::uniform_real_distribution<float> angleDist(0.0f, 6.2831853f);
-    std::uniform_real_distribution<float> rSqDist(
-        params.scatterInnerRadius * params.scatterInnerRadius,
-        params.scatterOuterRadius * params.scatterOuterRadius);
+    // [inner, outer] 링 영역에 면적 균등 분포로 scatterCount 개 배치.
+    // 클라이언트와 같은 PRNG/호출 순서/실수 변환을 사용한다.
+    ScatterRandom rng(params.seed);
+    const float innerSq = params.scatterInnerRadius * params.scatterInnerRadius;
+    const float outerSq = params.scatterOuterRadius * params.scatterOuterRadius;
 
     for (int32 i = 0; i < params.scatterCount; ++i)
     {
-        const float angle = angleDist(rng);
-        const float r = std::sqrt(rSqDist(rng));
+        const float angle = rng.Next01() * 6.2831853f;
+        const float r = std::sqrt(innerSq + rng.Next01() * (outerSq - innerSq));
 
         EffectParams sub = params;
         sub.scatterCount = 0;   // 분산된 각 조각은 다시 분산하지 않는다

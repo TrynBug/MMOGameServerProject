@@ -102,6 +102,7 @@ private:
     void onCastStrike();
     void executeSkill(int32 index, StageObject* pTarget);   // EffectDamage 별 발동(Area/투사체/직격)
     void startCooldown(int32 index);
+    uint32 nextScatterSeed(int32 skillId);
 
 private:
     Monster* m_pOwner = nullptr;
@@ -117,4 +118,5 @@ private:
     int64 m_castTargetObjectId         = 0;
     float m_castOriginX = 0.0f, m_castOriginY = 0.0f, m_castOriginZ = 0.0f;
     float m_castDirX = 0.0f, m_castDirZ = 0.0f;
+    uint32 m_scatterSequence = 0;
 };

@@ -202,6 +202,16 @@ void MonsterCombatComponent::startCooldown(int32 index)
     m_skills[index].remainingCooldownMs = m_skills[index].cooldownMs;
 }
 
+uint32 MonsterCombatComponent::nextScatterSeed(int32 skillId)
+{
+    ++m_scatterSequence;
+    const uint64 objectId = static_cast<uint64>(m_pOwner->GetObjectId());
+    uint32 seed = static_cast<uint32>(objectId) ^ static_cast<uint32>(objectId >> 32);
+    seed ^= static_cast<uint32>(skillId) * 0x9E3779B9u;
+    seed ^= m_scatterSequence * 0x85EBCA6Bu;
+    return seed != 0 ? seed : 0xA341316Cu;
+}
+
 void MonsterCombatComponent::tickCooldowns(int64 deltaMs)
 {
     for (MonsterSkill& skill : m_skills)
@@ -372,12 +382,13 @@ void MonsterCombatComponent::executeSkill(int32 index, StageObject* pTarget)
     {
         const Vector3 origin(m_castOriginX, m_castOriginY, m_castOriginZ);
         const Vector3 dir(m_castDirX, 0.0f, m_castDirZ);
-        EffectParams p = BakeSkillEffectParams(*pSkill, EObjectType::Monster, m_pOwner->GetObjectId(), origin, dir, /*seed*/ 0);
+        const uint32 seed = (pSkill->ScatterCount > 1) ? nextScatterSeed(skill.skillId) : 0;
+        EffectParams p = BakeSkillEffectParams(*pSkill, EObjectType::Monster, m_pOwner->GetObjectId(), origin, dir, seed);
         p.damageAmount = skill.damage;   // 스탯 결합 대미지(Initialize 계산)로 덮어쓴다 (bake 는 DamageCoeff flat).
         pStage->SpawnSkillAreaEffect(p);
         // 발동 통보 → 다른 클라(플레이어)/몬스터들이 EffectPrefabPath VFX 를 발동 시점에 재현한다.
         // (대미지는 서버 AreaEffect 가 SkillDamageNtf 로 구동. 이 Ntf 는 비주얼 전용.)
-        pStage->BroadcastSkillCastNtf(*m_pOwner, skill.skillId, /*effectId*/ 0, origin, dir, /*seed*/ 0, /*moveDistance*/ 0.0f);
+        pStage->BroadcastSkillCastNtf(*m_pOwner, skill.skillId, /*effectId*/ 0, origin, dir, seed, /*moveDistance*/ 0.0f);
         return;
     }
 

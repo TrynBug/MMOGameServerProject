@@ -411,21 +411,44 @@ namespace Client.Game
             Destroy(go, lifetimeSec);   // lifetimeSec(≈임팩트) 후 제거
         }
 
+        private struct ScatterRandom
+        {
+            private const uint k_zeroSeed = 0xA341316Cu;
+            private uint m_state;
+
+            public ScatterRandom(uint seed)
+            {
+                m_state = seed != 0 ? seed : k_zeroSeed;
+            }
+
+            public float Next01()
+            {
+                unchecked
+                {
+                    m_state ^= m_state << 13;
+                    m_state ^= m_state >> 17;
+                    m_state ^= m_state << 5;
+                }
+                return (m_state & 0x00FFFFFFu) * (1f / 16777216f);
+            }
+        }
+
         // 범위(Area) 스킬을 origin 에 표시한다 (로컬 예측/원격 재현 공용).
-        // ScatterCount>1 이면 [inner,outer] 링에 N개를 흩뿌린다 (메테오 파편).
-        // 흩뿌리는 위치는 클라 로컬 랜덤(장식) — 대미지는 서버가 enemy 위치로 판정하므로 DamageNtf 가 정확도를 보장.
-        private void spawnAreaVisual(GameData_Skill skill, Vector3 origin, Vector3 dir)
+        // ScatterCount>1 이면 서버와 공유한 seed/PRNG로 [inner,outer] 링에 N개를 흩뿌린다.
+        private void spawnAreaVisual(GameData_Skill skill, Vector3 origin, Vector3 dir, uint seed = 0)
         {
             if (skill.ScatterCount > 1)
             {
                 int n = (int)skill.ScatterCount;
                 float inner = (float)skill.ScatterInnerRadius;
                 float outer = (float)skill.ScatterOuterRadius;
+                float innerSq = inner * inner;
+                float outerSq = outer * outer;
+                ScatterRandom random = new ScatterRandom(seed);
                 for (int i = 0; i < n; ++i)
                 {
-                    float ang = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
-                    // 면적 균등: r = sqrt(U[inner^2, outer^2]). 서버와 같은 분포 형태(시드 미공유라 위치 자체는 다름).
-                    float r = Mathf.Sqrt(UnityEngine.Random.Range(inner * inner, outer * outer));
+                    float ang = random.Next01() * 6.2831853f;
+                    float r = Mathf.Sqrt(innerSq + random.Next01() * (outerSq - innerSq));
                     Vector3 p = origin + new Vector3(Mathf.Cos(ang) * r, 0f, Mathf.Sin(ang) * r);
                     spawnOneAreaVisual(skill, p, dir);
                 }
@@ -480,9 +503,9 @@ namespace Client.Game
 
         // ─── 다중 Area 체인 재생 (블레이즈 빔→화염지대, 메테오 운석→파편) ───
         // 현재 Area 페이즈를 표시하고, 체인(NextSkillKey)이 있으면 다음 Area 페이즈를 예약한다.
-        private void spawnAreaChainPhase(GameData_Skill skill, Vector3 center, Vector3 dir)
+        private void spawnAreaChainPhase(GameData_Skill skill, Vector3 center, Vector3 dir, uint seed = 0)
         {
-            spawnAreaVisual(skill, center, dir);
+            spawnAreaVisual(skill, center, dir, seed);
 
             if (skill.NextSkillKey == 0 || skill.NextTriggerTiming == ENextSkillTiming.None)
                 return;
@@ -496,14 +519,14 @@ namespace Client.Game
                 wait += skill.NextTriggerDelayMs / 1000f;
 
             Vector3 nextCenter = resolveAreaChainOrigin(skill, center, dir);
-            StartCoroutine(spawnAreaChainAfter(next, nextCenter, dir, wait));
+            StartCoroutine(spawnAreaChainAfter(next, nextCenter, dir, wait, seed));
         }
 
-        private IEnumerator spawnAreaChainAfter(GameData_Skill skill, Vector3 center, Vector3 dir, float wait)
+        private IEnumerator spawnAreaChainAfter(GameData_Skill skill, Vector3 center, Vector3 dir, float wait, uint seed)
         {
             if (wait > 0f)
                 yield return new WaitForSeconds(wait);
-            spawnAreaChainPhase(skill, center, dir);   // 재귀 (다음 페이즈도 체인 가능)
+            spawnAreaChainPhase(skill, center, dir, seed);   // 재귀 (다음 페이즈도 체인 가능)
         }
 
         // Area 페이즈의 체인 지속시간(초). 서버 chainDurationMs(Area) = max(FirstTickDelay, Lifetime) 와 동일.
@@ -609,7 +632,7 @@ namespace Client.Game
                 OriginZ = origin.z,
                 DirX = dir.x,
                 DirZ = dir.z,
-                Seed = 0,                 // 마일스톤 1: scatter 미사용 → seed 무관.
+                Seed = 0,                 // 공유 PRNG가 0을 고정 기본 seed로 변환 → 로컬 예측/서버 판정 일치.
                 TargetObjectId = targetId,
                 TargetPosX = targetPos.x,
                 TargetPosZ = targetPos.z,
@@ -726,7 +749,7 @@ namespace Client.Game
             {
                 // 지속음 (클라 전용). 원격 entry 페이즈 지속시간 동안 루프. 원격 캐스터라 볼륨 감소.
                 SfxPlayer.PlayLoop(skill.SfxLoop, origin, areaPhaseDurationSec(skill), sfxScale);
-                spawnAreaChainPhase(skill, origin, dir);
+                spawnAreaChainPhase(skill, origin, dir, ntf.Seed);
             }
             // 이동 스킬: 원격 캐스터를 서버가 실제 사용한 거리(move_distance)로 동일하게 이동시킨다.
             else if (skill.EffectDamage == ESkillEffectDamage.None && skill.MoveDistance > 0.0)
