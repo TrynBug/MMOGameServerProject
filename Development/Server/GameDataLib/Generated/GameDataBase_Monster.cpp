@@ -37,6 +37,7 @@ bool GameDataTableBase_Monster::makeGameData(const std::string& line)
     std::getline(ss, field, ','); pData->SkillKey2 = std::stoi(field);
     std::getline(ss, field, ','); pData->SkillKey3 = std::stoi(field);
     std::getline(ss, field, ','); pData->SkillKey4 = std::stoi(field);
+    std::getline(ss, field, ','); pData->SkillKey5 = std::stoi(field);
     std::getline(ss, field, ','); pData->Stat1 = static_cast<EStat>(std::stoi(field));
     std::getline(ss, field, ','); pData->StatValue1 = std::stod(field);
     std::getline(ss, field, ','); pData->Stat2 = static_cast<EStat>(std::stoi(field));

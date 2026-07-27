@@ -31,6 +31,7 @@ struct GameDataBase_Monster : public GameData
     int32_t              SkillKey2            = 0;
     int32_t              SkillKey3            = 0;
     int32_t              SkillKey4            = 0;
+    int32_t              SkillKey5            = 0;
     EStat                Stat1                = EStat::None;
     double               StatValue1           = 0;
     EStat                Stat2                = EStat::None;
@@ -48,7 +49,7 @@ struct GameDataBase_Monster : public GameData
     EStat                Stat8                = EStat::None;
     double               StatValue8           = 0;
 
-    int32_t GetSkillKeyCount() const { return 4; }
+    int32_t GetSkillKeyCount() const { return 5; }
     int32_t GetSkillKey(int32_t index) const
     {
         switch (index)
@@ -57,6 +58,7 @@ struct GameDataBase_Monster : public GameData
         case 1: return SkillKey2;
         case 2: return SkillKey3;
         case 3: return SkillKey4;
+        case 4: return SkillKey5;
         default: return 0;
         }
     }

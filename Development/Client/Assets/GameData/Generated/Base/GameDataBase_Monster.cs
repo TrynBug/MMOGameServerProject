@@ -18,6 +18,7 @@ namespace GameData
         public int                  SkillKey2            = 0;
         public int                  SkillKey3            = 0;
         public int                  SkillKey4            = 0;
+        public int                  SkillKey5            = 0;
         public EStat                Stat1                = EStat.None;
         public double               StatValue1           = 0;
         public EStat                Stat2                = EStat.None;
@@ -35,7 +36,7 @@ namespace GameData
         public EStat                Stat8                = EStat.None;
         public double               StatValue8           = 0;
 
-        public int GetSkillKeyCount() => 4;
+        public int GetSkillKeyCount() => 5;
         public int GetSkillKey(int index)
         {
             switch (index)
@@ -44,6 +45,7 @@ namespace GameData
                 case 1: return SkillKey2;
                 case 2: return SkillKey3;
                 case 3: return SkillKey4;
+                case 4: return SkillKey5;
                 default: return 0;
             }
         }
@@ -111,22 +113,23 @@ namespace GameData
             data.SkillKey2 = int.Parse(fields[5]);
             data.SkillKey3 = int.Parse(fields[6]);
             data.SkillKey4 = int.Parse(fields[7]);
-            data.Stat1 = (EStat)int.Parse(fields[8]);
-            data.StatValue1 = double.Parse(fields[9]);
-            data.Stat2 = (EStat)int.Parse(fields[10]);
-            data.StatValue2 = double.Parse(fields[11]);
-            data.Stat3 = (EStat)int.Parse(fields[12]);
-            data.StatValue3 = double.Parse(fields[13]);
-            data.Stat4 = (EStat)int.Parse(fields[14]);
-            data.StatValue4 = double.Parse(fields[15]);
-            data.Stat5 = (EStat)int.Parse(fields[16]);
-            data.StatValue5 = double.Parse(fields[17]);
-            data.Stat6 = (EStat)int.Parse(fields[18]);
-            data.StatValue6 = double.Parse(fields[19]);
-            data.Stat7 = (EStat)int.Parse(fields[20]);
-            data.StatValue7 = double.Parse(fields[21]);
-            data.Stat8 = (EStat)int.Parse(fields[22]);
-            data.StatValue8 = double.Parse(fields[23]);
+            data.SkillKey5 = int.Parse(fields[8]);
+            data.Stat1 = (EStat)int.Parse(fields[9]);
+            data.StatValue1 = double.Parse(fields[10]);
+            data.Stat2 = (EStat)int.Parse(fields[11]);
+            data.StatValue2 = double.Parse(fields[12]);
+            data.Stat3 = (EStat)int.Parse(fields[13]);
+            data.StatValue3 = double.Parse(fields[14]);
+            data.Stat4 = (EStat)int.Parse(fields[15]);
+            data.StatValue4 = double.Parse(fields[16]);
+            data.Stat5 = (EStat)int.Parse(fields[17]);
+            data.StatValue5 = double.Parse(fields[18]);
+            data.Stat6 = (EStat)int.Parse(fields[19]);
+            data.StatValue6 = double.Parse(fields[20]);
+            data.Stat7 = (EStat)int.Parse(fields[21]);
+            data.StatValue7 = double.Parse(fields[22]);
+            data.Stat8 = (EStat)int.Parse(fields[23]);
+            data.StatValue8 = double.Parse(fields[24]);
 
             if (data.Key <= 0)
                 return false;
