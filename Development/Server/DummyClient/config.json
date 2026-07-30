@@ -22,8 +22,8 @@
   "//stageKeys": "최초 접속 시 균등 선택할 스테이지 키 목록. 실제 이동은 현재 스테이지의 포탈을 사용한다.",
   "stageKeys": [100, 101, 107],
 
-  "//create": "캐릭터가 없으면 jobIds와 appearancePresetIds에서 각각 무작위로 선택해 생성한다.",
-  "create": { "jobIds": [1, 2], "appearancePresetIds": [0, 1] },
+  "//create": "캐릭터가 없으면 jobProbabilities의 직업별 확률과 appearancePresetIds의 균등 확률로 선택해 생성한다. jobProbabilities 합계는 1이어야 한다.",
+  "create": { "jobProbabilities": { "1": 0.5, "2": 0.5 }, "appearancePresetIds": [0, 1] },
 
   "//skill": "useIntervalMsByStage는 Stage별 연속 스킬 시전 간격(ms), 0은 스킬 미사용. detectRange 내 적 발견→전투. 직업별 skillsByJob 로테이션에서 준비된 스킬의 사거리까지 접근해 시전.",
   "skill": {

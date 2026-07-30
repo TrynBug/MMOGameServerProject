@@ -39,11 +39,28 @@ namespace DummyClient.Config
 
     public sealed class CreateCfg
     {
-        // 캐릭터 생성 시 무작위로 고를 직업 목록 (1=Mage, 2=Warrior).
-        // 기본값은 현재 스킬 게임데이터에 있는 Mage(1), Warrior(2).
-        public int[] JobIds { get; set; } = { 1, 2 };
+        // 신규 캐릭터의 직업별 선택 확률 (1=Mage, 2=Warrior). 합계는 1이어야 한다.
+        public Dictionary<int, double> JobProbabilities { get; set; } = new()
+        {
+            [1] = 0.5,
+            [2] = 0.5,
+        };
         // CharacterFactory가 지원하는 외형 프리셋 인덱스(현재 직업당 0, 1).
         public int[] AppearancePresetIds { get; set; } = { 0, 1 };
+
+        public int SelectJobId(double roll)
+        {
+            double cumulative = 0.0;
+            int selectedJobId = 0;
+            foreach (var (jobId, probability) in JobProbabilities)
+            {
+                selectedJobId = jobId;
+                cumulative += probability;
+                if (roll < cumulative)
+                    return jobId;
+            }
+            return selectedJobId;
+        }
     }
 
     public sealed class SkillCfg
@@ -175,9 +192,9 @@ namespace DummyClient.Config
                 error = "probability 값은 0~1 범위여야 함";
                 return false;
             }
-            if (StageKeys == null || StageKeys.Length == 0 || Create.JobIds == null || Create.JobIds.Length == 0 || Create.AppearancePresetIds == null || Create.AppearancePresetIds.Length == 0 || Skill.UseIntervalMsByStage == null || Skill.SkillsByJob == null || Skill.SkillsByJob.Count == 0)
+            if (StageKeys == null || StageKeys.Length == 0 || Create.JobProbabilities == null || Create.JobProbabilities.Count == 0 || Create.AppearancePresetIds == null || Create.AppearancePresetIds.Length == 0 || Skill.UseIntervalMsByStage == null || Skill.SkillsByJob == null || Skill.SkillsByJob.Count == 0)
             {
-                error = "stageKeys, create.jobIds, create.appearancePresetIds, skill.useIntervalMsByStage, skill.skillsByJob은 비어 있을 수 없음";
+                error = "stageKeys, create.jobProbabilities, create.appearancePresetIds, skill.useIntervalMsByStage, skill.skillsByJob은 비어 있을 수 없음";
                 return false;
             }
             foreach (int stageKey in StageKeys)
@@ -196,14 +213,21 @@ namespace DummyClient.Config
                     return false;
                 }
             }
-            foreach (int jobId in Create.JobIds)
+            double jobProbabilitySum = 0.0;
+            foreach (var (jobId, probability) in Create.JobProbabilities)
             {
                 int[] keys = Skill.GetSkillKeys(jobId);
-                if (jobId <= 0 || keys == null || keys.Length == 0)
+                if (jobId <= 0 || !isProbability(probability) || keys == null || keys.Length == 0)
                 {
-                    error = $"create.jobIds의 직업에 대한 스킬 설정이 없음: jobId={jobId}";
+                    error = $"create.jobProbabilities의 직업/확률/스킬 설정이 잘못됨: jobId={jobId}, probability={probability}";
                     return false;
                 }
+                jobProbabilitySum += probability;
+            }
+            if (System.Math.Abs(jobProbabilitySum - 1.0) > 0.000001)
+            {
+                error = $"create.jobProbabilities의 확률 합계는 1이어야 함: sum={jobProbabilitySum}";
+                return false;
             }
 
             error = "";

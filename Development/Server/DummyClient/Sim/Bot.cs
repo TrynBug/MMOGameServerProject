@@ -361,8 +361,7 @@ namespace DummyClient.Sim
                     var ntf = CharacterListNtf.Parser.ParseFrom(body);
                     if (ntf.Characters.Count == 0)
                     {
-                        var jobs = m_ctx.Config.Create.JobIds;
-                        int jobId = (jobs != null && jobs.Length > 0) ? jobs[m_rng.Next(jobs.Length)] : 1;
+                        int jobId = m_ctx.Config.Create.SelectJobId(m_rng.NextDouble());
                         var presets = m_ctx.Config.Create.AppearancePresetIds;
                         int presetId = presets[m_rng.Next(presets.Length)];
                         m_characterCreateStartedMs = m_ctx.NowMs;
