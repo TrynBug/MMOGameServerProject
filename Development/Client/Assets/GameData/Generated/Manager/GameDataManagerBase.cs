@@ -12,6 +12,14 @@ namespace GameData
             if (!table_Buff.LoadData(csvPath))
                 return false;
 
+            var table_Item = new GameDataTable_Item();
+            if (!table_Item.LoadData(csvPath))
+                return false;
+
+            var table_ItemDrop = new GameDataTable_ItemDrop();
+            if (!table_ItemDrop.LoadData(csvPath))
+                return false;
+
             var table_JobBase = new GameDataTable_JobBase();
             if (!table_JobBase.LoadData(csvPath))
                 return false;

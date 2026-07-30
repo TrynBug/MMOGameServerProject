@@ -34,6 +34,25 @@ namespace Client.Game
         // object_id -> PropObject (prop 전용 레지스트리. 디스폰은 despawnObject 로 공용 처리, 상태변경은 PropStateNtf)
         private readonly Dictionary<long, PropObject> m_props = new Dictionary<long, PropObject>();
 
+        // object_id -> 소유자에게만 전송된 필드 드롭 아이템.
+        // 서버가 다른 캐릭터의 드롭을 패킷에 넣지 않으므로 이 레지스트리에는 내 드롭만 존재한다.
+        private readonly Dictionary<long, DropObject> m_drops = new Dictionary<long, DropObject>();
+
+        // 요청을 보낸 드롭의 재전송 허용 시각(Time.unscaledTime). 응답 유실/지연 중 매 frame 같은
+        // ID를 보내지 않게 하며, 실패 응답도 짧은 cooldown 뒤 서버 상태를 다시 확인하도록 한다.
+        private readonly Dictionary<long, float> m_dropPickupPendingUntil = new Dictionary<long, float>();
+
+        // 습득 응답으로 변경된 Item 행의 최신 스냅샷. 현재는 UI가 없으므로 부분 캐시만 유지하며,
+        // 추후 인벤토리 UI는 캐릭터 진입 시 전체 목록과 이 updated_items를 같은 모델에 반영해야 한다.
+        private readonly Dictionary<long, DataStructures.Item> m_inventoryItems = new Dictionary<long, DataStructures.Item>();
+        private float m_nextDropPickupScanTime;
+
+        // 클라이언트 요청 반경은 서버 권위 반경(2m)보다 작게 두어 위치 동기화 오차를 흡수한다.
+        private const float k_dropPickupClientRange = 1.5f;
+        private const float k_dropPickupScanIntervalSec = 0.1f;
+        private const float k_dropPickupRetrySec = 2f;
+        private const int k_dropPickupMaxBatch = 32;
+
         // 내 캐릭터 (편의 접근). CharacterSelectRes 데이터모델로 1회 생성 후 영속.
         // 스테이지 이동 시 파괴하지 않고 숨김(SetActive false)+재배치만 한다.
         public PlayerCharacter LocalPlayer { get; private set; }
@@ -76,6 +95,7 @@ namespace Client.Game
             PacketDispatcher.Instance.Register<StageNoticeNtf>(GamePacketId.StageNoticeNtf, onStageNoticeNtf);
             PacketDispatcher.Instance.Register<PropStateNtf>(GamePacketId.PropStateNtf, onPropStateNtf);
             PacketDispatcher.Instance.Register<ObjectInteractRes>(GamePacketId.ObjectInteractRes, onObjectInteractRes);
+            PacketDispatcher.Instance.Register<ItemPickupRes>(GamePacketId.ItemPickupRes, onItemPickupRes);
 
             // 이벤트영역 진입/이탈 감지기(로컬 플레이어 위치로 매 프레임 판정 → Req 송신).
             gameObject.AddComponent<EventAreaDetector>();
@@ -359,6 +379,19 @@ namespace Client.Game
                 Debug.Log($"[StageManager] ObjectVisibilityNtf: PropSpawn objectId={propSpawnInfo.ObjectId} key={propSpawnInfo.PropKey} state={propSpawnInfo.State}");
             }
 
+            // 드롭은 이동 Snapshot 대상이 아니다. origin/landing을 한 번 받아 로컬 비산 연출을
+            // 재생하고, 이후 서버 despawn ID가 올 때까지 landing에 고정한다.
+            foreach (DropSpawnInfo dropSpawnInfo in ntf.DropSpawns)
+            {
+                spawnDrop(
+                    objectId: dropSpawnInfo.ObjectId,
+                    itemKey: dropSpawnInfo.ItemKey,
+                    count: dropSpawnInfo.Count,
+                    origin: new Vector3(dropSpawnInfo.OriginX, dropSpawnInfo.OriginY, dropSpawnInfo.OriginZ),
+                    landing: new Vector3(dropSpawnInfo.PosX, dropSpawnInfo.PosY, dropSpawnInfo.PosZ),
+                    createdServerTimeMs: dropSpawnInfo.CreatedServerTimeMs);
+            }
+
             // 오브젝트 디스폰 정보 처리 (캐릭터/몬스터/prop 공용)
             foreach (long despawnObjectId in ntf.DespawnIds)
             {
@@ -390,6 +423,23 @@ namespace Client.Game
             }
 
             Debug.Log($"[StageManager] ObjectInteractRes OK. objectId={res.ObjectId}");
+        }
+
+        // batch 요청은 드롭마다 결과가 다를 수 있다. 성공 ID는 곧 별도 despawn 패킷으로 제거되고,
+        // 실패 ID는 cooldown을 갱신해 일시적인 PENDING/DB 오류를 과도하게 재요청하지 않는다.
+        // updated_items는 DB commit까지 끝난 행의 최종값만 담는다.
+        private void onItemPickupRes(ItemPickupRes res)
+        {
+            foreach (ItemPickupResultEntry result in res.Results)
+            {
+                if (result.Result == EItemPickupResult.ItemPickupResultSuccess)
+                    m_dropPickupPendingUntil.Remove(result.DropObjectId);
+                else
+                    m_dropPickupPendingUntil[result.DropObjectId] = Time.unscaledTime + k_dropPickupRetrySec;
+            }
+
+            foreach (DataStructures.Item item in res.UpdatedItems)
+                m_inventoryItems[item.ItemId] = item.Clone();
         }
 
         // 오브젝트 사망 알림. 해당 액터를 사망 상태로 전환한다(이동 정지 + 사망 애니메이션).
@@ -520,6 +570,52 @@ namespace Client.Game
         private void Update()
         {
             NetClock.Tick(Time.deltaTime);
+            requestNearbyDropPickup();
+        }
+
+        // 착지한 내 드롭 중 가까운 항목을 찾아 최대 32개까지 한 패킷으로 요청한다.
+        // 이 검사는 네트워크 요청 최적화와 연출 보호 목적이며 보안 판정은 서버가 다시 수행한다.
+        private void requestNearbyDropPickup()
+        {
+            // Update마다 전체 dictionary를 순회하지 않도록 10Hz로 제한한다. 게임 timeScale과
+            // 무관하게 네트워크 cooldown이 흐르도록 unscaledTime을 사용한다.
+            if (Time.unscaledTime < m_nextDropPickupScanTime)
+                return;
+            m_nextDropPickupScanTime = Time.unscaledTime + k_dropPickupScanIntervalSec;
+
+            NetworkManager net = NetworkManager.Instance;
+            if (IsStageLoading || LocalPlayer == null || !LocalPlayer.gameObject.activeInHierarchy ||
+                net == null || !net.IsConnected)
+                return;
+
+            float rangeSq = k_dropPickupClientRange * k_dropPickupClientRange;
+            Vector3 playerPos = LocalPlayer.transform.position;
+            ItemPickupReq req = new ItemPickupReq();
+
+            foreach (KeyValuePair<long, DropObject> kv in m_drops)
+            {
+                DropObject drop = kv.Value;
+                // 비산 중 transform이 플레이어 근처를 지나더라도 실제 착지 전에는 요청하지 않는다.
+                if (drop == null || !drop.IsLanded)
+                    continue;
+                if (m_dropPickupPendingUntil.TryGetValue(kv.Key, out float pendingUntil) &&
+                    Time.unscaledTime < pendingUntil)
+                    continue;
+
+                // 서버와 동일하게 높이(Y)는 제외하고 XZ 평면 거리만 사용한다.
+                Vector3 delta = drop.transform.position - playerPos;
+                if (delta.x * delta.x + delta.z * delta.z > rangeSq)
+                    continue;
+
+                // 전송 전에 pending을 기록해야 다음 scan이 응답보다 먼저 돌아도 중복 요청하지 않는다.
+                req.DropObjectIds.Add(kv.Key);
+                m_dropPickupPendingUntil[kv.Key] = Time.unscaledTime + k_dropPickupRetrySec;
+                if (req.DropObjectIds.Count >= k_dropPickupMaxBatch)
+                    break;
+            }
+
+            if (req.DropObjectIds.Count > 0)
+                net.Send(GamePacketId.ItemPickupReq, req);
         }
 
         // 서버가 내 위치와 서버 위치의 오차가 허용 이상이라고 판단했을 때 보내는 패킷.
@@ -673,6 +769,20 @@ namespace Client.Game
             return po;
         }
 
+        // AOI 중복 spawn에도 안전하도록 objectId 기준 idempotent 생성으로 처리한다.
+        // createdServerTimeMs는 늦은 AOI 진입 시 남은 비산 시간 계산에 사용한다.
+        private DropObject spawnDrop(long objectId, int itemKey, int count, Vector3 origin, Vector3 landing,
+            long createdServerTimeMs)
+        {
+            if (m_drops.TryGetValue(objectId, out DropObject existing) && existing != null)
+                return existing;
+
+            DropObject drop = DropFactory.Create(objectId, itemKey, count, origin, landing, createdServerTimeMs);
+            if (drop != null)
+                m_drops.Add(objectId, drop);
+            return drop;
+        }
+
         // 로컬 플레이어 위치(pos)에서 maxRange(평면 X-Z) 안의 가장 가까운 prop 을 찾는다(없으면 null).
         // PropInteractor 의 상호작용 대상 선택용. 실제 사거리 검증은 서버 권위.
         public PropObject FindNearestProp(Vector3 pos, float maxRange)
@@ -725,6 +835,14 @@ namespace Client.Game
                     Destroy(prop.gameObject);
             }
             m_props.Clear();
+
+            foreach (DropObject drop in m_drops.Values)
+            {
+                if (drop != null)
+                    Destroy(drop.gameObject);
+            }
+            m_drops.Clear();
+            m_dropPickupPendingUntil.Clear();
         }
 
         // 오브젝트 공용 디스폰. objectId 로 캐릭터/몬스터 어느 쪽이든 찾아 제거한다.
@@ -750,6 +868,14 @@ namespace Client.Game
                 m_props.Remove(objectId);
                 Destroy(prop.gameObject);
                 return;
+            }
+
+
+            if (m_drops.TryGetValue(objectId, out DropObject drop) && drop != null)
+            {
+                m_drops.Remove(objectId);
+                m_dropPickupPendingUntil.Remove(objectId);
+                Destroy(drop.gameObject);
             }
         }
 

@@ -1,0 +1,4 @@
+﻿Key,Name,ItemType,Grade,MaxStack,DropPrefabPath
+1001,회복 물약,1,1,999,Prefabs/Drops/apple
+1002,슬라임 젤,2,1,999,Prefabs/Drops/banana
+1003,빛나는 조각,2,2,999,Prefabs/Drops/acorn

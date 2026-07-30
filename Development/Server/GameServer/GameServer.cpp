@@ -824,7 +824,7 @@ db::AwaitableCoTask<CharacterPtr> GameServer::loadCharacterForUser(int64 account
     // ── 함께 로드한 재화/아이템/계정재화 보관 (이미 워커 스레드에서 파싱 완료된 proto) ──
     if (auto spCurrency = loaded.Get<DataStructures::Currency>())
     {
-        // TBD: 보관 로직
+        // Currency 런타임 모델은 아직 별도 작업 대상이다.
     }
     {
         std::vector<DataStructures::Item> items;
@@ -835,7 +835,11 @@ db::AwaitableCoTask<CharacterPtr> GameServer::loadCharacterForUser(int64 account
             items.push_back(*spItem);
         }
 
-        // TBD: 보관 로직
+        if (!spCharacter->GetInventory().Initialize(items))
+        {
+            LOG_WRITE(LogLevel::Error, std::format("loadCharacter - invalid inventory. accountId={} characterId={}", accountId, characterId));
+            co_return nullptr;
+        }
     }
     if (auto spAccountCurrency = loaded.Get<DataStructures::AccountCurrency>())
     {

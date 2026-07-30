@@ -44,6 +44,8 @@ class MetricsRegistry;
 // PropObject forward declaration (SpawnProp/FindProp 리턴 타입). 완전타입은 Stage.cpp 에서 include.
 class PropObject;
 
+class DropObject;
+
 // ActorObject forward declaration (BroadcastBuff* takes const ActorObject&). Full type in Stage.cpp.
 class ActorObject;
 
@@ -558,6 +560,14 @@ protected:
     // 오브젝트(prop) 상호작용 요청(클라 -> 서버). 권위 위치가 marker 범위 안인지 검증 후 OnObjectInteract 발동.
     void handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
 
+    // 드롭 픽업 batch 요청의 소유권/만료/거리 검증 후 DB-first 습득 코루틴을 시작한다.
+    void handleItemPickupReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket);
+    // fire-and-forget coroutine
+    db::DetachedCoTask pickupDropsAsync(UserPtr spUser, CharacterPtr spCharacter,
+                                        GamePacket::ItemPickupRes res,
+                                        std::vector<int64> dropObjectIds,
+                                        std::vector<int32> resultIndexes);
+
     // ── 유저 컨테이너 접근 ──
     const std::unordered_map<int64, UserPtr>& GetUsers() const { return m_users; }
 
@@ -581,6 +591,14 @@ private:
     // DespawnDelayMs 가 예약된 prop 의 제거 타이머를 진행하고, 만료된 prop 을 디스폰한다.
     // 대부분의 prop 은 정적이라 예약된 것만 처리한다(컨텐츠 스레드 전용).
     void updateProps(int64 deltaMs);
+
+    // 개인 드롭의 생성/만료/AOI 생명주기. 모든 호출은 Stage 컨텐츠 스레드에서 이루어진다.
+    void updateDrops();
+
+    void spawnMonsterDrops(const Monster& monster, int64 killerObjectId);
+    DropObject* spawnDrop(int32 itemKey, int32 count, const Character& owner,
+                          float originX, float originY, float originZ);
+    bool despawnDrop(int64 objectId);
 
     // prop 상태 변경을 prop 주변 AOI 유저에게 PropStateNtf 로 broadcast 한다.
     void broadcastPropState(const PropObject& prop, int64 actorObjectId);
@@ -720,6 +738,7 @@ private:
     std::unordered_map<int64, StageObjectPtr> m_monsterObjects;
     std::unordered_map<int64, StageObjectPtr> m_propObjects;
     std::unordered_map<int64, StageObjectPtr> m_dropObjects;
+    std::mt19937 m_dropRng { static_cast<uint32>(m_stageId) ^ 0x9e3779b9u };
 
     // ── NavMesh ────────────────────────────────────────────
     // 길찾기 로직 + dtNavMeshQuery/dtQueryFilter lifetime 은 StageNavMesh 가 담당.

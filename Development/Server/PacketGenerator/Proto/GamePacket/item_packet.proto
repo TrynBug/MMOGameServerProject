@@ -15,3 +15,30 @@ message ItemUseRes {
     string              message = 2;
     DataStructures.Item item    = 3;
 }
+
+// 근처 개인 드롭을 한 번에 최대 32개까지 습득 요청한다.
+message ItemPickupReq {
+    repeated int64 drop_object_ids = 1;
+}
+
+enum EItemPickupResult {
+    ITEM_PICKUP_RESULT_NONE = 0;
+    ITEM_PICKUP_RESULT_SUCCESS = 1;
+    ITEM_PICKUP_RESULT_UNAVAILABLE = 2; // 없음/만료/소유자 불일치. 숨겨진 드롭 정보는 노출하지 않는다.
+    ITEM_PICKUP_RESULT_TOO_FAR = 3;
+    ITEM_PICKUP_RESULT_PENDING = 4;
+    ITEM_PICKUP_RESULT_STORAGE_ERROR = 5;
+}
+
+message ItemPickupResultEntry {
+    int64 drop_object_id = 1;
+    EItemPickupResult result = 2;
+    int32 item_key = 3;     // 성공한 항목만 채운다.
+    int32 picked_count = 4; // 성공한 항목만 채운다.
+}
+
+// updated_items는 이번 트랜잭션으로 생성되거나 count가 변경된 인벤토리 행의 최종값이다.
+message ItemPickupRes {
+    repeated ItemPickupResultEntry results = 1;
+    repeated DataStructures.Item updated_items = 2;
+}

@@ -34,6 +34,7 @@
 #include "Generated/DataStructures/account_currency.pb.h"
 #include "Generated/DataStructures/item.pb.h"
 #include "Generated/GamePacket/character_packet.pb.h"
+#include "Generated/GamePacket/item_packet.pb.h"
 #include "Generated/GamePacket/chat_packet.pb.h"
 #include "Generated/GamePacket/session_packet.pb.h"
 #include "Generated/GamePacket/stage_packet.pb.h"

@@ -45,6 +45,7 @@
     <ClCompile Include="Components\CharacterStatComponent.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
+    <ClCompile Include="Components\InventoryComponent.cpp"><Filter>소스 파일\Components</Filter></ClCompile>
     <ClCompile Include="Components\MonsterCombatComponent.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
@@ -90,6 +91,7 @@
     <ClCompile Include="StageObjects\Character.cpp">
       <Filter>소스 파일\StageObjects</Filter>
     </ClCompile>
+    <ClCompile Include="StageObjects\DropObject.cpp"><Filter>소스 파일\StageObjects</Filter></ClCompile>
     <ClCompile Include="StageObjects\EventArea.cpp">
       <Filter>소스 파일\StageObjects</Filter>
     </ClCompile>
@@ -152,6 +154,7 @@
     <ClInclude Include="Components\CharacterStatComponent.h">
       <Filter>소스 파일\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Components\InventoryComponent.h"><Filter>소스 파일\Components</Filter></ClInclude>
     <ClInclude Include="Components\IMonsterAI.h">
       <Filter>소스 파일\Components</Filter>
     </ClInclude>
@@ -209,6 +212,7 @@
     <ClInclude Include="StageObjects\Character.h">
       <Filter>소스 파일\StageObjects</Filter>
     </ClInclude>
+    <ClInclude Include="StageObjects\DropObject.h"><Filter>소스 파일\StageObjects</Filter></ClInclude>
     <ClInclude Include="StageObjects\EventArea.h">
       <Filter>소스 파일\StageObjects</Filter>
     </ClInclude>

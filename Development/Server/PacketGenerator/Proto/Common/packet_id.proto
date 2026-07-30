@@ -38,6 +38,8 @@ enum GamePacketId {
     // 2000~2999: 아이템
     GAME_PACKET_ID_ITEM_USE_REQ = 2001;   // 클라 -> 서버: 아이템 사용 요청
     GAME_PACKET_ID_ITEM_USE_RES = 2002;   // 서버 -> 클라: 아이템 사용 결과
+    GAME_PACKET_ID_ITEM_PICKUP_REQ = 2003; // 클라 -> 서버: 근처 드롭 아이템 배치 습득 요청
+    GAME_PACKET_ID_ITEM_PICKUP_RES = 2004; // 서버 -> 클라: 드롭별 습득 결과 + 변경된 인벤토리 아이템
 
     // 3000~3999: 채팅
     GAME_PACKET_ID_CHAT_SEND_REQ = 3001;   // 클라 -> 서버: 채팅 전송 요청

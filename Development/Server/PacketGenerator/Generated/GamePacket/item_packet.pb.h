@@ -28,6 +28,7 @@
 #include "google/protobuf/message_lite.h"
 #include "google/protobuf/repeated_field.h"  // IWYU pragma: export
 #include "google/protobuf/extension_set.h"  // IWYU pragma: export
+#include "google/protobuf/generated_enum_reflection.h"
 #include "google/protobuf/unknown_field_set.h"
 #include "DataStructures/item.pb.h"
 // @@protoc_insertion_point(includes)
@@ -54,6 +55,20 @@ extern "C" {
 extern const ::google::protobuf::internal::DescriptorTable descriptor_table_GamePacket_2fitem_5fpacket_2eproto;
 }  // extern "C"
 namespace GamePacket {
+enum EItemPickupResult : int;
+extern const uint32_t EItemPickupResult_internal_data_[];
+class ItemPickupReq;
+struct ItemPickupReqDefaultTypeInternal;
+extern ItemPickupReqDefaultTypeInternal _ItemPickupReq_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ItemPickupReq_class_data_;
+class ItemPickupRes;
+struct ItemPickupResDefaultTypeInternal;
+extern ItemPickupResDefaultTypeInternal _ItemPickupRes_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ItemPickupRes_class_data_;
+class ItemPickupResultEntry;
+struct ItemPickupResultEntryDefaultTypeInternal;
+extern ItemPickupResultEntryDefaultTypeInternal _ItemPickupResultEntry_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ItemPickupResultEntry_class_data_;
 class ItemUseReq;
 struct ItemUseReqDefaultTypeInternal;
 extern ItemUseReqDefaultTypeInternal _ItemUseReq_default_instance_;
@@ -65,10 +80,53 @@ extern const ::google::protobuf::internal::ClassDataFull ItemUseRes_class_data_;
 }  // namespace GamePacket
 namespace google {
 namespace protobuf {
+template <>
+internal::EnumTraitsT<::GamePacket::EItemPickupResult_internal_data_>
+    internal::EnumTraitsImpl::value<::GamePacket::EItemPickupResult>;
 }  // namespace protobuf
 }  // namespace google
 
 namespace GamePacket {
+enum EItemPickupResult : int {
+  ITEM_PICKUP_RESULT_NONE = 0,
+  ITEM_PICKUP_RESULT_SUCCESS = 1,
+  ITEM_PICKUP_RESULT_UNAVAILABLE = 2,
+  ITEM_PICKUP_RESULT_TOO_FAR = 3,
+  ITEM_PICKUP_RESULT_PENDING = 4,
+  ITEM_PICKUP_RESULT_STORAGE_ERROR = 5,
+  EItemPickupResult_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      ::std::numeric_limits<::int32_t>::min(),
+  EItemPickupResult_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      ::std::numeric_limits<::int32_t>::max(),
+};
+
+extern const uint32_t EItemPickupResult_internal_data_[];
+inline constexpr EItemPickupResult EItemPickupResult_MIN =
+    static_cast<EItemPickupResult>(0);
+inline constexpr EItemPickupResult EItemPickupResult_MAX =
+    static_cast<EItemPickupResult>(5);
+inline bool EItemPickupResult_IsValid(int value) {
+  return 0 <= value && value <= 5;
+}
+inline constexpr int EItemPickupResult_ARRAYSIZE = 5 + 1;
+const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL EItemPickupResult_descriptor();
+template <typename T>
+const ::std::string& EItemPickupResult_Name(T value) {
+  static_assert(::std::is_same<T, EItemPickupResult>::value ||
+                    ::std::is_integral<T>::value,
+                "Incorrect type passed to EItemPickupResult_Name().");
+  return EItemPickupResult_Name(static_cast<EItemPickupResult>(value));
+}
+template <>
+inline const ::std::string& EItemPickupResult_Name(EItemPickupResult value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<EItemPickupResult_descriptor, 0, 5>(
+      static_cast<int>(value));
+}
+inline bool EItemPickupResult_Parse(
+    ::absl::string_view name, EItemPickupResult* PROTOBUF_NONNULL value) {
+  return ::google::protobuf::internal::ParseNamedEnum<EItemPickupResult>(EItemPickupResult_descriptor(), name,
+                                           value);
+}
 
 // ===================================================================
 
@@ -263,6 +321,431 @@ class ItemUseReq final : public ::google::protobuf::Message
 };
 
 extern const ::google::protobuf::internal::ClassDataFull ItemUseReq_class_data_;
+// -------------------------------------------------------------------
+
+class ItemPickupResultEntry final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.ItemPickupResultEntry) */ {
+ public:
+  inline ItemPickupResultEntry() : ItemPickupResultEntry(nullptr) {}
+  ~ItemPickupResultEntry() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ItemPickupResultEntry* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ItemPickupResultEntry));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ItemPickupResultEntry(::google::protobuf::internal::ConstantInitialized);
+
+  inline ItemPickupResultEntry(const ItemPickupResultEntry& from) : ItemPickupResultEntry(nullptr, from) {}
+  inline ItemPickupResultEntry(ItemPickupResultEntry&& from) noexcept
+      : ItemPickupResultEntry(nullptr, ::std::move(from)) {}
+  inline ItemPickupResultEntry& operator=(const ItemPickupResultEntry& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ItemPickupResultEntry& operator=(ItemPickupResultEntry&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ItemPickupResultEntry& default_instance() {
+    return *reinterpret_cast<const ItemPickupResultEntry*>(
+        &_ItemPickupResultEntry_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 3;
+  friend void swap(ItemPickupResultEntry& a, ItemPickupResultEntry& b) { a.Swap(&b); }
+  inline void Swap(ItemPickupResultEntry* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ItemPickupResultEntry* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ItemPickupResultEntry* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ItemPickupResultEntry>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ItemPickupResultEntry& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ItemPickupResultEntry& from) { ItemPickupResultEntry::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ItemPickupResultEntry* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.ItemPickupResultEntry"; }
+
+  explicit ItemPickupResultEntry(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ItemPickupResultEntry(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ItemPickupResultEntry& from);
+  ItemPickupResultEntry(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ItemPickupResultEntry&& from) noexcept
+      : ItemPickupResultEntry(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kDropObjectIdFieldNumber = 1,
+    kResultFieldNumber = 2,
+    kItemKeyFieldNumber = 3,
+    kPickedCountFieldNumber = 4,
+  };
+  // int64 drop_object_id = 1;
+  void clear_drop_object_id() ;
+  ::int64_t drop_object_id() const;
+  void set_drop_object_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_drop_object_id() const;
+  void _internal_set_drop_object_id(::int64_t value);
+
+  public:
+  // .GamePacket.EItemPickupResult result = 2;
+  void clear_result() ;
+  ::GamePacket::EItemPickupResult result() const;
+  void set_result(::GamePacket::EItemPickupResult value);
+
+  private:
+  ::GamePacket::EItemPickupResult _internal_result() const;
+  void _internal_set_result(::GamePacket::EItemPickupResult value);
+
+  public:
+  // int32 item_key = 3;
+  void clear_item_key() ;
+  ::int32_t item_key() const;
+  void set_item_key(::int32_t value);
+
+  private:
+  ::int32_t _internal_item_key() const;
+  void _internal_set_item_key(::int32_t value);
+
+  public:
+  // int32 picked_count = 4;
+  void clear_picked_count() ;
+  ::int32_t picked_count() const;
+  void set_picked_count(::int32_t value);
+
+  private:
+  ::int32_t _internal_picked_count() const;
+  void _internal_set_picked_count(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.ItemPickupResultEntry)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ItemPickupResultEntry& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int64_t drop_object_id_;
+    int result_;
+    ::int32_t item_key_;
+    ::int32_t picked_count_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fitem_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ItemPickupResultEntry_class_data_;
+// -------------------------------------------------------------------
+
+class ItemPickupReq final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.ItemPickupReq) */ {
+ public:
+  inline ItemPickupReq() : ItemPickupReq(nullptr) {}
+  ~ItemPickupReq() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ItemPickupReq* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ItemPickupReq));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ItemPickupReq(::google::protobuf::internal::ConstantInitialized);
+
+  inline ItemPickupReq(const ItemPickupReq& from) : ItemPickupReq(nullptr, from) {}
+  inline ItemPickupReq(ItemPickupReq&& from) noexcept
+      : ItemPickupReq(nullptr, ::std::move(from)) {}
+  inline ItemPickupReq& operator=(const ItemPickupReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ItemPickupReq& operator=(ItemPickupReq&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ItemPickupReq& default_instance() {
+    return *reinterpret_cast<const ItemPickupReq*>(
+        &_ItemPickupReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 2;
+  friend void swap(ItemPickupReq& a, ItemPickupReq& b) { a.Swap(&b); }
+  inline void Swap(ItemPickupReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ItemPickupReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ItemPickupReq* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ItemPickupReq>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ItemPickupReq& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ItemPickupReq& from) { ItemPickupReq::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ItemPickupReq* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.ItemPickupReq"; }
+
+  explicit ItemPickupReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ItemPickupReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ItemPickupReq& from);
+  ItemPickupReq(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ItemPickupReq&& from) noexcept
+      : ItemPickupReq(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kDropObjectIdsFieldNumber = 1,
+  };
+  // repeated int64 drop_object_ids = 1;
+  int drop_object_ids_size() const;
+  private:
+  int _internal_drop_object_ids_size() const;
+
+  public:
+  void clear_drop_object_ids() ;
+  ::int64_t drop_object_ids(int index) const;
+  void set_drop_object_ids(int index, ::int64_t value);
+  void add_drop_object_ids(::int64_t value);
+  const ::google::protobuf::RepeatedField<::int64_t>& drop_object_ids() const;
+  ::google::protobuf::RepeatedField<::int64_t>* PROTOBUF_NONNULL mutable_drop_object_ids();
+
+  private:
+  const ::google::protobuf::RepeatedField<::int64_t>& _internal_drop_object_ids() const;
+  ::google::protobuf::RepeatedField<::int64_t>* PROTOBUF_NONNULL _internal_mutable_drop_object_ids();
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.ItemPickupReq)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<0, 1,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ItemPickupReq& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::RepeatedField<::int64_t> drop_object_ids_;
+    ::google::protobuf::internal::CachedSize _drop_object_ids_cached_byte_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fitem_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ItemPickupReq_class_data_;
 // -------------------------------------------------------------------
 
 class ItemUseRes final : public ::google::protobuf::Message
@@ -487,6 +970,222 @@ class ItemUseRes final : public ::google::protobuf::Message
 };
 
 extern const ::google::protobuf::internal::ClassDataFull ItemUseRes_class_data_;
+// -------------------------------------------------------------------
+
+class ItemPickupRes final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.ItemPickupRes) */ {
+ public:
+  inline ItemPickupRes() : ItemPickupRes(nullptr) {}
+  ~ItemPickupRes() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ItemPickupRes* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ItemPickupRes));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ItemPickupRes(::google::protobuf::internal::ConstantInitialized);
+
+  inline ItemPickupRes(const ItemPickupRes& from) : ItemPickupRes(nullptr, from) {}
+  inline ItemPickupRes(ItemPickupRes&& from) noexcept
+      : ItemPickupRes(nullptr, ::std::move(from)) {}
+  inline ItemPickupRes& operator=(const ItemPickupRes& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ItemPickupRes& operator=(ItemPickupRes&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ItemPickupRes& default_instance() {
+    return *reinterpret_cast<const ItemPickupRes*>(
+        &_ItemPickupRes_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 4;
+  friend void swap(ItemPickupRes& a, ItemPickupRes& b) { a.Swap(&b); }
+  inline void Swap(ItemPickupRes* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ItemPickupRes* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ItemPickupRes* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ItemPickupRes>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ItemPickupRes& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ItemPickupRes& from) { ItemPickupRes::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ItemPickupRes* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.ItemPickupRes"; }
+
+  explicit ItemPickupRes(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ItemPickupRes(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ItemPickupRes& from);
+  ItemPickupRes(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ItemPickupRes&& from) noexcept
+      : ItemPickupRes(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kResultsFieldNumber = 1,
+    kUpdatedItemsFieldNumber = 2,
+  };
+  // repeated .GamePacket.ItemPickupResultEntry results = 1;
+  int results_size() const;
+  private:
+  int _internal_results_size() const;
+
+  public:
+  void clear_results() ;
+  ::GamePacket::ItemPickupResultEntry* PROTOBUF_NONNULL mutable_results(int index);
+  ::google::protobuf::RepeatedPtrField<::GamePacket::ItemPickupResultEntry>* PROTOBUF_NONNULL mutable_results();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::GamePacket::ItemPickupResultEntry>& _internal_results() const;
+  ::google::protobuf::RepeatedPtrField<::GamePacket::ItemPickupResultEntry>* PROTOBUF_NONNULL _internal_mutable_results();
+  public:
+  const ::GamePacket::ItemPickupResultEntry& results(int index) const;
+  ::GamePacket::ItemPickupResultEntry* PROTOBUF_NONNULL add_results();
+  const ::google::protobuf::RepeatedPtrField<::GamePacket::ItemPickupResultEntry>& results() const;
+  // repeated .DataStructures.Item updated_items = 2;
+  int updated_items_size() const;
+  private:
+  int _internal_updated_items_size() const;
+
+  public:
+  void clear_updated_items() ;
+  ::DataStructures::Item* PROTOBUF_NONNULL mutable_updated_items(int index);
+  ::google::protobuf::RepeatedPtrField<::DataStructures::Item>* PROTOBUF_NONNULL mutable_updated_items();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::DataStructures::Item>& _internal_updated_items() const;
+  ::google::protobuf::RepeatedPtrField<::DataStructures::Item>* PROTOBUF_NONNULL _internal_mutable_updated_items();
+  public:
+  const ::DataStructures::Item& updated_items(int index) const;
+  ::DataStructures::Item* PROTOBUF_NONNULL add_updated_items();
+  const ::google::protobuf::RepeatedPtrField<::DataStructures::Item>& updated_items() const;
+  // @@protoc_insertion_point(class_scope:GamePacket.ItemPickupRes)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<1, 2,
+                                   2, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ItemPickupRes& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::RepeatedPtrField< ::GamePacket::ItemPickupResultEntry > results_;
+    ::google::protobuf::RepeatedPtrField< ::DataStructures::Item > updated_items_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fitem_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ItemPickupRes_class_data_;
 
 // ===================================================================
 
@@ -716,6 +1415,274 @@ inline void ItemUseRes::set_allocated_item(::DataStructures::Item* PROTOBUF_NULL
   // @@protoc_insertion_point(field_set_allocated:GamePacket.ItemUseRes.item)
 }
 
+// -------------------------------------------------------------------
+
+// ItemPickupReq
+
+// repeated int64 drop_object_ids = 1;
+inline int ItemPickupReq::_internal_drop_object_ids_size() const {
+  return _internal_drop_object_ids().size();
+}
+inline int ItemPickupReq::drop_object_ids_size() const {
+  return _internal_drop_object_ids_size();
+}
+inline void ItemPickupReq::clear_drop_object_ids() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.drop_object_ids_.Clear();
+  ClearHasBitForRepeated(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::int64_t ItemPickupReq::drop_object_ids(int index) const {
+  // @@protoc_insertion_point(field_get:GamePacket.ItemPickupReq.drop_object_ids)
+  return _internal_drop_object_ids().Get(index);
+}
+inline void ItemPickupReq::set_drop_object_ids(int index, ::int64_t value) {
+  _internal_mutable_drop_object_ids()->Set(index, value);
+  // @@protoc_insertion_point(field_set:GamePacket.ItemPickupReq.drop_object_ids)
+}
+inline void ItemPickupReq::add_drop_object_ids(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_drop_object_ids()->Add(value);
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_add:GamePacket.ItemPickupReq.drop_object_ids)
+}
+inline const ::google::protobuf::RepeatedField<::int64_t>& ItemPickupReq::drop_object_ids() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:GamePacket.ItemPickupReq.drop_object_ids)
+  return _internal_drop_object_ids();
+}
+inline ::google::protobuf::RepeatedField<::int64_t>* PROTOBUF_NONNULL ItemPickupReq::mutable_drop_object_ids()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_mutable_list:GamePacket.ItemPickupReq.drop_object_ids)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_drop_object_ids();
+}
+inline const ::google::protobuf::RepeatedField<::int64_t>&
+ItemPickupReq::_internal_drop_object_ids() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.drop_object_ids_;
+}
+inline ::google::protobuf::RepeatedField<::int64_t>* PROTOBUF_NONNULL
+ItemPickupReq::_internal_mutable_drop_object_ids() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.drop_object_ids_;
+}
+
+// -------------------------------------------------------------------
+
+// ItemPickupResultEntry
+
+// int64 drop_object_id = 1;
+inline void ItemPickupResultEntry::clear_drop_object_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.drop_object_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::int64_t ItemPickupResultEntry::drop_object_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ItemPickupResultEntry.drop_object_id)
+  return _internal_drop_object_id();
+}
+inline void ItemPickupResultEntry::set_drop_object_id(::int64_t value) {
+  _internal_set_drop_object_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_set:GamePacket.ItemPickupResultEntry.drop_object_id)
+}
+inline ::int64_t ItemPickupResultEntry::_internal_drop_object_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.drop_object_id_;
+}
+inline void ItemPickupResultEntry::_internal_set_drop_object_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.drop_object_id_ = value;
+}
+
+// .GamePacket.EItemPickupResult result = 2;
+inline void ItemPickupResultEntry::clear_result() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.result_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline ::GamePacket::EItemPickupResult ItemPickupResultEntry::result() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ItemPickupResultEntry.result)
+  return _internal_result();
+}
+inline void ItemPickupResultEntry::set_result(::GamePacket::EItemPickupResult value) {
+  _internal_set_result(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:GamePacket.ItemPickupResultEntry.result)
+}
+inline ::GamePacket::EItemPickupResult ItemPickupResultEntry::_internal_result() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::GamePacket::EItemPickupResult>(_impl_.result_);
+}
+inline void ItemPickupResultEntry::_internal_set_result(::GamePacket::EItemPickupResult value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.result_ = value;
+}
+
+// int32 item_key = 3;
+inline void ItemPickupResultEntry::clear_item_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.item_key_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline ::int32_t ItemPickupResultEntry::item_key() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ItemPickupResultEntry.item_key)
+  return _internal_item_key();
+}
+inline void ItemPickupResultEntry::set_item_key(::int32_t value) {
+  _internal_set_item_key(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:GamePacket.ItemPickupResultEntry.item_key)
+}
+inline ::int32_t ItemPickupResultEntry::_internal_item_key() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.item_key_;
+}
+inline void ItemPickupResultEntry::_internal_set_item_key(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.item_key_ = value;
+}
+
+// int32 picked_count = 4;
+inline void ItemPickupResultEntry::clear_picked_count() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.picked_count_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline ::int32_t ItemPickupResultEntry::picked_count() const {
+  // @@protoc_insertion_point(field_get:GamePacket.ItemPickupResultEntry.picked_count)
+  return _internal_picked_count();
+}
+inline void ItemPickupResultEntry::set_picked_count(::int32_t value) {
+  _internal_set_picked_count(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:GamePacket.ItemPickupResultEntry.picked_count)
+}
+inline ::int32_t ItemPickupResultEntry::_internal_picked_count() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.picked_count_;
+}
+inline void ItemPickupResultEntry::_internal_set_picked_count(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.picked_count_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ItemPickupRes
+
+// repeated .GamePacket.ItemPickupResultEntry results = 1;
+inline int ItemPickupRes::_internal_results_size() const {
+  return _internal_results().size();
+}
+inline int ItemPickupRes::results_size() const {
+  return _internal_results_size();
+}
+inline void ItemPickupRes::clear_results() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.results_.Clear();
+  ClearHasBitForRepeated(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::GamePacket::ItemPickupResultEntry* PROTOBUF_NONNULL ItemPickupRes::mutable_results(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:GamePacket.ItemPickupRes.results)
+  return _internal_mutable_results()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::GamePacket::ItemPickupResultEntry>* PROTOBUF_NONNULL ItemPickupRes::mutable_results()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_mutable_list:GamePacket.ItemPickupRes.results)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_results();
+}
+inline const ::GamePacket::ItemPickupResultEntry& ItemPickupRes::results(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:GamePacket.ItemPickupRes.results)
+  return _internal_results().Get(index);
+}
+inline ::GamePacket::ItemPickupResultEntry* PROTOBUF_NONNULL ItemPickupRes::add_results()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::GamePacket::ItemPickupResultEntry* _add =
+      _internal_mutable_results()->InternalAddWithArena(
+          ::google::protobuf::MessageLite::internal_visibility(), GetArena());
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_add:GamePacket.ItemPickupRes.results)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::GamePacket::ItemPickupResultEntry>& ItemPickupRes::results() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:GamePacket.ItemPickupRes.results)
+  return _internal_results();
+}
+inline const ::google::protobuf::RepeatedPtrField<::GamePacket::ItemPickupResultEntry>&
+ItemPickupRes::_internal_results() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.results_;
+}
+inline ::google::protobuf::RepeatedPtrField<::GamePacket::ItemPickupResultEntry>* PROTOBUF_NONNULL
+ItemPickupRes::_internal_mutable_results() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.results_;
+}
+
+// repeated .DataStructures.Item updated_items = 2;
+inline int ItemPickupRes::_internal_updated_items_size() const {
+  return _internal_updated_items().size();
+}
+inline int ItemPickupRes::updated_items_size() const {
+  return _internal_updated_items_size();
+}
+inline ::DataStructures::Item* PROTOBUF_NONNULL ItemPickupRes::mutable_updated_items(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:GamePacket.ItemPickupRes.updated_items)
+  return _internal_mutable_updated_items()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::DataStructures::Item>* PROTOBUF_NONNULL ItemPickupRes::mutable_updated_items()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_mutable_list:GamePacket.ItemPickupRes.updated_items)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_updated_items();
+}
+inline const ::DataStructures::Item& ItemPickupRes::updated_items(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:GamePacket.ItemPickupRes.updated_items)
+  return _internal_updated_items().Get(index);
+}
+inline ::DataStructures::Item* PROTOBUF_NONNULL ItemPickupRes::add_updated_items()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::DataStructures::Item* _add =
+      _internal_mutable_updated_items()->InternalAddWithArena(
+          ::google::protobuf::MessageLite::internal_visibility(), GetArena());
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_add:GamePacket.ItemPickupRes.updated_items)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::DataStructures::Item>& ItemPickupRes::updated_items() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:GamePacket.ItemPickupRes.updated_items)
+  return _internal_updated_items();
+}
+inline const ::google::protobuf::RepeatedPtrField<::DataStructures::Item>&
+ItemPickupRes::_internal_updated_items() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.updated_items_;
+}
+inline ::google::protobuf::RepeatedPtrField<::DataStructures::Item>* PROTOBUF_NONNULL
+ItemPickupRes::_internal_mutable_updated_items() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.updated_items_;
+}
+
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif  // __GNUC__
@@ -723,6 +1690,19 @@ inline void ItemUseRes::set_allocated_item(::DataStructures::Item* PROTOBUF_NULL
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace GamePacket
 
+
+namespace google {
+namespace protobuf {
+
+template <>
+struct is_proto_enum<::GamePacket::EItemPickupResult> : std::true_type {};
+template <>
+inline const EnumDescriptor* PROTOBUF_NONNULL GetEnumDescriptor<::GamePacket::EItemPickupResult>() {
+  return ::GamePacket::EItemPickupResult_descriptor();
+}
+
+}  // namespace protobuf
+}  // namespace google
 
 // @@protoc_insertion_point(global_scope)
 

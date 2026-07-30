@@ -22,7 +22,6 @@ struct GameDataBase_Monster : public GameData
     int32_t              Key                  = 0;
     std::string          PrefabPath           = "";
     int32_t              ItemDropGroup        = 0;
-    bool                 IsItemDrop           = true;
     double               Exp                  = 0;
     bool                 IsExp                = true;
     EMonsterGrade        Grade                = EMonsterGrade::Normal;

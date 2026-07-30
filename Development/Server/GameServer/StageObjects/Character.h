@@ -3,6 +3,7 @@
 #include "pch.h"
 #include "StageObjects/ActorObject.h"
 #include "Components/CharacterStatComponent.h"
+#include "Components/InventoryComponent.h"
 #include "StageObjects/WaypointMover.h"
 
 // 전방선언 (User <-> Character 양방향 참조의 한쪽)
@@ -65,6 +66,9 @@ public:
     // 변경 가능 접근 (hp/level/exp 등을 직접 set 하기 위해).
     // 좌표/yaw는 직접 변경하지 말 것. SetPos/SetYaw 사용.
     DataStructures::Character& GetProtoMutable() { return m_protoData; }
+
+    InventoryComponent&       GetInventory()       { return m_inventory; }
+    const InventoryComponent& GetInventory() const { return m_inventory; }
 
     // ── 스탯 ──────────────────────────────────────────────────
     // 캐릭터의 모든 스탯을 관리하는 컴포넌트.
@@ -162,6 +166,7 @@ private:
 
     // 캐릭터 스탯 컴포넌트. 생성자에서 JobBase 기본스탯을 적용한다.
     CharacterStatComponent    m_statComponent;
+    InventoryComponent        m_inventory;
 
     // ── 이동 ──────────────────────────────────────────────────
     // 경로(waypoint) 기반 이동은 공유 컴포넌트가 담당(Monster 와 동일 로직).

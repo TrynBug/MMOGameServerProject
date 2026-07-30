@@ -58,6 +58,12 @@ constexpr int32 k_aoiRange = 1;
 constexpr int64 k_characterUpdateIntervalMs = 50;    // 캐릭터: 매 tick (중요)
 constexpr int64 k_monsterUpdateIntervalMs   = 500;   // 몬스터 idle 기본 주기(비관여, 비용 절감). 타겟 관여 시 Monster::SetEngagedTick 으로 engaged(데이터, 예 100ms)로 승격. 적응형 LOD.
 constexpr int64 k_propUpdateIntervalMs      = 500;   // prop: 정적이라 거의 Update 불필요. DespawnDelay 예약된 prop 의 제거타이머만 이 주기로 진행.
+constexpr int64 k_dropUpdateIntervalMs      = 500;   // 드롭: 정적이며 만료 sweep만 수행.
+
+constexpr int64 k_dropLifetimeMs = 180000;            // 개인 드롭 유지시간 3분.
+constexpr float k_dropScatterRadius = 1.0f;            // 몬스터 사망 위치 주변 착지 반경.
+constexpr float k_itemPickupServerRange = 2.0f;        // 서버 권위 습득 허용 반경(클라 1.5m보다 여유).
+constexpr int32 k_itemPickupMaxBatch = 32;
 
 // ── 스냅샷 가변 송신율 ────────────────────────────────────────────
 // 위치/회전이 바뀐 오브젝트는 매 tick(20Hz), 유휴 오브젝트는 이 주기로만 스냅샷에 포함한다.

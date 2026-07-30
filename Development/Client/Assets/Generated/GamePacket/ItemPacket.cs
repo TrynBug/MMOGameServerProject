@@ -28,17 +28,46 @@ namespace GamePacket {
             "YXRhU3RydWN0dXJlcy9pdGVtLnByb3RvIh0KCkl0ZW1Vc2VSZXESDwoHaXRl",
             "bV9pZBgBIAEoAyJSCgpJdGVtVXNlUmVzEg8KB3N1Y2Nlc3MYASABKAgSDwoH",
             "bWVzc2FnZRgCIAEoCRIiCgRpdGVtGAMgASgLMhQuRGF0YVN0cnVjdHVyZXMu",
-            "SXRlbWIGcHJvdG8z"));
+            "SXRlbSIoCg1JdGVtUGlja3VwUmVxEhcKD2Ryb3Bfb2JqZWN0X2lkcxgBIAMo",
+            "AyKGAQoVSXRlbVBpY2t1cFJlc3VsdEVudHJ5EhYKDmRyb3Bfb2JqZWN0X2lk",
+            "GAEgASgDEi0KBnJlc3VsdBgCIAEoDjIdLkdhbWVQYWNrZXQuRUl0ZW1QaWNr",
+            "dXBSZXN1bHQSEAoIaXRlbV9rZXkYAyABKAUSFAoMcGlja2VkX2NvdW50GAQg",
+            "ASgFInAKDUl0ZW1QaWNrdXBSZXMSMgoHcmVzdWx0cxgBIAMoCzIhLkdhbWVQ",
+            "YWNrZXQuSXRlbVBpY2t1cFJlc3VsdEVudHJ5EisKDXVwZGF0ZWRfaXRlbXMY",
+            "AiADKAsyFC5EYXRhU3RydWN0dXJlcy5JdGVtKtoBChFFSXRlbVBpY2t1cFJl",
+            "c3VsdBIbChdJVEVNX1BJQ0tVUF9SRVNVTFRfTk9ORRAAEh4KGklURU1fUElD",
+            "S1VQX1JFU1VMVF9TVUNDRVNTEAESIgoeSVRFTV9QSUNLVVBfUkVTVUxUX1VO",
+            "QVZBSUxBQkxFEAISHgoaSVRFTV9QSUNLVVBfUkVTVUxUX1RPT19GQVIQAxIe",
+            "ChpJVEVNX1BJQ0tVUF9SRVNVTFRfUEVORElORxAEEiQKIElURU1fUElDS1VQ",
+            "X1JFU1VMVF9TVE9SQUdFX0VSUk9SEAViBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::DataStructures.ItemReflection.Descriptor, },
-          new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::GamePacket.EItemPickupResult), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ItemUseReq), global::GamePacket.ItemUseReq.Parser, new[]{ "ItemId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ItemUseRes), global::GamePacket.ItemUseRes.Parser, new[]{ "Success", "Message", "Item" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ItemUseRes), global::GamePacket.ItemUseRes.Parser, new[]{ "Success", "Message", "Item" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ItemPickupReq), global::GamePacket.ItemPickupReq.Parser, new[]{ "DropObjectIds" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ItemPickupResultEntry), global::GamePacket.ItemPickupResultEntry.Parser, new[]{ "DropObjectId", "Result", "ItemKey", "PickedCount" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::GamePacket.ItemPickupRes), global::GamePacket.ItemPickupRes.Parser, new[]{ "Results", "UpdatedItems" }, null, null, null, null)
           }));
     }
     #endregion
 
   }
+  #region Enums
+  public enum EItemPickupResult {
+    [pbr::OriginalName("ITEM_PICKUP_RESULT_NONE")] ItemPickupResultNone = 0,
+    [pbr::OriginalName("ITEM_PICKUP_RESULT_SUCCESS")] ItemPickupResultSuccess = 1,
+    /// <summary>
+    /// 없음/만료/소유자 불일치. 숨겨진 드롭 정보는 노출하지 않는다.
+    /// </summary>
+    [pbr::OriginalName("ITEM_PICKUP_RESULT_UNAVAILABLE")] ItemPickupResultUnavailable = 2,
+    [pbr::OriginalName("ITEM_PICKUP_RESULT_TOO_FAR")] ItemPickupResultTooFar = 3,
+    [pbr::OriginalName("ITEM_PICKUP_RESULT_PENDING")] ItemPickupResultPending = 4,
+    [pbr::OriginalName("ITEM_PICKUP_RESULT_STORAGE_ERROR")] ItemPickupResultStorageError = 5,
+  }
+
+  #endregion
+
   #region Messages
   /// <summary>
   /// 아이템 사용 요청 (클라 -> 서버)
@@ -516,6 +545,729 @@ namespace GamePacket {
               Item = new global::DataStructures.Item();
             }
             input.ReadMessage(Item);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// 근처 개인 드롭을 한 번에 최대 32개까지 습득 요청한다.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ItemPickupReq : pb::IMessage<ItemPickupReq>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ItemPickupReq> _parser = new pb::MessageParser<ItemPickupReq>(() => new ItemPickupReq());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ItemPickupReq> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::GamePacket.ItemPacketReflection.Descriptor.MessageTypes[2]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ItemPickupReq() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ItemPickupReq(ItemPickupReq other) : this() {
+      dropObjectIds_ = other.dropObjectIds_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ItemPickupReq Clone() {
+      return new ItemPickupReq(this);
+    }
+
+    /// <summary>Field number for the "drop_object_ids" field.</summary>
+    public const int DropObjectIdsFieldNumber = 1;
+    private static readonly pb::FieldCodec<long> _repeated_dropObjectIds_codec
+        = pb::FieldCodec.ForInt64(10);
+    private readonly pbc::RepeatedField<long> dropObjectIds_ = new pbc::RepeatedField<long>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<long> DropObjectIds {
+      get { return dropObjectIds_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ItemPickupReq);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ItemPickupReq other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!dropObjectIds_.Equals(other.dropObjectIds_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= dropObjectIds_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      dropObjectIds_.WriteTo(output, _repeated_dropObjectIds_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      dropObjectIds_.WriteTo(ref output, _repeated_dropObjectIds_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += dropObjectIds_.CalculateSize(_repeated_dropObjectIds_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ItemPickupReq other) {
+      if (other == null) {
+        return;
+      }
+      dropObjectIds_.Add(other.dropObjectIds_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10:
+          case 8: {
+            dropObjectIds_.AddEntriesFrom(input, _repeated_dropObjectIds_codec);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10:
+          case 8: {
+            dropObjectIds_.AddEntriesFrom(ref input, _repeated_dropObjectIds_codec);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ItemPickupResultEntry : pb::IMessage<ItemPickupResultEntry>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ItemPickupResultEntry> _parser = new pb::MessageParser<ItemPickupResultEntry>(() => new ItemPickupResultEntry());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ItemPickupResultEntry> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::GamePacket.ItemPacketReflection.Descriptor.MessageTypes[3]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ItemPickupResultEntry() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ItemPickupResultEntry(ItemPickupResultEntry other) : this() {
+      dropObjectId_ = other.dropObjectId_;
+      result_ = other.result_;
+      itemKey_ = other.itemKey_;
+      pickedCount_ = other.pickedCount_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ItemPickupResultEntry Clone() {
+      return new ItemPickupResultEntry(this);
+    }
+
+    /// <summary>Field number for the "drop_object_id" field.</summary>
+    public const int DropObjectIdFieldNumber = 1;
+    private long dropObjectId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long DropObjectId {
+      get { return dropObjectId_; }
+      set {
+        dropObjectId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "result" field.</summary>
+    public const int ResultFieldNumber = 2;
+    private global::GamePacket.EItemPickupResult result_ = global::GamePacket.EItemPickupResult.ItemPickupResultNone;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::GamePacket.EItemPickupResult Result {
+      get { return result_; }
+      set {
+        result_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "item_key" field.</summary>
+    public const int ItemKeyFieldNumber = 3;
+    private int itemKey_;
+    /// <summary>
+    /// 성공한 항목만 채운다.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int ItemKey {
+      get { return itemKey_; }
+      set {
+        itemKey_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "picked_count" field.</summary>
+    public const int PickedCountFieldNumber = 4;
+    private int pickedCount_;
+    /// <summary>
+    /// 성공한 항목만 채운다.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int PickedCount {
+      get { return pickedCount_; }
+      set {
+        pickedCount_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ItemPickupResultEntry);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ItemPickupResultEntry other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (DropObjectId != other.DropObjectId) return false;
+      if (Result != other.Result) return false;
+      if (ItemKey != other.ItemKey) return false;
+      if (PickedCount != other.PickedCount) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (DropObjectId != 0L) hash ^= DropObjectId.GetHashCode();
+      if (Result != global::GamePacket.EItemPickupResult.ItemPickupResultNone) hash ^= Result.GetHashCode();
+      if (ItemKey != 0) hash ^= ItemKey.GetHashCode();
+      if (PickedCount != 0) hash ^= PickedCount.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (DropObjectId != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(DropObjectId);
+      }
+      if (Result != global::GamePacket.EItemPickupResult.ItemPickupResultNone) {
+        output.WriteRawTag(16);
+        output.WriteEnum((int) Result);
+      }
+      if (ItemKey != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(ItemKey);
+      }
+      if (PickedCount != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(PickedCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (DropObjectId != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(DropObjectId);
+      }
+      if (Result != global::GamePacket.EItemPickupResult.ItemPickupResultNone) {
+        output.WriteRawTag(16);
+        output.WriteEnum((int) Result);
+      }
+      if (ItemKey != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(ItemKey);
+      }
+      if (PickedCount != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(PickedCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (DropObjectId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(DropObjectId);
+      }
+      if (Result != global::GamePacket.EItemPickupResult.ItemPickupResultNone) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Result);
+      }
+      if (ItemKey != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ItemKey);
+      }
+      if (PickedCount != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PickedCount);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ItemPickupResultEntry other) {
+      if (other == null) {
+        return;
+      }
+      if (other.DropObjectId != 0L) {
+        DropObjectId = other.DropObjectId;
+      }
+      if (other.Result != global::GamePacket.EItemPickupResult.ItemPickupResultNone) {
+        Result = other.Result;
+      }
+      if (other.ItemKey != 0) {
+        ItemKey = other.ItemKey;
+      }
+      if (other.PickedCount != 0) {
+        PickedCount = other.PickedCount;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            DropObjectId = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            Result = (global::GamePacket.EItemPickupResult) input.ReadEnum();
+            break;
+          }
+          case 24: {
+            ItemKey = input.ReadInt32();
+            break;
+          }
+          case 32: {
+            PickedCount = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            DropObjectId = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            Result = (global::GamePacket.EItemPickupResult) input.ReadEnum();
+            break;
+          }
+          case 24: {
+            ItemKey = input.ReadInt32();
+            break;
+          }
+          case 32: {
+            PickedCount = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// updated_items는 이번 트랜잭션으로 생성되거나 count가 변경된 인벤토리 행의 최종값이다.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ItemPickupRes : pb::IMessage<ItemPickupRes>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ItemPickupRes> _parser = new pb::MessageParser<ItemPickupRes>(() => new ItemPickupRes());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ItemPickupRes> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::GamePacket.ItemPacketReflection.Descriptor.MessageTypes[4]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ItemPickupRes() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ItemPickupRes(ItemPickupRes other) : this() {
+      results_ = other.results_.Clone();
+      updatedItems_ = other.updatedItems_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ItemPickupRes Clone() {
+      return new ItemPickupRes(this);
+    }
+
+    /// <summary>Field number for the "results" field.</summary>
+    public const int ResultsFieldNumber = 1;
+    private static readonly pb::FieldCodec<global::GamePacket.ItemPickupResultEntry> _repeated_results_codec
+        = pb::FieldCodec.ForMessage(10, global::GamePacket.ItemPickupResultEntry.Parser);
+    private readonly pbc::RepeatedField<global::GamePacket.ItemPickupResultEntry> results_ = new pbc::RepeatedField<global::GamePacket.ItemPickupResultEntry>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::GamePacket.ItemPickupResultEntry> Results {
+      get { return results_; }
+    }
+
+    /// <summary>Field number for the "updated_items" field.</summary>
+    public const int UpdatedItemsFieldNumber = 2;
+    private static readonly pb::FieldCodec<global::DataStructures.Item> _repeated_updatedItems_codec
+        = pb::FieldCodec.ForMessage(18, global::DataStructures.Item.Parser);
+    private readonly pbc::RepeatedField<global::DataStructures.Item> updatedItems_ = new pbc::RepeatedField<global::DataStructures.Item>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::DataStructures.Item> UpdatedItems {
+      get { return updatedItems_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ItemPickupRes);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ItemPickupRes other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!results_.Equals(other.results_)) return false;
+      if(!updatedItems_.Equals(other.updatedItems_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= results_.GetHashCode();
+      hash ^= updatedItems_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      results_.WriteTo(output, _repeated_results_codec);
+      updatedItems_.WriteTo(output, _repeated_updatedItems_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      results_.WriteTo(ref output, _repeated_results_codec);
+      updatedItems_.WriteTo(ref output, _repeated_updatedItems_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += results_.CalculateSize(_repeated_results_codec);
+      size += updatedItems_.CalculateSize(_repeated_updatedItems_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ItemPickupRes other) {
+      if (other == null) {
+        return;
+      }
+      results_.Add(other.results_);
+      updatedItems_.Add(other.updatedItems_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            results_.AddEntriesFrom(input, _repeated_results_codec);
+            break;
+          }
+          case 18: {
+            updatedItems_.AddEntriesFrom(input, _repeated_updatedItems_codec);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            results_.AddEntriesFrom(ref input, _repeated_results_codec);
+            break;
+          }
+          case 18: {
+            updatedItems_.AddEntriesFrom(ref input, _repeated_updatedItems_codec);
             break;
           }
         }

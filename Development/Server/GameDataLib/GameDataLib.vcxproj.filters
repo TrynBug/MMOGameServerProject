@@ -108,6 +108,10 @@
     <ClCompile Include="Generated\GameDataBase_SpawnGroup.cpp">
       <Filter>소스 파일\Generated</Filter>
     </ClCompile>
+    <ClCompile Include="Generated\GameData_Item.cpp"><Filter>소스 파일\Generated</Filter></ClCompile>
+    <ClCompile Include="Generated\GameDataBase_Item.cpp"><Filter>소스 파일\Generated</Filter></ClCompile>
+    <ClCompile Include="Generated\GameData_ItemDrop.cpp"><Filter>소스 파일\Generated</Filter></ClCompile>
+    <ClCompile Include="Generated\GameDataBase_ItemDrop.cpp"><Filter>소스 파일\Generated</Filter></ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Generated\GameDataBase_Monster.h">
@@ -197,5 +201,9 @@
     <ClInclude Include="Generated\GameDataBase_SpawnGroup.h">
       <Filter>소스 파일\Generated</Filter>
     </ClInclude>
+    <ClInclude Include="Generated\GameData_Item.h"><Filter>소스 파일\Generated</Filter></ClInclude>
+    <ClInclude Include="Generated\GameDataBase_Item.h"><Filter>소스 파일\Generated</Filter></ClInclude>
+    <ClInclude Include="Generated\GameData_ItemDrop.h"><Filter>소스 파일\Generated</Filter></ClInclude>
+    <ClInclude Include="Generated\GameDataBase_ItemDrop.h"><Filter>소스 파일\Generated</Filter></ClInclude>
   </ItemGroup>
 </Project>

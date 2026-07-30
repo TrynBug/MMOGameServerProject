@@ -101,6 +101,7 @@
     <ClInclude Include="Components\BuffComponent.h" />
     <ClInclude Include="Components\BuffInstance.h" />
     <ClInclude Include="Components\CharacterStatComponent.h" />
+    <ClInclude Include="Components\InventoryComponent.h" />
     <ClInclude Include="Components\IMonsterAI.h" />
     <ClInclude Include="Components\MonsterCombatComponent.h" />
     <ClInclude Include="Components\MonsterFsmAI.h" />
@@ -124,6 +125,7 @@
     <ClInclude Include="Skills\SkillBake.h" />
     <ClInclude Include="StageObjects\ActorObject.h" />
     <ClInclude Include="StageObjects\Character.h" />
+    <ClInclude Include="StageObjects\DropObject.h" />
     <ClInclude Include="StageObjects\EventArea.h" />
     <ClInclude Include="StageObjects\Monster.h" />
     <ClInclude Include="StageObjects\MonsterSpawner.h" />
@@ -145,6 +147,7 @@
     <ClCompile Include="Components\BasicStatComponent.cpp" />
     <ClCompile Include="Components\BuffComponent.cpp" />
     <ClCompile Include="Components\CharacterStatComponent.cpp" />
+    <ClCompile Include="Components\InventoryComponent.cpp" />
     <ClCompile Include="Components\MonsterCombatComponent.cpp" />
     <ClCompile Include="Components\MonsterFsmAI.cpp" />
     <ClCompile Include="Components\SkillComponent.cpp" />
@@ -166,6 +169,7 @@
     <ClCompile Include="Skills\SkillBake.cpp" />
     <ClCompile Include="StageObjects\ActorObject.cpp" />
     <ClCompile Include="StageObjects\Character.cpp" />
+    <ClCompile Include="StageObjects\DropObject.cpp" />
     <ClCompile Include="StageObjects\EventArea.cpp" />
     <ClCompile Include="StageObjects\Monster.cpp" />
     <ClCompile Include="StageObjects\MonsterSpawner.cpp" />

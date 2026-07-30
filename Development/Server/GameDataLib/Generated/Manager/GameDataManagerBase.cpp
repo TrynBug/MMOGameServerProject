@@ -5,6 +5,8 @@
 #include "../GameDataManagerBase.h"
 
 #include "../GameData_Buff.h"
+#include "../GameData_Item.h"
+#include "../GameData_ItemDrop.h"
 #include "../GameData_JobBase.h"
 #include "../GameData_Monster.h"
 #include "../GameData_MonsterAI.h"
@@ -19,6 +21,8 @@
 bool GameDataManagerBase::createAllGameDataTables()
 {
 	if (!createGameDataTable<GameDataTable_Buff>()) return false;
+	if (!createGameDataTable<GameDataTable_Item>()) return false;
+	if (!createGameDataTable<GameDataTable_ItemDrop>()) return false;
 	if (!createGameDataTable<GameDataTable_JobBase>()) return false;
 	if (!createGameDataTable<GameDataTable_Monster>()) return false;
 	if (!createGameDataTable<GameDataTable_MonsterAI>()) return false;

@@ -153,6 +153,8 @@
     <ClCompile Include="Generated\Enum\GameEnum_Stat.cpp" />
     <ClCompile Include="Generated\GameDataBase_Buff.cpp" />
     <ClCompile Include="Generated\GameDataBase_JobBase.cpp" />
+    <ClCompile Include="Generated\GameDataBase_Item.cpp" />
+    <ClCompile Include="Generated\GameDataBase_ItemDrop.cpp" />
     <ClCompile Include="Generated\GameDataBase_Monster.cpp" />
     <ClCompile Include="Generated\GameDataBase_MonsterAI.cpp" />
     <ClCompile Include="Generated\GameDataBase_Prop.cpp" />
@@ -164,6 +166,8 @@
     <ClCompile Include="Generated\GameDataBase_Stat.cpp" />
     <ClCompile Include="Generated\GameData_Buff.cpp" />
     <ClCompile Include="Generated\GameData_JobBase.cpp" />
+    <ClCompile Include="Generated\GameData_Item.cpp" />
+    <ClCompile Include="Generated\GameData_ItemDrop.cpp" />
     <ClCompile Include="Generated\GameData_Monster.cpp" />
     <ClCompile Include="Generated\GameData_MonsterAI.cpp" />
     <ClCompile Include="Generated\GameData_Prop.cpp" />
@@ -188,6 +192,8 @@
     <ClInclude Include="Generated\Enum\GameEnum_Stat.h" />
     <ClInclude Include="Generated\GameDataBase_Buff.h" />
     <ClInclude Include="Generated\GameDataBase_JobBase.h" />
+    <ClInclude Include="Generated\GameDataBase_Item.h" />
+    <ClInclude Include="Generated\GameDataBase_ItemDrop.h" />
     <ClInclude Include="Generated\GameDataBase_Monster.h" />
     <ClInclude Include="Generated\GameDataBase_MonsterAI.h" />
     <ClInclude Include="Generated\GameDataBase_Prop.h" />
@@ -199,6 +205,8 @@
     <ClInclude Include="Generated\GameDataBase_Stat.h" />
     <ClInclude Include="Generated\GameData_Buff.h" />
     <ClInclude Include="Generated\GameData_JobBase.h" />
+    <ClInclude Include="Generated\GameData_Item.h" />
+    <ClInclude Include="Generated\GameData_ItemDrop.h" />
     <ClInclude Include="Generated\GameData_Monster.h" />
     <ClInclude Include="Generated\GameData_MonsterAI.h" />
     <ClInclude Include="Generated\GameData_Prop.h" />

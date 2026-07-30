@@ -80,7 +80,10 @@ public:
                                  const std::vector<GamePacket::CharacterSpawnInfo>& characterSpawns,
                                  const std::vector<int64>& despawnIds,
                                  const std::vector<GamePacket::MonsterSpawnInfo>& monsterSpawns = {},
-                                 const std::vector<GamePacket::PropSpawnInfo>& propSpawns = {});
+                                 const std::vector<GamePacket::PropSpawnInfo>& propSpawns = {},
+                                 const std::vector<GamePacket::DropSpawnInfo>& dropSpawns = {});
+
+    void SendItemPickupRes(int64 accountId, const GamePacket::ItemPickupRes& res);
 
     // prop 상태 변경 알림 전송 (PropStateNtf). Stage 가 상태전이 시 prop 주변 AOI 유저들에게 broadcast.
     // actorObjectId: 상호작용을 유발한 액터(없으면 0, 예: 스크립트 SetPropState).

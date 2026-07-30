@@ -61,6 +61,10 @@ class CharacterSpawnInfo;
 struct CharacterSpawnInfoDefaultTypeInternal;
 extern CharacterSpawnInfoDefaultTypeInternal _CharacterSpawnInfo_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull CharacterSpawnInfo_class_data_;
+class DropSpawnInfo;
+struct DropSpawnInfoDefaultTypeInternal;
+extern DropSpawnInfoDefaultTypeInternal _DropSpawnInfo_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull DropSpawnInfo_class_data_;
 class MonsterSpawnInfo;
 struct MonsterSpawnInfoDefaultTypeInternal;
 extern MonsterSpawnInfoDefaultTypeInternal _MonsterSpawnInfo_default_instance_;
@@ -153,7 +157,7 @@ class PropStateNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const PropStateNtf*>(
         &_PropStateNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 5;
+  static constexpr int kIndexInFileMessages = 6;
   friend void swap(PropStateNtf& a, PropStateNtf& b) { a.Swap(&b); }
   inline void Swap(PropStateNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -629,7 +633,7 @@ class ObjectReviveNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const ObjectReviveNtf*>(
         &_ObjectReviveNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 7;
+  static constexpr int kIndexInFileMessages = 8;
   friend void swap(ObjectReviveNtf& a, ObjectReviveNtf& b) { a.Swap(&b); }
   inline void Swap(ObjectReviveNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -891,7 +895,7 @@ class ObjectDeathNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const ObjectDeathNtf*>(
         &_ObjectDeathNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 6;
+  static constexpr int kIndexInFileMessages = 7;
   friend void swap(ObjectDeathNtf& a, ObjectDeathNtf& b) { a.Swap(&b); }
   inline void Swap(ObjectDeathNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -1036,6 +1040,316 @@ class ObjectDeathNtf final : public ::google::protobuf::Message
 };
 
 extern const ::google::protobuf::internal::ClassDataFull ObjectDeathNtf_class_data_;
+// -------------------------------------------------------------------
+
+class DropSpawnInfo final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.DropSpawnInfo) */ {
+ public:
+  inline DropSpawnInfo() : DropSpawnInfo(nullptr) {}
+  ~DropSpawnInfo() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(DropSpawnInfo* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(DropSpawnInfo));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR DropSpawnInfo(::google::protobuf::internal::ConstantInitialized);
+
+  inline DropSpawnInfo(const DropSpawnInfo& from) : DropSpawnInfo(nullptr, from) {}
+  inline DropSpawnInfo(DropSpawnInfo&& from) noexcept
+      : DropSpawnInfo(nullptr, ::std::move(from)) {}
+  inline DropSpawnInfo& operator=(const DropSpawnInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DropSpawnInfo& operator=(DropSpawnInfo&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const DropSpawnInfo& default_instance() {
+    return *reinterpret_cast<const DropSpawnInfo*>(
+        &_DropSpawnInfo_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 4;
+  friend void swap(DropSpawnInfo& a, DropSpawnInfo& b) { a.Swap(&b); }
+  inline void Swap(DropSpawnInfo* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DropSpawnInfo* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  DropSpawnInfo* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<DropSpawnInfo>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const DropSpawnInfo& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const DropSpawnInfo& from) { DropSpawnInfo::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(DropSpawnInfo* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.DropSpawnInfo"; }
+
+  explicit DropSpawnInfo(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  DropSpawnInfo(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const DropSpawnInfo& from);
+  DropSpawnInfo(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, DropSpawnInfo&& from) noexcept
+      : DropSpawnInfo(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kObjectIdFieldNumber = 1,
+    kItemKeyFieldNumber = 2,
+    kCountFieldNumber = 3,
+    kOriginXFieldNumber = 4,
+    kOriginYFieldNumber = 5,
+    kOriginZFieldNumber = 6,
+    kPosXFieldNumber = 7,
+    kPosYFieldNumber = 8,
+    kPosZFieldNumber = 9,
+    kCreatedServerTimeMsFieldNumber = 10,
+    kExpireServerTimeMsFieldNumber = 11,
+  };
+  // int64 object_id = 1;
+  void clear_object_id() ;
+  ::int64_t object_id() const;
+  void set_object_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_object_id() const;
+  void _internal_set_object_id(::int64_t value);
+
+  public:
+  // int32 item_key = 2;
+  void clear_item_key() ;
+  ::int32_t item_key() const;
+  void set_item_key(::int32_t value);
+
+  private:
+  ::int32_t _internal_item_key() const;
+  void _internal_set_item_key(::int32_t value);
+
+  public:
+  // int32 count = 3;
+  void clear_count() ;
+  ::int32_t count() const;
+  void set_count(::int32_t value);
+
+  private:
+  ::int32_t _internal_count() const;
+  void _internal_set_count(::int32_t value);
+
+  public:
+  // float origin_x = 4;
+  void clear_origin_x() ;
+  float origin_x() const;
+  void set_origin_x(float value);
+
+  private:
+  float _internal_origin_x() const;
+  void _internal_set_origin_x(float value);
+
+  public:
+  // float origin_y = 5;
+  void clear_origin_y() ;
+  float origin_y() const;
+  void set_origin_y(float value);
+
+  private:
+  float _internal_origin_y() const;
+  void _internal_set_origin_y(float value);
+
+  public:
+  // float origin_z = 6;
+  void clear_origin_z() ;
+  float origin_z() const;
+  void set_origin_z(float value);
+
+  private:
+  float _internal_origin_z() const;
+  void _internal_set_origin_z(float value);
+
+  public:
+  // float pos_x = 7;
+  void clear_pos_x() ;
+  float pos_x() const;
+  void set_pos_x(float value);
+
+  private:
+  float _internal_pos_x() const;
+  void _internal_set_pos_x(float value);
+
+  public:
+  // float pos_y = 8;
+  void clear_pos_y() ;
+  float pos_y() const;
+  void set_pos_y(float value);
+
+  private:
+  float _internal_pos_y() const;
+  void _internal_set_pos_y(float value);
+
+  public:
+  // float pos_z = 9;
+  void clear_pos_z() ;
+  float pos_z() const;
+  void set_pos_z(float value);
+
+  private:
+  float _internal_pos_z() const;
+  void _internal_set_pos_z(float value);
+
+  public:
+  // int64 created_server_time_ms = 10;
+  void clear_created_server_time_ms() ;
+  ::int64_t created_server_time_ms() const;
+  void set_created_server_time_ms(::int64_t value);
+
+  private:
+  ::int64_t _internal_created_server_time_ms() const;
+  void _internal_set_created_server_time_ms(::int64_t value);
+
+  public:
+  // int64 expire_server_time_ms = 11;
+  void clear_expire_server_time_ms() ;
+  ::int64_t expire_server_time_ms() const;
+  void set_expire_server_time_ms(::int64_t value);
+
+  private:
+  ::int64_t _internal_expire_server_time_ms() const;
+  void _internal_set_expire_server_time_ms(::int64_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.DropSpawnInfo)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<4, 11,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const DropSpawnInfo& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int64_t object_id_;
+    ::int32_t item_key_;
+    ::int32_t count_;
+    float origin_x_;
+    float origin_y_;
+    float origin_z_;
+    float pos_x_;
+    float pos_y_;
+    float pos_z_;
+    ::int64_t created_server_time_ms_;
+    ::int64_t expire_server_time_ms_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fobject_5fvisibility_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull DropSpawnInfo_class_data_;
 // -------------------------------------------------------------------
 
 class BuffSnapshotInfo final : public ::google::protobuf::Message
@@ -1994,7 +2308,7 @@ class ObjectVisibilityNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const ObjectVisibilityNtf*>(
         &_ObjectVisibilityNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 4;
+  static constexpr int kIndexInFileMessages = 5;
   friend void swap(ObjectVisibilityNtf& a, ObjectVisibilityNtf& b) { a.Swap(&b); }
   inline void Swap(ObjectVisibilityNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -2084,6 +2398,7 @@ class ObjectVisibilityNtf final : public ::google::protobuf::Message
     kCharacterSpawnsFieldNumber = 1,
     kMonsterSpawnsFieldNumber = 2,
     kPropSpawnsFieldNumber = 3,
+    kDropSpawnsFieldNumber = 4,
     kDespawnIdsFieldNumber = 10,
   };
   // repeated .GamePacket.CharacterSpawnInfo character_spawns = 1;
@@ -2137,6 +2452,23 @@ class ObjectVisibilityNtf final : public ::google::protobuf::Message
   const ::GamePacket::PropSpawnInfo& prop_spawns(int index) const;
   ::GamePacket::PropSpawnInfo* PROTOBUF_NONNULL add_prop_spawns();
   const ::google::protobuf::RepeatedPtrField<::GamePacket::PropSpawnInfo>& prop_spawns() const;
+  // repeated .GamePacket.DropSpawnInfo drop_spawns = 4;
+  int drop_spawns_size() const;
+  private:
+  int _internal_drop_spawns_size() const;
+
+  public:
+  void clear_drop_spawns() ;
+  ::GamePacket::DropSpawnInfo* PROTOBUF_NONNULL mutable_drop_spawns(int index);
+  ::google::protobuf::RepeatedPtrField<::GamePacket::DropSpawnInfo>* PROTOBUF_NONNULL mutable_drop_spawns();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::GamePacket::DropSpawnInfo>& _internal_drop_spawns() const;
+  ::google::protobuf::RepeatedPtrField<::GamePacket::DropSpawnInfo>* PROTOBUF_NONNULL _internal_mutable_drop_spawns();
+  public:
+  const ::GamePacket::DropSpawnInfo& drop_spawns(int index) const;
+  ::GamePacket::DropSpawnInfo* PROTOBUF_NONNULL add_drop_spawns();
+  const ::google::protobuf::RepeatedPtrField<::GamePacket::DropSpawnInfo>& drop_spawns() const;
   // repeated int64 despawn_ids = 10;
   int despawn_ids_size() const;
   private:
@@ -2159,8 +2491,8 @@ class ObjectVisibilityNtf final : public ::google::protobuf::Message
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 4,
-                                   3, 0,
+  static const ::google::protobuf::internal::TcParseTable<2, 5,
+                                   4, 0,
                                    2>
       _table_;
 
@@ -2184,6 +2516,7 @@ class ObjectVisibilityNtf final : public ::google::protobuf::Message
     ::google::protobuf::RepeatedPtrField< ::GamePacket::CharacterSpawnInfo > character_spawns_;
     ::google::protobuf::RepeatedPtrField< ::GamePacket::MonsterSpawnInfo > monster_spawns_;
     ::google::protobuf::RepeatedPtrField< ::GamePacket::PropSpawnInfo > prop_spawns_;
+    ::google::protobuf::RepeatedPtrField< ::GamePacket::DropSpawnInfo > drop_spawns_;
     ::google::protobuf::RepeatedField<::int64_t> despawn_ids_;
     ::google::protobuf::internal::CachedSize _despawn_ids_cached_byte_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -3226,6 +3559,285 @@ inline void PropSpawnInfo::_internal_set_state(::int32_t value) {
 
 // -------------------------------------------------------------------
 
+// DropSpawnInfo
+
+// int64 object_id = 1;
+inline void DropSpawnInfo::clear_object_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.object_id_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::int64_t DropSpawnInfo::object_id() const {
+  // @@protoc_insertion_point(field_get:GamePacket.DropSpawnInfo.object_id)
+  return _internal_object_id();
+}
+inline void DropSpawnInfo::set_object_id(::int64_t value) {
+  _internal_set_object_id(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_set:GamePacket.DropSpawnInfo.object_id)
+}
+inline ::int64_t DropSpawnInfo::_internal_object_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.object_id_;
+}
+inline void DropSpawnInfo::_internal_set_object_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.object_id_ = value;
+}
+
+// int32 item_key = 2;
+inline void DropSpawnInfo::clear_item_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.item_key_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline ::int32_t DropSpawnInfo::item_key() const {
+  // @@protoc_insertion_point(field_get:GamePacket.DropSpawnInfo.item_key)
+  return _internal_item_key();
+}
+inline void DropSpawnInfo::set_item_key(::int32_t value) {
+  _internal_set_item_key(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  // @@protoc_insertion_point(field_set:GamePacket.DropSpawnInfo.item_key)
+}
+inline ::int32_t DropSpawnInfo::_internal_item_key() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.item_key_;
+}
+inline void DropSpawnInfo::_internal_set_item_key(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.item_key_ = value;
+}
+
+// int32 count = 3;
+inline void DropSpawnInfo::clear_count() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.count_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000004U);
+}
+inline ::int32_t DropSpawnInfo::count() const {
+  // @@protoc_insertion_point(field_get:GamePacket.DropSpawnInfo.count)
+  return _internal_count();
+}
+inline void DropSpawnInfo::set_count(::int32_t value) {
+  _internal_set_count(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  // @@protoc_insertion_point(field_set:GamePacket.DropSpawnInfo.count)
+}
+inline ::int32_t DropSpawnInfo::_internal_count() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.count_;
+}
+inline void DropSpawnInfo::_internal_set_count(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.count_ = value;
+}
+
+// float origin_x = 4;
+inline void DropSpawnInfo::clear_origin_x() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.origin_x_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline float DropSpawnInfo::origin_x() const {
+  // @@protoc_insertion_point(field_get:GamePacket.DropSpawnInfo.origin_x)
+  return _internal_origin_x();
+}
+inline void DropSpawnInfo::set_origin_x(float value) {
+  _internal_set_origin_x(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:GamePacket.DropSpawnInfo.origin_x)
+}
+inline float DropSpawnInfo::_internal_origin_x() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.origin_x_;
+}
+inline void DropSpawnInfo::_internal_set_origin_x(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.origin_x_ = value;
+}
+
+// float origin_y = 5;
+inline void DropSpawnInfo::clear_origin_y() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.origin_y_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000010U);
+}
+inline float DropSpawnInfo::origin_y() const {
+  // @@protoc_insertion_point(field_get:GamePacket.DropSpawnInfo.origin_y)
+  return _internal_origin_y();
+}
+inline void DropSpawnInfo::set_origin_y(float value) {
+  _internal_set_origin_y(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000010U);
+  // @@protoc_insertion_point(field_set:GamePacket.DropSpawnInfo.origin_y)
+}
+inline float DropSpawnInfo::_internal_origin_y() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.origin_y_;
+}
+inline void DropSpawnInfo::_internal_set_origin_y(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.origin_y_ = value;
+}
+
+// float origin_z = 6;
+inline void DropSpawnInfo::clear_origin_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.origin_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000020U);
+}
+inline float DropSpawnInfo::origin_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.DropSpawnInfo.origin_z)
+  return _internal_origin_z();
+}
+inline void DropSpawnInfo::set_origin_z(float value) {
+  _internal_set_origin_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000020U);
+  // @@protoc_insertion_point(field_set:GamePacket.DropSpawnInfo.origin_z)
+}
+inline float DropSpawnInfo::_internal_origin_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.origin_z_;
+}
+inline void DropSpawnInfo::_internal_set_origin_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.origin_z_ = value;
+}
+
+// float pos_x = 7;
+inline void DropSpawnInfo::clear_pos_x() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_x_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000040U);
+}
+inline float DropSpawnInfo::pos_x() const {
+  // @@protoc_insertion_point(field_get:GamePacket.DropSpawnInfo.pos_x)
+  return _internal_pos_x();
+}
+inline void DropSpawnInfo::set_pos_x(float value) {
+  _internal_set_pos_x(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000040U);
+  // @@protoc_insertion_point(field_set:GamePacket.DropSpawnInfo.pos_x)
+}
+inline float DropSpawnInfo::_internal_pos_x() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_x_;
+}
+inline void DropSpawnInfo::_internal_set_pos_x(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_x_ = value;
+}
+
+// float pos_y = 8;
+inline void DropSpawnInfo::clear_pos_y() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_y_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000080U);
+}
+inline float DropSpawnInfo::pos_y() const {
+  // @@protoc_insertion_point(field_get:GamePacket.DropSpawnInfo.pos_y)
+  return _internal_pos_y();
+}
+inline void DropSpawnInfo::set_pos_y(float value) {
+  _internal_set_pos_y(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000080U);
+  // @@protoc_insertion_point(field_set:GamePacket.DropSpawnInfo.pos_y)
+}
+inline float DropSpawnInfo::_internal_pos_y() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_y_;
+}
+inline void DropSpawnInfo::_internal_set_pos_y(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_y_ = value;
+}
+
+// float pos_z = 9;
+inline void DropSpawnInfo::clear_pos_z() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000100U);
+}
+inline float DropSpawnInfo::pos_z() const {
+  // @@protoc_insertion_point(field_get:GamePacket.DropSpawnInfo.pos_z)
+  return _internal_pos_z();
+}
+inline void DropSpawnInfo::set_pos_z(float value) {
+  _internal_set_pos_z(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000100U);
+  // @@protoc_insertion_point(field_set:GamePacket.DropSpawnInfo.pos_z)
+}
+inline float DropSpawnInfo::_internal_pos_z() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pos_z_;
+}
+inline void DropSpawnInfo::_internal_set_pos_z(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pos_z_ = value;
+}
+
+// int64 created_server_time_ms = 10;
+inline void DropSpawnInfo::clear_created_server_time_ms() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.created_server_time_ms_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000200U);
+}
+inline ::int64_t DropSpawnInfo::created_server_time_ms() const {
+  // @@protoc_insertion_point(field_get:GamePacket.DropSpawnInfo.created_server_time_ms)
+  return _internal_created_server_time_ms();
+}
+inline void DropSpawnInfo::set_created_server_time_ms(::int64_t value) {
+  _internal_set_created_server_time_ms(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000200U);
+  // @@protoc_insertion_point(field_set:GamePacket.DropSpawnInfo.created_server_time_ms)
+}
+inline ::int64_t DropSpawnInfo::_internal_created_server_time_ms() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.created_server_time_ms_;
+}
+inline void DropSpawnInfo::_internal_set_created_server_time_ms(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.created_server_time_ms_ = value;
+}
+
+// int64 expire_server_time_ms = 11;
+inline void DropSpawnInfo::clear_expire_server_time_ms() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.expire_server_time_ms_ = ::int64_t{0};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000400U);
+}
+inline ::int64_t DropSpawnInfo::expire_server_time_ms() const {
+  // @@protoc_insertion_point(field_get:GamePacket.DropSpawnInfo.expire_server_time_ms)
+  return _internal_expire_server_time_ms();
+}
+inline void DropSpawnInfo::set_expire_server_time_ms(::int64_t value) {
+  _internal_set_expire_server_time_ms(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000400U);
+  // @@protoc_insertion_point(field_set:GamePacket.DropSpawnInfo.expire_server_time_ms)
+}
+inline ::int64_t DropSpawnInfo::_internal_expire_server_time_ms() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.expire_server_time_ms_;
+}
+inline void DropSpawnInfo::_internal_set_expire_server_time_ms(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.expire_server_time_ms_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // ObjectVisibilityNtf
 
 // repeated .GamePacket.CharacterSpawnInfo character_spawns = 1;
@@ -3396,6 +4008,62 @@ ObjectVisibilityNtf::_internal_mutable_prop_spawns() {
   return &_impl_.prop_spawns_;
 }
 
+// repeated .GamePacket.DropSpawnInfo drop_spawns = 4;
+inline int ObjectVisibilityNtf::_internal_drop_spawns_size() const {
+  return _internal_drop_spawns().size();
+}
+inline int ObjectVisibilityNtf::drop_spawns_size() const {
+  return _internal_drop_spawns_size();
+}
+inline void ObjectVisibilityNtf::clear_drop_spawns() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.drop_spawns_.Clear();
+  ClearHasBitForRepeated(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline ::GamePacket::DropSpawnInfo* PROTOBUF_NONNULL ObjectVisibilityNtf::mutable_drop_spawns(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:GamePacket.ObjectVisibilityNtf.drop_spawns)
+  return _internal_mutable_drop_spawns()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::GamePacket::DropSpawnInfo>* PROTOBUF_NONNULL ObjectVisibilityNtf::mutable_drop_spawns()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_mutable_list:GamePacket.ObjectVisibilityNtf.drop_spawns)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_drop_spawns();
+}
+inline const ::GamePacket::DropSpawnInfo& ObjectVisibilityNtf::drop_spawns(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:GamePacket.ObjectVisibilityNtf.drop_spawns)
+  return _internal_drop_spawns().Get(index);
+}
+inline ::GamePacket::DropSpawnInfo* PROTOBUF_NONNULL ObjectVisibilityNtf::add_drop_spawns()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::GamePacket::DropSpawnInfo* _add =
+      _internal_mutable_drop_spawns()->InternalAddWithArena(
+          ::google::protobuf::MessageLite::internal_visibility(), GetArena());
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_add:GamePacket.ObjectVisibilityNtf.drop_spawns)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::GamePacket::DropSpawnInfo>& ObjectVisibilityNtf::drop_spawns() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:GamePacket.ObjectVisibilityNtf.drop_spawns)
+  return _internal_drop_spawns();
+}
+inline const ::google::protobuf::RepeatedPtrField<::GamePacket::DropSpawnInfo>&
+ObjectVisibilityNtf::_internal_drop_spawns() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.drop_spawns_;
+}
+inline ::google::protobuf::RepeatedPtrField<::GamePacket::DropSpawnInfo>* PROTOBUF_NONNULL
+ObjectVisibilityNtf::_internal_mutable_drop_spawns() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.drop_spawns_;
+}
+
 // repeated int64 despawn_ids = 10;
 inline int ObjectVisibilityNtf::_internal_despawn_ids_size() const {
   return _internal_despawn_ids().size();
@@ -3407,7 +4075,7 @@ inline void ObjectVisibilityNtf::clear_despawn_ids() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.despawn_ids_.Clear();
   ClearHasBitForRepeated(_impl_._has_bits_[0],
-                  0x00000008U);
+                  0x00000010U);
 }
 inline ::int64_t ObjectVisibilityNtf::despawn_ids(int index) const {
   // @@protoc_insertion_point(field_get:GamePacket.ObjectVisibilityNtf.despawn_ids)
@@ -3420,7 +4088,7 @@ inline void ObjectVisibilityNtf::set_despawn_ids(int index, ::int64_t value) {
 inline void ObjectVisibilityNtf::add_despawn_ids(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _internal_mutable_despawn_ids()->Add(value);
-  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000008U);
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000010U);
   // @@protoc_insertion_point(field_add:GamePacket.ObjectVisibilityNtf.despawn_ids)
 }
 inline const ::google::protobuf::RepeatedField<::int64_t>& ObjectVisibilityNtf::despawn_ids() const
@@ -3430,7 +4098,7 @@ inline const ::google::protobuf::RepeatedField<::int64_t>& ObjectVisibilityNtf::
 }
 inline ::google::protobuf::RepeatedField<::int64_t>* PROTOBUF_NONNULL ObjectVisibilityNtf::mutable_despawn_ids()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000008U);
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000010U);
   // @@protoc_insertion_point(field_mutable_list:GamePacket.ObjectVisibilityNtf.despawn_ids)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   return _internal_mutable_despawn_ids();

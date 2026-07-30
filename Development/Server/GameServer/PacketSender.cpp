@@ -132,7 +132,8 @@ void PacketSender::SendObjectVisibilityNtf(int64 accountId,
                                            const std::vector<GamePacket::CharacterSpawnInfo>& characterSpawns,
                                            const std::vector<int64>& despawnIds,
                                            const std::vector<GamePacket::MonsterSpawnInfo>& monsterSpawns,
-                                           const std::vector<GamePacket::PropSpawnInfo>& propSpawns)
+                                           const std::vector<GamePacket::PropSpawnInfo>& propSpawns,
+                                           const std::vector<GamePacket::DropSpawnInfo>& dropSpawns)
 {
     GamePacket::ObjectVisibilityNtf ntf;
     for (const auto& spawn : characterSpawns)
@@ -150,6 +151,11 @@ void PacketSender::SendObjectVisibilityNtf(int64 accountId,
         *ntf.add_prop_spawns() = spawn;
     }
 
+    for (const auto& spawn : dropSpawns)
+    {
+        *ntf.add_drop_spawns() = spawn;
+    }
+
     for (int64 id : despawnIds)
     {
         ntf.add_despawn_ids(id);
@@ -157,8 +163,13 @@ void PacketSender::SendObjectVisibilityNtf(int64 accountId,
 
     SendToUser(accountId, Common::GAME_PACKET_ID_OBJECT_VISIBILITY_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("ObjectVisibilityNtf sent. accountId={} characterSpawns={} monsterSpawns={} propSpawns={} despawns={}",
-        accountId, characterSpawns.size(), monsterSpawns.size(), propSpawns.size(), despawnIds.size()));
+    LOG_WRITE(LogLevel::Info, std::format("ObjectVisibilityNtf sent. accountId={} characterSpawns={} monsterSpawns={} propSpawns={} dropSpawns={} despawns={}",
+        accountId, characterSpawns.size(), monsterSpawns.size(), propSpawns.size(), dropSpawns.size(), despawnIds.size()));
+}
+
+void PacketSender::SendItemPickupRes(int64 accountId, const GamePacket::ItemPickupRes& res)
+{
+    SendToUser(accountId, Common::GAME_PACKET_ID_ITEM_PICKUP_RES, res);
 }
 
 void PacketSender::SendPropStateNtf(std::span<const int64> accountIds, int64 objectId, int32 state, int64 actorObjectId)

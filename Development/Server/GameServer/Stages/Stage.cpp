@@ -11,7 +11,11 @@
 #include "Stages/StageScript.h"
 #include "StageObjects/EventArea.h"
 #include "StageObjects/PropObject.h"
+#include "StageObjects/DropObject.h"
 #include "Generated/GameData_Prop.h"
+#include "Generated/GameData_Item.h"
+#include "Generated/GameData_ItemDrop.h"
+#include "DbSaveExecutor.h"
 #include "Generated/GameData_Skill.h"
 #include "Skills/EffectShape.h"
 #include "Skills/EffectParams.h"
@@ -24,6 +28,8 @@
 #include "Enum/GameEnum_Common.h"
 
 #include <cmath>
+#include <map>
+#include <unordered_set>
 
 namespace
 {
@@ -135,6 +141,23 @@ namespace
         info.set_pos_z(prop.GetPosZ());
         info.set_yaw(prop.GetYaw());
         info.set_state(prop.GetState());
+        return info;
+    }
+
+    GamePacket::DropSpawnInfo makeDropSpawnInfo(const DropObject& drop)
+    {
+        GamePacket::DropSpawnInfo info;
+        info.set_object_id(drop.GetObjectId());
+        info.set_item_key(drop.GetItemKey());
+        info.set_count(drop.GetCount());
+        info.set_origin_x(drop.GetOriginX());
+        info.set_origin_y(drop.GetOriginY());
+        info.set_origin_z(drop.GetOriginZ());
+        info.set_pos_x(drop.GetPosX());
+        info.set_pos_y(drop.GetPosY());
+        info.set_pos_z(drop.GetPosZ());
+        info.set_created_server_time_ms(drop.GetCreatedServerTimeMs());
+        info.set_expire_server_time_ms(drop.GetExpireServerTimeMs());
         return info;
     }
 
@@ -634,6 +657,9 @@ void Stage::OnUpdate(int64 deltaMs)
     if (!m_propObjects.empty())
         updateProps(deltaMs);
 
+    if (!m_dropObjects.empty())
+        updateDrops();
+
     // Stage 스크립트 (타이머 만기 → Lua 콜백).
     if (m_pScript)
         m_pScript->Update(deltaMs);
@@ -789,6 +815,135 @@ bool Stage::DespawnMonster(int64 objectId)
 
 
     return true;
+}
+
+// 드롭 아이템 생성
+// 몬스터의 ItemDropGroup을 독립 만분율로 판정한다.
+// 같은 item_key가 여러 행에서 당첨될 수 있으므로 먼저 수량을 합산한 다음 MaxStack 단위로 필드 오브젝트를 나눈다. 
+// 드롭 아이템의 소유자는 몬스터를 처치한 캐릭터이다.
+void Stage::spawnMonsterDrops(const Monster& monster, int64 killerObjectId)
+{
+    const GameData_Monster* pMonsterData = monster.GetMonsterData();
+    if (pMonsterData == nullptr || pMonsterData->ItemDropGroup <= 0)
+        return;
+
+    StageObject* pKillerObject = FindObject(killerObjectId);
+    if (pKillerObject == nullptr || pKillerObject->GetObjectType() != EObjectType::Character)
+        return;
+    Character& owner = *static_cast<Character*>(pKillerObject);
+    if (owner.IsDead())
+        return;
+
+    // 각 ItemDrop 행은 서로 배타적이지 않다. 한 몬스터에서 여러 행이 동시에 성공할 수 있다.
+    std::map<int32, int32> countsByItemKey;
+    std::uniform_int_distribution<int32> chanceRoll(1, 10000);
+    for (const auto& [entryKey, pDropData] : GameDataTable_ItemDrop::GetDataMap())
+    {
+        if (pDropData->GroupKey != pMonsterData->ItemDropGroup || chanceRoll(m_dropRng) > pDropData->ChancePermyriad)
+            continue;
+
+        std::uniform_int_distribution<int32> countRoll(pDropData->MinCount, pDropData->MaxCount);
+        countsByItemKey[pDropData->ItemKey] += countRoll(m_dropRng);
+    }
+
+    for (const auto& [itemKey, totalCount] : countsByItemKey)
+    {
+        const GameData_Item* pItemData = GameDataTable_Item::FindData(itemKey);
+        if (pItemData == nullptr || pItemData->MaxStack <= 0)
+            continue;
+
+        int32 remaining = totalCount;
+        while (remaining > 0)
+        {
+            const int32 stackCount = std::min(remaining, pItemData->MaxStack);
+            spawnDrop(itemKey, stackCount, owner, monster.GetPosX(), monster.GetPosY(), monster.GetPosZ());
+            remaining -= stackCount;
+        }
+    }
+}
+
+// 드롭 아이템의 착지점을 NavMesh 위에서 확정하고 Stage/sector에 등록한다.
+// origin은 클라이언트 연출용이고 실제 거리 검사와 AOI sector는 landing을 기준으로 한다.
+DropObject* Stage::spawnDrop(int32 itemKey, int32 count, const Character& owner,
+                             float originX, float originY, float originZ)
+{
+    float landingX = originX;
+    float landingY = originY;
+    float landingZ = originZ;
+    // 사망점 주변 랜덤 위치를 우선 사용하고, 좁은 지형 등으로 실패하면 사망점 근처의
+    // 가장 가까운 NavMesh 위치로 투영한다. 둘 다 실패하면 아래 sector 검증에서 생성이 취소된다.
+    if (!SampleRandomNavPoint(originX, originY, originZ, k_dropScatterRadius, landingX, landingY, landingZ))
+        SampleNavMeshPosition(originX, originY, originZ, 2.0f, 10.0f, 2.0f, landingX, landingY, landingZ);
+
+    int32 sectorX = 0;
+    int32 sectorZ = 0;
+    if (!GetSectorIndex(landingX, landingZ, sectorX, sectorZ))
+        return nullptr;
+
+    GameServer& server = GameServer::Instance();
+    const int64 objectId = server.GenerateObjectId();
+    auto spDrop = std::make_shared<DropObject>();
+    if (!spDrop->Initialize(objectId, itemKey, count,
+                            owner.GetOwnerAccountId(), owner.GetObjectId(),
+                            originX, originY, originZ,
+                            m_stageClockMs, m_stageClockMs + k_dropLifetimeMs))
+        return nullptr;
+
+    spDrop->SetPos(landingX, landingY, landingZ);
+    registerObject(spDrop, k_dropUpdateIntervalMs, m_dropObjects);
+
+    // 생성 순간 소유자가 이미 AOI 안에 있을 때만 즉시 unicast한다. AOI 밖이라면 이후
+    // updateVisibilityOnSectorChange가 소유자 진입 시 동일 spawn 정보를 전송한다.
+    const int32 dx = std::abs(owner.GetCurSectorX() - spDrop->GetCurSectorX());
+    const int32 dz = std::abs(owner.GetCurSectorZ() - spDrop->GetCurSectorZ());
+    if (dx <= k_aoiRange && dz <= k_aoiRange)
+    {
+        const std::vector<GamePacket::DropSpawnInfo> single = { makeDropSpawnInfo(*spDrop) };
+        server.GetPacketSender().SendObjectVisibilityNtf(owner.GetOwnerAccountId(), {}, {}, {}, {}, single);
+    }
+    return spDrop.get();
+}
+
+// Stage와 sector 컨테이너에서 드롭을 제거한다. 
+// 제거 알림은 소유 캐릭터가 현재 해당 드롭 sector의 AOI 안에 있을 때만 보내며 다른 캐릭터에게는 ID를 노출하지 않는다.
+bool Stage::despawnDrop(int64 objectId)
+{
+    auto iter = m_dropObjects.find(objectId);
+    if (iter == m_dropObjects.end())
+        return false;
+
+    auto spDrop = std::static_pointer_cast<DropObject>(iter->second);
+    const int32 dropSectorX = spDrop->GetCurSectorX();
+    const int32 dropSectorZ = spDrop->GetCurSectorZ();
+    removeObjectFromSector(spDrop.get());
+    m_dropObjects.erase(iter);
+    m_objects.erase(objectId);
+
+    StageObject* pOwnerObject = FindObject(spDrop->GetOwnerCharacterId());
+    if (pOwnerObject != nullptr && pOwnerObject->GetObjectType() == EObjectType::Character)
+    {
+        const int32 dx = std::abs(pOwnerObject->GetCurSectorX() - dropSectorX);
+        const int32 dz = std::abs(pOwnerObject->GetCurSectorZ() - dropSectorZ);
+        if (dx <= k_aoiRange && dz <= k_aoiRange)
+            GameServer::Instance().GetPacketSender().SendObjectVisibilityNtf(
+                spDrop->GetOwnerAccountId(), {}, std::vector<int64>{ objectId });
+    }
+    return true;
+}
+
+// 만료 대상을 먼저 수집한 뒤 제거한다. 순회 중 컨테이너 erase로 iterator가 무효화되는 것을
+// 피하며, DB 저장 중(IsPicking)인 드롭은 트랜잭션 결과가 정리할 때까지 만료를 보류한다.
+void Stage::updateDrops()
+{
+    std::vector<int64> expired;
+    for (const auto& [objectId, spObject] : m_dropObjects)
+    {
+        const DropObject* pDrop = static_cast<const DropObject*>(spObject.get());
+        if (!pDrop->IsPicking() && pDrop->IsExpired(m_stageClockMs))
+            expired.push_back(objectId);
+    }
+    for (int64 objectId : expired)
+        despawnDrop(objectId);
 }
 
 // ── prop 스폰/디스폰/상태/동작 ─────────────────────────────
@@ -1212,6 +1367,8 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     monsterSpawnsForMe.reserve(16);
     std::vector<GamePacket::PropSpawnInfo> propSpawnsForMe;
     propSpawnsForMe.reserve(16);
+    std::vector<GamePacket::DropSpawnInfo> dropSpawnsForMe;
+    dropSpawnsForMe.reserve(8);
 
     // 다른 캐릭터에게 전송할 용도의 "내 spawn 1개".
     std::vector<GamePacket::CharacterSpawnInfo> singleSpawn = { myInfo };
@@ -1243,6 +1400,13 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
             {
                 propSpawnsForMe.push_back(makePropSpawnInfo(*static_cast<PropObject*>(pPropObj)));
             }
+
+            for (const auto& [dropObjId, pDropObj] : pSector->GetDrops())
+            {
+                const DropObject* pDrop = static_cast<const DropObject*>(pDropObj);
+                if (pDrop->GetOwnerCharacterId() == objectId)
+                    dropSpawnsForMe.push_back(makeDropSpawnInfo(*pDrop));
+            }
         });
 
     // ── StageLoadCompleteRes 를 먼저 보낸다 (StatUpdate/HpMp 는 PacketSender 가 그 뒤에 송신) ──
@@ -1254,7 +1418,7 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
         static_cast<float>(GetWorldMinX()), static_cast<float>(GetWorldMinZ()),
         static_cast<float>(GetWorldMaxX()), static_cast<float>(GetWorldMaxZ()));
 
-    server.GetPacketSender().SendObjectVisibilityNtf(accountId, spawnsForMe, {}, monsterSpawnsForMe, propSpawnsForMe);
+    server.GetPacketSender().SendObjectVisibilityNtf(accountId, spawnsForMe, {}, monsterSpawnsForMe, propSpawnsForMe, dropSpawnsForMe);
 
 
     // 스폰 완료 후 서브클래스 훅 (기본 no-op). 캐릭터가 Stage에 등록되고 통보까지 끝난 뒤 호출.
@@ -1439,6 +1603,7 @@ const Stage::UserPacketHandlerMap& Stage::getUserPacketHandlerMap() const
         { Common::GAME_PACKET_ID_EVENT_AREA_ENTER_REQ,     &Stage::handleEventAreaEnterReq },
         { Common::GAME_PACKET_ID_EVENT_AREA_EXIT_REQ,      &Stage::handleEventAreaExitReq },
         { Common::GAME_PACKET_ID_OBJECT_INTERACT_REQ,      &Stage::handleObjectInteractReq },
+        { Common::GAME_PACKET_ID_ITEM_PICKUP_REQ,          &Stage::handleItemPickupReq },
 #ifdef _DEBUG
         { Common::GAME_PACKET_ID_CHEAT_REQ,                &Stage::handleCheatReq },
 #endif
@@ -2166,6 +2331,183 @@ void Stage::handleObjectInteractReq(const UserPtr& spUser, const netlib::PacketP
     // 7) DespawnDelay 가 예약됐으면(OneShot 등) updateProps 가 타이머 만료 시 제거한다.
 }
 
+// 클라이언트가 묶어서 보낸 드롭 ID를 서버 권위 상태로 1차 검증한다.
+// 이 단계에서는 인벤토리를 변경하지 않고, 유효한 드롭만 picking 잠금 후 비동기 DB 단계로 넘긴다.
+void Stage::handleItemPickupReq(const UserPtr& spUser, const netlib::PacketPtr& spPacket)
+{
+    GamePacket::ItemPickupReq req;
+    if (!deserializeUserPacket(spUser, spPacket, req))
+        return;
+
+    GamePacket::ItemPickupRes res;
+    const int32 requestCount = std::min(req.drop_object_ids_size(), k_itemPickupMaxBatch);
+    CharacterPtr spCharacter = spUser->GetCurrentCharacter();
+
+    auto appendResult = [&](int64 dropObjectId, GamePacket::EItemPickupResult result)
+    {
+        GamePacket::ItemPickupResultEntry* pEntry = res.add_results();
+        pEntry->set_drop_object_id(dropObjectId);
+        pEntry->set_result(result);
+    };
+
+    // 비정상 batch 크기, Stage 불일치, 사망 상태는 전체 요청을 처리하지 않는다.
+    // 최대 개수를 넘긴 패킷은 앞부분만 성공시키지 않고 전체를 실패 처리한다.
+    if (req.drop_object_ids_size() <= 0 || req.drop_object_ids_size() > k_itemPickupMaxBatch ||
+        !spCharacter || spCharacter->GetStage() != this || spCharacter->IsDead())
+    {
+        for (int32 i = 0; i < requestCount; ++i)
+            appendResult(req.drop_object_ids(i), GamePacket::ITEM_PICKUP_RESULT_UNAVAILABLE);
+        GameServer::Instance().GetPacketSender().SendItemPickupRes(spUser->GetAccountId(), res);
+        return;
+    }
+
+    // 같은 캐릭터의 DB-first 변경을 직렬화한다. 이전 습득의 체크와 메모리 반영 사이에
+    // 또 다른 인벤토리 변경이 끼어드는 last-write-wins 문제를 막는다.
+    if (spCharacter->HasPendingAsync())
+    {
+        for (int32 i = 0; i < requestCount; ++i)
+            appendResult(req.drop_object_ids(i), GamePacket::ITEM_PICKUP_RESULT_PENDING);
+        GameServer::Instance().GetPacketSender().SendItemPickupRes(spUser->GetAccountId(), res);
+        return;
+    }
+
+    std::unordered_set<int64> uniqueIds;
+    std::vector<int64> validDropIds;
+    std::vector<int32> validResultIndexes;
+    for (int32 i = 0; i < requestCount; ++i)
+    {
+        const int64 dropObjectId = req.drop_object_ids(i);
+        const int32 resultIndex = res.results_size();
+        // 기본값을 UNAVAILABLE로 먼저 넣는다. 존재하지 않음/만료/소유권 불일치를 같은 결과로
+        // 처리하면 타인이 임의 ID를 조회해 드롭 존재 여부를 알아내는 것을 막을 수 있다.
+        appendResult(dropObjectId, GamePacket::ITEM_PICKUP_RESULT_UNAVAILABLE);
+
+        if (dropObjectId <= 0 || !uniqueIds.insert(dropObjectId).second)
+            continue;
+
+        auto iter = m_dropObjects.find(dropObjectId);
+        if (iter == m_dropObjects.end())
+            continue;
+        DropObject* pDrop = static_cast<DropObject*>(iter->second.get());
+        if (pDrop->GetOwnerAccountId() != spUser->GetAccountId() ||
+            pDrop->GetOwnerCharacterId() != spCharacter->GetObjectId() || pDrop->IsExpired(m_stageClockMs))
+            continue;
+        if (pDrop->IsPicking())
+        {
+            res.mutable_results(resultIndex)->set_result(GamePacket::ITEM_PICKUP_RESULT_PENDING);
+            continue;
+        }
+        if (GameDataTable_Item::FindData(pDrop->GetItemKey()) == nullptr)
+            continue;
+
+        // 캐릭터 위치와 드롭 위치의 XZ 평면 거리를 검사한다.
+        const float dx = spCharacter->GetPosX() - pDrop->GetPosX();
+        const float dz = spCharacter->GetPosZ() - pDrop->GetPosZ();
+        if (dx * dx + dz * dz > k_itemPickupServerRange * k_itemPickupServerRange)
+        {
+            res.mutable_results(resultIndex)->set_result(GamePacket::ITEM_PICKUP_RESULT_TOO_FAR);
+            continue;
+        }
+
+        pDrop->SetPicking(true);
+        validDropIds.push_back(dropObjectId);
+        validResultIndexes.push_back(resultIndex);
+    }
+
+    if (validDropIds.empty())
+    {
+        GameServer::Instance().GetPacketSender().SendItemPickupRes(spUser->GetAccountId(), res);
+        return;
+    }
+
+    pickupDropsAsync(spUser, spCharacter, std::move(res), std::move(validDropIds), std::move(validResultIndexes));
+}
+
+// 검증된 드롭아이템 픽업을 한 인벤토리 스냅샷과 한 DB 트랜잭션으로 원자적으로 처리한다.
+db::DetachedCoTask Stage::pickupDropsAsync(UserPtr spUser, CharacterPtr spCharacter,
+                                            GamePacket::ItemPickupRes res,
+                                            std::vector<int64> dropObjectIds,
+                                            std::vector<int32> resultIndexes)
+{
+    // 코루틴 suspend 동안 캐릭터가 제거되지 않도록 AsyncPin 획득
+    AsyncPin pin = PinForAsync(spCharacter);
+
+    // 인벤토리는 DB 성공 전까지 건드리지 않는다. 복사본에 모든 stack 결과를 계산하면 저장 실패 시 rollback 코드 없이 복사본만 폐기할 수 있다.
+    InventoryComponent stagedInventory = spCharacter->GetInventory();
+    std::map<int64, DataStructures::Item> updatedItems;
+    auto spBatch = std::make_shared<db::DbSaveBatch>();
+
+    const int64 accountId = spUser->GetAccountId();
+    const int64 characterId = spCharacter->GetObjectId();
+    for (size_t i = 0; i < dropObjectIds.size(); ++i)
+    {
+        auto iter = m_dropObjects.find(dropObjectIds[i]);
+        if (iter == m_dropObjects.end())
+            continue;
+
+        DropObject* pDrop = static_cast<DropObject*>(iter->second.get());
+        const GameData_Item* pItemData = GameDataTable_Item::FindData(pDrop->GetItemKey());
+        if (pItemData == nullptr)
+        {
+            pDrop->SetPicking(false);
+            continue;
+        }
+
+        std::vector<DataStructures::Item> changed = stagedInventory.AddStackable(
+            *pItemData, pDrop->GetCount(), [] { return GameServer::Instance().GenerateObjectId(); });
+
+        for (DataStructures::Item& item : changed)
+            updatedItems[item.item_id()] = std::move(item);
+    }
+
+    // 여러 드롭이 같은 stack 행을 연속 갱신할 수 있으므로 map의 item_id별 마지막 최종값만
+    // 배치에 넣는다. DbSaveBatch는 이 행들을 단일 GameDB 트랜잭션으로 upsert한다.
+    for (const auto& [itemId, item] : updatedItems)
+        spBatch->Upsert(std::make_shared<DataStructures::Item>(item), accountId, characterId);
+
+    db::DBResult dbResult;
+    if (!spBatch->Empty() && GameServer::Instance().GetDB().HasDatabase(db::EDBType::Game, spUser->GetGameDbIndex()))
+    {
+        dbResult = co_await db::DbSaveExecutor::Save(
+            GameServer::Instance().GetDB(), spBatch, spUser->GetGameDbIndex(), GetResumeExecutor());
+    }
+
+    // 저장 실패 시 라이브 인벤토리와 필드 드롭은 그대로 둔다. picking만 해제해 클라이언트가
+    // cooldown 후 안전하게 재시도할 수 있도록 한다.
+    if (!dbResult.success)
+    {
+        for (size_t i = 0; i < dropObjectIds.size(); ++i)
+        {
+            auto iter = m_dropObjects.find(dropObjectIds[i]);
+            if (iter != m_dropObjects.end())
+                static_cast<DropObject*>(iter->second.get())->SetPicking(false);
+            res.mutable_results(resultIndexes[i])->set_result(GamePacket::ITEM_PICKUP_RESULT_STORAGE_ERROR);
+        }
+        GameServer::Instance().GetPacketSender().SendItemPickupRes(accountId, res);
+        co_return;
+    }
+
+    // DB commit 이후에만 메모리 인벤토리를 교체한다. 이 시점부터 드롭 despawn과 SUCCESS 응답을
+    // 보내므로, 클라이언트가 성공을 본 아이템은 이미 DB에 저장된 상태다.
+    spCharacter->GetInventory() = std::move(stagedInventory);
+    for (const auto& [itemId, item] : updatedItems)
+        *res.add_updated_items() = item;
+
+    for (size_t i = 0; i < dropObjectIds.size(); ++i)
+    {
+        auto iter = m_dropObjects.find(dropObjectIds[i]);
+        if (iter == m_dropObjects.end())
+            continue;
+        const DropObject* pDrop = static_cast<const DropObject*>(iter->second.get());
+        GamePacket::ItemPickupResultEntry* pResult = res.mutable_results(resultIndexes[i]);
+        pResult->set_result(GamePacket::ITEM_PICKUP_RESULT_SUCCESS);
+        pResult->set_item_key(pDrop->GetItemKey());
+        pResult->set_picked_count(pDrop->GetCount());
+        despawnDrop(dropObjectIds[i]);
+    }
+    GameServer::Instance().GetPacketSender().SendItemPickupRes(accountId, res);
+}
+
 void Stage::processUserPackets()
 {
     // 각 유저의 패킷 큐를 drain하여 OnUserPacket 호출.
@@ -2493,6 +2835,8 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
     newlyVisibleMonstersForMe.reserve(8);
     std::vector<GamePacket::PropSpawnInfo> newlyVisiblePropsForMe;
     newlyVisiblePropsForMe.reserve(8);
+    std::vector<GamePacket::DropSpawnInfo> newlyVisibleDropsForMe;
+    newlyVisibleDropsForMe.reserve(8);
     std::vector<GamePacket::CharacterSpawnInfo> singleSpawnOfMe = { myInfo };
 
     ForEachAdjacentSector(newSectorX, newSectorZ, k_aoiRange,
@@ -2527,11 +2871,21 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
             {
                 newlyVisiblePropsForMe.push_back(makePropSpawnInfo(*static_cast<PropObject*>(pPropObj)));
             }
+
+
+            for (const auto& [dropObjId, pDropObj] : pSector->GetDrops())
+            {
+                const DropObject* pDrop = static_cast<const DropObject*>(pDropObj);
+                if (pDrop->GetOwnerCharacterId() == myObjectId)
+                    newlyVisibleDropsForMe.push_back(makeDropSpawnInfo(*pDrop));
+            }
         });
 
-    if (!newlyVisibleSpawnsForMe.empty() || !newlyVisibleMonstersForMe.empty() || !newlyVisiblePropsForMe.empty())
+    if (!newlyVisibleSpawnsForMe.empty() || !newlyVisibleMonstersForMe.empty() ||
+        !newlyVisiblePropsForMe.empty() || !newlyVisibleDropsForMe.empty())
     {
-        server.GetPacketSender().SendObjectVisibilityNtf(myAccountId, newlyVisibleSpawnsForMe, {}, newlyVisibleMonstersForMe, newlyVisiblePropsForMe);
+        server.GetPacketSender().SendObjectVisibilityNtf(
+            myAccountId, newlyVisibleSpawnsForMe, {}, newlyVisibleMonstersForMe, newlyVisiblePropsForMe, newlyVisibleDropsForMe);
     }
 
     // ── oldAOI 순회 ──
@@ -2571,6 +2925,14 @@ void Stage::updateVisibilityOnSectorChange(Character& character,
             for (const auto& [propObjId, pPropObj] : pSector->GetProps())
             {
                 despawnIdsForMe.push_back(propObjId);
+            }
+
+
+            for (const auto& [dropObjId, pDropObj] : pSector->GetDrops())
+            {
+                const DropObject* pDrop = static_cast<const DropObject*>(pDropObj);
+                if (pDrop->GetOwnerCharacterId() == myObjectId)
+                    despawnIdsForMe.push_back(dropObjId);
             }
         });
 

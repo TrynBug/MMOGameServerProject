@@ -28,7 +28,6 @@ bool GameDataTableBase_Monster::makeGameData(const std::string& line)
     std::getline(ss, field, ','); pData->Key = std::stoi(field);
     std::getline(ss, field, ','); pData->PrefabPath = field;
     std::getline(ss, field, ','); pData->ItemDropGroup = std::stoi(field);
-    std::getline(ss, field, ','); pData->IsItemDrop = StringToBool(field);
     std::getline(ss, field, ','); pData->Exp = std::stod(field);
     std::getline(ss, field, ','); pData->IsExp = StringToBool(field);
     std::getline(ss, field, ','); pData->Grade = static_cast<EMonsterGrade>(std::stoi(field));

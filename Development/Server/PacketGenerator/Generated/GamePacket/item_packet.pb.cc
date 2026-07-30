@@ -51,6 +51,60 @@ struct ItemUseReqDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ItemUseReqDefaultTypeInternal _ItemUseReq_default_instance_;
 
+inline constexpr ItemPickupResultEntry::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        drop_object_id_{::int64_t{0}},
+        result_{static_cast< ::GamePacket::EItemPickupResult >(0)},
+        item_key_{0},
+        picked_count_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ItemPickupResultEntry::ItemPickupResultEntry(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(ItemPickupResultEntry_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ItemPickupResultEntryDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ItemPickupResultEntryDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ItemPickupResultEntryDefaultTypeInternal() {}
+  union {
+    ItemPickupResultEntry _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ItemPickupResultEntryDefaultTypeInternal _ItemPickupResultEntry_default_instance_;
+
+inline constexpr ItemPickupReq::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        drop_object_ids_{},
+        _drop_object_ids_cached_byte_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ItemPickupReq::ItemPickupReq(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(ItemPickupReq_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ItemPickupReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ItemPickupReqDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ItemPickupReqDefaultTypeInternal() {}
+  union {
+    ItemPickupReq _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ItemPickupReqDefaultTypeInternal _ItemPickupReq_default_instance_;
+
 inline constexpr ItemUseRes::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -79,9 +133,35 @@ struct ItemUseResDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ItemUseResDefaultTypeInternal _ItemUseRes_default_instance_;
+
+inline constexpr ItemPickupRes::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        results_{},
+        updated_items_{} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ItemPickupRes::ItemPickupRes(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(ItemPickupRes_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ItemPickupResDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ItemPickupResDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ItemPickupResDefaultTypeInternal() {}
+  union {
+    ItemPickupRes _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ItemPickupResDefaultTypeInternal _ItemPickupRes_default_instance_;
 }  // namespace GamePacket
-static constexpr const ::_pb::EnumDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
-    file_level_enum_descriptors_GamePacket_2fitem_5fpacket_2eproto = nullptr;
+static const ::_pb::EnumDescriptor* PROTOBUF_NONNULL
+    file_level_enum_descriptors_GamePacket_2fitem_5fpacket_2eproto[1];
 static constexpr const ::_pb::ServiceDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_service_descriptors_GamePacket_2fitem_5fpacket_2eproto = nullptr;
 const ::uint32_t
@@ -101,16 +181,45 @@ const ::uint32_t
         2,
         0,
         1,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ItemPickupReq, _impl_._has_bits_),
+        4, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ItemPickupReq, _impl_.drop_object_ids_),
+        0,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ItemPickupResultEntry, _impl_._has_bits_),
+        7, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ItemPickupResultEntry, _impl_.drop_object_id_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ItemPickupResultEntry, _impl_.result_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ItemPickupResultEntry, _impl_.item_key_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ItemPickupResultEntry, _impl_.picked_count_),
+        0,
+        1,
+        2,
+        3,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ItemPickupRes, _impl_._has_bits_),
+        5, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ItemPickupRes, _impl_.results_),
+        PROTOBUF_FIELD_OFFSET(::GamePacket::ItemPickupRes, _impl_.updated_items_),
+        0,
+        1,
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, sizeof(::GamePacket::ItemUseReq)},
         {5, sizeof(::GamePacket::ItemUseRes)},
+        {14, sizeof(::GamePacket::ItemPickupReq)},
+        {19, sizeof(::GamePacket::ItemPickupResultEntry)},
+        {30, sizeof(::GamePacket::ItemPickupRes)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::GamePacket::_ItemUseReq_default_instance_._instance,
     &::GamePacket::_ItemUseRes_default_instance_._instance,
+    &::GamePacket::_ItemPickupReq_default_instance_._instance,
+    &::GamePacket::_ItemPickupResultEntry_default_instance_._instance,
+    &::GamePacket::_ItemPickupRes_default_instance_._instance,
 };
 const char descriptor_table_protodef_GamePacket_2fitem_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
@@ -118,7 +227,20 @@ const char descriptor_table_protodef_GamePacket_2fitem_5fpacket_2eproto[] ABSL_A
     "et\032\031DataStructures/item.proto\"\035\n\nItemUse"
     "Req\022\017\n\007item_id\030\001 \001(\003\"R\n\nItemUseRes\022\017\n\007su"
     "ccess\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\022\"\n\004item\030\003 \001"
-    "(\0132\024.DataStructures.Itemb\006proto3"
+    "(\0132\024.DataStructures.Item\"(\n\rItemPickupRe"
+    "q\022\027\n\017drop_object_ids\030\001 \003(\003\"\206\001\n\025ItemPicku"
+    "pResultEntry\022\026\n\016drop_object_id\030\001 \001(\003\022-\n\006"
+    "result\030\002 \001(\0162\035.GamePacket.EItemPickupRes"
+    "ult\022\020\n\010item_key\030\003 \001(\005\022\024\n\014picked_count\030\004 "
+    "\001(\005\"p\n\rItemPickupRes\0222\n\007results\030\001 \003(\0132!."
+    "GamePacket.ItemPickupResultEntry\022+\n\rupda"
+    "ted_items\030\002 \003(\0132\024.DataStructures.Item*\332\001"
+    "\n\021EItemPickupResult\022\033\n\027ITEM_PICKUP_RESUL"
+    "T_NONE\020\000\022\036\n\032ITEM_PICKUP_RESULT_SUCCESS\020\001"
+    "\022\"\n\036ITEM_PICKUP_RESULT_UNAVAILABLE\020\002\022\036\n\032"
+    "ITEM_PICKUP_RESULT_TOO_FAR\020\003\022\036\n\032ITEM_PIC"
+    "KUP_RESULT_PENDING\020\004\022$\n ITEM_PICKUP_RESU"
+    "LT_STORAGE_ERROR\020\005b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_GamePacket_2fitem_5fpacket_2eproto_deps[1] = {
@@ -128,13 +250,13 @@ static ::absl::once_flag descriptor_table_GamePacket_2fitem_5fpacket_2eproto_onc
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fitem_5fpacket_2eproto = {
     false,
     false,
-    192,
+    706,
     descriptor_table_protodef_GamePacket_2fitem_5fpacket_2eproto,
     "GamePacket/item_packet.proto",
     &descriptor_table_GamePacket_2fitem_5fpacket_2eproto_once,
     descriptor_table_GamePacket_2fitem_5fpacket_2eproto_deps,
     1,
-    2,
+    5,
     schemas,
     file_default_instances,
     TableStruct_GamePacket_2fitem_5fpacket_2eproto::offsets,
@@ -142,6 +264,12 @@ PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fi
     file_level_service_descriptors_GamePacket_2fitem_5fpacket_2eproto,
 };
 namespace GamePacket {
+const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL EItemPickupResult_descriptor() {
+  ::google::protobuf::internal::AssignDescriptors(&descriptor_table_GamePacket_2fitem_5fpacket_2eproto);
+  return file_level_enum_descriptors_GamePacket_2fitem_5fpacket_2eproto[0];
+}
+PROTOBUF_CONSTINIT const uint32_t EItemPickupResult_internal_data_[] = {
+    393216u, 0u, };
 // ===================================================================
 
 class ItemUseReq::_Internal {
@@ -753,6 +881,968 @@ void ItemUseRes::InternalSwap(ItemUseRes* PROTOBUF_RESTRICT PROTOBUF_NONNULL oth
 }
 
 ::google::protobuf::Metadata ItemUseRes::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class ItemPickupReq::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<ItemPickupReq>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(ItemPickupReq, _impl_._has_bits_);
+};
+
+ItemPickupReq::ItemPickupReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ItemPickupReq_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:GamePacket.ItemPickupReq)
+}
+PROTOBUF_NDEBUG_INLINE ItemPickupReq::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::GamePacket::ItemPickupReq& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        drop_object_ids_{visibility, arena, from.drop_object_ids_},
+        _drop_object_ids_cached_byte_size_{0} {}
+
+ItemPickupReq::ItemPickupReq(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const ItemPickupReq& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ItemPickupReq_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  ItemPickupReq* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:GamePacket.ItemPickupReq)
+}
+PROTOBUF_NDEBUG_INLINE ItemPickupReq::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        drop_object_ids_{visibility, arena},
+        _drop_object_ids_cached_byte_size_{0} {}
+
+inline void ItemPickupReq::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+ItemPickupReq::~ItemPickupReq() {
+  // @@protoc_insertion_point(destructor:GamePacket.ItemPickupReq)
+  SharedDtor(*this);
+}
+inline void ItemPickupReq::SharedDtor(MessageLite& self) {
+  ItemPickupReq& this_ = static_cast<ItemPickupReq&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL ItemPickupReq::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) ItemPickupReq(arena);
+}
+constexpr auto ItemPickupReq::InternalNewImpl_() {
+  constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
+      PROTOBUF_FIELD_OFFSET(ItemPickupReq, _impl_.drop_object_ids_) +
+          decltype(ItemPickupReq::_impl_.drop_object_ids_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+  });
+  if (arena_bits.has_value()) {
+    return ::google::protobuf::internal::MessageCreator::ZeroInit(
+        sizeof(ItemPickupReq), alignof(ItemPickupReq), *arena_bits);
+  } else {
+    return ::google::protobuf::internal::MessageCreator(&ItemPickupReq::PlacementNew_,
+                                 sizeof(ItemPickupReq),
+                                 alignof(ItemPickupReq));
+  }
+}
+constexpr auto ItemPickupReq::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_ItemPickupReq_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &ItemPickupReq::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<ItemPickupReq>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &ItemPickupReq::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<ItemPickupReq>(), &ItemPickupReq::ByteSizeLong,
+              &ItemPickupReq::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(ItemPickupReq, _impl_._cached_size_),
+          false,
+      },
+      &ItemPickupReq::kDescriptorMethods,
+      &descriptor_table_GamePacket_2fitem_5fpacket_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull ItemPickupReq_class_data_ =
+        ItemPickupReq::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+ItemPickupReq::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&ItemPickupReq_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(ItemPickupReq_class_data_.tc_table);
+  return ItemPickupReq_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 0, 2>
+ItemPickupReq::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(ItemPickupReq, _impl_._has_bits_),
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    ItemPickupReq_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::GamePacket::ItemPickupReq>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // repeated int64 drop_object_ids = 1;
+    {::_pbi::TcParser::FastV64P1,
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(ItemPickupReq, _impl_.drop_object_ids_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated int64 drop_object_ids = 1;
+    {PROTOBUF_FIELD_OFFSET(ItemPickupReq, _impl_.drop_object_ids_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt64)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+PROTOBUF_NOINLINE void ItemPickupReq::Clear() {
+// @@protoc_insertion_point(message_clear_start:GamePacket.ItemPickupReq)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+    _impl_.drop_object_ids_.Clear();
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL ItemPickupReq::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const ItemPickupReq& this_ = static_cast<const ItemPickupReq&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL ItemPickupReq::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const ItemPickupReq& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:GamePacket.ItemPickupReq)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // repeated int64 drop_object_ids = 1;
+  if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+    {
+      int byte_size = this_._impl_._drop_object_ids_cached_byte_size_.Get();
+      if (byte_size > 0) {
+        target = stream->WriteInt64Packed(
+            1, this_._internal_drop_object_ids(), byte_size, target);
+      }
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:GamePacket.ItemPickupReq)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t ItemPickupReq::ByteSizeLong(const MessageLite& base) {
+  const ItemPickupReq& this_ = static_cast<const ItemPickupReq&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t ItemPickupReq::ByteSizeLong() const {
+  const ItemPickupReq& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:GamePacket.ItemPickupReq)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+   {
+    // repeated int64 drop_object_ids = 1;
+    cached_has_bits = this_._impl_._has_bits_[0];
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+      total_size +=
+          ::_pbi::WireFormatLite::Int64SizeWithPackedTagSize(
+              this_._internal_drop_object_ids(), 1,
+              this_._impl_._drop_object_ids_cached_byte_size_);
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void ItemPickupReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<ItemPickupReq*>(&to_msg);
+  auto& from = static_cast<const ItemPickupReq&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.ItemPickupReq)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+    _this->_internal_mutable_drop_object_ids()->MergeFrom(from._internal_drop_object_ids());
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void ItemPickupReq::CopyFrom(const ItemPickupReq& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.ItemPickupReq)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void ItemPickupReq::InternalSwap(ItemPickupReq* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  _impl_.drop_object_ids_.InternalSwap(&other->_impl_.drop_object_ids_);
+}
+
+::google::protobuf::Metadata ItemPickupReq::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class ItemPickupResultEntry::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<ItemPickupResultEntry>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(ItemPickupResultEntry, _impl_._has_bits_);
+};
+
+ItemPickupResultEntry::ItemPickupResultEntry(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ItemPickupResultEntry_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:GamePacket.ItemPickupResultEntry)
+}
+ItemPickupResultEntry::ItemPickupResultEntry(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ItemPickupResultEntry& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ItemPickupResultEntry_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(from._impl_) {
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+PROTOBUF_NDEBUG_INLINE ItemPickupResultEntry::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0} {}
+
+inline void ItemPickupResultEntry::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, drop_object_id_),
+           0,
+           offsetof(Impl_, picked_count_) -
+               offsetof(Impl_, drop_object_id_) +
+               sizeof(Impl_::picked_count_));
+}
+ItemPickupResultEntry::~ItemPickupResultEntry() {
+  // @@protoc_insertion_point(destructor:GamePacket.ItemPickupResultEntry)
+  SharedDtor(*this);
+}
+inline void ItemPickupResultEntry::SharedDtor(MessageLite& self) {
+  ItemPickupResultEntry& this_ = static_cast<ItemPickupResultEntry&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL ItemPickupResultEntry::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) ItemPickupResultEntry(arena);
+}
+constexpr auto ItemPickupResultEntry::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(ItemPickupResultEntry),
+                                            alignof(ItemPickupResultEntry));
+}
+constexpr auto ItemPickupResultEntry::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_ItemPickupResultEntry_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &ItemPickupResultEntry::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<ItemPickupResultEntry>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &ItemPickupResultEntry::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<ItemPickupResultEntry>(), &ItemPickupResultEntry::ByteSizeLong,
+              &ItemPickupResultEntry::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(ItemPickupResultEntry, _impl_._cached_size_),
+          false,
+      },
+      &ItemPickupResultEntry::kDescriptorMethods,
+      &descriptor_table_GamePacket_2fitem_5fpacket_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull ItemPickupResultEntry_class_data_ =
+        ItemPickupResultEntry::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+ItemPickupResultEntry::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&ItemPickupResultEntry_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(ItemPickupResultEntry_class_data_.tc_table);
+  return ItemPickupResultEntry_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 4, 0, 0, 2>
+ItemPickupResultEntry::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(ItemPickupResultEntry, _impl_._has_bits_),
+    0, // no _extensions_
+    4, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967280,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    4,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    ItemPickupResultEntry_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::GamePacket::ItemPickupResultEntry>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // int32 picked_count = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ItemPickupResultEntry, _impl_.picked_count_), 3>(),
+     {32, 3, 0,
+      PROTOBUF_FIELD_OFFSET(ItemPickupResultEntry, _impl_.picked_count_)}},
+    // int64 drop_object_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(ItemPickupResultEntry, _impl_.drop_object_id_), 0>(),
+     {8, 0, 0,
+      PROTOBUF_FIELD_OFFSET(ItemPickupResultEntry, _impl_.drop_object_id_)}},
+    // .GamePacket.EItemPickupResult result = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ItemPickupResultEntry, _impl_.result_), 1>(),
+     {16, 1, 0,
+      PROTOBUF_FIELD_OFFSET(ItemPickupResultEntry, _impl_.result_)}},
+    // int32 item_key = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ItemPickupResultEntry, _impl_.item_key_), 2>(),
+     {24, 2, 0,
+      PROTOBUF_FIELD_OFFSET(ItemPickupResultEntry, _impl_.item_key_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int64 drop_object_id = 1;
+    {PROTOBUF_FIELD_OFFSET(ItemPickupResultEntry, _impl_.drop_object_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // .GamePacket.EItemPickupResult result = 2;
+    {PROTOBUF_FIELD_OFFSET(ItemPickupResultEntry, _impl_.result_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
+    // int32 item_key = 3;
+    {PROTOBUF_FIELD_OFFSET(ItemPickupResultEntry, _impl_.item_key_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int32 picked_count = 4;
+    {PROTOBUF_FIELD_OFFSET(ItemPickupResultEntry, _impl_.picked_count_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+PROTOBUF_NOINLINE void ItemPickupResultEntry::Clear() {
+// @@protoc_insertion_point(message_clear_start:GamePacket.ItemPickupResultEntry)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+    ::memset(&_impl_.drop_object_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.picked_count_) -
+        reinterpret_cast<char*>(&_impl_.drop_object_id_)) + sizeof(_impl_.picked_count_));
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL ItemPickupResultEntry::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const ItemPickupResultEntry& this_ = static_cast<const ItemPickupResultEntry&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL ItemPickupResultEntry::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const ItemPickupResultEntry& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:GamePacket.ItemPickupResultEntry)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // int64 drop_object_id = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (this_._internal_drop_object_id() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
+              stream, this_._internal_drop_object_id(), target);
+    }
+  }
+
+  // .GamePacket.EItemPickupResult result = 2;
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    if (this_._internal_result() != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteEnumToArray(
+          2, this_._internal_result(), target);
+    }
+  }
+
+  // int32 item_key = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (this_._internal_item_key() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<3>(
+              stream, this_._internal_item_key(), target);
+    }
+  }
+
+  // int32 picked_count = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (this_._internal_picked_count() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<4>(
+              stream, this_._internal_picked_count(), target);
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:GamePacket.ItemPickupResultEntry)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t ItemPickupResultEntry::ByteSizeLong(const MessageLite& base) {
+  const ItemPickupResultEntry& this_ = static_cast<const ItemPickupResultEntry&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t ItemPickupResultEntry::ByteSizeLong() const {
+  const ItemPickupResultEntry& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:GamePacket.ItemPickupResultEntry)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+  cached_has_bits = this_._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+    // int64 drop_object_id = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (this_._internal_drop_object_id() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+            this_._internal_drop_object_id());
+      }
+    }
+    // .GamePacket.EItemPickupResult result = 2;
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (this_._internal_result() != 0) {
+        total_size += 1 +
+                      ::_pbi::WireFormatLite::EnumSize(this_._internal_result());
+      }
+    }
+    // int32 item_key = 3;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (this_._internal_item_key() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_item_key());
+      }
+    }
+    // int32 picked_count = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (this_._internal_picked_count() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_picked_count());
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void ItemPickupResultEntry::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<ItemPickupResultEntry*>(&to_msg);
+  auto& from = static_cast<const ItemPickupResultEntry&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.ItemPickupResultEntry)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (from._internal_drop_object_id() != 0) {
+        _this->_impl_.drop_object_id_ = from._impl_.drop_object_id_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (from._internal_result() != 0) {
+        _this->_impl_.result_ = from._impl_.result_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (from._internal_item_key() != 0) {
+        _this->_impl_.item_key_ = from._impl_.item_key_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (from._internal_picked_count() != 0) {
+        _this->_impl_.picked_count_ = from._impl_.picked_count_;
+      }
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void ItemPickupResultEntry::CopyFrom(const ItemPickupResultEntry& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.ItemPickupResultEntry)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void ItemPickupResultEntry::InternalSwap(ItemPickupResultEntry* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(ItemPickupResultEntry, _impl_.picked_count_)
+      + sizeof(ItemPickupResultEntry::_impl_.picked_count_)
+      - PROTOBUF_FIELD_OFFSET(ItemPickupResultEntry, _impl_.drop_object_id_)>(
+          reinterpret_cast<char*>(&_impl_.drop_object_id_),
+          reinterpret_cast<char*>(&other->_impl_.drop_object_id_));
+}
+
+::google::protobuf::Metadata ItemPickupResultEntry::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class ItemPickupRes::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<ItemPickupRes>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(ItemPickupRes, _impl_._has_bits_);
+};
+
+void ItemPickupRes::clear_updated_items() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.updated_items_.Clear();
+  ClearHasBitForRepeated(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+ItemPickupRes::ItemPickupRes(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ItemPickupRes_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:GamePacket.ItemPickupRes)
+}
+PROTOBUF_NDEBUG_INLINE ItemPickupRes::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::GamePacket::ItemPickupRes& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        results_{visibility, arena, from.results_},
+        updated_items_{visibility, arena, from.updated_items_} {}
+
+ItemPickupRes::ItemPickupRes(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const ItemPickupRes& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ItemPickupRes_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  ItemPickupRes* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:GamePacket.ItemPickupRes)
+}
+PROTOBUF_NDEBUG_INLINE ItemPickupRes::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        results_{visibility, arena},
+        updated_items_{visibility, arena} {}
+
+inline void ItemPickupRes::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+ItemPickupRes::~ItemPickupRes() {
+  // @@protoc_insertion_point(destructor:GamePacket.ItemPickupRes)
+  SharedDtor(*this);
+}
+inline void ItemPickupRes::SharedDtor(MessageLite& self) {
+  ItemPickupRes& this_ = static_cast<ItemPickupRes&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL ItemPickupRes::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) ItemPickupRes(arena);
+}
+constexpr auto ItemPickupRes::InternalNewImpl_() {
+  constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
+      PROTOBUF_FIELD_OFFSET(ItemPickupRes, _impl_.results_) +
+          decltype(ItemPickupRes::_impl_.results_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+      PROTOBUF_FIELD_OFFSET(ItemPickupRes, _impl_.updated_items_) +
+          decltype(ItemPickupRes::_impl_.updated_items_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+  });
+  if (arena_bits.has_value()) {
+    return ::google::protobuf::internal::MessageCreator::ZeroInit(
+        sizeof(ItemPickupRes), alignof(ItemPickupRes), *arena_bits);
+  } else {
+    return ::google::protobuf::internal::MessageCreator(&ItemPickupRes::PlacementNew_,
+                                 sizeof(ItemPickupRes),
+                                 alignof(ItemPickupRes));
+  }
+}
+constexpr auto ItemPickupRes::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_ItemPickupRes_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &ItemPickupRes::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<ItemPickupRes>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &ItemPickupRes::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<ItemPickupRes>(), &ItemPickupRes::ByteSizeLong,
+              &ItemPickupRes::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(ItemPickupRes, _impl_._cached_size_),
+          false,
+      },
+      &ItemPickupRes::kDescriptorMethods,
+      &descriptor_table_GamePacket_2fitem_5fpacket_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull ItemPickupRes_class_data_ =
+        ItemPickupRes::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+ItemPickupRes::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&ItemPickupRes_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(ItemPickupRes_class_data_.tc_table);
+  return ItemPickupRes_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 2, 0, 2>
+ItemPickupRes::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(ItemPickupRes, _impl_._has_bits_),
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    2,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    ItemPickupRes_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::GamePacket::ItemPickupRes>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // repeated .DataStructures.Item updated_items = 2;
+    {::_pbi::TcParser::FastMtR1,
+     {18, 1, 1,
+      PROTOBUF_FIELD_OFFSET(ItemPickupRes, _impl_.updated_items_)}},
+    // repeated .GamePacket.ItemPickupResultEntry results = 1;
+    {::_pbi::TcParser::FastMtR1,
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(ItemPickupRes, _impl_.results_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated .GamePacket.ItemPickupResultEntry results = 1;
+    {PROTOBUF_FIELD_OFFSET(ItemPickupRes, _impl_.results_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+    // repeated .DataStructures.Item updated_items = 2;
+    {PROTOBUF_FIELD_OFFSET(ItemPickupRes, _impl_.updated_items_), _Internal::kHasBitsOffset + 1, 1, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+  }},
+  {{
+      {::_pbi::TcParser::GetTable<::GamePacket::ItemPickupResultEntry>()},
+      {::_pbi::TcParser::GetTable<::DataStructures::Item>()},
+  }},
+  {{
+  }},
+};
+PROTOBUF_NOINLINE void ItemPickupRes::Clear() {
+// @@protoc_insertion_point(message_clear_start:GamePacket.ItemPickupRes)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+      _impl_.results_.Clear();
+    }
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000002U)) {
+      _impl_.updated_items_.Clear();
+    }
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL ItemPickupRes::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const ItemPickupRes& this_ = static_cast<const ItemPickupRes&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL ItemPickupRes::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const ItemPickupRes& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:GamePacket.ItemPickupRes)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // repeated .GamePacket.ItemPickupResultEntry results = 1;
+  if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+    for (unsigned i = 0, n = static_cast<unsigned>(
+                             this_._internal_results_size());
+         i < n; i++) {
+      const auto& repfield = this_._internal_results().Get(i);
+      target =
+          ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+              1, repfield, repfield.GetCachedSize(),
+              target, stream);
+    }
+  }
+
+  // repeated .DataStructures.Item updated_items = 2;
+  if (CheckHasBitForRepeated(cached_has_bits, 0x00000002U)) {
+    for (unsigned i = 0, n = static_cast<unsigned>(
+                             this_._internal_updated_items_size());
+         i < n; i++) {
+      const auto& repfield = this_._internal_updated_items().Get(i);
+      target =
+          ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+              2, repfield, repfield.GetCachedSize(),
+              target, stream);
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:GamePacket.ItemPickupRes)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t ItemPickupRes::ByteSizeLong(const MessageLite& base) {
+  const ItemPickupRes& this_ = static_cast<const ItemPickupRes&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t ItemPickupRes::ByteSizeLong() const {
+  const ItemPickupRes& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:GamePacket.ItemPickupRes)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+  cached_has_bits = this_._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+    // repeated .GamePacket.ItemPickupResultEntry results = 1;
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+      total_size += 1UL * this_._internal_results_size();
+      for (const auto& msg : this_._internal_results()) {
+        total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+      }
+    }
+    // repeated .DataStructures.Item updated_items = 2;
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000002U)) {
+      total_size += 1UL * this_._internal_updated_items_size();
+      for (const auto& msg : this_._internal_updated_items()) {
+        total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void ItemPickupRes::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<ItemPickupRes*>(&to_msg);
+  auto& from = static_cast<const ItemPickupRes&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  ::google::protobuf::Arena* arena = _this->GetArena();
+  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.ItemPickupRes)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+      _this->_internal_mutable_results()->InternalMergeFromWithArena(
+          ::google::protobuf::MessageLite::internal_visibility(), arena,
+          from._internal_results());
+    }
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000002U)) {
+      _this->_internal_mutable_updated_items()->InternalMergeFromWithArena(
+          ::google::protobuf::MessageLite::internal_visibility(), arena,
+          from._internal_updated_items());
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void ItemPickupRes::CopyFrom(const ItemPickupRes& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.ItemPickupRes)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void ItemPickupRes::InternalSwap(ItemPickupRes* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  _impl_.results_.InternalSwap(&other->_impl_.results_);
+  _impl_.updated_items_.InternalSwap(&other->_impl_.updated_items_);
+}
+
+::google::protobuf::Metadata ItemPickupRes::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)

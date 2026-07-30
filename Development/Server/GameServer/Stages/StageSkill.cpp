@@ -266,6 +266,9 @@ void Stage::ApplyEffectDamage(ActorObject& target, double damage, int64 killerOb
     {
         BroadcastObjectDeathNtf(target, killerObjectId);
 
+        if (target.GetObjectType() == EObjectType::Monster)
+            spawnMonsterDrops(static_cast<const Monster&>(target), killerObjectId);
+
         // 몬스터 사망이면 스크립트 콜백 (watch 필터는 StageScript 내부). 대량몹 부하 방지를 위해 watch 등록분만 Lua 진입.
         if (m_pScript && target.GetObjectType() == EObjectType::Monster)
         {
