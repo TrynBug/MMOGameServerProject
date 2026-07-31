@@ -327,6 +327,7 @@ void GameServer::OnBeforeShutdown()
     // 모든 유저 정리. Stage에서도 제거되고, 글로벌 맵에서도 제거된다.
     // 향후 단계에서 DB 저장 등이 추가될 예정.
     m_safeUsers.Clear();
+    GetRegistryClient()->SetUserCount(0);
 
     // 모든 게이트웨이서버 연결 끊기
     std::vector<int32> gatewayIds = m_safeGatewayClients.CollectKeys(
@@ -631,6 +632,7 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
     UserPtr spUser = std::make_shared<User>(accountId, gatewayId, clientIp);
     spUser->SetAccount(*accountOpt);
     m_safeUsers.Insert(accountId, spUser);
+    GetRegistryClient()->SetUserCount(static_cast<int32>(m_safeUsers.Size()));
 
     // SystemStage(캐릭터 선택창)에 입장 메시지 push
     // 캐릭터 선택이 끝나면 handleClientCharacterSelect에서 Town으로 이동시킨다.
@@ -1003,6 +1005,8 @@ void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSess
         return;
     }
 
+    GetRegistryClient()->SetUserCount(static_cast<int32>(m_safeUsers.Size()));
+
     if (CharacterPtr spCharacter = spUser->GetCurrentCharacter())
         m_chatManager.NotifyPresence(spCharacter->GetProto().character_id(), spCharacter->GetProto().name(), false);
 
@@ -1126,6 +1130,7 @@ db::DetachedCoTask GameServer::BeginCrossServerMove(int64 accountId, int32 targe
     pSourceStage->EnqueueMessage(StageMsg_UserLeave{ accountId });
     UserPtr removed;
     m_safeUsers.EraseAndGet(accountId, removed);   // 글로벌 맵에서 제거
+    GetRegistryClient()->SetUserCount(static_cast<int32>(m_safeUsers.Size()));
 
     LOG_WRITE(LogLevel::Info, std::format("CrossServerMove - handed off. accountId={} characterId={} -> gameServerId={} stageKey={}",
         accountId, characterId, targetGameServerId, targetStageDataKey));
@@ -1155,6 +1160,7 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
     // 실패 시에도 응답을 먼저 보낸 다음 유저를 제거한다.
     UserPtr spUser = std::make_shared<User>(accountId, gatewayId, clientIp);
     m_safeUsers.Insert(accountId, spUser);
+    GetRegistryClient()->SetUserCount(static_cast<int32>(m_safeUsers.Size()));
 
     // 이 계정의 Account 로드 + 보관
     auto accountOpt = co_await loadAccount(accountId);
@@ -1164,6 +1170,7 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
         m_packetSender.SendStageMoveRes(accountId, EResultCode::Fail, "server error: account", targetStageDataKey);
         UserPtr removed; 
         m_safeUsers.EraseAndGet(accountId, removed);
+        GetRegistryClient()->SetUserCount(static_cast<int32>(m_safeUsers.Size()));
         co_return;
     }
     const int32 gameDbIndex = accountOpt->game_db_index();
@@ -1173,6 +1180,7 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
         m_packetSender.SendStageMoveRes(accountId, EResultCode::Fail, "server error: shard", targetStageDataKey);
         UserPtr removed; 
         m_safeUsers.EraseAndGet(accountId, removed);
+        GetRegistryClient()->SetUserCount(static_cast<int32>(m_safeUsers.Size()));
         co_return;
     }
     spUser->SetAccount(*accountOpt);
@@ -1183,6 +1191,7 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
         m_packetSender.SendStageMoveRes(accountId, EResultCode::Fail, "character load failed", targetStageDataKey);
         UserPtr removed; 
         m_safeUsers.EraseAndGet(accountId, removed);
+        GetRegistryClient()->SetUserCount(static_cast<int32>(m_safeUsers.Size()));
         co_return;
     }
 
@@ -1195,6 +1204,7 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
         m_packetSender.SendStageMoveRes(accountId, EResultCode::Fail, "target stage not found", targetStageDataKey);
         UserPtr removed; 
         m_safeUsers.EraseAndGet(accountId, removed);
+        GetRegistryClient()->SetUserCount(static_cast<int32>(m_safeUsers.Size()));
         co_return;
     }
 

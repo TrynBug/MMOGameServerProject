@@ -34,6 +34,7 @@ struct ServerBaseConfig
 
     // 서버정보 폴링대상 서버목록
     std::vector<ServerType> pollTargetTypes;
+    int64 registryPollIntervalMs = 60000;
 
     // 접속자 수 보고 주기(ms). 0이면 보고 안 함
     int64 userCountReportMs = 0;

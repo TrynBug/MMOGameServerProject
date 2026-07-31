@@ -35,6 +35,7 @@ int main()
 
     config.registryIp = configParser.GetString("Registry", "IP", "127.0.0.1");
     config.registryPort = static_cast<uint16>(configParser.GetInt32("Registry", "Port", 10001));
+    config.registryPollIntervalMs = configParser.GetInt32("Registry", "PollIntervalMs", 10000);
     config.useRegistry = true;
 
     // 게이트웨이서버는 로그인서버, 게임서버 정보를 폴링

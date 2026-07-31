@@ -120,10 +120,19 @@ void GatewayServer::OnServerInfoUpdated(const ServerInfo& info)
 {
     if (info.serverType == ServerType::Game)
     {
+        std::lock_guard<std::mutex> lock(m_gameServerSelectionMutex);
+
+        // 새 Registry 스냅샷에는 이전 선택 결과가 반영됐다고 보고 예약값을 초기화한다.
         if (info.status == ServerStatus::Disconnected)
+        {
             m_safeGameServerInfos.Erase(info.serverId);
+            m_gameServerPendingAssignments.erase(info.serverId);
+        }
         else
+        {
             m_safeGameServerInfos.Insert(info.serverId, info);
+            m_gameServerPendingAssignments[info.serverId] = 0;
+        }
     }
 }
 
@@ -186,6 +195,8 @@ void GatewayServer::onClientDisconnect(const netlib::ISessionPtr& spSession)
 
     if (!spUser)
         return;
+
+    GetRegistryClient()->SetUserCount(static_cast<int32>(m_safeUsers.Size()));
 
     LOG_WRITE(LogLevel::Info, std::format("client disconnected. accountId={}", accountId));
 
@@ -281,7 +292,10 @@ void GatewayServer::onInternalDisconnect(const netlib::ISessionPtr& spSession)
 
         LOG_WRITE(LogLevel::Warn, std::format("game server disconnected. gameServerId={}", gameServerId));
 
-        m_safeGameServerSessions.Erase(gameServerId);
+        {
+            std::lock_guard<std::mutex> lock(m_gameServerSelectionMutex);
+            m_safeGameServerSessions.Erase(gameServerId);
+        }
 
         std::vector<int64> affectedUsers = m_safeUsers.CollectKeys(
             [gameServerId](const int64&, const GatewayUserPtr& spUser)
@@ -342,13 +356,35 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
         return;
     }
 
-    // 유저 객체 생성
+    // 게임서버에 유저 입장 알림. 선택 직후 세션이 사라졌으면 인증을 완료하지 않는다.
     auto spUser = std::make_shared<GatewayUser>();
     spUser->accountId = accountId;
     spUser->gameServerId = gameServer->serverId;
     spUser->spClientSession = spClientSession;
 
+    ServerPacket::GatewayUserEnterNtf ntf;
+    ntf.set_account_id(accountId);
+    ntf.set_gateway_id(GetServerId());
+    ntf.set_client_ip(spUser->clientIp);
+
+    auto spNtfPacket = SerializePacket(Common::SERVER_PACKET_ID_USER_ENTER_NTF, ntf);
+    if (!spNtfPacket || !sendToGameServer(gameServer->serverId, spNtfPacket))
+    {
+        {
+            std::lock_guard<std::mutex> lock(m_gameServerSelectionMutex);
+            auto iter = m_gameServerPendingAssignments.find(gameServer->serverId);
+            if (iter != m_gameServerPendingAssignments.end() && iter->second > 0)
+                --iter->second;
+        }
+
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_AuthFailure);
+        LOG_WRITE(LogLevel::Warn, std::format("selected game server became unavailable. accountId={} gameServerId={}", accountId, gameServer->serverId));
+        spClientSession->Disconnect();
+        return;
+    }
+
     m_safeUsers.Insert(accountId, spUser);
+    GetRegistryClient()->SetUserCount(static_cast<int32>(m_safeUsers.Size()));
     GetMetricsRegistry().Inc(serverbase::CounterMetric::Gateway_AuthSuccess);
 
     pMeta->accountId = accountId;
@@ -357,16 +393,6 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
     upsertPrevGameServer(accountId, gameServer->serverId);
 
     LOG_WRITE(LogLevel::Info, std::format("client authenticated. accountId={}, gameServerId={}", accountId, gameServer->serverId));
-
-    // 게임서버에 유저 입장 알림
-    ServerPacket::GatewayUserEnterNtf ntf;
-    ntf.set_account_id(accountId);
-    ntf.set_gateway_id(GetServerId());
-    ntf.set_client_ip(spUser->clientIp);
-
-    auto spNtfPacket = SerializePacket(Common::SERVER_PACKET_ID_USER_ENTER_NTF, ntf);
-    if (spNtfPacket)
-        sendToGameServer(gameServer->serverId, spNtfPacket);
 }
 
 void GatewayServer::handleLogoutReq(const netlib::ISessionPtr& spClientSession)
@@ -538,7 +564,10 @@ void GatewayServer::handleGameServerHandshakeReq(const netlib::ISessionPtr& spGa
     pMeta->peerServerId = gameServerId;
     pMeta->peerServerType = gameServerType;
 
-    m_safeGameServerSessions.Insert(gameServerId, spGameSession);
+    {
+        std::lock_guard<std::mutex> lock(m_gameServerSelectionMutex);
+        m_safeGameServerSessions.Insert(gameServerId, spGameSession);
+    }
 
     // 게임서버에 Handshake Res 전송
     ServerPacket::ServerHandshakeRes res;
@@ -687,10 +716,17 @@ void GatewayServer::cleanupExpiredPrevGameServer()
     m_safePrevGameServer.Erase(expiredKeys);
 }
 
-std::optional<ServerInfo> GatewayServer::selectGameServer(int64 accountId) const
+std::optional<ServerInfo> GatewayServer::selectGameServer(int64 accountId)
 {
+    std::lock_guard<std::mutex> lock(m_gameServerSelectionMutex);
+
     if (m_safeGameServerInfos.Empty())
         return std::nullopt;
+
+    auto isAvailable = [this](const ServerInfo& info)
+    {
+        return info.status == ServerStatus::Running && m_safeGameServerSessions.Contains(info.serverId);
+    };
 
     // 이전 접속 게임서버 우선 선택 (5분 TTL)
     PrevGameServerEntry prevEntry;
@@ -701,38 +737,60 @@ std::optional<ServerInfo> GatewayServer::selectGameServer(int64 accountId) const
             ServerInfo prevInfo;
             if (m_safeGameServerInfos.Find(prevEntry.gameServerId, prevInfo))
             {
-                if (prevInfo.status == ServerStatus::Running)
+                if (isAvailable(prevInfo))
+                {
+                    ++m_gameServerPendingAssignments[prevInfo.serverId];
                     return prevInfo;
+                }
             }
         }
     }
 
-    // 유저 수가 가장 적은 Running 게임서버 선택
-    std::optional<ServerInfo> best;
+    // Registry 접속자 수와 아직 스냅샷에 반영되지 않은 선택 수를 합산한다.
+    int64 bestExpectedUserCount = std::numeric_limits<int64>::max();
+    std::vector<ServerInfo> bestGameServers;
     m_safeGameServerInfos.ForEach([&](const int32&, const ServerInfo& info)
     {
-        if (info.status != ServerStatus::Running)
+        if (!isAvailable(info))
             return;
 
-        if (!best.has_value() || info.userCount < best->userCount)
-            best = info;
+        int64 expectedUserCount = static_cast<int64>(info.userCount) + m_gameServerPendingAssignments[info.serverId];
+        if (expectedUserCount < bestExpectedUserCount)
+        {
+            bestExpectedUserCount = expectedUserCount;
+            bestGameServers.clear();
+            bestGameServers.push_back(info);
+        }
+        else if (expectedUserCount == bestExpectedUserCount)
+        {
+            bestGameServers.push_back(info);
+        }
     });
 
-    return best;
+    if (bestGameServers.empty())
+        return std::nullopt;
+
+    size_t selectedIndex = static_cast<size_t>(m_gameServerRoundRobinCursor % bestGameServers.size());
+    ++m_gameServerRoundRobinCursor;
+
+    ServerInfo selected = bestGameServers[selectedIndex];
+    ++m_gameServerPendingAssignments[selected.serverId];
+    return selected;
 }
 
 
 // 게임서버로 서버간 패킷 전달
-void GatewayServer::sendToGameServer(int32 gameServerId, const netlib::PacketPtr& spPacket)
+bool GatewayServer::sendToGameServer(int32 gameServerId, const netlib::PacketPtr& spPacket)
 {
     netlib::ISessionPtr spSession;
     if (!m_safeGameServerSessions.Find(gameServerId, spSession))
     {
         LOG_WRITE(LogLevel::Warn, std::format("no session for gameServerId={}", gameServerId));
-        return;
+        return false;
     }
 
     spSession->Send(spPacket);
+    return true;
 }
 
 void GatewayServer::forceDisconnectUser(int64 accountId, const std::string& reason)

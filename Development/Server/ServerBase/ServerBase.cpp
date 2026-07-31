@@ -216,6 +216,7 @@ bool ServerBase::Initialize(const ServerBaseConfig& config)
         regConfig.myClientPort      = config.clientListenServerConfig.port;
         regConfig.myInternalPort    = config.internalListenServerConfig.port;
         regConfig.pollTargetTypes   = config.pollTargetTypes;
+        regConfig.pollIntervalMs    = config.registryPollIntervalMs;
         regConfig.userCountReportMs = config.userCountReportMs;
 
         m_spRegistryClient = std::make_unique<RegistryClient>();

@@ -90,11 +90,21 @@ void LoginServer::OnServerInfoUpdated(const ServerInfo& info)
     if (info.serverType != ServerType::Gateway)
         return;
 
-    // 게이트웨이 정보 캐시 갱신
-    if (info.status == ServerStatus::Disconnected)
-        m_safeGatewayInfos.Erase(info.serverId);
-    else
-        m_safeGatewayInfos.Insert(info.serverId, info);
+    {
+        std::lock_guard<std::mutex> lock(m_gatewaySelectionMutex);
+
+        // 게이트웨이 정보 캐시 갱신. 새 Registry 스냅샷에는 이전 선택 결과가 반영됐다고 보고 예약값을 초기화한다.
+        if (info.status == ServerStatus::Disconnected)
+        {
+            m_safeGatewayInfos.Erase(info.serverId);
+            m_gatewayPendingAssignments.erase(info.serverId);
+        }
+        else
+        {
+            m_safeGatewayInfos.Insert(info.serverId, info);
+            m_gatewayPendingAssignments[info.serverId] = 0;
+        }
+    }
 
     if (info.status == ServerStatus::Running)
     {
@@ -155,7 +165,10 @@ void LoginServer::onGatewayDisconnect(const netlib::ISessionPtr& spSession)
     }
 
     int32 gatewayId = pMeta->peerServerId;
-    m_safeGatewaySessions.Erase(gatewayId);
+    {
+        std::lock_guard<std::mutex> lock(m_gatewaySelectionMutex);
+        m_safeGatewaySessions.Erase(gatewayId);
+    }
 
     LOG_WRITE(LogLevel::Warn, std::format("gateway disconnected. gatewayId={}", gatewayId));
 }
@@ -236,7 +249,21 @@ db::DetachedCoTask LoginServer::handleLoginReq(netlib::ISessionPtr spSession, Ga
     uint64 authToken = generateAuthToken();
     int64 expireTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() + k_authTokenTtlMs;
 
-    sendAuthTokenToGateway(gateway->serverId, accountId, authToken, expireTimeMs);
+    if (!sendAuthTokenToGateway(gateway->serverId, accountId, authToken, expireTimeMs))
+    {
+        {
+            std::lock_guard<std::mutex> lock(m_gatewaySelectionMutex);
+            auto iter = m_gatewayPendingAssignments.find(gateway->serverId);
+            if (iter != m_gatewayPendingAssignments.end() && iter->second > 0)
+                --iter->second;
+        }
+
+        GetMetricsRegistry().Inc(serverbase::CounterMetric::Login_RequestNoGateway);
+        LOG_WRITE(LogLevel::Warn, std::format("selected gateway became unavailable. accountId={} gatewayId={}", accountId, gateway->serverId));
+        sendLoginFailed(spSession, "Server is busy. Please try again later.");
+        co_return;
+    }
+
     upsertLoginEntry(accountId, gateway->serverId);
     sendLoginSuccess(spSession, accountId, authToken, *gateway);
     GetMetricsRegistry().Inc(serverbase::CounterMetric::Login_RequestSuccess);
@@ -267,7 +294,10 @@ void LoginServer::handleGatewayHandshakeRes(const netlib::ISessionPtr& spSession
     pMeta->peerServerId = gatewayId;
     pMeta->peerServerType = ServerType::Gateway;
     
-    m_safeGatewaySessions.Insert(gatewayId, spSession);
+    {
+        std::lock_guard<std::mutex> lock(m_gatewaySelectionMutex);
+        m_safeGatewaySessions.Insert(gatewayId, spSession);
+    }
 
     LOG_WRITE(LogLevel::Info, std::format("gateway handshake complete. gatewayId={}, sessionId={}", gatewayId, spSession->GetId()));
 }
@@ -329,10 +359,20 @@ void LoginServer::disconnectFromGateway(int32 gatewayId)
     LOG_WRITE(LogLevel::Info, std::format("disconnected from gateway {}", gatewayId));
 }
 
-std::optional<ServerInfo> LoginServer::selectGateway(int64 accountId) const
+std::optional<ServerInfo> LoginServer::selectGateway(int64 accountId)
 {
+    std::lock_guard<std::mutex> lock(m_gatewaySelectionMutex);
+
     if (m_safeGatewayInfos.Empty())
         return std::nullopt;
+
+    auto isAvailable = [this](const ServerInfo& info)
+    {
+        return info.status == ServerStatus::Running &&
+               !info.publicIp.empty() &&
+               info.clientPort != 0 &&
+               m_safeGatewaySessions.Contains(info.serverId);
+    };
 
     // 이전 접속 게이트웨이 우선 선택 (5분 TTL)
     PrevGatewayEntry prevEntry;
@@ -343,35 +383,54 @@ std::optional<ServerInfo> LoginServer::selectGateway(int64 accountId) const
             ServerInfo prevInfo;
             if (m_safeGatewayInfos.Find(prevEntry.gatewayServerId, prevInfo))
             {
-                if (prevInfo.status == ServerStatus::Running)
+                if (isAvailable(prevInfo))
                 {
+                    ++m_gatewayPendingAssignments[prevInfo.serverId];
                     return prevInfo;
                 }
             }
         }
     }
 
-    // 유저 수가 가장 적은 Running 게이트웨이 선택
-    std::optional<ServerInfo> best;
+    // Registry 접속자 수와 아직 스냅샷에 반영되지 않은 선택 수를 합산한다.
+    int64 bestExpectedUserCount = std::numeric_limits<int64>::max();
+    std::vector<ServerInfo> bestGateways;
     m_safeGatewayInfos.ForEach([&](const int32&, const ServerInfo& info)
     {
-        if (info.status != ServerStatus::Running)
+        if (!isAvailable(info))
             return;
 
-        if (!best.has_value() || info.userCount < best->userCount)
-            best = info;
+        int64 expectedUserCount = static_cast<int64>(info.userCount) + m_gatewayPendingAssignments[info.serverId];
+        if (expectedUserCount < bestExpectedUserCount)
+        {
+            bestExpectedUserCount = expectedUserCount;
+            bestGateways.clear();
+            bestGateways.push_back(info);
+        }
+        else if (expectedUserCount == bestExpectedUserCount)
+        {
+            bestGateways.push_back(info);
+        }
     });
 
-    return best;
+    if (bestGateways.empty())
+        return std::nullopt;
+
+    size_t selectedIndex = static_cast<size_t>(m_gatewayRoundRobinCursor % bestGateways.size());
+    ++m_gatewayRoundRobinCursor;
+
+    ServerInfo selected = bestGateways[selectedIndex];
+    ++m_gatewayPendingAssignments[selected.serverId];
+    return selected;
 }
 
-void LoginServer::sendAuthTokenToGateway(int32 gatewayId, int64 accountId, uint64 authToken, int64 expireTimeMs)
+bool LoginServer::sendAuthTokenToGateway(int32 gatewayId, int64 accountId, uint64 authToken, int64 expireTimeMs)
 {
     netlib::ISessionPtr spSession;
     if (!m_safeGatewaySessions.Find(gatewayId, spSession))
     {
         LOG_WRITE(LogLevel::Warn, std::format("no session for gatewayId={}", gatewayId));
-        return;
+        return false;
     }
 
     ServerPacket::LoginAuthTokenNtf ntf;
@@ -380,8 +439,11 @@ void LoginServer::sendAuthTokenToGateway(int32 gatewayId, int64 accountId, uint6
     ntf.set_expire_time_ms(expireTimeMs);
 
     auto spPacket = SerializePacket(Common::SERVER_PACKET_ID_LOGIN_AUTH_TOKEN_NTF, ntf);
-    if (spPacket)
-        spSession->Send(spPacket);
+    if (!spPacket)
+        return false;
+
+    spSession->Send(spPacket);
+    return true;
 }
 
 void LoginServer::sendDuplicateLoginToGateway(int32 gatewayId, int64 accountId)

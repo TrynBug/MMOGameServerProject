@@ -79,11 +79,11 @@ private:
     void cleanupExpiredPrevGameServer();
 
     // 클라가 연결될 게임서버 선택 (로드밸런싱)
-    // 이전 접속 게임서버 정보가 있으면 우선 선택, 없으면 유저 수가 적은 서버 선택
-    std::optional<ServerInfo> selectGameServer(int64 accountId) const;
+    // 이전 접속 게임서버 정보가 있으면 우선 선택, 없으면 연결된 Running 서버 중 예상 유저 수가 적은 서버 선택
+    std::optional<ServerInfo> selectGameServer(int64 accountId);
 
     // 게임서버로 서버간 패킷 전달
-    void sendToGameServer(int32 gameServerId, const netlib::PacketPtr& spPacket);
+    bool sendToGameServer(int32 gameServerId, const netlib::PacketPtr& spPacket);
 
     // 유저에게 강제 종료 알림 전송 후 Disconnect
     void forceDisconnectUser(int64 accountId, const std::string& reason);
@@ -100,6 +100,11 @@ private:
 
     // 게임서버 정보 캐시 (레지스트리 폴링으로 갱신)
     SharedThreadSafeUnorderedMap<int32, ServerInfo> m_safeGameServerInfos;
+
+    // Registry 스냅샷 이후 선택됐지만 아직 스냅샷에 반영되지 않은 유저 수
+    std::mutex m_gameServerSelectionMutex;
+    std::unordered_map<int32, int32> m_gameServerPendingAssignments;
+    uint64 m_gameServerRoundRobinCursor = 0;
 
     // 패킷 디스패처
     serverbase::PacketDispatcher m_clientDispatcher;

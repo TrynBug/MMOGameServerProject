@@ -50,11 +50,11 @@ private:
     void connectToGateway(int32 gatewayId, const std::string& ip, uint16 port);
     void disconnectFromGateway(int32 gatewayId);
 
-    // 게이트웨이서버 선택(로드밸런싱): 유저 수가 가장 적고 Running 상태인 게이트웨이 선택, 이전 접속 게이트웨이가 있으면 우선 선택
-    std::optional<ServerInfo> selectGateway(int64 accountId) const;
+    // 게이트웨이서버 선택(로드밸런싱): 연결된 Running 게이트웨이 중 예상 유저 수가 가장 적은 서버 선택, 이전 접속 게이트웨이가 있으면 우선 선택
+    std::optional<ServerInfo> selectGateway(int64 accountId);
 
     // 선택된 게이트웨이에 인증 토큰 전달
-    void sendAuthTokenToGateway(int32 gatewayId, int64 accountId, uint64 authToken, int64 expireTimeMs);
+    bool sendAuthTokenToGateway(int32 gatewayId, int64 accountId, uint64 authToken, int64 expireTimeMs);
 
     // 이미 로그인 중인 게이트웨이에 중복 로그인 알림
     void sendDuplicateLoginToGateway(int32 gatewayId, int64 accountId);
@@ -102,6 +102,11 @@ private:
 
     // 게이트웨이 서버 정보 캐시 (레지스트리서버 폴링으로 갱신)
     SharedThreadSafeUnorderedMap<int32, ServerInfo>  m_safeGatewayInfos;  //  key=gatewayServerId
+
+    // Registry 스냅샷 이후 선택됐지만 아직 스냅샷에 반영되지 않은 유저 수
+    std::mutex m_gatewaySelectionMutex;
+    std::unordered_map<int32, int32> m_gatewayPendingAssignments;
+    uint64 m_gatewayRoundRobinCursor = 0;
 
     // 랜덤값 생성
     mutable std::mutex  m_rngMutex;
