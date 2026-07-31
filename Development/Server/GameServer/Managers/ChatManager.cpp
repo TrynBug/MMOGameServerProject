@@ -167,7 +167,7 @@ void ChatManager::SendPresenceSnapshot(const netlib::ISessionPtr& spSession, int
         ++presenceCount;
     });
 
-    LOG_WRITE(LogLevel::Info, std::format("ChatPresence snapshot sent. serverId={} count={}", communicationServerId, presenceCount));
+    LOG_WRITE(LogLevel::Debug, std::format("ChatPresence snapshot sent. serverId={} count={}", communicationServerId, presenceCount));
 }
 
 void ChatManager::HandleCommunicationChatBroadcastNtf(const netlib::ISessionPtr& spSession, const ServerPacket::ChatBroadcastNtf& msg)

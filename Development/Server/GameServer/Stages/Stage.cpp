@@ -335,7 +335,7 @@ void Stage::SetNavMesh(const dtNavMesh* pNavMesh)
     // pNavMesh 가 nullptr 이면 StageNavMesh 생성자가 IsReady()=false 로 둘다.
     m_pStageNavMesh = std::make_unique<StageNavMesh>(pNavMesh);
 
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} ready={}", m_stageId, m_pStageNavMesh->IsReady()));
+    LOG_WRITE(LogLevel::Debug, std::format("stageId={} ready={}", m_stageId, m_pStageNavMesh->IsReady()));
 }
 
 bool Stage::FindPath(float startX, float startY, float startZ,
@@ -493,7 +493,7 @@ void Stage::initializeSectorGrid()
         }
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} world=({},{})~({},{}) sectorSize={} grid={}x{} totalSectors={}",
+    LOG_WRITE(LogLevel::Debug, std::format("stageId={} world=({},{})~({},{}) sectorSize={} grid={}x{} totalSectors={}",
         m_stageId,
         m_worldMinX, m_worldMinZ, m_worldMaxX, m_worldMaxZ,
         m_sectorSize, m_sectorCountX, m_sectorCountZ, totalSectors));
@@ -550,7 +550,7 @@ Sector* Stage::GetSectorByPos(float posX, float posZ)
 
 void Stage::OnStart()
 {
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} stageType={}", m_stageId, static_cast<int>(m_stageType)));
+    LOG_WRITE(LogLevel::Debug, std::format("stageId={} stageType={}", m_stageId, static_cast<int>(m_stageType)));
 
     // 배치데이터: StageAssetManager 의 공유 불변 레이아웃 참조(인스턴스마다 파싱하지 않음).
     m_pLayout = GameServer::Instance().GetStageAssetManager().FindLayout(GetStageDataKey());
@@ -606,7 +606,7 @@ void Stage::OnStart()
 
             registerObject(spProp, k_propUpdateIntervalMs, m_propObjects);
         }
-        LOG_WRITE(LogLevel::Info, std::format("stageId={} props instantiated={}", m_stageId, m_propObjects.size()));
+        LOG_WRITE(LogLevel::Debug, std::format("stageId={} props instantiated={}", m_stageId, m_propObjects.size()));
     }
 
     // Stage 로직 스크립트 로드 (GameData_Stage.ScriptName1~3, 빈 슬롯 제외).
@@ -690,7 +690,7 @@ void Stage::OnUpdate(int64 deltaMs)
 
 void Stage::OnStop()
 {
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} stageType={} userCount={}",
+    LOG_WRITE(LogLevel::Debug, std::format("stageId={} stageType={} userCount={}",
         m_stageId, static_cast<int>(m_stageType), m_users.size()));
 
     // 남아있는 유저들은 그대로 두고 종료. GameServer 종료 흐름에서 별도 처리됨.
@@ -768,7 +768,7 @@ Monster* Stage::SpawnMonster(int32 monsterKey, float posX, float posY, float pos
     // 몬스터 업데이트 주기는 등록 진입점에 명시 전달 (현재 매 tick; 향후 잡몹은 더 긴 주기로).
     registerObject(spMonster, k_monsterUpdateIntervalMs, m_monsterObjects);
 
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} monsterKey={} objectId={} pos=({},{},{}) yaw={} sector=({},{}) totalObjects={}",
+    LOG_WRITE(LogLevel::Debug, std::format("stageId={} monsterKey={} objectId={} pos=({},{},{}) yaw={} sector=({},{}) totalObjects={}",
         m_stageId, monsterKey, objectId, spawnX, spawnY, spawnZ, yaw,
         spMonster->GetCurSectorX(), spMonster->GetCurSectorZ(), m_objects.size()));
 
@@ -803,7 +803,7 @@ bool Stage::DespawnMonster(int64 objectId)
     m_monsterObjects.erase(iter);
     m_objects.erase(objectId);
 
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} objectId={} totalObjects={}", m_stageId, objectId, m_objects.size()));
+    LOG_WRITE(LogLevel::Debug, std::format("stageId={} objectId={} totalObjects={}", m_stageId, objectId, m_objects.size()));
 
     // 주변 sector AOI 안의 유저들에게 despawn 통보.
     const std::vector<int64> despawnIds = { objectId };
@@ -995,7 +995,7 @@ PropObject* Stage::SpawnProp(int32 propDataKey, float posX, float posY, float po
             GameServer::Instance().GetPacketSender().SendObjectVisibilityNtf(acc, {}, {}, {}, single);
         });
 
-    LOG_WRITE(LogLevel::Info, std::format("prop spawned. stageId={} propDataKey={} objectId={} placementKey={} pos=({},{},{})",
+    LOG_WRITE(LogLevel::Debug, std::format("prop spawned. stageId={} propDataKey={} objectId={} placementKey={} pos=({},{},{})",
         m_stageId, propDataKey, objectId, placementKey, posX, posY, posZ));
     return spProp.get();
 }
@@ -1025,7 +1025,7 @@ bool Stage::DespawnProp(int64 objectId)
             GameServer::Instance().GetPacketSender().SendObjectVisibilityNtf(acc, {}, despawnIds);
         });
 
-    LOG_WRITE(LogLevel::Info, std::format("prop despawned. stageId={} objectId={} totalObjects={}", m_stageId, objectId, m_objects.size()));
+    LOG_WRITE(LogLevel::Debug, std::format("prop despawned. stageId={} objectId={} totalObjects={}", m_stageId, objectId, m_objects.size()));
     return true;
 }
 
@@ -1276,7 +1276,7 @@ void Stage::OnUserEnter(const UserPtr& spUser)
     // 유저가 Moving 상태로 pendingCharacter를 들고 있으면, 클라의 StageLoadCompleteReq
     // 수신 시 spawnPendingCharacter가 스폰한다. SystemStage는 캐릭터가 없으므로 여기서 끝.
     // 스크립트 OnPlayerEnter 콜백은 세션 입장이 아니라 캐릭터 스폰 완료 후(spawnPendingCharacter)에 발동한다.
-    LOG_WRITE(LogLevel::Info, std::format("stageId={}(ch{}) accountId={} stageState={} totalUsers={}",
+    LOG_WRITE(LogLevel::Debug, std::format("stageId={}(ch{}) accountId={} stageState={} totalUsers={}",
         m_stageId, m_channelNo, accountId, static_cast<int32>(spUser->GetStageState()), m_users.size()));
 }
 
@@ -1349,7 +1349,7 @@ void Stage::spawnPendingCharacter(const UserPtr& spUser)
     // 상태 전환 (캐릭터 소유는 이미 User가 갖고 있으므로 별도 설정 불필요).
     spUser->SetStageState(EUserStageState::InStage);
 
-    LOG_WRITE(LogLevel::Info, std::format("stageId={} accountId={} characterId={} sector=({},{}) totalUsers={} totalObjects={}",
+    LOG_WRITE(LogLevel::Debug, std::format("stageId={} accountId={} characterId={} sector=({},{}) totalUsers={} totalObjects={}",
         m_stageId, accountId, objectId,
         spCharacter->GetCurSectorX(), spCharacter->GetCurSectorZ(),
         m_users.size(), m_objects.size()));
@@ -1537,7 +1537,7 @@ void Stage::OnUserLeave(int64 accountId)
     m_users.erase(iter);
     m_userCountHint.store(static_cast<int32>(m_users.size()), std::memory_order_relaxed);
 
-    LOG_WRITE(LogLevel::Info, std::format("stageId={}(ch{}) accountId={} totalUsers={} totalObjects={}",
+    LOG_WRITE(LogLevel::Debug, std::format("stageId={}(ch{}) accountId={} totalUsers={} totalObjects={}",
         m_stageId, m_channelNo, accountId, m_users.size(), m_objects.size()));
 
     // 스크립트 OnPlayerLeave 콜백 — 스폰됐던 캐릭터의 objectId. 캐릭터 없이 떠난 경우 0.
@@ -1793,7 +1793,7 @@ void Stage::handleStageMoveReq(const UserPtr& spUser, const netlib::PacketPtr& s
         // 이 Stage를 넘겨, DB await 후속작업이 이 Stage의 컨텐츠 스레드에서 재개되고 퇴장도 이 Stage로 enqueue된다.
         server.BeginCrossServerMove(accountId, req.target_game_server_id(), req.target_stage_data_key(), req.position_type(), this);
 
-        LOG_WRITE(LogLevel::Info, std::format("cross-server moving. accountId={} from stageId={} to gameServerId={} (stageKey={}) positionType={}",
+        LOG_WRITE(LogLevel::Debug, std::format("cross-server moving. accountId={} from stageId={} to gameServerId={} (stageKey={}) positionType={}",
             accountId, m_stageId, req.target_game_server_id(), req.target_stage_data_key(), static_cast<int32>(positionType)));
         return;
     }
@@ -1870,7 +1870,7 @@ void Stage::handleReturnToCharacterSelectReq(const UserPtr& spUser, const netlib
     // SystemStage 입장 → SystemStage::OnUserEnter 가 CharacterListNtf 를 전송한다(전송 시점 일원화).
     spSystemStage->EnqueueMessage(StageMsg_UserEnter{spUser});
 
-    LOG_WRITE(LogLevel::Info, std::format("ReturnToCharacterSelect - left stage. stageId={} accountId={}", m_stageId, accountId));
+    LOG_WRITE(LogLevel::Debug, std::format("ReturnToCharacterSelect - left stage. stageId={} accountId={}", m_stageId, accountId));
 }
 
 bool Stage::executeLocalStageMove(const UserPtr& spUser, const CharacterPtr& spCharacter,
@@ -1937,7 +1937,7 @@ bool Stage::moveUserToStage(const UserPtr& spUser, const StagePtr& spTarget,
     // 4) 성공 응답 → 클라는 로딩 시작, 완료 시 StageLoadCompleteReq.
     server.GetPacketSender().SendStageMoveRes(accountId, EResultCode::Success, "", targetStageDataKey);
 
-    LOG_WRITE(LogLevel::Info, std::format("moving. accountId={} from stageId={}(ch{}) to stageId={}(ch{}) (dataKey={}) positionType={}",
+    LOG_WRITE(LogLevel::Debug, std::format("moving. accountId={} from stageId={}(ch{}) to stageId={}(ch{}) (dataKey={}) positionType={}",
         accountId, m_stageId, m_channelNo, spTarget->GetStageId(), spTarget->GetChannelNo(),
         targetStageDataKey, static_cast<int32>(positionType)));
     return true;
@@ -2630,7 +2630,7 @@ void Stage::respawnCharacter(Character& character)
     // 주변 AOI 에 부활 통보 (클라 상태/위치 복원 + 부활 연출).
     BroadcastObjectReviveNtf(character);
 
-    LOG_WRITE(LogLevel::Info, std::format("respawn character. stageId={} objectId={} pos=({},{},{})",
+    LOG_WRITE(LogLevel::Debug, std::format("respawn character. stageId={} objectId={} pos=({},{},{})",
         m_stageId, character.GetObjectId(), posX, posY, posZ));
 }
 

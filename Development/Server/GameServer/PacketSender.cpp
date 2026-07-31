@@ -114,7 +114,7 @@ void PacketSender::SendStageLoadCompleteRes(int64 accountId, EResultCode resultC
         }
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("StageLoadCompleteRes sent. accountId={} stageId={} stageKey={} pos=({},{},{}) yaw={}",
+    LOG_WRITE(LogLevel::Debug, std::format("StageLoadCompleteRes sent. accountId={} stageId={} stageKey={} pos=({},{},{}) yaw={}",
         accountId, stageId, stageDataKey, myPosX, myPosY, myPosZ, myYaw));
 }
 
@@ -163,7 +163,7 @@ void PacketSender::SendObjectVisibilityNtf(int64 accountId,
 
     SendToUser(accountId, Common::GAME_PACKET_ID_OBJECT_VISIBILITY_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("ObjectVisibilityNtf sent. accountId={} characterSpawns={} monsterSpawns={} propSpawns={} dropSpawns={} despawns={}",
+    LOG_WRITE(LogLevel::Debug, std::format("ObjectVisibilityNtf sent. accountId={} characterSpawns={} monsterSpawns={} propSpawns={} dropSpawns={} despawns={}",
         accountId, characterSpawns.size(), monsterSpawns.size(), propSpawns.size(), dropSpawns.size(), despawnIds.size()));
 }
 
@@ -181,7 +181,7 @@ void PacketSender::SendPropStateNtf(std::span<const int64> accountIds, int64 obj
 
     SendToUsers(accountIds, Common::GAME_PACKET_ID_PROP_STATE_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("PropStateNtf sent. recipients={} objectId={} state={} actorObjectId={}",
+    LOG_WRITE(LogLevel::Debug, std::format("PropStateNtf sent. recipients={} objectId={} state={} actorObjectId={}",
         accountIds.size(), objectId, state, actorObjectId));
 }
 
@@ -205,7 +205,7 @@ void PacketSender::SendMovePosCorrectNtf(int64 accountId, float posX, float posY
 
     SendToUser(accountId, Common::GAME_PACKET_ID_MOVE_POS_CORRECT_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("MovePosCorrectNtf sent. accountId={} pos=({},{},{}) yaw={}", accountId, posX, posY, posZ, yaw));
+    LOG_WRITE(LogLevel::Debug, std::format("MovePosCorrectNtf sent. accountId={} pos=({},{},{}) yaw={}", accountId, posX, posY, posZ, yaw));
 }
 
 void PacketSender::SendSnapshotNtf(int64 accountId, const GamePacket::SnapshotNtf& ntf)
@@ -237,7 +237,7 @@ void PacketSender::SendStatUpdateNtf(int64 accountId, const Character& character
 
     SendToUser(accountId, Common::GAME_PACKET_ID_STAT_UPDATE_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("StatUpdateNtf sent. accountId={} objectId={} count={}",
+    LOG_WRITE(LogLevel::Debug, std::format("StatUpdateNtf sent. accountId={} objectId={} count={}",
         accountId, character.GetObjectId(), ntf.entries_size()));
 }
 

@@ -604,7 +604,7 @@ db::DetachedCoTask GameServer::handleGatewayUserEnter(netlib::ISessionPtr /*spSe
     const int32 gatewayId = msg.gateway_id();
     const std::string clientIp = msg.client_ip();
 
-    LOG_WRITE(LogLevel::Info, std::format("GatewayUserEnterNtf received. accountId={} gatewayId={} clientIp={}", accountId, gatewayId, clientIp));
+    LOG_WRITE(LogLevel::Debug, std::format("GatewayUserEnterNtf received. accountId={} gatewayId={} clientIp={}", accountId, gatewayId, clientIp));
 
     // 이미 입장한 유저인지 확인
     if (m_safeUsers.Contains(accountId))
@@ -678,13 +678,13 @@ void GameServer::sendCharacterListNtf(int64 accountId, const std::vector<DataStr
     }
     m_packetSender.SendToUser(accountId, Common::GAME_PACKET_ID_CHARACTER_LIST_NTF, ntf);
 
-    LOG_WRITE(LogLevel::Info, std::format("CharacterListNtf sent. accountId={} count={}", accountId, characters.size()));
+    LOG_WRITE(LogLevel::Debug, std::format("CharacterListNtf sent. accountId={} count={}", accountId, characters.size()));
 }
 
 // 클라이언트 캐릭터 생성 요청 처리 → 코루틴
 db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 accountId, GamePacket::CharacterCreateReq req)
 {
-    LOG_WRITE(LogLevel::Info, std::format("CharacterCreateReq received. accountId={} name='{}' jobId={}", accountId, req.name(), req.job_id()));
+    LOG_WRITE(LogLevel::Debug, std::format("CharacterCreateReq received. accountId={} name='{}' jobId={}", accountId, req.name(), req.job_id()));
 
     // 명칭 검증
     if (req.name().empty())
@@ -739,7 +739,7 @@ db::DetachedCoTask GameServer::handleClientCharacterCreate(int64 accountId, Game
         co_return;
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("character created. accountId={} characterId={} name='{}'",
+    LOG_WRITE(LogLevel::Debug, std::format("character created. accountId={} characterId={} name='{}'",
         accountId, character.character_id(), character.name()));
 
     // ── 성공 응답 ────────────────────────────────────────────
@@ -852,7 +852,7 @@ db::AwaitableCoTask<CharacterPtr> GameServer::loadCharacterForUser(int64 account
     spCharacter->SetUser(spUser);              // Character -> User weak_ptr
     spUser->SetCurrentCharacter(spCharacter);  // User -> Character shared_ptr (소유)
 
-    LOG_WRITE(LogLevel::Info, std::format("loadCharacter - loaded. accountId={} characterId={}",
+    LOG_WRITE(LogLevel::Debug, std::format("loadCharacter - loaded. accountId={} characterId={}",
         accountId, characterId));
 
     co_return spCharacter;
@@ -867,7 +867,7 @@ db::AwaitableCoTask<CharacterPtr> GameServer::loadCharacterForUser(int64 account
 db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 accountId, GamePacket::CharacterSelectReq req)
 {
     const int64 characterId = req.character_id();
-    LOG_WRITE(LogLevel::Info, std::format("CharacterSelectReq received. accountId={} characterId={}", accountId, characterId));
+    LOG_WRITE(LogLevel::Debug, std::format("CharacterSelectReq received. accountId={} characterId={}", accountId, characterId));
 
     // ── 1) User 조회 + 상태 검증 (DB 조회 전에 값싼 검증 먼저) ──
     UserPtr spUser;
@@ -897,7 +897,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 accountId, Game
 
     // 클라 응답(CharacterSelectRes)/로깅에 실을 캐릭터 데이터는 생성된 객체에서 되찾는다.
     const DataStructures::Character& character = spCharacter->GetProto();
-    LOG_WRITE(LogLevel::Info, std::format("character selected. accountId={} characterId={} name='{}'",
+    LOG_WRITE(LogLevel::Debug, std::format("character selected. accountId={} characterId={} name='{}'",
         accountId, character.character_id(), character.name()));
 
     // ── 5) Town 채널 선택 ────────────────────────────────────────────────
@@ -929,7 +929,7 @@ db::DetachedCoTask GameServer::handleClientCharacterSelect(int64 accountId, Game
     }
     spTown->EnqueueMessage(StageMsg_UserEnter{spUser});
 
-    LOG_WRITE(LogLevel::Info, std::format("CharacterSelect - entering town. accountId={} stageId={}(ch{})",
+    LOG_WRITE(LogLevel::Debug, std::format("CharacterSelect - entering town. accountId={} stageId={}(ch{})",
         accountId, spTown->GetStageId(), spTown->GetChannelNo()));
 }
 
@@ -940,7 +940,7 @@ db::DetachedCoTask GameServer::SendCharacterListForUser(int64 accountId, int32 g
 {
     std::vector<DataStructures::Character> characters = co_await loadAllCharactersForUser(accountId, gameDbIndex, pResumeExecutor);
     sendCharacterListNtf(accountId, characters);
-    LOG_WRITE(LogLevel::Info, std::format("CharacterListNtf sent on SystemStage enter. accountId={} count={}", accountId, characters.size()));
+    LOG_WRITE(LogLevel::Debug, std::format("CharacterListNtf sent on SystemStage enter. accountId={} count={}", accountId, characters.size()));
 }
 
 // 계정의 모든 캐릭터를 DB에서 로드 (handleGatewayUserEnter 의 로드 패턴과 동일).
@@ -986,7 +986,7 @@ void GameServer::sendCharacterSelectRes(int64 accountId, EResultCode resultCode,
     res.set_stage_data_key(stageDataKey);
     m_packetSender.SendToUser(accountId, Common::GAME_PACKET_ID_CHARACTER_SELECT_RES, res);
 
-    LOG_WRITE(LogLevel::Info, std::format("CharacterSelectRes sent. accountId={} resultCode={} characterId={} stageDataKey={}",
+    LOG_WRITE(LogLevel::Debug, std::format("CharacterSelectRes sent. accountId={} resultCode={} characterId={} stageDataKey={}",
         accountId, static_cast<int32>(resultCode), pCharacter ? pCharacter->character_id() : 0, stageDataKey));
 }
 
@@ -996,7 +996,7 @@ void GameServer::handleGatewayUserDisconnect(const netlib::ISessionPtr& /*spSess
 {
     const int64 accountId = msg.account_id();
 
-    LOG_WRITE(LogLevel::Info, std::format("GatewayUserDisconnectNtf received. accountId={}", accountId));
+    LOG_WRITE(LogLevel::Debug, std::format("GatewayUserDisconnectNtf received. accountId={}", accountId));
 
     UserPtr spUser;
     if (!m_safeUsers.EraseAndGet(accountId, spUser) || !spUser)
@@ -1132,7 +1132,7 @@ db::DetachedCoTask GameServer::BeginCrossServerMove(int64 accountId, int32 targe
     m_safeUsers.EraseAndGet(accountId, removed);   // 글로벌 맵에서 제거
     GetRegistryClient()->SetUserCount(static_cast<int32>(m_safeUsers.Size()));
 
-    LOG_WRITE(LogLevel::Info, std::format("CrossServerMove - handed off. accountId={} characterId={} -> gameServerId={} stageKey={}",
+    LOG_WRITE(LogLevel::Debug, std::format("CrossServerMove - handed off. accountId={} characterId={} -> gameServerId={} stageKey={}",
         accountId, characterId, targetGameServerId, targetStageDataKey));
 }
 
@@ -1146,7 +1146,7 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
     const int32       targetStageDataKey = msg.target_stage_data_key();
     const auto        positionType       = static_cast<EStagePositionType>(msg.position_type());
 
-    LOG_WRITE(LogLevel::Info, std::format("GatewayUserRerouteNtf received. accountId={} characterId={} stageKey={} gatewayId={}",
+    LOG_WRITE(LogLevel::Debug, std::format("GatewayUserRerouteNtf received. accountId={} characterId={} stageKey={} gatewayId={}",
         accountId, characterId, targetStageDataKey, gatewayId));
 
     if (m_safeUsers.Contains(accountId))
@@ -1219,7 +1219,7 @@ db::DetachedCoTask GameServer::handleGatewayUserReroute(netlib::ISessionPtr /*sp
     // ── 클라에 StageMoveRes(성공) → 클라가 맵 로딩 시작 → StageLoadCompleteReq → 대상 Stage가 스폰 ──
     m_packetSender.SendStageMoveRes(accountId, EResultCode::Success, "", targetStageDataKey);
 
-    LOG_WRITE(LogLevel::Info, std::format("reroute - user entering target stage. accountId={} stageId={} stageKey={}",
+    LOG_WRITE(LogLevel::Debug, std::format("reroute - user entering target stage. accountId={} stageId={} stageKey={}",
         accountId, spTarget->GetStageId(), targetStageDataKey));
 }
 
@@ -1237,7 +1237,7 @@ db::DetachedCoTask GameServer::SaveCharacterFromStage(Stage* pStage, CharacterPt
         // 코루틴 prologue(첫 co_await 이전, Stage 스레드)에서 핀 획득 → 카운터 ++.
         AsyncPin pin = pStage->PinForAsync(spChar);
 
-        LOG_WRITE(LogLevel::Info, std::format(
+        LOG_WRITE(LogLevel::Debug, std::format(
             "[savechar] start. thread={} stageId={} characterId={} stageBusy={} charPending={}",
             launchTid, pStage->GetStageId(), characterId, pStage->HasInFlightAsync(), spChar->HasPendingAsync()));
 
@@ -1246,12 +1246,12 @@ db::DetachedCoTask GameServer::SaveCharacterFromStage(Stage* pStage, CharacterPt
         const bool saved = co_await saveCharacterToDB(spChar, pStage->GetResumeExecutor());
 
         const size_t resumeTid = std::hash<std::thread::id>{}(std::this_thread::get_id());
-        LOG_WRITE(LogLevel::Info, std::format(
+        LOG_WRITE(LogLevel::Debug, std::format(
             "[savechar] resumed. resumeThread={} sameAsLaunch={} saved={} stageBusy={} charPending={}",
             resumeTid, (resumeTid == launchTid), saved, pStage->HasInFlightAsync(), spChar->HasPendingAsync()));
     }   // AsyncPin 소멸(Stage 스레드) → 카운터 --.
 
-    LOG_WRITE(LogLevel::Info, std::format(
+    LOG_WRITE(LogLevel::Debug, std::format(
         "[savechar] pin released. stageBusy={} charPending={}",
         pStage->HasInFlightAsync(), spChar->HasPendingAsync()));
 }
@@ -1320,7 +1320,7 @@ db::DetachedCoTask GameServer::UpsertTestCurrencyAndItemFromStage(Stage* pStage,
         co_return;
     }
 
-    LOG_WRITE(LogLevel::Info, std::format("[testupsert] ok. accountId={} characterId={} itemId={}",
+    LOG_WRITE(LogLevel::Debug, std::format("[testupsert] ok. accountId={} characterId={} itemId={}",
         accountId, characterId, itemId));
 }
 
