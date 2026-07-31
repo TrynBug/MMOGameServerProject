@@ -20,13 +20,6 @@ bool GameData_ItemDrop::Initialize()
         return false;
     }
 
-    const GameData_Item* pItem = GameDataTable_Item::FindData(ItemKey);
-    if (pItem == nullptr || MaxCount > pItem->MaxStack)
-    {
-        LOG_WRITE(LogLevel::Error, std::format(
-            "invalid ItemDrop item reference/count. key={} itemKey={} maxCount={}", Key, ItemKey, MaxCount));
-        return false;
-    }
     return true;
 }
 
@@ -38,5 +31,17 @@ bool GameDataTable_ItemDrop::OnAddData(const GameData* pRawData)
 
 bool GameDataTable_ItemDrop::OnLoadComplete()
 {
+    for (const auto& [key, pData] : sm_dataMap)
+    {
+        const GameData_Item* pItem = GameDataTable_Item::FindData(pData->ItemKey);
+        if (pItem == nullptr || pData->MaxCount > pItem->MaxStack)
+        {
+            LOG_WRITE(LogLevel::Error, std::format(
+                "invalid ItemDrop item reference/count. key={} itemKey={} maxCount={}",
+                pData->Key, pData->ItemKey, pData->MaxCount));
+            return false;
+        }
+    }
+
     return true;
 }
