@@ -119,58 +119,32 @@ namespace DummyClient
             double projectileRate = (projectileHits - s_lastProjectileHits) / intervalSec;
 
             var sb = new StringBuilder(4096);
-            //sb.AppendLine("────────────────────────────────────────────────────────────────────────────────");
-            //sb.AppendLine($" DummyClient | uptime {FormatDuration(elapsedMs)} | target {bots.Count} | started {started} | ready {ready} ({readyPercent:F1}%)");
-            //sb.AppendLine("────────────────────────────────────────────────────────────────────────────────");
-            //sb.AppendLine($" Bots    connected {connected} | loggedIn {loggedIn} | fighting {fighting} | roaming {Math.Max(0, ready - fighting - dead)} | dead {dead}");
-            //sb.AppendLine($" States  idle {counts[(int)BotState.Idle]} | login {counts[(int)BotState.ConnectingLogin] + counts[(int)BotState.WaitLoginRes]} | gateway {counts[(int)BotState.NeedGatewayConnect] + counts[(int)BotState.ConnectingGateway] + counts[(int)BotState.WaitCharList]} | create {counts[(int)BotState.WaitCreate]} | select {counts[(int)BotState.WaitSelect]} | load {counts[(int)BotState.WaitStageLoad]} | moving {counts[(int)BotState.WaitStageMoveRes]} | reconnect {counts[(int)BotState.Disconnected]}");
-            //if (stageDist.Count > 0) sb.AppendLine($" Stages  {FormatDistribution(stageDist)}");
-            //if (jobDist.Count > 0) sb.AppendLine($" Jobs    {FormatDistribution(jobDist)}");
-            //sb.AppendLine();
-            //sb.AppendLine($" OUT app {sent.Packets:N0} pkts | total {FormatBytes(sent.Bytes)} | {sentPps:N1} pkt/s | {FormatBytes(sentBytesPerSec)}/s | avg {AverageBytes(sent):N1} B | peak {s_peakSentPps:N1} pkt/s {FormatBytes(s_peakSentBytesPerSec)}/s");
-            //sb.AppendLine($" IN  app {recv.Packets:N0} pkts | total {FormatBytes(recv.Bytes)} | {recvPps:N1} pkt/s | {FormatBytes(recvBytesPerSec)}/s | avg {AverageBytes(recv):N1} B | peak {s_peakRecvPps:N1} pkt/s {FormatBytes(s_peakRecvBytesPerSec)}/s");
-            //if (topSent.Length > 0) sb.AppendLine($" OUT top {topSent}");
-            //if (topRecv.Length > 0) sb.AppendLine($" IN  top {topRecv}");
-            //sb.AppendLine();
-            //sb.AppendLine($" Tick    target {manager.TargetTickRateHz}Hz | actual {actualTickHz:F1}Hz | avg {averageTickMs:F2}ms | max {maxTickMs:F2}ms | overruns +{intervalOverruns} ({tickOverruns:N0})");
-            //sb.AppendLine($" Queue   recv pending {Math.Max(0, metrics.RecvQueueDepth):N0} | interval max {maxRecvQueue:N0}");
-            //sb.AppendLine($" Client  CPU {cpuPercent:F1}% | working {FormatBytes(process.WorkingSet64)} | private {FormatBytes(process.PrivateMemorySize64)} | GC {FormatBytes(GC.GetTotalMemory(false))} | alloc {FormatBytes(allocatedPerSec)}/s | threads {threadCount}");
-            //AppendLatencies(sb, metrics);
-            //sb.AppendLine();
-            //sb.AppendLine($" Skills  req {skillRequests:N0} ({skillReqRate:N1}/s) | accepted {skillsAccepted:N0} ({skillAcceptRate:N1}/s) | hits {projectileHits:N0} ({projectileRate:N1}/s)");
-            //sb.AppendLine($" Moves   portal {stageMoves - returns}/{portalAttempts} fail {portalFailures} timeout {portalTimeouts} | return {returns}/{returnAttempts} fail {returnFailures} | loadTimeout {stageLoadTimeouts}");
-            //sb.AppendLine($" Life    deaths {deaths} | revives {revives} | reconnects {reconnects}");
-
-            //IReadOnlyList<ErrorSnapshot> recentErrors = metrics.GetRecentErrors(elapsedMs, 3);
-            //sb.AppendLine($" Errors  total {metrics.ErrorCount:N0} | last60s {metrics.RecentErrorCount(elapsedMs):N0}");
-            //foreach (ErrorSnapshot error in recentErrors)
-            //    sb.AppendLine($"         {error.Count,5}  {error.Reason}");
             sb.AppendLine("────────────────────────────────────────────────────────────────────────────────");
-            sb.AppendLine($" DummyClient | uptime 06:20:17 | target 1500 | started 1500 | ready 1498 (99.9%)");
+            sb.AppendLine($" DummyClient | uptime {FormatDuration(elapsedMs)} | target {bots.Count} | started {started} | ready {ready} ({readyPercent:F1}%)");
             sb.AppendLine("────────────────────────────────────────────────────────────────────────────────");
-            sb.AppendLine($" Bots    connected {1498} | loggedIn {1500} | fighting {535} | roaming {845} | dead {118}");
-            sb.AppendLine($" States  idle 0 | login 0 | gateway 0 | create 0 | select 0 | load 0 | moving 0 | reconnect 2");
-            sb.AppendLine($" Stages  [100] 311 | [101] 525 | [107] 662");
-            sb.AppendLine($" Jobs    [1] 1124 | [2] 376");
+            sb.AppendLine($" Bots    connected {connected} | loggedIn {loggedIn} | fighting {fighting} | roaming {Math.Max(0, ready - fighting - dead)} | dead {dead}");
+            sb.AppendLine($" States  idle {counts[(int)BotState.Idle]} | login {counts[(int)BotState.ConnectingLogin] + counts[(int)BotState.WaitLoginRes]} | gateway {counts[(int)BotState.NeedGatewayConnect] + counts[(int)BotState.ConnectingGateway] + counts[(int)BotState.WaitCharList]} | create {counts[(int)BotState.WaitCreate]} | select {counts[(int)BotState.WaitSelect]} | load {counts[(int)BotState.WaitStageLoad]} | moving {counts[(int)BotState.WaitStageMoveRes]} | reconnect {counts[(int)BotState.Disconnected]}");
+            if (stageDist.Count > 0) sb.AppendLine($" Stages  {FormatDistribution(stageDist)}");
+            if (jobDist.Count > 0) sb.AppendLine($" Jobs    {FormatDistribution(jobDist)}");
             sb.AppendLine();
-            sb.AppendLine($" OUT app 64,244,803 pkts | total 2.8 GiB | run avg 2,815.7 pkt/s | 128.7 KiB/s | peak 4,168.1 pkt/s 183.1 KiB/s");
-            sb.AppendLine($" IN  app 822,176,703 pkts | total 47.5 GiB | run avg 36,033.3 pkt/s | 2.1 MiB/s | peak 46,304.3 pkt/s 16.3 MiB/s");
-            sb.AppendLine($" OUT top MoveIntentReq 2,226.5/s | SkillProjectileHitReq 671.1/s | SkillCastReq 516.6/s");
-            sb.AppendLine($" IN  top SnapshotNtf 21,000.0/s | SkillDamageNtf 7,338.4/s | SkillCastNtf 2,719.4/s");
+            sb.AppendLine($" OUT app {sent.Packets:N0} pkts | total {FormatBytes(sent.Bytes)} | {sentPps:N1} pkt/s | {FormatBytes(sentBytesPerSec)}/s | avg {AverageBytes(sent):N1} B | peak {s_peakSentPps:N1} pkt/s {FormatBytes(s_peakSentBytesPerSec)}/s");
+            sb.AppendLine($" IN  app {recv.Packets:N0} pkts | total {FormatBytes(recv.Bytes)} | {recvPps:N1} pkt/s | {FormatBytes(recvBytesPerSec)}/s | avg {AverageBytes(recv):N1} B | peak {s_peakRecvPps:N1} pkt/s {FormatBytes(s_peakRecvBytesPerSec)}/s");
+            if (topSent.Length > 0) sb.AppendLine($" OUT top {topSent}");
+            if (topRecv.Length > 0) sb.AppendLine($" IN  top {topRecv}");
             sb.AppendLine();
-            sb.AppendLine($" Tick    target 10Hz | actual 9.7Hz | avg 18.22ms | max 26.73ms");
-            sb.AppendLine($" Queue   recv pending 1,338");
-            sb.AppendLine($" Client  CPU 20.7% | working 518.5 MiB | private 487.2 MiB | alloc 8.2 MiB/s | threads 11");
-            sb.AppendLine($" Latency LoginConnect avg 96ms max 125ms | Login avg 101ms max 207ms | GatewayConnect avg 103ms max 120ms | GatewayAuth avg 153ms max 250ms | CharacterSelect avg 100ms max 126ms | StageLoad avg 101ms max 300ms | StageMove avg 100ms max 203ms");
+            sb.AppendLine($" Tick    target {manager.TargetTickRateHz}Hz | actual {actualTickHz:F1}Hz | avg {averageTickMs:F2}ms | max {maxTickMs:F2}ms | overruns +{intervalOverruns} ({tickOverruns:N0})");
+            sb.AppendLine($" Queue   recv pending {Math.Max(0, metrics.RecvQueueDepth):N0} | interval max {maxRecvQueue:N0}");
+            sb.AppendLine($" Client  CPU {cpuPercent:F1}% | working {FormatBytes(process.WorkingSet64)} | private {FormatBytes(process.PrivateMemorySize64)} | GC {FormatBytes(GC.GetTotalMemory(false))} | alloc {FormatBytes(allocatedPerSec)}/s | threads {threadCount}");
+            AppendLatencies(sb, metrics);
             sb.AppendLine();
-            sb.AppendLine($" Skills  req 11,286,486 (516.6/s) | accepted 10,550,008 (482.5/s) | hits 29,468,849 (1,717.5/s)");
-            sb.AppendLine($" Moves   portal 30014/30300 fail 286 timeout 286 | return 17654/17658 fail 0 | loadTimeout 0");
-            sb.AppendLine($" Life    deaths 507558 | revives 506179 | reconnects 23488");
+            sb.AppendLine($" Skills  req {skillRequests:N0} ({skillReqRate:N1}/s) | accepted {skillsAccepted:N0} ({skillAcceptRate:N1}/s) | hits {projectileHits:N0} ({projectileRate:N1}/s)");
+            sb.AppendLine($" Moves   portal {stageMoves - returns}/{portalAttempts} fail {portalFailures} timeout {portalTimeouts} | return {returns}/{returnAttempts} fail {returnFailures} | loadTimeout {stageLoadTimeouts}");
+            sb.AppendLine($" Life    deaths {deaths} | revives {revives} | reconnects {reconnects}");
 
             IReadOnlyList<ErrorSnapshot> recentErrors = metrics.GetRecentErrors(elapsedMs, 3);
-            sb.AppendLine($" Errors  total 21,688 | last60s 58");
-            sb.AppendLine($"         {52,5}  random disconnect");
-            sb.AppendLine($"         {6,5}  portal search/move timeout");
+            sb.AppendLine($" Errors  total {metrics.ErrorCount:N0} | last60s {metrics.RecentErrorCount(elapsedMs):N0}");
+            foreach (ErrorSnapshot error in recentErrors)
+                sb.AppendLine($"         {error.Count,5}  {error.Reason}");
 
             try { Console.Clear(); }
             catch { }
