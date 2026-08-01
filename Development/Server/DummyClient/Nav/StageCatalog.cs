@@ -8,6 +8,7 @@ namespace DummyClient.Nav
     public sealed class StageCatalog
     {
         private readonly Dictionary<int, string> m_navMeshByKey = new();
+        private readonly Dictionary<int, string> m_stageLayoutByKey = new();
         private readonly Dictionary<int, int> m_stageTypeByKey = new();
 
         public static StageCatalog Load(string csvPath)
@@ -34,6 +35,12 @@ namespace DummyClient.Nav
                 string navName = cols[2].Trim();
                 if (!string.IsNullOrEmpty(navName))
                     cat.m_navMeshByKey[key] = navName;
+                if (cols.Length > 3)
+                {
+                    string stageLayoutName = cols[3].Trim();
+                    if (!string.IsNullOrEmpty(stageLayoutName))
+                        cat.m_stageLayoutByKey[key] = stageLayoutName;
+                }
             }
             return cat;
         }
@@ -41,6 +48,9 @@ namespace DummyClient.Nav
         // stageDataKey 의 NavMesh 파일명(확장자 제외). 없으면 null.
         public string GetNavMeshName(int stageDataKey)
             => m_navMeshByKey.TryGetValue(stageDataKey, out string name) ? name : null;
+
+        public string GetStageLayoutName(int stageDataKey)
+            => m_stageLayoutByKey.TryGetValue(stageDataKey, out string name) ? name : null;
 
         // EStageType.Town = 2. Town 은 전투 없이 저빈도 배회만 한다.
         public bool IsTown(int stageDataKey)

@@ -114,7 +114,12 @@ namespace DummyClient.Config
         public SpawnCfg Spawn { get; set; } = new();
         public MoveCfg Move { get; set; } = new();
         public TownCfg Town { get; set; } = new();
-        public int[] StageKeys { get; set; } = { 100, 101, 107 };
+        public Dictionary<int, double> StageProbabilities { get; set; } = new()
+        {
+            [100] = 1.0 / 3.0,
+            [101] = 1.0 / 3.0,
+            [107] = 1.0 / 3.0,
+        };
         public CreateCfg Create { get; set; } = new();
         public SkillCfg Skill { get; set; } = new();
         public StageMoveCfg StageMove { get; set; } = new();
@@ -132,6 +137,30 @@ namespace DummyClient.Config
         // 실제 띄울 봇(클라) 수. MaxClients 상한 적용.
         [JsonIgnore]
         public int BotCount => MaxClients > 0 ? System.Math.Min(PoolSize, MaxClients) : PoolSize;
+
+        public int SelectStageKey(double roll, int excludedStageKey = 0)
+        {
+            double total = 0.0;
+            foreach (var (stageKey, probability) in StageProbabilities)
+                if (stageKey != excludedStageKey)
+                    total += probability;
+
+            if (total <= 0.0)
+                return excludedStageKey;
+
+            double threshold = roll * total;
+            double cumulative = 0.0;
+            int selectedStageKey = excludedStageKey;
+            foreach (var (stageKey, probability) in StageProbabilities)
+            {
+                if (stageKey == excludedStageKey) continue;
+                selectedStageKey = stageKey;
+                cumulative += probability;
+                if (threshold < cumulative)
+                    return stageKey;
+            }
+            return selectedStageKey;
+        }
 
         // 실행파일 위치 기준으로 상대경로를 절대경로로 해석
         public string ResolvePath(string p)
@@ -192,18 +221,30 @@ namespace DummyClient.Config
                 error = "probability 값은 0~1 범위여야 함";
                 return false;
             }
-            if (StageKeys == null || StageKeys.Length == 0 || Create.JobProbabilities == null || Create.JobProbabilities.Count == 0 || Create.AppearancePresetIds == null || Create.AppearancePresetIds.Length == 0 || Skill.UseIntervalMsByStage == null || Skill.SkillsByJob == null || Skill.SkillsByJob.Count == 0)
+            if (StageProbabilities == null || StageProbabilities.Count == 0 || Create.JobProbabilities == null || Create.JobProbabilities.Count == 0 || Create.AppearancePresetIds == null || Create.AppearancePresetIds.Length == 0 || Skill.UseIntervalMsByStage == null || Skill.SkillsByJob == null || Skill.SkillsByJob.Count == 0)
             {
-                error = "stageKeys, create.jobProbabilities, create.appearancePresetIds, skill.useIntervalMsByStage, skill.skillsByJob은 비어 있을 수 없음";
+                error = "stageProbabilities, create.jobProbabilities, create.appearancePresetIds, skill.useIntervalMsByStage, skill.skillsByJob은 비어 있을 수 없음";
                 return false;
             }
-            foreach (int stageKey in StageKeys)
+            if (!StageProbabilities.ContainsKey(100))
             {
-                if (!Skill.UseIntervalMsByStage.TryGetValue(stageKey, out int intervalMs) || intervalMs < 0)
+                error = "stageProbabilities에는 마을 Stage 100이 포함되어야 함";
+                return false;
+            }
+            double stageProbabilitySum = 0.0;
+            foreach (var (stageKey, probability) in StageProbabilities)
+            {
+                if (stageKey <= 0 || !isProbability(probability) || !Skill.UseIntervalMsByStage.TryGetValue(stageKey, out int intervalMs) || intervalMs < 0)
                 {
-                    error = $"stage별 스킬 시전 간격이 없거나 음수임: stageKey={stageKey}";
+                    error = $"stageProbabilities 또는 Stage별 스킬 시전 간격이 잘못됨: stageKey={stageKey}, probability={probability}";
                     return false;
                 }
+                stageProbabilitySum += probability;
+            }
+            if (System.Math.Abs(stageProbabilitySum - 1.0) > 0.000001)
+            {
+                error = $"stageProbabilities의 확률 합계는 1이어야 함: sum={stageProbabilitySum}";
+                return false;
             }
             foreach (int presetId in Create.AppearancePresetIds)
             {

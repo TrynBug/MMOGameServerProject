@@ -81,6 +81,7 @@ namespace DummyClient.Sim
         private long m_nextStageMoveMs;
         private long m_nextDisconnectMs;
         private long m_targetPortalId;
+        private int m_targetStageKey;
         private bool m_stageChangeRequested;
         private bool m_directTownReturnPending;
         private bool m_initialStageSelected;
@@ -285,6 +286,7 @@ namespace DummyClient.Sim
             m_authToken = 0;
             m_serverMoveSpeed = 0f;
             m_targetPortalId = 0;
+            m_targetStageKey = 0;
             m_stageChangeRequested = false;
             m_directTownReturnPending = false;
             m_initialStageSelected = false;
@@ -438,6 +440,7 @@ namespace DummyClient.Sim
                     m_skillRotation = 0;
                     m_behavior = Behavior.Roaming;
                     m_targetPortalId = 0;
+                    m_targetStageKey = 0;
                     m_stageChangeRequested = false;
                     m_directTownReturnPending = false;
                     m_isDead = false;
@@ -453,9 +456,9 @@ namespace DummyClient.Sim
                     if (!m_initialStageSelected)
                     {
                         m_initialStageSelected = true;
-                        var stages = m_ctx.Config.StageKeys;
-                        if (stages != null && stages.Length > 0 && stages[m_rng.Next(stages.Length)] != StageDataKey)
-                            requestStageChange(t);
+                        int targetStageKey = m_ctx.Config.SelectStageKey(m_rng.NextDouble());
+                        if (targetStageKey != StageDataKey)
+                            requestStageChange(t, targetStageKey);
                     }
 
                     State = BotState.InStage;
@@ -545,6 +548,7 @@ namespace DummyClient.Sim
                             if (m_stageChangeRequested || m_targetPortalId != 0)
                                 PortalFailures++;
                             m_targetPortalId = 0;
+                            m_targetStageKey = 0;
                             m_stageChangeRequested = false;
                             m_portalDeadlineMs = 0;
                             m_nextStageMoveMs = m_ctx.NowMs + m_ctx.Config.StageMove.IntervalMs;
@@ -619,6 +623,7 @@ namespace DummyClient.Sim
                     m_moving = false;
                     m_path.Clear();
                     m_targetPortalId = 0;
+                    m_targetStageKey = 0;
                     m_stageChangeRequested = false;
                     m_directTownReturnPending = false;
                     m_portalDeadlineMs = 0;
@@ -1008,7 +1013,7 @@ namespace DummyClient.Sim
             requestStageChange(nowMs);
         }
 
-        private void requestStageChange(long nowMs)
+        private void requestStageChange(long nowMs, int targetStageKey = 0)
         {
             if (StageDataKey == 101 || StageDataKey == 107)
             {
@@ -1016,6 +1021,12 @@ namespace DummyClient.Sim
                 return;
             }
 
+            if (targetStageKey == 0)
+                targetStageKey = m_ctx.Config.SelectStageKey(m_rng.NextDouble(), StageDataKey);
+            if (targetStageKey == StageDataKey)
+                return;
+
+            m_targetStageKey = targetStageKey;
             m_stageChangeRequested = true;
             m_portalDeadlineMs = nowMs + m_ctx.Config.StageMove.PortalTimeoutMs;
             PortalAttempts++;
@@ -1064,7 +1075,8 @@ namespace DummyClient.Sim
                 var portalIds = new List<long>();
                 foreach (var (objectId, prop) in m_props)
                 {
-                    if (m_ctx.Props.IsPortal(prop.PropKey))
+                    if (m_ctx.Props.IsPortal(prop.PropKey) &&
+                        m_ctx.Props.GetPortalTargetStageKey(StageDataKey, prop.PropKey, prop.Pos.X, prop.Pos.Z) == m_targetStageKey)
                         portalIds.Add(objectId);
                 }
 
@@ -1137,6 +1149,7 @@ namespace DummyClient.Sim
             if (m_moving)
                 StopMoving(nowMs);
             m_targetPortalId = 0;
+            m_targetStageKey = 0;
             m_stageChangeRequested = false;
             m_directTownReturnPending = false;
             m_portalDeadlineMs = 0;

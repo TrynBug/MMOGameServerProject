@@ -19,8 +19,8 @@
   "//town": "마을에서는 전투하지 않는다. roamCheckIntervalMs 마다 roamProbability 확률로만 배회한다.",
   "town": { "roamCheckIntervalMs": 10000, "roamProbability": 0.2 },
 
-  "//stageKeys": "최초 접속 시 균등 선택할 스테이지 키 목록. 실제 이동은 현재 스테이지의 포탈을 사용한다.",
-  "stageKeys": [100, 101, 107],
+  "//stageProbabilities": "최초 Stage 선택 확률. 합계는 1이어야 한다. 마을에서 이동할 때는 현재 Stage를 제외한 목적지 확률을 상대 비율로 적용하고 실제 포탈을 사용한다.",
+  "stageProbabilities": { "100": 0.333334, "101": 0.333333, "107": 0.333333 },
 
   "//create": "캐릭터가 없으면 jobProbabilities의 직업별 확률과 appearancePresetIds의 균등 확률로 선택해 생성한다. jobProbabilities 합계는 1이어야 한다.",
   "create": { "jobProbabilities": { "1": 0.5, "2": 0.5 }, "appearancePresetIds": [0, 1] },

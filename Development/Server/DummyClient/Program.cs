@@ -41,14 +41,10 @@ string propCsv = Path.Combine(Path.GetDirectoryName(stageCsv) ?? ".", "Prop.csv"
 PropCatalog props = PropCatalog.Load(propCsv);
 Console.WriteLine($"[dummy] propCsv   : {propCsv}");
 
-var uniqueStages = new System.Collections.Generic.HashSet<int>();
-foreach (int stageKey in cfg.StageKeys)
+string mapDir = Directory.GetParent(navMeshDir)?.FullName ?? navMeshDir;
+string stageLayoutDir = Path.Combine(mapDir, "StageLayout");
+foreach (int stageKey in cfg.StageProbabilities.Keys)
 {
-    if (!uniqueStages.Add(stageKey))
-    {
-        Console.Error.WriteLine($"[config] 중복 stageKey: {stageKey}");
-        return;
-    }
     if (!catalog.Contains(stageKey))
     {
         Console.Error.WriteLine($"[config] Stage.csv에 없는 stageKey: {stageKey}");
@@ -65,6 +61,14 @@ foreach (int stageKey in cfg.StageKeys)
     if (string.IsNullOrEmpty(navName) || !File.Exists(navPath))
     {
         Console.Error.WriteLine($"[config] NavMesh 없음: stage={stageKey}, path={navPath}");
+        return;
+    }
+
+    string stageLayoutName = catalog.GetStageLayoutName(stageKey);
+    string stageLayoutPath = Path.Combine(stageLayoutDir, stageLayoutName + ".json");
+    if (string.IsNullOrEmpty(stageLayoutName) || !props.LoadStageLayout(stageKey, stageLayoutPath))
+    {
+        Console.Error.WriteLine($"[config] StageLayout 없음 또는 파싱 실패: stage={stageKey}, path={stageLayoutPath}");
         return;
     }
 }
@@ -97,11 +101,20 @@ if (!props.HasPortal())
     Console.Error.WriteLine("[config] Prop.csv에 Portal 프랍이 없음");
     return;
 }
+foreach (var (stageKey, probability) in cfg.StageProbabilities)
+{
+    if (stageKey != 100 && probability > 0.0 && !props.HasPortalToStage(100, stageKey))
+    {
+        Console.Error.WriteLine($"[config] 마을에서 목적지로 연결되는 포탈이 없음: targetStage={stageKey}");
+        return;
+    }
+}
 
 // ── 자가진단: 서버 없이 NavMesh 로드 + 경로탐색 검증 ────────────────────────
 if (Array.Exists(args, a => a == "--navtest"))
 {
-    int stageKey = cfg.StageKeys.Length > 0 ? cfg.StageKeys[0] : 100;
+    int stageKey = 100;
+    foreach (int configuredStageKey in cfg.StageProbabilities.Keys) { stageKey = configuredStageKey; break; }
     string name = catalog.GetNavMeshName(stageKey) ?? "SyntyForest";
     Console.WriteLine($"[navtest] stage {stageKey} → navmesh '{name}'");
 
