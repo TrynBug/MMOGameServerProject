@@ -4,6 +4,7 @@
 #include "Session.h"
 #include "OverlappedEx.h"
 #include "PacketPool.h"
+#include "PacketHeader.h"
 #include "ISession.h"
 #include "INetEventHandler.h"
 #include "NetLibStats.h"
@@ -31,6 +32,13 @@ bool NetServer::Initialize(const NetServerConfig& config)
     {
         return false;
     }
+
+    const int32 maxReserveSize = m_pIoContext->GetConfig().maxPacketSize - static_cast<int32>(sizeof(PacketHeader));
+    if (config.recvPacketReserveSize < 0 || config.recvPacketReserveSize > maxReserveSize)
+    {
+        return false;
+    }
+
     m_config = config;
     return true;
 }
@@ -238,7 +246,7 @@ bool NetServer::registerNewSession(SOCKET clientSocket, const std::string& ip, u
 
     const int64 sessionId = generateSessionId();
     auto spSession = std::make_shared<Session>(
-        this, sessionId, clientSocket, ip, port, m_config.recvBufSize);
+        this, sessionId, clientSocket, ip, port, m_config.recvBufSize, m_config.recvPacketReserveSize);
 
     spSession->SetConnected(true);
 

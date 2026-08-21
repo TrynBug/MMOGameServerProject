@@ -258,7 +258,7 @@ bool NetClient::postConnect()
 
     // Session 생성
     const int64 sessionId = m_nextSessionId.fetch_add(1);
-    auto spSession = std::make_shared<Session>(this, sessionId, sock, m_remoteIp, m_remotePort, m_config.recvBufSize);
+    auto spSession = std::make_shared<Session>(this, sessionId, sock, m_remoteIp, m_remotePort, m_config.recvBufSize, 0);
     spSession->SetConnected(false); // 아직 연결된건 아니라서 m_bConnected=false로 설정
 
     // IOCP에 등록

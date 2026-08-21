@@ -9,12 +9,13 @@
 namespace netlib
 {
 
-Session::Session(INetBase* pNetBase, int64 sessionId, SOCKET socket, const std::string& ip, uint16 port, int32 recvBufSize)
+Session::Session(INetBase* pNetBase, int64 sessionId, SOCKET socket, const std::string& ip, uint16 port, int32 recvBufSize, int32 recvPacketReserveSize)
     : m_pNetBase(pNetBase)
     , m_sessionId(sessionId)
     , m_socket(socket)
     , m_ip(ip)
     , m_port(port)
+    , m_recvPacketReserveSize(recvPacketReserveSize)
 {
     m_recvBuf.Initialize(recvBufSize);
 
@@ -292,7 +293,7 @@ void Session::parseReceivedPackets()
         PacketHeader header;
         m_recvBuf.Peek(reinterpret_cast<char*>(&header), sizeof(PacketHeader));
 
-        if (header.size < sizeof(PacketHeader) || header.size > maxPacketSize)
+        if (header.size < sizeof(PacketHeader) || header.size > maxPacketSize - m_recvPacketReserveSize)
         {
             // 패킷 크기가 너무 큼
             NetLibStats::Inc(StatCounter::InvalidPacketHeader);
@@ -310,8 +311,8 @@ void Session::parseReceivedPackets()
             break;
         }
 
-        // 패킷버퍼 할당받기
-        PacketPtr spPacket = m_pNetBase->GetPacketPool().Alloc(header.size);
+        // 클라이언트 Packet의 크기는 [실제 데이터 크기 + Sidecar 를 위해 추가로 확보할 공간] 이다.
+        PacketPtr spPacket = m_pNetBase->GetPacketPool().Alloc(static_cast<int32>(header.size) + m_recvPacketReserveSize);
         if (spPacket == nullptr)
         {
             if (handler != nullptr)

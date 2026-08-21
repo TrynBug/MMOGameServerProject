@@ -26,7 +26,7 @@ class Session : public ISession, public std::enable_shared_from_this<Session>
 public:
     static constexpr int32 SEND_WSABUF_MAX_SIZE = 50;   // send할 때 WSABUF 배열 최대크기
 
-    Session(INetBase* pNetBase, int64 sessionId, SOCKET socket, const std::string& ip, uint16 port, int32 recvBufSize);
+    Session(INetBase* pNetBase, int64 sessionId, SOCKET socket, const std::string& ip, uint16 port, int32 recvBufSize, int32 recvPacketReserveSize);
     ~Session() override;
 
     /* ISession */
@@ -93,6 +93,7 @@ private:
     uint16                        m_port       = 0;
 
     RingBuffer                    m_recvBuf;                // 수신버퍼
+    int32                         m_recvPacketReserveSize = 0; // 수신 Packet의 추가 capacity
     OVERLAPPED_EX                 m_recvOverlapped;         // recv 전용 overlapped
     std::atomic<bool>             m_bRecving   { false };   // recv 중인지 여부
 

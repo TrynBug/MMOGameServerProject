@@ -25,6 +25,11 @@ struct NetServerConfig
     bool        bUseNagle     = false;  // Nagle 알고리즘 사용 여부
     int32       recvBufSize   = 65536;  // Session 수신용 링버퍼 크기 (bytes)
 
+    // 수신한 데이터를 Packet으로 만들 때, 데이터 크기와 관계없이 Packet의 capacity에만 추가로 확보할 공간 크기.
+    // Packet에 Sidecar 같은 부가 데이터를 붙여야 할 경우 Packet에 남은 공간이 모자랄 일이 없도록 미리 공간을 확보해놓기 위함이다.
+    // 허용되는 원본 패킷의 최대 크기는 maxPacketSize - recvPacketReserveSize가 된다.
+    int32       recvPacketReserveSize = 0;
+
     int32       backlog       = 256;    // listen backlog
 };
 

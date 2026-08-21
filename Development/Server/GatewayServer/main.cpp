@@ -51,6 +51,9 @@ int main()
     config.useClientListenServer = true;
     config.clientListenServerConfig.ip   = config.privateIp;
     config.clientListenServerConfig.port = static_cast<uint16>(configParser.GetInt32("Server", "ClientPort", -1));;
+    // 클라이언트 패킷을 게임서버로 중계할 때 붙이는 [SidecarHeader][AccountId] 공간을 수신 시점에 확보한다.
+    config.clientListenServerConfig.recvPacketReserveSize =
+        static_cast<int32>(sizeof(netlib::SidecarHeader) + sizeof(int64));
 
     // 내부 서버용 포트 (게임서버/로그인서버 접속. 방화벽으로 외부 차단 권장)
     config.useInternalListenServer = true;

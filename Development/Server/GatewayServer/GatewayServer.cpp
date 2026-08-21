@@ -432,7 +432,7 @@ void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spClientSession
         return;
     }
 
-    // 원본 클라 패킷에 accountId를 Sidecar로 추가해서 그대로 게임서버로 전송한다.
+    // 클라이언트 수신 Packet은 SidecarHeader + accountId 공간을 미리 확보되어 있다.
     int64 accountId = pMeta->accountId;
     if (!spPacket->SetSidecar(&accountId, sizeof(accountId)))
     {
