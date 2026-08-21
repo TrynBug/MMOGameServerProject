@@ -172,12 +172,17 @@ namespace DummyClient
             {
                 LatencySnapshot latency = metrics.GetLatency(kind);
                 if (latency.Count == 0) continue;
-                values.Add($"{kind} avg {latency.AverageMs:F0} p95 {latency.P95Ms} max {latency.MaxMs}ms");
+                values.Add($"{kind} avg {latency.AverageMs:F2} p95 {latency.P95Ms:F2} max {latency.MaxMs:F2}ms");
             }
             if (values.Count == 0) return;
             sb.AppendLine($" Latency {string.Join(" | ", values.Take(4))}");
             if (values.Count > 4)
                 sb.AppendLine($"         {string.Join(" | ", values.Skip(4))}");
+
+            LatencySnapshot gateway = metrics.GetLatency(LatencyKind.GatewayPing);
+            LatencySnapshot game = metrics.GetLatency(LatencyKind.GamePing);
+            if (gateway.Count > 0 && game.Count > 0)
+                sb.AppendLine($" Probe   p95 delta(Game-Gateway) {game.P95Ms - gateway.P95Ms:F2}ms | samples {Math.Min(gateway.Count, game.Count):N0}");
         }
 
         private static string FormatTopPackets(IReadOnlyDictionary<ushort, CounterSnapshot> current,

@@ -101,6 +101,13 @@ namespace DummyClient.Config
         public double Probability { get; set; } = 0.03;   // 주기마다 끊을 확률
     }
 
+    public sealed class LatencyProbeCfg
+    {
+        public bool Enabled { get; set; }
+        public int IntervalMs { get; set; } = 500;
+        public int TimeoutMs { get; set; } = 5000;
+    }
+
     public sealed class DummyConfig
     {
         public string LoginIp { get; set; } = "127.0.0.1";
@@ -129,6 +136,7 @@ namespace DummyClient.Config
         public int TickRateHz { get; set; } = 20;
         public int StatusPrintIntervalMs { get; set; } = 1000;
         public ReconnectCfg Reconnect { get; set; } = new();
+        public LatencyProbeCfg LatencyProbe { get; set; } = new();
 
         // 계정 범위 크기 (dummyStart .. dummyEnd)
         [JsonIgnore]
@@ -191,7 +199,7 @@ namespace DummyClient.Config
 
         public bool Validate(out string error)
         {
-            if (Account == null || Spawn == null || Move == null || Town == null || Create == null || Skill == null || StageMove == null || Disconnect == null || Reconnect == null)
+            if (Account == null || Spawn == null || Move == null || Town == null || Create == null || Skill == null || StageMove == null || Disconnect == null || Reconnect == null || LatencyProbe == null)
             {
                 error = "설정 섹션 중 null 값이 있음";
                 return false;
@@ -214,6 +222,11 @@ namespace DummyClient.Config
             if (Disconnect.CheckIntervalMs <= 0 || Reconnect.DelayMs < 0 || Account.End < Account.Start)
             {
                 error = "disconnect/reconnect/account 범위 설정이 잘못됨";
+                return false;
+            }
+            if (LatencyProbe.IntervalMs <= 0 || LatencyProbe.TimeoutMs <= 0)
+            {
+                error = "latencyProbe 간격과 timeout은 0보다 커야 함";
                 return false;
             }
             if (!isProbability(Town.RoamProbability) || !isProbability(StageMove.Probability) || !isProbability(Disconnect.Probability))

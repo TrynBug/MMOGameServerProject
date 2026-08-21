@@ -49,5 +49,8 @@
   "tickRateHz": 20,
   "statusPrintIntervalMs": 1000,
 
+  "//latencyProbe": "enabled=true면 모든 봇이 기존 행동을 유지하면서 Gateway/Game RTT probe를 추가 전송한다. 두 경로를 번갈아 보내므로 각 경로의 주기는 intervalMs의 2배다.",
+  "latencyProbe": { "enabled": false, "intervalMs": 500, "timeoutMs": 5000 },
+
   "reconnect": { "enabled": true, "delayMs": 3000 }
 }

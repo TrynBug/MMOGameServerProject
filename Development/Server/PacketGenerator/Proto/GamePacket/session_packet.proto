@@ -28,6 +28,15 @@ message GameEnterNtf {
 message GameLogoutReq {
 }
 
+// 테스트 A용 RTT 측정. sequence는 요청과 응답을 짝짓는 용도로만 사용한다.
+message LatencyProbeReq {
+    uint64 sequence = 1;
+}
+
+message LatencyProbeRes {
+    uint64 sequence = 1;
+}
+
 // 강제 퇴장 알림 (게이트웨이 -> 클라)
 // 서버가 클라이언트 연결을 끊기 직전에 전송. 클라는 이유를 표시하고 연결 종료
 message ForceDisconnectNtf {

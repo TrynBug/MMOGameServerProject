@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 using System.Threading.Tasks;
 using DummyClient.Config;
@@ -97,6 +98,15 @@ namespace DummyClient.Sim
         private long m_characterSelectStartedMs = -1;
         private long m_stageLoadStartedMs = -1;
         private long m_stageMoveStartedMs = -1;
+        private long m_nextLatencyProbeMs;
+        private long m_gatewayProbeDeadlineMs;
+        private long m_gameProbeDeadlineMs;
+        private long m_gatewayProbeStartedTimestamp;
+        private long m_gameProbeStartedTimestamp;
+        private ulong m_nextProbeSequence;
+        private ulong m_gatewayProbeSequence;
+        private ulong m_gameProbeSequence;
+        private bool m_sendGatewayProbeNext = true;
 
         // 통계 접근용
         public bool IsConnected => m_conn?.IsConnected ?? false;
@@ -174,6 +184,8 @@ namespace DummyClient.Sim
                     break;
 
                 case BotState.InStage:
+                    if (m_ctx.Config.LatencyProbe.Enabled)
+                        UpdateLatencyProbe(nowMs);
                     UpdateDisconnect(nowMs);
                     if (State != BotState.InStage) break;   // 연결 끊김 처리됨
                     if (m_isDead) break;
@@ -301,6 +313,14 @@ namespace DummyClient.Sim
             m_characterSelectStartedMs = -1;
             m_stageLoadStartedMs = -1;
             m_stageMoveStartedMs = -1;
+            m_nextLatencyProbeMs = 0;
+            m_gatewayProbeDeadlineMs = 0;
+            m_gameProbeDeadlineMs = 0;
+            m_gatewayProbeStartedTimestamp = 0;
+            m_gameProbeStartedTimestamp = 0;
+            m_gatewayProbeSequence = 0;
+            m_gameProbeSequence = 0;
+            m_sendGatewayProbeNext = true;
         }
 
         public void Stop()
@@ -332,14 +352,14 @@ namespace DummyClient.Sim
         {
             var conn = m_conn;
             if (conn == null) return;
-            while (conn.TryDequeue(out var raw))
+            while (conn.TryDequeue(out var raw, out long receivedTimestamp))
             {
-                try { OnPacket(raw.Type, raw.Body); }
+                try { OnPacket(raw.Type, raw.Body, receivedTimestamp); }
                 catch (Exception e) { SetError($"parse {raw.Type}: {e.Message}"); }
             }
         }
 
-        private void OnPacket(ushort type, byte[] body)
+        private void OnPacket(ushort type, byte[] body, long receivedTimestamp)
         {
             switch ((PId)type)
             {
@@ -353,6 +373,22 @@ namespace DummyClient.Sim
                     m_gatewayIp = res.GatewayIp;
                     m_gatewayPort = res.GatewayPort;
                     State = BotState.NeedGatewayConnect;
+                    break;
+                }
+
+                case PId.GatewayLatencyProbeRes:
+                {
+                    var res = LatencyProbeRes.Parser.ParseFrom(body);
+                    RecordProbeLatency(LatencyKind.GatewayPing, res.Sequence, m_gatewayProbeSequence,
+                        ref m_gatewayProbeStartedTimestamp, ref m_gatewayProbeDeadlineMs, receivedTimestamp);
+                    break;
+                }
+
+                case PId.GameLatencyProbeRes:
+                {
+                    var res = LatencyProbeRes.Parser.ParseFrom(body);
+                    RecordProbeLatency(LatencyKind.GamePing, res.Sequence, m_gameProbeSequence,
+                        ref m_gameProbeStartedTimestamp, ref m_gameProbeDeadlineMs, receivedTimestamp);
                     break;
                 }
 
@@ -650,6 +686,65 @@ namespace DummyClient.Sim
                     break;
                 }
             }
+        }
+
+        private void UpdateLatencyProbe(long nowMs)
+        {
+            ExpireProbe(nowMs, "Gateway", ref m_gatewayProbeStartedTimestamp, ref m_gatewayProbeDeadlineMs);
+            ExpireProbe(nowMs, "Game", ref m_gameProbeStartedTimestamp, ref m_gameProbeDeadlineMs);
+
+            // 여러 봇이 같은 tick에 probe를 몰아 보내지 않도록 최초 시각만 interval 안에서 분산한다.
+            if (m_nextLatencyProbeMs == 0)
+            {
+                m_nextLatencyProbeMs = nowMs + m_rng.Next(m_ctx.Config.LatencyProbe.IntervalMs);
+                return;
+            }
+
+            if (nowMs < m_nextLatencyProbeMs)
+                return;
+            m_nextLatencyProbeMs = nowMs + m_ctx.Config.LatencyProbe.IntervalMs;
+
+            ulong sequence = ++m_nextProbeSequence;
+            if (m_sendGatewayProbeNext)
+            {
+                if (m_gatewayProbeStartedTimestamp == 0)
+                {
+                    m_gatewayProbeSequence = sequence;
+                    m_gatewayProbeStartedTimestamp = Stopwatch.GetTimestamp();
+                    m_gatewayProbeDeadlineMs = nowMs + m_ctx.Config.LatencyProbe.TimeoutMs;
+                    m_conn.Send(PId.GatewayLatencyProbeReq, new LatencyProbeReq { Sequence = sequence });
+                }
+            }
+            else if (m_gameProbeStartedTimestamp == 0)
+            {
+                m_gameProbeSequence = sequence;
+                m_gameProbeStartedTimestamp = Stopwatch.GetTimestamp();
+                m_gameProbeDeadlineMs = nowMs + m_ctx.Config.LatencyProbe.TimeoutMs;
+                m_conn.Send(PId.GameLatencyProbeReq, new LatencyProbeReq { Sequence = sequence });
+            }
+            m_sendGatewayProbeNext = !m_sendGatewayProbeNext;
+        }
+
+        private void RecordProbeLatency(LatencyKind kind, ulong sequence, ulong expectedSequence,
+            ref long startedTimestamp, ref long deadlineMs, long receivedTimestamp)
+        {
+            if (startedTimestamp == 0 || sequence != expectedSequence)
+                return;
+
+            m_ctx.Metrics.RecordLatency(kind,
+                Stopwatch.GetElapsedTime(startedTimestamp, receivedTimestamp).TotalMilliseconds);
+            startedTimestamp = 0;
+            deadlineMs = 0;
+        }
+
+        private void ExpireProbe(long nowMs, string name, ref long startedTimestamp, ref long deadlineMs)
+        {
+            if (startedTimestamp == 0 || deadlineMs == 0 || nowMs < deadlineMs)
+                return;
+
+            SetError($"{name} latency probe timeout");
+            startedTimestamp = 0;
+            deadlineMs = 0;
         }
 
         // ── NavMesh / 이동 ───────────────────────────────────────────────

@@ -27,6 +27,7 @@ Console.WriteLine($"[dummy] login     : {cfg.LoginIp}:{cfg.LoginPort}");
 int lastNum = cfg.Account.Start + System.Math.Max(0, cfg.BotCount - 1);
 string capNote = cfg.MaxClients > 0 ? $"  [maxClients {cfg.MaxClients}, pool {cfg.PoolSize}]" : "";
 Console.WriteLine($"[dummy] bots      : {cfg.BotCount}  ({cfg.Account.Prefix}{cfg.Account.Start}..{cfg.Account.Prefix}{lastNum}){capNote}");
+Console.WriteLine($"[dummy] latency   : {(cfg.LatencyProbe.Enabled ? "enabled" : "disabled")}");
 Console.WriteLine($"[dummy] navMeshDir: {navMeshDir}");
 Console.WriteLine($"[dummy] stageCsv  : {stageCsv}");
 

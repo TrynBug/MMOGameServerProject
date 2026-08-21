@@ -26,6 +26,56 @@ namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 namespace GamePacket {
 
+inline constexpr LatencyProbeRes::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        sequence_{::uint64_t{0u}} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR LatencyProbeRes::LatencyProbeRes(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(LatencyProbeRes_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct LatencyProbeResDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR LatencyProbeResDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~LatencyProbeResDefaultTypeInternal() {}
+  union {
+    LatencyProbeRes _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 LatencyProbeResDefaultTypeInternal _LatencyProbeRes_default_instance_;
+
+inline constexpr LatencyProbeReq::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        sequence_{::uint64_t{0u}} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR LatencyProbeReq::LatencyProbeReq(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(LatencyProbeReq_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct LatencyProbeReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR LatencyProbeReqDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~LatencyProbeReqDefaultTypeInternal() {}
+  union {
+    LatencyProbeReq _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 LatencyProbeReqDefaultTypeInternal _LatencyProbeReq_default_instance_;
+
 inline constexpr GatewayAuthReq::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -147,6 +197,16 @@ const ::uint32_t
         1,
         0x000, // bitmap
         0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::GamePacket::LatencyProbeReq, _impl_._has_bits_),
+        4, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::GamePacket::LatencyProbeReq, _impl_.sequence_),
+        0,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::GamePacket::LatencyProbeRes, _impl_._has_bits_),
+        4, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::GamePacket::LatencyProbeRes, _impl_.sequence_),
+        0,
+        0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GamePacket::ForceDisconnectNtf, _impl_._has_bits_),
         5, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GamePacket::ForceDisconnectNtf, _impl_.reason_code_),
@@ -160,12 +220,16 @@ static const ::_pbi::MigrationSchema
         {0, sizeof(::GamePacket::GatewayAuthReq)},
         {7, sizeof(::GamePacket::GameEnterNtf)},
         {14, sizeof(::GamePacket::GameLogoutReq)},
-        {15, sizeof(::GamePacket::ForceDisconnectNtf)},
+        {15, sizeof(::GamePacket::LatencyProbeReq)},
+        {20, sizeof(::GamePacket::LatencyProbeRes)},
+        {25, sizeof(::GamePacket::ForceDisconnectNtf)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::GamePacket::_GatewayAuthReq_default_instance_._instance,
     &::GamePacket::_GameEnterNtf_default_instance_._instance,
     &::GamePacket::_GameLogoutReq_default_instance_._instance,
+    &::GamePacket::_LatencyProbeReq_default_instance_._instance,
+    &::GamePacket::_LatencyProbeRes_default_instance_._instance,
     &::GamePacket::_ForceDisconnectNtf_default_instance_._instance,
 };
 const char descriptor_table_protodef_GamePacket_2fsession_5fpacket_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -174,26 +238,28 @@ const char descriptor_table_protodef_GamePacket_2fsession_5fpacket_2eproto[] ABS
     "acket\"8\n\016GatewayAuthReq\022\022\n\naccount_id\030\001 "
     "\001(\003\022\022\n\nauth_token\030\002 \001(\004\"3\n\014GameEnterNtf\022"
     "\020\n\010stage_id\030\001 \001(\003\022\021\n\tstage_key\030\002 \001(\005\"\017\n\r"
-    "GameLogoutReq\":\n\022ForceDisconnectNtf\022\023\n\013r"
-    "eason_code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t*\340\001\n\025Fo"
-    "rceDisconnectReason\022 \n\034FORCE_DISCONNECT_"
-    "REASON_NONE\020\000\022+\n\'FORCE_DISCONNECT_REASON"
-    "_DUPLICATE_LOGIN\020\001\022+\n\'FORCE_DISCONNECT_R"
-    "EASON_SERVER_SHUTDOWN\020\002\022\'\n#FORCE_DISCONN"
-    "ECT_REASON_AUTH_FAILED\020\003\022\"\n\036FORCE_DISCON"
-    "NECT_REASON_KICKED\020\004b\006proto3"
+    "GameLogoutReq\"#\n\017LatencyProbeReq\022\020\n\010sequ"
+    "ence\030\001 \001(\004\"#\n\017LatencyProbeRes\022\020\n\010sequenc"
+    "e\030\001 \001(\004\":\n\022ForceDisconnectNtf\022\023\n\013reason_"
+    "code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t*\340\001\n\025ForceDis"
+    "connectReason\022 \n\034FORCE_DISCONNECT_REASON"
+    "_NONE\020\000\022+\n\'FORCE_DISCONNECT_REASON_DUPLI"
+    "CATE_LOGIN\020\001\022+\n\'FORCE_DISCONNECT_REASON_"
+    "SERVER_SHUTDOWN\020\002\022\'\n#FORCE_DISCONNECT_RE"
+    "ASON_AUTH_FAILED\020\003\022\"\n\036FORCE_DISCONNECT_R"
+    "EASON_KICKED\020\004b\006proto3"
 };
 static ::absl::once_flag descriptor_table_GamePacket_2fsession_5fpacket_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GamePacket_2fsession_5fpacket_2eproto = {
     false,
     false,
-    468,
+    542,
     descriptor_table_protodef_GamePacket_2fsession_5fpacket_2eproto,
     "GamePacket/session_packet.proto",
     &descriptor_table_GamePacket_2fsession_5fpacket_2eproto_once,
     nullptr,
     0,
-    4,
+    6,
     schemas,
     file_default_instances,
     TableStruct_GamePacket_2fsession_5fpacket_2eproto::offsets,
@@ -901,6 +967,502 @@ GameLogoutReq::_table_ = {
 
 ::google::protobuf::Metadata GameLogoutReq::GetMetadata() const {
   return ::google::protobuf::internal::ZeroFieldsBase::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class LatencyProbeReq::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<LatencyProbeReq>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(LatencyProbeReq, _impl_._has_bits_);
+};
+
+LatencyProbeReq::LatencyProbeReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, LatencyProbeReq_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:GamePacket.LatencyProbeReq)
+}
+LatencyProbeReq::LatencyProbeReq(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const LatencyProbeReq& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, LatencyProbeReq_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(from._impl_) {
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+PROTOBUF_NDEBUG_INLINE LatencyProbeReq::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0} {}
+
+inline void LatencyProbeReq::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.sequence_ = {};
+}
+LatencyProbeReq::~LatencyProbeReq() {
+  // @@protoc_insertion_point(destructor:GamePacket.LatencyProbeReq)
+  SharedDtor(*this);
+}
+inline void LatencyProbeReq::SharedDtor(MessageLite& self) {
+  LatencyProbeReq& this_ = static_cast<LatencyProbeReq&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL LatencyProbeReq::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) LatencyProbeReq(arena);
+}
+constexpr auto LatencyProbeReq::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(LatencyProbeReq),
+                                            alignof(LatencyProbeReq));
+}
+constexpr auto LatencyProbeReq::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_LatencyProbeReq_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &LatencyProbeReq::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<LatencyProbeReq>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &LatencyProbeReq::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<LatencyProbeReq>(), &LatencyProbeReq::ByteSizeLong,
+              &LatencyProbeReq::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(LatencyProbeReq, _impl_._cached_size_),
+          false,
+      },
+      &LatencyProbeReq::kDescriptorMethods,
+      &descriptor_table_GamePacket_2fsession_5fpacket_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull LatencyProbeReq_class_data_ =
+        LatencyProbeReq::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+LatencyProbeReq::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&LatencyProbeReq_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(LatencyProbeReq_class_data_.tc_table);
+  return LatencyProbeReq_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 0, 2>
+LatencyProbeReq::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(LatencyProbeReq, _impl_._has_bits_),
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    LatencyProbeReq_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::GamePacket::LatencyProbeReq>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // uint64 sequence = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(LatencyProbeReq, _impl_.sequence_), 0>(),
+     {8, 0, 0,
+      PROTOBUF_FIELD_OFFSET(LatencyProbeReq, _impl_.sequence_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // uint64 sequence = 1;
+    {PROTOBUF_FIELD_OFFSET(LatencyProbeReq, _impl_.sequence_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUInt64)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+PROTOBUF_NOINLINE void LatencyProbeReq::Clear() {
+// @@protoc_insertion_point(message_clear_start:GamePacket.LatencyProbeReq)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.sequence_ = ::uint64_t{0u};
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL LatencyProbeReq::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const LatencyProbeReq& this_ = static_cast<const LatencyProbeReq&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL LatencyProbeReq::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const LatencyProbeReq& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:GamePacket.LatencyProbeReq)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // uint64 sequence = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (this_._internal_sequence() != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteUInt64ToArray(
+          1, this_._internal_sequence(), target);
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:GamePacket.LatencyProbeReq)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t LatencyProbeReq::ByteSizeLong(const MessageLite& base) {
+  const LatencyProbeReq& this_ = static_cast<const LatencyProbeReq&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t LatencyProbeReq::ByteSizeLong() const {
+  const LatencyProbeReq& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:GamePacket.LatencyProbeReq)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+   {
+    // uint64 sequence = 1;
+    cached_has_bits = this_._impl_._has_bits_[0];
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (this_._internal_sequence() != 0) {
+        total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(
+            this_._internal_sequence());
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void LatencyProbeReq::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<LatencyProbeReq*>(&to_msg);
+  auto& from = static_cast<const LatencyProbeReq&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.LatencyProbeReq)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (from._internal_sequence() != 0) {
+      _this->_impl_.sequence_ = from._impl_.sequence_;
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void LatencyProbeReq::CopyFrom(const LatencyProbeReq& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.LatencyProbeReq)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void LatencyProbeReq::InternalSwap(LatencyProbeReq* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  swap(_impl_.sequence_, other->_impl_.sequence_);
+}
+
+::google::protobuf::Metadata LatencyProbeReq::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class LatencyProbeRes::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<LatencyProbeRes>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(LatencyProbeRes, _impl_._has_bits_);
+};
+
+LatencyProbeRes::LatencyProbeRes(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, LatencyProbeRes_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:GamePacket.LatencyProbeRes)
+}
+LatencyProbeRes::LatencyProbeRes(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const LatencyProbeRes& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, LatencyProbeRes_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(from._impl_) {
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+PROTOBUF_NDEBUG_INLINE LatencyProbeRes::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0} {}
+
+inline void LatencyProbeRes::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.sequence_ = {};
+}
+LatencyProbeRes::~LatencyProbeRes() {
+  // @@protoc_insertion_point(destructor:GamePacket.LatencyProbeRes)
+  SharedDtor(*this);
+}
+inline void LatencyProbeRes::SharedDtor(MessageLite& self) {
+  LatencyProbeRes& this_ = static_cast<LatencyProbeRes&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL LatencyProbeRes::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) LatencyProbeRes(arena);
+}
+constexpr auto LatencyProbeRes::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(LatencyProbeRes),
+                                            alignof(LatencyProbeRes));
+}
+constexpr auto LatencyProbeRes::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_LatencyProbeRes_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &LatencyProbeRes::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<LatencyProbeRes>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &LatencyProbeRes::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<LatencyProbeRes>(), &LatencyProbeRes::ByteSizeLong,
+              &LatencyProbeRes::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(LatencyProbeRes, _impl_._cached_size_),
+          false,
+      },
+      &LatencyProbeRes::kDescriptorMethods,
+      &descriptor_table_GamePacket_2fsession_5fpacket_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull LatencyProbeRes_class_data_ =
+        LatencyProbeRes::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+LatencyProbeRes::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&LatencyProbeRes_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(LatencyProbeRes_class_data_.tc_table);
+  return LatencyProbeRes_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 0, 2>
+LatencyProbeRes::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(LatencyProbeRes, _impl_._has_bits_),
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    LatencyProbeRes_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::GamePacket::LatencyProbeRes>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // uint64 sequence = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(LatencyProbeRes, _impl_.sequence_), 0>(),
+     {8, 0, 0,
+      PROTOBUF_FIELD_OFFSET(LatencyProbeRes, _impl_.sequence_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // uint64 sequence = 1;
+    {PROTOBUF_FIELD_OFFSET(LatencyProbeRes, _impl_.sequence_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUInt64)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+PROTOBUF_NOINLINE void LatencyProbeRes::Clear() {
+// @@protoc_insertion_point(message_clear_start:GamePacket.LatencyProbeRes)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.sequence_ = ::uint64_t{0u};
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL LatencyProbeRes::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const LatencyProbeRes& this_ = static_cast<const LatencyProbeRes&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL LatencyProbeRes::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const LatencyProbeRes& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:GamePacket.LatencyProbeRes)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // uint64 sequence = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (this_._internal_sequence() != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteUInt64ToArray(
+          1, this_._internal_sequence(), target);
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:GamePacket.LatencyProbeRes)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t LatencyProbeRes::ByteSizeLong(const MessageLite& base) {
+  const LatencyProbeRes& this_ = static_cast<const LatencyProbeRes&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t LatencyProbeRes::ByteSizeLong() const {
+  const LatencyProbeRes& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:GamePacket.LatencyProbeRes)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+   {
+    // uint64 sequence = 1;
+    cached_has_bits = this_._impl_._has_bits_[0];
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (this_._internal_sequence() != 0) {
+        total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(
+            this_._internal_sequence());
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void LatencyProbeRes::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<LatencyProbeRes*>(&to_msg);
+  auto& from = static_cast<const LatencyProbeRes&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(class_specific_merge_from_start:GamePacket.LatencyProbeRes)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (from._internal_sequence() != 0) {
+      _this->_impl_.sequence_ = from._impl_.sequence_;
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void LatencyProbeRes::CopyFrom(const LatencyProbeRes& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:GamePacket.LatencyProbeRes)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void LatencyProbeRes::InternalSwap(LatencyProbeRes* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  swap(_impl_.sequence_, other->_impl_.sequence_);
+}
+
+::google::protobuf::Metadata LatencyProbeRes::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // ===================================================================
 

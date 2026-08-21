@@ -16,6 +16,10 @@ enum GamePacketId {
     GAME_PACKET_ID_GAME_ENTER_NTF = 201;             // 게임서버 -> 클라: 게임 입장 완료 알림
     GAME_PACKET_ID_GAME_LOGOUT_REQ = 202;            // 클라 -> 게이트웨이: 게임 로그아웃 요청
     GAME_PACKET_ID_FORCE_DISCONNECT_NTF = 203;       // 게이트웨이 -> 클라: 강제 퇴장 알림
+    GAME_PACKET_ID_GATEWAY_LATENCY_PROBE_REQ = 204;  // 클라 -> 게이트웨이: Gateway RTT 측정 요청
+    GAME_PACKET_ID_GATEWAY_LATENCY_PROBE_RES = 205;  // 게이트웨이 -> 클라: Gateway RTT 측정 응답
+    GAME_PACKET_ID_GAME_LATENCY_PROBE_REQ = 206;     // 클라 -> 게임서버: Gateway 경유 Game RTT 측정 요청
+    GAME_PACKET_ID_GAME_LATENCY_PROBE_RES = 207;     // 게임서버 -> 클라: Gateway 경유 Game RTT 측정 응답
 
     // 300~399: 캐릭터 선택 / 생성
     GAME_PACKET_ID_CHARACTER_LIST_NTF = 301;          // 게임서버 -> 클라: 캐릭터 목록 알림 (입장 시 자동 전송)

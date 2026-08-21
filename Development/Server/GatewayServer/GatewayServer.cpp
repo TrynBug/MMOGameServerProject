@@ -35,6 +35,9 @@ bool GatewayServer::OnInitialize()
     m_clientDispatcher.Register<GamePacket::GameLogoutReq>(Common::GAME_PACKET_ID_GAME_LOGOUT_REQ,
         [this](auto& spClientSession, auto& msg) { handleLogoutReq(spClientSession); });
 
+    m_clientDispatcher.Register<GamePacket::LatencyProbeReq>(Common::GAME_PACKET_ID_GATEWAY_LATENCY_PROBE_REQ,
+        [this](auto& spClientSession, auto& msg) { handleLatencyProbeReq(spClientSession, msg); });
+
     // 게이트웨이서버가 핸들링하지않는 클라이언트 패킷은 게임서버로 relay
     m_clientDispatcher.SetUnknownPacketHandler([this](const netlib::ISessionPtr& spClientSession, const netlib::PacketPtr& spPacket)
     {
@@ -398,6 +401,19 @@ void GatewayServer::handleAuthReq(const netlib::ISessionPtr& spClientSession, co
 void GatewayServer::handleLogoutReq(const netlib::ISessionPtr& spClientSession)
 {
     spClientSession->Disconnect();
+}
+
+void GatewayServer::handleLatencyProbeReq(const netlib::ISessionPtr& spClientSession, const GamePacket::LatencyProbeReq& msg)
+{
+    const SessionMetaInfo* pMeta = getSessionMeta(spClientSession);
+    if (!pMeta || pMeta->accountId == 0)
+        return;
+
+    GamePacket::LatencyProbeRes res;
+    res.set_sequence(msg.sequence());
+    netlib::PacketPtr spResponse = SerializePacket(Common::GAME_PACKET_ID_GATEWAY_LATENCY_PROBE_RES, res);
+    if (spResponse)
+        spClientSession->Send(spResponse);
 }
 
 void GatewayServer::relayToGameServer(const netlib::ISessionPtr& spClientSession, const netlib::PacketPtr& spPacket)

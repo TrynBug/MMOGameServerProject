@@ -1412,6 +1412,17 @@ void GameServer::handleRelayedClientPacket(const netlib::PacketPtr& spPacket)
         handleClientCharacterSelect(accountId, std::move(req));
         return;
     }
+    case Common::GAME_PACKET_ID_GAME_LATENCY_PROBE_REQ:
+    {
+        GamePacket::LatencyProbeReq req;
+        if (!DeserializePacket(*spPacket, req))
+            return;
+
+        GamePacket::LatencyProbeRes res;
+        res.set_sequence(req.sequence());
+        m_packetSender.SendToUser(accountId, Common::GAME_PACKET_ID_GAME_LATENCY_PROBE_RES, res);
+        return;
+    }
     default:
         break;
     }

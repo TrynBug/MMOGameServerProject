@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,7 +22,8 @@ namespace DummyClient.Net
         private readonly DummyMetrics m_metrics;
         private int m_closed;
 
-        private readonly ConcurrentQueue<RawPacket> m_recvQueue = new();
+        private readonly record struct ReceivedPacket(RawPacket Packet, long ReceivedTimestamp);
+        private readonly ConcurrentQueue<ReceivedPacket> m_recvQueue = new();
         public bool IsConnected => m_tcp is { Connected: true } && m_closed == 0;
 
         // 임의 스레드에서 호출될 수 있음. reason==null 이면 정상 종료.
@@ -98,12 +100,14 @@ namespace DummyClient.Net
                         break;
 
                     if (m_closed != 0) break;
-                    m_recvQueue.Enqueue(new RawPacket { Type = type, Flags = flags, Body = body });
+                    m_recvQueue.Enqueue(new ReceivedPacket(
+                        new RawPacket { Type = type, Flags = flags, Body = body },
+                        Stopwatch.GetTimestamp()));
                     m_metrics.RecordRecv(type, size);
                     m_metrics.RecordRecvEnqueued();
                     if (m_closed != 0)
                     {
-                        while (TryDequeue(out _)) { }
+                        while (TryDequeue(out _, out _)) { }
                         break;
                     }
                 }
@@ -133,13 +137,20 @@ namespace DummyClient.Net
             try { m_cts?.Cancel(); } catch { }
             try { m_stream?.Close(); } catch { }
             try { m_tcp?.Close(); } catch { }
-            while (TryDequeue(out _)) { }
+            while (TryDequeue(out _, out _)) { }
             try { OnClosed?.Invoke(reason); } catch { }
         }
 
-        public bool TryDequeue(out RawPacket packet)
+        public bool TryDequeue(out RawPacket packet, out long receivedTimestamp)
         {
-            if (!m_recvQueue.TryDequeue(out packet)) return false;
+            if (!m_recvQueue.TryDequeue(out ReceivedPacket received))
+            {
+                packet = null;
+                receivedTimestamp = 0;
+                return false;
+            }
+            packet = received.Packet;
+            receivedTimestamp = received.ReceivedTimestamp;
             m_metrics.RecordRecvDequeued();
             return true;
         }

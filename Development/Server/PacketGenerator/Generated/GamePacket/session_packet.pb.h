@@ -73,6 +73,14 @@ class GatewayAuthReq;
 struct GatewayAuthReqDefaultTypeInternal;
 extern GatewayAuthReqDefaultTypeInternal _GatewayAuthReq_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull GatewayAuthReq_class_data_;
+class LatencyProbeReq;
+struct LatencyProbeReqDefaultTypeInternal;
+extern LatencyProbeReqDefaultTypeInternal _LatencyProbeReq_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull LatencyProbeReq_class_data_;
+class LatencyProbeRes;
+struct LatencyProbeResDefaultTypeInternal;
+extern LatencyProbeResDefaultTypeInternal _LatencyProbeRes_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull LatencyProbeRes_class_data_;
 }  // namespace GamePacket
 namespace google {
 namespace protobuf {
@@ -126,6 +134,386 @@ inline bool ForceDisconnectReason_Parse(
 // ===================================================================
 
 
+// -------------------------------------------------------------------
+
+class LatencyProbeRes final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.LatencyProbeRes) */ {
+ public:
+  inline LatencyProbeRes() : LatencyProbeRes(nullptr) {}
+  ~LatencyProbeRes() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(LatencyProbeRes* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(LatencyProbeRes));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR LatencyProbeRes(::google::protobuf::internal::ConstantInitialized);
+
+  inline LatencyProbeRes(const LatencyProbeRes& from) : LatencyProbeRes(nullptr, from) {}
+  inline LatencyProbeRes(LatencyProbeRes&& from) noexcept
+      : LatencyProbeRes(nullptr, ::std::move(from)) {}
+  inline LatencyProbeRes& operator=(const LatencyProbeRes& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline LatencyProbeRes& operator=(LatencyProbeRes&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const LatencyProbeRes& default_instance() {
+    return *reinterpret_cast<const LatencyProbeRes*>(
+        &_LatencyProbeRes_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 4;
+  friend void swap(LatencyProbeRes& a, LatencyProbeRes& b) { a.Swap(&b); }
+  inline void Swap(LatencyProbeRes* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(LatencyProbeRes* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  LatencyProbeRes* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<LatencyProbeRes>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const LatencyProbeRes& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const LatencyProbeRes& from) { LatencyProbeRes::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(LatencyProbeRes* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.LatencyProbeRes"; }
+
+  explicit LatencyProbeRes(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  LatencyProbeRes(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const LatencyProbeRes& from);
+  LatencyProbeRes(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, LatencyProbeRes&& from) noexcept
+      : LatencyProbeRes(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kSequenceFieldNumber = 1,
+  };
+  // uint64 sequence = 1;
+  void clear_sequence() ;
+  ::uint64_t sequence() const;
+  void set_sequence(::uint64_t value);
+
+  private:
+  ::uint64_t _internal_sequence() const;
+  void _internal_set_sequence(::uint64_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.LatencyProbeRes)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<0, 1,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const LatencyProbeRes& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::uint64_t sequence_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fsession_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull LatencyProbeRes_class_data_;
+// -------------------------------------------------------------------
+
+class LatencyProbeReq final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:GamePacket.LatencyProbeReq) */ {
+ public:
+  inline LatencyProbeReq() : LatencyProbeReq(nullptr) {}
+  ~LatencyProbeReq() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(LatencyProbeReq* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(LatencyProbeReq));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR LatencyProbeReq(::google::protobuf::internal::ConstantInitialized);
+
+  inline LatencyProbeReq(const LatencyProbeReq& from) : LatencyProbeReq(nullptr, from) {}
+  inline LatencyProbeReq(LatencyProbeReq&& from) noexcept
+      : LatencyProbeReq(nullptr, ::std::move(from)) {}
+  inline LatencyProbeReq& operator=(const LatencyProbeReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline LatencyProbeReq& operator=(LatencyProbeReq&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const LatencyProbeReq& default_instance() {
+    return *reinterpret_cast<const LatencyProbeReq*>(
+        &_LatencyProbeReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 3;
+  friend void swap(LatencyProbeReq& a, LatencyProbeReq& b) { a.Swap(&b); }
+  inline void Swap(LatencyProbeReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(LatencyProbeReq* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  LatencyProbeReq* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<LatencyProbeReq>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const LatencyProbeReq& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const LatencyProbeReq& from) { LatencyProbeReq::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(LatencyProbeReq* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "GamePacket.LatencyProbeReq"; }
+
+  explicit LatencyProbeReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  LatencyProbeReq(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const LatencyProbeReq& from);
+  LatencyProbeReq(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, LatencyProbeReq&& from) noexcept
+      : LatencyProbeReq(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kSequenceFieldNumber = 1,
+  };
+  // uint64 sequence = 1;
+  void clear_sequence() ;
+  ::uint64_t sequence() const;
+  void set_sequence(::uint64_t value);
+
+  private:
+  ::uint64_t _internal_sequence() const;
+  void _internal_set_sequence(::uint64_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:GamePacket.LatencyProbeReq)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<0, 1,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const LatencyProbeReq& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::uint64_t sequence_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_GamePacket_2fsession_5fpacket_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull LatencyProbeReq_class_data_;
 // -------------------------------------------------------------------
 
 class GatewayAuthReq final : public ::google::protobuf::Message
@@ -721,7 +1109,7 @@ class ForceDisconnectNtf final : public ::google::protobuf::Message
     return *reinterpret_cast<const ForceDisconnectNtf*>(
         &_ForceDisconnectNtf_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 3;
+  static constexpr int kIndexInFileMessages = 5;
   friend void swap(ForceDisconnectNtf& a, ForceDisconnectNtf& b) { a.Swap(&b); }
   inline void Swap(ForceDisconnectNtf* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -995,6 +1383,64 @@ inline void GameEnterNtf::_internal_set_stage_key(::int32_t value) {
 // -------------------------------------------------------------------
 
 // GameLogoutReq
+
+// -------------------------------------------------------------------
+
+// LatencyProbeReq
+
+// uint64 sequence = 1;
+inline void LatencyProbeReq::clear_sequence() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sequence_ = ::uint64_t{0u};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::uint64_t LatencyProbeReq::sequence() const {
+  // @@protoc_insertion_point(field_get:GamePacket.LatencyProbeReq.sequence)
+  return _internal_sequence();
+}
+inline void LatencyProbeReq::set_sequence(::uint64_t value) {
+  _internal_set_sequence(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_set:GamePacket.LatencyProbeReq.sequence)
+}
+inline ::uint64_t LatencyProbeReq::_internal_sequence() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.sequence_;
+}
+inline void LatencyProbeReq::_internal_set_sequence(::uint64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sequence_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// LatencyProbeRes
+
+// uint64 sequence = 1;
+inline void LatencyProbeRes::clear_sequence() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sequence_ = ::uint64_t{0u};
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::uint64_t LatencyProbeRes::sequence() const {
+  // @@protoc_insertion_point(field_get:GamePacket.LatencyProbeRes.sequence)
+  return _internal_sequence();
+}
+inline void LatencyProbeRes::set_sequence(::uint64_t value) {
+  _internal_set_sequence(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_set:GamePacket.LatencyProbeRes.sequence)
+}
+inline ::uint64_t LatencyProbeRes::_internal_sequence() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.sequence_;
+}
+inline void LatencyProbeRes::_internal_set_sequence(::uint64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sequence_ = value;
+}
 
 // -------------------------------------------------------------------
 

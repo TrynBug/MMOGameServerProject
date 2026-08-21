@@ -16,10 +16,12 @@ namespace DummyClient.Metrics
         CharacterSelect,
         StageLoad,
         StageMove,
+        GatewayPing,
+        GamePing,
     }
 
     public readonly record struct CounterSnapshot(long Packets, long Bytes);
-    public readonly record struct LatencySnapshot(int Count, double AverageMs, long P95Ms, long MaxMs);
+    public readonly record struct LatencySnapshot(int Count, double AverageMs, double P95Ms, double MaxMs);
     public readonly record struct ErrorSnapshot(string Reason, long Count);
 
     public sealed class DummyMetrics
@@ -33,10 +35,10 @@ namespace DummyClient.Metrics
         private sealed class LatencyWindow
         {
             private const int Capacity = 4096;
-            private readonly Queue<long> m_samples = new(Capacity);
-            private long m_sum;
+            private readonly Queue<double> m_samples = new(Capacity);
+            private double m_sum;
 
-            public void Record(long elapsedMs)
+            public void Record(double elapsedMs)
             {
                 lock (m_samples)
                 {
@@ -52,7 +54,7 @@ namespace DummyClient.Metrics
                 lock (m_samples)
                 {
                     if (m_samples.Count == 0) return default;
-                    long[] sorted = m_samples.ToArray();
+                    double[] sorted = m_samples.ToArray();
                     Array.Sort(sorted);
                     int p95Index = Math.Min(sorted.Length - 1, (int)Math.Ceiling(sorted.Length * 0.95) - 1);
                     return new LatencySnapshot(sorted.Length, (double)m_sum / sorted.Length, sorted[p95Index], sorted[^1]);
@@ -109,7 +111,7 @@ namespace DummyClient.Metrics
         public IReadOnlyDictionary<ushort, CounterSnapshot> SnapshotSentByType() => SnapshotPackets(m_sentByType);
         public IReadOnlyDictionary<ushort, CounterSnapshot> SnapshotRecvByType() => SnapshotPackets(m_recvByType);
 
-        public void RecordLatency(LatencyKind kind, long elapsedMs)
+        public void RecordLatency(LatencyKind kind, double elapsedMs)
         {
             if (elapsedMs >= 0)
                 m_latencies[(int)kind].Record(elapsedMs);

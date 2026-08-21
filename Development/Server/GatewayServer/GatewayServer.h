@@ -44,6 +44,7 @@ private:
     // ── 클라이언트 패킷 핸들러 ───────────────────────────────────────────
     void handleAuthReq    (const netlib::ISessionPtr& spClientSession, const GamePacket::GatewayAuthReq& msg);
     void handleLogoutReq  (const netlib::ISessionPtr& spClientSession);
+    void handleLatencyProbeReq(const netlib::ISessionPtr& spClientSession, const GamePacket::LatencyProbeReq& msg);
     void relayToGameServer(const netlib::ISessionPtr& spClientSession, const netlib::PacketPtr& spPacket);
 
     // ── 게임서버 패킷 핸들러 ─────────────────────────────────────────────
