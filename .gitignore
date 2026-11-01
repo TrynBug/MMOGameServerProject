@@ -243,3 +243,9 @@ Document/etc
 /Development/Monitoring/data/
 /Development/Monitoring/results/
 /Development/Monitoring/.env
+
+# claude
+/claude
+
+# 포트폴리오
+/Portfolio

@@ -219,7 +219,11 @@ sol2로 바인딩하는 함수들. **경계를 작고 안정적으로** 유지�
 | `GetSpawnPoint(key) -> location, yaw` | 배치 좌표 |
 | `GetEventArea(key) -> center, shape, size` | 영역 정보 |
 | `GetWaypointPath(key) -> {points}` | 순찰/에스코트 경로 |
-| `GetProp(key) -> location, type` | NPC/문/레버 등 prop 기준점 |
+| `GetProp(key) -> location, type` | prop 배치(정적) 기준점 조회 |
+| `GetPropState(objectId) -> int` | prop 엔티티 현재 상태값(없으면 -1). §18.8 |
+| `SetPropState(objectId, state) -> bool` | prop 상태 직접 설정(게이팅 없이) + AOI broadcast |
+| `SpawnProp(propDataKey,x,y,z[,yaw,placementKey,initialState]) -> objectId` | prop 동적 스폰 |
+| `DespawnProp(objectId) -> bool` | prop 디스폰 |
 
 ### 7.4 질의 / 카운트
 | API | 설명 |
@@ -626,16 +630,25 @@ P0b StageNoticeNtf(패킷) ─────────────────�
 ### 18.7 공지 배너(클라) + 배치 export 툴 (구현 완료)
 
 - **공지 배너(클라)**: `UI_StageNotice`(코드빌드, 프리팹 무의존 — 상단 중앙, `durationMs` 후 페이드아웃). `StageManager` 가 `StageNoticeNtf` 핸들러 등록 → `Notice()` 전 구간(스크립트→서버→클라 배너) 완성.
-- **배치 export 툴(에디터)**: 메뉴 `Tools/StageLayout/Export Active Scene` + 브릿지 명령 `EXPORT_STAGELAYOUT:<scene>`. 활성 씬의 마커(`SpawnerMarker`/`SpawnPointMarker`/`EventAreaMarker`/`WaypointMarker`)를 스캔해 **`<씬이름>.json`** 을 서버 `OUTPUT/Map/StageLayout/` 에 출력(NavMesh export 와 동형). 클라는 런타임 프리팹의 `EventAreaMarker` 를 직접 쓰므로 json 은 **서버 전용**. 마커 컴포넌트는 `NavMeshSource` 와 같은 "씬 오토링 마커" 부류라 **NavMesh 어셈블리**에 둠.
+- **배치 export 툴(에디터)**: 메뉴 `Tools/StageLayout/Export Active Scene`에서 활성 씬의 마커(`SpawnerMarker`/`SpawnPointMarker`/`EventAreaMarker`/`WaypointMarker`)를 스캔해 **`<씬이름>.json`** 을 서버 `OUTPUT/Map/StageLayout/` 에 출력(NavMesh export 와 동형). 클라는 런타임 프리팹의 `EventAreaMarker` 를 직접 쓰므로 json 은 **서버 전용**. 마커 타입은 `Client.Game`/Game 어셈블리에 있으므로 `Editor.asmdef`가 `Game`을 참조한다.
 - **콘솔 UTF-8**: `GameServer/main.cpp` 에 `SetConsoleOutputCP/SetConsoleCP(CP_UTF8)` — exe 를 콘솔에서 직접 실행할 때 한글 로그가 깨지지 않게(로그/Lua 가 UTF-8).
 
-### 18.8 오브젝트 상호작용 — 문/레버/NPC (구현 완료, fire-and-forget)
+### 18.8 오브젝트 상호작용 — prop 상태 엔티티 (구현 완료, 상태 동기화)
 
-- **패킷**: `ObjectInteractReq`(4014, C→S, `prop_key`+`pos_x/y/z`) 신설. 상태 동기화 없음 → **Ntf 없음**(연출은 스크립트가 `Notice` 등으로).
-- **배치**: `StageLayout` 가 `props`(`Prop{key,type,x,y,z,range}`) 로드 + `GetProp(key)` 바인딩. 클라 씬 마커(`PropMarker`)를 export 로 수집.
-- **검증**: EventArea 와 동일 결 — 클라 보고 위치가 마커 `range` 안인지 + 권위 위치와의 평면 괴리를 `MoveSpdTotal×lag+여유` 로 제한(거짓 보고 방지).
-- **콜백**: `OnObjectInteract(markerKey, objectId)` 멀티캐스트. prop 은 StageObject 안 만듦(발동만 — `m_propObjects` 미사용).
-- **클라**: `PropMarker`(NavMesh 어셈블리, Key/Type/InteractRange) — export 소스 + 런타임 근접 판정 겸용. `PropInteractor`(Game, StageManager 부착) 가 Interact 키(Input System `Gameplay/Interact`=F)에 범위 내 최근접 `PropMarker` 로 `ObjectInteractReq` 송신. (`InputManager.OnInteract` 이벤트 경유.)
+> v1 에서 fire-and-forget 트리거 → **상태를 갖는 월드 엔티티(`PropObject` : `StageObject`)** 로 격상.
+> 핵심 원칙: **상태(state)=데이터(`GameData_Prop`) 자동 서버권위 / 효과(effect)=스크립트 `OnObjectInteract`**. 상세 설계는 [prop엔티티.md](prop엔티티.md).
+
+- **엔티티**: 레이아웃 배치마다 `OnStart` 에서 `PropObject` 인스턴스화 → ObjectId 발급 → `m_objects`/`m_propObjects`/sector 등록. 정적이라 **위치 SnapshotNtf 제외**(상태 변경만 이벤트로 전송).
+- **데이터**(`GameData_Prop`, type 단위): `StateMode`(None/Toggle/OneShot), `StateCount`, `InitialState`, `MaxInteract`(0=무제한), `CooldownMs`, `InteractRange`, `DespawnDelayMs`, `Behavior`(None/Portal)+`PortalStageKey`/`PortalPositionType`. 상태전이/게이팅은 `PropObject::TryInteract` 가 캡슐화.
+- **배치**(`StageLayout::Prop`, 인스턴스 단위): `key`(배치 인스턴스 키), `type`(→`GameData_Prop`), `x/y/z/yaw`, `range`/`initialState` override, `param0`(포탈 목적지 override 등).
+- **패킷**: `ObjectInteractReq`(4014, C→S) — `prop_key`→**`object_id`**(이제 엔티티). `PropSpawnInfo`(ObjectVisibilityNtf.prop_spawns, 진입 시 현재 상태) + **`PropStateNtf`(4015, S→C)** 상태변경 broadcast.
+- **검증**: EventArea 와 동일 결 — 보고 위치가 prop `InteractRange` 안인지 + 권위 위치와의 평면 괴리를 `MoveSpdTotal×lag+여유` 로 제한.
+- **흐름**(`handleObjectInteractReq`): object_id→`FindProp`→검증→`TryInteract`(게이팅+상태전이)→상태변경 시 `PropStateNtf` broadcast→`Behavior`(Portal 등) 발동→`OnObjectInteract` 스크립트 훅.
+- **콜백**: `OnObjectInteract(propObjectId, placementKey, actorObjectId, newState)` 멀티캐스트. **`placementKey`(배치 키)로 분기**(런타임 objectId 가 아님), `propObjectId` 로 타게팅.
+- **포탈(선언형)**: `Behavior=Portal` prop 은 무스크립트로 `executeLocalStageMove`(handleStageMoveReq 와 공용) 직결. 목적지=`PortalStageKey`(placement `param0` override)+`PortalPositionType`. v1=같은 서버 이동만.
+- **라이프사이클**: `DespawnProp`(=`DespawnMonster` 미러). `OneShot`+`DespawnDelayMs` → `updateProps` 가 타이머 만료 시 자동 제거(파괴 prop 근사). HP 기반 파괴 prop 은 v2(ActorObject 파생).
+- **Lua API**: `GetPropState(objectId)` / `SetPropState(objectId,state)`(게이팅 없이 설정+broadcast) / `SpawnProp(propDataKey,x,y,z[,yaw,placementKey,initialState])` / `DespawnProp(objectId)`. 기존 `GetProp(key)`(정적 배치 조회) 유지.
+- **클라**(별도 트랙, 미적용): `PropMarker`(export 시 yaw/initialState/param + 런타임 ObjectId 매핑), `PropInteractor`(`object_id` 송신), `PropSpawnInfo`/`PropStateNtf` 수신 핸들러(상태별 시각 전환).
 
 ### 18.9 아직 안 된 것 / 다음
 

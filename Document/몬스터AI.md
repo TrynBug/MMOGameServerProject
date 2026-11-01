@@ -161,7 +161,7 @@ message AbilityCastNtf {
 
 설계 노트:
 - `windup_ms` 를 패킷에 실어 보낸다(데이터에서도 알 수 있지만, **서버 권위 타이밍**을 단일 출처로 못박기 위해). 클라 텔레그래프는 이 값으로 채우고, 실제 대미지는 서버가 Strike 시점에 적용하므로 둘의 미세 오차는 허용(예고는 "읽기", 대미지는 권위). ※ 이 타이밍 정합성은 6장(업데이트 주기 분리)·8장(피격감)과 직결된다.
-- `seed` 는 v1 근접/단순 장판엔 불필요. scatter(메테오류) 예고를 몬스터가 쓰게 되면 그때 필드 추가.
+- scatter 스킬은 `SkillCastNtf.seed`를 서버 판정과 클라이언트 VFX가 공유하고 동일한 xorshift32 순서로 위치를 재현한다. `AbilityCastNtf`는 기존 텔레그래프용 구조를 유지한다.
 
 ### 4.4 타이밍 시퀀스
 
@@ -229,6 +229,7 @@ Attack 로 복귀
 | `LeashRange` | float | server | 스폰 이탈 복귀 거리 |
 | `DesiredRange` | float | server | 원거리 유지 거리(카이팅 밴드). **0=근접** |
 | `EngagedUpdateIntervalMs` | int32 | server | 타겟 관여 중 업데이트 주기(ms). 6장 적응형 주기용. 예: 100 |
+| `IgnoreSkillRange` | bool | server | true면 최대 공격거리 안의 Attack 상태에서 개별 스킬 `MaxRange` 검사를 무시 |
 
 > 20슬롯 포위 상수(`k_attackSlot*`)는 요청대로 코드에 유지. 나중에 아키타입별로 다르게 하고 싶어지면 이 테이블로 끌어올린다.
 > `EngagedUpdateIntervalMs` 는 6장(업데이트 주기 분리)에서 "타겟을 잡았을 때 승격할 주기"를 데이터로 잡기 위한 것. idle 주기는 코드 상수(예: 500ms)로 두고, 관여 시 이 값으로 올린다.
@@ -843,7 +844,7 @@ P1 패킷 proto ──┼─► P2 서버 공유캐스트 ─► P3 서버 FSM �
 ```
 P0·P1 은 서로 독립 → 병렬 가능. P5 는 P1 만 끝나면 P2~P4 와 병렬 가능.
 
-**검증 도구:** 서버 = VS 빌드/디버거 MCP + `packet`/`packetdetail` 치트(송신 패킷 관측). 클라 = `AIEditorBridge`(`COMPILE_CHECK`/`PLAY`/`RUN_EDIT_MODE_TESTS`/`GET_CONSOLE_LOGS`).
+**검증 도구:** 서버 = VS 빌드/디버거 MCP + `packet`/`packetdetail` 치트(송신 패킷 관측). 클라 = Unity MCP의 콘솔 조회·스크립트/에셋 재임포트·테스트 실행 도구.
 
 ### P0 — 데이터 / enum (기반)
 
@@ -937,8 +938,8 @@ P0·P1 은 서로 독립 → 병렬 가능. P5 는 P1 만 끝나면 P2~P4 와 �
 ### 14.3 게임데이터 (실제 형태)
 
 - **`EMonsterAIType`** enum (None/Fsm/BehaviorTree).
-- **`GameData_MonsterAI`** 신규 테이블 — `1001 MeleeRusher`(DesiredRange 0), `1002 RangedKiter`(DesiredRange 7). 컬럼: AIType/AggroRange/LeashRange/DesiredRange/EngagedUpdateIntervalMs + **배회(WanderRadius/WanderMinIntervalMs/WanderMaxIntervalMs)**(14.6). 현재값: AggroRange 10/12, **LeashRange 35/38**(카이팅 추격여유 위해 20/22 → 상향), WanderRadius 5(둘 다)·간격 3000~8000ms.
-- **`GameData_Monster`**: `AIKey` + `SkillKey1~2` 컬럼. 테스트 몹 — Key50=원거리(AIKey 1002, SkillKey 9002), Key51=근접(AIKey 1001, SkillKey 9001).
+- **`GameData_MonsterAI`** 프로파일 테이블 — `1001 MeleeRusher`, `1002 RangedKiter`, `1003 DragonBoss`. `DragonBoss`는 `IgnoreSkillRange=true`라 최대 공격거리 24m 안에서는 개별 스킬 사거리를 무시한다. Chase→Attack의 최대 공격거리와 시야(LoS) 검사는 유지한다.
+- **`GameData_Monster`**: `AIKey` + `SkillKey1~5` 컬럼. 테스트 몹 — Key50=원거리(AIKey 1002, SkillKey 9002), Key51=근접(AIKey 1001, SkillKey 9001). 드래곤(Key70)은 9104/9103/9102/9101/9105의 5개 스킬을 보유한다.
 - **`GameData_Skill`** (몬스터 ability = 스킬 행) — `9001 Mob_Claw`(EffectShape=Obb / EffectDamage=Area / Placement=Forward / CastDelay 350·ActionLock 250), `9002 Mob_Fireball`(Circle / ContactHit / ProjectileSpeed 12·MaxRange 12 / CastDelay 600).
 - **역할별 스킬 배정 규칙**: 근접몹엔 근접스킬만, 원거리몹엔 원거리스킬만. 공격 사거리 = `GetCombat().GetMaxAttackRange()`(보유 스킬 최대 MaxRange) — `m_attackRange` 하드코딩 제거.
 
@@ -960,7 +961,7 @@ P0·P1 은 서로 독립 → 병렬 가능. P5 는 P1 만 끝나면 P2~P4 와 �
 
 ### 14.6 AI 행동 확장 — 피격 반격 + idle 배회 (v1 이후)
 
-설계 3장 FSM 위에 두 가지 비전투/반응 행동을 추가했다. **실제 FSM 상태 = `Idle · Wander · Chase · Attack · Return · Dead`**(캐스트는 상태가 아니라 `MonsterCombatComponent` 페이즈).
+설계 3장 FSM 위에 세 가지 비전투/반응/전투 행동을 추가했다. **실제 FSM 상태 = `Idle · Wander · Chase · Attack · Reposition · Return · Dead`**(캐스트는 상태가 아니라 `MonsterCombatComponent` 페이즈).
 
 **(1) 피격 반격 — 어그로 범위 밖 피격 대응.** 어그로 범위 밖에서 맞으면 `AcquireTarget`(범위 스캔)에 안 잡혀 추격을 시작하지 못하던 문제. 데미지 단일 진입점(`Stage::ApplyEffectDamage`)에서 몬스터 생존 시 `Monster::OnDamagedBy(attackerId)` 호출 → 공격자를 **강제 타겟**(어그로 범위 무시)으로 삼고 두뇌를 `IMonsterAI::OnProvoked` 로 도발. FSM은 비교전(Idle/Wander/Return)이면 즉시 Chase 전환.
 - **정책**: 이미 살아있는 교전 타겟이 있으면 교체 안 함(무교전일 때만 반격 — 다중 피격 thrash 방지). 공격자는 **살아있는 User** 만.
@@ -973,6 +974,12 @@ P0·P1 은 서로 독립 → 병렬 가능. P5 는 P1 만 끝나면 P2~P4 와 �
 - **RNG**: 몬스터별 경량 xorshift(objectId 지연 시드) — FSM이 몬스터별 인스턴스라 상태 보관 안전. 전역 RNG 유틸 없음.
 - **부드러움(중요)**: 배회 **이동 중에만** `SetEngagedTick`(idle 500ms → 100ms)로 승격, 서있는 Idle 복귀 시 `SetIdleTick` 강등. 500ms로는 위치가 500ms마다만 갱신돼 뚝뚝 끊겨 보임(추격이 부드러운 이유 = engaged tick). 서있을 땐 idle 주기 유지라 비용 절감은 그대로.
 - **애니**: 이동 중 moving 플래그 → 클라 run 애니. 느긋한 walk 연출은 클라에 속도 전달 필요(후속).
+
+**(3) 드래곤 전투 위치 변경 + 밀집 타겟.** `DragonBoss`는 전투 중 12초마다 현재 위치에서 8~15m 떨어진 NavMesh 목적지로 걸어서 이동한다. 목적지는 최대 8회 샘플링하고, 스폰 위치 기준 `LeashRange - 1m` 밖의 후보는 제외한다. 이동 중에는 스킬을 시전하지 않으며, 도착(1m 이내) 또는 6초 타임아웃 후 `Attack/Chase`로 복귀한다. 시전·후딜은 중단하지 않고 잠금이 끝난 후에 이동을 시작한다.
+- 데이터: `CombatRepositionIntervalMs`(0=비활성), `CombatRepositionMinDistance`, `CombatRepositionMaxDistance`.
+- FSM: `Reposition` 상태가 기존 `Monster::MoveTo`/`WaypointMover`/스냅샷 복제를 그대로 재사용한다. 클라 코드·패킷 변경은 없다.
+- 스킬 타겟: `TargetClusterRadius`(0=기존 최근거리 타겟) 반경 안의 살아있는 캐릭터 수를 각 후보별로 계산한다. 스킬이 실제로 준비된 시전 직전에만 재선정하며, 밀집 수가 같으면 현재 타겟을 유지하고 그 외 동률은 드래곤에서 가까운 후보를 선택한다. 후보는 최대 공격거리 내·시야(LoS) 확보·생존 캐릭터로 제한한다.
+- `DragonBoss` 설정: `12000 / 8 / 15 / TargetClusterRadius=8`. 일반 몬스터 프로파일은 모두 0으로 기존 동작을 유지한다.
 
 파일: `Monster`(`OnDamagedBy` + 배회 파라미터 로드/게터), `MonsterFsmAI`(`Wander` 상태·`updateWander`·배회타이머·RNG·`OnProvoked`), `MonsterCombatComponent`(`SetTarget`), `Stage::ApplyEffectDamage`(반격 호출). 데이터 컬럼 추가 절차 = `RunGameDataGenerator`(게임데이터.md).
 

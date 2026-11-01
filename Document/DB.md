@@ -281,7 +281,7 @@ Enabled=true
 5. 그래도 남는 데드락(InnoDB 갭락 등)은 `TransactionAsync` 재시도가 흡수(1213/1205 분류 → 백오프 replay).
 
 ## 설계 결정 / 미결
-- **런타임 모델 위치**: 캐릭터 스코프(인벤/재화)는 `Character` 하위, **계정 스코프(AccountCurrency 등)는 `User` 하위**(캐릭터 소멸/전환과 무관해야 하므로). 현재는 임시로 proto 보관, 런타임 컴포넌트화는 향후.
+- **런타임 모델 위치**: 아이템은 `Character::InventoryComponent`로 구현했다. 재화는 아직 임시 proto 보관이다. **계정 스코프(AccountCurrency 등)는 `User` 하위**로 둔다.
 - **(미결) HP/MP/버프 영속 여부**: 현재 비영속(이동 시 잡 기본값 리셋). 영속 필요 시 정책 결정.
 - **(미결) `DbTables.h` 자동생성 전환 / 히스토리 도입(라이브 전) 시점**.
 
@@ -296,6 +296,7 @@ Enabled=true
 - `saveCharacterToDB` 를 **배치 경로로 교체**(`UPDATE` → `INSERT...ON DUPLICATE KEY UPDATE`). 크로스서버 이동 저장도 배치 사용.
 - **읽기 레이어**(`DbLoadBatch`/`DbLoadResult`/`DbLoadExecutor`) 구현 — 멀티문장 1왕복 + 워커 스레드 역직렬화.
 - `loadCharacterForUser` 가 **캐릭터+재화+아이템+계정재화를 한 번에 로드**(재화/아이템→`Character`, 계정재화→`User` 에 임시 proto 보관).
+- 로드된 Item 행은 `InventoryComponent`가 검증·보관한다. 필드 아이템 습득은 캐릭터 pending-async 가드로 직렬화하고, 복사 인벤토리 계산 → Item 배치 upsert → DB 성공 후 메모리 교체 순서로 처리한다.
 - **손쿼리 → 퍼시스턴스 레이어 흡수**: `loadAccount`(Accounts, AccountDB)·캐릭터 목록(Characters)·캐릭터 생성(Characters)을 `DbLoadExecutor`/`DbSaveExecutor` 로 교체. 손쿼리 5→2(남은 건 로그인 `by login_name`, 부트스트랩 `GameDBRegistry` — 각각 사용자입력 바인딩/관계형 부트스트랩이라 의도적으로 손쿼리 유지).
 - `DbLoadExecutor::Load` 에 **`EDBType` 파라미터** 추가 → AccountDB/GameDB 둘 다 타겟(`Accounts` 는 로드 전용으로 레지스트리 등록, `IdColumns` 미정의 = 저장 차단).
 - **정적 스키마 통합**: 로드 WHERE 컬럼을 `DbTableInfo.loadKeyCol` 로 이동 → 쓰기 `insertCols` ↔ 읽기 `loadKeyCol` 대칭(컬럼명=kInfo, 값=`IdColumns`/`LoadKey` 함수).
@@ -305,8 +306,8 @@ Enabled=true
 
 ## 남은 작업 (TODO)
 - **수명 경계 저장(유실 방지)** — `handleGatewayUserDisconnect`(로그아웃/접속종료)에 Character 저장 추가(현재 제거만), 서버종료 시 전 Character 저장. *가장 우선*.
-- **아이템/재화 변경 시 저장 경로 + 런타임 모델** — 인벤토리/재화 런타임 보관 모델(현재 없음, `Character` 하위 컴포넌트로 결정) + 변경 지점에서 배치 저장. 계정 스코프 데이터(AccountCurrency 등)는 `User` 하위.
-- **로드 일반화** — 캐릭터 번들 로드(캐릭선택/재라우팅)·계정 입장 캐릭터 *목록*(`handleGatewayUserEnter`)·계정 로드(`loadAccount`) **모두 `DbLoadExecutor` 로 완료**. 잔여: 재화/아이템 **런타임 컴포넌트화**(현재 임시 proto 보관만).
+- **재화 변경 시 저장 경로 + 런타임 모델** — 아이템 인벤토리와 필드 습득 저장은 구현됨. 재화 런타임 모델 및 변경 지점의 배치 저장은 남아 있다. 계정 스코프 데이터(AccountCurrency 등)는 `User` 하위.
+- **로드 일반화** — 캐릭터 번들 로드(캐릭선택/재라우팅)·계정 입장 캐릭터 *목록*(`handleGatewayUserEnter`)·계정 로드(`loadAccount`) **모두 `DbLoadExecutor` 로 완료**. Item은 런타임 컴포넌트화 완료, 재화 컴포넌트화는 남아 있다.
 - **(선택) 히스토리 테이블**(아이템 감사/복구), **PacketGenerator로 `DbTables.h` 자동생성**(proto custom option).
 
 # 향후 / 미결 항목
@@ -318,7 +319,7 @@ Enabled=true
 - **스키마 DDL 의 N개 샤드 적용/변경 도구** — 스키마 변경 시 모든 GameDB 에 동시 반영(마이그레이션 스크립트).
 - **온라인 마이그레이션(무중단 이주)** — 현재는 전체 서버 중지 방식.
 - ~~**다중테이블 배치 저장**~~ — **구현 완료**(위 "퍼시스턴스 레이어"). coalescing/스태거는 채택 안 함(필요 시 재검토).
-- **퍼시스턴스 레이어 잔여** — 수명 경계 저장(로그아웃/종료), 아이템·재화 런타임 모델 + 변경 시 저장, 로드 일반화, (선택)히스토리/자동생성. (위 "퍼시스턴스 레이어 — 남은 작업" 참조)
+- **퍼시스턴스 레이어 잔여** — 수명 경계 저장(로그아웃/종료), 재화 런타임 모델 + 변경 시 저장, (선택)히스토리/자동생성. 아이템 인벤토리와 필드 습득 저장은 구현 완료. (위 "퍼시스턴스 레이어 — 남은 작업" 참조)
 - **AccountDB HA** — 미구현(개발단계).
 - **계정 횡단 글로벌 DB / 랭킹(Redis) + escrow·saga 구현** — TBD.
 - **ProxySQL** — 고부하 단계에서 도입.
