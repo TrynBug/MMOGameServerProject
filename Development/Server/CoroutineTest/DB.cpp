@@ -1,11 +1,11 @@
 #include "DB.h"
-#include "Example.h"
+#include "IOCP.h"
 #include <mysql.h>
 #include <stdexcept>
 #include <utility>
 
 DbAwaitable::DbAwaitable(DbWorkerPool& pool, std::shared_ptr<const DbRequest> request,
-    std::shared_ptr<ResumeExecutor> executor)
+    std::shared_ptr<IResumeExecutor> executor)
     : m_pool(pool), m_request(std::move(request)), m_executor(std::move(executor)), m_result(std::make_shared<DbResult>())
 {
     Check(m_request && m_executor, "DB request and resume executor are required");
@@ -13,7 +13,7 @@ DbAwaitable::DbAwaitable(DbWorkerPool& pool, std::shared_ptr<const DbRequest> re
 
 void DbAwaitable::await_suspend(std::coroutine_handle<> handle)
 {
-    // [#코루틴 08 | IOCP worker] 현재 코루틴은 이미 suspend된 상태이다. 
+    // [#코루틴 09 | IOCP worker] 현재 코루틴은 이미 suspend된 상태이다. 
     // DB job을 등록한다.
     m_pool.Submit(
         m_request,  // 프로시저 입력 데이터.
@@ -24,9 +24,10 @@ void DbAwaitable::await_suspend(std::coroutine_handle<> handle)
     // 주의: job 등록 직후 다른 IOCP worker에서 재개/종료될 수 있으므로 이후 this에 접근하지 않는다.
 }
 
+// DB worker 스레드 시작하기
 DbWorkerPool::DbWorkerPool(std::shared_ptr<const DbConfig> config, int workerCount)
 {
-    // [#시작 02 | main] worker 수만큼 연결을 미리 연다. 이 루프에서는 스레드를 생성하지 않는다.
+    // DB connection 만들기
     for (int index = 0; index < workerCount; ++index)
     {
         std::shared_ptr<MYSQL> connection(mysql_init(nullptr), mysql_close);
@@ -40,14 +41,13 @@ DbWorkerPool::DbWorkerPool(std::shared_ptr<const DbConfig> config, int workerCou
         if (mysql_real_connect(connection.get(), config->host.c_str(), config->user.c_str(),
             config->password.c_str(), "CoroutineExample", config->port, nullptr, CLIENT_MULTI_RESULTS) == nullptr)
         {
-            // 생성자 실패 시 지역 connection과 이미 저장한 연결들이 자동으로 닫힌다.
-            // worker는 아직 시작하지 않았으므로 DB 요청을 받을 수 없다.
             throw std::runtime_error("DB connection " + std::to_string(index) + " initialization failed: " + mysql_error(connection.get()));
         }
+
         m_connections.push_back(std::move(connection));
     }
 
-    // [#시작 03 | main] 모든 연결이 성공했을 때만 worker를 시작한다. 연결은 스레드별로 고정 배정한다.
+    // DB worker 스레드 시작하기
     try
     {
         for (int index = 0; index < workerCount; ++index)
@@ -55,7 +55,6 @@ DbWorkerPool::DbWorkerPool(std::shared_ptr<const DbConfig> config, int workerCou
     }
     catch (...)
     {
-        // 스레드 생성 도중 실패해도 이미 시작한 worker를 종료한 뒤 예외를 전달한다.
         Stop();
         throw;
     }
@@ -66,7 +65,7 @@ DbWorkerPool::~DbWorkerPool()
     Stop();
 }
 
-DbAwaitable DbWorkerPool::Execute(std::shared_ptr<const DbRequest> request, std::shared_ptr<ResumeExecutor> executor)
+DbAwaitable DbWorkerPool::Execute(std::shared_ptr<const DbRequest> request, std::shared_ptr<IResumeExecutor> executor)
 {
     // [#코루틴 06 | IOCP worker] awaitable 객체(DbAwaitable 객체)를 생성한다.
     // DbAwaitable 에는 request, executor를 저장해둔다. 그리고 DbAwaitable 에는 DB 결과를 담을 멤버변수(m_result)도 준비되어 있다.
@@ -74,9 +73,9 @@ DbAwaitable DbWorkerPool::Execute(std::shared_ptr<const DbRequest> request, std:
 }
 
 void DbWorkerPool::Submit(std::shared_ptr<const DbRequest> request, std::shared_ptr<DbResult> result,
-    std::shared_ptr<ResumeExecutor> executor, std::coroutine_handle<> handle)
+    std::shared_ptr<IResumeExecutor> executor, std::coroutine_handle<> handle)
 {
-    // [#코루틴 09 | IOCP worker 스레드] DB 작업 요청을 큐에 넣고 DB worker 스레드를 깨운다.
+    // [#코루틴 10 | IOCP worker 스레드] DB 작업 요청을 큐에 넣고 DB worker 스레드를 깨운다.
     {
         std::lock_guard lock(m_mutex);
         Check(!m_stopped, "DB request after shutdown");
@@ -131,7 +130,7 @@ void DbWorkerPool::run(MYSQL* connection)
             if (m_jobs.empty())
                 break;
 
-            // [#코루틴 11 | DB worker 스레드] 큐에서 DB Job을 꺼낸다.
+            // [#코루틴 12 | DB worker 스레드] 큐에서 DB Job을 꺼낸다.
             job = std::move(m_jobs.front());
             m_jobs.pop();
         }
@@ -153,8 +152,8 @@ void DbWorkerPool::run(MYSQL* connection)
             break;
         }
 
-        // [#코루틴 12 | DB worker 스레드] DB 프로시저를 동기로 실행하고 결과를 job.result에 채운다.
-		// 여기서 job.result 는 [#코루틴 08] 에서 전달된 std::shared_ptr<DbResult> 이다.
+        // [#코루틴 13 | DB worker 스레드] DB 프로시저를 동기로 실행하고 결과를 job.result에 채운다.
+		// 여기서 job.result 는 [#코루틴 09] 에서 전달된 std::shared_ptr<DbResult> 이다.
         int status = mysql_query(connection, sql.c_str());
         while (status == 0)
         {
@@ -210,21 +209,22 @@ void DbWorkerPool::run(MYSQL* connection)
             job.result->rows.clear();
         }
 
-        // [#코루틴 13 | DB worker 스레드] 코루틴 재개 작업을 만든다.
-        // 여기서 job.handle은 [#코루틴 08] 에서 전달된 std::coroutine_handle 이다.
+        // [#코루틴 14 | DB worker 스레드] 코루틴 재개 작업을 만든다.
+        // 여기서 job.handle은 [#코루틴 09] 에서 전달된 std::coroutine_handle 이다.
         // handle.resume() 을 호출하면 코루틴이 재개된다.
 		// 주의: handle.resume() 호출 이후에는 job.handle을 사용하지 않는다. 코루틴이 재개되면 프레임이 파괴될 수 있기 때문이다.
         auto resume = [handle = job.handle] 
             { 
-                // [#코루틴 13-1 | IOCP worker 스레드] IOCP worker 스레드에서 이 람다함수를 호출하였다.
+                // [#코루틴 18 | IOCP worker 스레드] IOCP worker 스레드에서 이 람다함수를 호출하였다.
                 // handle.resume()은 코루틴을 재개한다. 
-                // handle.resume() 함수 안에서는 handle이 가리키는 코루틴 프레임의 awaitable.await_resume 함수를 호출한다.
-                // 그리고 suspend 되었던 지점에서 실행을 이어간다.
+                // 코루틴을 재개하면 코루틴 프레임에 저장되어 있던 중단 지점으로 제어가 이동한다. 중단 지점에서부터 실행을 계속해나간다.
+                // 중단 지점으로 제어가 이동하면 그곳에 코루틴 프레임의 awaitable.await_resume 함수 호출 코드를 컴파일러가 삽입해놓았다.
+                // 그래서 awaitable.await_resume 함수가 호출된다.
                 handle.resume(); 
             };
 
-        // [#코루틴 14 | DB worker 스레드] 코루틴 재개 작업을 job.executor를 통해 IOCP 완료통지 큐에 등록한다. 
-        // 여기서 job.executor 는 [#코루틴 08] 에서 전달된 std::shared_ptr<IocpResumeExecutor> 이다.
+        // [#코루틴 15 | DB worker 스레드] 코루틴 재개 작업을 job.executor를 통해 IOCP 완료통지 큐에 등록한다. 
+        // 여기서 job.executor 는 [#코루틴 09] 에서 전달된 std::shared_ptr<IocpResumeExecutor> 이다.
         // IocpResumeExecutor 는 코루틴이 어느 스레드에서 재개되어야 하는지를 결정하는 역할을 한다(여기서는 IOCP worker 스레드).
         // C++ 코루틴은 코루틴이 suspend된 스레드에서 재개되는것을 보장해주지 않는다. 사용자가 직접 그렇게 만들어야 한다.
         job.executor->Post(std::move(resume));

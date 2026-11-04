@@ -1,5 +1,5 @@
 #include "DB.h"
-#include "Example.h"
+#include "IOCP.h"
 #include "Contents.h"
 #include <mysql.h>
 #include <chrono>
@@ -27,7 +27,7 @@ int main()
         auto db = std::make_shared<DbWorkerPool>(config, 4);
 
         // IOCP worker 스레드 2개 시작
-        auto iocp = IocpExecutor::Instance();
+        auto iocp = Iocp::Instance();
         iocp->Start(2);
 
         // job 처리 로직이 있는 Contents 객체 생성

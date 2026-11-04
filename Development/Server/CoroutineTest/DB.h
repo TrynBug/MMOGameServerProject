@@ -10,7 +10,7 @@
 #include <vector>
 
 struct MYSQL;
-class ResumeExecutor;
+class IResumeExecutor;
 
 // main에서 worker 전용 연결들을 미리 생성할 때 사용하는 공통 설정이다.
 struct DbConfig
@@ -64,16 +64,16 @@ struct DetachedTask
             return {};
         }
 
-        // [#코루틴 21 | IOCP worker 스레드] 코루틴 함수의 반환값은 없다.
+        // [#코루틴 23 | IOCP worker 스레드] 코루틴 함수의 반환값은 없다.
         void return_void() noexcept {}
 
-        // [#코루틴 22 | IOCP worker 스레드] 마지막 suspend 없이 promise/함수인자를 정리하고 코루틴 프레임을 해제한다.
+        // [#코루틴 24 | IOCP worker 스레드] 마지막 suspend 없이 promise/함수인자를 정리하고 코루틴 프레임을 해제한다.
         std::suspend_never final_suspend() noexcept 
         { 
             return {}; 
         }
         
-        // 코루틴 내부에서 오류가 발생했을때 호출됨
+        // 코루틴 본문에서 발생한 처리되지 않은 예외가 있으면 이 함수가 호출됨
         void unhandled_exception() noexcept
         {
             std::terminate();
@@ -90,7 +90,7 @@ class DbWorkerPool;
 class DbAwaitable
 {
 public:
-    DbAwaitable(DbWorkerPool& pool, std::shared_ptr<const DbRequest> request, std::shared_ptr<ResumeExecutor> executor);
+    DbAwaitable(DbWorkerPool& pool, std::shared_ptr<const DbRequest> request, std::shared_ptr<IResumeExecutor> executor);
 
     // [#코루틴 07 | IOCP worker 스레드] false를 반환하여 코루틴이 suspend 되도록 한다.
     bool await_ready() const noexcept
@@ -98,10 +98,10 @@ public:
         return false;
     }
 
-    // [#코루틴 07 | IOCP worker 스레드] 컴파일러가 코루틴을 중단하고 코루틴 프레임의 handle을 넘겨준다.
+    // [#코루틴 08 | IOCP worker 스레드] 컴파일러가 코루틴을 중단하고 코루틴 프레임의 handle을 넘겨준다.
     void await_suspend(std::coroutine_handle<> handle);
 
-    // [#코루틴 17 | IOCP worker 스레드] DB 처리결과를 반환한다.
+    // [#코루틴 19 | IOCP worker 스레드] DB 처리결과를 반환한다.
     std::shared_ptr<DbResult> await_resume() 
     {
         // m_result 에는 DB worker 스레드가 채워준 DB처리 결과값이 들어있다.
@@ -109,9 +109,9 @@ public:
     }
 
 private:
-    DbWorkerPool& m_pool; // 참조이므로 모든 코루틴이 끝날 때까지 main이 pool을 유지해야 한다.
+    DbWorkerPool& m_pool;
     std::shared_ptr<const DbRequest> m_request;
-    std::shared_ptr<ResumeExecutor> m_executor;
+    std::shared_ptr<IResumeExecutor> m_executor;
     std::shared_ptr<DbResult> m_result;
 };
 
@@ -124,10 +124,10 @@ public:
     DbWorkerPool(std::shared_ptr<const DbConfig> config, int workerCount);
     ~DbWorkerPool();
     // 호출부가 co_await할 대기 객체를 만든다. 요청 등록은 await_suspend에서 이루어진다.
-    DbAwaitable Execute(std::shared_ptr<const DbRequest> request, std::shared_ptr<ResumeExecutor> executor);
+    DbAwaitable Execute(std::shared_ptr<const DbRequest> request, std::shared_ptr<IResumeExecutor> executor);
     // 하나의 Job으로 묶어 큐에 추가하고 대기 중인 DB worker를 깨운다.
     void Submit(std::shared_ptr<const DbRequest> request, std::shared_ptr<DbResult> result,
-        std::shared_ptr<ResumeExecutor> executor, std::coroutine_handle<> handle);
+        std::shared_ptr<IResumeExecutor> executor, std::coroutine_handle<> handle);
     void Stop();
 private:
     void run(MYSQL* connection);
@@ -136,7 +136,7 @@ private:
         // 입력, 출력, 재개 위치, 재개할 코루틴을 한 작업으로 묶어 큐에 넘긴다.
         std::shared_ptr<const DbRequest> request;
         std::shared_ptr<DbResult> result;
-        std::shared_ptr<ResumeExecutor> executor;
+        std::shared_ptr<IResumeExecutor> executor;
         // handle은 프레임의 소유권이나 참조 카운트를 제공하지 않는 비소유 핸들이다.
         // DB 완료 시 한 번 재개한다. 그때까지 대상 프레임은 유효해야 한다.
         std::coroutine_handle<> handle;

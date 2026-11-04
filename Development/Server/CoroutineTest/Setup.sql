@@ -1,4 +1,4 @@
--- 예제 전용 스키마만 사용한다. 게임 DB와 연결하지 않는다.
+-- 코루틴 예제 DB 스키마
 CREATE DATABASE IF NOT EXISTS CoroutineExample;
 USE CoroutineExample;
 

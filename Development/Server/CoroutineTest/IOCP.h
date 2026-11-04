@@ -10,46 +10,60 @@
 #include <thread>
 #include <vector>
 
+// 로그출력
 void Trace(const std::string& message);
+// 조건체크
 void Check(bool condition, const char* message);
 
-// 코루틴의 후속 코드를 실행할 스레드에 작업을 전달하는 인터페이스다.
-// DB worker는 Post로 재개 작업을 등록하고, 대상 스레드가 나중에 그 작업을 실행한다.
-class ResumeExecutor
+// 이 컴포넌트는 코루틴이 중지됐을 때 어떤 스레드에서 재개되어야 하는지 결정할때 사용된다.
+class IResumeExecutor
 {
 public:
-    virtual ~ResumeExecutor() = default;
+    virtual ~IResumeExecutor() = default;
     virtual void Post(std::function<void()> task) = 0;
 };
 
-class IocpExecutor;
+class Iocp;
 class Contents;
 enum class JobType;
 
-// 코루틴 재개 요청을 소유자의 IOCP 작업 등록 함수로 전달하는 컴포넌트다.
-class IocpResumeExecutor : public ResumeExecutor
+// 코루틴 재개 요청을 IOCP worker 스레드에 전달하는 컴포넌트다.
+class IocpResumeExecutor : public IResumeExecutor
 {
 public:
-    explicit IocpResumeExecutor(IocpExecutor& owner) : m_owner(owner) {}
+    explicit IocpResumeExecutor(Iocp& owner) : m_owner(owner) {}
     void Post(std::function<void()> task) override;
 private:
-    IocpExecutor& m_owner;
+    Iocp& m_owner;
 };
 
 // IOCP 포트 하나와 그 포트에서 작업을 꺼내 실행하는 worker들을 소유한다.
 // 내부 job 객체를 생성하고 completion packet으로 전달한 뒤 처리 완료 시 해제한다.
-class IocpExecutor
+class Iocp
 {
 public:
-    static std::shared_ptr<IocpExecutor> Instance();
-    ~IocpExecutor();
-    void Start(int workerCount);
-    void PostJob(JobType type, std::shared_ptr<Contents> contents);
-    std::shared_ptr<ResumeExecutor> GetResumeExecutor();
-    void Post(std::function<void()> task);
-    void Stop();
+    static std::shared_ptr<Iocp> Instance();
+
 private:
-    // job 자체는 IOCP만 소유한다. 컨텐츠는 대기/처리 중 shared_ptr로 유지한다.
+    Iocp() = default;
+    Iocp(const Iocp&) = delete;
+    Iocp& operator=(const Iocp&) = delete;
+
+public:
+    ~Iocp();
+
+public:
+    void Start(int workerCount);
+    void Stop();
+
+    std::shared_ptr<IResumeExecutor> GetResumeExecutor();
+
+    void PostJob(JobType type, std::shared_ptr<Contents> contents);
+    void Post(std::function<void()> task);
+
+private:
+
+    // job
     struct IocpJob
     {
         JobType type;
@@ -57,12 +71,13 @@ private:
         std::function<void()> resumeTask;
     };
 
-    IocpExecutor() = default;
-    IocpExecutor(const IocpExecutor&) = delete;
-    IocpExecutor& operator=(const IocpExecutor&) = delete;
+    
     void postJob(std::unique_ptr<IocpJob> job);
+
     void run();
-    HANDLE m_port = nullptr;
+
+private:
+    HANDLE m_hIOCP = nullptr;
     std::vector<std::thread> m_workers;
     IocpResumeExecutor m_resumeExecutor { *this };
 };

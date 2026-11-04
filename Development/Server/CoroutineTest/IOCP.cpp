@@ -1,5 +1,5 @@
 #include "DB.h"
-#include "Example.h"
+#include "IOCP.h"
 #include "Contents.h"
 #include <iostream>
 #include <stdexcept>
@@ -7,7 +7,7 @@
 
 void Trace(const std::string& message)
 {
-	// 로그 출력. std::osyncstream를 사용하여 여러 스레드에서 동시에 호출해도 출력이 섞이지 않도록 한다.
+	// 로그 출력
     std::osyncstream(std::cout) << "[thread " << GetCurrentThreadId() << "] " << message << '\n';
 }
 
@@ -20,77 +20,75 @@ void Check(bool condition, const char* message)
 
 void IocpResumeExecutor::Post(std::function<void()> task)
 {
-    // [#코루틴 15 | DB worker] 재개용 컴포넌트가 IOCP 소유자에게 작업 등록을 위임한다.
+    // [#코루틴 16 | DB worker 스레드] IOCP에 코루틴 재개 작업을 삽입한다.
     m_owner.Post(std::move(task));
 }
 
 // singleton
-std::shared_ptr<IocpExecutor> IocpExecutor::Instance()
+std::shared_ptr<Iocp> Iocp::Instance()
 {
-    static std::shared_ptr<IocpExecutor> instance(new IocpExecutor());
+    static std::shared_ptr<Iocp> instance(new Iocp());
     return instance;
 }
 
-IocpExecutor::~IocpExecutor()
+Iocp::~Iocp()
 {
     Stop();
 }
 
-void IocpExecutor::Start(int workerCount)
+void Iocp::Start(int workerCount)
 {
-    Check(m_port == nullptr, "IOCP already started");
+    Check(m_hIOCP == nullptr, "IOCP already started");
 
     // completion port 생성
-    m_port = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, workerCount);
-    Check(m_port != nullptr, "CreateIoCompletionPort failed");
+    m_hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, workerCount);
+    Check(m_hIOCP != nullptr, "CreateIoCompletionPort failed");
 
     // worker 스레드 생성
     for (int index = 0; index < workerCount; ++index)
-        m_workers.emplace_back(&IocpExecutor::run, this);
+        m_workers.emplace_back(&Iocp::run, this);
 }
 
 // IOCP에 job 등록
-void IocpExecutor::PostJob(JobType type, std::shared_ptr<Contents> contents)
+void Iocp::PostJob(JobType type, std::shared_ptr<Contents> contents)
 {
     std::unique_ptr<IocpJob> job = std::make_unique<IocpJob>(IocpJob{ type, std::move(contents), {} });
     postJob(std::move(job));
 }
 
-std::shared_ptr<ResumeExecutor> IocpExecutor::GetResumeExecutor()
+std::shared_ptr<IResumeExecutor> Iocp::GetResumeExecutor()
 {
-    // 멤버 컴포넌트를 가리키면서 싱글톤 소유권을 공유하여 DB 대기 중에도 소유자를 유지한다.
-    return std::shared_ptr<ResumeExecutor>(Instance(), &m_resumeExecutor);
+    return std::shared_ptr<IResumeExecutor>(Instance(), &m_resumeExecutor); // m_resumeExecutor 의 수명을 Iocp와 공유하도록 함
 }
 
 // IOCP에 코루틴 재개 job 등록
-void IocpExecutor::Post(std::function<void()> task)
+void Iocp::Post(std::function<void()> task)
 {
-    // DB 완료 후 재개할 함수도 내부 type의 IocpJob으로 감싸서 같은 큐에 넣는다.
     std::unique_ptr<IocpJob> job = std::make_unique<IocpJob>(IocpJob{ JobType::ResumeCoroutine, nullptr, std::move(task) });
     postJob(std::move(job));
 }
 
-void IocpExecutor::Stop()
+void Iocp::Stop()
 {
-    if (m_port == nullptr)
+    if (m_hIOCP == nullptr)
         return;
 
     // 완료통지 큐에 key=0인 완료통지를 삽입하여 worker 스레드가 종료되도록 한다.
     for (size_t index = 0; index < m_workers.size(); ++index)
-        PostQueuedCompletionStatus(m_port, 0, 0, nullptr);
+        PostQueuedCompletionStatus(m_hIOCP, 0, 0, nullptr);
 
     for (auto& worker : m_workers)
         worker.join();
 
     m_workers.clear();
-    CloseHandle(m_port);
-    m_port = nullptr;
+    CloseHandle(m_hIOCP);
+    m_hIOCP = nullptr;
 }
 
-void IocpExecutor::postJob(std::unique_ptr<IocpJob> job)
+void Iocp::postJob(std::unique_ptr<IocpJob> job)
 {
     // job을 완료통지 큐에 등록
-    BOOL result = PostQueuedCompletionStatus(m_port, 0, reinterpret_cast<ULONG_PTR>(job.get()), nullptr);
+    BOOL result = PostQueuedCompletionStatus(m_hIOCP, 0, reinterpret_cast<ULONG_PTR>(job.get()), nullptr);
 
     Check(result != FALSE, "PostQueuedCompletionStatus failed");
 
@@ -98,7 +96,7 @@ void IocpExecutor::postJob(std::unique_ptr<IocpJob> job)
 }
 
 // IOCP worker 스레드 루틴
-void IocpExecutor::run()
+void Iocp::run()
 {
     while (true)
     {
@@ -107,7 +105,7 @@ void IocpExecutor::run()
         OVERLAPPED* overlapped = nullptr;
         
         // GQCS
-		BOOL result = GetQueuedCompletionStatus(m_port, &bytes, &key, &overlapped, INFINITE);
+		BOOL result = GetQueuedCompletionStatus(m_hIOCP, &bytes, &key, &overlapped, INFINITE);
         Check(result != FALSE, "GetQueuedCompletionStatus failed");
 
         if (key == 0)
@@ -118,12 +116,12 @@ void IocpExecutor::run()
 
         if (job->type == JobType::ResumeCoroutine)
         {
-            // [#코루틴 16 | IOCP worker 스레드] 
-            // 이 job은 [#코루틴 14] 에서 IOCP 완료통지 큐에 등록한 job 이다.
+            // [#코루틴 17 | IOCP worker 스레드] 
+            // 이 job은 [#코루틴 15] 에서 IOCP 완료통지 큐에 등록한 job 이다.
             // 코루틴 재개 함수를 호출한다.
             job->resumeTask();
 
-            // [#코루틴 23 | IOCP worker 스레드] 코루틴이 완료되었고 코루틴 프레임도 정리되었다.
+            // [#코루틴 25 | IOCP worker 스레드] 코루틴이 완료되었고 코루틴 프레임도 정리되었다.
         }
         else
         {

@@ -142,14 +142,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Example.cpp" />
+    <ClCompile Include="IOCP.cpp" />
     <ClCompile Include="Contents.cpp" />
     <ClCompile Include="DB.cpp" />
-    <ClInclude Include="Example.h" />
+    <ClInclude Include="IOCP.h" />
     <ClInclude Include="Contents.h" />
     <ClInclude Include="DB.h" />
     <None Include="Setup.sql" />
-    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="CopyMySqlRuntime" AfterTargets="Build">
