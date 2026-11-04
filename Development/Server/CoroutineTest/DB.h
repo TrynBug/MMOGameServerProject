@@ -45,9 +45,10 @@ struct DbResult
 };
 
 
-// 이 타입은 코루틴 함수의 반환 타입으로 사용될 수 있다.
-// 코루틴 함수 호출 즉시 함수 본문을 실행하고, 함수 종료 시 프레임을 자동 해제한다.
-// 반환값이 없으므로 promise_type::return_void() 를 구현한다.
+// 이 타입은 코루틴 함수의 반환 타입으로 사용될 수 있다. 왜냐하면 아래 2가지 조건을 만족하기 때문이다:
+// 1. promise_type 이 있다.
+// 2. promise_type::get_return_object 함수로 코루틴 함수 반환 타입 객체를 생성할 수 있다.
+// 이 타입은 반환값이 없으므로 promise_type::return_void() 를 구현한다.
 struct DetachedTask
 {
     struct promise_type
@@ -87,6 +88,7 @@ class DbWorkerPool;
 
 // 이 클래스 타입은 Awaitable 이다. 이 타입을 반환하는 함수는 co_await 키워드로 호출할 수 있다.
 // 이 클래스의 객체는 co_await 키워드로 호출될 때 await_ready, await_suspend, await_resume 세 가지 함수를 통해 코루틴의 중단과 재개를 제어한다.
+// Awaitable이 되기 위한 조건은 await_ready, await_suspend, await_resume 3개 함수를 제공하는 것이다.
 class DbAwaitable
 {
 public:
