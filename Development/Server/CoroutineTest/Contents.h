@@ -20,10 +20,12 @@ class Contents : public std::enable_shared_from_this<Contents>
 public:
     explicit Contents(std::shared_ptr<DbWorkerPool> db);
     void Dispatch(JobType type);
+
 private:
     void handlePrintMessage();
     void handleLoadGold();
     static DetachedTask loadGoldAsync(std::shared_ptr<Contents> spContents, std::shared_ptr<IResumeExecutor> executor);
 
+private:
     std::shared_ptr<DbWorkerPool> m_db;
 };

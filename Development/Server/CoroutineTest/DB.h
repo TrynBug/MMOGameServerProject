@@ -117,37 +117,41 @@ private:
     std::shared_ptr<DbResult> m_result;
 };
 
-// 공용 요청 큐와 DB worker들을 관리한다. 각 worker는 전용 MySQL 연결로 프로시저를 동기 호출한다.
-// 완료된 요청은 요청자가 지정한 executor에 재개 작업을 등록한다.
+// DB job 큐, DB worker 스레드 관리클래스
 class DbWorkerPool
 {
 public:
-    // main에서 연결을 모두 연 뒤 worker를 시작한다. 연결 실패 시 예외로 초기화를 중단한다.
     DbWorkerPool(std::shared_ptr<const DbConfig> config, int workerCount);
     ~DbWorkerPool();
-    // 호출부가 co_await할 대기 객체를 만든다. 요청 등록은 await_suspend에서 이루어진다.
+
+    // 비동기 쿼리 요청. co_await 키워드로 호출해야 한다. 
     DbAwaitable Execute(std::shared_ptr<const DbRequest> request, std::shared_ptr<IResumeExecutor> executor);
-    // 하나의 Job으로 묶어 큐에 추가하고 대기 중인 DB worker를 깨운다.
+
+    // DB job 큐에 job 등록
     void Submit(std::shared_ptr<const DbRequest> request, std::shared_ptr<DbResult> result,
         std::shared_ptr<IResumeExecutor> executor, std::coroutine_handle<> handle);
+
     void Stop();
+
 private:
     void run(MYSQL* connection);
+
+private:
+    // 1개의 DB 작업에 대한 정보들
     struct Job
     {
-        // 입력, 출력, 재개 위치, 재개할 코루틴을 한 작업으로 묶어 큐에 넘긴다.
-        std::shared_ptr<const DbRequest> request;
-        std::shared_ptr<DbResult> result;
-        std::shared_ptr<IResumeExecutor> executor;
-        // handle은 프레임의 소유권이나 참조 카운트를 제공하지 않는 비소유 핸들이다.
-        // DB 완료 시 한 번 재개한다. 그때까지 대상 프레임은 유효해야 한다.
-        std::coroutine_handle<> handle;
+        std::shared_ptr<const DbRequest> request;   // DB 요청 정보
+        std::shared_ptr<DbResult> result;           // DB 처리 결과
+        std::shared_ptr<IResumeExecutor> executor;  // suspend된 코루틴을 resume할 스레드를 결정하는 컴포넌트
+        std::coroutine_handle<> handle;             // 코루틴 핸들
     };
+
+private:
     std::mutex m_mutex;
     std::condition_variable m_ready;
     std::queue<Job> m_jobs;
     bool m_stopped = false;
-    // index번째 연결은 index번째 worker 전용이다. worker join 이후 main에서 해제한다.
+
     std::vector<std::shared_ptr<MYSQL>> m_connections;
     std::vector<std::thread> m_workers;
 };
