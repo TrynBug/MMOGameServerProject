@@ -263,7 +263,7 @@ bool NetServer::registerNewSession(SOCKET clientSocket, const std::string& ip, u
         m_sessions[sessionId] = spSession;
     }
 
-    if (!m_pIoContext->RegisterSocket(clientSocket,
+    if (!m_pIoContext->registerSocket(clientSocket,
                                       reinterpret_cast<ULONG_PTR>(spSession.get())))
     {
         std::lock_guard<std::mutex> lock(m_sessionMutex);

@@ -51,6 +51,7 @@ public:
     void SetEventHandler(INetEventHandler* handler) { m_eventHandler = handler; }
 
     // 연결 시도. 실패하면 자동으로 재연결 한다. 기존 연결이 있으면 끊고 새로 연결한다.
+    // 반환값은 연결 시도 요청 결과다. 실제 연결 성공은 OnConnect로 통지한다.
     bool Connect(const std::string& ip, uint16 port);
 
     // 연결 끊기. 자동 재연결도 중단

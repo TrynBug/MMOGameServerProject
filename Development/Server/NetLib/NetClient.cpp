@@ -262,7 +262,7 @@ bool NetClient::postConnect()
     spSession->SetConnected(false); // 아직 연결된건 아니라서 m_bConnected=false로 설정
 
     // IOCP에 등록
-    if (!m_ioContext->RegisterSocket(sock, reinterpret_cast<ULONG_PTR>(spSession.get())))
+    if (!m_ioContext->registerSocket(sock, reinterpret_cast<ULONG_PTR>(spSession.get())))
     {
         return false;
     }

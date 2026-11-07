@@ -24,7 +24,7 @@ public:
     // 패킷 1개를 수신했을 때 호출
     virtual void OnRecv(const ISessionPtr& spSession, const PacketPtr& spPacket) = 0;
 
-    // Send가 완료되었을 때 호출
+    // 송신 작업 한 건이 완료되었을 때 호출. 한 작업에는 여러 패킷이 포함될 수 있다.
     virtual void OnSendComplete(const ISessionPtr& spSession) = 0;
 
     // Session 연결이 끊겼을 때 호출

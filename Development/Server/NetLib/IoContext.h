@@ -34,15 +34,11 @@ public:
 
     bool IsRunning() const { return m_bRunning.load(); }
 
-    HANDLE      GetIocpHandle() const { return m_hIocp; }
-    PacketPool& GetPacketPool()       { return m_packetPool; }
+    PacketPool& GetPacketPool() { return m_packetPool; }
 
     const IoContextConfig& GetConfig() const { return m_config; }
 
-    // 소켓을 IOCP에 등록한다
-    bool RegisterSocket(SOCKET socket, ULONG_PTR completionKey);
-
-    // IOCP 메시지큐에 Worker 스레드에서 실행할 함수 입력
+    // 네트워크 워커에서 실행할 함수를 큐에 넣는다.
     void PostMsg(std::function<void()> fn);
 
     // deliverAt(절대 시각)에 fn 을 실행하도록 예약한다. (네트워크 지연 시뮬레이션용)
@@ -51,6 +47,11 @@ public:
     void ScheduleAt(std::chrono::steady_clock::time_point deliverAt, std::function<void()> fn);
 
 private:
+    friend class NetClient;
+    friend class NetServer;
+
+    // 소켓을 IOCP에 등록한다.
+    bool registerSocket(SOCKET socket, ULONG_PTR completionKey);
     void workerThreadProc();
     void delaySchedulerProc();
 

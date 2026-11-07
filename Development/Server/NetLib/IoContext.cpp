@@ -126,7 +126,7 @@ void IoContext::Shutdown()
 }
 
 // 소켓을 IOCP에 등록
-bool IoContext::RegisterSocket(SOCKET socket, ULONG_PTR completionKey)
+bool IoContext::registerSocket(SOCKET socket, ULONG_PTR completionKey)
 {
     if (m_hIocp == nullptr)
     {

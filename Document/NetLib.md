@@ -22,7 +22,7 @@
 
 # IoContext 클래스
 - IOCP, Worker 스레드, PacketPool 등을 관리합니다. 
-- IOCP에 세션을 등록하는 기능을 제공합니다.
+- `NetServer`와 `NetClient`가 내부적으로 소켓을 IOCP에 등록합니다. 서버 호출부는 `IoContext::PostMsg()`로 네트워크 워커에 작업을 게시할 수 있습니다.
 - 하나의 프로세스에 보통 IoContext 한 개를 두고, 여러 NetServer, NetClient가 IoContext를 공유해서 사용합니다. IoContext를 공유해서 사용하는 이유는 IOCP, 패킷풀 등은 공유해서 사용하는 것이 효율적이기 때문입니다.
 - IoContext의 Worker 스레드는 recv 완료통지를 받았을 때 세션 객체 안의 m_pNetBase 멤버를 통해 세션이 어떤 NetServer 또는 NetClient와 연결되어 있는지 알수 있습니다. 그래서 해당 NetServer 또는 NetClient 에게로 패킷 처리를 넘깁니다.
 - Overlapped 구조체는 OVERLAPPED를 확장한 OVERLAPPED_EX를 사용하는데, 여기에는 std::shared_ptr<ISession> 멤버가 있습니다. IoContext의 Worker 스레드는 이 멤버에서 세션을 얻습니다.
@@ -49,7 +49,7 @@ public:
     // 패킷 1개를 수신했을 때 호출
     virtual void OnRecv(const ISessionPtr& spSession, const PacketPtr& spPacket) = 0;
 
-    // Send가 완료되었을 때 호출
+    // 송신 작업 한 건이 완료되었을 때 호출. 한 작업에는 여러 패킷이 포함될 수 있다.
     virtual void OnSendComplete(const ISessionPtr& spSession) = 0;
 
     // Session 연결이 끊겼을 때 호출
@@ -82,7 +82,7 @@ public:
 - 다른 서버에 connect 해야하는 서버가 네트워크 기능 사용을 위해 컴포넌트로 소유하는 클래스 입니다.
 - INetBase를 상속받습니다.
 - IoContext의 포인터를 멤버로 가집니다. 네트워크 기능, 패킷풀은 IoContext를 통해 사용합니다.
-- 1개의 connect용 세션을 멤버로 가집니다. Connect 기능을 제공합니다.
+- 1개의 connect용 세션을 멤버로 가집니다. `Connect()`의 반환값은 연결 시도 요청 결과이며, 실제 연결 성공은 `OnConnect()`로 통지합니다.
 - connect가 실패했을 경우 계속해서 재연결을 시도하는 기능을 제공합니다.
 - INetEventHandler 인터페이스를 멤버로 가집니다. 사용자는 NetClient에 INetEventHandler를 등록(하나만 등록가능)해야 이것을 통해 네트워크 이벤트를 받을 수 있습니다.
 - 초기화 파라미터:
