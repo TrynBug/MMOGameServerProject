@@ -1,5 +1,6 @@
-#include "pch.h"
 #include "RingBuffer.h"
+
+#include <cstring>
 
 namespace netlib
 {

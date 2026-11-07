@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Crypto.h"
 
 // ====================================================================
@@ -10,7 +9,7 @@
 //      vcpkg install libsodium:x64-windows-static
 //    또는 NuGet 의 libsodium 패키지 사용.
 //
-// 2) pch.h 또는 이 파일에 다음 추가:
+// 2) 이 파일에 다음 추가:
 //      #include <sodium.h>
 //      #pragma comment(lib, "libsodium.lib")
 //

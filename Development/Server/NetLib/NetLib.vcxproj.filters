@@ -27,13 +27,13 @@
     <ClCompile Include="pch.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Packet.cpp">
+    <ClCompile Include="..\NetLibCommon\Packet.cpp">
       <Filter>소스 파일\Packet</Filter>
     </ClCompile>
-    <ClCompile Include="PacketPool.cpp">
+    <ClCompile Include="..\NetLibCommon\PacketPool.cpp">
       <Filter>소스 파일\Packet</Filter>
     </ClCompile>
-    <ClCompile Include="Crypto.cpp">
+    <ClCompile Include="..\NetLibCommon\Crypto.cpp">
       <Filter>소스 파일\Packet</Filter>
     </ClCompile>
     <ClCompile Include="Session.cpp">
@@ -45,13 +45,13 @@
     <ClCompile Include="NetClient.cpp">
       <Filter>소스 파일\Network</Filter>
     </ClCompile>
-    <ClCompile Include="NetLibStats.cpp">
+    <ClCompile Include="..\NetLibCommon\NetLibStats.cpp">
       <Filter>소스 파일\Network</Filter>
     </ClCompile>
     <ClCompile Include="NetServer.cpp">
       <Filter>소스 파일\Network</Filter>
     </ClCompile>
-    <ClCompile Include="RingBuffer.cpp">
+    <ClCompile Include="..\NetLibCommon\RingBuffer.cpp">
       <Filter>소스 파일\Network</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,22 +62,22 @@
     <ClInclude Include="pch.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Types.h">
+    <ClInclude Include="..\NetLibCommon\Types.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Packet.h">
+    <ClInclude Include="..\NetLibCommon\Packet.h">
       <Filter>소스 파일\Packet</Filter>
     </ClInclude>
-    <ClInclude Include="PacketHeader.h">
+    <ClInclude Include="..\NetLibCommon\PacketHeader.h">
       <Filter>소스 파일\Packet</Filter>
     </ClInclude>
-    <ClInclude Include="PacketPool.h">
+    <ClInclude Include="..\NetLibCommon\PacketPool.h">
       <Filter>소스 파일\Packet</Filter>
     </ClInclude>
-    <ClInclude Include="Crypto.h">
+    <ClInclude Include="..\NetLibCommon\Crypto.h">
       <Filter>소스 파일\Packet</Filter>
     </ClInclude>
-    <ClInclude Include="ISession.h">
+    <ClInclude Include="..\NetLibCommon\ISession.h">
       <Filter>소스 파일\Session</Filter>
     </ClInclude>
     <ClInclude Include="Session.h">
@@ -86,19 +86,19 @@
     <ClInclude Include="IoContext.h">
       <Filter>소스 파일\Network</Filter>
     </ClInclude>
-    <ClInclude Include="INetBase.h">
+    <ClInclude Include="..\NetLibCommon\INetBase.h">
       <Filter>소스 파일\Network</Filter>
     </ClInclude>
-    <ClInclude Include="INetEventHandler.h">
+    <ClInclude Include="..\NetLibCommon\INetEventHandler.h">
       <Filter>소스 파일\Network</Filter>
     </ClInclude>
     <ClInclude Include="NetClient.h">
       <Filter>소스 파일\Network</Filter>
     </ClInclude>
-    <ClInclude Include="NetConfig.h">
+    <ClInclude Include="..\NetLibCommon\NetConfig.h">
       <Filter>소스 파일\Network</Filter>
     </ClInclude>
-    <ClInclude Include="NetLibStats.h">
+    <ClInclude Include="..\NetLibCommon\NetLibStats.h">
       <Filter>소스 파일\Network</Filter>
     </ClInclude>
     <ClInclude Include="NetServer.h">
@@ -107,13 +107,13 @@
     <ClInclude Include="OverlappedEx.h">
       <Filter>소스 파일\Network</Filter>
     </ClInclude>
-    <ClInclude Include="RingBuffer.h">
+    <ClInclude Include="..\NetLibCommon\RingBuffer.h">
       <Filter>소스 파일\Network</Filter>
     </ClInclude>
-    <ClInclude Include="FuncEventHandler.h">
+    <ClInclude Include="..\NetLibCommon\FuncEventHandler.h">
       <Filter>소스 파일\Network</Filter>
     </ClInclude>
-    <ClInclude Include="NetDefine.h">
+    <ClInclude Include="..\NetLibCommon\NetDefine.h">
       <Filter>소스 파일\Network</Filter>
     </ClInclude>
   </ItemGroup>

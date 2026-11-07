@@ -5,8 +5,7 @@
 #include "Generated/Common/packet_id.pb.h"
 #include "Generated/ServerPacket/server_registry_packet.pb.h"
 
-#include "IoContext.h"
-#include "NetClient.h"
+#include "NetLib.h"
 #include "ServerBase.h"
 
 namespace serverbase

@@ -7,6 +7,19 @@
 - 프로젝트의 출력물은 NetLib.lib 이며, namespace는 netlib 입니다.
 - NetLib.h 헤더파일은 다른 프로젝트가 NetLib 라이브러리를 쓰기 위해 include 하는 헤더파일 입니다.
 
+# NetLibAsio
+
+- `Development/Server/NetLibAsio`는 같은 `netlib` 인터페이스를 제공하는 x64 정적 라이브러리입니다. 두 백엔드는 `Development/Server/NetLibCommon`의 인터페이스, 패킷, 링버퍼, 패킷 풀, 암호화와 통계 소스를 공유합니다.
+- `IoContext`의 워커가 Boost.Asio 이벤트 루프를 실행합니다. 연결 수락과 접속은 비동기로 처리하며, 재접속과 네트워크 지연은 타이머로 예약합니다. 세션마다 읽기와 쓰기를 각각 한 건씩 진행하고, 송신은 최대 50개 패킷을 묶어 부분 쓰기가 끝날 때까지 버퍼를 유지합니다.
+- `OnAccept → OnConnect → 첫 수신` 순서를 지키며, 같은 세션의 콜백은 직렬로 실행합니다. 수락, 연결, 송수신 콜백은 네트워크 워커에서 실행합니다. 명시적으로 `NetServer::Shutdown()`이나 `NetClient::Disconnect()`를 호출하면 `OnDisconnect`는 호출 스레드에서 실행될 수 있습니다.
+- 이벤트 핸들러는 등록한 객체를 종료할 때까지 유지합니다. 관리 스레드에서 리스너와 클라이언트를 먼저 종료하고 `IoContext::Shutdown()`으로 취소 완료를 처리한 뒤 워커를 종료합니다.
+- `Common/ProjectPropertyMacro.props`의 `NetLibBackend`에 `NetLib` 또는 `NetLibAsio`를 지정하면 `ServerBase`와 서버 실행 파일 프로젝트 5개가 선택한 디렉터리의 `NetLib.h`를 직접 포함하고 해당 `.lib`를 링크합니다.
+- VS 개발자 PowerShell에서는 `/p:NetLibBackend=NetLib` 또는 `/p:NetLibBackend=NetLibAsio`로 해당 빌드의 선택값을 지정할 수 있습니다.
+
+```powershell
+msbuild Development/Server/MMOGameServerProject.sln /p:Configuration=Debug /p:Platform=x64 /p:NetLibBackend=NetLibAsio
+```
+
 # 다른 프로젝트와의 관계
 - ServerBase 프로젝트는 NetLib 라이브러리를 사용하여 클라이언트 통신, 서버간 통신을 구현하고 네트워크 기능의 공용로직을 제공합니다. 그리고 GameServer, GatewayServer 등은 ServerBase 클래스를 상속받아 네트워크 기능을 사용합니다. 그리고 NetLib의 패킷 버퍼 pool에서 패킷버퍼를 할당받아 사용합니다.
 - 패킷버퍼에 데이터를 직렬화, 역직렬화 하는 기능은 PacketGenerator 프로젝트(protobuf구현)가 담당합니다.

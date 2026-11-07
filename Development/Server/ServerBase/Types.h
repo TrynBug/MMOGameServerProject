@@ -1,7 +1,7 @@
 #pragma once
 
 // 변수 타입 정의
-// NetLib/Types.h 와 내용이 동일하므로 중복 정의 방지를 위해 guard로 보호
+// NetLibCommon/Types.h 와 내용이 동일하므로 중복 정의 방지를 위해 guard로 보호
 #ifndef NETLIB_TYPES_DEFINED
 #define NETLIB_TYPES_DEFINED
 using int8   = signed char;

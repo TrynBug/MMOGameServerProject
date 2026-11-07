@@ -4,6 +4,7 @@
 // namespace는 netlib 이다.
 
 #pragma comment(lib, "NetLib.lib")
+#pragma detect_mismatch("NetLibBackend", "NetLib")
 
 // 전역 데이터타입
 #include "Types.h"

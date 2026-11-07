@@ -45,14 +45,14 @@
   <PropertyGroup Label="UserMacros" />
   <!-- include / lib 경로 -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)Common;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib\Gemerated;$(SolutionDir)GameDataLib;$(SolutionDir)Logger;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Common;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib\Gemerated;$(SolutionDir)GameDataLib;$(SolutionDir)Logger;$(SolutionDir)NetLibCommon;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
     <ExternalIncludePath>$(SolutionDir)ThirdParty\cpp-httplib;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)Common;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib\Gemerated;$(SolutionDir)GameDataLib;$(SolutionDir)Logger;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Common;$(SolutionDir)DBConnector;$(SolutionDir)GameDataLib\Gemerated;$(SolutionDir)GameDataLib;$(SolutionDir)Logger;$(SolutionDir)NetLibCommon;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
@@ -63,6 +63,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;SPDLOG_COMPILED_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)$(NetLibBackend);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 /external:templates- %(AdditionalOptions)</AdditionalOptions>
@@ -81,6 +82,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;SPDLOG_COMPILED_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)$(NetLibBackend);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 /external:templates- %(AdditionalOptions)</AdditionalOptions>

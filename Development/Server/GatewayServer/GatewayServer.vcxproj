@@ -44,14 +44,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)Common;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Common;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLibCommon;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)mysql\lib\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
     <ExternalIncludePath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)Common;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLib;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Common;$(SolutionDir)Logger;$(SolutionDir)ServerBase;$(SolutionDir)NetLibCommon;$(SolutionDir)PacketGenerator;$(SolutionDir)PacketGenerator\Generated;$(SolutionDir)DBConnector;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)mysql\lib\;$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(SolutionDir)OUTPUT\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
@@ -62,6 +62,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;SPDLOG_COMPILED_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)$(NetLibBackend);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 /external:templates- %(AdditionalOptions)</AdditionalOptions>
@@ -72,7 +73,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;Logger.lib;$(spdlogLibsDebug);$(protobufLibsDebug);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ServerBase.lib;$(NetLibBackend).lib;PacketGenerator.lib;Logger.lib;$(spdlogLibsDebug);$(protobufLibsDebug);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -82,6 +83,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;SPDLOG_COMPILED_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)$(NetLibBackend);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 /external:templates- %(AdditionalOptions)</AdditionalOptions>
@@ -92,7 +94,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ServerBase.lib;NetLib.lib;PacketGenerator.lib;Logger.lib;$(spdlogLibs);$(protobufLibs);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ServerBase.lib;$(NetLibBackend).lib;PacketGenerator.lib;Logger.lib;$(spdlogLibs);$(protobufLibs);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <!-- 헤더 파일 -->

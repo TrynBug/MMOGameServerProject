@@ -1,9 +1,8 @@
-#include "pch.h"
-
 #include "PacketHeader.h"
 #include "Packet.h"
 
 #include <cassert>
+#include <cstring>
 
 namespace netlib
 {

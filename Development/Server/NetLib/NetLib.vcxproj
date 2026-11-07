@@ -19,41 +19,51 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Crypto.cpp" />
+    <ClCompile Include="..\NetLibCommon\Crypto.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="IoContext.cpp" />
     <ClCompile Include="NetClient.cpp" />
-    <ClCompile Include="NetLibStats.cpp" />
+    <ClCompile Include="..\NetLibCommon\NetLibStats.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="NetServer.cpp" />
-    <ClCompile Include="Packet.cpp" />
-    <ClCompile Include="PacketPool.cpp" />
+    <ClCompile Include="..\NetLibCommon\Packet.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\NetLibCommon\PacketPool.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="RingBuffer.cpp" />
+    <ClCompile Include="..\NetLibCommon\RingBuffer.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Session.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Crypto.h" />
-    <ClInclude Include="FuncEventHandler.h" />
-    <ClInclude Include="INetEventHandler.h" />
+    <ClInclude Include="..\NetLibCommon\Crypto.h" />
+    <ClInclude Include="..\NetLibCommon\FuncEventHandler.h" />
+    <ClInclude Include="..\NetLibCommon\INetEventHandler.h" />
     <ClInclude Include="IoContext.h" />
-    <ClInclude Include="ISession.h" />
-    <ClInclude Include="INetBase.h" />
+    <ClInclude Include="..\NetLibCommon\ISession.h" />
+    <ClInclude Include="..\NetLibCommon\INetBase.h" />
     <ClInclude Include="NetClient.h" />
-    <ClInclude Include="NetConfig.h" />
-    <ClInclude Include="NetDefine.h" />
-    <ClInclude Include="NetLibStats.h" />
+    <ClInclude Include="..\NetLibCommon\NetConfig.h" />
+    <ClInclude Include="..\NetLibCommon\NetDefine.h" />
+    <ClInclude Include="..\NetLibCommon\NetLibStats.h" />
     <ClInclude Include="NetServer.h" />
     <ClInclude Include="NetLib.h" />
     <ClInclude Include="OverlappedEx.h" />
-    <ClInclude Include="Packet.h" />
-    <ClInclude Include="PacketHeader.h" />
-    <ClInclude Include="PacketPool.h" />
+    <ClInclude Include="..\NetLibCommon\Packet.h" />
+    <ClInclude Include="..\NetLibCommon\PacketHeader.h" />
+    <ClInclude Include="..\NetLibCommon\PacketPool.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="RingBuffer.h" />
+    <ClInclude Include="..\NetLibCommon\RingBuffer.h" />
     <ClInclude Include="Session.h" />
-    <ClInclude Include="Types.h" />
+    <ClInclude Include="..\NetLibCommon\Types.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -113,12 +123,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Common;$(ProjectDir)..\NetLibCommon;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)OUTPUT\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)Common;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Common;$(ProjectDir)..\NetLibCommon;$(SolutionDir)vcpkg\x64-windows-static-md-2022\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)vcpkg\x64-windows-static-md-2022\lib\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

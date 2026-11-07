@@ -4,9 +4,7 @@
 
 #include "ServerBase.h"
 
-#include "IoContext.h"
-#include "NetServer.h"
-#include "NetClient.h"
+#include "NetLib.h"
 
 namespace serverbase
 {
