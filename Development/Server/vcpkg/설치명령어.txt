@@ -2,10 +2,10 @@
 vcpkg package management program version 2026-04-08-e0612b42ce44e55a0e630f2ee9d3c533a63d8bc1
 
 # 설치 명령어
-vcpkg install protobuf --overlay-triplets=D:/project/MMOGameServerProject/Development/Server/vcpkg/triplets/ --triplet=x64-windows-static-md-2022 --x-install-root=D:/project/MMOGameServerProject/Development/Server/vcpkg
+vcpkg install protobuf --overlay-triplets=C:/project/MMOGameServerProject/Development/Server/vcpkg/triplets/ --triplet=x64-windows-static-md-2022 --x-install-root=C:/project/MMOGameServerProject/Development/Server/vcpkg
 
 # 설치한 라이브러리 목록
-vcpkg list --x-install-root=D:/project/MMOGameServerProject/Development/Server/vcpkg
+vcpkg list --x-install-root=C:/project/MMOGameServerProject/Development/Server/vcpkg
 
 abseil:x64-windows                                20260107.1#2 
 abseil:x64-windows-static-md-2022                 20260107.1#2  
@@ -21,7 +21,7 @@ vcpkg-cmake-config:x64-windows                    2024-05-23
 vcpkg-cmake:x64-windows                           2024-04-23
 sol2:x64-windows-static-md-2022                   3.5.0#1
 lua:x64-windows-static-md-2022                    5.4.7#1
-
+boost-asio                                           1.91.0
 
 # 설치한 라이브러리 이름
 protobuf
