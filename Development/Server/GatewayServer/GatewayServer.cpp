@@ -822,8 +822,5 @@ void GatewayServer::forceDisconnectUser(int64 accountId, const std::string& reas
     ntf.set_message(reason);
 
     auto spPacket = SerializePacket(Common::GAME_PACKET_ID_FORCE_DISCONNECT_NTF, ntf);
-    if (spPacket)
-        spUser->spClientSession->Send(spPacket);
-
-    spUser->spClientSession->Disconnect();
+    spUser->spClientSession->SendAndDisconnect(spPacket);
 }

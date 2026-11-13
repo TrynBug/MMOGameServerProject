@@ -10,9 +10,12 @@
 # NetLibAsio
 
 - `Development/Server/NetLibAsio`는 같은 `netlib` 인터페이스를 제공하는 x64 정적 라이브러리입니다. 두 백엔드는 `Development/Server/NetLibCommon`의 인터페이스, 패킷, 링버퍼, 패킷 풀, 암호화와 통계 소스를 공유합니다.
-- `IoContext`의 워커가 Boost.Asio 이벤트 루프를 실행합니다. 연결 수락과 접속은 비동기로 처리하며, 재접속과 네트워크 지연은 타이머로 예약합니다. 세션마다 읽기와 쓰기를 각각 한 건씩 진행하고, 송신은 최대 50개 패킷을 묶어 부분 쓰기가 끝날 때까지 버퍼를 유지합니다.
+- `IoContext`의 워커가 Boost.Asio 이벤트 루프를 실행합니다. 연결 수락과 접속은 비동기로 처리하며, 재접속과 네트워크 지연은 타이머로 예약합니다. 세션마다 읽기와 쓰기를 각각 한 건씩 진행합니다. 송신은 최대 50개 패킷을 묶고, 비동기 쓰기의 완료 처리까지 세션에 버퍼 목록을 보관합니다. 패킷 데이터는 배치 전체가 전송되거나 취소 완료가 처리될 때까지 유지합니다.
 - `OnAccept → OnConnect → 첫 수신` 순서를 지키며, 같은 세션의 콜백은 직렬로 실행합니다. 수락, 연결, 송수신 콜백은 네트워크 워커에서 실행합니다. 명시적으로 `NetServer::Shutdown()`이나 `NetClient::Disconnect()`를 호출하면 `OnDisconnect`는 호출 스레드에서 실행될 수 있습니다.
-- 이벤트 핸들러는 등록한 객체를 종료할 때까지 유지합니다. 관리 스레드에서 리스너와 클라이언트를 먼저 종료하고 `IoContext::Shutdown()`으로 취소 완료를 처리한 뒤 워커를 종료합니다.
+- Registry 등록 거절과 Gateway 강제 종료 통지는 `SendAndDisconnect()`로 보냅니다. Asio 세션은 이미 대기 중인 송신 패킷과 마지막 패킷을 순서대로 쓴 뒤 TCP 송신 방향을 종료합니다. 송신을 기다리는 시간은 최대 5초이며, 패킷 직렬화 실패로 빈 포인터를 전달하면 즉시 종료합니다. 기존 IOCP 구현은 기존 `Send()`와 `Disconnect()` 호출 순서를 사용합니다.
+- `IoContext::Shutdown()`은 관리 스레드에서 호출합니다. 새 작업을 차단하고 등록된 리스너, 접속 시도, 재접속 타이머와 세션을 닫은 뒤, 취소 완료를 처리하는 워커가 모두 끝나면 내부 컨텍스트를 해제합니다. `IoContext` 객체 자체는 `NetServer`와 `NetClient`보다 오래 유지합니다.
+- `PostMsg()`와 `ScheduleAt()`은 실행 상태 확인부터 작업 등록까지 `Shutdown()`과 같은 뮤텍스로 보호합니다. 게시된 작업은 워커가 처리하고, 아직 실행하지 않은 예약 작업은 종료 시 취소합니다. 예약 큐와 타이머는 별도 락으로 보호합니다.
+- 이벤트 핸들러의 소유자는 해당 `NetServer::Shutdown()`, `NetClient::Shutdown()` 또는 `IoContext::Shutdown()`이 반환할 때까지 핸들러를 유지합니다. 종료한 Asio 리스너나 클라이언트에서 다시 작업하려면 새 객체를 생성합니다. 일시 중지 후 다시 시작하려면 `StopAccept()` 또는 `Disconnect()`를 사용합니다.
 - `Common/ProjectPropertyMacro.props`의 `NetLibBackend`에 `NetLib` 또는 `NetLibAsio`를 지정하면 `ServerBase`와 서버 실행 파일 프로젝트 5개가 선택한 디렉터리의 `NetLib.h`를 직접 포함하고 해당 `.lib`를 링크합니다.
 - VS 개발자 PowerShell에서는 `/p:NetLibBackend=NetLib` 또는 `/p:NetLibBackend=NetLibAsio`로 해당 빌드의 선택값을 지정할 수 있습니다.
 

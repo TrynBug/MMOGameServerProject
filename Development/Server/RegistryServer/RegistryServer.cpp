@@ -180,10 +180,7 @@ void RegistryServer::handleRegisterReq(const netlib::ISessionPtr& spSession, con
         res.set_message(errorMsg);
 
         auto spPacket = SerializePacket(Common::SERVER_PACKET_ID_REGISTRY_REGISTER_RES, res);
-        if (spPacket)
-            spSession->Send(spPacket);
-
-        spSession->Disconnect();
+        spSession->SendAndDisconnect(spPacket);
         return;
     }
 

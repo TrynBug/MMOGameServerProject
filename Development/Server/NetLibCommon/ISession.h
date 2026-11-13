@@ -19,6 +19,16 @@ public:
 
     virtual void        Send(const PacketPtr& spPacket) = 0;
     virtual void        Disconnect()                = 0;
+
+    // 마지막 패킷과 연결 종료를 함께 요청한다. 빈 포인터를 넘기면 즉시 종료를 요청한다.
+    // 기본 구현은 기존 IOCP와 같은 Send() → Disconnect() 순서로 호출한다.
+    virtual void SendAndDisconnect(const PacketPtr& spPacket)
+    {
+        if (spPacket)
+            Send(spPacket);
+        Disconnect();
+    }
+
     virtual int64       GetId()       const         = 0;
     virtual std::string GetIP()       const         = 0;
     virtual uint16      GetPort()     const         = 0;

@@ -581,21 +581,19 @@ void ServerBase::shutdownInternal()
     // 타이머 정지
     m_timer.Stop();
 
-    // RegistryClient 정지
+    // RegistryClient는 접속을 먼저 정지하고, 이벤트 핸들러 객체는 네트워크 워커 종료까지 유지한다.
     if (m_spRegistryClient)
-    {
         m_spRegistryClient->Stop();
-        m_spRegistryClient.reset();
-    }
 
-    // 서버간 연결 종료
+    // 종료 콜백이 연결 목록에 접근할 수 있으므로 목록만 옮기고 락 밖에서 연결을 닫는다.
+    std::vector<netlib::NetClientPtr> serverConnections;
     {
         std::lock_guard<std::mutex> lock(m_serverConnectionsMutex);
-        for (auto& spClient : m_serverConnections)
-            spClient->Shutdown();
-
-        m_serverConnections.clear();
+        serverConnections.swap(m_serverConnections);
     }
+    for (auto& spClient : serverConnections)
+        spClient->Shutdown();
+    serverConnections.clear();
     LOG_WRITE(LogLevel::Info, "server connections closed");
 
     // Listen NetServer 종료
@@ -619,6 +617,7 @@ void ServerBase::shutdownInternal()
 
     // IoContext 종료 (Worker 스레드 종료)
     m_ioContext.Shutdown();
+    m_spRegistryClient.reset();
     LOG_WRITE(LogLevel::Info, "IoContext shutdown");
 
     // 서브클래스 훅
@@ -637,6 +636,9 @@ void ServerBase::shutdownInternal()
 
 netlib::NetClientPtr ServerBase::ConnectToServer(const std::string& ip, uint16 port, netlib::FuncEventHandler& handler)
 {
+    if (IsShuttingDown())
+        return nullptr;
+
     netlib::NetClientConfig clientConfig;
     clientConfig.bUseNagle = false;
     clientConfig.bAutoReconnect = true;
@@ -650,11 +652,15 @@ netlib::NetClientPtr ServerBase::ConnectToServer(const std::string& ip, uint16 p
     }
 
     spClient->SetEventHandler(&handler);
-    spClient->Connect(ip, port);  // 연결시도 시작. 연결 안되면 자동으로 재연결 시도함
+    if (!spClient->Connect(ip, port))
+        return nullptr;
 
     {
         std::lock_guard<std::mutex> lock(m_serverConnectionsMutex);
-        m_serverConnections.push_back(spClient);
+        if (!IsShuttingDown())
+            m_serverConnections.push_back(spClient);
+        else
+            return nullptr;
     }
 
     LOG_WRITE(LogLevel::Info, std::format("connecting to {}:{}", ip, port));
@@ -666,15 +672,14 @@ void ServerBase::DisconnectToServer(netlib::NetClientPtr spClient)
     if(!spClient)
 		return;
 
-    std::lock_guard<std::mutex> lock(m_serverConnectionsMutex);
-    auto iter = std::find_if(m_serverConnections.begin(), m_serverConnections.end(),
-        [&spClient](const netlib::NetClientPtr& sp) { return sp.get() == spClient.get(); });
-
-    if (iter != m_serverConnections.end())
     {
-        (*iter)->Shutdown();
+        std::lock_guard<std::mutex> lock(m_serverConnectionsMutex);
+        auto iter = std::find(m_serverConnections.begin(), m_serverConnections.end(), spClient);
+        if (iter == m_serverConnections.end())
+            return;
         m_serverConnections.erase(iter);
     }
+    spClient->Shutdown();
 }
 
 void ServerBase::AssignContents(int32 threadIndex, ContentsPtr spContents)
