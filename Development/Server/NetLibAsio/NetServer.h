@@ -8,7 +8,7 @@ namespace netlib
 
 class IoContext;
 
-// TCP 리스너와 수락한 세션을 관리한다.
+// TCP listener, 세션을 관리한다.
 class NetServer : public INetBase
 {
 public:
@@ -18,6 +18,7 @@ public:
     NetServer(const NetServer&) = delete;
     NetServer& operator=(const NetServer&) = delete;
 
+public:
     bool Initialize(const NetServerConfig& config);
     bool StartAccept();
     // 새 연결 수락을 중지한다. 기존 세션은 Shutdown()에서 함께 닫을 수 있다.

@@ -124,7 +124,7 @@ bool NetServer::Initialize(const NetServerConfig& config)
             if (auto self = weak.lock())
                 self->shutdown();
         });
-        if (!state.pIoContext->registerEndpoint(spShutdown))
+        if (!state.pIoContext->registerShutdownCallback(spShutdown))
             return false;
     }
     const int32 maxReserveSize = GetMaxPacketSize() - static_cast<int32>(sizeof(PacketHeader));

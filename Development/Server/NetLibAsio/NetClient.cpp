@@ -158,7 +158,7 @@ bool NetClient::Initialize(const NetClientConfig& config)
             if (auto self = weak.lock())
                 self->shutdown();
         });
-        if (!state.pIoContext->registerEndpoint(spShutdown))
+        if (!state.pIoContext->registerShutdownCallback(spShutdown))
             return false;
         state.spShutdown = std::move(spShutdown);
     }
